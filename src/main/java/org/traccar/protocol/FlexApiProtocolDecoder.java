@@ -58,87 +58,12 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
         if (topic.contains("/gnss/")) {
             parseGnss(position, payload);
         } else if (topic.contains("/cellular1/")) {
-
-            getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
-
-            if (payload.containsKey("modem1.imei")) {
-                position.set("imei", payload.getString("modem1.imei"));
-            }
-            if (payload.containsKey("modem1.rssi")) {
-                position.set(Position.KEY_RSSI, payload.getInt("modem1.rssi"));
-            }
-            if (payload.containsKey("modem1.imsi")) {
-                position.set("imsi", payload.getString("modem1.imsi"));
-            }
-            if (payload.containsKey("modem1.iccid")) {
-                position.set(Position.KEY_ICCID, payload.getString("modem1.iccid"));
-            }
-
-
-            String operator = payload.getString("modem1.operator");
-            if (!operator.isEmpty()) {
-                CellTower cellTower = CellTower.from(
-                        Integer.parseInt(operator.substring(0, 3)),
-                        Integer.parseInt(operator.substring(3)),
-                        Integer.parseInt(payload.getString("modem1.lac"), 16),
-                        Integer.parseInt(payload.getString("modem1.cell_id"), 16));
-
-                if (payload.containsKey("modem1.rsrp")) {
-                    cellTower.setSignalStrength(payload.getInt("modem1.rsrp"));
-                }
-                if (payload.containsKey("modem1.rssi")) {
-                    cellTower.setSignalStrength(payload.getInt("modem1.rssi"));
-                }
-
-                switch (payload.getInt("modem1.network")) {
-                    case 1:
-                        cellTower.setRadioType("gsm");
-                        break;
-                    case 2:
-                        cellTower.setRadioType("wcdma");
-                        break;
-                    case 3:
-                        cellTower.setRadioType("lte");
-                        break;
-                    default:
-                        break;
-                }
-                position.setNetwork(new Network(cellTower));
-            }
-
+            parseCellular(position, payload);
         } else if (topic.contains("/obd/")) {
-
             parseObd(position, payload);
-
         } else if (topic.contains("/motion/")) {
-
-            getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
-            if (payload.containsKey("motion.ax")) {
-                position.set("ax", payload.getJsonNumber("motion.ax").doubleValue());
-            }
-            if (payload.containsKey("motion.ay")) {
-                position.set("ay", payload.getJsonNumber("motion.ay").doubleValue());
-            }
-            if (payload.containsKey("motion.az")) {
-                position.set("az", payload.getJsonNumber("motion.az").doubleValue());
-            }
-            if (payload.containsKey("motion.gx")) {
-                position.set("gx", payload.getJsonNumber("motion.gx").doubleValue());
-            }
-            if (payload.containsKey("motion.gy")) {
-                position.set("gy", payload.getJsonNumber("motion.gy").doubleValue());
-            }
-            if (payload.containsKey("motion.gz")) {
-                position.set("gz", payload.getJsonNumber("motion.gz").doubleValue());
-            }
+            parseMotion(position, payload);
         } else if (topic.contains("/io/") || (topic.contains("/event/notice") && "DI_CHG".equals(payload.getString("type")))) {
-
-            getLastLocation(position, new Date(payload.getInt("io.ts") * 1000L));
-
-            if (payload.containsKey("io.IGT")) {
-                position.set(Position.KEY_IGNITION, payload.getInt("io.IGT") > 0);
-            }
-
             parseIO(position, payload);
 
         } else if (topic.contains("/sysinfo/")) {
@@ -150,12 +75,86 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (topic.contains("/summary/")) {
             parseIO(position, payload);
-            parseGnss(position, payload);
             parseObd(position, payload);
+            parseCellular(position, payload);
+            parseMotion(position, payload);
+            parseGnss(position, payload);
+            getLastLocation(position, new Date(payload.getInt("summary.ts") * 1000L));
 
         }
 
         return position;
+    }
+
+    private void parseMotion(Position position, JsonObject payload) {
+        getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
+        if (payload.containsKey("motion.ax")) {
+            position.set("ax", payload.getJsonNumber("motion.ax").doubleValue());
+        }
+        if (payload.containsKey("motion.ay")) {
+            position.set("ay", payload.getJsonNumber("motion.ay").doubleValue());
+        }
+        if (payload.containsKey("motion.az")) {
+            position.set("az", payload.getJsonNumber("motion.az").doubleValue());
+        }
+        if (payload.containsKey("motion.gx")) {
+            position.set("gx", payload.getJsonNumber("motion.gx").doubleValue());
+        }
+        if (payload.containsKey("motion.gy")) {
+            position.set("gy", payload.getJsonNumber("motion.gy").doubleValue());
+        }
+        if (payload.containsKey("motion.gz")) {
+            position.set("gz", payload.getJsonNumber("motion.gz").doubleValue());
+        }
+    }
+
+    private void parseCellular(Position position, JsonObject payload) {
+        getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
+
+        if (payload.containsKey("modem1.imei")) {
+            position.set("imei", payload.getString("modem1.imei"));
+        }
+        if (payload.containsKey("modem1.rssi")) {
+            position.set(Position.KEY_RSSI, payload.getInt("modem1.rssi"));
+        }
+        if (payload.containsKey("modem1.imsi")) {
+            position.set("imsi", payload.getString("modem1.imsi"));
+        }
+        if (payload.containsKey("modem1.iccid")) {
+            position.set(Position.KEY_ICCID, payload.getString("modem1.iccid"));
+        }
+
+
+        String operator = payload.getString("modem1.operator");
+        if (!operator.isEmpty()) {
+            CellTower cellTower = CellTower.from(
+                    Integer.parseInt(operator.substring(0, 3)),
+                    Integer.parseInt(operator.substring(3)),
+                    Integer.parseInt(payload.getString("modem1.lac"), 16),
+                    Integer.parseInt(payload.getString("modem1.cell_id"), 16));
+
+            if (payload.containsKey("modem1.rsrp")) {
+                cellTower.setSignalStrength(payload.getInt("modem1.rsrp"));
+            }
+            if (payload.containsKey("modem1.rssi")) {
+                cellTower.setSignalStrength(payload.getInt("modem1.rssi"));
+            }
+
+            switch (payload.getInt("modem1.network")) {
+                case 1:
+                    cellTower.setRadioType("gsm");
+                    break;
+                case 2:
+                    cellTower.setRadioType("wcdma");
+                    break;
+                case 3:
+                    cellTower.setRadioType("lte");
+                    break;
+                default:
+                    break;
+            }
+            position.setNetwork(new Network(cellTower));
+        }
     }
 
     private void parseObd(Position position, JsonObject payload) {
@@ -212,6 +211,11 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseIO(Position position, JsonObject payload) {
+        getLastLocation(position, new Date(payload.getInt("io.ts") * 1000L));
+
+        if (payload.containsKey("io.IGT")) {
+            position.set(Position.KEY_IGNITION, payload.getInt("io.IGT") > 0);
+        }
         for (String key : payload.keySet()) {
             if (key.startsWith("io.AI")) {
                 position.set(Position.PREFIX_ADC + key.substring(5), payload.getJsonNumber(key).doubleValue());
