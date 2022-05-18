@@ -74,12 +74,12 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_VERSION_FW, payload.getString("sysinfo.firmware_version"));
 
         } else if (topic.contains("/summary/")) {
+            getLastLocation(position, new Date(payload.getInt("summary.ts") * 1000L));
             parseIO(position, payload);
             parseObd(position, payload);
             parseCellular(position, payload);
             parseMotion(position, payload);
             parseGnss(position, payload);
-            getLastLocation(position, new Date(payload.getInt("summary.ts") * 1000L));
 
         }
 
@@ -87,7 +87,7 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseMotion(Position position, JsonObject payload) {
-        if (payload.containsKey("motion.ts")){
+        if (payload.containsKey("motion.ts")) {
             getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
         }
         if (payload.containsKey("motion.ax")) {
@@ -130,36 +130,39 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
         }
 
 
-        String operator = payload.getString("modem1.operator");
-        if (!operator.isEmpty()) {
-            CellTower cellTower = CellTower.from(
-                    Integer.parseInt(operator.substring(0, 3)),
-                    Integer.parseInt(operator.substring(3)),
-                    Integer.parseInt(payload.getString("modem1.lac"), 16),
-                    Integer.parseInt(payload.getString("modem1.cell_id"), 16));
+        if (payload.containsKey("modem1.operator")) {
+            String operator = payload.getString("modem1.operator");
+            if (!operator.isEmpty()) {
+                CellTower cellTower = CellTower.from(
+                        Integer.parseInt(operator.substring(0, 3)),
+                        Integer.parseInt(operator.substring(3)),
+                        Integer.parseInt(payload.getString("modem1.lac"), 16),
+                        Integer.parseInt(payload.getString("modem1.cell_id"), 16));
 
-            if (payload.containsKey("modem1.rsrp")) {
-                cellTower.setSignalStrength(payload.getInt("modem1.rsrp"));
-            }
-            if (payload.containsKey("modem1.rssi")) {
-                cellTower.setSignalStrength(payload.getInt("modem1.rssi"));
-            }
+                if (payload.containsKey("modem1.rsrp")) {
+                    cellTower.setSignalStrength(payload.getInt("modem1.rsrp"));
+                }
+                if (payload.containsKey("modem1.rssi")) {
+                    cellTower.setSignalStrength(payload.getInt("modem1.rssi"));
+                }
 
-            switch (payload.getInt("modem1.network")) {
-                case 1:
-                    cellTower.setRadioType("gsm");
-                    break;
-                case 2:
-                    cellTower.setRadioType("wcdma");
-                    break;
-                case 3:
-                    cellTower.setRadioType("lte");
-                    break;
-                default:
-                    break;
+                switch (payload.getInt("modem1.network")) {
+                    case 1:
+                        cellTower.setRadioType("gsm");
+                        break;
+                    case 2:
+                        cellTower.setRadioType("wcdma");
+                        break;
+                    case 3:
+                        cellTower.setRadioType("lte");
+                        break;
+                    default:
+                        break;
+                }
+                position.setNetwork(new Network(cellTower));
             }
-            position.setNetwork(new Network(cellTower));
         }
+
     }
 
     private void parseObd(Position position, JsonObject payload) {
@@ -208,7 +211,6 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_HDOP, payload.getJsonNumber("gnss.hdop").doubleValue());
             }
         } else {
-            position.setValid(false);
             if (payload.containsKey("gnss.num_sv")) {
                 position.set(Position.KEY_SATELLITES, payload.getJsonNumber("gnss.num_sv").intValue());
             }

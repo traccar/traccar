@@ -34,9 +34,7 @@ public class FlexApiProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, text(
                 "${\"topic\":\"v1/VF3102021111601/sysinfo/info\",\"payload\":{\"sysinfo.ts\":1637224740,\"sysinfo.model_name\":\"310\",\"sysinfo.oem_name\":\"inhand\",\"sysinfo.serial_number\":\"VF3102021111601\",\"sysinfo.firmware_version\":\"VT3_V1.1.32\",\"sysinfo.product_number\":\"FQ58\",\"sysinfo.description\":\"www.inhand.com.cn\"}}xx"));
         verifyAttributes(decoder, text(
-                "${\"topic\":\"v1/VF3102021111601/cellular1/info\",\"payload\":{\"modem1.ts\":1637225330,\"modem1.imei\":\"863674047324999\",\"modem1.imsi\":\"460111150414721\",\"modem1.iccid\":\"89860319482086580401\",\"modem1.phone_num\":\"\",\"modem1.signal_lvl\":25,\"modem1.reg_status\":1,\"modem1.operator\":\"46011\",\"modem1.network\":3,\"modem1.lac\":\"EA00\",\"modem1.cell_id\":\"E779B81\",\"modem1.rssi\":0,\"modem1.rsrp\":0,\"modem1.rsrq\":0,\"cellular1.status\":3,\"cellular1.ip\":\"10.136.143.193\",\"cellular1.netmask\":\"255.255.255.255\",\"cellular1.gateway\":\"10.64.64.64\",\"cellular1.dns1\":\"223.5.5.5\",\"cellular1.up_at\":450}}xx"));
-        verifyAttributes(decoder, text(
-                "${\"topic\": \"v1/VG7102021110801/io/info\", \"payload\": {\"io.ts\": 1646641456, \"io.DI1\": 0, \"io.DI2\": 0, \"io.DI3\": 0, \"io.DI4\": 0, \"io.DI1_pullup\": 0, \"io.DI2_pullup\": 0, \"io.DI3_pullup\": 0, \"io.DI4_pullup\": 0}}ن\n"));
+                "${\"topic\": \"v1/VG7102022066666/summary/info\", \"payload\": {\"summary.ts\": 1652860720, \"modem1.ts\": 1652860604, \"modem1.imei\": \"358030090014650\", \"modem1.signal_lvl\": 20, \"modem1.rssi\": -73, \"cellular1.ts\": 1652860704, \"gnss.ts\": 1652860720, \"gnss.latitude\": 30.588253330000001, \"gnss.longitude\": 104.05361717, \"gnss.altitude\": 551.60000000000002, \"gnss.speed\": 0.0, \"gnss.heading\": 132.08000000000001, \"gnss.acc_heading\": 41.140000000000001, \"gnss.hdop\": 1.0800000000000001, \"gnss.pdop\": 1.9099999999999999, \"gnss.hacc\": 4.0, \"gnss.fix\": 3, \"gnss.num_sv\": 9, \"gnss.date\": \"2022-05-18\", \"gnss.time\": \"07:58:39\"}}��\n"));
 
     }
 
