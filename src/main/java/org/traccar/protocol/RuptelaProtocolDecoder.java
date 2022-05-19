@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_SMS_VIA_GPRS_RESPONSE = 7;
     public static final int MSG_SMS_VIA_GPRS = 8;
     public static final int MSG_DTCS = 9;
+    public static final int MSG_IDENTIFICATION = 15;
     public static final int MSG_SET_IO = 17;
     public static final int MSG_FILES = 37;
     public static final int MSG_EXTENDED_RECORDS = 68;
@@ -302,6 +303,18 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     photo = null;
                     return position;
                 }
+            }
+
+            return null;
+
+        } else if (type == MSG_IDENTIFICATION) {
+
+            ByteBuf content = Unpooled.buffer();
+            content.writeByte(1);
+            ByteBuf response = RuptelaProtocolEncoder.encodeContent(type, content);
+            content.release();
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
 
             return null;
