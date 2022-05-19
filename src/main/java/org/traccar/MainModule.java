@@ -53,7 +53,6 @@ import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DefaultDataHandler;
-import org.traccar.handler.DigitalPortHandler;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
@@ -285,15 +284,6 @@ public class MainModule extends AbstractModule {
     public static EngineHoursHandler provideEngineHoursHandler(Config config, IdentityManager identityManager) {
         if (config.getBoolean(Keys.PROCESSING_ENGINE_HOURS_ENABLE)) {
             return new EngineHoursHandler(config, identityManager);
-        }
-        return null;
-    }
-
-    @Singleton
-    @Provides
-    public static DigitalPortHandler provideDigitalPortHandler(Config config, IdentityManager identityManager) {
-        if (config.getBoolean(Keys.PROCESSING_DIGITAL_PORT_TIME_ENABLE)) {
-            return new DigitalPortHandler(identityManager);
         }
         return null;
     }

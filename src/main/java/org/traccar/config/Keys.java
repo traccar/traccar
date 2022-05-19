@@ -268,12 +268,6 @@ public final class Keys {
             "processing.engineHours.enable", Boolean.class);
 
     /**
-     * Enable digital ports time calculation on the server side.
-     */
-    public static final ConfigKey PROCESSING_DIGITAL_PORT_TIME_ENABLE = new ConfigKey(
-            "processing.digitalPortTime.enable", Boolean.class);
-
-    /**
      * Enable copying of missing attributes from last position to the current one. Might be useful if device doesn't
      * send some values in every message.
      */
