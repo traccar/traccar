@@ -63,7 +63,7 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
             parseObd(position, payload);
         } else if (topic.contains("/motion/")) {
             parseMotion(position, payload);
-        } else if (topic.contains("/io/") || (topic.contains("/event/notice") && "DI_CHG".equals(payload.getString("type")))) {
+        } else if (topic.contains("/io/")) {
             parseIO(position, payload);
 
         } else if (topic.contains("/sysinfo/")) {
@@ -81,9 +81,26 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
             parseMotion(position, payload);
             parseGnss(position, payload);
 
+        } else if (topic.contains("/event/notice")) {
+            getLastLocation(position, new Date(payload.getInt("starts_at") * 1000L));
+            parseIO(position, payload);
+            parseObd(position, payload);
+            parseMotion(position, payload);
+            parseGnss(position, payload);
+            parseEvent(position, payload);
         }
 
         return position;
+    }
+
+    private void parseEvent(Position position, JsonObject payload) {
+        if (payload.containsKey("type")) {
+            if ("IGON".equals(payload.getString("type"))) {
+                position.set(Position.KEY_IGNITION, true);
+            } else if ("IGOFF".equals(payload.getString("type"))) {
+                position.set(Position.KEY_IGNITION, false);
+            }
+        }
     }
 
     private void parseMotion(Position position, JsonObject payload) {
@@ -184,37 +201,38 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseGnss(Position position, JsonObject payload) {
-        if (payload.getInt("gnss.fix") > 0) {
-            position.setValid(true);
-            if (payload.containsKey("time")) {
-                position.setTime(new Date(payload.getInt("time") * 1000L));
-                position.setLatitude(payload.getJsonNumber("lat").doubleValue());
-                position.setLongitude(payload.getJsonNumber("log").doubleValue());
+        if (payload.containsKey("gnss.fix")) {
+            if (payload.getInt("gnss.fix") > 0) {
+                position.setValid(true);
+                if (payload.containsKey("time")) {
+                    position.setTime(new Date(payload.getInt("time") * 1000L));
+                    position.setLatitude(payload.getJsonNumber("lat").doubleValue());
+                    position.setLongitude(payload.getJsonNumber("log").doubleValue());
+                } else {
+                    position.setTime(new Date(payload.getInt("gnss.ts") * 1000L));
+                    position.setLatitude(payload.getJsonNumber("gnss.latitude").doubleValue());
+                    position.setLongitude(payload.getJsonNumber("gnss.longitude").doubleValue());
+                }
+                if (payload.containsKey("gnss.altitude")) {
+                    position.setAltitude(payload.getJsonNumber("gnss.altitude").doubleValue());
+                }
+                if (payload.containsKey("gnss.speed")) {
+                    position.setSpeed(payload.getJsonNumber("gnss.speed").doubleValue());
+                }
+                if (payload.containsKey("gnss.heading")) {
+                    position.setCourse(payload.getJsonNumber("gnss.heading").doubleValue());
+                }
+                if (payload.containsKey("gnss.num_sv")) {
+                    position.set(Position.KEY_SATELLITES, payload.getJsonNumber("gnss.num_sv").doubleValue());
+                }
+                if (payload.containsKey("gnss.hdop")) {
+                    position.set(Position.KEY_HDOP, payload.getJsonNumber("gnss.hdop").doubleValue());
+                }
             } else {
-                position.setTime(new Date(payload.getInt("gnss.ts") * 1000L));
-                position.setLatitude(payload.getJsonNumber("gnss.latitude").doubleValue());
-                position.setLongitude(payload.getJsonNumber("gnss.longitude").doubleValue());
+                if (payload.containsKey("gnss.num_sv")) {
+                    position.set(Position.KEY_SATELLITES, payload.getJsonNumber("gnss.num_sv").intValue());
+                }
             }
-            if (payload.containsKey("gnss.altitude")) {
-                position.setAltitude(payload.getJsonNumber("gnss.altitude").doubleValue());
-            }
-            if (payload.containsKey("gnss.speed")) {
-                position.setSpeed(payload.getJsonNumber("gnss.speed").doubleValue());
-            }
-            if (payload.containsKey("gnss.heading")) {
-                position.setCourse(payload.getJsonNumber("gnss.heading").doubleValue());
-            }
-            if (payload.containsKey("gnss.num_sv")) {
-                position.set(Position.KEY_SATELLITES, payload.getJsonNumber("gnss.num_sv").doubleValue());
-            }
-            if (payload.containsKey("gnss.hdop")) {
-                position.set(Position.KEY_HDOP, payload.getJsonNumber("gnss.hdop").doubleValue());
-            }
-        } else {
-            if (payload.containsKey("gnss.num_sv")) {
-                position.set(Position.KEY_SATELLITES, payload.getJsonNumber("gnss.num_sv").intValue());
-            }
-            position.setTime(new Date());
         }
     }
 
