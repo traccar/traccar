@@ -4,9 +4,15 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
-  logicalFilePath="changelog-4.16">
+  logicalFilePath="changelog-5.0">
 
-  <changeSet author="author" id="changelog-4.16">
+  <changeSet author="author" id="changelog-5.0">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <columnExists tableName="tc_servers" columnName="disablereports" />
+      </not>
+    </preConditions>
 
     <addColumn tableName="tc_servers">
       <column name="disablereports" type="BOOLEAN" defaultValueBoolean="false" />
