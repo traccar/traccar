@@ -165,10 +165,6 @@ public interface Condition {
             this(ownerClass, ownerId, propertyClass, 0, false);
         }
 
-        public Permission(Class<?> ownerClass, Class<?> propertyClass, long propertyId) {
-            this(ownerClass, 0, propertyClass, propertyId, false);
-        }
-
         public Permission excludeGroups() {
             return new Permission(this.ownerClass, this.ownerId, this.propertyClass, this.propertyId, true);
         }
