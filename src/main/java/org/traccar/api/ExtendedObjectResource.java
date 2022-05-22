@@ -47,11 +47,11 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             permissionsService.checkAdmin(getUserId());
         } else {
             if (userId == 0) {
-                userId = getUserId();
+                conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
             } else {
                 permissionsService.checkUser(getUserId(), userId);
+                conditions.add(new Condition.Permission(User.class, getUserId(), baseClass).excludeGroups());
             }
-            conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
 
         if (groupId > 0) {
