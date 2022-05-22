@@ -264,19 +264,9 @@ public class PermissionsManager {
         return user != null && user.getReadonly();
     }
 
-    public boolean getUserDeviceReadonly(long userId) {
-        User user = getUser(userId);
-        return user != null && user.getDeviceReadonly();
-    }
-
     public boolean getUserLimitCommands(long userId) {
         User user = getUser(userId);
         return user != null && user.getLimitCommands();
-    }
-
-    public boolean getUserDisableReport(long userId) {
-        User user = getUser(userId);
-        return user != null && user.getDisableReports();
     }
 
     public void checkReadonly(long userId) throws SecurityException {
@@ -285,21 +275,9 @@ public class PermissionsManager {
         }
     }
 
-    public void checkDeviceReadonly(long userId) throws SecurityException {
-        if (!getUserAdmin(userId) && (server.getDeviceReadonly() || getUserDeviceReadonly(userId))) {
-            throw new SecurityException("Account is device readonly");
-        }
-    }
-
     public void checkLimitCommands(long userId) throws SecurityException {
         if (!getUserAdmin(userId) && (server.getLimitCommands() || getUserLimitCommands(userId))) {
             throw new SecurityException("Account has limit sending commands");
-        }
-    }
-
-    public void checkDisableReports(long userId) throws SecurityException {
-        if (!getUserAdmin(userId) && (server.getDisableReports() || getUserDisableReport(userId))) {
-            throw new SecurityException("Account has reports disabled");
         }
     }
 

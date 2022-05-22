@@ -15,7 +15,6 @@
  */
 package org.traccar.database;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -110,7 +109,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     }
 
     @Override
-    public Device getByUniqueId(String uniqueId) throws SQLException {
+    public Device getByUniqueId(String uniqueId) {
         boolean forceUpdate;
         try {
             readLock();

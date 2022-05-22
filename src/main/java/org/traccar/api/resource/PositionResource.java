@@ -55,7 +55,7 @@ public class PositionResource extends BaseResource {
         } else {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             if (from != null && to != null) {
-                Context.getPermissionsManager().checkDisableReports(getUserId());
+                permissionsService.checkReports(getUserId());
                 return Context.getDataManager().getPositions(deviceId, from, to);
             } else {
                 return Collections.singleton(Context.getDeviceManager().getLastPosition(deviceId));

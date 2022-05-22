@@ -11,6 +11,7 @@
     <entry key='web.console'>true</entry>
 
     <entry key='logger.console'>true</entry>
+    <entry key='logger.queries'>true</entry>
 
     <entry key='database.driver'>org.h2.Driver</entry>
     <entry key='database.url'>jdbc:h2:./target/database</entry>
