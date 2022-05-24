@@ -110,8 +110,7 @@ public class SessionResource extends BaseResource {
             @FormParam("email") String email, @FormParam("password") String password) throws StorageException {
         User user = Context.getPermissionsManager().login(email, password);
         if (user != null) {
-            request.getSession().setAttribute(USER_ID_KEY, user.getId());
-            LogAction.login(user.getId());
+            LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
             return user;
         } else {
             LogAction.failedLogin(ServletHelper.retrieveRemoteAddress(request));
@@ -121,7 +120,7 @@ public class SessionResource extends BaseResource {
 
     @DELETE
     public Response remove() {
-        LogAction.logout(getUserId());
+        LogAction.logout(getUserId(), ServletHelper.retrieveRemoteAddress(request));
         request.getSession().removeAttribute(USER_ID_KEY);
         return Response.noContent().build();
     }
