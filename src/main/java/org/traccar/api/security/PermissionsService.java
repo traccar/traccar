@@ -126,7 +126,7 @@ public class PermissionsService {
 
     public <T extends BaseModel> void checkPermission(
             Class<T> clazz, long userId, long objectId) throws StorageException, SecurityException {
-        if (!getUser(userId).getAdministrator()) {
+        if (!getUser(userId).getAdministrator() && !(clazz.equals(User.class) && userId == objectId)) {
             var objects = storage.getObjects(clazz, new Request(
                     new Columns.Include("id"),
                     new Condition.Permission(User.class, userId, clazz)));
