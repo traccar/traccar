@@ -339,9 +339,9 @@ public class DatabaseStorage extends Storage {
             result.append(getStorageName(Group.class));
             result.append(" AS g1 ON g2.id = g1.groupid");
             result.append(" WHERE g2.groupid IS NOT NULL");
-            result.append(") AS groups ON ");
+            result.append(") AS `groups` ON ");
             result.append(groupStorageName);
-            result.append(".groupid = groups.parentid");
+            result.append(".groupid = `groups`.parentid");
 
             if (expandDevices) {
                 result.append(" INNER JOIN (");
