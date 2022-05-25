@@ -319,7 +319,7 @@ public class DatabaseStorage extends Storage {
             result.append(" UNION ");
 
             result.append("SELECT DISTINCT ");
-            result.append(expandDevices ? "devices." : "groups."); // TODO handle reverse search (e.g. users by device)
+            result.append(expandDevices ? "devices." : "all_groups."); // TODO handle reverse (e.g. users by device)
             result.append(outputKey);
             result.append(" FROM ");
             result.append(groupStorageName);
@@ -339,16 +339,16 @@ public class DatabaseStorage extends Storage {
             result.append(getStorageName(Group.class));
             result.append(" AS g1 ON g2.id = g1.groupid");
             result.append(" WHERE g2.groupid IS NOT NULL");
-            result.append(") AS groups ON ");
+            result.append(") AS all_groups ON ");
             result.append(groupStorageName);
-            result.append(".groupid = groups.parentid");
+            result.append(".groupid = all_groups.parentid");
 
             if (expandDevices) {
                 result.append(" INNER JOIN (");
                 result.append("SELECT groupid as parentid, id as deviceid FROM ");
                 result.append(getStorageName(Device.class));
                 result.append(" WHERE groupid IS NOT NULL");
-                result.append(") AS devices ON groups.groupid = devices.parentid");
+                result.append(") AS devices ON all_groups.groupid = devices.parentid");
             }
 
             result.append(" WHERE ");
