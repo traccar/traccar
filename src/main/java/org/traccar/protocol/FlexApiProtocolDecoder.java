@@ -38,58 +38,93 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
         String message = (String) msg;
-        JsonObject root = Json.createReader(new StringReader(message.substring(1, message.length() - 2))).readObject();
+        try {
 
-        String topic = root.getString("topic");
-        String clientId = topic.substring(3, topic.indexOf('/', 3));
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, clientId);
-        if (deviceSession == null) {
-            return null;
+            JsonObject root = Json.createReader(new StringReader(message.substring(1, message.length() - 2))).readObject();
+            String topic = root.getString("topic");
+            String clientId = topic.substring(3, topic.indexOf('/', 3));
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, clientId);
+            if (deviceSession == null) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            getLastLocation(position, new Date());
+            position.set(Position.KEY_ORIGINAL, message);
+            position.setTime(new Date());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            JsonObject payload = root.getJsonObject("payload");
+
+            if (topic.contains("/gnss/")) {
+                if (payload.containsKey("time")) {
+                    getLastLocation(position, new Date(payload.getInt("time") * 1000L));
+                    position.setTime(new Date(payload.getInt("time") * 1000L));
+                } else {
+                    getLastLocation(position, new Date(payload.getInt("gnss.ts") * 1000L));
+                    position.setTime(new Date(payload.getInt("gnss.ts") * 1000L));
+                }
+                parseGnss(position, payload);
+            } else if (topic.contains("/cellular1/")) {
+                if (payload.containsKey("modem1.ts")) {
+                    getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
+                    position.setTime(new Date(payload.getInt("modem1.ts") * 1000L));
+                }
+                parseCellular(position, payload);
+            } else if (topic.contains("/obd/")) {
+                if (payload.containsKey("obd.ts")) {
+                    getLastLocation(position, new Date(payload.getInt("obd.ts") * 1000L));
+                    position.setTime(new Date(payload.getInt("obd.ts") * 1000L));
+                }
+                parseObd(position, payload);
+            } else if (topic.contains("/motion/")) {
+                if (payload.containsKey("motion.ts")) {
+                    getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
+                    position.setTime(new Date(payload.getInt("motion.ts") * 1000L));
+                }
+                parseMotion(position, payload);
+            } else if (topic.contains("/io/")) {
+                if (payload.containsKey("io.ts")) {
+                    getLastLocation(position, new Date(payload.getInt("io.ts") * 1000L));
+                    position.setTime(new Date(payload.getInt("io.ts") * 1000L));
+                }
+                parseIO(position, payload);
+
+            } else if (topic.contains("/sysinfo/")) {
+
+                getLastLocation(position, new Date(payload.getInt("sysinfo.ts") * 1000L));
+                position.setTime(new Date(payload.getInt("sysinfo.ts") * 1000L));
+                position.set("serial", payload.getString("sysinfo.serial_number"));
+                position.set(Position.KEY_VERSION_FW, payload.getString("sysinfo.firmware_version"));
+
+            } else if (topic.contains("/summary/")) {
+                getLastLocation(position, new Date(payload.getInt("summary.ts") * 1000L));
+                position.setTime(new Date(payload.getInt("summary.ts") * 1000L));
+                parseIO(position, payload);
+                parseObd(position, payload);
+                parseCellular(position, payload);
+                parseMotion(position, payload);
+                parseGnss(position, payload);
+
+            } else if (topic.contains("/event/notice")) {
+                getLastLocation(position, new Date(payload.getInt("starts_at") * 1000L));
+                position.setTime(new Date(payload.getInt("starts_at") * 1000L));
+                parseIO(position, payload);
+                parseObd(position, payload);
+                parseMotion(position, payload);
+                parseGnss(position, payload);
+                parseEvent(position, payload);
+            }
+            return position;
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
         Position position = new Position(getProtocolName());
+        getLastLocation(position, new Date());
         position.set(Position.KEY_ORIGINAL, message);
-        position.setDeviceId(deviceSession.getDeviceId());
-
-        JsonObject payload = root.getJsonObject("payload");
-
-        if (topic.contains("/gnss/")) {
-            parseGnss(position, payload);
-        } else if (topic.contains("/cellular1/")) {
-            parseCellular(position, payload);
-        } else if (topic.contains("/obd/")) {
-            parseObd(position, payload);
-        } else if (topic.contains("/motion/")) {
-            parseMotion(position, payload);
-        } else if (topic.contains("/io/")) {
-            parseIO(position, payload);
-
-        } else if (topic.contains("/sysinfo/")) {
-
-            getLastLocation(position, new Date(payload.getInt("sysinfo.ts") * 1000L));
-
-            position.set("serial", payload.getString("sysinfo.serial_number"));
-            position.set(Position.KEY_VERSION_FW, payload.getString("sysinfo.firmware_version"));
-
-        } else if (topic.contains("/summary/")) {
-            getLastLocation(position, new Date(payload.getInt("summary.ts") * 1000L));
-            parseIO(position, payload);
-            parseObd(position, payload);
-            parseCellular(position, payload);
-            parseMotion(position, payload);
-            parseGnss(position, payload);
-
-        } else if (topic.contains("/event/notice")) {
-            getLastLocation(position, new Date(payload.getInt("starts_at") * 1000L));
-            parseIO(position, payload);
-            parseObd(position, payload);
-            parseMotion(position, payload);
-            parseGnss(position, payload);
-            parseEvent(position, payload);
-        }
-
+        position.setTime(new Date());
+        position.setValid(false);
         return position;
     }
 
@@ -104,9 +139,6 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseMotion(Position position, JsonObject payload) {
-        if (payload.containsKey("motion.ts")) {
-            getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
-        }
         if (payload.containsKey("motion.ax")) {
             position.set("ax", payload.getJsonNumber("motion.ax").doubleValue());
         }
@@ -128,24 +160,18 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseCellular(Position position, JsonObject payload) {
-
-        if (payload.containsKey("modem1.ts")) {
-            getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
-        }
-
         if (payload.containsKey("modem1.imei")) {
-            position.set("imei", payload.getString("modem1.imei"));
+            position.set("IMEI", payload.getString("modem1.imei"));
         }
         if (payload.containsKey("modem1.rssi")) {
             position.set(Position.KEY_RSSI, payload.getInt("modem1.rssi"));
         }
         if (payload.containsKey("modem1.imsi")) {
-            position.set("imsi", payload.getString("modem1.imsi"));
+            position.set("IMSI", payload.getString("modem1.imsi"));
         }
         if (payload.containsKey("modem1.iccid")) {
             position.set(Position.KEY_ICCID, payload.getString("modem1.iccid"));
         }
-
 
         if (payload.containsKey("modem1.operator")) {
             String operator = payload.getString("modem1.operator");
@@ -183,9 +209,6 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseObd(Position position, JsonObject payload) {
-        if (payload.containsKey("obd.ts")) {
-            getLastLocation(position, new Date(payload.getInt("obd.ts") * 1000L));
-        }
         if (payload.containsKey("obd.speed")) {
             position.set(Position.KEY_OBD_SPEED, payload.getJsonNumber("obd.speed").doubleValue());
         }
@@ -202,14 +225,12 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
 
     private void parseGnss(Position position, JsonObject payload) {
         if (payload.containsKey("gnss.fix")) {
-            if (payload.getInt("gnss.fix") > 0) {
+            if (payload.getInt("gnss.fix") > 0 && payload.getInt("gnss.fix") != 5) {
                 position.setValid(true);
                 if (payload.containsKey("time")) {
-                    position.setTime(new Date(payload.getInt("time") * 1000L));
                     position.setLatitude(payload.getJsonNumber("lat").doubleValue());
                     position.setLongitude(payload.getJsonNumber("log").doubleValue());
                 } else {
-                    position.setTime(new Date(payload.getInt("gnss.ts") * 1000L));
                     position.setLatitude(payload.getJsonNumber("gnss.latitude").doubleValue());
                     position.setLongitude(payload.getJsonNumber("gnss.longitude").doubleValue());
                 }
@@ -237,10 +258,6 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void parseIO(Position position, JsonObject payload) {
-        if (payload.containsKey("io.ts")) {
-            getLastLocation(position, new Date(payload.getInt("io.ts") * 1000L));
-        }
-
         if (payload.containsKey("io.IGT")) {
             position.set(Position.KEY_IGNITION, payload.getInt("io.IGT") > 0);
         }
