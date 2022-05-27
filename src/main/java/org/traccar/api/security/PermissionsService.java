@@ -68,7 +68,7 @@ public class PermissionsService {
 
     public void checkReports(long userId) throws StorageException, SecurityException {
         if (!getUser(userId).getAdministrator()
-                && (server.getDisableReports() || getUser(userId).getDisableReports())) {
+                && (getServer().getDisableReports() || getUser(userId).getDisableReports())) {
             throw new SecurityException("Reports are disabled");
         }
     }
