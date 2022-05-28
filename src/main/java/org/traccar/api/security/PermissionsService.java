@@ -21,6 +21,7 @@ import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
+import org.traccar.model.ManagedUser;
 import org.traccar.model.ScheduledModel;
 import org.traccar.model.Server;
 import org.traccar.model.User;
@@ -60,9 +61,13 @@ public class PermissionsService {
         return user;
     }
 
+    public boolean isAdmin(long userId) throws StorageException {
+        return getUser(userId).getAdministrator();
+    }
+
     public void checkAdmin(long userId) throws StorageException, SecurityException {
         if (!getUser(userId).getAdministrator()) {
-            throw new SecurityException("Account is readonly");
+            throw new SecurityException("Administrator access required");
         }
     }
 
@@ -118,7 +123,7 @@ public class PermissionsService {
     public void checkUser(long userId, long managedUserId) throws StorageException, SecurityException {
         if (userId != managedUserId && !getUser(userId).getAdministrator()) {
             if (!getUser(userId).getManager()
-                    || storage.getPermissions(User.class, userId, User.class, managedUserId).isEmpty()) {
+                    || storage.getPermissions(User.class, userId, ManagedUser.class, managedUserId).isEmpty()) {
                 throw new SecurityException("User access denied");
             }
         }
@@ -129,7 +134,8 @@ public class PermissionsService {
         if (!getUser(userId).getAdministrator() && !(clazz.equals(User.class) && userId == objectId)) {
             var objects = storage.getObjects(clazz, new Request(
                     new Columns.Include("id"),
-                    new Condition.Permission(User.class, userId, clazz)));
+                    new Condition.Permission(
+                            User.class, userId, clazz.equals(User.class) ? ManagedUser.class : clazz)));
             boolean found = false;
             for (var object : objects) {
                 if (object.getId() == objectId) {

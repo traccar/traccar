@@ -128,9 +128,13 @@ public class DatabaseStorage extends Storage {
             conditions.add(new Condition.Equals(
                     Permission.getKey(propertyClass), Permission.getKey(propertyClass), propertyId));
         }
-        query.append(formatCondition(Condition.merge(conditions)));
+        Condition combinedCondition = Condition.merge(conditions);
+        query.append(formatCondition(combinedCondition));
         try {
             QueryBuilder builder = QueryBuilder.create(dataSource, query.toString());
+            for (Map.Entry<String, Object> variable : getConditionVariables(combinedCondition).entrySet()) {
+                builder.setValue(variable.getKey(), variable.getValue());
+            }
             return builder.executePermissionsQuery();
         } catch (SQLException e) {
             throw new StorageException(e);
