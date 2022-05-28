@@ -15,6 +15,9 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new WatchProtocolDecoder(null);
 
+        verifyPosition(decoder, buffer(
+                "[3G*9031853319*004E*UD2,220322,055105,A,22.761162,N,114.360192,E,0,0,47,14,100,64,0,0,00000008,0,0]"));
+
         verifyAttribute(decoder, buffer(
                 "[3G*2104326058*000E*btemp2,1,35.29]"),
                 Position.PREFIX_TEMP + 1, 35.29);

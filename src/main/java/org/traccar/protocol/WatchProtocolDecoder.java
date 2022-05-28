@@ -145,17 +145,19 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
         int cellCount = Integer.parseInt(values[index++]);
         index += 1; // timing advance
-        int mcc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
-        int mnc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
+        if (cellCount > 0) {
+            int mcc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
+            int mnc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
 
-        for (int i = 0; i < cellCount; i++) {
-            int lac = Integer.parseInt(values[index++]);
-            int cid = Integer.parseInt(values[index++]);
-            String rssi = values[index++];
-            if (!rssi.isEmpty()) {
-                network.addCellTower(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(rssi)));
-            } else {
-                network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+            for (int i = 0; i < cellCount; i++) {
+                int lac = Integer.parseInt(values[index++]);
+                int cid = Integer.parseInt(values[index++]);
+                String rssi = values[index++];
+                if (!rssi.isEmpty()) {
+                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(rssi)));
+                } else {
+                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+                }
             }
         }
 
