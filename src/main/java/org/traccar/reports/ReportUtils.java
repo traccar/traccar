@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,6 +48,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -83,7 +84,7 @@ public final class ReportUtils {
     }
 
     public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
-        Collection<Long> result = new ArrayList<>(deviceIds);
+        Collection<Long> result = new LinkedHashSet<>(deviceIds);
         for (long groupId : groupIds) {
             result.addAll(Context.getPermissionsManager().getGroupDevices(groupId));
         }
