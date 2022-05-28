@@ -16,6 +16,9 @@
  */
 package org.traccar.model;
 
+import org.traccar.storage.StorageName;
+
+@StorageName("tc_drivers")
 public class Driver extends ExtendedModel {
 
     private String name;
@@ -37,4 +40,5 @@ public class Driver extends ExtendedModel {
     public void setUniqueId(String uniqueId) {
         this.uniqueId = uniqueId;
     }
+
 }

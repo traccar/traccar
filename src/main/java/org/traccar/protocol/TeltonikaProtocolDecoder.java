@@ -362,7 +362,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (cid != 0 && lac != 0) {
             CellTower cellTower = CellTower.fromLacCid(lac, cid);
             long operator = position.getInteger(Position.KEY_OPERATOR);
-            if (operator != 0) {
+            if (operator >= 1000) {
                 cellTower.setOperator(operator);
             }
             position.setNetwork(new Network(cellTower));

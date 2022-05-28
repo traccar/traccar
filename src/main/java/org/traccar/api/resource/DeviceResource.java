@@ -21,6 +21,7 @@ import org.traccar.database.DeviceManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
+import org.traccar.storage.StorageException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -30,8 +31,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -50,7 +49,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds) throws SQLException {
+            @QueryParam("id") List<Long> deviceIds) {
         DeviceManager deviceManager = Context.getDeviceManager();
         Set<Long> result;
         if (all) {
@@ -87,7 +86,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Path("{id}/accumulators")
     @PUT
-    public Response updateAccumulators(DeviceAccumulators entity) throws SQLException {
+    public Response updateAccumulators(DeviceAccumulators entity) throws StorageException {
         if (!Context.getPermissionsManager().getUserAdmin(getUserId())) {
             Context.getPermissionsManager().checkManager(getUserId());
             Context.getPermissionsManager().checkPermission(Device.class, getUserId(), entity.getDeviceId());

@@ -195,6 +195,9 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
 
                     for (int j = 0; j < bits.length(); j++) {
                         if (bits.get(j)) {
+
+                            int value = 0;
+
                             switch (j + 1) {
                                 case 1:
                                     position.set(Position.KEY_INDEX, buf.readUnsignedIntLE());
@@ -205,8 +208,12 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 3:
                                     position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
                                     break;
+                                case 8:
+                                    value = buf.readUnsignedByte();
+                                    position.setValid(BitUtil.check(value, 1));
+                                    position.set(Position.KEY_SATELLITES, BitUtil.from(value, 2));
+                                    break;
                                 case 9:
-                                    position.setValid(true);
                                     position.setFixTime(new Date(buf.readUnsignedIntLE() * 1000));
                                     break;
                                 case 10:
@@ -220,6 +227,73 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 13:
                                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readFloatLE()));
+                                    break;
+                                case 14:
+                                    position.setCourse(buf.readUnsignedShortLE());
+                                    break;
+                                case 15:
+                                    position.set(Position.KEY_ODOMETER, buf.readFloatLE());
+                                    break;
+                                case 19:
+                                    position.set(Position.KEY_POWER, buf.readShortLE() * 0.001);
+                                    break;
+                                case 20:
+                                    position.set(Position.KEY_BATTERY, buf.readShortLE() * 0.001);
+                                    break;
+                                case 21:
+                                case 22:
+                                case 23:
+                                case 24:
+                                case 25:
+                                case 26:
+                                    position.set(Position.PREFIX_ADC + (j + 2 - 21), buf.readUnsignedShortLE() * 0.001);
+                                    break;
+                                case 29:
+                                    value = buf.readUnsignedByte();
+                                    for (int k = 0; k <= 7; k++) {
+                                        position.set(Position.PREFIX_IN + (k + 1), BitUtil.check(value, k));
+                                    }
+                                    break;
+                                case 31:
+                                    value = buf.readUnsignedByte();
+                                    for (int k = 0; k <= 3; k++) {
+                                        position.set(Position.PREFIX_OUT + (k + 1), BitUtil.check(value, k));
+                                    }
+                                    break;
+                                case 33:
+                                case 34:
+                                    position.set(Position.PREFIX_COUNT + (j + 2 - 33), buf.readUnsignedIntLE());
+                                    break;
+                                case 35:
+                                case 36:
+                                    position.set("freq" + (j + 2 - 35), buf.readUnsignedShortLE());
+                                    break;
+                                case 37:
+                                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE());
+                                    break;
+                                case 38:
+                                case 39:
+                                case 40:
+                                case 41:
+                                case 42:
+                                case 43:
+                                    value = buf.readUnsignedShortLE();
+                                    position.set("rs485Fuel" + (j + 2 - 38), (value < 65500) ? value : null);
+                                    break;
+                                case 44:
+                                    value = buf.readUnsignedShortLE();
+                                    position.set("rs232Fuel", (value < 65500) ? value : null);
+                                    break;
+                                case 45:
+                                case 46:
+                                case 47:
+                                case 48:
+                                case 49:
+                                case 50:
+                                case 51:
+                                case 52:
+                                    value = buf.readByte();
+                                    position.set(Position.PREFIX_TEMP + (j + 2 - 45), (value != 0x80) ? value : null);
                                     break;
                                 default:
                                     buf.skipBytes(getItemLength(j + 1));
@@ -239,7 +313,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                     ByteBuf response = Unpooled.buffer();
                     response.writeCharSequence(type, StandardCharsets.US_ASCII);
                     response.writeByte(count);
-                    response.writeByte(Checksum.xor(response.nioBuffer()));
+                    response.writeByte(Checksum.crc8(Checksum.CRC8_EGTS, response.nioBuffer()));
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 }
 

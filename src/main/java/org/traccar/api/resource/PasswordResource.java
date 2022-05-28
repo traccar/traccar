@@ -21,6 +21,7 @@ import org.traccar.api.BaseResource;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationMessage;
 import org.traccar.notification.TextTemplateFormatter;
+import org.traccar.storage.StorageException;
 
 import javax.annotation.security.PermitAll;
 import javax.mail.MessagingException;
@@ -31,7 +32,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.sql.SQLException;
 import java.util.UUID;
 
 @Path("password")
@@ -44,7 +44,7 @@ public class PasswordResource extends BaseResource {
     @Path("reset")
     @PermitAll
     @POST
-    public Response reset(@FormParam("email") String email) throws SQLException, MessagingException {
+    public Response reset(@FormParam("email") String email) throws StorageException, MessagingException {
         for (long userId : Context.getUsersManager().getAllItems()) {
             User user = Context.getUsersManager().getById(userId);
             if (email.equals(user.getEmail())) {
@@ -66,7 +66,7 @@ public class PasswordResource extends BaseResource {
     @PermitAll
     @POST
     public Response update(
-            @FormParam("token") String token, @FormParam("password") String password) throws SQLException {
+            @FormParam("token") String token, @FormParam("password") String password) throws StorageException {
         for (long userId : Context.getUsersManager().getAllItems()) {
             User user = Context.getUsersManager().getById(userId);
             if (token.equals(user.getString(PASSWORD_RESET_TOKEN))) {

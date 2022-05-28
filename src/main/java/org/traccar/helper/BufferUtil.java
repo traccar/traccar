@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,18 @@ public final class BufferUtil {
     private BufferUtil() {
     }
 
+    public static int indexOf(ByteBuf buffer, int fromIndex, int toIndex, byte value, int count) {
+        int startIndex = fromIndex;
+        for (int i = 0; i < count; i++) {
+            int result = buffer.indexOf(startIndex, toIndex, value);
+            if (result < 0 || i == count - 1) {
+                return result;
+            }
+            startIndex = result + 1;
+        }
+        return -1;
+    }
+
     public static int indexOf(String needle, ByteBuf haystack) {
         return indexOf(needle, haystack, haystack.readerIndex(), haystack.writerIndex());
     }
@@ -50,7 +62,7 @@ public final class BufferUtil {
             wrappedHaystack.writerIndex(endIndex - haystack.readerIndex());
         }
         int result = ByteBufUtil.indexOf(needle, wrappedHaystack);
-        return result < 0 ? result : haystack.readerIndex() + startIndex + result;
+        return result < 0 ? result : startIndex + result;
     }
 
 }

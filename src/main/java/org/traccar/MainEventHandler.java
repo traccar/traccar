@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +26,10 @@ import org.slf4j.LoggerFactory;
 import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
+import org.traccar.helper.NetworkUtil;
 import org.traccar.model.Position;
+import org.traccar.storage.StorageException;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -57,14 +58,14 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             Position position = (Position) msg;
             try {
                 Context.getDeviceManager().updateLatestPosition(position);
-            } catch (SQLException error) {
+            } catch (StorageException error) {
                 LOGGER.warn("Failed to update device", error);
             }
 
             String uniqueId = Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();
 
             StringBuilder builder = new StringBuilder();
-            builder.append(formatChannel(ctx.channel())).append(" ");
+            builder.append("[").append(NetworkUtil.session(ctx.channel())).append("] ");
             builder.append("id: ").append(uniqueId);
             for (String attribute : logAttributes) {
                 switch (attribute) {
@@ -113,20 +114,16 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
         }
     }
 
-    private static String formatChannel(Channel channel) {
-        return String.format("[%s]", channel.id().asShortText());
-    }
-
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
         if (!(ctx.channel() instanceof DatagramChannel)) {
-            LOGGER.info(formatChannel(ctx.channel()) + " connected");
+            LOGGER.info("[{}] connected", NetworkUtil.session(ctx.channel()));
         }
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        LOGGER.info(formatChannel(ctx.channel()) + " disconnected");
+        LOGGER.info("[{}] disconnected", NetworkUtil.session(ctx.channel()));
         closeChannel(ctx.channel());
 
         if (BasePipelineFactory.getHandler(ctx.pipeline(), HttpRequestDecoder.class) == null
@@ -140,14 +137,14 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
         while (cause.getCause() != null && cause.getCause() != cause) {
             cause = cause.getCause();
         }
-        LOGGER.warn(formatChannel(ctx.channel()) + " error", cause);
+        LOGGER.info("[{}] error", NetworkUtil.session(ctx.channel()), cause);
         closeChannel(ctx.channel());
     }
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
         if (evt instanceof IdleStateEvent) {
-            LOGGER.info(formatChannel(ctx.channel()) + " timed out");
+            LOGGER.info("[{}] timed out", NetworkUtil.session(ctx.channel()));
             closeChannel(ctx.channel());
         }
     }

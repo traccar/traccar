@@ -18,7 +18,6 @@ package org.traccar.database;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -36,6 +35,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Typed;
+import org.traccar.storage.StorageException;
 
 public class NotificationManager extends ExtendedObjectManager<Notification> {
 
@@ -66,7 +66,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
     public void updateEvent(Event event, Position position) {
         try {
             getDataManager().addObject(event);
-        } catch (SQLException error) {
+        } catch (StorageException error) {
             LOGGER.warn("Event save error", error);
         }
 

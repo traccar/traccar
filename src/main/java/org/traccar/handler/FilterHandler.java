@@ -24,8 +24,8 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.storage.StorageException;
 
-import java.sql.SQLException;
 import java.util.Date;
 
 @ChannelHandler.Sharable
@@ -174,14 +174,14 @@ public class FilterHandler extends BaseDataHandler {
                 try {
                     Date newFixTime = position.getFixTime();
                     preceding = Context.getDataManager().getPrecedingPosition(deviceId, newFixTime);
-                } catch (SQLException e) {
+                } catch (StorageException e) {
                     LOGGER.warn("Error retrieving preceding position; fallbacking to last received position.", e);
                     preceding = getLastReceivedPosition(deviceId);
                 }
             } else {
                 preceding = getLastReceivedPosition(deviceId);
             }
-            if (filterDuplicate(position, preceding)) {
+            if (filterDuplicate(position, preceding) && !skipLimit(position, preceding) && !skipAttributes(position)) {
                 filterType.append("Duplicate ");
             }
             if (filterStatic(position) && !skipLimit(position, preceding) && !skipAttributes(position)) {

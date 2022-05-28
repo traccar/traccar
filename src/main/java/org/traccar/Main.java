@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.api.HealthCheckService;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -27,8 +26,10 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.nio.charset.Charset;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Timer;
 
 public final class Main {
 
@@ -107,14 +108,6 @@ public final class Main {
         }
     }
 
-    private static void scheduleHealthCheck() {
-        HealthCheckService service = new HealthCheckService();
-        if (service.isEnabled()) {
-            new Timer().scheduleAtFixedRate(
-                    service.createTask(), service.getPeriod(), service.getPeriod());
-        }
-    }
-
     public static void run(String configFile) {
         try {
             Context.init(configFile);
@@ -123,24 +116,29 @@ public final class Main {
             LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");
 
-            Context.getServerManager().start();
-            if (Context.getWebServer() != null) {
-                Context.getWebServer().start();
-            }
-            Context.getScheduleManager().start();
+            List<LifecycleObject> services = new LinkedList<>();
+            services.add(Context.getServerManager());
+            services.add(Context.getWebServer());
+            services.add(Context.getScheduleManager());
+            services.add(Context.getBroadcastService());
 
-            scheduleHealthCheck();
+            for (LifecycleObject service : services) {
+                if (service != null) {
+                    service.start();
+                }
+            }
 
             Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error("Thread exception", e));
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOGGER.info("Shutting down server...");
 
-                Context.getScheduleManager().stop();
-                if (Context.getWebServer() != null) {
-                    Context.getWebServer().stop();
+                Collections.reverse(services);
+                for (LifecycleObject service : services) {
+                    if (service != null) {
+                        service.stop();
+                    }
                 }
-                Context.getServerManager().stop();
             }));
         } catch (Exception e) {
             LOGGER.error("Main method error", e);

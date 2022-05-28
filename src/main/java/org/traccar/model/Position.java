@@ -17,8 +17,11 @@ package org.traccar.model;
 
 import java.util.Date;
 
-import org.traccar.database.QueryIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.traccar.storage.QueryIgnore;
+import org.traccar.storage.StorageName;
 
+@StorageName("tc_positions")
 public class Position extends Message {
 
     public static final String KEY_ORIGINAL = "raw";
@@ -190,6 +193,7 @@ public class Position extends Message {
         this.fixTime = fixTime;
     }
 
+    @QueryIgnore
     public void setTime(Date time) {
         setDeviceTime(time);
         setFixTime(time);
@@ -202,6 +206,7 @@ public class Position extends Message {
         return outdated;
     }
 
+    @QueryIgnore
     public void setOutdated(boolean outdated) {
         this.outdated = outdated;
     }
@@ -296,10 +301,18 @@ public class Position extends Message {
         this.network = network;
     }
 
-    @Override
+    @JsonIgnore
     @QueryIgnore
+    @Override
     public String getType() {
         return super.getType();
+    }
+
+    @JsonIgnore
+    @QueryIgnore
+    @Override
+    public void setType(String type) {
+        super.setType(type);
     }
 
 }

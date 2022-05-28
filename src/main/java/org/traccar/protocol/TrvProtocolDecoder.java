@@ -59,7 +59,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .number("(d)")                       // acc
             .number("(dd)")                      // arm status
             .number("(dd)")                      // working mode
-            .number("(?:[0-2]{3})?,")
+            .number("(?:d{3,5})?,")
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(d+),")                     // lac
@@ -183,7 +183,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type.equals("AP01") || type.equals("AP10") || type.equals("YP03")) {
+        } else if (type.equals("AP01") || type.equals("AP10") || type.equals("YP03") || type.equals("YP14")) {
 
             Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {

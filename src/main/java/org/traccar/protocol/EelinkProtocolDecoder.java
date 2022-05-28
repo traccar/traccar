@@ -31,6 +31,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -192,48 +193,67 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, position.getDeviceTime());
         }
 
+        Network network = new Network();
+
+        int mcc = 0;
+        int mnc = 0;
         if (BitUtil.check(flags, 1)) {
-            position.setNetwork(new Network(CellTower.from(
-                    buf.readUnsignedShort(), buf.readUnsignedShort(),
-                    buf.readUnsignedShort(), buf.readUnsignedInt(), buf.readUnsignedByte())));
+            mcc = buf.readUnsignedShort();
+            mnc = buf.readUnsignedShort();
+            network.addCellTower(CellTower.from(
+                    mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedInt(), buf.readUnsignedByte()));
         }
 
         if (BitUtil.check(flags, 2)) {
-            buf.skipBytes(7); // bsid1
+            network.addCellTower(CellTower.from(
+                    mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedInt(), buf.readUnsignedByte()));
         }
 
         if (BitUtil.check(flags, 3)) {
-            buf.skipBytes(7); // bsid2
+            network.addCellTower(CellTower.from(
+                    mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedInt(), buf.readUnsignedByte()));
         }
 
         if (BitUtil.check(flags, 4)) {
-            buf.skipBytes(7); // bss0
+            String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+            network.addWifiAccessPoint(WifiAccessPoint.from(
+                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
         }
 
         if (BitUtil.check(flags, 5)) {
-            buf.skipBytes(7); // bss1
+            String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+            network.addWifiAccessPoint(WifiAccessPoint.from(
+                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
         }
 
         if (BitUtil.check(flags, 6)) {
-            buf.skipBytes(7); // bss2
+            String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+            network.addWifiAccessPoint(WifiAccessPoint.from(
+                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
         }
 
         if (BitUtil.check(flags, 7)) {
             buf.readUnsignedByte(); // radio access technology
             int count = buf.readUnsignedByte();
+            int lac = 0;
             if (count > 0) {
-                buf.readUnsignedShort(); // mcc
-                buf.readUnsignedShort(); // mnc
-                buf.readUnsignedShort(); // lac
+                mcc = buf.readUnsignedShort();
+                mnc = buf.readUnsignedShort();
+                lac = buf.readUnsignedShort(); // lac
                 buf.readUnsignedShort(); // tac
                 buf.readUnsignedInt(); // cid
                 buf.readUnsignedShort(); // ta
             }
             for (int i = 0; i < count; i++) {
-                buf.readUnsignedShort(); // physical cid
+                int cid = buf.readUnsignedShort(); // physical cid
                 buf.readUnsignedShort(); // e-arfcn
-                buf.readUnsignedByte(); // rssi
+                int rssi = buf.readUnsignedByte();
+                network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
             }
+        }
+
+        if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+            position.setNetwork(network);
         }
 
         if (type == MSG_WARNING) {

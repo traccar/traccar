@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +16,6 @@
  */
 package org.traccar.api.resource;
 
-import java.sql.SQLException;
-
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
@@ -32,8 +30,13 @@ import javax.ws.rs.core.Response;
 import org.traccar.Context;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Attribute;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.handler.ComputedAttributesHandler;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 @Path("attributes/computed")
 @Produces(MediaType.APPLICATION_JSON)
@@ -46,51 +49,61 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
 
     @POST
     @Path("test")
-    public Response test(@QueryParam("deviceId") long deviceId, Attribute entity) {
-        Context.getPermissionsManager().checkAdmin(getUserId());
-        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        Position last = Context.getIdentityManager().getLastPosition(deviceId);
-        if (last != null) {
-            Object result = new ComputedAttributesHandler(
-                    Context.getConfig(),
-                    Context.getIdentityManager(),
-                    Context.getAttributesManager()).computeAttribute(entity, last);
-            if (result != null) {
-                switch (entity.getType()) {
-                    case "number":
-                        Number numberValue = (Number) result;
-                        return Response.ok(numberValue).build();
-                    case "boolean":
-                        Boolean booleanValue = (Boolean) result;
-                        return Response.ok(booleanValue).build();
-                    default:
-                        return Response.ok(result.toString()).build();
-                }
-            } else {
-                return Response.noContent().build();
+    public Response test(@QueryParam("deviceId") long deviceId, Attribute entity) throws StorageException {
+        permissionsService.checkAdmin(getUserId());
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+
+        Device device = storage.getObject(Device.class, new Request(
+                new Columns.All(),
+                new Condition.Equals("id", "id", deviceId)));
+        if (device == null) {
+            throw new IllegalArgumentException("Device not found");
+        }
+
+        Position last = storage.getObject(Position.class, new Request(
+                new Columns.All(),
+                new Condition.Equals("id", "id", device.getPositionId())));
+        if (last == null) {
+            throw new IllegalArgumentException("Device has no last position");
+        }
+
+        Object result = new ComputedAttributesHandler(
+                Context.getConfig(),
+                Context.getIdentityManager(),
+                Context.getAttributesManager()).computeAttribute(entity, last);
+        if (result != null) {
+            switch (entity.getType()) {
+                case "number":
+                    Number numberValue = (Number) result;
+                    return Response.ok(numberValue).build();
+                case "boolean":
+                    Boolean booleanValue = (Boolean) result;
+                    return Response.ok(booleanValue).build();
+                default:
+                    return Response.ok(result.toString()).build();
             }
         } else {
-            throw new IllegalArgumentException("Device has no last position");
+            return Response.noContent().build();
         }
     }
 
     @POST
-    public Response add(Attribute entity) throws SQLException {
-        Context.getPermissionsManager().checkAdmin(getUserId());
+    public Response add(Attribute entity) throws StorageException {
+        permissionsService.checkAdmin(getUserId());
         return super.add(entity);
     }
 
     @Path("{id}")
     @PUT
-    public Response update(Attribute entity) throws SQLException {
-        Context.getPermissionsManager().checkAdmin(getUserId());
+    public Response update(Attribute entity) throws StorageException {
+        permissionsService.checkAdmin(getUserId());
         return super.update(entity);
     }
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) throws SQLException {
-        Context.getPermissionsManager().checkAdmin(getUserId());
+    public Response remove(@PathParam("id") long id) throws StorageException {
+        permissionsService.checkAdmin(getUserId());
         return super.remove(id);
     }
 

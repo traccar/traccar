@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
@@ -34,10 +35,16 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TimeZone;
 
 public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
+    private boolean universal;
     private String prefix;
 
     private int protocolType;
@@ -46,8 +53,14 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     private boolean includeRpm;
     private boolean includeTemp;
 
+    private ByteBuf crash;
+
     public SuntechProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    public boolean getUniversal() {
+        return universal;
     }
 
     public String getPrefix() {
@@ -732,6 +745,89 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Collection<Position> decodeCrashReport(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        if (buf.getByte(buf.readerIndex() + 3) != ';') {
+            return null;
+        }
+
+        String[] values = buf.readCharSequence(23, StandardCharsets.US_ASCII).toString().split(";");
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[1]);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        int currentIndex = Integer.parseInt(values[2]);
+        int totalIndex = Integer.parseInt(values[3]);
+
+        if (crash == null) {
+            crash = Unpooled.buffer();
+        }
+
+        crash.writeBytes(buf.readSlice(buf.readableBytes() - 3));
+
+        if (currentIndex == totalIndex) {
+
+            LinkedList<Position> positions = new LinkedList<>();
+
+            Date crashTime = new DateBuilder()
+                    .setDate(crash.readUnsignedByte(), crash.readUnsignedByte(), crash.readUnsignedByte())
+                    .setTime(crash.readUnsignedByte(), crash.readUnsignedByte(), crash.readUnsignedByte())
+                    .getDate();
+
+            List<Date> times = Arrays.asList(
+                    new Date(crashTime.getTime() - 3000),
+                    new Date(crashTime.getTime() - 2000),
+                    new Date(crashTime.getTime() - 1000),
+                    new Date(crashTime.getTime() + 1000));
+
+            for (Date time : times) {
+
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+
+                position.setValid(true);
+                position.setTime(time);
+                position.setLatitude(crash.readIntLE() * 0.0000001);
+                position.setLongitude(crash.readIntLE() * 0.0000001);
+                position.setSpeed(UnitsConverter.knotsFromKph(crash.readUnsignedShort() * 0.01));
+                position.setCourse(crash.readUnsignedShort() * 0.01);
+
+                StringBuilder value = new StringBuilder("[");
+                for (int i = 0; i < 100; i++) {
+                    if (value.length() > 1) {
+                        value.append(",");
+                    }
+                    value.append("[");
+                    value.append(crash.readShortLE());
+                    value.append(",");
+                    value.append(crash.readShortLE());
+                    value.append(",");
+                    value.append(crash.readShortLE());
+                    value.append("]");
+                }
+                value.append("]");
+
+                position.set(Position.KEY_G_SENSOR, value.toString());
+
+                positions.add(position);
+
+            }
+
+            crash.release();
+            crash = null;
+
+            return positions;
+
+        } else {
+
+            return null;
+
+        }
+
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -740,6 +836,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         if (buf.getByte(buf.readerIndex() + 1) == 0) {
 
+            universal = true;
             return decodeBinary(channel, remoteAddress, buf);
 
         } else {
@@ -747,7 +844,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             String[] values = buf.toString(StandardCharsets.US_ASCII).split(";");
             prefix = values[0];
 
-            if (prefix.length() < 5) {
+            if (prefix.equals("CRR")) {
+                return decodeCrashReport(channel, remoteAddress, buf);
+            } else if (prefix.length() < 5) {
+                universal = true;
                 return decodeUniversal(channel, remoteAddress, values);
             } else if (prefix.endsWith("HTE")) {
                 return decodeTravelReport(channel, remoteAddress, values);

@@ -19,14 +19,16 @@ import java.text.ParseException;
 
 import org.traccar.Context;
 import org.traccar.config.Keys;
-import org.traccar.database.QueryIgnore;
+import org.traccar.storage.QueryIgnore;
 import org.traccar.geofence.GeofenceCircle;
 import org.traccar.geofence.GeofenceGeometry;
 import org.traccar.geofence.GeofencePolygon;
 import org.traccar.geofence.GeofencePolyline;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.traccar.storage.StorageName;
 
+@StorageName("tc_geofences")
 public class Geofence extends ScheduledModel {
 
     public static final String TYPE_GEOFENCE_CILCLE = "geofenceCircle";

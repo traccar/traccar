@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.database;
+package org.traccar.storage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.model.Permission;
 
 import javax.sql.DataSource;
@@ -33,7 +34,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -255,13 +255,29 @@ public final class QueryBuilder {
         return this;
     }
 
+    public QueryBuilder setValue(String name, Object value) throws SQLException {
+        if (value instanceof Boolean) {
+            setBoolean(name, (Boolean) value);
+        } else if (value instanceof Integer) {
+            setInteger(name, (Integer) value);
+        } else if (value instanceof Long) {
+            setLong(name, (Long) value);
+        } else if (value instanceof Double) {
+            setDouble(name, (Double) value);
+        } else if (value instanceof String) {
+            setString(name, (String) value);
+        } else if (value instanceof Date) {
+            setDate(name, (Date) value);
+        }
+        return this;
+    }
+
     public QueryBuilder setObject(Object object) throws SQLException {
 
         Method[] methods = object.getClass().getMethods();
 
         for (Method method : methods) {
-            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0
-                    && !method.isAnnotationPresent(QueryIgnore.class)) {
+            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 String name = method.getName().substring(3);
                 try {
                     if (method.getReturnType().equals(boolean.class)) {
@@ -292,15 +308,6 @@ public final class QueryBuilder {
 
     private interface ResultSetProcessor<T> {
         void process(T object, ResultSet resultSet) throws SQLException;
-    }
-
-    public <T> T executeQuerySingle(Class<T> clazz) throws SQLException {
-        Collection<T> result = executeQuery(clazz);
-        if (!result.isEmpty()) {
-            return result.iterator().next();
-        } else {
-            return null;
-        }
     }
 
     private <T> void addProcessors(
@@ -380,12 +387,20 @@ public final class QueryBuilder {
         }
     }
 
-    public <T> Collection<T> executeQuery(Class<T> clazz) throws SQLException {
+    private void logQuery() {
+        if (Context.getConfig().getBoolean(Keys.LOGGER_QUERIES)) {
+            LOGGER.info(query);
+        }
+    }
+
+    public <T> List<T> executeQuery(Class<T> clazz) throws SQLException {
         List<T> result = new LinkedList<>();
 
         if (query != null) {
 
             try {
+
+                logQuery();
 
                 try (ResultSet resultSet = statement.executeQuery()) {
 
@@ -396,8 +411,7 @@ public final class QueryBuilder {
                     Method[] methods = clazz.getMethods();
 
                     for (final Method method : methods) {
-                        if (method.getName().startsWith("set") && method.getParameterTypes().length == 1
-                                && !method.isAnnotationPresent(QueryIgnore.class)) {
+                        if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
 
                             final String name = method.getName().substring(3);
 
@@ -443,6 +457,7 @@ public final class QueryBuilder {
 
         if (query != null) {
             try {
+                logQuery();
                 statement.execute();
                 if (returnGeneratedKeys) {
                     ResultSet resultSet = statement.getGeneratedKeys();
@@ -458,10 +473,11 @@ public final class QueryBuilder {
         return 0;
     }
 
-    public Collection<Permission> executePermissionsQuery() throws SQLException, ClassNotFoundException {
+    public List<Permission> executePermissionsQuery() throws SQLException {
         List<Permission> result = new LinkedList<>();
         if (query != null) {
             try {
+                logQuery();
                 try (ResultSet resultSet = statement.executeQuery()) {
                     ResultSetMetaData resultMetaData = resultSet.getMetaData();
                     while (resultSet.next()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,10 @@ public class HoopoProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_EVENT, eventData.getString("eventType"));
             position.set(Position.KEY_BATTERY_LEVEL, eventData.getInt("batteryLevel"));
+
+            if (json.containsKey("movement")) {
+                position.setSpeed(json.getJsonObject("movement").getInt("Speed"));
+            }
 
             return position;
 

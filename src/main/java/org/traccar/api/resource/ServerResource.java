@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,13 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Server;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Request;
 
 import javax.annotation.security.PermitAll;
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -29,25 +34,26 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.TimeZone;
 
 @Path("server")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class ServerResource extends BaseResource {
 
+    @Inject
+    private Storage storage;
+
     @PermitAll
     @GET
-    public Server get(@QueryParam("force") boolean force) throws SQLException {
-        if (force) {
-            return Context.getDataManager().getServer();
-        } else {
-            return Context.getPermissionsManager().getServer();
-        }
+    public Server get() throws StorageException {
+        return storage.getObject(Server.class, new Request(new Columns.All()));
     }
 
     @PUT
-    public Response update(Server entity) throws SQLException {
+    public Response update(Server entity) throws StorageException {
         Context.getPermissionsManager().checkAdmin(getUserId());
         Context.getPermissionsManager().updateServer(entity);
         LogAction.edit(getUserId(), entity);
@@ -62,6 +68,12 @@ public class ServerResource extends BaseResource {
         } else {
             throw new RuntimeException("Reverse geocoding is not enabled");
         }
+    }
+
+    @Path("timezones")
+    @GET
+    public Collection<String> timezones() {
+        return Arrays.asList(TimeZone.getAvailableIDs());
     }
 
 }

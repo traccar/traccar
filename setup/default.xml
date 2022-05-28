@@ -12,6 +12,7 @@
 
     <entry key='web.port'>8082</entry>
     <entry key='web.path'>./web</entry>
+    <entry key='web.sanitize'>true</entry>
     <entry key='web.persistSession'>false</entry>
 
     <entry key='geocoder.enable'>true</entry>
@@ -41,37 +42,7 @@
     <entry key='commands.queueing'>true</entry>
 
     <entry key='database.ignoreUnknown'>true</entry>
-    <entry key='database.generateQueries'>true</entry>
     <entry key='database.changelog'>./schema/changelog-master.xml</entry>
- 
-    <entry key='database.loginUser'>
-        SELECT * FROM tc_users
-        WHERE email = :email OR login = :email
-    </entry>
-
-    <entry key='database.selectPositions'>
-        SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
-    </entry>
-
-    <entry key='database.selectPrecedingPosition'>
-        SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime &lt;= :time ORDER BY fixTime DESC LIMIT 1
-    </entry>
-
-    <entry key='database.selectLatestPositions'>
-        SELECT tc_positions.* FROM tc_positions INNER JOIN tc_devices ON tc_positions.id = tc_devices.positionid;
-    </entry>
-
-    <entry key='database.updateLatestPosition'>
-        UPDATE tc_devices SET positionId = :id WHERE id = :deviceId
-    </entry>
-
-    <entry key='database.selectEvents'>
-        SELECT * FROM tc_events WHERE deviceId = :deviceId AND eventTime BETWEEN :from AND :to ORDER BY eventTime
-    </entry>
-
-    <entry key='database.selectStatistics'>
-        SELECT * FROM tc_statistics WHERE captureTime BETWEEN :from AND :to ORDER BY captureTime
-    </entry>
 
     <entry key='gps103.port'>5001</entry>
     <entry key='tk103.port'>5002</entry>
@@ -312,5 +283,7 @@
     <entry key='dsf22.port'>5236</entry>
     <entry key='jido.port'>5237</entry>
     <entry key='armoli.port'>5238</entry>
+    <entry key='teratrack.port'>5239</entry>
+    <entry key='envotech.port'>5240</entry>
 
 </properties>

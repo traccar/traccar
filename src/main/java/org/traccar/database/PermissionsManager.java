@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ import org.traccar.model.Order;
 import org.traccar.model.Permission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -156,7 +156,7 @@ public class PermissionsManager {
     public void refreshServer() {
         try {
             server = dataManager.getServer();
-        } catch (SQLException error) {
+        } catch (StorageException error) {
             LOGGER.warn("Refresh server config error", error);
         }
     }
@@ -193,7 +193,7 @@ public class PermissionsManager {
                     }
                 }
 
-            } catch (SQLException | ClassNotFoundException error) {
+            } catch (StorageException | ClassNotFoundException error) {
                 LOGGER.warn("Refresh device permissions error", error);
             }
 
@@ -264,11 +264,6 @@ public class PermissionsManager {
         return user != null && user.getReadonly();
     }
 
-    public boolean getUserDeviceReadonly(long userId) {
-        User user = getUser(userId);
-        return user != null && user.getDeviceReadonly();
-    }
-
     public boolean getUserLimitCommands(long userId) {
         User user = getUser(userId);
         return user != null && user.getLimitCommands();
@@ -277,12 +272,6 @@ public class PermissionsManager {
     public void checkReadonly(long userId) throws SecurityException {
         if (!getUserAdmin(userId) && (server.getReadonly() || getUserReadonly(userId))) {
             throw new SecurityException("Account is readonly");
-        }
-    }
-
-    public void checkDeviceReadonly(long userId) throws SecurityException {
-        if (!getUserAdmin(userId) && (server.getDeviceReadonly() || getUserDeviceReadonly(userId))) {
-            throw new SecurityException("Account is device readonly");
         }
     }
 
@@ -326,7 +315,8 @@ public class PermissionsManager {
         if (before.getReadonly() != after.getReadonly()
                 || before.getDeviceReadonly() != after.getDeviceReadonly()
                 || before.getDisabled() != after.getDisabled()
-                || before.getLimitCommands() != after.getLimitCommands()) {
+                || before.getLimitCommands() != after.getLimitCommands()
+                || before.getDisableReports() != after.getDisableReports()) {
             if (userId == after.getId()) {
                 checkAdmin(userId);
             }
@@ -487,12 +477,12 @@ public class PermissionsManager {
         return server;
     }
 
-    public void updateServer(Server server) throws SQLException {
+    public void updateServer(Server server) throws StorageException {
         dataManager.updateObject(server);
         this.server = server;
     }
 
-    public User login(String email, String password) throws SQLException {
+    public User login(String email, String password) throws StorageException {
         User user = dataManager.login(email, password);
         if (user != null) {
             checkUserEnabled(user.getId());
