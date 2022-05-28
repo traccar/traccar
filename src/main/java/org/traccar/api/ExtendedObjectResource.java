@@ -52,7 +52,7 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
                 conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
             } else {
                 permissionsService.checkUser(getUserId(), userId);
-                conditions.add(new Condition.Permission(User.class, getUserId(), baseClass).excludeGroups());
+                conditions.add(new Condition.Permission(User.class, userId, baseClass).excludeGroups());
             }
         }
 
