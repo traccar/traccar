@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -127,7 +127,12 @@ public final class Summary {
         ArrayList<SummaryReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(calculateSummaryResults(userId, deviceId, from, to, daily));
+            Collection<SummaryReport> deviceResults = calculateSummaryResults(userId, deviceId, from, to, daily);
+            for (SummaryReport summaryReport : deviceResults) {
+                if (summaryReport.getStartTime() != null && summaryReport.getEndTime() != null) {
+                    result.add(summaryReport);
+                }
+            }
         }
         return result;
     }
