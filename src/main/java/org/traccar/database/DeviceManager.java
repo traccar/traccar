@@ -38,7 +38,7 @@ import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.storage.StorageException;
 
-public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager, ManagableObjects {
+public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceManager.class);
 
@@ -162,7 +162,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return Context.getPermissionsManager().getDevicePermissions(userId);
     }
 
-    @Override
     public Set<Long> getUserItems(long userId) {
         if (Context.getPermissionsManager() != null) {
             Set<Long> result = new HashSet<>();
@@ -186,7 +185,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return result;
     }
 
-    @Override
     public Set<Long> getManagedItems(long userId) {
         Set<Long> result = new HashSet<>(getUserItems(userId));
         for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {

@@ -23,7 +23,7 @@ import org.traccar.Context;
 import org.traccar.model.Group;
 import org.traccar.storage.StorageException;
 
-public class GroupsManager extends BaseObjectManager<Group> implements ManagableObjects {
+public class GroupsManager extends BaseObjectManager<Group> {
 
     public GroupsManager(DataManager dataManager) {
         super(dataManager, Group.class);
@@ -60,24 +60,6 @@ public class GroupsManager extends BaseObjectManager<Group> implements Managable
     public void updateItem(Group group) throws StorageException {
         checkGroupCycles(group);
         super.updateItem(group);
-    }
-
-    @Override
-    public Set<Long> getUserItems(long userId) {
-        if (Context.getPermissionsManager() != null) {
-            return Context.getPermissionsManager().getGroupPermissions(userId);
-        } else {
-            return new HashSet<>();
-        }
-    }
-
-    @Override
-    public Set<Long> getManagedItems(long userId) {
-        Set<Long> result = getUserItems(userId);
-        for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
-            result.addAll(getUserItems(managedUserId));
-        }
-        return result;
     }
 
 }

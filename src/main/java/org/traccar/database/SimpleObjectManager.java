@@ -29,8 +29,7 @@ import org.traccar.model.Permission;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
-public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjectManager<T>
-        implements ManagableObjects {
+public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjectManager<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleObjectManager.class);
 
@@ -40,7 +39,6 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
         super(dataManager, baseClass);
     }
 
-    @Override
     public final Set<Long> getUserItems(long userId) {
         try {
             readLock();
@@ -55,7 +53,6 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
         }
     }
 
-    @Override
     public Set<Long> getManagedItems(long userId) {
         Set<Long> result = getUserItems(userId);
         for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
