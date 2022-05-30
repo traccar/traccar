@@ -15,8 +15,11 @@
  */
 package org.traccar.model;
 
+import org.traccar.storage.StorageName;
+
 import java.util.Date;
 
+@StorageName("tc_events")
 public class Event extends Message {
 
     public Event(String type, Position position) {

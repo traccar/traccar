@@ -404,7 +404,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             int paramCount = buf.readUnsignedByte();
             for (int j = 0; j < paramCount; j++) {
-                int id = buf.readUnsignedByte();
+                boolean extension = buf.getUnsignedByte(buf.readerIndex()) == 0xFE;
+                int id = extension ? buf.readUnsignedShort() : buf.readUnsignedByte();
                 switch (id) {
                     case 0x01:
                         position.set(Position.KEY_EVENT, buf.readUnsignedByte());
@@ -430,6 +431,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x9D:
                         position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
                         break;
+                    case 0xFE69:
+                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        break;
                     default:
                         buf.readUnsignedByte();
                         break;
@@ -438,7 +442,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             paramCount = buf.readUnsignedByte();
             for (int j = 0; j < paramCount; j++) {
-                int id = buf.readUnsignedByte();
+                boolean extension = buf.getUnsignedByte(buf.readerIndex()) == 0xFE;
+                int id = extension ? buf.readUnsignedShort() : buf.readUnsignedByte();
                 switch (id) {
                     case 0x08:
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
@@ -491,7 +496,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             paramCount = buf.readUnsignedByte();
             for (int j = 0; j < paramCount; j++) {
-                int id = buf.readUnsignedByte();
+                boolean extension = buf.getUnsignedByte(buf.readerIndex()) == 0xFE;
+                int id = extension ? buf.readUnsignedShort() : buf.readUnsignedByte();
                 switch (id) {
                     case 0x02:
                         position.setLatitude(buf.readIntLE() * 0.000001);
@@ -523,7 +529,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             paramCount = buf.readUnsignedByte();
             for (int j = 0; j < paramCount; j++) {
-                buf.readUnsignedByte(); // id
+                if (buf.getUnsignedByte(buf.readerIndex()) == 0xFE) {
+                    buf.readUnsignedShort(); // extension id
+                } else {
+                    buf.readUnsignedByte(); // id
+                }
                 buf.skipBytes(buf.readUnsignedByte()); // value
             }
 

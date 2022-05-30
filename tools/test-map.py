@@ -38,6 +38,7 @@ conn = httplib.HTTPConnection(server)
 for i in range(devices):
     device_id = "{0:0>6}".format(i)
     add_device(cookie, device_id)
+    send_message(conn, device_id)
 
 while True:
     device_id = "{0:0>6}".format(random.randint(0, devices))

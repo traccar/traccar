@@ -20,7 +20,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -34,13 +33,14 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.TripReport;
+import org.traccar.storage.StorageException;
 
 public final class Trips {
 
     private Trips() {
     }
 
-    private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws SQLException {
+    private static Collection<TripReport> detectTrips(long deviceId, Date from, Date to) throws StorageException {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
 
@@ -53,7 +53,7 @@ public final class Trips {
     }
 
     public static Collection<TripReport> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException {
+            Date from, Date to) throws StorageException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<TripReport> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
@@ -65,7 +65,7 @@ public final class Trips {
 
     public static void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws SQLException, IOException {
+            Date from, Date to) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReport> devicesTrips = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();

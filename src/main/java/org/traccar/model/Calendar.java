@@ -24,7 +24,8 @@ import net.fortuna.ical4j.filter.predicate.PeriodRule;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.CalendarComponent;
-import org.traccar.database.QueryIgnore;
+import org.traccar.storage.QueryIgnore;
+import org.traccar.storage.StorageName;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,6 +33,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 
+@StorageName("tc_calendars")
 public class Calendar extends ExtendedModel {
 
     private String name;

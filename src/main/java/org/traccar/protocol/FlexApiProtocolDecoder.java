@@ -128,6 +128,7 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+
     private void parseEvent(Position position, JsonObject payload) {
         if (payload.containsKey("type")) {
             if ("IGON".equals(payload.getString("type"))) {
@@ -173,6 +174,8 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ICCID, payload.getString("modem1.iccid"));
         }
 
+    
+
         if (payload.containsKey("modem1.operator")) {
             String operator = payload.getString("modem1.operator");
             if (!operator.isEmpty()) {
@@ -207,7 +210,6 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
         }
 
     }
-
     private void parseObd(Position position, JsonObject payload) {
         if (payload.containsKey("obd.speed")) {
             position.set(Position.KEY_OBD_SPEED, payload.getJsonNumber("obd.speed").doubleValue());
@@ -222,6 +224,7 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_VIN, payload.getString("obd.vin"));
         }
     }
+
 
     private void parseGnss(Position position, JsonObject payload) {
         if (payload.containsKey("gnss.fix")) {

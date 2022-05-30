@@ -1,5 +1,6 @@
 package org.traccar.protocol;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
@@ -254,6 +255,18 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "ST910;Emergency;238569;528;20170403;00:02:09;7574160020;+19.661292;-099.144473;000.176;000.00;1;228638;1"));
+
+    }
+
+    @Ignore
+    @Test
+    public void testDecodeCrash() throws Exception {
+
+        var decoder = new SuntechProtocolDecoder(null);
+
+        verifyAttribute(decoder, binary(
+                "4352523b303931303030303036333b313b313b303135303b16011c150f0ad82f6c0000000000ae037085fbff7700fd00faff6300f30000006800fb000d007100fa00f32f6c00000000005e044a80fcff6f000301e1ff5d00e900e1ff6400e600f4ff5b00ec000a306c00000000002104248306006c000501fcff5b00e00001006e000101eeff4e00e10022306c00000000005c041a7e00006a00010100005d00f800b5ff7cffdf0050009300fc003b44350d"),
+                Position.KEY_G_SENSOR, "");
 
     }
 

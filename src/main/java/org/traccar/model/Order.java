@@ -15,6 +15,9 @@
  */
 package org.traccar.model;
 
+import org.traccar.storage.StorageName;
+
+@StorageName("tc_orders")
 public class Order extends ExtendedModel {
 
     private String uniqueId;

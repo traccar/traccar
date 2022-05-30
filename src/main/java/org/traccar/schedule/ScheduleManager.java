@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,30 @@
  */
 package org.traccar.schedule;
 
+import org.traccar.LifecycleObject;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public class ScheduleManager {
+public class ScheduleManager implements LifecycleObject {
 
     private ScheduledExecutorService executor;
 
+    @Override
     public void start() {
-
         executor = Executors.newSingleThreadScheduledExecutor();
 
         new TaskDeviceInactivityCheck().schedule(executor);
         new TaskWebSocketKeepalive().schedule(executor);
-
+        new TaskHealthCheck().schedule(executor);
     }
 
+    @Override
     public void stop() {
-
         if (executor != null) {
             executor.shutdown();
             executor = null;
         }
-
     }
 
 }

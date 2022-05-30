@@ -18,63 +18,27 @@ package org.traccar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Keys;
+import org.traccar.helper.ClassScanner;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ConnectException;
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
-public class ServerManager {
+public class ServerManager implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
 
     private final List<TrackerConnector> connectorList = new LinkedList<>();
     private final Map<String, BaseProtocol> protocolList = new ConcurrentHashMap<>();
 
-    private void loadPackage(String packageName) throws IOException, URISyntaxException, ReflectiveOperationException {
-
-        List<String> names = new LinkedList<>();
-        String packagePath = packageName.replace('.', '/');
-        URL packageUrl = getClass().getClassLoader().getResource(packagePath);
-
-        if (packageUrl.getProtocol().equals("jar")) {
-            String jarFileName = URLDecoder.decode(packageUrl.getFile(), StandardCharsets.UTF_8.name());
-            try (JarFile jf = new JarFile(jarFileName.substring(5, jarFileName.indexOf("!")))) {
-                Enumeration<JarEntry> jarEntries = jf.entries();
-                while (jarEntries.hasMoreElements()) {
-                    String entryName = jarEntries.nextElement().getName();
-                    if (entryName.startsWith(packagePath) && entryName.length() > packagePath.length() + 5) {
-                        names.add(entryName.substring(packagePath.length() + 1, entryName.lastIndexOf('.')));
-                    }
-                }
-            }
-        } else {
-            File folder = new File(new URI(packageUrl.toString()));
-            File[] files = folder.listFiles();
-            if (files != null) {
-                for (File actual: files) {
-                    String entryName = actual.getName();
-                    names.add(entryName.substring(0, entryName.lastIndexOf('.')));
-                }
-            }
-        }
-
-        for (String name : names) {
-            Class<?> protocolClass = Class.forName(packageName + '.' + name);
-            if (BaseProtocol.class.isAssignableFrom(protocolClass) && Context.getConfig().hasKey(
-                    Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(protocolClass)))) {
+    public ServerManager() throws IOException, URISyntaxException, ReflectiveOperationException {
+        for (Class<?> protocolClass : ClassScanner.findSubclasses(BaseProtocol.class, "org.traccar.protocol")) {
+            if (Context.getConfig().hasKey(Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(protocolClass)))) {
                 BaseProtocol protocol = (BaseProtocol) protocolClass.getDeclaredConstructor().newInstance();
                 connectorList.addAll(protocol.getConnectorList());
                 protocolList.put(protocol.getName(), protocol);
@@ -82,14 +46,11 @@ public class ServerManager {
         }
     }
 
-    public ServerManager() throws IOException, URISyntaxException, ReflectiveOperationException {
-        loadPackage("org.traccar.protocol");
-    }
-
     public BaseProtocol getProtocol(String name) {
         return protocolList.get(name);
     }
 
+    @Override
     public void start() throws Exception {
         for (TrackerConnector connector: connectorList) {
             try {
@@ -102,6 +63,7 @@ public class ServerManager {
         }
     }
 
+    @Override
     public void stop() {
         for (TrackerConnector connector: connectorList) {
             connector.stop();

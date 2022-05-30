@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.api;
+package org.traccar.api.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +23,7 @@ import org.traccar.api.resource.SessionResource;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
 import javax.annotation.security.PermitAll;
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +35,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLException;
 
 public class SecurityRequestFilter implements ContainerRequestFilter {
 
@@ -82,7 +82,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                         Main.getInjector().getInstance(StatisticsManager.class).registerRequest(user.getId());
                         securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
                     }
-                } catch (SQLException e) {
+                } catch (StorageException e) {
                     throw new WebApplicationException(e);
                 }
 

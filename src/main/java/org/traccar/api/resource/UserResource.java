@@ -22,6 +22,7 @@ import org.traccar.database.UsersManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
 import javax.annotation.security.PermitAll;
 import javax.ws.rs.Consumes;
@@ -67,7 +68,7 @@ public class UserResource extends BaseObjectResource<User> {
     @Override
     @PermitAll
     @POST
-    public Response add(User entity) throws SQLException {
+    public Response add(User entity) throws StorageException {
         if (!Context.getPermissionsManager().getUserAdmin(getUserId())) {
             Context.getPermissionsManager().checkUserUpdate(getUserId(), new User(), entity);
             if (Context.getPermissionsManager().getUserManager(getUserId())) {

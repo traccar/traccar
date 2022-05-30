@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.traccar.Context;
-import org.traccar.database.QueryIgnore;
+import org.traccar.storage.QueryIgnore;
+import org.traccar.storage.StorageName;
 
+@StorageName("tc_servers")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Server extends ExtendedModel {
 
@@ -150,6 +152,16 @@ public class Server extends ExtendedModel {
 
     public void setLimitCommands(boolean limitCommands) {
         this.limitCommands = limitCommands;
+    }
+
+    private boolean disableReports;
+
+    public boolean getDisableReports() {
+        return disableReports;
+    }
+
+    public void setDisableReports(boolean disableReports) {
+        this.disableReports = disableReports;
     }
 
     private String poiLayer;

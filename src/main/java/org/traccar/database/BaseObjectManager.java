@@ -16,7 +16,6 @@
  */
 package org.traccar.database;
 
-import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,6 +28,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.model.BaseModel;
+import org.traccar.storage.StorageException;
 
 public class BaseObjectManager<T extends BaseModel> {
 
@@ -102,7 +102,7 @@ public class BaseObjectManager<T extends BaseModel> {
                         removeCachedItem(cachedItemId);
                     }
                 }
-            } catch (SQLException error) {
+            } catch (StorageException error) {
                 LOGGER.warn("Error refreshing items", error);
             } finally {
                 writeUnlock();
@@ -119,7 +119,7 @@ public class BaseObjectManager<T extends BaseModel> {
         }
     }
 
-    public void addItem(T item) throws SQLException {
+    public void addItem(T item) throws StorageException {
         dataManager.addObject(item);
         addNewItem(item);
     }
@@ -133,7 +133,7 @@ public class BaseObjectManager<T extends BaseModel> {
         }
     }
 
-    public void updateItem(T item) throws SQLException {
+    public void updateItem(T item) throws StorageException {
         dataManager.updateObject(item);
         updateCachedItem(item);
     }
@@ -147,7 +147,7 @@ public class BaseObjectManager<T extends BaseModel> {
         }
     }
 
-    public void removeItem(long itemId) throws SQLException {
+    public void removeItem(long itemId) throws StorageException {
         BaseModel item = getById(itemId);
         if (item != null) {
             dataManager.removeObject(baseClass, itemId);

@@ -47,7 +47,7 @@ public class OrbcommProtocolPoller extends BaseProtocolPoller {
     }
 
     public OrbcommProtocolPoller(Protocol protocol) {
-        super(protocol);
+        super(Context.getConfig().getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol.getName())));
         accessId = Context.getConfig().getString(Keys.ORBCOMM_ACCESS_ID);
         password = Context.getConfig().getString(Keys.ORBCOMM_PASSWORD);
         host = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol.getName()));
@@ -65,7 +65,7 @@ public class OrbcommProtocolPoller extends BaseProtocolPoller {
         encoder.addParam("start_utc", dateFormat.format(startTime));
 
         HttpRequest request = new DefaultFullHttpRequest(
-                HttpVersion.HTTP_1_1, HttpMethod.POST, encoder.toString(), Unpooled.buffer());
+                HttpVersion.HTTP_1_1, HttpMethod.GET, encoder.toString(), Unpooled.buffer());
         request.headers().add(HttpHeaderNames.HOST, host);
         request.headers().add(HttpHeaderNames.CONTENT_LENGTH, 0);
         channel.writeAndFlush(request);

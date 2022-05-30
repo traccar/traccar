@@ -15,9 +15,12 @@
  */
 package org.traccar.model;
 
+import org.traccar.storage.StorageName;
+
 import java.util.Date;
 import java.util.Map;
 
+@StorageName("tc_statistics")
 public class Statistics extends ExtendedModel {
 
     private Date captureTime;

@@ -16,7 +16,6 @@
  */
 package org.traccar.api.resource;
 
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,6 +36,7 @@ import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
 @Path("permissions")
 @Produces(MediaType.APPLICATION_JSON)
@@ -71,7 +71,7 @@ public class PermissionsResource  extends BaseResource {
 
     @Path("bulk")
     @POST
-    public Response add(List<LinkedHashMap<String, Long>> entities) throws SQLException, ClassNotFoundException {
+    public Response add(List<LinkedHashMap<String, Long>> entities) throws StorageException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
@@ -89,13 +89,13 @@ public class PermissionsResource  extends BaseResource {
     }
 
     @POST
-    public Response add(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
+    public Response add(LinkedHashMap<String, Long> entity) throws StorageException, ClassNotFoundException {
         return add(Collections.singletonList(entity));
     }
 
     @DELETE
     @Path("bulk")
-    public Response remove(List<LinkedHashMap<String, Long>> entities) throws SQLException, ClassNotFoundException {
+    public Response remove(List<LinkedHashMap<String, Long>> entities) throws StorageException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
@@ -113,7 +113,7 @@ public class PermissionsResource  extends BaseResource {
     }
 
     @DELETE
-    public Response remove(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
+    public Response remove(LinkedHashMap<String, Long> entity) throws StorageException, ClassNotFoundException {
         return remove(Collections.singletonList(entity));
     }
 

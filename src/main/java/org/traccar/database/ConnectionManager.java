@@ -30,9 +30,9 @@ import org.traccar.model.Device;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.storage.StorageException;
 
 import java.net.SocketAddress;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -127,8 +127,8 @@ public class ConnectionManager {
 
         try {
             Context.getDeviceManager().updateDeviceStatus(device);
-        } catch (SQLException error) {
-            LOGGER.warn("Update device status error", error);
+        } catch (StorageException e) {
+            LOGGER.warn("Update device status error", e);
         }
 
         updateDevice(device);
