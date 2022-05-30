@@ -31,7 +31,7 @@ import org.traccar.Context;
 import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
-import org.traccar.model.DeviceState;
+import org.traccar.session.DeviceState;
 import org.traccar.model.DeviceAccumulators;
 import org.traccar.model.Group;
 import org.traccar.model.Position;

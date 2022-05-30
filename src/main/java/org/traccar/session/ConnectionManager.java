@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.database;
+package org.traccar.session;
 
 import io.netty.channel.Channel;
 import io.netty.util.Timeout;
@@ -27,7 +27,6 @@ import org.traccar.config.Keys;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
-import org.traccar.model.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.storage.StorageException;

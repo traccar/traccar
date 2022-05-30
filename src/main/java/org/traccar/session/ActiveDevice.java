@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.database;
+package org.traccar.session;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.HttpRequestDecoder;

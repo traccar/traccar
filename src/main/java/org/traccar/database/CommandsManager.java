@@ -34,6 +34,7 @@ import org.traccar.Context;
 import org.traccar.model.Command;
 import org.traccar.model.Typed;
 import org.traccar.model.Position;
+import org.traccar.session.ActiveDevice;
 
 public class CommandsManager  extends ExtendedObjectManager<Command> {
 

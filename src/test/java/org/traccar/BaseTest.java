@@ -1,7 +1,7 @@
 package org.traccar;
 
 import org.traccar.config.Config;
-import org.traccar.database.ConnectionManager;
+import org.traccar.session.ConnectionManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.StatisticsManager;

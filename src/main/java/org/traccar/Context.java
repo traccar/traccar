@@ -27,7 +27,7 @@ import org.traccar.database.AttributesManager;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.CalendarManager;
 import org.traccar.database.CommandsManager;
-import org.traccar.database.ConnectionManager;
+import org.traccar.session.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.DriversManager;

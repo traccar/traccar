@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.traccar.BaseTest;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.model.DeviceState;
+import org.traccar.session.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 

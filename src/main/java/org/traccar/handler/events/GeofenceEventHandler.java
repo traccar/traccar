@@ -22,7 +22,7 @@ import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
 import org.traccar.database.CalendarManager;
-import org.traccar.database.ConnectionManager;
+import org.traccar.session.ConnectionManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Calendar;

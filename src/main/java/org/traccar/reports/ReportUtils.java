@@ -31,7 +31,7 @@ import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.DeviceState;
+import org.traccar.session.DeviceState;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
 import org.traccar.model.Position;

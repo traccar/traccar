@@ -15,7 +15,7 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 import org.traccar.BaseTest;
-import org.traccar.model.DeviceState;
+import org.traccar.session.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.model.TripsConfig;

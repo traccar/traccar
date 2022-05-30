@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
-import org.traccar.database.ConnectionManager;
+import org.traccar.session.ConnectionManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.StatisticsManager;
@@ -33,6 +33,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
