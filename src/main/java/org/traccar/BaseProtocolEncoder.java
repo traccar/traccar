@@ -21,6 +21,7 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.helper.NetworkUtil;
 import org.traccar.model.Command;
 
 public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter {
@@ -62,7 +63,7 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
             Object encodedCommand = encodeCommand(ctx.channel(), command);
 
             StringBuilder s = new StringBuilder();
-            s.append("[").append(ctx.channel().id().asShortText()).append("] ");
+            s.append("[").append(NetworkUtil.session(ctx.channel())).append("] ");
             s.append("id: ").append(getUniqueId(command.getDeviceId())).append(", ");
             s.append("command type: ").append(command.getType()).append(" ");
             if (encodedCommand != null) {

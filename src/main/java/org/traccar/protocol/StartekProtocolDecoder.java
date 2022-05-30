@@ -42,7 +42,6 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")                       // length
             .number("(d+),")                     // imei
             .expression("(.+)")                  // content
-            .number("xx")                        // checksum
             .compile();
 
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
@@ -123,6 +122,9 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String content = parser.next();
+        if (content.charAt(content.length() - 2 - 1) != '|') {
+            content = content.substring(0, content.length() - 2);
+        }
         if (content.length() < 100) {
 
             Position position = new Position(getProtocolName());

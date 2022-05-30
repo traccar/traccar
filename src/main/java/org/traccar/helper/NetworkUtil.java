@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.storage;
+package org.traccar.helper;
 
-public class StorageException extends Exception {
+import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramChannel;
 
-    public StorageException(String message) {
-        super(message);
+public final class NetworkUtil {
+
+    private NetworkUtil() {
     }
 
-    public StorageException(Throwable cause) {
-        super(cause);
-    }
-
-    public StorageException(String message, Throwable cause) {
-        super(message, cause);
+    public static String session(Channel channel) {
+        char transport = channel instanceof DatagramChannel ? 'U' : 'T';
+        return transport + channel.id().asShortText();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,13 +118,14 @@ public final class Main {
 
             List<LifecycleObject> services = new LinkedList<>();
             services.add(Context.getServerManager());
-            if (Context.getWebServer() != null) {
-                services.add(Context.getWebServer());
-            }
+            services.add(Context.getWebServer());
             services.add(Context.getScheduleManager());
+            services.add(Context.getBroadcastService());
 
             for (LifecycleObject service : services) {
-                service.start();
+                if (service != null) {
+                    service.start();
+                }
             }
 
             Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error("Thread exception", e));
@@ -134,7 +135,9 @@ public final class Main {
 
                 Collections.reverse(services);
                 for (LifecycleObject service : services) {
-                    service.stop();
+                    if (service != null) {
+                        service.stop();
+                    }
                 }
             }));
         } catch (Exception e) {

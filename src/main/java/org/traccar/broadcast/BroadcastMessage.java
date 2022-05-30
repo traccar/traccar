@@ -13,20 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.storage;
+package org.traccar.broadcast;
 
-public class StorageException extends Exception {
+import org.traccar.model.Position;
 
-    public StorageException(String message) {
-        super(message);
+public class BroadcastMessage {
+
+    private DeviceStatus deviceStatus;
+
+    public DeviceStatus getDeviceStatus() {
+        return deviceStatus;
     }
 
-    public StorageException(Throwable cause) {
-        super(cause);
+    public void setDeviceStatus(DeviceStatus deviceStatus) {
+        this.deviceStatus = deviceStatus;
     }
 
-    public StorageException(String message, Throwable cause) {
-        super(message, cause);
+    private Position position;
+
+    public Position getPosition() {
+        return position;
+    }
+
+    public void setPosition(Position position) {
+        this.position = position;
     }
 
 }

@@ -13,20 +13,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.storage;
+package org.traccar.broadcast;
 
-public class StorageException extends Exception {
+import java.util.Date;
 
-    public StorageException(String message) {
-        super(message);
+public class DeviceStatus {
+
+    private long deviceId;
+
+    public long getDeviceId() {
+        return deviceId;
     }
 
-    public StorageException(Throwable cause) {
-        super(cause);
+    public void setDeviceId(long deviceId) {
+        this.deviceId = deviceId;
     }
 
-    public StorageException(String message, Throwable cause) {
-        super(message, cause);
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    private Date lastUpdate;
+
+    public Date getLastUpdate() {
+        return this.lastUpdate;
+    }
+
+    public void setLastUpdate(Date lastUpdate) {
+        this.lastUpdate = lastUpdate;
     }
 
 }

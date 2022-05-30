@@ -553,6 +553,14 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Sanitize all strings returned via API. This is needed to fix XSS issues in the old web interface. New React-based
+     * interface doesn't require this.
+     */
+    public static final ConfigKey<Boolean> WEB_SANITIZE = new ConfigKey<>(
+            "web.sanitize",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Path to the web app folder.
      */
     public static final ConfigKey<String> WEB_PATH = new ConfigKey<>(
@@ -1272,6 +1280,13 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Log executed SQL queries.
+     */
+    public static final ConfigKey<Boolean> LOGGER_QUERIES = new ConfigKey<>(
+            "logger.queries",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Log file name. For rotating logs, a date is added at the end of the file name for non-current logs.
      */
     public static final ConfigKey<String> LOGGER_FILE = new ConfigKey<>(
@@ -1308,5 +1323,19 @@ public final class Keys {
             "logger.attributes",
             Collections.singletonList(KeyType.GLOBAL),
             "time,position,speed,course,accuracy,result");
+
+    /**
+     * Multicast address for broadcasting synchronization events.
+     */
+    public static final ConfigKey<String> BROADCAST_ADDRESS = new ConfigKey<>(
+            "broadcast.address",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Multicast port for broadcasting synchronization events.
+     */
+    public static final ConfigKey<Integer> BROADCAST_PORT = new ConfigKey<>(
+            "broadcast.port",
+            Collections.singletonList(KeyType.GLOBAL));
 
 }
