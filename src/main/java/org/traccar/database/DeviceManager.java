@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     private final long dataRefreshDelay;
 
     private Map<String, Device> devicesByUniqueId;
-    private Map<String, Device> devicesByPhone;
     private final AtomicLong devicesLastUpdate = new AtomicLong();
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
@@ -58,9 +57,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         this.config = Context.getConfig();
         try {
             writeLock();
-            if (devicesByPhone == null) {
-                devicesByPhone = new ConcurrentHashMap<>();
-            }
             if (devicesByUniqueId == null) {
                 devicesByUniqueId = new ConcurrentHashMap<>();
             }
@@ -216,39 +212,10 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         }
     }
 
-    private void addByPhone(Device device) {
-        try {
-            writeLock();
-            if (devicesByPhone == null) {
-                devicesByPhone = new ConcurrentHashMap<>();
-            }
-            devicesByPhone.put(device.getPhone(), device);
-        } finally {
-            writeUnlock();
-        }
-    }
-
-    private void removeByPhone(String phone) {
-        if (phone == null || phone.isEmpty()) {
-            return;
-        }
-        try {
-            writeLock();
-            if (devicesByPhone != null) {
-                devicesByPhone.remove(phone);
-            }
-        } finally {
-            writeUnlock();
-        }
-    }
-
     @Override
     protected void addNewItem(Device device) {
         super.addNewItem(device);
         addByUniqueId(device);
-        if (device.getPhone() != null  && !device.getPhone().isEmpty()) {
-            addByPhone(device);
-        }
         if (Context.getGeofenceManager() != null) {
             Position lastPosition = getLastPosition(device.getId());
             if (lastPosition != null) {
@@ -264,6 +231,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         cachedDevice.setGroupId(device.getGroupId());
         cachedDevice.setCategory(device.getCategory());
         cachedDevice.setContact(device.getContact());
+        cachedDevice.setPhone(device.getPhone());
         cachedDevice.setModel(device.getModel());
         cachedDevice.setDisabled(device.getDisabled());
         cachedDevice.setAttributes(device.getAttributes());
@@ -272,13 +240,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             cachedDevice.setUniqueId(device.getUniqueId());
             addByUniqueId(cachedDevice);
         }
-        if (device.getPhone() != null && !device.getPhone().isEmpty()
-                && !device.getPhone().equals(cachedDevice.getPhone())) {
-            String phone = cachedDevice.getPhone();
-            removeByPhone(phone);
-            cachedDevice.setPhone(device.getPhone());
-            addByPhone(cachedDevice);
-        }
     }
 
     @Override
@@ -286,10 +247,8 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         Device cachedDevice = getById(deviceId);
         if (cachedDevice != null) {
             String deviceUniqueId = cachedDevice.getUniqueId();
-            String phone = cachedDevice.getPhone();
             super.removeCachedItem(deviceId);
             removeByUniqueId(deviceUniqueId);
-            removeByPhone(phone);
         }
         positions.remove(deviceId);
     }
