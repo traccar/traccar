@@ -198,8 +198,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (deviceSession.getTimeZone() == null) {
-            deviceSession.setTimeZone(getTimeZone(deviceSession.getDeviceId(), "GMT+8"));
+        if (!deviceSession.contains(DeviceSession.KEY_TIMEZONE)) {
+            deviceSession.set(DeviceSession.KEY_TIMEZONE, getTimeZone(deviceSession.getDeviceId(), "GMT+8"));
         }
 
         if (type == MSG_TERMINAL_REGISTER) {
@@ -407,7 +407,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(buf.readShort());
         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
         position.setCourse(buf.readUnsignedShort());
-        position.setTime(readDate(buf, deviceSession.getTimeZone()));
+        position.setTime(readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE)));
 
         if (buf.readableBytes() == 20) {
 
@@ -642,7 +642,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            Date time = readDate(buf, deviceSession.getTimeZone());
+            Date time = readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE));
 
             if (buf.readUnsignedByte() > 0) {
                 position.set(Position.KEY_ARCHIVE, true);

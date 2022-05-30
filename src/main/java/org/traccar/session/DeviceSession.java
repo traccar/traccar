@@ -15,7 +15,8 @@
  */
 package org.traccar.session;
 
-import java.util.TimeZone;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DeviceSession {
 
@@ -29,14 +30,25 @@ public class DeviceSession {
         return deviceId;
     }
 
-    private TimeZone timeZone;
+    public static final String KEY_TIMEZONE = "timezone";
 
-    public void setTimeZone(TimeZone timeZone) {
-        this.timeZone = timeZone;
+    private final Map<String, Object> locals = new HashMap<>();
+
+    public boolean contains(String key) {
+        return locals.containsKey(key);
     }
 
-    public TimeZone getTimeZone() {
-        return timeZone;
+    public void set(String key, Object value) {
+        if (value != null) {
+            locals.put(key, value);
+        } else {
+            locals.remove(key);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key) {
+        return (T) locals.get(key);
     }
 
 }

@@ -444,8 +444,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
             position.setDeviceId(deviceSession.getDeviceId());
-            if (deviceSession.getTimeZone() == null) {
-                deviceSession.setTimeZone(getTimeZone(deviceSession.getDeviceId()));
+            if (!deviceSession.contains(DeviceSession.KEY_TIMEZONE)) {
+                deviceSession.set(DeviceSession.KEY_TIMEZONE, getTimeZone(deviceSession.getDeviceId()));
             }
         }
 
@@ -455,8 +455,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // type
 
             deviceSession = getDeviceSession(channel, remoteAddress, imei);
-            if (deviceSession != null && deviceSession.getTimeZone() == null) {
-                deviceSession.setTimeZone(getTimeZone(deviceSession.getDeviceId()));
+            if (deviceSession != null && !deviceSession.contains(DeviceSession.KEY_TIMEZONE)) {
+                deviceSession.set(DeviceSession.KEY_TIMEZONE, getTimeZone(deviceSession.getDeviceId()));
             }
 
             if (dataLength > 10) {
@@ -468,7 +468,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     offset = -offset;
                 }
                 if (deviceSession != null) {
-                    TimeZone timeZone = deviceSession.getTimeZone();
+                    TimeZone timeZone = deviceSession.get(DeviceSession.KEY_TIMEZONE);
                     if (timeZone.getRawOffset() == 0) {
                         timeZone.setRawOffset(offset * 1000);
                         deviceSession.setTimeZone(timeZone);
@@ -531,7 +531,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedInt(); // data and alarm
 
-            decodeGps(position, buf, false, deviceSession.getTimeZone());
+            decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
 
             buf.readUnsignedShort(); // terminal info
 
@@ -653,7 +653,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             boolean longFormat = type == MSG_LBS_2 || type == MSG_WIFI_3 || type == MSG_WIFI_5;
 
-            DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
+            DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                     .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
 
@@ -769,7 +769,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (hasGps(type)) {
-                decodeGps(position, buf, false, deviceSession.getTimeZone());
+                decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
             } else {
                 getLastLocation(position, null);
             }
@@ -858,9 +858,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             boolean extendedAlarm = dataLength > 7;
             if (extendedAlarm) {
-                decodeGps(position, buf, false, false, false, deviceSession.getTimeZone());
+                decodeGps(position, buf, false, false, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
             } else {
-                DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
+                DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
                         .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                         .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
                 getLastLocation(position, dateBuilder.getDate());
@@ -925,8 +925,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (deviceSession.getTimeZone() == null) {
-            deviceSession.setTimeZone(getTimeZone(deviceSession.getDeviceId()));
+        if (!deviceSession.contains(DeviceSession.KEY_TIMEZONE)) {
+            deviceSession.set(DeviceSession.KEY_TIMEZONE, getTimeZone(deviceSession.getDeviceId()));
         }
 
         Position position = new Position(getProtocolName());
@@ -1033,7 +1033,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_AZ735_GPS || type == MSG_AZ735_ALARM) {
 
-            if (!decodeGps(position, buf, true, deviceSession.getTimeZone())) {
+            if (!decodeGps(position, buf, true, deviceSession.get(DeviceSession.KEY_TIMEZONE))) {
                 getLastLocation(position, position.getDeviceTime());
             }
 
@@ -1078,7 +1078,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_OBD) {
 
-            DateBuilder dateBuilder = new DateBuilder(deviceSession.getTimeZone())
+            DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
                     .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                     .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
 
