@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,23 +48,23 @@ public final class Main {
         try {
             OperatingSystemMXBean operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
             LOGGER.info("Operating system"
-                    + " name: " + operatingSystemBean.getName()
-                    + " version: " + operatingSystemBean.getVersion()
-                    + " architecture: " + operatingSystemBean.getArch());
+                                + " name: " + operatingSystemBean.getName()
+                                + " version: " + operatingSystemBean.getVersion()
+                                + " architecture: " + operatingSystemBean.getArch());
 
             RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
             LOGGER.info("Java runtime"
-                    + " name: " + runtimeBean.getVmName()
-                    + " vendor: " + runtimeBean.getVmVendor()
-                    + " version: " + runtimeBean.getVmVersion());
+                                + " name: " + runtimeBean.getVmName()
+                                + " vendor: " + runtimeBean.getVmVendor()
+                                + " version: " + runtimeBean.getVmVersion());
 
             MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
             LOGGER.info("Memory limit"
-                    + " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb"
-                    + " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
+                                + " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb"
+                                + " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
 
             LOGGER.info("Character encoding: "
-                    + System.getProperty("file.encoding") + " charset: " + Charset.defaultCharset());
+                                + System.getProperty("file.encoding") + " charset: " + Charset.defaultCharset());
 
         } catch (Exception error) {
             LOGGER.warn("Failed to get system info");
@@ -118,13 +118,14 @@ public final class Main {
 
             List<LifecycleObject> services = new LinkedList<>();
             services.add(Context.getServerManager());
-            if (Context.getWebServer() != null) {
-                services.add(Context.getWebServer());
-            }
+            services.add(Context.getWebServer());
             services.add(Context.getScheduleManager());
+            services.add(Context.getBroadcastService());
 
             for (LifecycleObject service : services) {
-                service.start();
+                if (service != null) {
+                    service.start();
+                }
             }
 
             Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error("Thread exception", e));
@@ -134,7 +135,9 @@ public final class Main {
 
                 Collections.reverse(services);
                 for (LifecycleObject service : services) {
-                    service.stop();
+                    if (service != null) {
+                        service.stop();
+                    }
                 }
             }));
         } catch (Exception e) {
