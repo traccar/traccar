@@ -7,9 +7,9 @@ import org.traccar.model.Command;
 public class UlbotechProtocolEncoderTest extends ProtocolTest {
 
     @Test
-    public void testEncode() {
+    public void testEncode() throws Exception {
 
-        var encoder = new UlbotechProtocolEncoder(null);
+        var encoder = inject(new UlbotechProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

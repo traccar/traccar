@@ -21,13 +21,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 public class GpsGateProtocol extends BaseProtocol {
 
     public GpsGateProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "\0", "\n", "\r\n"));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());

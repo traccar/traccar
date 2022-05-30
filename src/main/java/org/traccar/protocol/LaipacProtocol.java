@@ -18,10 +18,11 @@ package org.traccar.protocol;
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
-import org.traccar.model.Command;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+import org.traccar.model.Command;
 
 public class LaipacProtocol extends BaseProtocol {
 
@@ -34,7 +35,7 @@ public class LaipacProtocol extends BaseProtocol {
 
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());

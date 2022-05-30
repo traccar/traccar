@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
@@ -67,7 +66,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public String[] getFormat(long deviceId) {
-        return Context.getIdentityManager().lookupAttributeString(
+        return getIdentityManager().lookupAttributeString(
                 deviceId, getProtocolName() + ".format", format, false, false).split(",");
     }
 
@@ -76,7 +75,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public DateFormat getDateFormat(long deviceId) {
-        DateFormat dateFormat = new SimpleDateFormat(Context.getIdentityManager().lookupAttributeString(
+        DateFormat dateFormat = new SimpleDateFormat(getIdentityManager().lookupAttributeString(
                 deviceId, getProtocolName() + ".dateFormat", this.dateFormat, false, false));
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat;

@@ -19,13 +19,14 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 public class Gt02Protocol extends BaseProtocol {
 
     public Gt02Protocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(256, 2, 1, 2, 0));
                 pipeline.addLast(new Gt02ProtocolDecoder(Gt02Protocol.this));
             }

@@ -20,13 +20,14 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 public class Stl060Protocol extends BaseProtocol {
 
     public Stl060Protocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Stl060FrameDecoder(1024));
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());

@@ -15,18 +15,18 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
-
-import io.netty.handler.codec.string.StringDecoder;
+import org.traccar.config.Config;
 
 public class VtfmsProtocol extends BaseProtocol {
 
     public VtfmsProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new VtfmsFrameDecoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new VtfmsProtocolDecoder(VtfmsProtocol.this));
@@ -34,7 +34,7 @@ public class VtfmsProtocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new VtfmsProtocolDecoder(VtfmsProtocol.this));
             }

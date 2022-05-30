@@ -19,6 +19,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 import java.nio.ByteOrder;
 public class RitiProtocol extends BaseProtocol {
@@ -26,7 +27,7 @@ public class RitiProtocol extends BaseProtocol {
     public RitiProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 105, 2, 3, 0, true));
                 pipeline.addLast(new RitiProtocolDecoder(RitiProtocol.this));
             }

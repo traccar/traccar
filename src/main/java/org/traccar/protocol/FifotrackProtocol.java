@@ -19,6 +19,7 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class FifotrackProtocol extends BaseProtocol {
@@ -29,7 +30,7 @@ public class FifotrackProtocol extends BaseProtocol {
                 Command.TYPE_REQUEST_PHOTO);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new FifotrackFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new FifotrackProtocolEncoder(FifotrackProtocol.this));

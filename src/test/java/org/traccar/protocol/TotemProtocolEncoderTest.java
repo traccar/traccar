@@ -11,7 +11,7 @@ public class TotemProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new TotemProtocolEncoder(null);
+        var encoder = inject(new TotemProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(2);
@@ -25,7 +25,7 @@ public class TotemProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testSmsEncode() throws Exception {
 
-        var encoder = new TotemProtocolSmsEncoder(null);
+        var encoder = inject(new TotemProtocolSmsEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(2);

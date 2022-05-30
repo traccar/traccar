@@ -19,6 +19,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 import java.nio.ByteOrder;
 public class AutoTrackProtocol extends BaseProtocol {
@@ -26,7 +27,7 @@ public class AutoTrackProtocol extends BaseProtocol {
     public AutoTrackProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 5, 2, 2, 0, true));
                 pipeline.addLast(new AutoTrackProtocolDecoder(AutoTrackProtocol.this));
             }

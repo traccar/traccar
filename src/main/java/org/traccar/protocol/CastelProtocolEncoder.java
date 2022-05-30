@@ -18,10 +18,9 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.Context;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
-import org.traccar.Protocol;
 
 import java.nio.charset.StandardCharsets;
 
@@ -34,7 +33,7 @@ public class CastelProtocolEncoder extends BaseProtocolEncoder {
     private ByteBuf encodeContent(long deviceId, short type, ByteBuf content) {
 
         ByteBuf buf = Unpooled.buffer(0);
-        String uniqueId = Context.getIdentityManager().getById(deviceId).getUniqueId();
+        String uniqueId = getIdentityManager().getById(deviceId).getUniqueId();
 
         buf.writeByte('@');
         buf.writeByte('@');

@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class WatchProtocol extends BaseProtocol {
@@ -42,7 +43,7 @@ public class WatchProtocol extends BaseProtocol {
                 Command.TYPE_SET_INDICATOR);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new WatchFrameDecoder());
                 pipeline.addLast(new WatchProtocolEncoder(WatchProtocol.this));
                 pipeline.addLast(new WatchProtocolDecoder(WatchProtocol.this));

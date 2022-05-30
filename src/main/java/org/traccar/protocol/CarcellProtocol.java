@@ -21,6 +21,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class CarcellProtocol extends BaseProtocol {
@@ -31,7 +32,7 @@ public class CarcellProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '\r'));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());

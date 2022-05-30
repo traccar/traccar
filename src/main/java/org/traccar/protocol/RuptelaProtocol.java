@@ -19,6 +19,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class RuptelaProtocol extends BaseProtocol {
@@ -37,7 +38,7 @@ public class RuptelaProtocol extends BaseProtocol {
                 Command.TYPE_SET_ODOMETER);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));
                 pipeline.addLast(new RuptelaProtocolEncoder(RuptelaProtocol.this));
                 pipeline.addLast(new RuptelaProtocolDecoder(RuptelaProtocol.this));

@@ -20,13 +20,14 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 public class EskyProtocol extends BaseProtocol {
 
     public EskyProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new EskyFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
@@ -35,7 +36,7 @@ public class EskyProtocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new EskyProtocolDecoder(EskyProtocol.this));

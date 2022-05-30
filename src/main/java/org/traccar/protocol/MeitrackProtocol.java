@@ -19,6 +19,7 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class MeitrackProtocol extends BaseProtocol {
@@ -34,7 +35,7 @@ public class MeitrackProtocol extends BaseProtocol {
                 Command.TYPE_SEND_SMS);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new MeitrackFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new MeitrackProtocolEncoder(MeitrackProtocol.this));
@@ -43,7 +44,7 @@ public class MeitrackProtocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new MeitrackProtocolEncoder(MeitrackProtocol.this));
                 pipeline.addLast(new MeitrackProtocolDecoder(MeitrackProtocol.this));

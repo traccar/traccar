@@ -15,12 +15,12 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
-
-import io.netty.handler.codec.string.StringEncoder;
 
 public class Gl200Protocol extends BaseProtocol {
 
@@ -33,7 +33,7 @@ public class Gl200Protocol extends BaseProtocol {
                 Command.TYPE_REBOOT_DEVICE);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Gl200FrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new Gl200ProtocolEncoder(Gl200Protocol.this));
@@ -42,7 +42,7 @@ public class Gl200Protocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new Gl200ProtocolEncoder(Gl200Protocol.this));
                 pipeline.addLast(new Gl200ProtocolDecoder(Gl200Protocol.this));

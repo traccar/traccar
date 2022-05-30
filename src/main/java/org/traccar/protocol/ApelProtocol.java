@@ -19,6 +19,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 import java.nio.ByteOrder;
 public class ApelProtocol extends BaseProtocol {
@@ -26,7 +27,7 @@ public class ApelProtocol extends BaseProtocol {
     public ApelProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 2, 4, 0, true));
                 pipeline.addLast(new ApelProtocolDecoder(ApelProtocol.this));
             }

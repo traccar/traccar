@@ -25,6 +25,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import javax.net.ssl.SSLContext;
@@ -76,7 +77,7 @@ public abstract class TrackerServer implements TrackerConnector {
 
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                TrackerServer.this.addProtocolHandlers(pipeline);
+                TrackerServer.this.addProtocolHandlers(pipeline, Context.getConfig());
             }
         };
 
@@ -97,7 +98,7 @@ public abstract class TrackerServer implements TrackerConnector {
         }
     }
 
-    protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
+    protected abstract void addProtocolHandlers(PipelineBuilder pipeline, Config config);
 
     public int getPort() {
         return port;

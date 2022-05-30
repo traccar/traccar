@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  */
 package org.traccar;
 
+import com.google.inject.Inject;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.database.IdentityManager;
 import org.traccar.helper.NetworkUtil;
 import org.traccar.model.Command;
 
@@ -32,8 +34,19 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
 
     private final Protocol protocol;
 
+    private IdentityManager identityManager;
+
     public BaseProtocolEncoder(Protocol protocol) {
         this.protocol = protocol;
+    }
+
+    public IdentityManager getIdentityManager() {
+        return identityManager;
+    }
+
+    @Inject
+    public void setIdentityManager(IdentityManager identityManager) {
+        this.identityManager = identityManager;
     }
 
     public String getProtocolName() {
@@ -41,12 +54,12 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
     }
 
     protected String getUniqueId(long deviceId) {
-        return Context.getIdentityManager().getById(deviceId).getUniqueId();
+        return identityManager.getById(deviceId).getUniqueId();
     }
 
     protected void initDevicePassword(Command command, String defaultPassword) {
         if (!command.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
-            String password = Context.getIdentityManager()
+            String password = identityManager
                 .getDevicePassword(command.getDeviceId(), getProtocolName(), defaultPassword);
             command.set(Command.KEY_DEVICE_PASSWORD, password);
         }

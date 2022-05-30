@@ -20,13 +20,14 @@ import io.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 public class SiwiProtocol extends BaseProtocol {
 
     public SiwiProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new SiwiProtocolDecoder(SiwiProtocol.this));

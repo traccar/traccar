@@ -78,6 +78,10 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         init();
     }
 
+    public IdentityManager getIdentityManager() {
+        return identityManager;
+    }
+
     @Inject
     public void setIdentityManager(IdentityManager identityManager) {
         this.identityManager = identityManager;

@@ -19,21 +19,21 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestEncoder;
 import io.netty.handler.codec.http.HttpResponseDecoder;
 import org.traccar.BaseProtocol;
-import org.traccar.Context;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerClient;
+import org.traccar.config.Config;
 
 public class OrbcommProtocol extends BaseProtocol {
 
     public OrbcommProtocol() {
         addClient(new TrackerClient(getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new HttpRequestEncoder());
                 pipeline.addLast(new HttpResponseDecoder());
                 pipeline.addLast(new HttpObjectAggregator(65535));
                 pipeline.addLast(new OrbcommProtocolDecoder(OrbcommProtocol.this));
-                pipeline.addLast(new OrbcommProtocolPoller(OrbcommProtocol.this, Context.getConfig()));
+                pipeline.addLast(new OrbcommProtocolPoller(OrbcommProtocol.this, config));
             }
         });
     }

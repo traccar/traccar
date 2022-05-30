@@ -9,9 +9,9 @@ import static org.junit.Assert.assertEquals;
 public class EasyTrackProtocolEncoderTest extends ProtocolTest {
 
     @Test
-    public void testEncodeEngineStop() {
+    public void testEncodeEngineStop() throws Exception {
 
-        var encoder = new EasyTrackProtocolEncoder(null);
+        var encoder = inject(new EasyTrackProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

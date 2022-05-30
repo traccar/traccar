@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class GalileoProtocol extends BaseProtocol {
@@ -28,7 +29,7 @@ public class GalileoProtocol extends BaseProtocol {
                 Command.TYPE_OUTPUT_CONTROL);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new GalileoFrameDecoder());
                 pipeline.addLast(new GalileoProtocolEncoder(GalileoProtocol.this));
                 pipeline.addLast(new GalileoProtocolDecoder(GalileoProtocol.this));

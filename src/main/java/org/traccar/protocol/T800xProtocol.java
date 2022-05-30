@@ -19,6 +19,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class T800xProtocol extends BaseProtocol {
@@ -28,7 +29,7 @@ public class T800xProtocol extends BaseProtocol {
                 Command.TYPE_CUSTOM);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2, -5, 0));
                 pipeline.addLast(new T800xProtocolEncoder(T800xProtocol.this));
                 pipeline.addLast(new T800xProtocolDecoder(T800xProtocol.this));

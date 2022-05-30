@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -149,7 +148,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                             channel, remoteAddress, photoId,
                             photo.writerIndex(), Math.min(IMAGE_PACKET_MAX, photo.writableBytes()));
                 } else {
-                    String uniqueId = Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();
+                    String uniqueId = getIdentityManager().getById(position.getDeviceId()).getUniqueId();
                     photos.remove(photoId);
                     try {
                         position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, photo, "jpg"));

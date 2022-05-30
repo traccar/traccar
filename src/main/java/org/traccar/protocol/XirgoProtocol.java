@@ -15,14 +15,14 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.string.StringDecoder;
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
-
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 
 public class XirgoProtocol extends BaseProtocol {
 
@@ -31,7 +31,7 @@ public class XirgoProtocol extends BaseProtocol {
                 Command.TYPE_OUTPUT_CONTROL);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "##"));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
@@ -41,7 +41,7 @@ public class XirgoProtocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new XirgoProtocolEncoder(XirgoProtocol.this));

@@ -19,6 +19,7 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class Jt600Protocol extends BaseProtocol {
@@ -31,7 +32,7 @@ public class Jt600Protocol extends BaseProtocol {
                 Command.TYPE_REBOOT_DEVICE);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Jt600FrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new Jt600ProtocolEncoder(Jt600Protocol.this));

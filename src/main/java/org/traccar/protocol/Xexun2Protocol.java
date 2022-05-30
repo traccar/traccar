@@ -18,13 +18,14 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 public class Xexun2Protocol extends BaseProtocol {
 
     public Xexun2Protocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Xexun2FrameDecoder());
                 pipeline.addLast(new Xexun2ProtocolDecoder(Xexun2Protocol.this));
             }

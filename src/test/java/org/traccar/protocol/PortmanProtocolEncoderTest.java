@@ -9,9 +9,9 @@ import static org.junit.Assert.assertEquals;
 public class PortmanProtocolEncoderTest extends ProtocolTest {
 
     @Test
-    public void testEncodeEngineStop() {
+    public void testEncodeEngineStop() throws Exception {
 
-        var encoder = new PortmanProtocolEncoder(null);
+        var encoder = inject(new PortmanProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -22,9 +22,9 @@ public class PortmanProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeEngineResume() {
+    public void testEncodeEngineResume() throws Exception {
 
-        var encoder = new PortmanProtocolEncoder(null);
+        var encoder = inject(new PortmanProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

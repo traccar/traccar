@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -40,7 +39,7 @@ import java.util.regex.Pattern;
 
 public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
-    private Map<Byte, ByteBuf> photos = new HashMap<>();
+    private final Map<Byte, ByteBuf> photos = new HashMap<>();
 
     public MeiligaoProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -469,7 +468,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             } else if (command == MSG_POSITION_IMAGE) {
                 byte imageIndex = buf.readByte();
                 buf.readUnsignedByte(); // image upload type
-                String uniqueId = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
+                String uniqueId = getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
                 ByteBuf photo = photos.remove(imageIndex);
                 try {
                     position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, photo, "jpg"));

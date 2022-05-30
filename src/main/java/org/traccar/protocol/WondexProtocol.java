@@ -15,12 +15,12 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
-
-import io.netty.handler.codec.string.StringEncoder;
 
 public class WondexProtocol extends BaseProtocol {
 
@@ -42,7 +42,7 @@ public class WondexProtocol extends BaseProtocol {
                 Command.TYPE_IDENTIFICATION);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new WondexFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new WondexProtocolEncoder(WondexProtocol.this));
@@ -51,7 +51,7 @@ public class WondexProtocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new WondexProtocolEncoder(WondexProtocol.this));
                 pipeline.addLast(new WondexProtocolDecoder(WondexProtocol.this));

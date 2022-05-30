@@ -21,6 +21,7 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class Tk103Protocol extends BaseProtocol {
@@ -47,7 +48,7 @@ public class Tk103Protocol extends BaseProtocol {
                 Command.TYPE_OUTPUT_CONTROL);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Tk103FrameDecoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
@@ -57,7 +58,7 @@ public class Tk103Protocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new Tk103ProtocolEncoder(Tk103Protocol.this));

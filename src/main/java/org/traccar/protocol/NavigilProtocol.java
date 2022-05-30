@@ -18,13 +18,14 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 public class NavigilProtocol extends BaseProtocol {
 
     public NavigilProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new NavigilFrameDecoder());
                 pipeline.addLast(new NavigilProtocolDecoder(NavigilProtocol.this));
             }

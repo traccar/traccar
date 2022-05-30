@@ -9,7 +9,7 @@ public class KhdProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new KhdProtocolEncoder(null);
+        var encoder = inject(new KhdProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

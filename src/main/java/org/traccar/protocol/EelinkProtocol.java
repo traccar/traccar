@@ -19,6 +19,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class EelinkProtocol extends BaseProtocol {
@@ -32,7 +33,7 @@ public class EelinkProtocol extends BaseProtocol {
                 Command.TYPE_REBOOT_DEVICE);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2));
                 pipeline.addLast(new EelinkProtocolEncoder(EelinkProtocol.this, false));
                 pipeline.addLast(new EelinkProtocolDecoder(EelinkProtocol.this));
@@ -40,7 +41,7 @@ public class EelinkProtocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new EelinkProtocolEncoder(EelinkProtocol.this, true));
                 pipeline.addLast(new EelinkProtocolDecoder(EelinkProtocol.this));
             }

@@ -15,11 +15,10 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.Context;
+import org.traccar.Protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
-import org.traccar.Protocol;
 
 import java.util.Map;
 
@@ -42,7 +41,7 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
 
         Map<String, Object> attributes = command.getAttributes();
 
-        boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
+        boolean alternative = getIdentityManager().lookupAttributeBoolean(
                 command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
 
         switch (command.getType()) {

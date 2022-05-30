@@ -21,6 +21,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class Gps103Protocol extends BaseProtocol {
@@ -38,7 +39,7 @@ public class Gps103Protocol extends BaseProtocol {
                 Command.TYPE_REQUEST_PHOTO);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(2048, false, "\r\n", "\n", ";", "*"));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
@@ -48,7 +49,7 @@ public class Gps103Protocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new Gps103ProtocolEncoder(Gps103Protocol.this));

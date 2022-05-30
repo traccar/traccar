@@ -9,7 +9,7 @@ public class MeiligaoProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new MeiligaoProtocolEncoder(null);
+        var encoder = inject(new MeiligaoProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

@@ -21,6 +21,7 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -36,7 +37,7 @@ public class Xrb28Protocol extends BaseProtocol {
                 Command.TYPE_ALARM_DISARM);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
                 pipeline.addLast(new StringEncoder(StandardCharsets.ISO_8859_1));
                 pipeline.addLast(new StringDecoder());

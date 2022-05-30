@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class BceProtocol extends BaseProtocol {
@@ -27,7 +28,7 @@ public class BceProtocol extends BaseProtocol {
                 Command.TYPE_OUTPUT_CONTROL);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new BceFrameDecoder());
                 pipeline.addLast(new BceProtocolEncoder(BceProtocol.this));
                 pipeline.addLast(new BceProtocolDecoder(BceProtocol.this));

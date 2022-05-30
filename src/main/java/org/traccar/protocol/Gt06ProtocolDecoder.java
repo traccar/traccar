@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -1027,7 +1026,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (photo.writableBytes() > 0) {
                 sendPhotoRequest(channel, pictureId);
             } else {
-                Device device = Context.getDeviceManager().getById(deviceSession.getDeviceId());
+                Device device = getIdentityManager().getById(deviceSession.getDeviceId());
                 position.set(Position.KEY_IMAGE, writeMediaFile(device.getUniqueId(), photo, "jpg"));
                 photos.remove(pictureId).release();
             }
@@ -1263,7 +1262,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position = new Position(getProtocolName());
                         position.setDeviceId(deviceSession.getDeviceId());
                         getLastLocation(position, new Date(timestamp));
-                        Device device = Context.getDeviceManager().getById(deviceSession.getDeviceId());
+                        Device device = getIdentityManager().getById(deviceSession.getDeviceId());
                         position.set(Position.KEY_IMAGE, writeMediaFile(device.getUniqueId(), photo, "jpg"));
                         photos.remove(mediaId).release();
                     }

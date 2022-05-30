@@ -18,13 +18,14 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 public class SolarPoweredProtocol extends BaseProtocol {
 
     public SolarPoweredProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new HuabaoFrameDecoder());
                 pipeline.addLast(new SolarPoweredProtocolDecoder(SolarPoweredProtocol.this));
             }

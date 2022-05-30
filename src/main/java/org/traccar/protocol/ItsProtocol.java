@@ -20,6 +20,7 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class ItsProtocol extends BaseProtocol {
@@ -30,7 +31,7 @@ public class ItsProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new ItsFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());

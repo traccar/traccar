@@ -16,10 +16,9 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.Context;
+import org.traccar.Protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
-import org.traccar.Protocol;
 
 public class Tk103ProtocolEncoder extends StringProtocolEncoder {
 
@@ -42,7 +41,7 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        boolean alternative = forceAlternative || Context.getIdentityManager().lookupAttributeBoolean(
+        boolean alternative = forceAlternative || getIdentityManager().lookupAttributeBoolean(
                 command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
 
         initDevicePassword(command, "123456");

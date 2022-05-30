@@ -15,16 +15,15 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.BaseProtocol;
-import org.traccar.Context;
-import org.traccar.PipelineBuilder;
-import org.traccar.TrackerServer;
-import org.traccar.config.Keys;
-import org.traccar.model.Command;
-
 import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import org.traccar.BaseProtocol;
+import org.traccar.PipelineBuilder;
+import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.model.Command;
 
 public class XexunProtocol extends BaseProtocol {
 
@@ -34,8 +33,8 @@ public class XexunProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                boolean full = Context.getConfig().getBoolean(Keys.PROTOCOL_EXTENDED.withPrefix(getName()));
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                boolean full = config.getBoolean(Keys.PROTOCOL_EXTENDED.withPrefix(getName()));
                 if (full) {
                     pipeline.addLast(new LineBasedFrameDecoder(1024)); // tracker bug \n\r
                 } else {

@@ -19,6 +19,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class CityeasyProtocol extends BaseProtocol {
@@ -31,7 +32,7 @@ public class CityeasyProtocol extends BaseProtocol {
                 Command.TYPE_SET_TIMEZONE);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 0));
                 pipeline.addLast(new CityeasyProtocolEncoder(CityeasyProtocol.this));
                 pipeline.addLast(new CityeasyProtocolDecoder(CityeasyProtocol.this));

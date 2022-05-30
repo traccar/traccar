@@ -19,6 +19,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class EnforaProtocol extends BaseProtocol {
@@ -30,7 +31,7 @@ public class EnforaProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
                 pipeline.addLast(new EnforaProtocolEncoder(EnforaProtocol.this));
                 pipeline.addLast(new EnforaProtocolDecoder(EnforaProtocol.this));
@@ -38,7 +39,7 @@ public class EnforaProtocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new EnforaProtocolEncoder(EnforaProtocol.this));
                 pipeline.addLast(new EnforaProtocolDecoder(EnforaProtocol.this));
             }

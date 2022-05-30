@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -72,7 +71,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public int getProtocolType(long deviceId) {
-        return Context.getIdentityManager().lookupAttributeInteger(
+        return getIdentityManager().lookupAttributeInteger(
                 deviceId, getProtocolName() + ".protocolType", protocolType, false, true);
     }
 
@@ -81,7 +80,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public boolean isHbm(long deviceId) {
-        return Context.getIdentityManager().lookupAttributeBoolean(
+        return getIdentityManager().lookupAttributeBoolean(
                 deviceId, getProtocolName() + ".hbm", hbm, false, true);
     }
 
@@ -90,7 +89,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public boolean isIncludeAdc(long deviceId) {
-        return Context.getIdentityManager().lookupAttributeBoolean(
+        return getIdentityManager().lookupAttributeBoolean(
                 deviceId, getProtocolName() + ".includeAdc", includeAdc, false, true);
     }
 
@@ -99,7 +98,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public boolean isIncludeRpm(long deviceId) {
-        return Context.getIdentityManager().lookupAttributeBoolean(
+        return getIdentityManager().lookupAttributeBoolean(
                 deviceId, getProtocolName() + ".includeRpm", includeRpm, false, true);
     }
 
@@ -108,7 +107,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public boolean isIncludeTemp(long deviceId) {
-        return Context.getIdentityManager().lookupAttributeBoolean(
+        return getIdentityManager().lookupAttributeBoolean(
                 deviceId, getProtocolName() + ".includeTemp", includeTemp, false, true);
     }
 

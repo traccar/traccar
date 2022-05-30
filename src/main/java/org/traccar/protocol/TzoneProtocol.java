@@ -15,18 +15,18 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
-
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import org.traccar.config.Config;
 
 public class TzoneProtocol extends BaseProtocol {
 
     public TzoneProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(256, 2, 2, 2, 0));
                 pipeline.addLast(new TzoneProtocolDecoder(TzoneProtocol.this));
             }

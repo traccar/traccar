@@ -9,7 +9,7 @@ public class TopinProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new TopinProtocolEncoder(null);
+        var encoder = inject(new TopinProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

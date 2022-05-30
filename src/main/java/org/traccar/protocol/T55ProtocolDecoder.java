@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -130,7 +129,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             DeviceSession deviceSession, String sentence, SocketAddress remoteAddress, Channel channel) {
 
         if (deviceSession != null && channel != null && !(channel instanceof DatagramChannel)
-                && Context.getIdentityManager().lookupAttributeBoolean(
+                && getIdentityManager().lookupAttributeBoolean(
                         deviceSession.getDeviceId(), getProtocolName() + ".ack", false, false, true)) {
             channel.writeAndFlush(new NetworkMessage("OK1\r\n", remoteAddress));
         }

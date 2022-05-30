@@ -23,6 +23,7 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import javax.net.ssl.SSLContext;
@@ -77,7 +78,7 @@ public abstract class TrackerClient implements TrackerConnector {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 try {
-                    TrackerClient.this.addProtocolHandlers(pipeline);
+                    TrackerClient.this.addProtocolHandlers(pipeline, Context.getConfig());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -90,7 +91,7 @@ public abstract class TrackerClient implements TrackerConnector {
                 .handler(pipelineFactory);
     }
 
-    protected abstract void addProtocolHandlers(PipelineBuilder pipeline) throws Exception;
+    protected abstract void addProtocolHandlers(PipelineBuilder pipeline, Config config) throws Exception;
 
     public String[] getDevices() {
         return devices;

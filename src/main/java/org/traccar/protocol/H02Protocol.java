@@ -17,9 +17,9 @@ package org.traccar.protocol;
 
 import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
-import org.traccar.Context;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Command;
 
@@ -35,8 +35,8 @@ public class H02Protocol extends BaseProtocol {
         );
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                int messageLength = Context.getConfig().getInteger(Keys.PROTOCOL_MESSAGE_LENGTH.withPrefix(getName()));
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                int messageLength = config.getInteger(Keys.PROTOCOL_MESSAGE_LENGTH.withPrefix(getName()));
                 pipeline.addLast(new H02FrameDecoder(messageLength));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new H02ProtocolEncoder(H02Protocol.this));
@@ -45,7 +45,7 @@ public class H02Protocol extends BaseProtocol {
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new H02ProtocolEncoder(H02Protocol.this));
                 pipeline.addLast(new H02ProtocolDecoder(H02Protocol.this));

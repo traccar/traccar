@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
 
 public class Gt06Protocol extends BaseProtocol {
@@ -29,7 +30,7 @@ public class Gt06Protocol extends BaseProtocol {
                 Command.TYPE_CUSTOM);
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Gt06FrameDecoder());
                 pipeline.addLast(new Gt06ProtocolEncoder(Gt06Protocol.this));
                 pipeline.addLast(new Gt06ProtocolDecoder(Gt06Protocol.this));

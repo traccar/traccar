@@ -11,7 +11,7 @@ public class Gps103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionPeriodic() throws Exception {
 
-        var encoder = new Gps103ProtocolEncoder(null);
+        var encoder = inject(new Gps103ProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -25,7 +25,7 @@ public class Gps103ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeCustom() throws Exception {
 
-        var encoder = new Gps103ProtocolEncoder(null);
+        var encoder = inject(new Gps103ProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

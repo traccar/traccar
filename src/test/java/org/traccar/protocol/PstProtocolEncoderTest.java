@@ -7,9 +7,9 @@ import org.traccar.model.Command;
 public class PstProtocolEncoderTest extends ProtocolTest {
 
     @Test
-    public void testEncodeEngineStop() {
+    public void testEncodeEngineStop() throws Exception {
 
-        var encoder = new PstProtocolEncoder(null);
+        var encoder = inject(new PstProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -20,9 +20,9 @@ public class PstProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeEngineResume() {
+    public void testEncodeEngineResume() throws Exception {
 
-        var encoder = new PstProtocolEncoder(null);
+        var encoder = inject(new PstProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

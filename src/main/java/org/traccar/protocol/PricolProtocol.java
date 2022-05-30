@@ -19,20 +19,21 @@ import io.netty.handler.codec.FixedLengthFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 public class PricolProtocol extends BaseProtocol {
 
     public PricolProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new FixedLengthFrameDecoder(64));
                 pipeline.addLast(new PricolProtocolDecoder(PricolProtocol.this));
             }
         });
         addServer(new TrackerServer(true, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new PricolProtocolDecoder(PricolProtocol.this));
             }
         });
