@@ -171,7 +171,8 @@ public final class ReportUtils {
     }
 
     private static TripReport calculateTrip(
-            ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
+            IdentityManager identityManager, ArrayList<Position> positions,
+            int startIndex, int endIndex, boolean ignoreOdometer) {
 
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
@@ -189,7 +190,7 @@ public final class ReportUtils {
         long tripDuration = endTrip.getFixTime().getTime() - startTrip.getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
-        trip.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
+        trip.setDeviceName(identityManager.getById(deviceId).getName());
 
         trip.setStartPositionId(startTrip.getId());
         trip.setStartLat(startTrip.getLatitude());
@@ -238,7 +239,8 @@ public final class ReportUtils {
     }
 
     private static StopReport calculateStop(
-            ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
+            IdentityManager identityManager, ArrayList<Position> positions,
+            int startIndex, int endIndex, boolean ignoreOdometer) {
 
         Position startStop = positions.get(startIndex);
         Position endStop = positions.get(endIndex);
@@ -247,7 +249,7 @@ public final class ReportUtils {
 
         long deviceId = startStop.getDeviceId();
         stop.setDeviceId(deviceId);
-        stop.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
+        stop.setDeviceName(identityManager.getById(deviceId).getName());
 
         stop.setPositionId(startStop.getId());
         stop.setLatitude(startStop.getLatitude());
@@ -286,12 +288,13 @@ public final class ReportUtils {
     }
 
     private static <T extends BaseReport> T calculateTripOrStop(
-            ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer, Class<T> reportClass) {
+            IdentityManager identityManager, ArrayList<Position> positions,
+            int startIndex, int endIndex, boolean ignoreOdometer, Class<T> reportClass) {
 
         if (reportClass.equals(TripReport.class)) {
-            return (T) calculateTrip(positions, startIndex, endIndex, ignoreOdometer);
+            return (T) calculateTrip(identityManager, positions, startIndex, endIndex, ignoreOdometer);
         } else {
-            return (T) calculateStop(positions, startIndex, endIndex, ignoreOdometer);
+            return (T) calculateStop(identityManager, positions, startIndex, endIndex, ignoreOdometer);
         }
     }
 
@@ -351,15 +354,15 @@ public final class ReportUtils {
                 }
                 if (startEventIndex != -1 && startNoEventIndex != -1 && event != null
                         && trips != deviceState.getMotionState()) {
-                    result.add(calculateTripOrStop(positions, startEventIndex, startNoEventIndex,
-                            ignoreOdometer, reportClass));
+                    result.add(calculateTripOrStop(identityManager, positions,
+                            startEventIndex, startNoEventIndex, ignoreOdometer, reportClass));
                     startEventIndex = -1;
                 }
             }
             if (startEventIndex != -1 && (startNoEventIndex != -1 || !trips)) {
-                result.add(calculateTripOrStop(positions, startEventIndex,
-                            startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1,
-                            ignoreOdometer, reportClass));
+                result.add(calculateTripOrStop(identityManager, positions,
+                        startEventIndex, startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1,
+                        ignoreOdometer, reportClass));
             }
         }
 

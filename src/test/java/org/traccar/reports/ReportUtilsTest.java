@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -17,7 +20,8 @@ import java.util.TimeZone;
 
 import org.junit.Test;
 import org.traccar.BaseTest;
-import org.traccar.TestIdentityManager;
+import org.traccar.database.IdentityManager;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.TripReport;
@@ -41,6 +45,14 @@ public class ReportUtilsTest extends BaseTest {
         position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);
 
         return position;
+    }
+
+    private IdentityManager mockIdentityManager() {
+        var device = mock(Device.class);
+        when(device.getName()).thenReturn("test");
+        var identityManager = mock(IdentityManager.class);
+        when(identityManager.getById(anyLong())).thenReturn(device);
+        return identityManager;
     }
 
     @Test
@@ -81,7 +93,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
 
         Collection<TripReport> trips = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, TripReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, TripReport.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -96,7 +108,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
         Collection<StopReport> stops = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -135,7 +147,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, true, false, 0.01);
 
         Collection<TripReport> trips = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, TripReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, TripReport.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -150,7 +162,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
         trips = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, TripReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, TripReport.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -165,7 +177,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
         Collection<StopReport> stops = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -206,7 +218,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
 
         Collection<TripReport> trips = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, TripReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, TripReport.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -221,7 +233,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(7000, itemTrip.getDistance(), 0.01);
 
         Collection<StopReport> stops = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -256,7 +268,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
         Collection<StopReport> result = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -283,7 +295,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
         Collection<StopReport> result = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -310,7 +322,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
         Collection<StopReport> result = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -337,7 +349,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
         Collection<StopReport> result = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -360,7 +372,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, 900000, false, false, 0.01);
 
         Collection<TripReport> trips = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, TripReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, TripReport.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -375,7 +387,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(600, itemTrip.getDistance(), 0.01);
 
         Collection<StopReport> stops = ReportUtils.detectTripsAndStops(
-                new TestIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());

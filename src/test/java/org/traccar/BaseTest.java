@@ -1,7 +1,5 @@
 package org.traccar;
 
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.traccar.config.Config;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.IdentityManager;
@@ -17,10 +15,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class BaseTest {
-
-    static {
-        Context.init(new TestIdentityManager());
-    }
 
     protected <T extends BaseProtocolDecoder> T inject(T decoder) throws Exception {
         decoder.setConfig(new Config());
