@@ -182,7 +182,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
 
                     getLastLocation(position, null);
 
-                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
+                    position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, photo, "jpg"));
                     photo.release();
                     photo = null;
 

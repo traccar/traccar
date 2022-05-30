@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -381,7 +380,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(getDeviceSession(channel, remoteAddress, imei).getDeviceId());
                     getLastLocation(position, null);
-                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
+                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, photo, "jpg"));
                     photo.release();
                     photo = null;
                     return position;

@@ -15,6 +15,8 @@
  */
 package org.traccar;
 
+import com.google.inject.Inject;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.handler.codec.http.HttpRequestDecoder;
@@ -25,6 +27,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.database.ConnectionManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.database.MediaManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Command;
@@ -53,9 +56,20 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private final StatisticsManager statisticsManager;
     private final Protocol protocol;
 
+    private MediaManager mediaManager;
+
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
         statisticsManager = Main.getInjector() != null ? Main.getInjector().getInstance(StatisticsManager.class) : null;
+    }
+
+    @Inject
+    public void setMediaManager(MediaManager mediaManager) {
+        this.mediaManager = mediaManager;
+    }
+
+    public String writeMediaFile(String uniqueId, ByteBuf buf, String extension) {
+        return mediaManager.writeFile(uniqueId, buf, extension);
     }
 
     public String getProtocolName() {

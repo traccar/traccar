@@ -472,7 +472,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
                 String uniqueId = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
                 ByteBuf photo = photos.remove(imageIndex);
                 try {
-                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
+                    position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, photo, "jpg"));
                 } finally {
                     photo.release();
                 }

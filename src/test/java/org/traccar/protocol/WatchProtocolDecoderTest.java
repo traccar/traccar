@@ -1,12 +1,11 @@
 package org.traccar.protocol;
 
-import io.netty.buffer.ByteBuf;
 import org.junit.Test;
-import org.traccar.Context;
 import org.traccar.ProtocolTest;
+import org.traccar.database.MediaManager;
 import org.traccar.model.Position;
 
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
 public class WatchProtocolDecoderTest extends ProtocolTest {
 
@@ -148,14 +147,15 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         var decoder = new WatchProtocolDecoder(null);
 
-        verifyNull(decoder.decode(null, null, buffer("[CS*1234567890*0004*TK,1]")));
+        var mediaManager = mock(MediaManager.class);
+        when(mediaManager.writeFile(any(), any(), any())).thenReturn("mock.amr");
+        decoder.setMediaManager(mediaManager);
 
-        ByteBuf data = binary("7d5b5d2c2aff");
+        verifyAttribute(decoder, concatenateBuffers(
+                buffer("[CS*1234567890*000e*TK,#!AMR"), binary("7d5b5d2c2aff"), buffer("]")),
+                Position.KEY_AUDIO, "mock.amr");
 
-        Object decodedObject = decoder.decode(null, null, concatenateBuffers(buffer("[CS*1234567890*000e*TK,#!AMR"), data.resetReaderIndex(), buffer("]")));
-        assertEquals("1234567890/mock.amr", ((Position) decodedObject).getAttributes().get("audio"));
-
-        verifyFrame(concatenateBuffers(buffer("#!AMR"), data.resetReaderIndex()), ((MockMediaManager) Context.getMediaManager()).readFile("1234567890/mock.amr"));
+        verify(mediaManager).writeFile(any(), any(), any());
 
     }
 

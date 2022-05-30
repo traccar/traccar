@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -361,7 +360,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             try {
-                position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
+                position.set(Position.KEY_IMAGE, writeMediaFile(imei, photo, "jpg"));
             } finally {
                 photoPackets = 0;
                 photo.release();

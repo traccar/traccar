@@ -109,7 +109,9 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         pipeline.addLast(new StandardLoggingHandler(protocol));
 
         addProtocolHandlers(handler -> {
-            if (!(handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder)) {
+            if (handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder) {
+                Main.getInjector().injectMembers(handler);
+            } else {
                 if (handler instanceof ChannelInboundHandler) {
                     handler = new WrapperInboundHandler((ChannelInboundHandler) handler);
                 } else {
@@ -144,9 +146,8 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 AlertEventHandler.class,
                 IgnitionEventHandler.class,
                 MaintenanceEventHandler.class,
-                DriverEventHandler.class);
-
-        pipeline.addLast(new MainEventHandler());
+                DriverEventHandler.class,
+                MainEventHandler.class);
     }
 
 }

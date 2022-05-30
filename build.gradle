@@ -83,6 +83,7 @@ dependencies {
     implementation "javax.activation:activation:1.1.1"
     implementation "com.amazonaws:aws-java-sdk-sns:1.12.141"
     testImplementation "junit:junit:4.13.2"
+    testImplementation "org.mockito:mockito-core:3.+"
 }
 
 task copyDependencies(type: Copy) {

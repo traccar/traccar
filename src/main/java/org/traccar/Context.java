@@ -37,7 +37,6 @@ import org.traccar.database.IdentityManager;
 import org.traccar.database.LdapProvider;
 import org.traccar.database.MailManager;
 import org.traccar.database.MaintenancesManager;
-import org.traccar.database.MediaManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.OrderManager;
 import org.traccar.database.PermissionsManager;
@@ -112,12 +111,6 @@ public final class Context {
 
     public static MailManager getMailManager() {
         return mailManager;
-    }
-
-    private static MediaManager mediaManager;
-
-    public static MediaManager getMediaManager() {
-        return mediaManager;
     }
 
     private static UsersManager usersManager;
@@ -313,8 +306,6 @@ public final class Context {
 
         mailManager = new MailManager();
 
-        mediaManager = new MediaManager(config.getString(Keys.MEDIA_PATH));
-
         if (dataManager != null) {
             usersManager = new UsersManager(dataManager);
             groupsManager = new GroupsManager(dataManager);
@@ -390,13 +381,12 @@ public final class Context {
         velocityEngine.init(velocityProperties);
     }
 
-    public static void init(IdentityManager testIdentityManager, MediaManager testMediaManager) {
+    public static void init(IdentityManager testIdentityManager) {
         config = new Config();
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JSR353Module());
         client = ClientBuilder.newClient().register(new ObjectMapperContextResolver());
         identityManager = testIdentityManager;
-        mediaManager = testMediaManager;
     }
 
     public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {

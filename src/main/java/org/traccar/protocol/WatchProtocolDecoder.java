@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -313,7 +312,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             int timeIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
             buf.readerIndex(timeIndex + 12 + 2);
-            position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(id, buf, "jpg"));
+            position.set(Position.KEY_IMAGE, writeMediaFile(id, buf, "jpg"));
 
             return position;
 
@@ -339,7 +338,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
                 getLastLocation(position, null);
-                position.set(Position.KEY_AUDIO, Context.getMediaManager().writeFile(id, audio, "amr"));
+                position.set(Position.KEY_AUDIO, writeMediaFile(id, audio, "amr"));
                 audio.release();
                 audio = null;
                 return position;
@@ -356,7 +355,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Position.KEY_AUDIO, Context.getMediaManager().writeFile(id, buf, "amr"));
+            position.set(Position.KEY_AUDIO, writeMediaFile(id, buf, "amr"));
 
             return position;
 

@@ -626,7 +626,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, new Date(time * 1000));
 
-            position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(String.valueOf(id), photo, "jpg"));
+            position.set(Position.KEY_IMAGE, writeMediaFile(String.valueOf(id), photo, "jpg"));
             photo.release();
             photo = null;
 

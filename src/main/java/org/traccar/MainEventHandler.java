@@ -30,6 +30,7 @@ import org.traccar.helper.NetworkUtil;
 import org.traccar.model.Position;
 import org.traccar.storage.StorageException;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -42,6 +43,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     private final Set<String> connectionlessProtocols = new HashSet<>();
     private final Set<String> logAttributes = new LinkedHashSet<>();
 
+    @Inject
     public MainEventHandler() {
         String connectionlessProtocolList = Context.getConfig().getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {

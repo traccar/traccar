@@ -1028,8 +1028,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 sendPhotoRequest(channel, pictureId);
             } else {
                 Device device = Context.getDeviceManager().getById(deviceSession.getDeviceId());
-                position.set(
-                        Position.KEY_IMAGE, Context.getMediaManager().writeFile(device.getUniqueId(), photo, "jpg"));
+                position.set(Position.KEY_IMAGE, writeMediaFile(device.getUniqueId(), photo, "jpg"));
                 photos.remove(pictureId).release();
             }
 
@@ -1265,8 +1264,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position.setDeviceId(deviceSession.getDeviceId());
                         getLastLocation(position, new Date(timestamp));
                         Device device = Context.getDeviceManager().getById(deviceSession.getDeviceId());
-                        position.set(Position.KEY_IMAGE,
-                                Context.getMediaManager().writeFile(device.getUniqueId(), photo, "jpg"));
+                        position.set(Position.KEY_IMAGE, writeMediaFile(device.getUniqueId(), photo, "jpg"));
                         photos.remove(mediaId).release();
                     }
                 }

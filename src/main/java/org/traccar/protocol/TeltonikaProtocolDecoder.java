@@ -148,7 +148,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                     String uniqueId = Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();
                     photos.remove(photoId);
                     try {
-                        position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
+                        position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, photo, "jpg"));
                     } finally {
                         photo.release();
                     }

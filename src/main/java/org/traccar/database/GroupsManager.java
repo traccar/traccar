@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ package org.traccar.database;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.traccar.Context;
 import org.traccar.model.Group;
 import org.traccar.storage.StorageException;
 
