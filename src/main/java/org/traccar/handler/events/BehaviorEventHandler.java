@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
 import java.util.Collections;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ public class BehaviorEventHandler extends BaseEventHandler {
 
     private final IdentityManager identityManager;
 
+    @Inject
     public BehaviorEventHandler(Config config, IdentityManager identityManager) {
         accelerationThreshold = config.getDouble(Keys.EVENT_BEHAVIOR_ACCELERATION_THRESHOLD);
         brakingThreshold = config.getDouble(Keys.EVENT_BEHAVIOR_BRAKING_THRESHOLD);

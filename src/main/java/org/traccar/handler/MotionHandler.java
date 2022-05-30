@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,14 +19,18 @@ package org.traccar.handler;
 import io.netty.channel.ChannelHandler;
 import org.traccar.BaseDataHandler;
 import org.traccar.model.Position;
+import org.traccar.reports.model.TripsConfig;
+
+import javax.inject.Inject;
 
 @ChannelHandler.Sharable
 public class MotionHandler extends BaseDataHandler {
 
-    private double speedThreshold;
+    private final double speedThreshold;
 
-    public MotionHandler(double speedThreshold) {
-        this.speedThreshold = speedThreshold;
+    @Inject
+    public MotionHandler(TripsConfig tripsConfig) {
+        speedThreshold = tripsConfig.getSpeedThreshold();
     }
 
     @Override

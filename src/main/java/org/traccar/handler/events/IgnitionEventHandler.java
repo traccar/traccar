@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,11 +25,14 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
+
 @ChannelHandler.Sharable
 public class IgnitionEventHandler extends BaseEventHandler {
 
     private final IdentityManager identityManager;
 
+    @Inject
     public IgnitionEventHandler(IdentityManager identityManager) {
         this.identityManager = identityManager;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,9 +18,6 @@ package org.traccar.reports.model;
 
 public class TripsConfig {
 
-    public TripsConfig() {
-    }
-
     public TripsConfig(double minimalTripDistance, long minimalTripDuration, long minimalParkingDuration,
             long minimalNoDataDuration, boolean useIgnition, boolean processInvalidPositions, double speedThreshold) {
         this.minimalTripDistance = minimalTripDistance;
@@ -32,74 +29,46 @@ public class TripsConfig {
         this.speedThreshold = speedThreshold;
     }
 
-    private double minimalTripDistance;
+    private final double minimalTripDistance;
 
     public double getMinimalTripDistance() {
         return minimalTripDistance;
     }
 
-    public void setMinimalTripDistance(double minimalTripDistance) {
-        this.minimalTripDistance = minimalTripDistance;
-    }
-
-    private long minimalTripDuration;
+    private final long minimalTripDuration;
 
     public long getMinimalTripDuration() {
         return minimalTripDuration;
     }
 
-    public void setMinimalTripDuration(long minimalTripDuration) {
-        this.minimalTripDuration = minimalTripDuration;
-    }
-
-    private long minimalParkingDuration;
+    private final long minimalParkingDuration;
 
     public long getMinimalParkingDuration() {
         return minimalParkingDuration;
     }
 
-    public void setMinimalParkingDuration(long minimalParkingDuration) {
-        this.minimalParkingDuration = minimalParkingDuration;
-    }
-
-    private long minimalNoDataDuration;
+    private final long minimalNoDataDuration;
 
     public long getMinimalNoDataDuration() {
         return minimalNoDataDuration;
     }
 
-    public void setMinimalNoDataDuration(long minimalNoDataDuration) {
-        this.minimalNoDataDuration = minimalNoDataDuration;
-    }
-
-    private boolean useIgnition;
+    private final boolean useIgnition;
 
     public boolean getUseIgnition() {
         return useIgnition;
     }
 
-    public void setUseIgnition(boolean useIgnition) {
-        this.useIgnition = useIgnition;
-    }
-
-    private boolean processInvalidPositions;
+    private final boolean processInvalidPositions;
 
     public boolean getProcessInvalidPositions() {
         return processInvalidPositions;
     }
 
-    public void setProcessInvalidPositions(boolean processInvalidPositions) {
-        this.processInvalidPositions = processInvalidPositions;
-    }
-
-    private double speedThreshold;
+    private final double speedThreshold;
 
     public double getSpeedThreshold() {
         return speedThreshold;
-    }
-
-    public void setSpeedThreshold(double speedThreshold) {
-        this.speedThreshold = speedThreshold;
     }
 
 }

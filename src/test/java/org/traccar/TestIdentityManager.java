@@ -53,9 +53,6 @@ public final class TestIdentityManager implements IdentityManager {
     @Override
     public String lookupAttributeString(
             long deviceId, String attributeName, String defaultValue, boolean lookupServer, boolean lookupConfig) {
-        if (attributeName.equals("filter.skipAttributes")) {
-            return "alarm,result";
-        }
         return defaultValue;
     }
 

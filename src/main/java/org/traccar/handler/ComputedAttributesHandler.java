@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,6 +40,8 @@ import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
+
 @ChannelHandler.Sharable
 public class ComputedAttributesHandler extends BaseDataHandler {
 
@@ -52,6 +54,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     private final boolean includeDeviceAttributes;
 
+    @Inject
     public ComputedAttributesHandler(
             Config config, IdentityManager identityManager, AttributesManager attributesManager) {
         this.identityManager = identityManager;

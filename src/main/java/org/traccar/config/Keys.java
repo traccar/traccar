@@ -1022,25 +1022,11 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * Enable engine hours calculation on the server side. It uses ignition value to determine engine state.
-     */
-    public static final ConfigKey<Boolean> PROCESSING_ENGINE_HOURS_ENABLE = new ConfigKey<>(
-            "processing.engineHours.enable",
-            Collections.singletonList(KeyType.GLOBAL));
-
-    /**
      * Enable copying of missing attributes from last position to the current one. Might be useful if device doesn't
      * send some values in every message.
      */
     public static final ConfigKey<Boolean> PROCESSING_COPY_ATTRIBUTES_ENABLE = new ConfigKey<>(
             "processing.copyAttributes.enable",
-            Collections.singletonList(KeyType.GLOBAL));
-
-    /**
-     * Enable computed attributes processing.
-     */
-    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_ENABLE = new ConfigKey<>(
-            "processing.computedAttributes.enable",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,6 +29,8 @@ import org.traccar.model.Position;
 import org.traccar.reports.ReportUtils;
 import org.traccar.reports.model.TripsConfig;
 
+import javax.inject.Inject;
+
 @ChannelHandler.Sharable
 public class MotionEventHandler extends BaseEventHandler {
 
@@ -36,6 +38,7 @@ public class MotionEventHandler extends BaseEventHandler {
     private final DeviceManager deviceManager;
     private final TripsConfig tripsConfig;
 
+    @Inject
     public MotionEventHandler(IdentityManager identityManager, DeviceManager deviceManager, TripsConfig tripsConfig) {
         this.identityManager = identityManager;
         this.deviceManager = deviceManager;

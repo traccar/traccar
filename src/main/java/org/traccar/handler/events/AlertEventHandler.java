@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,12 +25,15 @@ import org.traccar.database.IdentityManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
+
 @ChannelHandler.Sharable
 public class AlertEventHandler extends BaseEventHandler {
 
     private final IdentityManager identityManager;
     private final boolean ignoreDuplicateAlerts;
 
+    @Inject
     public AlertEventHandler(Config config, IdentityManager identityManager) {
         this.identityManager = identityManager;
         ignoreDuplicateAlerts = config.getBoolean(Keys.EVENT_IGNORE_DUPLICATE_ALERTS);

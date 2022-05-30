@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import org.traccar.BaseDataHandler;
 import org.traccar.database.DataManager;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
+
 @ChannelHandler.Sharable
 public class DefaultDataHandler extends BaseDataHandler {
 
@@ -29,6 +31,7 @@ public class DefaultDataHandler extends BaseDataHandler {
 
     private final DataManager dataManager;
 
+    @Inject
     public DefaultDataHandler(DataManager dataManager) {
         this.dataManager = dataManager;
     }

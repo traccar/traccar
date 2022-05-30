@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,10 @@ package org.traccar.database;
 
 import io.netty.channel.Channel;
 import io.netty.util.Timeout;
+import io.netty.util.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.GlobalTimer;
 import org.traccar.Main;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -52,9 +52,12 @@ public class ConnectionManager {
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
     private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
 
+    private final Timer timer;
+
     public ConnectionManager() {
         deviceTimeout = Context.getConfig().getLong(Keys.STATUS_TIMEOUT) * 1000;
         updateDeviceState = Context.getConfig().getBoolean(Keys.STATUS_UPDATE_DEVICE_STATE);
+        timer = Main.getInjector().getInstance(Timer.class);
     }
 
     public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
@@ -118,7 +121,7 @@ public class ConnectionManager {
         }
 
         if (status.equals(Device.STATUS_ONLINE)) {
-            timeouts.put(deviceId, GlobalTimer.getTimer().newTimeout(timeout1 -> {
+            timeouts.put(deviceId, timer.newTimeout(timeout1 -> {
                 if (!timeout1.isCancelled()) {
                     updateDevice(deviceId, Device.STATUS_UNKNOWN, null);
                 }

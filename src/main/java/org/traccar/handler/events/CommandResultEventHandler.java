@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,14 @@ import io.netty.channel.ChannelHandler;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
+
 @ChannelHandler.Sharable
 public class CommandResultEventHandler extends BaseEventHandler {
+
+    @Inject
+    public CommandResultEventHandler() {
+    }
 
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {

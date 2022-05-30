@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,12 +26,15 @@ import org.traccar.model.Event;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
+
 @ChannelHandler.Sharable
 public class MaintenanceEventHandler extends BaseEventHandler {
 
     private final IdentityManager identityManager;
     private final MaintenancesManager maintenancesManager;
 
+    @Inject
     public MaintenanceEventHandler(IdentityManager identityManager, MaintenancesManager maintenancesManager) {
         this.identityManager = identityManager;
         this.maintenancesManager = maintenancesManager;

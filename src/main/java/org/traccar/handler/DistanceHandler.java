@@ -1,6 +1,6 @@
 /*
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2015 Amila Silva
- * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.traccar.database.IdentityManager;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -36,6 +37,7 @@ public class DistanceHandler extends BaseDataHandler {
     private final int coordinatesMinError;
     private final int coordinatesMaxError;
 
+    @Inject
     public DistanceHandler(Config config, IdentityManager identityManager) {
         this.identityManager = identityManager;
         this.filter = config.getBoolean(Keys.COORDINATES_FILTER);

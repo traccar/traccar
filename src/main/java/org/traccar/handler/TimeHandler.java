@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,11 +32,18 @@ import java.util.Set;
 @ChannelHandler.Sharable
 public class TimeHandler extends ChannelInboundHandlerAdapter {
 
+    private final boolean enabled;
     private final boolean useServerTime;
     private final Set<String> protocols;
 
+    @Inject
     public TimeHandler(Config config) {
-        useServerTime = config.getString(Keys.TIME_OVERRIDE).equalsIgnoreCase("serverTime");
+        enabled = config.hasKey(Keys.TIME_OVERRIDE);
+        if (enabled) {
+            useServerTime = config.getString(Keys.TIME_OVERRIDE).equalsIgnoreCase("serverTime");
+        } else {
+            useServerTime = false;
+        }
         String protocolList = Context.getConfig().getString(Keys.TIME_PROTOCOLS);
         if (protocolList != null) {
             protocols = new HashSet<>(Arrays.asList(protocolList.split("[, ]")));
@@ -47,7 +55,7 @@ public class TimeHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
-        if (msg instanceof Position && (protocols == null
+        if (enabled && msg instanceof Position && (protocols == null
                 || protocols.contains(ctx.pipeline().get(BaseProtocolDecoder.class).getProtocolName()))) {
 
             Position position = (Position) msg;

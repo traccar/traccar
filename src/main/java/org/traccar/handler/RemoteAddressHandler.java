@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,34 @@ package org.traccar.handler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
 import java.net.InetSocketAddress;
 
 @ChannelHandler.Sharable
 public class RemoteAddressHandler extends ChannelInboundHandlerAdapter {
 
+    private final boolean enabled;
+
+    @Inject
+    public RemoteAddressHandler(Config config) {
+        enabled = config.getBoolean(Keys.PROCESSING_REMOTE_ADDRESS_ENABLE);
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
 
-        InetSocketAddress remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
-        String hostAddress = remoteAddress != null ? remoteAddress.getAddress().getHostAddress() : null;
+        if (enabled) {
+            InetSocketAddress remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
+            String hostAddress = remoteAddress != null ? remoteAddress.getAddress().getHostAddress() : null;
 
-        if (msg instanceof Position) {
-            Position position = (Position) msg;
-            position.set(Position.KEY_IP, hostAddress);
+            if (msg instanceof Position) {
+                Position position = (Position) msg;
+                position.set(Position.KEY_IP, hostAddress);
+            }
         }
 
         ctx.fireChannelRead(msg);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +30,8 @@ import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
+
 @ChannelHandler.Sharable
 public class OverspeedEventHandler extends BaseEventHandler {
 
@@ -43,6 +45,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
     private final long minimalDuration;
     private final boolean preferLowest;
 
+    @Inject
     public OverspeedEventHandler(Config config, DeviceManager deviceManager, GeofenceManager geofenceManager) {
         this.deviceManager = deviceManager;
         this.geofenceManager = geofenceManager;

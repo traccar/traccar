@@ -287,8 +287,10 @@ public class WebDataHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
 
-        AsyncRequestAndCallback request = new AsyncRequestAndCallback(position);
-        request.send();
+        if (url != null) {
+            AsyncRequestAndCallback request = new AsyncRequestAndCallback(position);
+            request.send();
+        }
 
         return position;
     }

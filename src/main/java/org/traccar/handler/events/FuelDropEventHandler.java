@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
 import java.util.Collections;
 import java.util.Map;
 
@@ -31,6 +32,7 @@ public class FuelDropEventHandler extends BaseEventHandler {
 
     private final IdentityManager identityManager;
 
+    @Inject
     public FuelDropEventHandler(IdentityManager identityManager) {
         this.identityManager = identityManager;
     }
