@@ -8,7 +8,7 @@ public class OigoProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new OigoProtocolDecoder(null);
+        var decoder = inject(new OigoProtocolDecoder(null));
 
         verifyPosition(decoder, binary(
                 "7e002e000000146310002523830400001bfb000369150f310c0591594d062ac0c0141508011303cd63101604fd00000000"));

@@ -8,7 +8,7 @@ public class SwiftechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new SwiftechProtocolDecoder(null);
+        var decoder = inject(new SwiftechProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "@@861551041946971,,0,102040,1023.9670,N,07606.8160,E,2.26,151220,A,0127,1,1,03962,00000,#"));

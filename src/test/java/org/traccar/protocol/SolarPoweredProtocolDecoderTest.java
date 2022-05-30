@@ -9,7 +9,7 @@ public class SolarPoweredProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new SolarPoweredProtocolDecoder(null);
+        var decoder = inject(new SolarPoweredProtocolDecoder(null));
 
         verifyAttribute(decoder, binary(
                 "7e850256553309440011003e81131914030600332301a61ed709209ff40014b89082020f0283100000f908000000440000003d1f19021784114161726f6e34475630312d323030333031057e"),

@@ -8,7 +8,7 @@ public class NavisetFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new NavisetFrameDecoder();
+        var decoder = inject(new NavisetFrameDecoder());
 
         verifyFrame(
                 binary("1310e4073836383230343030353935383436362a060716"),

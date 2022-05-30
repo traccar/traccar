@@ -9,7 +9,7 @@ public class ArmoliProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new ArmoliProtocolDecoder(null);
+        var decoder = inject(new ArmoliProtocolDecoder(null));
 
         verifyAttribute(decoder, text(
                 "[M869867039550712160821153237N41.033508E029.2697032F00036000000410006B336FFFFG458563@A6D>04410C2482>03410F56>03412F19>0441210000>034130FF>0441313A7>03410D30>04411F01B6>0341048C>04410C1C98];"),

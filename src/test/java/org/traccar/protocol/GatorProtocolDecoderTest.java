@@ -17,7 +17,7 @@ public class GatorProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GatorProtocolDecoder(null);
+        var decoder = inject(new GatorProtocolDecoder(null));
 
         verifyAttributes(decoder, binary(
                 "242480002600341cad190917022021812497260280594200000000c047010000135400009bb600ff00b90d"));

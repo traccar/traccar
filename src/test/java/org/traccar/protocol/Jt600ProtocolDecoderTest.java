@@ -9,7 +9,7 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Jt600ProtocolDecoder(null);
+        var decoder = inject(new Jt600ProtocolDecoder(null));
 
         verifyPosition(decoder, buffer(
                 "(8000632862,P45,290322,132412,25.28217,S,57.54683,W,A,0,0,5,0,0000000000,0,0,9,0)"));

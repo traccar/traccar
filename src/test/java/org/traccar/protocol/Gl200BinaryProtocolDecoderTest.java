@@ -8,7 +8,7 @@ public class Gl200BinaryProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Gl200BinaryProtocolDecoder(null);
+        var decoder = inject(new Gl200BinaryProtocolDecoder(null));
 
         verifyPosition(decoder, binary(
                 "2b4556542d00fc1fbf0063450102020956325403000343056437f8220700000200000000010000160100f2007eff75a1f0025c6b1a07e1080108241a02680003189c1ac500000000000002100800000000000000000007e1080108241a19e24e4e0d0a"));

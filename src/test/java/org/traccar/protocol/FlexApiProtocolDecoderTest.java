@@ -8,7 +8,7 @@ public class FlexApiProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new FlexApiProtocolDecoder(null);
+        var decoder = inject(new FlexApiProtocolDecoder(null));
 
         verifyAttributes(decoder, text(
                 "${\"topic\":\"v1/VF3102021113001/motion/info\",\"payload\":{\"motion.ts\":1641885877,\"motion.ax\":0.006344,\"motion.ay\":0.289384,\"motion.az\":-0.939156,\"motion.gx\":0.420000,\"motion.gy\":0.420000,\"motion.gz\":-0.280000}}xx"));

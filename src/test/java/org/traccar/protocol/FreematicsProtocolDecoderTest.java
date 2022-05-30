@@ -8,7 +8,7 @@ public class FreematicsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new FreematicsProtocolDecoder(null);
+        var decoder = inject(new FreematicsProtocolDecoder(null));
 
         verifyPositions(decoder, text(
                 "M0ZR4X0#0:204391,11:140221,10:8445000,A:49.215920,B:18.737755,C:410,D:0,E:208,24:1252,20:0;0;0,82:47*B5"));

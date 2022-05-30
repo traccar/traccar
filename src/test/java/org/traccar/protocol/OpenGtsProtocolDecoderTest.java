@@ -8,7 +8,7 @@ public class OpenGtsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new OpenGtsProtocolDecoder(null);
+        var decoder = inject(new OpenGtsProtocolDecoder(null));
 
         verifyPosition(decoder, request(
                 "/?id=999000000000003&gprmc=$GPRMC,082202.0,A,5006.747329,N,01416.512315,E,0.0,,131018,1.2,E,A*2E"));

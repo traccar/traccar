@@ -8,7 +8,7 @@ public class SiwiProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new SiwiProtocolDecoder(null);
+        var decoder = inject(new SiwiProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$SIWI,868957040831465,44,E,,,1,1,1,16.79,0,0,5,A,17.204447,78.355087,534,44,140955,180221,11,1,15,5,4322,0,0,0,0,0,0,1.0,1.6CPTASF_6.60,0!"));

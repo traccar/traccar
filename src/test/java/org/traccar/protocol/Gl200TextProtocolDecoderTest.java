@@ -9,7 +9,7 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Gl200TextProtocolDecoder(null);
+        var decoder = inject(new Gl200TextProtocolDecoder(null));
 
         verifyPosition(decoder, buffer(
                 "+RESP:GTFRI,5E0100,861971050039361,,,,10,1,1,10.4,140,196.9,-80.709946,35.016525,20220302220944,0310,0260,1CE9,52A1,00,0.0,,,,,420000,,,,20220302220948,1B0B$"));

@@ -320,7 +320,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         int lac = parser.nextHexInt(0);
         int cid = parser.nextHexInt(0);
         if (lac != 0 && cid != 0) {
-            position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
+            position.setNetwork(new Network(CellTower.fromLacCid(getConfig(), lac, cid)));
         }
 
         position.set(Position.PREFIX_TEMP + 1, parser.next());
@@ -346,7 +346,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 2, parser.next());
 
         position.setNetwork(new Network(
-                CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
+                CellTower.fromLacCid(getConfig(), parser.nextHexInt(0), parser.nextHexInt(0))));
 
         position.setValid(parser.next().equals("A"));
         position.set(Position.KEY_SATELLITES, parser.nextInt());
@@ -403,7 +403,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             int mcc = parser.nextInt();
             cellTower = CellTower.from(mcc, mnc, lac, cid);
         } else {
-            cellTower = CellTower.fromLacCid(lac, cid);
+            cellTower = CellTower.fromLacCid(getConfig(), lac, cid);
         }
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         cellTower.setSignalStrength(parser.nextInt());

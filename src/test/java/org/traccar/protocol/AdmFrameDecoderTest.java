@@ -8,7 +8,7 @@ public class AdmFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new AdmFrameDecoder();
+        var decoder = inject(new AdmFrameDecoder());
 
         verifyFrame(
                 binary("38363931353330343235323337383400003728e000001402441d5f42c3711642930d000000c7000a461954f25fd82ed508000000000000000044000000010000000000140000"),

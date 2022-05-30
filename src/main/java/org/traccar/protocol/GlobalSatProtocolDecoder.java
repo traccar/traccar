@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -40,9 +39,12 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
 
     public GlobalSatProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
 
-        format0 = Context.getConfig().getString(getProtocolName() + ".format0", "TSPRXAB27GHKLMnaicz*U!");
-        format1 = Context.getConfig().getString(getProtocolName() + ".format1", "SARY*U!");
+    @Override
+    protected void init() {
+        format0 = getConfig().getString(getProtocolName() + ".format0", "TSPRXAB27GHKLMnaicz*U!");
+        format1 = getConfig().getString(getProtocolName() + ".format1", "SARY*U!");
     }
 
     public void setFormat0(String format) {

@@ -9,7 +9,7 @@ public class UproProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new UproProtocolDecoder(null);
+        var decoder = inject(new UproProtocolDecoder(null));
 
         verifyPosition(decoder, buffer(
                 "*HQ201999999,BA&A1656512233362911356523660000230618&B0100060010&C00000<6<&F0000&R2405&V0109&W0000003E&K00100&T65&I54600027A00FCB6227A00FCA5727A00E955327A00E8B5327A00F9748&Y54600027A000000FCB6227A000000FCA5727A000000E955327A000000E8B5327A000000F9748&b00A7E81007607#"));

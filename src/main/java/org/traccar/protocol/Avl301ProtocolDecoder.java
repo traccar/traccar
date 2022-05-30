@@ -125,7 +125,7 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             position.setNetwork(new Network(
-                    CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedMedium())));
+                    CellTower.fromLacCid(getConfig(), buf.readUnsignedShort(), buf.readUnsignedMedium())));
 
             position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
             int flags = buf.readUnsignedByte();

@@ -8,7 +8,7 @@ public class XirgoProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeCustom() throws Exception {
 
-        var decoder = new XirgoProtocolDecoder(null);
+        var decoder = inject(new XirgoProtocolDecoder(null));
 
         decoder.setForm("UID,EV,D,T,LT,LN,AL,GSPT,HD,SV,HP,BV,CQ,GS,SI,IG,OT");
 
@@ -31,7 +31,7 @@ public class XirgoProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeNew() throws Exception {
 
-        var decoder = new XirgoProtocolDecoder(null);
+        var decoder = inject(new XirgoProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$$352054058132185,4001,2017/04/21,00:01:05,32.54659,-116.90670,143.2,0,0,0,598,0.0,12,0.9,765840,7.0,14.5,19,1,1,0011,8.5,63.2,5,21999,184,255,671,207,100,185##"));
@@ -59,7 +59,7 @@ public class XirgoProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeOld() throws Exception {
 
-        var decoder = new XirgoProtocolDecoder(null);
+        var decoder = inject(new XirgoProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$$354660046140722,6001,2013/01/22,15:36:18,25.80907,-80.32531,7.1,19,165.2,11,0.8,11.1,17,1,1,3.9,2##"),

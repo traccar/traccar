@@ -8,7 +8,7 @@ public class AlematicsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new AlematicsProtocolDecoder(null);
+        var decoder = inject(new AlematicsProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$T,2,64,866050035975497,20180726103446,20180726103514,23.033305,72.558032,0,0,41,5.4,4,0,0,0.000,12.960,0,"));

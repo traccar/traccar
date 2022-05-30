@@ -8,9 +8,7 @@ public class ArnaviBinaryProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testHeader1Decode() throws Exception {
 
-        ArnaviBinaryProtocolDecoder decoder;
-
-        decoder = new ArnaviBinaryProtocolDecoder(null);
+        var decoder = inject(new ArnaviBinaryProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "ff22f30c45f5c90f0300"));
@@ -23,9 +21,7 @@ public class ArnaviBinaryProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testHeader2Decode() throws Exception {
 
-        ArnaviBinaryProtocolDecoder decoder;
-
-        decoder = new ArnaviBinaryProtocolDecoder(null);
+        var decoder = inject(new ArnaviBinaryProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "ff23f30c45f5c90f0300"));

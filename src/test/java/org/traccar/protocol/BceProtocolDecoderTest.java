@@ -9,7 +9,7 @@ public class BceProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new BceProtocolDecoder(null);
+        var decoder = inject(new BceProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "3ab90b71bc1503000300c10bff11"));

@@ -8,7 +8,7 @@ public class AustinNbProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new AustinNbProtocolDecoder(null);
+        var decoder = inject(new AustinNbProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "48666666666;2017-01-01 16:31:01;52,1133308410645;21,1000003814697;310;120;2292;1;ORANGE"));

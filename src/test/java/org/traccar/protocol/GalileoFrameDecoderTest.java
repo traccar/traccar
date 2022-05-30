@@ -10,7 +10,7 @@ public class GalileoFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GalileoFrameDecoder();
+        var decoder = inject(new GalileoFrameDecoder());
 
         assertEquals(
                 binary("011780011102e603383633353931303238393630323437043200801c"),

@@ -9,7 +9,7 @@ public class GotopProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GotopProtocolDecoder(null);
+        var decoder = inject(new GotopProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 ""));

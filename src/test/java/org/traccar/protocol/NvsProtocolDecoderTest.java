@@ -8,7 +8,7 @@ public class NvsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new NvsProtocolDecoder(null);
+        var decoder = inject(new NvsProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "0012333537303430303630303137383234312e38"));

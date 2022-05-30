@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -284,7 +283,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             if (hardware == 0x10A || hardware == 0x10B || hardware == 0x406) {
 
                 position.setNetwork(new Network(
-                        CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
+                        CellTower.fromLacCid(getConfig(), buf.readUnsignedShort(), buf.readUnsignedShort())));
 
             } else if (hardware == 0x407) {
 
@@ -371,7 +370,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        if (Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+        if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
             sendResponse(channel, remoteAddress, buf.getUnsignedShort(buf.writerIndex() - 6));
         }
 

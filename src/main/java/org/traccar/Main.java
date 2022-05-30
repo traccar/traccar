@@ -110,8 +110,8 @@ public final class Main {
 
     public static void run(String configFile) {
         try {
-            Context.init(configFile);
             injector = Guice.createInjector(new MainModule());
+            Context.init(configFile);
             logSystemInfo();
             LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");

@@ -55,7 +55,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     public TeltonikaProtocolDecoder(Protocol protocol, boolean connectionless) {
         super(protocol);
         this.connectionless = connectionless;
-        this.extended = Context.getConfig().getBoolean(Keys.PROTOCOL_EXTENDED.withPrefix(getProtocolName()));
+    }
+
+    @Override
+    protected void init() {
+        this.extended = getConfig().getBoolean(Keys.PROTOCOL_EXTENDED.withPrefix(getProtocolName()));
     }
 
     private void parseIdentification(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
@@ -360,7 +364,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         long cid = position.getLong(Position.PREFIX_IO + 205);
         int lac = position.getInteger(Position.PREFIX_IO + 206);
         if (cid != 0 && lac != 0) {
-            CellTower cellTower = CellTower.fromLacCid(lac, cid);
+            CellTower cellTower = CellTower.fromLacCid(getConfig(), lac, cid);
             long operator = position.getInteger(Position.KEY_OPERATOR);
             if (operator >= 1000) {
                 cellTower.setOperator(operator);
@@ -422,7 +426,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (BitUtil.check(locationMask, 5)) {
-                    CellTower cellTower = CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort());
+                    CellTower cellTower = CellTower.fromLacCid(
+                            getConfig(), buf.readUnsignedShort(), buf.readUnsignedShort());
 
                     if (BitUtil.check(locationMask, 6)) {
                         cellTower.setSignalStrength((int) buf.readUnsignedByte());

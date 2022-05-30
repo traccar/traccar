@@ -10,7 +10,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeTemperature() throws Exception {
 
-        var decoder = new SuntechProtocolDecoder(null);
+        var decoder = inject(new SuntechProtocolDecoder(null));
 
         decoder.setHbm(true);
         decoder.setIncludeAdc(true);
@@ -39,7 +39,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeRpm() throws Exception {
 
-        var decoder = new SuntechProtocolDecoder(null);
+        var decoder = inject(new SuntechProtocolDecoder(null));
 
         decoder.setHbm(true);
         decoder.setIncludeRpm(true);
@@ -53,7 +53,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeHours() throws Exception {
 
-        var decoder = new SuntechProtocolDecoder(null);
+        var decoder = inject(new SuntechProtocolDecoder(null));
 
         decoder.setHbm(true);
 
@@ -66,7 +66,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeDriver() throws Exception {
 
-        var decoder = new SuntechProtocolDecoder(null);
+        var decoder = inject(new SuntechProtocolDecoder(null));
 
         verifyAttribute(decoder, buffer(
                 "ST300HTE;511050566;45;308;20200909;13:38:38;0;12.50;001354;0.0;1;0;1;1;0;-27.636632;-052.277933;-27.636675;-052.277947;000.000;002.296;0;00000000000000"),
@@ -81,7 +81,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new SuntechProtocolDecoder(null);
+        var decoder = inject(new SuntechProtocolDecoder(null));
 
         verifyPosition(decoder, buffer(
                 "BLE;1140000053;114;1.0.1;20211001;17:27:09;+28.433465;-82.565891;1;-43;-46;-41;ACB89523EF68;247;0;0"));
@@ -262,7 +262,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeCrash() throws Exception {
 
-        var decoder = new SuntechProtocolDecoder(null);
+        var decoder = inject(new SuntechProtocolDecoder(null));
 
         verifyAttribute(decoder, binary(
                 "4352523b303931303030303036333b313b313b303135303b16011c150f0ad82f6c0000000000ae037085fbff7700fd00faff6300f30000006800fb000d007100fa00f32f6c00000000005e044a80fcff6f000301e1ff5d00e900e1ff6400e600f4ff5b00ec000a306c00000000002104248306006c000501fcff5b00e00001006e000101eeff4e00e10022306c00000000005c041a7e00006a00010100005d00f800b5ff7cffdf0050009300fc003b44350d"),

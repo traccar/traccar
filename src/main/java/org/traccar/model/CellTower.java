@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -37,14 +37,12 @@ public class CellTower {
         return cellTower;
     }
 
-    public static CellTower fromLacCid(int lac, long cid) {
-        return from(
-                Context.getConfig().getInteger(Keys.GEOLOCATION_MCC),
-                Context.getConfig().getInteger(Keys.GEOLOCATION_MCC), lac, cid);
+    public static CellTower fromLacCid(Config config, int lac, long cid) {
+        return from(config.getInteger(Keys.GEOLOCATION_MCC), config.getInteger(Keys.GEOLOCATION_MCC), lac, cid);
     }
 
-    public static CellTower fromCidLac(long cid, int lac) {
-        return fromLacCid(lac, cid);
+    public static CellTower fromCidLac(Config config, long cid, int lac) {
+        return fromLacCid(config, lac, cid);
     }
 
     private String radioType;

@@ -9,7 +9,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Gt06ProtocolDecoder(null);
+        var decoder = inject(new Gt06ProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "787805120099abec0d0a"));

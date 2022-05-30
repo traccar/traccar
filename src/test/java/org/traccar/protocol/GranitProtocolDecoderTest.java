@@ -8,7 +8,7 @@ public class GranitProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GranitProtocolDecoder(null);
+        var decoder = inject(new GranitProtocolDecoder(null));
 
         verifyPositions(decoder, binary(
                 "2b444441547e8400c500040130050c43495808002839aee3150200000000640000000000000008002839aee3150200000000640000000000000008002839aee3150200000000640000000000000008002839aee3150200000000640000000000000008002839aee3150200000000640000000000000008002839aee3150200000000640000000000000014002a37420d0a"));

@@ -8,7 +8,7 @@ public class TeraTrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TeraTrackProtocolDecoder(null);
+        var decoder = inject(new TeraTrackProtocolDecoder(null));
 
         verifyAttributes(decoder, text(
                 "{\"MDeviceID\":\"022043756090\",\"DiviceType\":\"1\",\"DataType\":\"1\",\"DataLength\":\"69\",\"DateTime\":\"2022-03-09 10:56:01\",\"Latitude\":\"-6.846451\",\"Longitude\":\"39.316324\",\"LongitudeState\":\"1\",\"LatitudeState\":\"0\",\"Speed\":\"90\",\"Mileage\":\"0\",\"FenceAlarm\":\"0\",\"AreaAlarmID\":\"0\",\"LockCutOff\":\"0\",\"SealTampered\":\"0\",\"MessageAck\":\"1\",\"LockRope\":\"1\",\"LockStatus\":\"1\",\"LockOpen\":\"0\",\"PasswordError\":\"0\",\"CardNo\":\"60000644\",\"IllegalCard\":\"0\",\"LowPower\":\"0\",\"UnCoverBack\":\"0\",\"CoverStatus\":\"1\",\"LockStuck\":\"0\",\"Power\":\"79\",\"GSM\":\"16\",\"IMEI\":\"860922043756090\",\"Index\":\"20\",\"Slave\":[]}"));

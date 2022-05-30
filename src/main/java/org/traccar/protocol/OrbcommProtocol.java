@@ -19,6 +19,7 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestEncoder;
 import io.netty.handler.codec.http.HttpResponseDecoder;
 import org.traccar.BaseProtocol;
+import org.traccar.Context;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerClient;
 
@@ -32,7 +33,7 @@ public class OrbcommProtocol extends BaseProtocol {
                 pipeline.addLast(new HttpResponseDecoder());
                 pipeline.addLast(new HttpObjectAggregator(65535));
                 pipeline.addLast(new OrbcommProtocolDecoder(OrbcommProtocol.this));
-                pipeline.addLast(new OrbcommProtocolPoller(OrbcommProtocol.this));
+                pipeline.addLast(new OrbcommProtocolPoller(OrbcommProtocol.this, Context.getConfig()));
             }
         });
     }

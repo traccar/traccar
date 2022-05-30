@@ -177,7 +177,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY_LEVEL, battery);
                 }
 
-                CellTower cellTower = CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort());
+                CellTower cellTower = CellTower.fromCidLac(
+                        getConfig(), buf.readUnsignedShort(), buf.readUnsignedShort());
                 cellTower.setSignalStrength((int) buf.readUnsignedByte());
                 position.setNetwork(new Network(cellTower));
 
@@ -201,7 +202,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 int rssi = buf.readUnsignedByte();
 
                 if (cid != 0 && lac != 0) {
-                    CellTower cellTower = CellTower.fromCidLac(cid, lac);
+                    CellTower cellTower = CellTower.fromCidLac(getConfig(), cid, lac);
                     cellTower.setSignalStrength(rssi);
                     position.setNetwork(new Network(cellTower));
                 } else {
@@ -356,7 +357,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
         position.set(Position.KEY_STATUS, parser.nextBinInt(0));
 
-        CellTower cellTower = CellTower.fromCidLac(parser.nextInt(0), parser.nextInt(0));
+        CellTower cellTower = CellTower.fromCidLac(getConfig(), parser.nextInt(0), parser.nextInt(0));
         cellTower.setSignalStrength(parser.nextInt(0));
         position.setNetwork(new Network(cellTower));
 

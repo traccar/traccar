@@ -9,7 +9,7 @@ public class StartekProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new StartekProtocolDecoder(null);
+        var decoder = inject(new StartekProtocolDecoder(null));
 
         verifyAttribute(decoder, text(
                 "&&R187,860294046453690,000,0,,220105160656,A,22.994986,72.499711,15,0.9,2,222,55,121135784,404|98|147B|0000376A,24,0000001F,02,00,052E|01A3|0000|0000,1,010000|020000,,853|6|10|105|73|41|125|34|52"),

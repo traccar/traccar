@@ -8,7 +8,7 @@ public class TrakMateProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TrakMateProtocolDecoder(null);
+        var decoder = inject(new TrakMateProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "^TMSTP|352984083995323|116|13.07809|77.55979|131508|131118|0.0|146.51|7|0|71 -2 248|0|13.1|0.0|10.5|1|0|0|0|#"));

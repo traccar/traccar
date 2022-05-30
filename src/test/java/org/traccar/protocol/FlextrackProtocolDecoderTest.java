@@ -9,7 +9,7 @@ public class FlextrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new FlextrackProtocolDecoder(null);
+        var decoder = inject(new FlextrackProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "-1,LOGON,7000000123,8945000000"));

@@ -8,7 +8,7 @@ public class ThinkPowerProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new ThinkPowerProtocolDecoder(null);
+        var decoder = inject(new ThinkPowerProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "0103002C01020F38363737333030353038323030343606544C3930344111522D312E302E31372E32303231303431300011C3"));

@@ -8,7 +8,7 @@ public class EnvotechProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new EnvotechProtocolDecoder(null);
+        var decoder = inject(new EnvotechProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$80IVM,03,E002215,E002215,110422061936,672763902,126423,0180,000000,00018600,0.0000'11042206193710406325S03966094E000118*42D6#"));

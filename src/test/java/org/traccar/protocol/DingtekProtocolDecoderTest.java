@@ -8,7 +8,7 @@ public class DingtekProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new DingtekProtocolDecoder(null);
+        var decoder = inject(new DingtekProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "800001011e0692001a00000000016e008027c40000186962703655111781"));

@@ -8,7 +8,7 @@ public class PortmanProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new PortmanProtocolDecoder(null);
+        var decoder = inject(new PortmanProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$EXT,P0RTMANGRANT,A,210609201710,N0951.6879W08357.0129,0,0,NA,NA,11,25,174700.25,NA,01820000,108"));

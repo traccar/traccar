@@ -9,7 +9,7 @@ public class DmtHttpProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new DmtHttpProtocolDecoder(null);
+        var decoder = inject(new DmtHttpProtocolDecoder(null));
 
         verifyAttributes(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"date\":\"2021-12-12T16:04:52Z\",\"device\":{\"sn\":\"416581\",\"prod\":85,\"rev\":1,\"fw\":\"1.12\",\"iccid\":\"89011702278612797427\",\"imei\":\"351358810439486\"},\"sqn\":1549,\"reason\":42,\"counters\":[{\"id\":0,\"val\":5304},{\"id\":3,\"val\":3200},{\"id\":4,\"val\":5066},{\"id\":128,\"val\":1},{\"id\":129,\"val\":8},{\"id\":130,\"val\":0},{\"id\":131,\"val\":0},{\"id\":132,\"val\":0},{\"id\":134,\"val\":1},{\"id\":138,\"val\":0},{\"id\":139,\"val\":36},{\"id\":142,\"val\":1629023},{\"id\":145,\"val\":0},{\"id\":146,\"val\":1}]}")));

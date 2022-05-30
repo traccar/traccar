@@ -24,8 +24,8 @@ import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 import io.netty.handler.codec.http.QueryStringEncoder;
 import org.traccar.BaseProtocolPoller;
-import org.traccar.Context;
 import org.traccar.Protocol;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.net.SocketAddress;
@@ -46,11 +46,11 @@ public class OrbcommProtocolPoller extends BaseProtocolPoller {
         this.startTime = startTime;
     }
 
-    public OrbcommProtocolPoller(Protocol protocol) {
-        super(Context.getConfig().getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol.getName())));
-        accessId = Context.getConfig().getString(Keys.ORBCOMM_ACCESS_ID);
-        password = Context.getConfig().getString(Keys.ORBCOMM_PASSWORD);
-        host = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol.getName()));
+    public OrbcommProtocolPoller(Protocol protocol, Config config) {
+        super(config.getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol.getName())));
+        accessId = config.getString(Keys.ORBCOMM_ACCESS_ID);
+        password = config.getString(Keys.ORBCOMM_PASSWORD);
+        host = config.getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol.getName()));
     }
 
     @Override

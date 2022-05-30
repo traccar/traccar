@@ -8,7 +8,7 @@ public class WondexProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new WondexProtocolDecoder(null);
+        var decoder = inject(new WondexProtocolDecoder(null));
 
         verifyPosition(decoder, buffer(
                 "2005010051,19990925063830,26.106181,44.440225,0,0,0,7,2,0.0,0,,,0"));

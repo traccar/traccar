@@ -104,7 +104,7 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedByte());
 
             position.setNetwork(new Network(
-                    CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
+                    CellTower.fromLacCid(getConfig(), buf.readUnsignedShort(), buf.readUnsignedShort())));
 
             return position;
 

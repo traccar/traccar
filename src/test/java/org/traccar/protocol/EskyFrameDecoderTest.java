@@ -8,7 +8,7 @@ public class EskyFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new EskyFrameDecoder();
+        var decoder = inject(new EskyFrameDecoder());
 
         verifyNull(
                 decoder.decode(null, null, binary("00")));

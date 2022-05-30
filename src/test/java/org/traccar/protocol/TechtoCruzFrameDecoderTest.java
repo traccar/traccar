@@ -10,7 +10,7 @@ public class TechtoCruzFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TechtoCruzFrameDecoder();
+        var decoder = inject(new TechtoCruzFrameDecoder());
 
         assertEquals(
                 buffer("$$A35,RESPO|G33|8612345678910|CRUZ,*E3"),

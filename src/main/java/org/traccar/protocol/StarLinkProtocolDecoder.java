@@ -55,12 +55,15 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
 
     public StarLinkProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
 
-        setFormat(Context.getConfig().getString(
+    @Override
+    protected void init() {
+        setFormat(getConfig().getString(
                 getProtocolName() + ".format", "#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,"
                 + "#IN1#,#IN2#,#IN3#,#IN4#,#OUT1#,#OUT2#,#OUT3#,#OUT4#,#LAC#,#CID#,#VIN#,#VBAT#,#DEST#,#IGN#,#ENG#"));
 
-        setDateFormat(Context.getConfig().getString(getProtocolName() + ".dateFormat", "yyMMddHHmmss"));
+        setDateFormat(getConfig().getString(getProtocolName() + ".dateFormat", "yyMMddHHmmss"));
     }
 
     public String[] getFormat(long deviceId) {
@@ -313,7 +316,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (lac != null && cid != null) {
-            position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
+            position.setNetwork(new Network(CellTower.fromLacCid(getConfig(), lac, cid)));
         }
 
         if (event == 20) {

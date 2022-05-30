@@ -9,7 +9,7 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Tk103ProtocolDecoder(null);
+        var decoder = inject(new Tk103ProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "(868822040452227,DW3B,150421,A,4154.51607N,45.78950E,0.050,103142,0.000,595.200,7,0)"));

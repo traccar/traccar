@@ -9,7 +9,7 @@ public class FlespiProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new FlespiProtocolDecoder(null);
+        var decoder = inject(new FlespiProtocolDecoder(null));
 
         verifyPositions(decoder, request(HttpMethod.POST, "/",
             buffer("[{\"position.speed\":0,\"position.latitude\":53.90573,\"time.valid.status\":true,\"timestamp\":1506956075,\"position.satellites\":10,\"message.buffered.status\":false,\"business.mode.status\":true,\"gps.status\":true,\"position.longitude\":27.455848,\"position.direction\":0,\"ident\":\"605630\"},{\"siren.status\":false,\"business.mode.status\":true,\"position.satellites\":8,\"timestamp\":1506695785,\"led.status\":false,\"position.latitude\":53.905569,\"position.longitude\":27.455986,\"position.speed\":0,\"gradual.stop.status\":false,\"position.direction\":262.643854,\"hardware.version.enum\":223,\"vehicle.mileage\":160,\"message.buffered.status\":false,\"blinkers.status\":false,\"ident\":\"605630\",\"position.altitude\":233.48,\"immobilizer.status\":false}]")));

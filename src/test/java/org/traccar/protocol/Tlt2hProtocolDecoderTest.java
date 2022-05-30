@@ -9,7 +9,7 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Tlt2hProtocolDecoder(null);
+        var decoder = inject(new Tlt2hProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "#860517049471362#MT700#0000#AUTO#1\r\n",

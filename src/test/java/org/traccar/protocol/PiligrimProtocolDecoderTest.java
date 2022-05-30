@@ -9,7 +9,7 @@ public class PiligrimProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new PiligrimProtocolDecoder(null);
+        var decoder = inject(new PiligrimProtocolDecoder(null));
         
         verifyPositions(decoder, request(HttpMethod.POST,
                 "/bingps?imei=868204005544720&csq=18&vout=00&vin=4050&dataid=00000000",

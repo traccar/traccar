@@ -9,7 +9,7 @@ public class TopinProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TopinProtocolDecoder(null);
+        var decoder = inject(new TopinProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "787801080D0A"));

@@ -8,7 +8,7 @@ public class Tr20ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Tr20ProtocolDecoder(null);
+        var decoder = inject(new Tr20ProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "%%TR20GRANT,L,210602170135,N0951.1733W08356.7672,000,000,C80:F0,00020008,108,CFG:6980.00|"));

@@ -9,7 +9,7 @@ public class BlueProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new BlueProtocolDecoder(null);
+        var decoder = inject(new BlueProtocolDecoder(null));
 
         verifyAttribute(decoder, binary(
                 "AA0056860080E3E79E0C811F80000114020207170520011F00407F8005EE1938113B270000000000000000140202071705005AC7A621121F0002000100B7000080110000000000001A3A0000000001F400000000000078"),

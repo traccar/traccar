@@ -9,7 +9,7 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new T55ProtocolDecoder(null);
+        var decoder = inject(new T55ProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "QZE,868994033976700,35,28062020,113553,22.13673,114.57263,0,22,A,0"));
@@ -121,7 +121,7 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
 
         // Maxon devices can send NMEA before identification
 
-        var decoder = new T55ProtocolDecoder(null);
+        var decoder = inject(new T55ProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "$GPRMC,012006,A,4828.10,N,1353.52,E,0.00,0.00,180915,020.3,E*42"));

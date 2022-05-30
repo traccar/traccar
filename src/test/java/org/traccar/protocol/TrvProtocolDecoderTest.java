@@ -8,7 +8,7 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TrvProtocolDecoder(null);
+        var decoder = inject(new TrvProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "TRVAP00352121088015548"));

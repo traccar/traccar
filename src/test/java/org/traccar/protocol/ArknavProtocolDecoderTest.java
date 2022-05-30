@@ -8,7 +8,7 @@ public class ArknavProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new ArknavProtocolDecoder(null);
+        var decoder = inject(new ArknavProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "358266016278447,05*827,000,L001,V,4821.6584,N,01053.8650,E,000.0,000.0,00.0,08:46:04 17-03-16,9.5A,D7,0,79,0,,,,"),

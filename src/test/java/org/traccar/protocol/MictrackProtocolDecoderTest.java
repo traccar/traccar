@@ -9,7 +9,7 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeStandard() throws Exception {
 
-        var decoder = new MictrackProtocolDecoder(null);
+        var decoder = inject(new MictrackProtocolDecoder(null));
 
         verifyAttributes(decoder, text(
                 "MT;5;867035041396795;Y1;220111085741+test,8c:53:c3:db:e7:26,-58,jiuide-842,80:26:89:f0:5e:4f,-74,jiu2ide 403,94:e4:4b:0a:31:08,-75,jiu3ide,7a:91:e9:50:26:0b,-85,CNet-9rNe,78:91:e9:40:26:0b,-87+0+4092+1"));
@@ -48,7 +48,7 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeLowAltitude() throws Exception {
 
-        var decoder = new MictrackProtocolDecoder(null);
+        var decoder = inject(new MictrackProtocolDecoder(null));
 
         verifyPositions(decoder, text(
                 "861836051888035$162835.00,A,4139.6460,N,07009.7239,W,,41.53,-25.8,220621"));

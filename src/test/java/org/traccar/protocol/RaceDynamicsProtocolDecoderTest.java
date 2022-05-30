@@ -8,7 +8,7 @@ public class RaceDynamicsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new RaceDynamicsProtocolDecoder(null);
+        var decoder = inject(new RaceDynamicsProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "$GPRMC,12,260819,100708,862549040661129,"));

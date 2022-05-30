@@ -110,7 +110,7 @@ public class TechTltProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_SATELLITES, parser.nextInt());
 
-        position.setNetwork(new Network(CellTower.fromLacCid(parser.nextInt(), parser.nextInt())));
+        position.setNetwork(new Network(CellTower.fromLacCid(getConfig(), parser.nextInt(), parser.nextInt())));
 
         return position;
     }

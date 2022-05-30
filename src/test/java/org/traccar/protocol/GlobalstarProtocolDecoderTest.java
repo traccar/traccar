@@ -9,7 +9,7 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GlobalstarProtocolDecoder(null);
+        var decoder = inject(new GlobalstarProtocolDecoder(null));
 
         verifyNull(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n",

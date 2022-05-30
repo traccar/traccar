@@ -10,7 +10,7 @@ public class IotmProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new IotmProtocolDecoder(null);
+        var decoder = inject(new IotmProtocolDecoder(null));
 
         verifyNull(decoder, MqttMessageBuilders.connect().clientId(
                 "123456789012345").build());

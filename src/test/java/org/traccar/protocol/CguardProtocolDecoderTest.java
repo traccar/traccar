@@ -8,7 +8,7 @@ public class CguardProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new CguardProtocolDecoder(null);
+        var decoder = inject(new CguardProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "IDRO:354868050655283"));

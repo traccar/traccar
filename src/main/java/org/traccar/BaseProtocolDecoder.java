@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,17 +50,47 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     private static final String PROTOCOL_UNKNOWN = "unknown";
 
-    private final Config config = Context.getConfig();
-    private final IdentityManager identityManager = Context.getIdentityManager();
-    private final ConnectionManager connectionManager = Context.getConnectionManager();
-    private final StatisticsManager statisticsManager;
     private final Protocol protocol;
 
+    private Config config;
+    private IdentityManager identityManager;
+    private ConnectionManager connectionManager;
+    private StatisticsManager statisticsManager;
     private MediaManager mediaManager;
 
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
-        statisticsManager = Main.getInjector() != null ? Main.getInjector().getInstance(StatisticsManager.class) : null;
+    }
+
+    /**
+     * Method called when config is initialized.
+     */
+    protected void init() {
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    @Inject
+    public void setConfig(Config config) {
+        this.config = config;
+        init();
+    }
+
+    @Inject
+    public void setIdentityManager(IdentityManager identityManager) {
+        this.identityManager = identityManager;
+    }
+
+    @Inject
+    public void setConnectionManager(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+
+    @Inject
+    public void setStatisticsManager(StatisticsManager statisticsManager) {
+        this.statisticsManager = statisticsManager;
     }
 
     @Inject

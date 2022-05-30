@@ -8,7 +8,7 @@ public class Dsf22FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Dsf22FrameDecoder();
+        var decoder = inject(new Dsf22FrameDecoder());
 
         verifyFrame(
                 binary("4642000101A8EE5F0ECA5FF421B33F524E32610401"),

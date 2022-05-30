@@ -8,7 +8,7 @@ public class Tk102ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Tk102ProtocolDecoder(null);
+        var decoder = inject(new Tk102ProtocolDecoder(null));
 
         verifyNull(decoder, buffer(
                 "[\u00800000000000\u000821315452]"));

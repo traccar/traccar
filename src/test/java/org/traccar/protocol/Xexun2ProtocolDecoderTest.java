@@ -8,7 +8,7 @@ public class Xexun2ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Xexun2ProtocolDecoder(null);
+        var decoder = inject(new Xexun2ProtocolDecoder(null));
 
         verifyPositions(decoder, false, binary(
                 "faaf00140a5a8618810536243350005ed8e101005b64622880401b001482060864cc2296f840daa22aa884f008c87483c291efddc4f09fc2f49db3c058ef68005a9abe1ae8299d6449bac4e984e0c1d6baa8469d265ff2b60100cc00080000fb2e0013572a3600000002000000000000faaf"));

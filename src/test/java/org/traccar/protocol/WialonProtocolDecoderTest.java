@@ -8,7 +8,7 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new WialonProtocolDecoder(null);
+        var decoder = inject(new WialonProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "#L#2.0;42001300083;;CE45"));
