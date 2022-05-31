@@ -1,11 +1,11 @@
 package org.traccar.handler;
 
-import java.util.Date;
-
 import org.junit.Test;
 import org.traccar.config.Config;
 import org.traccar.model.Attribute;
 import org.traccar.model.Position;
+
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 

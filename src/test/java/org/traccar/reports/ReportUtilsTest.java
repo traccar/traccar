@@ -1,12 +1,13 @@
 package org.traccar.reports;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.Test;
+import org.traccar.BaseTest;
+import org.traccar.database.IdentityManager;
+import org.traccar.model.Device;
+import org.traccar.model.Position;
+import org.traccar.reports.model.StopReport;
+import org.traccar.reports.model.TripReport;
+import org.traccar.reports.model.TripsConfig;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -18,14 +19,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
 
-import org.junit.Test;
-import org.traccar.BaseTest;
-import org.traccar.database.IdentityManager;
-import org.traccar.model.Device;
-import org.traccar.model.Position;
-import org.traccar.reports.model.StopReport;
-import org.traccar.reports.model.TripReport;
-import org.traccar.reports.model.TripsConfig;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ReportUtilsTest extends BaseTest {
 

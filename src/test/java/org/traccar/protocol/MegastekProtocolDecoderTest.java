@@ -1,8 +1,8 @@
 package org.traccar.protocol;
 
 import org.junit.Test;
-import org.traccar.model.Position;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class MegastekProtocolDecoderTest extends ProtocolTest {
 

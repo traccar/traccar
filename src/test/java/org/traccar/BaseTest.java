@@ -1,22 +1,16 @@
 package org.traccar;
 
 import io.netty.channel.Channel;
-import org.mockito.ArgumentCaptor;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.traccar.config.Config;
-import org.traccar.session.ConnectionManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Device;
+import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
-import java.util.TimeZone;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;

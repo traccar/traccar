@@ -9,10 +9,13 @@ import org.traccar.database.DataManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+
 import java.util.Date;
+
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class FilterHandlerTest extends BaseTest {
 

@@ -1,8 +1,7 @@
 package org.traccar.protocol;
 
-import org.traccar.ProtocolTest;
-
 import org.junit.Test;
+import org.traccar.ProtocolTest;
 
 public class NavisFrameDecoderTest extends ProtocolTest {
 

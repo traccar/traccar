@@ -1,9 +1,12 @@
 package org.traccar.handler.events;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import org.junit.Test;
+import org.traccar.BaseTest;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
+import org.traccar.session.DeviceState;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -12,13 +15,10 @@ import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 
-import org.junit.Test;
-import org.traccar.BaseTest;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
-import org.traccar.session.DeviceState;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class OverspeedEventHandlerTest  extends BaseTest {
 

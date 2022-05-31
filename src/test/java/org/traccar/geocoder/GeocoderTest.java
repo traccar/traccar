@@ -1,9 +1,9 @@
 package org.traccar.geocoder;
 
-import java.util.Locale;
-
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 
