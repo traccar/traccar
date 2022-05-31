@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,43 +16,43 @@
 package org.traccar.session;
 
 import io.netty.channel.Channel;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import org.traccar.BasePipelineFactory;
-import org.traccar.Protocol;
-import org.traccar.model.Command;
 
 import java.net.SocketAddress;
+import java.util.Objects;
 
-public class ActiveDevice {
+public class Endpoint {
 
-    private final long deviceId;
-    private final Protocol protocol;
     private final Channel channel;
     private final SocketAddress remoteAddress;
-    private final boolean supportsLiveCommands;
 
-    public ActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
-        this.deviceId = deviceId;
-        this.protocol = protocol;
+    public Endpoint(Channel channel, SocketAddress remoteAddress) {
         this.channel = channel;
         this.remoteAddress = remoteAddress;
-        supportsLiveCommands = BasePipelineFactory.getHandler(channel.pipeline(), HttpRequestDecoder.class) == null;
     }
 
     public Channel getChannel() {
         return channel;
     }
 
-    public long getDeviceId() {
-        return deviceId;
+    public SocketAddress getRemoteAddress() {
+        return remoteAddress;
     }
 
-    public boolean supportsLiveCommands() {
-        return supportsLiveCommands;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Endpoint endpoint = (Endpoint) o;
+        return channel.equals(endpoint.channel) && remoteAddress.equals(endpoint.remoteAddress);
     }
 
-    public void sendCommand(Command command) {
-        protocol.sendDataCommand(channel, remoteAddress, command);
+    @Override
+    public int hashCode() {
+        return Objects.hash(channel, remoteAddress);
     }
 
 }

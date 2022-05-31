@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,7 +34,7 @@ import org.traccar.Context;
 import org.traccar.model.Command;
 import org.traccar.model.Typed;
 import org.traccar.model.Position;
-import org.traccar.session.ActiveDevice;
+import org.traccar.session.DeviceSession;
 
 public class CommandsManager  extends ExtendedObjectManager<Command> {
 
@@ -75,10 +75,10 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }
         } else {
-            ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(deviceId);
-            if (activeDevice != null) {
-                if (activeDevice.supportsLiveCommands()) {
-                    activeDevice.sendCommand(command);
+            DeviceSession deviceSession = Context.getConnectionManager().getDeviceSession(deviceId);
+            if (deviceSession != null) {
+                if (deviceSession.supportsLiveCommands()) {
+                    deviceSession.sendCommand(command);
                 } else {
                     getDeviceQueue(deviceId).add(command);
                     return false;

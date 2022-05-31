@@ -31,6 +31,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.storage.StorageException;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Date;
 import java.util.HashMap;
@@ -47,7 +48,9 @@ public class ConnectionManager {
     private final long deviceTimeout;
     private final boolean updateDeviceState;
 
-    private final Map<Long, ActiveDevice> activeDevices = new ConcurrentHashMap<>();
+    private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
+    private final Map<Endpoint, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
+
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
     private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
 
@@ -59,22 +62,78 @@ public class ConnectionManager {
         timer = Main.getInjector().getInstance(Timer.class);
     }
 
-    public void addActiveDevice(long deviceId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
-        activeDevices.put(deviceId, new ActiveDevice(deviceId, protocol, channel, remoteAddress));
+    public DeviceSession getDeviceSession(long deviceId) {
+        return sessionsByDeviceId.get(deviceId);
     }
 
-    public void removeActiveDevice(Channel channel) {
-        for (ActiveDevice activeDevice : activeDevices.values()) {
-            if (activeDevice.getChannel() == channel) {
-                updateDevice(activeDevice.getDeviceId(), Device.STATUS_OFFLINE, null);
-                activeDevices.remove(activeDevice.getDeviceId());
-                break;
+    public DeviceSession getDeviceSession(
+            Protocol protocol, Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
+
+        Endpoint endpoint = new Endpoint(channel, remoteAddress);
+        Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.getOrDefault(
+                endpoint, new ConcurrentHashMap<>());
+        if (uniqueIds.length > 0) {
+            for (String uniqueId : uniqueIds) {
+                DeviceSession deviceSession = endpointSessions.get(uniqueId);
+                if (deviceSession != null) {
+                    return deviceSession;
+                }
             }
+        } else {
+            return endpointSessions.values().stream().findAny().orElse(null);
+        }
+
+        Device device = null;
+        try {
+            for (String uniqueId : uniqueIds) {
+                device = Context.getIdentityManager().getByUniqueId(uniqueId);
+                if (device != null) {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Find device error", e);
+        }
+
+        if (device == null && Context.getConfig().getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
+            device = Context.getIdentityManager().addUnknownDevice(uniqueIds[0]);
+        }
+
+        if (device != null && !device.getDisabled()) {
+            DeviceSession oldSession = sessionsByDeviceId.remove(device.getId());
+            if (oldSession != null) {
+                Endpoint oldEndpoint = new Endpoint(oldSession.getChannel(), oldSession.getRemoteAddress());
+                Map<String, DeviceSession> oldEndpointSessions = sessionsByEndpoint.get(oldEndpoint);
+                if (oldEndpointSessions.size() > 1) {
+                    oldEndpointSessions.remove(device.getUniqueId());
+                } else {
+                    sessionsByEndpoint.remove(oldEndpoint);
+                }
+            }
+
+            DeviceSession deviceSession = new DeviceSession(
+                    device.getId(), device.getUniqueId(), protocol, channel, remoteAddress);
+            endpointSessions.put(device.getUniqueId(), deviceSession);
+            sessionsByEndpoint.put(endpoint, endpointSessions);
+            sessionsByDeviceId.put(device.getId(), deviceSession);
+
+            return deviceSession;
+        } else {
+            LOGGER.warn((device == null ? "Unknown" : "Disabled") + " device - " + String.join(" ", uniqueIds)
+                    + " (" + ((InetSocketAddress) remoteAddress).getHostString() + ")");
+            return null;
         }
     }
 
-    public ActiveDevice getActiveDevice(long deviceId) {
-        return activeDevices.get(deviceId);
+    public void removeDeviceSessions(Channel channel) {
+        Endpoint endpoint = new Endpoint(channel, channel.remoteAddress());
+        Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(endpoint);
+        if (endpointSessions != null) {
+            for (DeviceSession deviceSession : endpointSessions.values()) {
+                updateDevice(deviceSession.getDeviceId(), Device.STATUS_OFFLINE, null);
+                sessionsByDeviceId.remove(deviceSession.getDeviceId());
+            }
+        }
     }
 
     public void updateDevice(final long deviceId, String status, Date time) {

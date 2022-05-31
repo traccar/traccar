@@ -68,7 +68,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     }
 
     @Override
-    public long addUnknownDevice(String uniqueId) {
+    public Device addUnknownDevice(String uniqueId) {
         Device device = new Device();
         device.setName(uniqueId);
         device.setUniqueId(uniqueId);
@@ -89,10 +89,10 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                 Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
 
-            return device.getId();
+            return device;
         } catch (StorageException e) {
             LOGGER.warn("Automatic device registration error", e);
-            return 0;
+            return null;
         }
     }
 

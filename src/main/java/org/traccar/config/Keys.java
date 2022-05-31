@@ -191,13 +191,6 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
-     * Skip device connection session cache. Per protocol configuration.
-     */
-    public static final ConfigSuffix<Boolean> PROTOCOL_IGNORE_SESSIONS_CACHE = new ConfigSuffix<>(
-            ".ignoreSessionCache",
-            Collections.singletonList(KeyType.GLOBAL));
-
-    /**
      * ORBCOMM API access id.
      */
     public static final ConfigKey<String> ORBCOMM_ACCESS_ID = new ConfigKey<>(
@@ -209,13 +202,6 @@ public final class Keys {
      */
     public static final ConfigKey<String> ORBCOMM_PASSWORD = new ConfigKey<>(
             "orbcomm.password",
-            Collections.singletonList(KeyType.GLOBAL));
-
-    /**
-     * Skip device connection session cache. Global configuration.
-     */
-    public static final ConfigKey<Boolean> DECODER_IGNORE_SESSIONS_CACHE = new ConfigKey<>(
-            "decoder.ignoreSessionCache",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**

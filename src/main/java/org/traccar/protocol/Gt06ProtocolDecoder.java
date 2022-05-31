@@ -471,7 +471,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     TimeZone timeZone = deviceSession.get(DeviceSession.KEY_TIMEZONE);
                     if (timeZone.getRawOffset() == 0) {
                         timeZone.setRawOffset(offset * 1000);
-                        deviceSession.setTimeZone(timeZone);
+                        deviceSession.set(DeviceSession.KEY_TIMEZONE, timeZone);
                     }
                 }
             }

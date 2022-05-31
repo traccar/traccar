@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,55 @@
  */
 package org.traccar.session;
 
+import io.netty.channel.Channel;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import org.traccar.BasePipelineFactory;
+import org.traccar.Protocol;
+import org.traccar.model.Command;
+
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
 public class DeviceSession {
 
     private final long deviceId;
+    private final String uniqueId;
+    private final Protocol protocol;
+    private final Channel channel;
+    private final SocketAddress remoteAddress;
 
-    public DeviceSession(long deviceId) {
+    public DeviceSession(
+            long deviceId, String uniqueId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
         this.deviceId = deviceId;
+        this.uniqueId = uniqueId;
+        this.protocol = protocol;
+        this.channel = channel;
+        this.remoteAddress = remoteAddress;
     }
 
     public long getDeviceId() {
         return deviceId;
+    }
+
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public Channel getChannel() {
+        return channel;
+    }
+
+    public SocketAddress getRemoteAddress() {
+        return remoteAddress;
+    }
+
+    public boolean supportsLiveCommands() {
+        return BasePipelineFactory.getHandler(channel.pipeline(), HttpRequestDecoder.class) == null;
+    }
+
+    public void sendCommand(Command command) {
+        protocol.sendDataCommand(channel, remoteAddress, command);
     }
 
     public static final String KEY_TIMEZONE = "timezone";

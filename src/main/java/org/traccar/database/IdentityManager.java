@@ -20,7 +20,7 @@ import org.traccar.model.Position;
 
 public interface IdentityManager {
 
-    long addUnknownDevice(String uniqueId);
+    Device addUnknownDevice(String uniqueId);
 
     Device getById(long id);
 

@@ -70,8 +70,7 @@ public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
         JsonArray messages = json.getJsonArray("Messages");
         for (int i = 0; i < messages.size(); i++) {
             JsonObject message = messages.getJsonObject(i);
-            DeviceSession deviceSession = getDeviceSession(
-                    channel, remoteAddress, true, message.getString("MobileID"));
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, message.getString("MobileID"));
             if (deviceSession != null) {
 
                 Position position = new Position(getProtocolName());

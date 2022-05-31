@@ -1,11 +1,22 @@
 package org.traccar;
 
+import io.netty.channel.Channel;
+import org.mockito.ArgumentCaptor;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.traccar.config.Config;
 import org.traccar.session.ConnectionManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Device;
+import org.traccar.session.DeviceSession;
+
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.TimeZone;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -30,7 +41,21 @@ public class BaseTest {
         when(identityManager.lookupAttributeInteger(anyLong(), any(), anyInt(), anyBoolean(), anyBoolean()))
                 .thenAnswer(invocation -> invocation.getArguments()[2]);
         decoder.setIdentityManager(identityManager);
-        decoder.setConnectionManager(mock(ConnectionManager.class));
+        var connectionManager = mock(ConnectionManager.class);
+        var uniqueIdsProvided = new HashSet<Boolean>();
+        when(connectionManager.getDeviceSession(any(), any(), any(), any())).thenAnswer(invocation -> {
+            var mock = new DeviceSession(1L, "", mock(Protocol.class), mock(Channel.class), mock(SocketAddress.class));
+            if (uniqueIdsProvided.isEmpty()) {
+                if (invocation.getArguments().length > 3) {
+                    uniqueIdsProvided.add(true);
+                    return mock;
+                }
+                return null;
+            } else {
+                return mock;
+            }
+        });
+        decoder.setConnectionManager(connectionManager);
         decoder.setStatisticsManager(mock(StatisticsManager.class));
         decoder.setMediaManager(mock(MediaManager.class));
         return decoder;
