@@ -29,6 +29,7 @@ import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
 import java.net.InetSocketAddress;
@@ -51,6 +52,8 @@ public class ConnectionManager {
     private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
     private final Map<Endpoint, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
 
+    private final CacheManager cacheManager;
+
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
     private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
 
@@ -60,6 +63,7 @@ public class ConnectionManager {
         deviceTimeout = Context.getConfig().getLong(Keys.STATUS_TIMEOUT) * 1000;
         updateDeviceState = Context.getConfig().getBoolean(Keys.STATUS_UPDATE_DEVICE_STATE);
         timer = Main.getInjector().getInstance(Timer.class);
+        cacheManager = Main.getInjector().getInstance(CacheManager.class);
     }
 
     public DeviceSession getDeviceSession(long deviceId) {
@@ -67,7 +71,8 @@ public class ConnectionManager {
     }
 
     public DeviceSession getDeviceSession(
-            Protocol protocol, Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
+            Protocol protocol, Channel channel, SocketAddress remoteAddress,
+            String... uniqueIds) throws StorageException {
 
         Endpoint endpoint = new Endpoint(channel, remoteAddress);
         Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.getOrDefault(
@@ -116,6 +121,7 @@ public class ConnectionManager {
             endpointSessions.put(device.getUniqueId(), deviceSession);
             sessionsByEndpoint.put(endpoint, endpointSessions);
             sessionsByDeviceId.put(device.getId(), deviceSession);
+            cacheManager.addDevice(device.getId());
 
             return deviceSession;
         } else {
@@ -125,14 +131,28 @@ public class ConnectionManager {
         }
     }
 
-    public void removeDeviceSessions(Channel channel) {
+    public void deviceDisconnected(Channel channel) {
         Endpoint endpoint = new Endpoint(channel, channel.remoteAddress());
         Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(endpoint);
         if (endpointSessions != null) {
             for (DeviceSession deviceSession : endpointSessions.values()) {
                 updateDevice(deviceSession.getDeviceId(), Device.STATUS_OFFLINE, null);
                 sessionsByDeviceId.remove(deviceSession.getDeviceId());
+                cacheManager.removeDevice(deviceSession.getDeviceId());
             }
+        }
+    }
+
+    public void deviceUnknown(long deviceId) {
+        updateDevice(deviceId, Device.STATUS_UNKNOWN, null);
+        DeviceSession deviceSession = sessionsByDeviceId.remove(deviceId);
+        cacheManager.removeDevice(deviceId);
+        if (deviceSession != null) {
+            Endpoint endpoint = new Endpoint(deviceSession.getChannel(), deviceSession.getRemoteAddress());
+            sessionsByEndpoint.computeIfPresent(endpoint, (e, sessions) -> {
+                sessions.remove(deviceSession.getUniqueId());
+                return sessions.isEmpty() ? null : sessions;
+            });
         }
     }
 
@@ -181,7 +201,7 @@ public class ConnectionManager {
         if (status.equals(Device.STATUS_ONLINE)) {
             timeouts.put(deviceId, timer.newTimeout(timeout1 -> {
                 if (!timeout1.isCancelled()) {
-                    updateDevice(deviceId, Device.STATUS_UNKNOWN, null);
+                    deviceUnknown(deviceId);
                 }
             }, deviceTimeout, TimeUnit.MILLISECONDS));
         }

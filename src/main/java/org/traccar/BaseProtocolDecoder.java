@@ -30,6 +30,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
+import org.traccar.storage.StorageException;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -140,7 +141,11 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
-        return connectionManager.getDeviceSession(protocol, channel, remoteAddress, uniqueIds);
+        try {
+            return connectionManager.getDeviceSession(protocol, channel, remoteAddress, uniqueIds);
+        } catch (StorageException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void getLastLocation(Position position, Date deviceTime) {

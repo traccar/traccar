@@ -99,7 +99,9 @@ public class CacheManager {
     public void addDevice(long deviceId) throws StorageException {
         try {
             lock.writeLock().lock();
-            unsafeAddDevice(deviceId);
+            if (!deviceLinks.containsKey(deviceId)) {
+                unsafeAddDevice(deviceId);
+            }
         } finally {
             lock.writeLock().unlock();
         }
@@ -108,7 +110,9 @@ public class CacheManager {
     public void removeDevice(long deviceId) {
         try {
             lock.writeLock().lock();
-            unsafeRemoveDevice(deviceId);
+            if (deviceLinks.containsKey(deviceId)) {
+                unsafeRemoveDevice(deviceId);
+            }
         } finally {
             lock.writeLock().unlock();
         }

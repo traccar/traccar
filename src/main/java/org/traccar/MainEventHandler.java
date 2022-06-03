@@ -130,7 +130,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
         if (BasePipelineFactory.getHandler(ctx.pipeline(), HttpRequestDecoder.class) == null
                 && !connectionlessProtocols.contains(ctx.pipeline().get(BaseProtocolDecoder.class).getProtocolName())) {
-            Context.getConnectionManager().removeDeviceSessions(ctx.channel());
+            Context.getConnectionManager().deviceDisconnected(ctx.channel());
         }
     }
 
