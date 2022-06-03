@@ -323,7 +323,6 @@ public class DatabaseStorage extends Storage {
             result.append(" UNION ");
 
             result.append("SELECT DISTINCT ");
-            result.append(expandDevices ? "devices." : "all_groups."); // TODO handle reverse (e.g. users by device)
             result.append(outputKey);
             result.append(" FROM ");
             result.append(groupStorageName);
