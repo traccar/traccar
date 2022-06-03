@@ -154,7 +154,7 @@ public class CacheManager {
         storage.getObjects(User.class, new Request(new Columns.All()))
                 .forEach(user -> users.put(user.getId(), user));
         storage.getPermissions(User.class, Notification.class).forEach(permission -> {
-            long notificationId = permission.getPropertyId();;
+            long notificationId = permission.getPropertyId();
             var user = users.get(permission.getOwnerId());
             notificationUsers.computeIfAbsent(notificationId, k -> new LinkedList<>()).add(user);
         });
