@@ -24,6 +24,7 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.Order;
+import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -59,6 +60,7 @@ public class CacheManager {
     private final Map<CacheKey, CacheValue> deviceCache = new HashMap<>();
     private final Map<Long, Map<Class<? extends BaseModel>, List<Long>>> deviceLinks = new HashMap<>();
 
+    private final Map<Long, Position> devicePositions = new HashMap<>();
     private final Map<Long, List<User>> notificationUsers = new HashMap<>();
 
     @Inject
@@ -82,6 +84,15 @@ public class CacheManager {
             return deviceLinks.get(deviceId).get(clazz).stream()
                     .map(id -> deviceCache.get(new CacheKey(clazz, id)).<T>getValue())
                     .collect(Collectors.toList());
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public Position getPosition(long deviceId) {
+        try {
+            lock.readLock().lock();
+            return devicePositions.get(deviceId);
         } finally {
             lock.readLock().unlock();
         }
@@ -113,6 +124,15 @@ public class CacheManager {
             if (deviceLinks.containsKey(deviceId)) {
                 unsafeRemoveDevice(deviceId);
             }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void updatePosition(Position position) {
+        try {
+            lock.writeLock().lock();
+            devicePositions.put(position.getDeviceId(), position);
         } finally {
             lock.writeLock().unlock();
         }
