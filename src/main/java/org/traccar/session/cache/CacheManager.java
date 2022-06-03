@@ -59,7 +59,7 @@ public class CacheManager {
     private final Map<CacheKey, CacheValue> deviceCache = new HashMap<>();
     private final Map<Long, Map<Class<? extends BaseModel>, List<Long>>> deviceLinks = new HashMap<>();
 
-    private final Map<Long, List<Notification>> userNotifications = new HashMap<>();
+    private final Map<Long, List<User>> notificationUsers = new HashMap<>();
 
     @Inject
     public CacheManager(Storage storage) throws StorageException {
@@ -87,10 +87,10 @@ public class CacheManager {
         }
     }
 
-    public List<Notification> getUserNotifications(long userId) {
+    public List<User> getNotificationUsers(long notificationId) {
         try {
             lock.readLock().lock();
-            return userNotifications.get(userId);
+            return notificationUsers.get(notificationId);
         } finally {
             lock.readLock().unlock();
         }
@@ -130,13 +130,13 @@ public class CacheManager {
     }
 
     private void invalidateUsers() throws StorageException {
-        Map<Long, Notification> notifications = new HashMap<>();
-        storage.getObjects(Notification.class, new Request(new Columns.All()))
-                .forEach(notification -> notifications.put(notification.getId(), notification));
+        Map<Long, User> users = new HashMap<>();
+        storage.getObjects(User.class, new Request(new Columns.All()))
+                .forEach(user -> users.put(user.getId(), user));
         storage.getPermissions(User.class, Notification.class).forEach(permission -> {
-            long userId = permission.getOwnerId();
-            var notification = notifications.get(permission.getPropertyId());
-            userNotifications.computeIfAbsent(userId, k -> new LinkedList<>()).add(notification);
+            long notificationId = permission.getPropertyId();;
+            var user = users.get(permission.getOwnerId());
+            notificationUsers.computeIfAbsent(notificationId, k -> new LinkedList<>()).add(user);
         });
     }
 
