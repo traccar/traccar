@@ -299,10 +299,11 @@ public class DatabaseStorage extends Storage {
             conditionKey = Permission.getKey(condition.getPropertyClass());
         }
 
+        String storageName = Permission.getStorageName(condition.getOwnerClass(), condition.getPropertyClass());
         result.append("SELECT ");
-        result.append(outputKey);
+        result.append(storageName).append('.').append(outputKey);
         result.append(" FROM ");
-        result.append(Permission.getStorageName(condition.getOwnerClass(), condition.getPropertyClass()));
+        result.append(storageName);
         result.append(" WHERE ");
         result.append(conditionKey);
         result.append(" = :");
@@ -323,7 +324,7 @@ public class DatabaseStorage extends Storage {
             result.append(" UNION ");
 
             result.append("SELECT DISTINCT ");
-            result.append(outputKey);
+            result.append(groupStorageName).append('.').append(outputKey);
             result.append(" FROM ");
             result.append(groupStorageName);
 
