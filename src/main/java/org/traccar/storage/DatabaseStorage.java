@@ -324,7 +324,10 @@ public class DatabaseStorage extends Storage {
             result.append(" UNION ");
 
             result.append("SELECT DISTINCT ");
-            result.append(groupStorageName).append('.').append(outputKey);
+            if (!expandDevices) {
+                result.append(groupStorageName).append('.');
+            }
+            result.append(outputKey);
             result.append(" FROM ");
             result.append(groupStorageName);
 
