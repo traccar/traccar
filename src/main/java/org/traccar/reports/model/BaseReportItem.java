@@ -18,7 +18,7 @@ package org.traccar.reports.model;
 
 import java.util.Date;
 
-public class BaseReport {
+public class BaseReportItem {
 
     private long deviceId;
 

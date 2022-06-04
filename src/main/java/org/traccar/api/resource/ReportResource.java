@@ -46,9 +46,9 @@ import org.traccar.model.UserRestrictions;
 import org.traccar.reports.Events;
 import org.traccar.reports.Summary;
 import org.traccar.reports.Trips;
-import org.traccar.reports.model.StopReport;
-import org.traccar.reports.model.SummaryReport;
-import org.traccar.reports.model.TripReport;
+import org.traccar.reports.model.StopReportItem;
+import org.traccar.reports.model.SummaryReportItem;
+import org.traccar.reports.model.TripReportItem;
 import org.traccar.reports.Route;
 import org.traccar.reports.Stops;
 import org.traccar.storage.StorageException;
@@ -147,7 +147,7 @@ public class ReportResource extends BaseResource {
 
     @Path("summary")
     @GET
-    public Collection<SummaryReport> getSummary(
+    public Collection<SummaryReportItem> getSummary(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("daily") boolean daily)
             throws StorageException {
@@ -174,7 +174,7 @@ public class ReportResource extends BaseResource {
     @Path("trips")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<TripReport> getTrips(
+    public Collection<TripReportItem> getTrips(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
@@ -199,7 +199,7 @@ public class ReportResource extends BaseResource {
     @Path("stops")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Collection<StopReport> getStops(
+    public Collection<StopReportItem> getStops(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);

@@ -37,9 +37,9 @@ import org.traccar.session.DeviceState;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.reports.model.BaseReport;
-import org.traccar.reports.model.StopReport;
-import org.traccar.reports.model.TripReport;
+import org.traccar.reports.model.BaseReportItem;
+import org.traccar.reports.model.StopReportItem;
+import org.traccar.reports.model.TripReportItem;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -185,7 +185,7 @@ public final class ReportUtils {
         transformer.write();
     }
 
-    private static TripReport calculateTrip(
+    private static TripReportItem calculateTrip(
             IdentityManager identityManager, ArrayList<Position> positions,
             int startIndex, int endIndex, boolean ignoreOdometer) {
 
@@ -200,7 +200,7 @@ public final class ReportUtils {
             }
         }
 
-        TripReport trip = new TripReport();
+        TripReportItem trip = new TripReportItem();
 
         long tripDuration = endTrip.getFixTime().getTime() - startTrip.getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
@@ -253,14 +253,14 @@ public final class ReportUtils {
         return trip;
     }
 
-    private static StopReport calculateStop(
+    private static StopReportItem calculateStop(
             IdentityManager identityManager, ArrayList<Position> positions,
             int startIndex, int endIndex, boolean ignoreOdometer) {
 
         Position startStop = positions.get(startIndex);
         Position endStop = positions.get(endIndex);
 
-        StopReport stop = new StopReport();
+        StopReportItem stop = new StopReportItem();
 
         long deviceId = startStop.getDeviceId();
         stop.setDeviceId(deviceId);
@@ -302,11 +302,11 @@ public final class ReportUtils {
 
     }
 
-    private static <T extends BaseReport> T calculateTripOrStop(
+    private static <T extends BaseReportItem> T calculateTripOrStop(
             IdentityManager identityManager, ArrayList<Position> positions,
             int startIndex, int endIndex, boolean ignoreOdometer, Class<T> reportClass) {
 
-        if (reportClass.equals(TripReport.class)) {
+        if (reportClass.equals(TripReportItem.class)) {
             return (T) calculateTrip(identityManager, positions, startIndex, endIndex, ignoreOdometer);
         } else {
             return (T) calculateStop(identityManager, positions, startIndex, endIndex, ignoreOdometer);
@@ -333,7 +333,7 @@ public final class ReportUtils {
         }
     }
 
-    public static <T extends BaseReport> Collection<T> detectTripsAndStops(
+    public static <T extends BaseReportItem> Collection<T> detectTripsAndStops(
             IdentityManager identityManager, DeviceManager deviceManager,
             Collection<Position> positionCollection,
             TripsConfig tripsConfig, boolean ignoreOdometer, Class<T> reportClass) {
@@ -342,7 +342,7 @@ public final class ReportUtils {
 
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (!positions.isEmpty()) {
-            boolean trips = reportClass.equals(TripReport.class);
+            boolean trips = reportClass.equals(TripReportItem.class);
             MotionEventHandler  motionHandler = new MotionEventHandler(identityManager, deviceManager, tripsConfig);
             DeviceState deviceState = new DeviceState();
             deviceState.setMotionState(isMoving(positions, 0, tripsConfig));

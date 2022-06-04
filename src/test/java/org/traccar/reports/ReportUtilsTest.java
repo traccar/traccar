@@ -6,8 +6,8 @@ import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
-import org.traccar.reports.model.StopReport;
-import org.traccar.reports.model.TripReport;
+import org.traccar.reports.model.StopReportItem;
+import org.traccar.reports.model.TripReportItem;
 import org.traccar.reports.common.TripsConfig;
 
 import java.text.DateFormat;
@@ -93,13 +93,13 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
 
-        Collection<TripReport> trips = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, TripReport.class);
+        Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
 
-        TripReport itemTrip = trips.iterator().next();
+        TripReportItem itemTrip = trips.iterator().next();
 
         assertEquals(date("2016-01-01 00:02:00.000"), itemTrip.getStartTime());
         assertEquals(date("2016-01-01 00:05:00.000"), itemTrip.getEndTime());
@@ -108,15 +108,15 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReport> stops = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+        Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
 
-        Iterator<StopReport> iterator = stops.iterator();
+        Iterator<StopReportItem> iterator = stops.iterator();
 
-        StopReport itemStop = iterator.next();
+        StopReportItem itemStop = iterator.next();
 
         assertEquals(date("2016-01-01 00:00:00.000"), itemStop.getStartTime());
         assertEquals(date("2016-01-01 00:02:00.000"), itemStop.getEndTime());
@@ -147,13 +147,13 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, true, false, 0.01);
 
-        Collection<TripReport> trips = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, TripReport.class);
+        Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
 
-        TripReport itemTrip = trips.iterator().next();
+        TripReportItem itemTrip = trips.iterator().next();
 
         assertEquals(date("2016-01-01 00:02:00.000"), itemTrip.getStartTime());
         assertEquals(date("2016-01-01 00:05:00.000"), itemTrip.getEndTime());
@@ -163,7 +163,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
         trips = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, TripReport.class);
+                mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -177,15 +177,15 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReport> stops = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+        Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
 
-        Iterator<StopReport> iterator = stops.iterator();
+        Iterator<StopReportItem> iterator = stops.iterator();
 
-        StopReport itemStop = iterator.next();
+        StopReportItem itemStop = iterator.next();
 
         assertEquals(date("2016-01-01 00:00:00.000"), itemStop.getStartTime());
         assertEquals(date("2016-01-01 00:02:00.000"), itemStop.getEndTime());
@@ -218,13 +218,13 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
 
-        Collection<TripReport> trips = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, TripReport.class);
+        Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
 
-        TripReport itemTrip = trips.iterator().next();
+        TripReportItem itemTrip = trips.iterator().next();
 
         assertEquals(date("2016-01-01 00:02:00.000"), itemTrip.getStartTime());
         assertEquals(date("2016-01-01 00:09:00.000"), itemTrip.getEndTime());
@@ -233,15 +233,15 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(7000, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReport> stops = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+        Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
 
-        Iterator<StopReport> iterator = stops.iterator();
+        Iterator<StopReportItem> iterator = stops.iterator();
 
-        StopReport itemStop = iterator.next();
+        StopReportItem itemStop = iterator.next();
 
         assertEquals(date("2016-01-01 00:00:00.000"), itemStop.getStartTime());
         assertEquals(date("2016-01-01 00:02:00.000"), itemStop.getEndTime());
@@ -268,13 +268,13 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
-        Collection<StopReport> result = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+        Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
-        StopReport itemStop = result.iterator().next();
+        StopReportItem itemStop = result.iterator().next();
 
         assertEquals(date("2016-01-01 00:00:00.000"), itemStop.getStartTime());
         assertEquals(date("2016-01-01 00:05:00.000"), itemStop.getEndTime());
@@ -295,13 +295,13 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
-        Collection<StopReport> result = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+        Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
-        StopReport itemStop = result.iterator().next();
+        StopReportItem itemStop = result.iterator().next();
 
         assertEquals(date("2016-01-01 00:00:00.000"), itemStop.getStartTime());
         assertEquals(date("2016-01-01 00:04:00.000"), itemStop.getEndTime());
@@ -322,13 +322,13 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
-        Collection<StopReport> result = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+        Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
 
-        StopReport itemStop = result.iterator().next();
+        StopReportItem itemStop = result.iterator().next();
 
         assertEquals(date("2016-01-01 00:02:00.000"), itemStop.getStartTime());
         assertEquals(date("2016-01-01 00:05:00.000"), itemStop.getEndTime());
@@ -349,8 +349,8 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
-        Collection<StopReport> result = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+        Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -372,13 +372,13 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, 900000, false, false, 0.01);
 
-        Collection<TripReport> trips = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, TripReport.class);
+        Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
 
-        TripReport itemTrip = trips.iterator().next();
+        TripReportItem itemTrip = trips.iterator().next();
 
         assertEquals(date("2016-01-01 00:00:00.000"), itemTrip.getStartTime());
         assertEquals(date("2016-01-01 00:04:00.000"), itemTrip.getEndTime());
@@ -387,13 +387,13 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(7, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(600, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReport> stops = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReport.class);
+        Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
+                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
 
-        StopReport itemStop = stops.iterator().next();
+        StopReportItem itemStop = stops.iterator().next();
 
         assertEquals(date("2016-01-01 00:04:00.000"), itemStop.getStartTime());
         assertEquals(date("2016-01-01 00:24:00.000"), itemStop.getEndTime());

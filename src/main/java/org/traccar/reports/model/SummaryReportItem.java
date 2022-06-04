@@ -16,7 +16,7 @@
  */
 package org.traccar.reports.model;
 
-public class SummaryReport extends BaseReport {
+public class SummaryReportItem extends BaseReportItem {
 
     private long engineHours; // milliseconds
 

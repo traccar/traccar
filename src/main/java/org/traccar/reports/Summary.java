@@ -30,7 +30,7 @@ import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
-import org.traccar.reports.model.SummaryReport;
+import org.traccar.reports.model.SummaryReportItem;
 import org.traccar.storage.StorageException;
 
 public final class Summary {
@@ -38,8 +38,8 @@ public final class Summary {
     private Summary() {
     }
 
-    private static SummaryReport calculateSummaryResult(long deviceId, Collection<Position> positions) {
-        SummaryReport result = new SummaryReport();
+    private static SummaryReportItem calculateSummaryResult(long deviceId, Collection<Position> positions) {
+        SummaryReportItem result = new SummaryReportItem();
         result.setDeviceId(deviceId);
         result.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
         if (positions != null && !positions.isEmpty()) {
@@ -97,12 +97,12 @@ public final class Summary {
         return calendar.get(Calendar.DAY_OF_MONTH);
     }
 
-    private static Collection<SummaryReport> calculateSummaryResults(
+    private static Collection<SummaryReportItem> calculateSummaryResults(
             long userId, long deviceId, Date from, Date to, boolean daily) throws StorageException {
 
         ArrayList<Position> positions = new ArrayList<>(Context.getDataManager().getPositions(deviceId, from, to));
 
-        ArrayList<SummaryReport> results = new ArrayList<>();
+        ArrayList<SummaryReportItem> results = new ArrayList<>();
         if (daily && !positions.isEmpty()) {
             int startIndex = 0;
             int startDay = getDay(userId, positions.iterator().next().getFixTime());
@@ -122,14 +122,14 @@ public final class Summary {
         return results;
     }
 
-    public static Collection<SummaryReport> getObjects(long userId, Collection<Long> deviceIds,
-            Collection<Long> groupIds, Date from, Date to, boolean daily) throws StorageException {
+    public static Collection<SummaryReportItem> getObjects(long userId, Collection<Long> deviceIds,
+                                                           Collection<Long> groupIds, Date from, Date to, boolean daily) throws StorageException {
         ReportUtils.checkPeriodLimit(from, to);
-        ArrayList<SummaryReport> result = new ArrayList<>();
+        ArrayList<SummaryReportItem> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<SummaryReport> deviceResults = calculateSummaryResults(userId, deviceId, from, to, daily);
-            for (SummaryReport summaryReport : deviceResults) {
+            Collection<SummaryReportItem> deviceResults = calculateSummaryResults(userId, deviceId, from, to, daily);
+            for (SummaryReportItem summaryReport : deviceResults) {
                 if (summaryReport.getStartTime() != null && summaryReport.getEndTime() != null) {
                     result.add(summaryReport);
                 }
@@ -142,7 +142,7 @@ public final class Summary {
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to, boolean daily) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
-        Collection<SummaryReport> summaries = getObjects(userId, deviceIds, groupIds, from, to, daily);
+        Collection<SummaryReportItem> summaries = getObjects(userId, deviceIds, groupIds, from, to, daily);
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/summary.xlsx")) {

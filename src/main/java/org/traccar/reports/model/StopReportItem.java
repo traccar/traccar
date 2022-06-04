@@ -16,7 +16,7 @@
  */
 package org.traccar.reports.model;
 
-public class StopReport extends BaseReport  {
+public class StopReportItem extends BaseReportItem {
 
     private long positionId;
 

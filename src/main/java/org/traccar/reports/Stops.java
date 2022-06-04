@@ -33,8 +33,8 @@ import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.common.ReportUtils;
-import org.traccar.reports.model.DeviceReport;
-import org.traccar.reports.model.StopReport;
+import org.traccar.reports.model.DeviceReportSection;
+import org.traccar.reports.model.StopReportItem;
 import org.traccar.storage.StorageException;
 
 public final class Stops {
@@ -42,7 +42,7 @@ public final class Stops {
     private Stops() {
     }
 
-    private static Collection<StopReport> detectStops(long deviceId, Date from, Date to) throws StorageException {
+    private static Collection<StopReportItem> detectStops(long deviceId, Date from, Date to) throws StorageException {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
 
@@ -51,14 +51,14 @@ public final class Stops {
 
         return ReportUtils.detectTripsAndStops(
                 identityManager, deviceManager, Context.getDataManager().getPositions(deviceId, from, to),
-                Context.getTripsConfig(), ignoreOdometer, StopReport.class);
+                Context.getTripsConfig(), ignoreOdometer, StopReportItem.class);
     }
 
-    public static Collection<StopReport> getObjects(
+    public static Collection<StopReportItem> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
         ReportUtils.checkPeriodLimit(from, to);
-        ArrayList<StopReport> result = new ArrayList<>();
+        ArrayList<StopReportItem> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             result.addAll(detectStops(deviceId, from, to));
@@ -70,12 +70,12 @@ public final class Stops {
             OutputStream outputStream, long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
-        ArrayList<DeviceReport> devicesStops = new ArrayList<>();
+        ArrayList<DeviceReportSection> devicesStops = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<StopReport> stops = detectStops(deviceId, from, to);
-            DeviceReport deviceStops = new DeviceReport();
+            Collection<StopReportItem> stops = detectStops(deviceId, from, to);
+            DeviceReportSection deviceStops = new DeviceReportSection();
             Device device = Context.getIdentityManager().getById(deviceId);
             deviceStops.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));

@@ -34,7 +34,7 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.Maintenance;
 import org.traccar.reports.common.ReportUtils;
-import org.traccar.reports.model.DeviceReport;
+import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
@@ -73,7 +73,7 @@ public final class Events {
             Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
-        ArrayList<DeviceReport> devicesEvents = new ArrayList<>();
+        ArrayList<DeviceReportSection> devicesEvents = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         HashMap<Long, String> geofenceNames = new HashMap<>();
         HashMap<Long, String> maintenanceNames = new HashMap<>();
@@ -107,7 +107,7 @@ public final class Events {
                     iterator.remove();
                 }
             }
-            DeviceReport deviceEvents = new DeviceReport();
+            DeviceReportSection deviceEvents = new DeviceReportSection();
             Device device = Context.getIdentityManager().getById(deviceId);
             deviceEvents.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));

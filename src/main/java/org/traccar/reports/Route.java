@@ -30,7 +30,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
-import org.traccar.reports.model.DeviceReport;
+import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.StorageException;
 
 public final class Route {
@@ -53,13 +53,13 @@ public final class Route {
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
-        ArrayList<DeviceReport> devicesRoutes = new ArrayList<>();
+        ArrayList<DeviceReportSection> devicesRoutes = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<Position> positions = Context.getDataManager()
                     .getPositions(deviceId, from, to);
-            DeviceReport deviceRoutes = new DeviceReport();
+            DeviceReportSection deviceRoutes = new DeviceReportSection();
             Device device = Context.getIdentityManager().getById(deviceId);
             deviceRoutes.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceRoutes.getDeviceName()));
