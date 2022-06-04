@@ -38,12 +38,9 @@ import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
-public final class Events {
+public class EventsReportProvider {
 
-    private Events() {
-    }
-
-    public static Collection<Event> getObjects(
+    public Collection<Event> getObjects(
             Storage storage, long userId,
             Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws StorageException {
@@ -68,7 +65,7 @@ public final class Events {
         return result;
     }
 
-    public static void getExcel(
+    public void getExcel(
             OutputStream outputStream, Storage storage, long userId,
             Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws StorageException, IOException {

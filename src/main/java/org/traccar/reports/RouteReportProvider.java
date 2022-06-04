@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,12 +33,9 @@ import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.StorageException;
 
-public final class Route {
+public class RouteReportProvider {
 
-    private Route() {
-    }
-
-    public static Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<Position> result = new ArrayList<>();
@@ -49,7 +46,7 @@ public final class Route {
         return result;
     }
 
-    public static void getExcel(OutputStream outputStream,
+    public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);

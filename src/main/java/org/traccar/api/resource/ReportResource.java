@@ -23,6 +23,7 @@ import java.util.Date;
 import java.util.List;
 
 import javax.activation.DataHandler;
+import javax.inject.Inject;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.util.ByteArrayDataSource;
@@ -43,14 +44,14 @@ import org.traccar.helper.LogAction;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.UserRestrictions;
-import org.traccar.reports.Events;
-import org.traccar.reports.Summary;
-import org.traccar.reports.Trips;
+import org.traccar.reports.EventsReportProvider;
+import org.traccar.reports.SummaryReportProvider;
+import org.traccar.reports.TripsReportProvider;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.SummaryReportItem;
 import org.traccar.reports.model.TripReportItem;
-import org.traccar.reports.Route;
-import org.traccar.reports.Stops;
+import org.traccar.reports.RouteReportProvider;
+import org.traccar.reports.StopsReportProvider;
 import org.traccar.storage.StorageException;
 
 @Path("reports")
@@ -62,6 +63,21 @@ public class ReportResource extends BaseResource {
 
     private static final String XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     private static final String CONTENT_DISPOSITION_VALUE_XLSX = "attachment; filename=report.xlsx";
+
+    @Inject
+    private EventsReportProvider eventsReportProvider;
+
+    @Inject
+    private RouteReportProvider routeReportProvider;
+
+    @Inject
+    private StopsReportProvider stopsReportProvider;
+
+    @Inject
+    private SummaryReportProvider summaryReportProvider;
+
+    @Inject
+    private TripsReportProvider tripsReportProvider;
 
     private interface ReportExecutor {
         void execute(ByteArrayOutputStream stream) throws StorageException, IOException;
@@ -102,7 +118,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "route", from, to, deviceIds, groupIds);
-        return Route.getObjects(getUserId(), deviceIds, groupIds, from, to);
+        return routeReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
     }
 
     @Path("route")
@@ -115,7 +131,7 @@ public class ReportResource extends BaseResource {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "route", from, to, deviceIds, groupIds);
-            Route.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
+            routeReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
         });
     }
 
@@ -127,7 +143,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "events", from, to, deviceIds, groupIds);
-        return Events.getObjects(storage, getUserId(), deviceIds, groupIds, types, from, to);
+        return eventsReportProvider.getObjects(storage, getUserId(), deviceIds, groupIds, types, from, to);
     }
 
     @Path("events")
@@ -141,7 +157,7 @@ public class ReportResource extends BaseResource {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "events", from, to, deviceIds, groupIds);
-            Events.getExcel(stream, storage, getUserId(), deviceIds, groupIds, types, from, to);
+            eventsReportProvider.getExcel(stream, storage, getUserId(), deviceIds, groupIds, types, from, to);
         });
     }
 
@@ -153,7 +169,7 @@ public class ReportResource extends BaseResource {
             throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "summary", from, to, deviceIds, groupIds);
-        return Summary.getObjects(getUserId(), deviceIds, groupIds, from, to, daily);
+        return summaryReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to, daily);
     }
 
     @Path("summary")
@@ -167,7 +183,7 @@ public class ReportResource extends BaseResource {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "summary", from, to, deviceIds, groupIds);
-            Summary.getExcel(stream, getUserId(), deviceIds, groupIds, from, to, daily);
+            summaryReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to, daily);
         });
     }
 
@@ -179,7 +195,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "trips", from, to, deviceIds, groupIds);
-        return Trips.getObjects(getUserId(), deviceIds, groupIds, from, to);
+        return tripsReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
     }
 
     @Path("trips")
@@ -192,7 +208,7 @@ public class ReportResource extends BaseResource {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "trips", from, to, deviceIds, groupIds);
-            Trips.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
+            tripsReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
         });
     }
 
@@ -204,7 +220,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "stops", from, to, deviceIds, groupIds);
-        return Stops.getObjects(getUserId(), deviceIds, groupIds, from, to);
+        return stopsReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
     }
 
     @Path("stops")
@@ -217,7 +233,7 @@ public class ReportResource extends BaseResource {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "stops", from, to, deviceIds, groupIds);
-            Stops.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
+            stopsReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
         });
     }
 

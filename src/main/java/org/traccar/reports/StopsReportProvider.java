@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,12 +37,9 @@ import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.storage.StorageException;
 
-public final class Stops {
+public class StopsReportProvider {
 
-    private Stops() {
-    }
-
-    private static Collection<StopReportItem> detectStops(long deviceId, Date from, Date to) throws StorageException {
+    private Collection<StopReportItem> detectStops(long deviceId, Date from, Date to) throws StorageException {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
 
@@ -54,7 +51,7 @@ public final class Stops {
                 Context.getTripsConfig(), ignoreOdometer, StopReportItem.class);
     }
 
-    public static Collection<StopReportItem> getObjects(
+    public Collection<StopReportItem> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
         ReportUtils.checkPeriodLimit(from, to);
@@ -66,7 +63,7 @@ public final class Stops {
         return result;
     }
 
-    public static void getExcel(
+    public void getExcel(
             OutputStream outputStream, long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);

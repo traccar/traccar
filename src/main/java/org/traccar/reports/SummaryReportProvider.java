@@ -33,12 +33,9 @@ import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.SummaryReportItem;
 import org.traccar.storage.StorageException;
 
-public final class Summary {
+public class SummaryReportProvider {
 
-    private Summary() {
-    }
-
-    private static SummaryReportItem calculateSummaryResult(long deviceId, Collection<Position> positions) {
+    private SummaryReportItem calculateSummaryResult(long deviceId, Collection<Position> positions) {
         SummaryReportItem result = new SummaryReportItem();
         result.setDeviceId(deviceId);
         result.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
@@ -91,13 +88,13 @@ public final class Summary {
         return result;
     }
 
-    private static int getDay(long userId, Date date) {
+    private int getDay(long userId, Date date) {
         Calendar calendar = Calendar.getInstance(ReportUtils.getTimezone(userId));
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_MONTH);
     }
 
-    private static Collection<SummaryReportItem> calculateSummaryResults(
+    private Collection<SummaryReportItem> calculateSummaryResults(
             long userId, long deviceId, Date from, Date to, boolean daily) throws StorageException {
 
         ArrayList<Position> positions = new ArrayList<>(Context.getDataManager().getPositions(deviceId, from, to));
@@ -122,8 +119,9 @@ public final class Summary {
         return results;
     }
 
-    public static Collection<SummaryReportItem> getObjects(long userId, Collection<Long> deviceIds,
-                                                           Collection<Long> groupIds, Date from, Date to, boolean daily) throws StorageException {
+    public Collection<SummaryReportItem> getObjects(
+            long userId, Collection<Long> deviceIds,
+            Collection<Long> groupIds, Date from, Date to, boolean daily) throws StorageException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<SummaryReportItem> result = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
@@ -138,7 +136,7 @@ public final class Summary {
         return result;
     }
 
-    public static void getExcel(OutputStream outputStream,
+    public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to, boolean daily) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
