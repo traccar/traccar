@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.reports.model;
+package org.traccar.reports.common;
 
 public class TripsConfig {
 

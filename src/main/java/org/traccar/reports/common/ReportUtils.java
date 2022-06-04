@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.reports;
+package org.traccar.reports.common;
 
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
@@ -40,7 +40,6 @@ import org.traccar.model.Position;
 import org.traccar.reports.model.BaseReport;
 import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.TripReport;
-import org.traccar.reports.model.TripsConfig;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;

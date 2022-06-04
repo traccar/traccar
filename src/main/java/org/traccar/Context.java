@@ -48,7 +48,7 @@ import org.traccar.model.Notification;
 import org.traccar.model.User;
 import org.traccar.notification.EventForwarder;
 import org.traccar.notification.NotificatorManager;
-import org.traccar.reports.model.TripsConfig;
+import org.traccar.reports.common.TripsConfig;
 import org.traccar.session.ConnectionManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;

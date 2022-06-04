@@ -33,6 +33,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.Maintenance;
+import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;

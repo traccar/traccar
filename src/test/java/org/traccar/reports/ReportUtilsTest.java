@@ -5,9 +5,10 @@ import org.traccar.BaseTest;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.TripReport;
-import org.traccar.reports.model.TripsConfig;
+import org.traccar.reports.common.TripsConfig;
 
 import java.text.DateFormat;
 import java.text.ParseException;

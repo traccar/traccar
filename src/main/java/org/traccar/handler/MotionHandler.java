@@ -19,7 +19,7 @@ package org.traccar.handler;
 import io.netty.channel.ChannelHandler;
 import org.traccar.BaseDataHandler;
 import org.traccar.model.Position;
-import org.traccar.reports.model.TripsConfig;
+import org.traccar.reports.common.TripsConfig;
 
 import javax.inject.Inject;
 

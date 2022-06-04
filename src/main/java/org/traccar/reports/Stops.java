@@ -32,6 +32,7 @@ import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
+import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReport;
 import org.traccar.reports.model.StopReport;
 import org.traccar.storage.StorageException;

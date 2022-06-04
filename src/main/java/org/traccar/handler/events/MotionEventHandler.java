@@ -26,8 +26,8 @@ import org.traccar.model.Device;
 import org.traccar.session.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.reports.ReportUtils;
-import org.traccar.reports.model.TripsConfig;
+import org.traccar.reports.common.ReportUtils;
+import org.traccar.reports.common.TripsConfig;
 
 import javax.inject.Inject;
 

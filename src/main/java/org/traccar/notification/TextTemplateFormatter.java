@@ -24,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.User;
-import org.traccar.reports.ReportUtils;
+import org.traccar.reports.common.ReportUtils;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;

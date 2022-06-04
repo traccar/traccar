@@ -24,7 +24,7 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.reports.ReportUtils;
+import org.traccar.reports.common.ReportUtils;
 import org.traccar.session.cache.CacheManager;
 
 public final class NotificationFormatter {

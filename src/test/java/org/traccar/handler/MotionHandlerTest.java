@@ -2,7 +2,7 @@ package org.traccar.handler;
 
 import org.junit.Test;
 import org.traccar.model.Position;
-import org.traccar.reports.model.TripsConfig;
+import org.traccar.reports.common.TripsConfig;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;

@@ -29,6 +29,7 @@ import org.jxls.util.JxlsHelper;
 import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.SummaryReport;
 import org.traccar.storage.StorageException;
 
