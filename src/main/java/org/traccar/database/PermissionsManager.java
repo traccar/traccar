@@ -27,7 +27,6 @@ import org.traccar.model.Group;
 import org.traccar.model.Maintenance;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
-import org.traccar.model.Order;
 import org.traccar.model.Permission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
@@ -395,8 +394,6 @@ public class PermissionsManager {
                 Context.getCalendarManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Maintenance.class)) {
                 Context.getMaintenancesManager().refreshUserItems();
-            } else if (permission.getPropertyClass().equals(Order.class)) {
-                Context.getOrderManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshUserItems();
@@ -408,8 +405,6 @@ public class PermissionsManager {
                 Context.getDriversManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Maintenance.class)) {
                 Context.getMaintenancesManager().refreshExtendedPermissions();
-            } else if (permission.getPropertyClass().equals(Order.class)) {
-                Context.getOrderManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshExtendedPermissions();
