@@ -22,7 +22,7 @@ import org.traccar.storage.StorageName;
 
 @StorageName("tc_servers")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Server extends ExtendedModel {
+public class Server extends ExtendedModel implements UserRestrictions {
 
     private boolean registration;
 
@@ -36,6 +36,7 @@ public class Server extends ExtendedModel {
 
     private boolean readonly;
 
+    @Override
     public boolean getReadonly() {
         return readonly;
     }
@@ -46,6 +47,7 @@ public class Server extends ExtendedModel {
 
     private boolean deviceReadonly;
 
+    @Override
     public boolean getDeviceReadonly() {
         return deviceReadonly;
     }
@@ -146,6 +148,7 @@ public class Server extends ExtendedModel {
 
     private boolean limitCommands;
 
+    @Override
     public boolean getLimitCommands() {
         return limitCommands;
     }
@@ -156,6 +159,7 @@ public class Server extends ExtendedModel {
 
     private boolean disableReports;
 
+    @Override
     public boolean getDisableReports() {
         return disableReports;
     }

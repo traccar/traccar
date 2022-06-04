@@ -209,6 +209,11 @@ public class DatabaseStorage extends Storage {
             } else {
                 results.put(Permission.getKey(condition.getPropertyClass()), condition.getPropertyId());
             }
+        } else if (genericCondition instanceof Condition.LatestPositions) {
+            var condition = (Condition.LatestPositions) genericCondition;
+            if (condition.getDeviceId() > 0) {
+                results.put("deviceId", condition.getDeviceId());
+            }
         }
         return results;
     }
@@ -260,6 +265,17 @@ public class DatabaseStorage extends Storage {
                 var condition = (Condition.Permission) genericCondition;
                 result.append("id IN (");
                 result.append(formatPermissionQuery(condition));
+                result.append(")");
+
+            } else if (genericCondition instanceof Condition.LatestPositions) {
+
+                var condition = (Condition.LatestPositions) genericCondition;
+                result.append("id IN (");
+                result.append("SELECT positionId FROM ");
+                result.append(getStorageName(Device.class));
+                if (condition.getDeviceId() > 0) {
+                    result.append(" WHERE id = :deviceId");
+                }
                 result.append(")");
 
             }

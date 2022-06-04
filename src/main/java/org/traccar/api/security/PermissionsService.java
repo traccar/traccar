@@ -25,6 +25,7 @@ import org.traccar.model.ManagedUser;
 import org.traccar.model.ScheduledModel;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.model.UserRestrictions;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -71,10 +72,15 @@ public class PermissionsService {
         }
     }
 
-    public void checkReports(long userId) throws StorageException, SecurityException {
+    public interface CheckRestrictionCallback {
+        boolean denied(UserRestrictions userRestrictions);
+    }
+
+    public void checkRestriction(
+            long userId, CheckRestrictionCallback callback) throws StorageException, SecurityException {
         if (!getUser(userId).getAdministrator()
-                && (getServer().getDisableReports() || getUser(userId).getDisableReports())) {
-            throw new SecurityException("Reports are disabled");
+                && (callback.denied(getServer()) || callback.denied(getUser(userId)))) {
+            throw new SecurityException("Operation restricted");
         }
     }
 

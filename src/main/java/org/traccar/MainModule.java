@@ -60,6 +60,7 @@ import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.reports.model.TripsConfig;
+import org.traccar.sms.SmsManager;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
 import org.traccar.storage.Storage;
@@ -132,6 +133,11 @@ public class MainModule extends AbstractModule {
     @Provides
     public static MaintenancesManager provideMaintenancesManager() {
         return Context.getMaintenancesManager();
+    }
+
+    @Provides
+    public static SmsManager provideSmsManager() {
+        return Context.getSmsManager();
     }
 
     @Singleton

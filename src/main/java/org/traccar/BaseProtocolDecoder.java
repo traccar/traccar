@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import com.google.inject.Inject;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.config.Config;
@@ -32,6 +31,7 @@ import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
 import org.traccar.storage.StorageException;
 
+import javax.inject.Inject;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
@@ -51,6 +51,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private ConnectionManager connectionManager;
     private StatisticsManager statisticsManager;
     private MediaManager mediaManager;
+    private CommandsManager commandsManager;
 
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
@@ -94,6 +95,15 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     @Inject
     public void setMediaManager(MediaManager mediaManager) {
         this.mediaManager = mediaManager;
+    }
+
+    @Inject
+    public void setCommandsManager(CommandsManager commandsManager) {
+        this.commandsManager = commandsManager;
+    }
+
+    public CommandsManager getCommandsManager() {
+        return commandsManager;
     }
 
     public String writeMediaFile(String uniqueId, ByteBuf buf, String extension) {
@@ -204,11 +214,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     protected void sendQueuedCommands(Channel channel, SocketAddress remoteAddress, long deviceId) {
-        CommandsManager commandsManager = Context.getCommandsManager();
-        if (commandsManager != null) {
-            for (Command command : commandsManager.readQueuedCommands(deviceId)) {
-                protocol.sendDataCommand(channel, remoteAddress, command);
-            }
+        for (Command command : commandsManager.readQueuedCommands(deviceId)) {
+            protocol.sendDataCommand(channel, remoteAddress, command);
         }
     }
 

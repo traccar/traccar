@@ -42,6 +42,7 @@ import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.UserRestrictions;
 import org.traccar.reports.Events;
 import org.traccar.reports.Summary;
 import org.traccar.reports.Trips;
@@ -99,7 +100,7 @@ public class ReportResource extends BaseResource {
     public Collection<Position> getRoute(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
-        permissionsService.checkReports(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "route", from, to, deviceIds, groupIds);
         return Route.getObjects(getUserId(), deviceIds, groupIds, from, to);
     }
@@ -111,7 +112,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("mail") boolean mail)
             throws StorageException, IOException {
-        permissionsService.checkReports(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "route", from, to, deviceIds, groupIds);
             Route.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
@@ -124,7 +125,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("type") final List<String> types,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
-        permissionsService.checkReports(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "events", from, to, deviceIds, groupIds);
         return Events.getObjects(getUserId(), deviceIds, groupIds, types, from, to);
     }
@@ -137,7 +138,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("type") final List<String> types,
             @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("mail") boolean mail)
             throws StorageException, IOException {
-        permissionsService.checkReports(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "events", from, to, deviceIds, groupIds);
             Events.getExcel(stream, getUserId(), deviceIds, groupIds, types, from, to);
@@ -150,7 +151,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("daily") boolean daily)
             throws StorageException {
-        permissionsService.checkReports(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "summary", from, to, deviceIds, groupIds);
         return Summary.getObjects(getUserId(), deviceIds, groupIds, from, to, daily);
     }
@@ -163,7 +164,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("daily") boolean daily,
             @QueryParam("mail") boolean mail)
             throws StorageException, IOException {
-        permissionsService.checkReports(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "summary", from, to, deviceIds, groupIds);
             Summary.getExcel(stream, getUserId(), deviceIds, groupIds, from, to, daily);
@@ -176,7 +177,7 @@ public class ReportResource extends BaseResource {
     public Collection<TripReport> getTrips(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
-        permissionsService.checkReports(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "trips", from, to, deviceIds, groupIds);
         return Trips.getObjects(getUserId(), deviceIds, groupIds, from, to);
     }
@@ -188,7 +189,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("mail") boolean mail)
             throws StorageException, IOException {
-        permissionsService.checkReports(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "trips", from, to, deviceIds, groupIds);
             Trips.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
@@ -201,7 +202,7 @@ public class ReportResource extends BaseResource {
     public Collection<StopReport> getStops(
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
-        permissionsService.checkReports(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "stops", from, to, deviceIds, groupIds);
         return Stops.getObjects(getUserId(), deviceIds, groupIds, from, to);
     }
@@ -213,7 +214,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("mail") boolean mail)
             throws StorageException, IOException {
-        permissionsService.checkReports(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "stops", from, to, deviceIds, groupIds);
             Stops.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);

@@ -25,7 +25,6 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.CalendarManager;
-import org.traccar.database.CommandsManager;
 import org.traccar.session.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
@@ -45,7 +44,6 @@ import org.traccar.helper.Log;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
-import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
@@ -217,12 +215,6 @@ public final class Context {
         return driversManager;
     }
 
-    private static CommandsManager commandsManager;
-
-    public static CommandsManager getCommandsManager() {
-        return commandsManager;
-    }
-
     private static MaintenancesManager maintenancesManager;
 
     public static MaintenancesManager getMaintenancesManager() {
@@ -337,8 +329,6 @@ public final class Context {
 
         driversManager = new DriversManager(dataManager);
 
-        commandsManager = new CommandsManager(dataManager, config.getBoolean(Keys.COMMANDS_QUEUEING));
-
         orderManager = new OrderManager(dataManager);
 
     }
@@ -392,8 +382,6 @@ public final class Context {
             return (BaseObjectManager<T>) geofenceManager;
         } else if (clazz.equals(Driver.class)) {
             return (BaseObjectManager<T>) driversManager;
-        } else if (clazz.equals(Command.class)) {
-            return (BaseObjectManager<T>) commandsManager;
         } else if (clazz.equals(Maintenance.class)) {
             return (BaseObjectManager<T>) maintenancesManager;
         } else if (clazz.equals(Notification.class)) {

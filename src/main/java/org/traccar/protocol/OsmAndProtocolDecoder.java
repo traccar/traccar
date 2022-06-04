@@ -21,10 +21,8 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
-import org.traccar.database.CommandsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
@@ -178,11 +176,8 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
         if (position.getDeviceId() != 0) {
             String response = null;
-            CommandsManager commandsManager = Context.getCommandsManager();
-            if (commandsManager != null) {
-                for (Command command : commandsManager.readQueuedCommands(position.getDeviceId(), 1)) {
-                    response = command.getString(Command.KEY_DATA);
-                }
+            for (Command command : getCommandsManager().readQueuedCommands(position.getDeviceId(), 1)) {
+                response = command.getString(Command.KEY_DATA);
             }
             if (response != null) {
                 sendResponse(channel, HttpResponseStatus.OK, Unpooled.copiedBuffer(response, StandardCharsets.UTF_8));

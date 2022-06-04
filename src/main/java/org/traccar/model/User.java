@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.traccar.storage.StorageName;
 import java.util.Date;
 
 @StorageName("tc_users")
-public class User extends ExtendedModel {
+public class User extends ExtendedModel implements UserRestrictions {
 
     private String name;
 
@@ -69,6 +69,7 @@ public class User extends ExtendedModel {
 
     private boolean readonly;
 
+    @Override
     public boolean getReadonly() {
         return readonly;
     }
@@ -195,6 +196,7 @@ public class User extends ExtendedModel {
 
     private boolean deviceReadonly;
 
+    @Override
     public boolean getDeviceReadonly() {
         return deviceReadonly;
     }
@@ -222,6 +224,7 @@ public class User extends ExtendedModel {
 
     private boolean limitCommands;
 
+    @Override
     public boolean getLimitCommands() {
         return limitCommands;
     }
@@ -234,6 +237,7 @@ public class User extends ExtendedModel {
 
     private boolean disableReports;
 
+    @Override
     public boolean getDisableReports() {
         return disableReports;
     }

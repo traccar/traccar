@@ -50,8 +50,6 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
 public class DataManager {
 
@@ -205,14 +203,9 @@ public class DataManager {
     }
 
     public Collection<Position> getLatestPositions() throws StorageException {
-        List<Position> positions = new LinkedList<>();
-        List<Device> devices = storage.getObjects(Device.class, new Request(new Columns.Include("positionId")));
-        for (Device device : devices) {
-            positions.addAll(storage.getObjects(Position.class, new Request(
-                    new Columns.All(),
-                    new Condition.Equals("id", "id", device.getPositionId()))));
-        }
-        return positions;
+        return storage.getObjects(Position.class, new Request(
+                new Columns.All(),
+                new Condition.LatestPositions()));
     }
 
     public Server getServer() throws StorageException {

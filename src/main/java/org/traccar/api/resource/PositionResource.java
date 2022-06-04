@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Position;
+import org.traccar.model.UserRestrictions;
 import org.traccar.storage.StorageException;
 
 import javax.ws.rs.Consumes;
@@ -55,7 +56,7 @@ public class PositionResource extends BaseResource {
         } else {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             if (from != null && to != null) {
-                permissionsService.checkReports(getUserId());
+                permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
                 return Context.getDataManager().getPositions(deviceId, from, to);
             } else {
                 return Collections.singleton(Context.getDeviceManager().getLastPosition(deviceId));
