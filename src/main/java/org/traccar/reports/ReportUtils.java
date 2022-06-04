@@ -31,6 +31,8 @@ import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.BaseModel;
+import org.traccar.model.User;
 import org.traccar.session.DeviceState;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
@@ -39,6 +41,11 @@ import org.traccar.reports.model.BaseReport;
 import org.traccar.reports.model.StopReport;
 import org.traccar.reports.model.TripReport;
 import org.traccar.reports.model.TripsConfig;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,6 +64,15 @@ import java.util.TimeZone;
 public final class ReportUtils {
 
     private ReportUtils() {
+    }
+
+    public static <T extends BaseModel> T getObject(
+            Storage storage, long userId, Class<T> clazz, long objectId) throws StorageException, SecurityException {
+        return storage.getObject(clazz, new Request(
+                new Columns.Include("id"),
+                new Condition.And(
+                        new Condition.Equals("id", "id", objectId),
+                        new Condition.Permission(User.class, userId, clazz))));
     }
 
     public static void checkPeriodLimit(Date from, Date to) {

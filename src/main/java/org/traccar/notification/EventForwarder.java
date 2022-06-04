@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,15 @@ package org.traccar.notification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.Main;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -39,9 +42,12 @@ public class EventForwarder {
     private final String url;
     private final String header;
 
-    public EventForwarder() {
-        url = Context.getConfig().getString(Keys.EVENT_FORWARD_URL);
-        header = Context.getConfig().getString(Keys.EVENT_FORWARD_HEADERS);
+    private final CacheManager cacheManager;
+
+    public EventForwarder(Config config) {
+        url = config.getString(Keys.EVENT_FORWARD_URL);
+        header = config.getString(Keys.EVENT_FORWARD_HEADERS);
+        cacheManager = Main.getInjector().getInstance(CacheManager.class);
     }
 
     private static final String KEY_POSITION = "position";
@@ -83,18 +89,18 @@ public class EventForwarder {
         if (position != null) {
             data.put(KEY_POSITION, position);
         }
-        Device device = Context.getIdentityManager().getById(event.getDeviceId());
+        Device device = cacheManager.getObject(Device.class, event.getDeviceId());
         if (device != null) {
             data.put(KEY_DEVICE, device);
         }
         if (event.getGeofenceId() != 0) {
-            Geofence geofence = Context.getGeofenceManager().getById(event.getGeofenceId());
+            Geofence geofence = cacheManager.getObject(Geofence.class, event.getGeofenceId());
             if (geofence != null) {
                 data.put(KEY_GEOFENCE, geofence);
             }
         }
         if (event.getMaintenanceId() != 0) {
-            Maintenance maintenance = Context.getMaintenancesManager().getById(event.getMaintenanceId());
+            Maintenance maintenance = cacheManager.getObject(Maintenance.class, event.getMaintenanceId());
             if (maintenance != null) {
                 data.put(KEY_MAINTENANCE, maintenance);
             }

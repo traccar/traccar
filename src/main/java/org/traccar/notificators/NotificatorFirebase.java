@@ -20,12 +20,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.Main;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationMessage;
 import org.traccar.notification.NotificationFormatter;
+import org.traccar.session.cache.CacheManager;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -69,7 +71,8 @@ public class NotificatorFirebase extends Notificator {
         final User user = Context.getPermissionsManager().getUser(userId);
         if (user.getAttributes().containsKey("notificationTokens")) {
 
-            NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
+            NotificationMessage shortMessage = NotificationFormatter.formatMessage(
+                    Main.getInjector().getInstance(CacheManager.class), userId, event, position, "short");
 
             Notification notification = new Notification();
             notification.title = shortMessage.getSubject();

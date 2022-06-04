@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +34,7 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.Maintenance;
 import org.traccar.reports.model.DeviceReport;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
 public final class Events {
@@ -41,7 +42,9 @@ public final class Events {
     private Events() {
     }
 
-    public static Collection<Event> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public static Collection<Event> getObjects(
+            Storage storage, long userId,
+            Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws StorageException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<Event> result = new ArrayList<>();
@@ -53,9 +56,9 @@ public final class Events {
                 if (all || types.contains(event.getType())) {
                     long geofenceId = event.getGeofenceId();
                     long maintenanceId = event.getMaintenanceId();
-                    if ((geofenceId == 0 || Context.getGeofenceManager().checkItemPermission(userId, geofenceId))
+                    if ((geofenceId == 0 || ReportUtils.getObject(storage, userId, Geofence.class, geofenceId) != null)
                             && (maintenanceId == 0
-                            || Context.getMaintenancesManager().checkItemPermission(userId, maintenanceId))) {
+                            || ReportUtils.getObject(storage, userId, Maintenance.class, maintenanceId) != null)) {
                        result.add(event);
                     }
                 }
@@ -64,8 +67,9 @@ public final class Events {
         return result;
     }
 
-    public static void getExcel(OutputStream outputStream,
-            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+    public static void getExcel(
+            OutputStream outputStream, Storage storage, long userId,
+            Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReport> devicesEvents = new ArrayList<>();
@@ -82,20 +86,18 @@ public final class Events {
                     long geofenceId = event.getGeofenceId();
                     long maintenanceId = event.getMaintenanceId();
                     if (geofenceId != 0) {
-                        if (Context.getGeofenceManager().checkItemPermission(userId, geofenceId)) {
-                            Geofence geofence = Context.getGeofenceManager().getById(geofenceId);
-                            if (geofence != null) {
-                                geofenceNames.put(geofenceId, geofence.getName());
-                            }
+                        Geofence geofence = ReportUtils.getObject(
+                                storage, userId, Geofence.class, geofenceId);
+                        if (geofence != null) {
+                            geofenceNames.put(geofenceId, geofence.getName());
                         } else {
                             iterator.remove();
                         }
                     } else if (maintenanceId != 0) {
-                        if (Context.getMaintenancesManager().checkItemPermission(userId, maintenanceId)) {
-                            Maintenance maintenance = Context.getMaintenancesManager().getById(maintenanceId);
-                            if (maintenance != null) {
-                                maintenanceNames.put(maintenanceId, maintenance.getName());
-                            }
+                        Maintenance maintenance = ReportUtils.getObject(
+                                storage, userId, Maintenance.class, maintenanceId);
+                        if (maintenance != null) {
+                            maintenanceNames.put(maintenanceId, maintenance.getName());
                         } else {
                             iterator.remove();
                         }

@@ -24,7 +24,6 @@ import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
-import org.traccar.model.Maintenance;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
 import org.traccar.model.Permission;
@@ -364,7 +363,6 @@ public class PermissionsManager {
         }
         Context.getCalendarManager().refreshUserItems();
         Context.getDriversManager().refreshUserItems();
-        Context.getMaintenancesManager().refreshUserItems();
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refreshUserItems();
         }
@@ -375,7 +373,6 @@ public class PermissionsManager {
             Context.getGeofenceManager().refreshExtendedPermissions();
         }
         Context.getDriversManager().refreshExtendedPermissions();
-        Context.getMaintenancesManager().refreshExtendedPermissions();
     }
 
     public void refreshPermissions(Permission permission) {
@@ -392,8 +389,6 @@ public class PermissionsManager {
                 Context.getDriversManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Calendar.class)) {
                 Context.getCalendarManager().refreshUserItems();
-            } else if (permission.getPropertyClass().equals(Maintenance.class)) {
-                Context.getMaintenancesManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshUserItems();
@@ -403,8 +398,6 @@ public class PermissionsManager {
                 Context.getGeofenceManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Driver.class)) {
                 Context.getDriversManager().refreshExtendedPermissions();
-            } else if (permission.getPropertyClass().equals(Maintenance.class)) {
-                Context.getMaintenancesManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshExtendedPermissions();

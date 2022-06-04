@@ -20,12 +20,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.Main;
 import org.traccar.model.User;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
+import org.traccar.session.cache.CacheManager;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
@@ -99,7 +101,8 @@ public class NotificatorTelegram extends Notificator {
     @Override
     public void sendSync(long userId, Event event, Position position) {
         User user = Context.getPermissionsManager().getUser(userId);
-        NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
+        NotificationMessage shortMessage = NotificationFormatter.formatMessage(
+                Main.getInjector().getInstance(CacheManager.class), userId, event, position, "short");
 
         TextMessage message = new TextMessage();
         message.chatId = user.getString("telegramChatId");

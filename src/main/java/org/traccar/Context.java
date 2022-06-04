@@ -32,7 +32,6 @@ import org.traccar.database.GeofenceManager;
 import org.traccar.database.GroupsManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MailManager;
-import org.traccar.database.MaintenancesManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.UsersManager;
@@ -45,7 +44,6 @@ import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
-import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.User;
 import org.traccar.notification.EventForwarder;
@@ -193,12 +191,6 @@ public final class Context {
         return driversManager;
     }
 
-    private static MaintenancesManager maintenancesManager;
-
-    public static MaintenancesManager getMaintenancesManager() {
-        return maintenancesManager;
-    }
-
     private static SmsManager smsManager;
 
     public static SmsManager getSmsManager() {
@@ -289,7 +281,7 @@ public final class Context {
         }
 
         if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
-            eventForwarder = new EventForwarder();
+            eventForwarder = new EventForwarder(config);
         }
 
         driversManager = new DriversManager(dataManager);
@@ -300,7 +292,6 @@ public final class Context {
 
         geofenceManager = new GeofenceManager(dataManager);
         calendarManager = new CalendarManager(dataManager);
-        maintenancesManager = new MaintenancesManager(dataManager);
         notificationManager = new NotificationManager(dataManager);
         notificatorManager = new NotificatorManager();
         Properties velocityProperties = new Properties();
@@ -345,8 +336,6 @@ public final class Context {
             return (BaseObjectManager<T>) geofenceManager;
         } else if (clazz.equals(Driver.class)) {
             return (BaseObjectManager<T>) driversManager;
-        } else if (clazz.equals(Maintenance.class)) {
-            return (BaseObjectManager<T>) maintenancesManager;
         } else if (clazz.equals(Notification.class)) {
             return (BaseObjectManager<T>) notificationManager;
         }

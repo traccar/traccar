@@ -20,41 +20,32 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.database.IdentityManager;
-import org.traccar.database.MaintenancesManager;
 import org.traccar.model.Event;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 
 @ChannelHandler.Sharable
 public class MaintenanceEventHandler extends BaseEventHandler {
 
-    private final IdentityManager identityManager;
-    private final MaintenancesManager maintenancesManager;
+    private final CacheManager cacheManager;
 
     @Inject
-    public MaintenanceEventHandler(IdentityManager identityManager, MaintenancesManager maintenancesManager) {
-        this.identityManager = identityManager;
-        this.maintenancesManager = maintenancesManager;
+    public MaintenanceEventHandler(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        if (identityManager.getById(position.getDeviceId()) == null
-                || !identityManager.isLatestPosition(position)) {
-            return null;
-        }
-
-        Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
-        if (lastPosition == null) {
+        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
+        if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) < 0) {
             return null;
         }
 
         Map<Event, Position> events = new HashMap<>();
-        for (long maintenanceId : maintenancesManager.getAllDeviceItems(position.getDeviceId())) {
-            Maintenance maintenance = maintenancesManager.getById(maintenanceId);
+        for (Maintenance maintenance : cacheManager.getDeviceObjects(position.getDeviceId(), Maintenance.class)) {
             if (maintenance.getPeriod() != 0) {
                 double oldValue = lastPosition.getDouble(maintenance.getType());
                 double newValue = position.getDouble(maintenance.getType());
@@ -62,7 +53,7 @@ public class MaintenanceEventHandler extends BaseEventHandler {
                         && (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
                         < (long) ((newValue - maintenance.getStart()) / maintenance.getPeriod())) {
                     Event event = new Event(Event.TYPE_MAINTENANCE, position);
-                    event.setMaintenanceId(maintenanceId);
+                    event.setMaintenanceId(maintenance.getId());
                     event.set(maintenance.getType(), newValue);
                     events.put(event, position);
                 }

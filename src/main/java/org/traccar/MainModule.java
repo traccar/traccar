@@ -30,7 +30,6 @@ import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
-import org.traccar.database.MaintenancesManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
@@ -129,11 +128,6 @@ public class MainModule extends AbstractModule {
     @Provides
     public static CalendarManager provideCalendarManager() {
         return Context.getCalendarManager();
-    }
-
-    @Provides
-    public static MaintenancesManager provideMaintenancesManager() {
-        return Context.getMaintenancesManager();
     }
 
     @Provides

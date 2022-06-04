@@ -77,42 +77,37 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
             usersToForward = new HashSet<>();
         }
         for (long userId : users) {
-            if ((event.getGeofenceId() == 0
-                    || Context.getGeofenceManager().checkItemPermission(userId, event.getGeofenceId()))
-                    && (event.getMaintenanceId() == 0
-                    || Context.getMaintenancesManager().checkItemPermission(userId, event.getMaintenanceId()))) {
-                if (usersToForward != null) {
-                    usersToForward.add(userId);
-                }
-                final Set<String> notificators = new HashSet<>();
-                for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getEventTime())) {
-                    Notification notification = getById(notificationId);
-                    if (getById(notificationId).getType().equals(event.getType())) {
-                        boolean filter = false;
-                        if (event.getType().equals(Event.TYPE_ALARM)) {
-                            String alarmsAttribute = notification.getString("alarms");
-                            if (alarmsAttribute == null) {
-                                filter = true;
-                            } else {
-                                List<String> alarms = Arrays.asList(alarmsAttribute.split(","));
-                                filter = !alarms.contains(event.getString(Position.KEY_ALARM));
-                            }
-                        }
-                        if (!filter) {
-                            notificators.addAll(notification.getNotificatorsTypes());
+            if (usersToForward != null) {
+                usersToForward.add(userId);
+            }
+            final Set<String> notificators = new HashSet<>();
+            for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getEventTime())) {
+                Notification notification = getById(notificationId);
+                if (getById(notificationId).getType().equals(event.getType())) {
+                    boolean filter = false;
+                    if (event.getType().equals(Event.TYPE_ALARM)) {
+                        String alarmsAttribute = notification.getString("alarms");
+                        if (alarmsAttribute == null) {
+                            filter = true;
+                        } else {
+                            List<String> alarms = Arrays.asList(alarmsAttribute.split(","));
+                            filter = !alarms.contains(event.getString(Position.KEY_ALARM));
                         }
                     }
+                    if (!filter) {
+                        notificators.addAll(notification.getNotificatorsTypes());
+                    }
                 }
+            }
 
-                if (position != null && position.getAddress() == null
-                        && geocodeOnRequest && Context.getGeocoder() != null) {
-                    position.setAddress(Context.getGeocoder()
-                            .getAddress(position.getLatitude(), position.getLongitude(), null));
-                }
+            if (position != null && position.getAddress() == null
+                    && geocodeOnRequest && Context.getGeocoder() != null) {
+                position.setAddress(Context.getGeocoder()
+                        .getAddress(position.getLatitude(), position.getLongitude(), null));
+            }
 
-                for (String notificator : notificators) {
-                    Context.getNotificatorManager().getNotificator(notificator).sendAsync(userId, event, position);
-                }
+            for (String notificator : notificators) {
+                Context.getNotificatorManager().getNotificator(notificator).sendAsync(userId, event, position);
             }
         }
         if (Context.getEventForwarder() != null) {
