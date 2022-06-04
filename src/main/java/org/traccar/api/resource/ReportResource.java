@@ -143,7 +143,7 @@ public class ReportResource extends BaseResource {
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "events", from, to, deviceIds, groupIds);
-        return eventsReportProvider.getObjects(storage, getUserId(), deviceIds, groupIds, types, from, to);
+        return eventsReportProvider.getObjects(getUserId(), deviceIds, groupIds, types, from, to);
     }
 
     @Path("events")
@@ -157,7 +157,7 @@ public class ReportResource extends BaseResource {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "events", from, to, deviceIds, groupIds);
-            eventsReportProvider.getExcel(stream, storage, getUserId(), deviceIds, groupIds, types, from, to);
+            eventsReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, types, from, to);
         });
     }
 
