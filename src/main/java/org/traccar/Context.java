@@ -25,14 +25,12 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.CalendarManager;
-import org.traccar.session.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.DriversManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.database.GroupsManager;
 import org.traccar.database.IdentityManager;
-import org.traccar.database.LdapProvider;
 import org.traccar.database.MailManager;
 import org.traccar.database.MaintenancesManager;
 import org.traccar.database.NotificationManager;
@@ -53,6 +51,7 @@ import org.traccar.model.User;
 import org.traccar.notification.EventForwarder;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.reports.model.TripsConfig;
+import org.traccar.session.ConnectionManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
 import org.traccar.sms.SnsSmsClient;
@@ -92,12 +91,6 @@ public final class Context {
 
     public static DataManager getDataManager() {
         return dataManager;
-    }
-
-    private static LdapProvider ldapProvider;
-
-    public static LdapProvider getLdapProvider() {
-        return ldapProvider;
     }
 
     private static MailManager mailManager;
@@ -261,10 +254,6 @@ public final class Context {
 
         if (config.hasKey(Keys.DATABASE_URL)) {
             dataManager = new DataManager(config);
-        }
-
-        if (config.hasKey(Keys.LDAP_URL)) {
-            ldapProvider = new LdapProvider(config);
         }
 
         mailManager = new MailManager();

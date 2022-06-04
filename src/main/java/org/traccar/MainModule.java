@@ -19,12 +19,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.google.inject.Singleton;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.CalendarManager;
+import org.traccar.database.LdapProvider;
 import org.traccar.session.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
@@ -66,6 +66,7 @@ import org.traccar.speedlimit.SpeedLimitProvider;
 import org.traccar.storage.Storage;
 
 import javax.annotation.Nullable;
+import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 
 public class MainModule extends AbstractModule {
@@ -138,6 +139,15 @@ public class MainModule extends AbstractModule {
     @Provides
     public static SmsManager provideSmsManager() {
         return Context.getSmsManager();
+    }
+
+    @Singleton
+    @Provides
+    public static LdapProvider provideLdapProvider(Config config) {
+        if (config.hasKey(Keys.LDAP_URL)) {
+            return new LdapProvider(config);
+        }
+        return null;
     }
 
     @Singleton

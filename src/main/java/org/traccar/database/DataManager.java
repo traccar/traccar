@@ -25,6 +25,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.traccar.Context;
+import org.traccar.Main;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.BaseModel;
@@ -131,12 +132,12 @@ public class DataManager {
                     config.getString(Keys.DATABASE_DRIVER),
                     null, null, null, resourceAccessor);
 
-            Liquibase liquibase = new Liquibase(
-                    config.getString(Keys.DATABASE_CHANGELOG), resourceAccessor, database);
+            String changelog = config.getString(Keys.DATABASE_CHANGELOG);
 
-            liquibase.clearCheckSums();
-
-            liquibase.update(new Contexts());
+            try (Liquibase liquibase = new Liquibase(changelog, resourceAccessor, database)) {
+                liquibase.clearCheckSums();
+                liquibase.update(new Contexts());
+            }
         }
     }
 
@@ -146,7 +147,7 @@ public class DataManager {
                 new Condition.Or(
                         new Condition.Equals("email", "email", email.trim()),
                         new Condition.Equals("login", "email"))));
-        LdapProvider ldapProvider = Context.getLdapProvider();
+        LdapProvider ldapProvider = Main.getInjector().getInstance(LdapProvider.class);
         if (user != null) {
             if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
                     || !forceLdap && user.isPasswordValid(password)) {
