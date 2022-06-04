@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +16,11 @@
  */
 package org.traccar.api.resource;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import org.traccar.Context;
+import org.traccar.api.BaseResource;
+import org.traccar.helper.LogAction;
+import org.traccar.model.Permission;
+import org.traccar.storage.StorageException;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -29,34 +30,21 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.traccar.Context;
-import org.traccar.api.BaseResource;
-import org.traccar.helper.LogAction;
-import org.traccar.model.Device;
-import org.traccar.model.Permission;
-import org.traccar.model.User;
-import org.traccar.storage.StorageException;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 
 @Path("permissions")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PermissionsResource  extends BaseResource {
 
-    private void checkPermission(Permission permission, boolean link) {
-        if (!link && permission.getOwnerClass().equals(User.class)
-                && permission.getPropertyClass().equals(Device.class)) {
-            if (getUserId() != permission.getOwnerId()) {
-                Context.getPermissionsManager().checkUser(getUserId(), permission.getOwnerId());
-            } else {
-                Context.getPermissionsManager().checkAdmin(getUserId());
-            }
-        } else {
-            Context.getPermissionsManager().checkPermission(
-                    permission.getOwnerClass(), getUserId(), permission.getOwnerId());
+    private void checkPermission(Permission permission, boolean link) throws StorageException {
+        if (permissionsService.notAdmin(getUserId())) {
+            permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
+            permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
         }
-        Context.getPermissionsManager().checkPermission(
-                permission.getPropertyClass(), getUserId(), permission.getPropertyId());
     }
 
     private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) {

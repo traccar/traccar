@@ -15,6 +15,7 @@
  */
 package org.traccar.storage;
 
+import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
@@ -116,7 +117,8 @@ public class DatabaseStorage extends Storage {
 
     @Override
     public List<Permission> getPermissions(
-            Class<?> ownerClass, long ownerId, Class<?> propertyClass, long propertyId) throws StorageException {
+            Class<? extends BaseModel> ownerClass, long ownerId,
+            Class<? extends BaseModel> propertyClass, long propertyId) throws StorageException {
         StringBuilder query = new StringBuilder("SELECT * FROM ");
         query.append(Permission.getStorageName(ownerClass, propertyClass));
         var conditions = new LinkedList<Condition>();

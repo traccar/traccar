@@ -44,7 +44,7 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
         var conditions = new LinkedList<Condition>();
 
         if (all) {
-            if (!permissionsService.isAdmin(getUserId())) {
+            if (permissionsService.notAdmin(getUserId())) {
                 conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
             }
         } else {

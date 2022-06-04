@@ -66,7 +66,12 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         permissionsService.checkEdit(getUserId(), entity, true);
 
         BaseObjectManager<T> manager = Context.getManager(baseClass);
-        manager.addItem(entity);
+        if (manager != null) {
+            manager.addItem(entity);
+        } else {
+            entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
+        }
+
         LogAction.create(getUserId(), entity);
 
         storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
@@ -87,7 +92,15 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         permissionsService.checkEdit(getUserId(), entity, false);
         permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
 
-        Context.getManager(baseClass).updateItem(entity);
+        BaseObjectManager<T> manager = Context.getManager(baseClass);
+        if (manager != null) {
+            manager.updateItem(entity);
+        } else {
+            storage.updateObject(entity, new Request(
+                    new Columns.Exclude("id"),
+                    new Condition.Equals("id", "id")));
+        }
+
         LogAction.edit(getUserId(), entity);
 
         if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
@@ -104,15 +117,20 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         permissionsService.checkPermission(baseClass, getUserId(), id);
 
         BaseObjectManager<T> manager = Context.getManager(baseClass);
-        manager.removeItem(id);
+        if (manager != null) {
+            manager.removeItem(id);
+            if (manager instanceof SimpleObjectManager) {
+                ((SimpleObjectManager<T>) manager).refreshUserItems();
+                if (manager instanceof ExtendedObjectManager) {
+                    ((ExtendedObjectManager<T>) manager).refreshExtendedPermissions();
+                }
+            }
+        } else {
+            storage.removeObject(baseClass, new Request(new Condition.Equals("id", "id", id)));
+        }
+
         LogAction.remove(getUserId(), baseClass, id);
 
-        if (manager instanceof SimpleObjectManager) {
-            ((SimpleObjectManager<T>) manager).refreshUserItems();
-            if (manager instanceof ExtendedObjectManager) {
-                ((ExtendedObjectManager<T>) manager).refreshExtendedPermissions();
-            }
-        }
         if (baseClass.equals(Group.class) || baseClass.equals(Device.class) || baseClass.equals(User.class)) {
             if (baseClass.equals(Group.class)) {
                 Context.getGroupsManager().refreshItems();

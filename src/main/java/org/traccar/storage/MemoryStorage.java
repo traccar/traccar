@@ -15,6 +15,7 @@
  */
 package org.traccar.storage;
 
+import org.traccar.model.BaseModel;
 import org.traccar.model.Pair;
 import org.traccar.model.Permission;
 import org.traccar.storage.query.Request;
@@ -54,7 +55,8 @@ public class MemoryStorage extends Storage {
 
     @Override
     public List<Permission> getPermissions(
-            Class<?> ownerClass, long ownerId, Class<?> propertyClass, long propertyId) {
+            Class<? extends BaseModel> ownerClass, long ownerId,
+            Class<? extends BaseModel> propertyClass, long propertyId) {
         return getPermissionsSet(ownerClass, propertyClass).stream()
                 .filter(pair -> ownerId == 0 || pair.getFirst().equals(ownerId))
                 .filter(pair -> propertyId == 0 || pair.getSecond().equals(propertyId))

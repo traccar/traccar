@@ -240,8 +240,9 @@ public class DataManager {
         return storage.getPermissions(owner, property);
     }
 
-    public void linkObject(Class<?> owner, long ownerId, Class<?> property, long propertyId, boolean link)
-            throws StorageException {
+    public void linkObject(
+            Class<? extends BaseModel> owner, long ownerId,
+            Class<? extends BaseModel> property, long propertyId, boolean link) throws StorageException {
         if (link) {
             storage.addPermission(new Permission(owner, ownerId, property, propertyId));
         } else {

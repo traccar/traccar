@@ -15,6 +15,7 @@
  */
 package org.traccar.storage;
 
+import org.traccar.model.BaseModel;
 import org.traccar.model.Permission;
 import org.traccar.storage.query.Request;
 
@@ -31,24 +32,28 @@ public abstract class Storage {
     public abstract void removeObject(Class<?> clazz, Request request) throws StorageException;
 
     public abstract List<Permission> getPermissions(
-            Class<?> ownerClass, long ownerId, Class<?> propertyClass, long propertyId) throws StorageException;
+            Class<? extends BaseModel> ownerClass, long ownerId,
+            Class<? extends BaseModel> propertyClass, long propertyId) throws StorageException;
 
     public abstract void addPermission(Permission permission) throws StorageException;
 
     public abstract void removePermission(Permission permission) throws StorageException;
 
     public List<Permission> getPermissions(
-            Class<?> ownerClass, Class<?> propertyClass) throws StorageException {
+            Class<? extends BaseModel> ownerClass,
+            Class<? extends BaseModel> propertyClass) throws StorageException {
         return getPermissions(ownerClass, 0, propertyClass, 0);
     }
 
     public List<Permission> getPermissions(
-            Class<?> ownerClass, long ownerId, Class<?> propertyClass) throws StorageException {
+            Class<? extends BaseModel> ownerClass, long ownerId,
+            Class<? extends BaseModel> propertyClass) throws StorageException {
         return getPermissions(ownerClass, ownerId, propertyClass, 0);
     }
 
     public List<Permission> getPermissions(
-            Class<?> ownerClass, Class<?> propertyClass, long propertyId) throws StorageException {
+            Class<? extends BaseModel> ownerClass,
+            Class<? extends BaseModel> propertyClass, long propertyId) throws StorageException {
         return getPermissions(ownerClass, 0, propertyClass, propertyId);
     }
 

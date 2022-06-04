@@ -67,10 +67,8 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
             throw new IllegalArgumentException("Device has no last position");
         }
 
-        Object result = new ComputedAttributesHandler(
-                Context.getConfig(),
-                Context.getIdentityManager(),
-                Context.getAttributesManager()).computeAttribute(entity, last);
+        Object result = new ComputedAttributesHandler(Context.getConfig(), Context.getIdentityManager(), null)
+                .computeAttribute(entity, last);
         if (result != null) {
             switch (entity.getType()) {
                 case "number":

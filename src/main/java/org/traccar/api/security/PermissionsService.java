@@ -61,8 +61,8 @@ public class PermissionsService {
         return user;
     }
 
-    public boolean isAdmin(long userId) throws StorageException {
-        return getUser(userId).getAdministrator();
+    public boolean notAdmin(long userId) throws StorageException {
+        return !getUser(userId).getAdministrator();
     }
 
     public void checkAdmin(long userId) throws StorageException, SecurityException {
@@ -134,16 +134,11 @@ public class PermissionsService {
         if (!getUser(userId).getAdministrator() && !(clazz.equals(User.class) && userId == objectId)) {
             var objects = storage.getObjects(clazz, new Request(
                     new Columns.Include("id"),
-                    new Condition.Permission(
-                            User.class, userId, clazz.equals(User.class) ? ManagedUser.class : clazz)));
-            boolean found = false;
-            for (var object : objects) {
-                if (object.getId() == objectId) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
+                    new Condition.And(
+                            new Condition.Equals("id", "id", objectId),
+                            new Condition.Permission(
+                                    User.class, userId, clazz.equals(User.class) ? ManagedUser.class : clazz))));
+            if (!objects.isEmpty()) {
                 throw new SecurityException(clazz.getSimpleName() + " access denied");
             }
         }

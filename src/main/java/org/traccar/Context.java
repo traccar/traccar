@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.AttributesManager;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.CalendarManager;
 import org.traccar.database.CommandsManager;
@@ -44,7 +43,6 @@ import org.traccar.database.UsersManager;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
 import org.traccar.helper.SanitizerModule;
-import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
 import org.traccar.model.Command;
@@ -213,12 +211,6 @@ public final class Context {
         return eventForwarder;
     }
 
-    private static AttributesManager attributesManager;
-
-    public static AttributesManager getAttributesManager() {
-        return attributesManager;
-    }
-
     private static DriversManager driversManager;
 
     public static DriversManager getDriversManager() {
@@ -343,8 +335,6 @@ public final class Context {
             eventForwarder = new EventForwarder();
         }
 
-        attributesManager = new AttributesManager(dataManager);
-
         driversManager = new DriversManager(dataManager);
 
         commandsManager = new CommandsManager(dataManager, config.getBoolean(Keys.COMMANDS_QUEUEING));
@@ -398,8 +388,6 @@ public final class Context {
             return (BaseObjectManager<T>) usersManager;
         } else if (clazz.equals(Calendar.class)) {
             return (BaseObjectManager<T>) calendarManager;
-        } else if (clazz.equals(Attribute.class)) {
-            return (BaseObjectManager<T>) attributesManager;
         } else if (clazz.equals(Geofence.class)) {
             return (BaseObjectManager<T>) geofenceManager;
         } else if (clazz.equals(Driver.class)) {

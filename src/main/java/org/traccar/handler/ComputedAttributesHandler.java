@@ -34,11 +34,11 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.AttributesManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 
@@ -48,7 +48,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputedAttributesHandler.class);
 
     private final IdentityManager identityManager;
-    private final AttributesManager attributesManager;
+    private final CacheManager cacheManager;
 
     private final JexlEngine engine;
 
@@ -56,9 +56,9 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     @Inject
     public ComputedAttributesHandler(
-            Config config, IdentityManager identityManager, AttributesManager attributesManager) {
+            Config config, IdentityManager identityManager, CacheManager cacheManager) {
         this.identityManager = identityManager;
-        this.attributesManager = attributesManager;
+        this.cacheManager = cacheManager;
         engine = new JexlEngine();
         engine.setStrict(true);
         engine.setFunctions(Collections.singletonMap("math", Math.class));
@@ -107,8 +107,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        Collection<Attribute> attributes = attributesManager.getItems(
-                attributesManager.getAllDeviceItems(position.getDeviceId()));
+        Collection<Attribute> attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class);
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
                 Object result = null;

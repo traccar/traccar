@@ -31,12 +31,12 @@ import org.traccar.storage.QueryIgnore;
 
 public class Permission {
 
-    private static final Map<String, Class<?>> CLASSES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private static final Map<String, Class<? extends BaseModel>> CLASSES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     static {
         try {
             for (Class<?> clazz : ClassScanner.findSubclasses(BaseModel.class)) {
-                CLASSES.put(clazz.getSimpleName(), clazz);
+                CLASSES.put(clazz.getSimpleName(), (Class<? extends BaseModel>) clazz);
             }
         } catch (IOException | ReflectiveOperationException | URISyntaxException e) {
             throw new RuntimeException(e);
@@ -45,9 +45,9 @@ public class Permission {
 
     private final LinkedHashMap<String, Long> data;
 
-    private final Class<?> ownerClass;
+    private final Class<? extends BaseModel> ownerClass;
     private final long ownerId;
-    private final Class<?> propertyClass;
+    private final Class<? extends BaseModel> propertyClass;
     private final long propertyId;
 
     public Permission(LinkedHashMap<String, Long> data) {
@@ -61,7 +61,9 @@ public class Permission {
         propertyId = property.getValue();
     }
 
-    public Permission(Class<?> ownerClass, long ownerId, Class<?> propertyClass, long propertyId) {
+    public Permission(
+            Class<? extends BaseModel> ownerClass, long ownerId,
+            Class<? extends BaseModel> propertyClass, long propertyId) {
         this.ownerClass = ownerClass;
         this.ownerId = ownerId;
         this.propertyClass = propertyClass;
@@ -105,7 +107,7 @@ public class Permission {
 
     @QueryIgnore
     @JsonIgnore
-    public Class<?> getOwnerClass() {
+    public Class<? extends BaseModel> getOwnerClass() {
         return ownerClass;
     }
 
@@ -117,7 +119,7 @@ public class Permission {
 
     @QueryIgnore
     @JsonIgnore
-    public Class<?> getPropertyClass() {
+    public Class<? extends BaseModel> getPropertyClass() {
         return propertyClass;
     }
 

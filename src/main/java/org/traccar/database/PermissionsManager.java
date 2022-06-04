@@ -18,7 +18,6 @@ package org.traccar.database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
 import org.traccar.model.Command;
@@ -368,26 +367,8 @@ public class PermissionsManager {
 
         if (object.equals(Device.class)) {
             checkDevice(userId, objectId);
-        } else if (object.equals(Group.class)) {
-            checkGroup(userId, objectId);
-        } else if (object.equals(User.class) || object.equals(ManagedUser.class)) {
-            checkUser(userId, objectId);
-        } else if (object.equals(Geofence.class)) {
-            manager = Context.getGeofenceManager();
-        } else if (object.equals(Attribute.class)) {
-            manager = Context.getAttributesManager();
-        } else if (object.equals(Driver.class)) {
-            manager = Context.getDriversManager();
-        } else if (object.equals(Calendar.class)) {
-            manager = Context.getCalendarManager();
         } else if (object.equals(Command.class)) {
             manager = Context.getCommandsManager();
-        } else if (object.equals(Maintenance.class)) {
-            manager = Context.getMaintenancesManager();
-        } else if (object.equals(Notification.class)) {
-            manager = Context.getNotificationManager();
-        } else if (object.equals(Order.class)) {
-            manager = Context.getOrderManager();
         } else {
             throw new IllegalArgumentException("Unknown object type");
         }
@@ -409,7 +390,6 @@ public class PermissionsManager {
         }
         Context.getCalendarManager().refreshUserItems();
         Context.getDriversManager().refreshUserItems();
-        Context.getAttributesManager().refreshUserItems();
         Context.getCommandsManager().refreshUserItems();
         Context.getMaintenancesManager().refreshUserItems();
         if (Context.getNotificationManager() != null) {
@@ -422,7 +402,6 @@ public class PermissionsManager {
             Context.getGeofenceManager().refreshExtendedPermissions();
         }
         Context.getDriversManager().refreshExtendedPermissions();
-        Context.getAttributesManager().refreshExtendedPermissions();
         Context.getCommandsManager().refreshExtendedPermissions();
         Context.getMaintenancesManager().refreshExtendedPermissions();
     }
@@ -439,8 +418,6 @@ public class PermissionsManager {
                 Context.getGeofenceManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Driver.class)) {
                 Context.getDriversManager().refreshUserItems();
-            } else if (permission.getPropertyClass().equals(Attribute.class)) {
-                Context.getAttributesManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Calendar.class)) {
                 Context.getCalendarManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Command.class)) {
@@ -458,8 +435,6 @@ public class PermissionsManager {
                 Context.getGeofenceManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Driver.class)) {
                 Context.getDriversManager().refreshExtendedPermissions();
-            } else if (permission.getPropertyClass().equals(Attribute.class)) {
-                Context.getAttributesManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Command.class)) {
                 Context.getCommandsManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Maintenance.class)) {
