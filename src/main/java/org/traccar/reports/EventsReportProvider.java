@@ -38,11 +38,19 @@ import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
+import javax.inject.Inject;
+
 public class EventsReportProvider {
 
+    private final Storage storage;
+
+    @Inject
+    public EventsReportProvider(Storage storage) {
+        this.storage = storage;
+    }
+
     public Collection<Event> getObjects(
-            Storage storage, long userId,
-            Collection<Long> deviceIds, Collection<Long> groupIds,
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws StorageException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<Event> result = new ArrayList<>();
@@ -66,8 +74,7 @@ public class EventsReportProvider {
     }
 
     public void getExcel(
-            OutputStream outputStream, Storage storage, long userId,
-            Collection<Long> deviceIds, Collection<Long> groupIds,
+            OutputStream outputStream, long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws StorageException, IOException {
         ReportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReportSection> devicesEvents = new ArrayList<>();
