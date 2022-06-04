@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.config.Keys;
 import org.traccar.helper.ClassScanner;
 
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ConnectException;
@@ -29,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Singleton
 public class ServerManager implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);

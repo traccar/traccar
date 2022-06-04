@@ -55,7 +55,6 @@ import org.traccar.model.User;
 import org.traccar.notification.EventForwarder;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.reports.model.TripsConfig;
-import org.traccar.schedule.ScheduleManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
 import org.traccar.sms.SnsSmsClient;
@@ -147,18 +146,6 @@ public final class Context {
 
     public static WebServer getWebServer() {
         return webServer;
-    }
-
-    private static ServerManager serverManager;
-
-    public static ServerManager getServerManager() {
-        return serverManager;
-    }
-
-    private static ScheduleManager scheduleManager;
-
-    public static ScheduleManager getScheduleManager() {
-        return scheduleManager;
     }
 
     private static BroadcastService broadcastService;
@@ -315,9 +302,6 @@ public final class Context {
         }
 
         initEventsModule();
-
-        serverManager = new ServerManager();
-        scheduleManager = new ScheduleManager();
 
         if (config.hasKey(Keys.BROADCAST_ADDRESS)) {
             broadcastService = new BroadcastService(config, objectMapper);

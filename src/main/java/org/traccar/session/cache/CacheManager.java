@@ -50,8 +50,7 @@ import java.util.stream.Collectors;
 public class CacheManager {
 
     private static final Collection<Class<? extends BaseModel>> CLASSES = Arrays.asList(
-            Attribute.class, Command.class, Driver.class, Geofence.class,
-            Maintenance.class, Notification.class, Order.class);
+            Attribute.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
 
     private final Storage storage;
 

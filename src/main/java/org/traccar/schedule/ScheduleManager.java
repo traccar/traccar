@@ -17,9 +17,11 @@ package org.traccar.schedule;
 
 import org.traccar.LifecycleObject;
 
+import javax.inject.Singleton;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+@Singleton
 public class ScheduleManager implements LifecycleObject {
 
     private ScheduledExecutorService executor;

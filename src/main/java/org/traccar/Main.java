@@ -19,6 +19,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.schedule.ScheduleManager;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -117,9 +118,9 @@ public final class Main {
             LOGGER.info("Starting server...");
 
             List<LifecycleObject> services = new LinkedList<>();
-            services.add(Context.getServerManager());
+            services.add(injector.getInstance(ServerManager.class));
             services.add(Context.getWebServer());
-            services.add(Context.getScheduleManager());
+            services.add(injector.getInstance(ScheduleManager.class));
             services.add(Context.getBroadcastService());
 
             for (LifecycleObject service : services) {

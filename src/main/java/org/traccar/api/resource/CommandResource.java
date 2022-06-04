@@ -20,7 +20,7 @@ package org.traccar.api.resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
-import org.traccar.Context;
+import org.traccar.ServerManager;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.database.CommandsManager;
 import org.traccar.model.Command;
@@ -60,6 +60,9 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     @Inject
     private CommandsManager commandsManager;
 
+    @Inject
+    private ServerManager serverManager;
+
     public CommandResource() {
         super(Command.class);
     }
@@ -68,7 +71,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
         Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(), new Condition.LatestPositions(deviceId)));
         if (position != null) {
-            return Context.getServerManager().getProtocol(position.getProtocol());
+            return serverManager.getProtocol(position.getProtocol());
         } else {
             return null;
         }
