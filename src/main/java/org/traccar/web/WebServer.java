@@ -68,16 +68,17 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 
 public class WebServer implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
 
-    private Server server;
+    private final Server server;
 
-    private void initServer(Config config) {
-
+    public WebServer(Config config) {
         String address = config.getString(Keys.WEB_ADDRESS);
         int port = config.getInteger(Keys.WEB_PORT);
         if (address == null) {
@@ -85,11 +86,6 @@ public class WebServer implements LifecycleObject {
         } else {
             server = new Server(new InetSocketAddress(address, port));
         }
-    }
-
-    public WebServer(Config config) {
-
-        initServer(config);
 
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
 
@@ -106,8 +102,13 @@ public class WebServer implements LifecycleObject {
             @Override
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
-                writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
-                        + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
+                if (code == HttpStatus.NOT_FOUND_404 && request.getPathInfo().startsWith("/modern")) {
+                    writer.write(Files.readString(
+                            Paths.get(config.getString(Keys.WEB_PATH), "modern", "index.html")));
+                } else {
+                    writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
+                            + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
+                }
             }
         });
 
