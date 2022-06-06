@@ -26,6 +26,7 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
 import javax.annotation.security.PermitAll;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -33,10 +34,11 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 
-public class SecurityRequestFilter implements ContainerRequestFilter {
+public class SecurityRequestFilter implements ContainerRequestFilter, Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityRequestFilter.class);
 
@@ -73,19 +75,18 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         try {
 
             String authHeader = requestContext.getHeaderString(AUTHORIZATION_HEADER);
-            if (authHeader != null) {
 
+            if (authHeader != null) {
                 try {
-                    String[] auth = decodeBasicAuth(authHeader);
-                    User user = Context.getPermissionsManager().login(auth[0], auth[1]);
-                    if (user != null) {
-                        Main.getInjector().getInstance(StatisticsManager.class).registerRequest(user.getId());
-                        securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
+                    Long userId = GetUserIdFromBasicAuth(authHeader);
+
+                    if(userId != null) {
+                        Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
+                        securityContext = new UserSecurityContext(new UserPrincipal(userId));
                     }
                 } catch (StorageException e) {
                     throw new WebApplicationException(e);
                 }
-
             } else if (request.getSession() != null) {
 
                 Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
@@ -116,4 +117,38 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
     }
 
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        String authHeaders = httpRequest.getQueryString();
+        String queryAuthName = AUTHORIZATION_HEADER + "=";
+
+        if (authHeaders != null && authHeaders.contains(queryAuthName)) {
+            try {
+                Long userId = GetUserIdFromBasicAuth(authHeaders.replace(queryAuthName, ""));
+
+                if (userId != null) {
+                    httpRequest.getSession().setAttribute(SessionResource.USER_ID_KEY, userId);
+                }
+            }
+            catch (StorageException e) {}
+        }
+
+        chain.doFilter(httpRequest, response);
+    }
+
+    private Long GetUserIdFromBasicAuth(String authHeaders) throws StorageException {
+        if(authHeaders == null) {
+            return null;
+        }
+
+        String[] auth = decodeBasicAuth(authHeaders);
+        User user = Context.getPermissionsManager().login(auth[0], auth[1]);
+
+        if (user != null) {
+            return user.getId();
+        }
+
+        return null;
+    }
 }

@@ -48,13 +48,8 @@ import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.LifecycleObject;
 import org.traccar.Main;
-import org.traccar.api.DateParameterConverterProvider;
+import org.traccar.api.*;
 import org.traccar.config.Config;
-import org.traccar.api.AsyncSocketServlet;
-import org.traccar.api.CorsResponseFilter;
-import org.traccar.api.MediaFilter;
-import org.traccar.api.ObjectMapperProvider;
-import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.security.SecurityRequestFilter;
 import org.traccar.api.resource.ServerResource;
 import org.traccar.config.Keys;
@@ -165,6 +160,7 @@ public class WebServer implements LifecycleObject {
 
     private void initApi(Config config, ServletContextHandler servletHandler) {
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/api/socket");
+        servletHandler.addFilter(SecurityRequestFilter.class, "/api/socket", EnumSet.allOf(DispatcherType.class));
         JettyWebSocketServletContainerInitializer.configure(servletHandler, null);
 
         String mediaPath = config.getString(Keys.MEDIA_PATH);
