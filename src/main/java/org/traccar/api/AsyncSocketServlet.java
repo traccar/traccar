@@ -20,9 +20,15 @@ import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
 import org.traccar.Context;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.config.Keys;
+import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
 import javax.servlet.http.HttpSession;
+import javax.ws.rs.WebApplicationException;
 import java.time.Duration;
+
+import static org.traccar.api.security.SecurityRequestFilter.AUTHORIZATION_HEADER;
+import static org.traccar.api.security.SecurityRequestFilter.decodeBasicAuth;
 
 public class AsyncSocketServlet extends JettyWebSocketServlet {
 
@@ -30,13 +36,27 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
     public void configure(JettyWebSocketServletFactory factory) {
         factory.setIdleTimeout(Duration.ofMillis(Context.getConfig().getLong(Keys.WEB_TIMEOUT)));
         factory.setCreator((req, resp) -> {
-            if (req.getSession() != null) {
-                long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
-                return new AsyncSocket(userId);
+            String authHeader = req.getHeader(AUTHORIZATION_HEADER);
+            if (authHeader != null) {
+                try {
+                    String[] auth = decodeBasicAuth(authHeader);
+                    User user = Context.getPermissionsManager().login(auth[0], auth[1]);
+
+                    if (user != null) {
+                        return new AsyncSocket(user.getId());
+                    }
+                    return  null;
+                } catch (StorageException e) {
+                    throw new WebApplicationException(e);
+                }
             } else {
-                return null;
+                if (req.getSession() != null) {
+                    long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
+                    return new AsyncSocket(userId);
+                } else {
+                    return null;
+                }
             }
         });
     }
-
 }
