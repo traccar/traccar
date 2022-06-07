@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,13 @@ public class T800xProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2, -5, 0));
+                pipeline.addLast(new T800xProtocolEncoder(T800xProtocol.this));
+                pipeline.addLast(new T800xProtocolDecoder(T800xProtocol.this));
+            }
+        });
+        addServer(new TrackerServer(true, getName()) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new T800xProtocolEncoder(T800xProtocol.this));
                 pipeline.addLast(new T800xProtocolDecoder(T800xProtocol.this));
             }
