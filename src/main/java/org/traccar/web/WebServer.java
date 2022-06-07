@@ -118,7 +118,7 @@ public class WebServer implements LifecycleObject {
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
 
-        if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
+        if (config.hasKey(Keys.WEB_REQUEST_LOG_PATH)) {
             RequestLogWriter logWriter = new RequestLogWriter(config.getString(Keys.WEB_REQUEST_LOG_PATH));
             logWriter.setAppend(true);
             logWriter.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
