@@ -146,9 +146,11 @@ public final class ReportUtils {
         return null;
     }
 
-    public static String findDriverName(String driverUniqueId) {
-        if (driverUniqueId != null && Context.getDriversManager() != null) {
-            Driver driver = Context.getDriversManager().getDriverByUniqueId(driverUniqueId);
+    public static String findDriverName(Storage storage, String driverUniqueId) throws StorageException {
+        if (driverUniqueId != null) {
+            Driver driver = storage.getObject(Driver.class, new Request(
+                    new Columns.All(),
+                    new Condition.Equals("uniqueId", "uniqueId", driverUniqueId)));
             if (driver != null) {
                 return driver.getName();
             }
@@ -186,8 +188,8 @@ public final class ReportUtils {
     }
 
     private static TripReportItem calculateTrip(
-            IdentityManager identityManager, ArrayList<Position> positions,
-            int startIndex, int endIndex, boolean ignoreOdometer) {
+            Storage storage, IdentityManager identityManager, ArrayList<Position> positions,
+            int startIndex, int endIndex, boolean ignoreOdometer) throws StorageException {
 
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
@@ -238,7 +240,7 @@ public final class ReportUtils {
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));
-        trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
+        trip.setDriverName(findDriverName(storage, trip.getDriverUniqueId()));
 
         if (!ignoreOdometer
                 && startTrip.getDouble(Position.KEY_ODOMETER) != 0
@@ -303,11 +305,11 @@ public final class ReportUtils {
     }
 
     private static <T extends BaseReportItem> T calculateTripOrStop(
-            IdentityManager identityManager, ArrayList<Position> positions,
-            int startIndex, int endIndex, boolean ignoreOdometer, Class<T> reportClass) {
+            Storage storage, IdentityManager identityManager, ArrayList<Position> positions,
+            int startIndex, int endIndex, boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
 
         if (reportClass.equals(TripReportItem.class)) {
-            return (T) calculateTrip(identityManager, positions, startIndex, endIndex, ignoreOdometer);
+            return (T) calculateTrip(storage, identityManager, positions, startIndex, endIndex, ignoreOdometer);
         } else {
             return (T) calculateStop(identityManager, positions, startIndex, endIndex, ignoreOdometer);
         }
@@ -334,9 +336,9 @@ public final class ReportUtils {
     }
 
     public static <T extends BaseReportItem> Collection<T> detectTripsAndStops(
-            IdentityManager identityManager, DeviceManager deviceManager,
+            Storage storage, IdentityManager identityManager, DeviceManager deviceManager,
             Collection<Position> positionCollection,
-            TripsConfig tripsConfig, boolean ignoreOdometer, Class<T> reportClass) {
+            TripsConfig tripsConfig, boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
 
         Collection<T> result = new ArrayList<>();
 
@@ -369,13 +371,13 @@ public final class ReportUtils {
                 }
                 if (startEventIndex != -1 && startNoEventIndex != -1 && event != null
                         && trips != deviceState.getMotionState()) {
-                    result.add(calculateTripOrStop(identityManager, positions,
+                    result.add(calculateTripOrStop(storage, identityManager, positions,
                             startEventIndex, startNoEventIndex, ignoreOdometer, reportClass));
                     startEventIndex = -1;
                 }
             }
             if (startEventIndex != -1 && (startNoEventIndex != -1 || !trips)) {
-                result.add(calculateTripOrStop(identityManager, positions,
+                result.add(calculateTripOrStop(storage, identityManager, positions,
                         startEventIndex, startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1,
                         ignoreOdometer, reportClass));
             }

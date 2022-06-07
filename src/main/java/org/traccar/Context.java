@@ -26,7 +26,6 @@ import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.DriversManager;
 import org.traccar.database.GeofenceManager;
 import org.traccar.database.GroupsManager;
 import org.traccar.database.IdentityManager;
@@ -39,7 +38,6 @@ import org.traccar.helper.Log;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
-import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.Notification;
@@ -178,12 +176,6 @@ public final class Context {
         return eventForwarder;
     }
 
-    private static DriversManager driversManager;
-
-    public static DriversManager getDriversManager() {
-        return driversManager;
-    }
-
     private static SmsManager smsManager;
 
     public static SmsManager getSmsManager() {
@@ -277,8 +269,6 @@ public final class Context {
             eventForwarder = new EventForwarder(config);
         }
 
-        driversManager = new DriversManager(dataManager);
-
     }
 
     private static void initEventsModule() {
@@ -324,8 +314,6 @@ public final class Context {
             return (BaseObjectManager<T>) usersManager;
         } else if (clazz.equals(Geofence.class)) {
             return (BaseObjectManager<T>) geofenceManager;
-        } else if (clazz.equals(Driver.class)) {
-            return (BaseObjectManager<T>) driversManager;
         } else if (clazz.equals(Notification.class)) {
             return (BaseObjectManager<T>) notificationManager;
         }

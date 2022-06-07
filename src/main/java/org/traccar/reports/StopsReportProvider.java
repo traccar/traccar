@@ -35,9 +35,19 @@ import org.traccar.model.Group;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.reports.model.StopReportItem;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
+import javax.inject.Inject;
+
 public class StopsReportProvider {
+
+    private final Storage storage;
+
+    @Inject
+    public StopsReportProvider(Storage storage) {
+        this.storage = storage;
+    }
 
     private Collection<StopReportItem> detectStops(long deviceId, Date from, Date to) throws StorageException {
         boolean ignoreOdometer = Context.getDeviceManager()
@@ -47,7 +57,7 @@ public class StopsReportProvider {
         DeviceManager deviceManager = Main.getInjector().getInstance(DeviceManager.class);
 
         return ReportUtils.detectTripsAndStops(
-                identityManager, deviceManager, Context.getDataManager().getPositions(deviceId, from, to),
+                storage, identityManager, deviceManager, Context.getDataManager().getPositions(deviceId, from, to),
                 Context.getTripsConfig(), ignoreOdometer, StopReportItem.class);
     }
 

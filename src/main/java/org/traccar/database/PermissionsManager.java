@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
-import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.ManagedUser;
@@ -360,7 +359,6 @@ public class PermissionsManager {
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refreshUserItems();
         }
-        Context.getDriversManager().refreshUserItems();
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refreshUserItems();
         }
@@ -370,7 +368,6 @@ public class PermissionsManager {
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refreshExtendedPermissions();
         }
-        Context.getDriversManager().refreshExtendedPermissions();
     }
 
     public void refreshPermissions(Permission permission) {
@@ -383,8 +380,6 @@ public class PermissionsManager {
                 usersManager.refreshUserItems();
             } else if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
                 Context.getGeofenceManager().refreshUserItems();
-            } else if (permission.getPropertyClass().equals(Driver.class)) {
-                Context.getDriversManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshUserItems();
@@ -392,8 +387,6 @@ public class PermissionsManager {
         } else if (permission.getOwnerClass().equals(Device.class) || permission.getOwnerClass().equals(Group.class)) {
             if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
                 Context.getGeofenceManager().refreshExtendedPermissions();
-            } else if (permission.getPropertyClass().equals(Driver.class)) {
-                Context.getDriversManager().refreshExtendedPermissions();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshExtendedPermissions();

@@ -9,6 +9,7 @@ import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.TripReportItem;
 import org.traccar.reports.common.TripsConfig;
+import org.traccar.storage.Storage;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -79,7 +80,7 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
-    public void testDetectTripsSimple() throws ParseException {
+    public void testDetectTripsSimple() throws Exception {
 
         List<Position> data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 0, 0),
@@ -94,7 +95,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
 
         Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -109,7 +110,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
         Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -131,7 +132,7 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
-    public void testDetectTripsSimpleWithIgnition() throws ParseException {
+    public void testDetectTripsSimpleWithIgnition() throws Exception {
 
         List<Position> data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 0, 0),
@@ -148,7 +149,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, true, false, 0.01);
 
         Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -163,7 +164,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
         trips = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -178,7 +179,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
         Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -200,7 +201,7 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
-    public void testDetectTripsWithFluctuation() throws ParseException {
+    public void testDetectTripsWithFluctuation() throws Exception {
 
         List<Position> data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 0, 0),
@@ -219,7 +220,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
 
         Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -234,7 +235,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(7000, itemTrip.getDistance(), 0.01);
 
         Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -256,7 +257,7 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
-    public void testDetectStopsOnly() throws ParseException {
+    public void testDetectStopsOnly() throws Exception {
 
         Collection<Position> data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 0, 0),
@@ -269,7 +270,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
         Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -283,7 +284,7 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
-    public void testDetectStopsWithTripCut() throws ParseException {
+    public void testDetectStopsWithTripCut() throws Exception {
 
         Collection<Position> data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 0, 0),
@@ -296,7 +297,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
         Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -310,7 +311,7 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
-    public void testDetectStopsStartedFromTrip() throws ParseException {
+    public void testDetectStopsStartedFromTrip() throws Exception {
 
         Collection<Position> data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 2, 0),
@@ -323,7 +324,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
         Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -337,7 +338,7 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
-    public void testDetectStopsMoving() throws ParseException {
+    public void testDetectStopsMoving() throws Exception {
 
         Collection<Position> data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 5, 0),
@@ -350,7 +351,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
 
         Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -358,7 +359,7 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
-    public void testDetectTripAndStopByGap() throws ParseException {
+    public void testDetectTripAndStopByGap() throws Exception {
 
         Collection<Position> data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 7, 100),
@@ -373,7 +374,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, 900000, false, false, 0.01);
 
         Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -388,7 +389,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(600, itemTrip.getDistance(), 0.01);
 
         Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
-                mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());

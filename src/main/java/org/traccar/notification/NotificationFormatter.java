@@ -17,7 +17,6 @@
 package org.traccar.notification;
 
 import org.apache.velocity.VelocityContext;
-import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -55,7 +54,7 @@ public final class NotificationFormatter {
         }
         String driverUniqueId = event.getString(Position.KEY_DRIVER_UNIQUE_ID);
         if (driverUniqueId != null) {
-            velocityContext.put("driver", Context.getDriversManager().getDriverByUniqueId(driverUniqueId));
+            velocityContext.put("driver", cacheManager.findDriverByUniqueId(device.getId(), driverUniqueId));
         }
 
         return TextTemplateFormatter.formatMessage(velocityContext, event.getType(), templatePath);
