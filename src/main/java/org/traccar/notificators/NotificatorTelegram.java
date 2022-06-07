@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2021 Rafael Miquelino (rafaelmiquelino@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,10 +99,9 @@ public class NotificatorTelegram extends Notificator {
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) {
-        User user = Context.getPermissionsManager().getUser(userId);
+    public void sendSync(User user, Event event, Position position) {
         NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                Main.getInjector().getInstance(CacheManager.class), userId, event, position, "short");
+                Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
 
         TextMessage message = new TextMessage();
         message.chatId = user.getString("telegramChatId");
@@ -117,8 +116,8 @@ public class NotificatorTelegram extends Notificator {
     }
 
     @Override
-    public void sendAsync(long userId, Event event, Position position) {
-        sendSync(userId, event, position);
+    public void sendAsync(User user, Event event, Position position) {
+        sendSync(user, event, position);
     }
 
 }

@@ -33,9 +33,8 @@ public final class NotificationFormatter {
     }
 
     public static NotificationMessage formatMessage(
-            CacheManager cacheManager, long userId, Event event, Position position, String templatePath) {
+            CacheManager cacheManager, User user, Event event, Position position, String templatePath) {
 
-        User user = cacheManager.getObject(User.class, userId);
         Device device = cacheManager.getObject(Device.class, event.getDeviceId());
 
         VelocityContext velocityContext = TextTemplateFormatter.prepareContext(user);
@@ -44,9 +43,9 @@ public final class NotificationFormatter {
         velocityContext.put("event", event);
         if (position != null) {
             velocityContext.put("position", position);
-            velocityContext.put("speedUnit", ReportUtils.getSpeedUnit(userId));
-            velocityContext.put("distanceUnit", ReportUtils.getDistanceUnit(userId));
-            velocityContext.put("volumeUnit", ReportUtils.getVolumeUnit(userId));
+            velocityContext.put("speedUnit", ReportUtils.getSpeedUnit(user.getId()));
+            velocityContext.put("distanceUnit", ReportUtils.getDistanceUnit(user.getId()));
+            velocityContext.put("volumeUnit", ReportUtils.getVolumeUnit(user.getId()));
         }
         if (event.getGeofenceId() != 0) {
             velocityContext.put("geofence", cacheManager.getObject(Geofence.class, event.getGeofenceId()));

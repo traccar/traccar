@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,12 +19,13 @@ package org.traccar.notificators;
 import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 
 public final class NotificatorWeb extends Notificator {
 
     @Override
-    public void sendSync(long userId, Event event, Position position) {
-        Context.getConnectionManager().updateEvent(userId, event);
+    public void sendSync(User user, Event event, Position position) {
+        Context.getConnectionManager().updateEvent(user.getId(), event);
     }
 
 }

@@ -46,7 +46,7 @@ public class PermissionsService {
         this.storage = storage;
     }
 
-    private Server getServer() throws StorageException {
+    public Server getServer() throws StorageException {
         if (server == null) {
             server = storage.getObject(
                     Server.class, new Request(new Columns.All()));
@@ -54,7 +54,7 @@ public class PermissionsService {
         return server;
     }
 
-    private User getUser(long userId) throws StorageException {
+    public User getUser(long userId) throws StorageException {
         if (user == null) {
             user = storage.getObject(
                     User.class, new Request(new Columns.All(), new Condition.Equals("id", "id", userId)));

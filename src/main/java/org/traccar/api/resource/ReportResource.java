@@ -43,6 +43,7 @@ import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.model.UserRestrictions;
 import org.traccar.reports.EventsReportProvider;
 import org.traccar.reports.SummaryReportProvider;
@@ -97,8 +98,9 @@ public class ReportResource extends BaseResource {
                     attachment.setDataHandler(new DataHandler(new ByteArrayDataSource(
                             stream.toByteArray(), "application/octet-stream")));
 
+                    User user = permissionsService.getUser(userId);
                     Context.getMailManager().sendMessage(
-                            userId, "Report", "The report is in the attachment.", attachment);
+                            user, "Report", "The report is in the attachment.", attachment);
                 } catch (StorageException | IOException | MessagingException e) {
                     LOGGER.warn("Report failed", e);
                 }

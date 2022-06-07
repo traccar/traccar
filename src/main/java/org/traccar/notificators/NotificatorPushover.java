@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,7 @@ public class NotificatorPushover extends Notificator {
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) {
-
-        final User user = Context.getPermissionsManager().getUser(userId);
+    public void sendSync(User user, Event event, Position position) {
 
         String device = "";
 
@@ -80,7 +78,7 @@ public class NotificatorPushover extends Notificator {
         }
 
         NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                Main.getInjector().getInstance(CacheManager.class), userId, event, position, "short");
+                Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
 
         Message message = new Message();
         message.token = token;
@@ -103,8 +101,8 @@ public class NotificatorPushover extends Notificator {
     }
 
     @Override
-    public void sendAsync(long userId, Event event, Position position) {
-        sendSync(userId, event, position);
+    public void sendAsync(User user, Event event, Position position) {
+        sendSync(user, event, position);
     }
 
 }

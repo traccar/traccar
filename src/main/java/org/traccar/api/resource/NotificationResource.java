@@ -31,7 +31,9 @@ import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Typed;
+import org.traccar.model.User;
 import org.traccar.notification.MessageException;
+import org.traccar.storage.StorageException;
 
 @Path("notifications")
 @Produces(MediaType.APPLICATION_JSON)
@@ -56,10 +58,11 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
 
     @POST
     @Path("test")
-    public Response testMessage() throws MessageException, InterruptedException {
+    public Response testMessage() throws MessageException, InterruptedException, StorageException {
+        User user = permissionsService.getUser(getUserId());
         for (Typed method : Context.getNotificatorManager().getAllNotificatorTypes()) {
             Context.getNotificatorManager()
-                    .getNotificator(method.getType()).sendSync(getUserId(), new Event("test", 0), null);
+                    .getNotificator(method.getType()).sendSync(user, new Event("test", 0), null);
         }
         return Response.noContent().build();
     }
@@ -67,8 +70,9 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @POST
     @Path("test/{notificator}")
     public Response testMessage(@PathParam("notificator") String notificator)
-            throws MessageException, InterruptedException {
-        Context.getNotificatorManager().getNotificator(notificator).sendSync(getUserId(), new Event("test", 0), null);
+            throws MessageException, InterruptedException, StorageException {
+        User user = permissionsService.getUser(getUserId());
+        Context.getNotificatorManager().getNotificator(notificator).sendSync(user, new Event("test", 0), null);
         return Response.noContent().build();
     }
 

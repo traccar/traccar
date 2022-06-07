@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -92,14 +92,12 @@ public final class MailManager {
     }
 
     public void sendMessage(
-            long userId, String subject, String body) throws MessagingException {
-        sendMessage(userId, subject, body, null);
+            User user, String subject, String body) throws MessagingException {
+        sendMessage(user, subject, body, null);
     }
 
     public void sendMessage(
-            long userId, String subject, String body, MimeBodyPart attachment) throws MessagingException {
-        User user = Context.getPermissionsManager().getUser(userId);
-
+            User user, String subject, String body, MimeBodyPart attachment) throws MessagingException {
         Properties properties = null;
         if (!Context.getConfig().getBoolean("mail.smtp.ignoreUserConfig")) {
             properties = getProperties(new PropertiesProvider(user));

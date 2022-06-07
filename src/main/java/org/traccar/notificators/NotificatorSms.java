@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,11 +30,10 @@ import org.traccar.session.cache.CacheManager;
 public final class NotificatorSms extends Notificator {
 
     @Override
-    public void sendAsync(long userId, Event event, Position position) {
-        final User user = Context.getPermissionsManager().getUser(userId);
+    public void sendAsync(User user, Event event, Position position) {
         if (user.getPhone() != null) {
             NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                    Main.getInjector().getInstance(CacheManager.class), userId, event, position, "short");
+                    Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
             Main.getInjector().getInstance(StatisticsManager.class).registerSms();
             Context.getSmsManager().sendMessageAsync(user.getPhone(),
                     shortMessage.getBody(), false);
@@ -42,11 +41,10 @@ public final class NotificatorSms extends Notificator {
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) throws MessageException, InterruptedException {
-        final User user = Context.getPermissionsManager().getUser(userId);
+    public void sendSync(User user, Event event, Position position) throws MessageException, InterruptedException {
         if (user.getPhone() != null) {
             NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                    Main.getInjector().getInstance(CacheManager.class), userId, event, position, "short");
+                    Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
             Main.getInjector().getInstance(StatisticsManager.class).registerSms();
             Context.getSmsManager().sendMessageSync(user.getPhone(),
                     shortMessage.getBody(), false);

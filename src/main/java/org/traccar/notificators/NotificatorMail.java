@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +20,7 @@ import org.traccar.Context;
 import org.traccar.Main;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.notification.NotificationMessage;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
@@ -30,11 +31,11 @@ import javax.mail.MessagingException;
 public final class NotificatorMail extends Notificator {
 
     @Override
-    public void sendSync(long userId, Event event, Position position) throws MessageException {
+    public void sendSync(User user, Event event, Position position) throws MessageException {
         try {
             NotificationMessage fullMessage = NotificationFormatter.formatMessage(
-                    Main.getInjector().getInstance(CacheManager.class), userId, event, position, "full");
-            Context.getMailManager().sendMessage(userId, fullMessage.getSubject(), fullMessage.getBody());
+                    Main.getInjector().getInstance(CacheManager.class), user, event, position, "full");
+            Context.getMailManager().sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
         } catch (MessagingException e) {
             throw new MessageException(e);
         }

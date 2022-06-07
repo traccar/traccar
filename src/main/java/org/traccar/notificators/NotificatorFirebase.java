@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,12 +67,11 @@ public class NotificatorFirebase extends Notificator {
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) {
-        final User user = Context.getPermissionsManager().getUser(userId);
+    public void sendSync(User user, Event event, Position position) {
         if (user.getAttributes().containsKey("notificationTokens")) {
 
             NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                    Main.getInjector().getInstance(CacheManager.class), userId, event, position, "short");
+                    Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
 
             Notification notification = new Notification();
             notification.title = shortMessage.getSubject();
@@ -99,8 +98,8 @@ public class NotificatorFirebase extends Notificator {
     }
 
     @Override
-    public void sendAsync(long userId, Event event, Position position) {
-        sendSync(userId, event, position);
+    public void sendAsync(User user, Event event, Position position) {
+        sendSync(user, event, position);
     }
 
 }
