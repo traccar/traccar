@@ -69,7 +69,8 @@ public class CacheManager {
     public <T extends BaseModel> T getObject(Class<T> clazz, long id) {
         try {
             lock.readLock().lock();
-            return deviceCache.get(new CacheKey(clazz, id)).getValue();
+            var cacheValue = deviceCache.get(new CacheKey(clazz, id));
+            return cacheValue != null ? cacheValue.getValue() : null;
         } finally {
             lock.readLock().unlock();
         }
