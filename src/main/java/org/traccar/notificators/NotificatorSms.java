@@ -27,27 +27,15 @@ import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 import org.traccar.session.cache.CacheManager;
 
-public final class NotificatorSms extends Notificator {
+public final class NotificatorSms implements Notificator {
 
     @Override
-    public void sendAsync(User user, Event event, Position position) {
+    public void send(User user, Event event, Position position) throws MessageException, InterruptedException {
         if (user.getPhone() != null) {
             NotificationMessage shortMessage = NotificationFormatter.formatMessage(
                     Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
             Main.getInjector().getInstance(StatisticsManager.class).registerSms();
-            Context.getSmsManager().sendMessageAsync(user.getPhone(),
-                    shortMessage.getBody(), false);
-        }
-    }
-
-    @Override
-    public void sendSync(User user, Event event, Position position) throws MessageException, InterruptedException {
-        if (user.getPhone() != null) {
-            NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                    Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
-            Main.getInjector().getInstance(StatisticsManager.class).registerSms();
-            Context.getSmsManager().sendMessageSync(user.getPhone(),
-                    shortMessage.getBody(), false);
+            Context.getSmsManager().sendMessage(user.getPhone(), shortMessage.getBody(), false);
         }
     }
 

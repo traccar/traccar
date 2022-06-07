@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2021 Subodh Ranadive (subodhranadive3103@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,7 +54,7 @@ public class SnsSmsClient implements SmsManager {
     }
 
     @Override
-    public void sendMessageSync(String destAddress, String message, boolean command) {
+    public void sendMessage(String destAddress, String message, boolean command) {
         Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
         smsAttributes.put("AWS.SNS.SMS.SenderID",
                 new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
@@ -73,10 +73,5 @@ public class SnsSmsClient implements SmsManager {
             public void onSuccess(PublishRequest request, PublishResult result) {
             }
         });
-    }
-
-    @Override
-    public void sendMessageAsync(String destAddress, String message, boolean command) {
-        sendMessageSync(destAddress, message, command);
     }
 }

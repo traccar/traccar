@@ -79,7 +79,7 @@ public class CommandsManager {
                 BaseProtocol protocol = serverManager.getProtocol(position.getProtocol());
                 protocol.sendTextCommand(device.getPhone(), command);
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                smsManager.sendMessageSync(device.getPhone(), command.getString(Command.KEY_DATA), true);
+                smsManager.sendMessage(device.getPhone(), command.getString(Command.KEY_DATA), true);
             } else {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }

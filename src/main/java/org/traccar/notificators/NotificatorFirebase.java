@@ -32,7 +32,7 @@ import org.traccar.session.cache.CacheManager;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
 
-public class NotificatorFirebase extends Notificator {
+public class NotificatorFirebase implements Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorFirebase.class);
 
@@ -67,7 +67,7 @@ public class NotificatorFirebase extends Notificator {
     }
 
     @Override
-    public void sendSync(User user, Event event, Position position) {
+    public void send(User user, Event event, Position position) {
         if (user.getAttributes().containsKey("notificationTokens")) {
 
             NotificationMessage shortMessage = NotificationFormatter.formatMessage(
@@ -95,11 +95,6 @@ public class NotificatorFirebase extends Notificator {
                 }
             });
         }
-    }
-
-    @Override
-    public void sendAsync(User user, Event event, Position position) {
-        sendSync(user, event, position);
     }
 
 }

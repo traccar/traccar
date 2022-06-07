@@ -113,11 +113,11 @@ public abstract class BaseProtocol implements Protocol {
     public void sendTextCommand(String destAddress, Command command) throws Exception {
         if (Context.getSmsManager() != null) {
             if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                Context.getSmsManager().sendMessageSync(destAddress, command.getString(Command.KEY_DATA), true);
+                Context.getSmsManager().sendMessage(destAddress, command.getString(Command.KEY_DATA), true);
             } else if (supportedTextCommands.contains(command.getType()) && textCommandEncoder != null) {
                 String encodedCommand = (String) textCommandEncoder.encodeCommand(command);
                 if (encodedCommand != null) {
-                    Context.getSmsManager().sendMessageSync(destAddress, encodedCommand, true);
+                    Context.getSmsManager().sendMessage(destAddress, encodedCommand, true);
                 } else {
                     throw new RuntimeException("Failed to encode command");
                 }

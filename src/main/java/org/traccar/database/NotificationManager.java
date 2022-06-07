@@ -36,6 +36,7 @@ import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Typed;
 import org.traccar.model.User;
+import org.traccar.notification.MessageException;
 import org.traccar.storage.StorageException;
 
 public class NotificationManager extends ExtendedObjectManager<Notification> {
@@ -108,9 +109,15 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
             }
 
             User user = Context.getUsersManager().getById(userId);
-            for (String notificator : notificators) {
-                Context.getNotificatorManager().getNotificator(notificator).sendAsync(user, event, position);
-            }
+            new Thread(() -> {
+                for (String notificator : notificators) {
+                    try {
+                        Context.getNotificatorManager().getNotificator(notificator).send(user, event, position);
+                    } catch (MessageException | InterruptedException exception) {
+                        LOGGER.warn("Notification failed", exception);
+                    }
+                }
+            }).start();
         }
         if (Context.getEventForwarder() != null) {
             Context.getEventForwarder().forwardEvent(event, position, usersToForward);

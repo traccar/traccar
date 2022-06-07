@@ -22,17 +22,12 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 
-public final class NotificatorNull extends Notificator {
+public class NotificatorNull implements Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorNull.class);
 
     @Override
-    public void sendAsync(User user, Event event, Position position) {
-        LOGGER.warn("You are using null notificatior, please check your configuration, notification not sent");
-    }
-
-    @Override
-    public void sendSync(User user, Event event, Position position) {
+    public void send(User user, Event event, Position position) {
         LOGGER.warn("You are using null notificatior, please check your configuration, notification not sent");
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,8 +16,6 @@
  */
 package org.traccar.sms;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.config.Keys;
 import org.traccar.helper.DataConverter;
@@ -25,7 +23,6 @@ import org.traccar.notification.MessageException;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
@@ -33,8 +30,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class HttpSmsClient implements SmsManager {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpSmsClient.class);
 
     private final String url;
     private final String authorizationHeader;
@@ -91,26 +86,13 @@ public class HttpSmsClient implements SmsManager {
     }
 
     @Override
-    public void sendMessageSync(String destAddress, String message, boolean command) throws MessageException {
-        Response response = getRequestBuilder().post(Entity.entity(preparePayload(destAddress, message), mediaType));
-        if (response.getStatus() / 100 != 2) {
-            throw new MessageException(response.readEntity(String.class));
+    public void sendMessage(String destAddress, String message, boolean command) throws MessageException {
+        try (Response response = getRequestBuilder()
+                .post(Entity.entity(preparePayload(destAddress, message), mediaType))) {
+            if (response.getStatus() / 100 != 2) {
+                throw new MessageException(response.readEntity(String.class));
+            }
         }
-    }
-
-    @Override
-    public void sendMessageAsync(final String destAddress, final String message, final boolean command) {
-        getRequestBuilder().async().post(
-                Entity.entity(preparePayload(destAddress, message), mediaType), new InvocationCallback<String>() {
-            @Override
-            public void completed(String s) {
-            }
-
-            @Override
-            public void failed(Throwable throwable) {
-                LOGGER.warn("SMS send failed", throwable);
-            }
-        });
     }
 
 }

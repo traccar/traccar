@@ -31,7 +31,7 @@ import org.traccar.session.cache.CacheManager;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
 
-public class NotificatorPushover extends Notificator {
+public class NotificatorPushover implements Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorPushover.class);
 
@@ -59,7 +59,7 @@ public class NotificatorPushover extends Notificator {
     }
 
     @Override
-    public void sendSync(User user, Event event, Position position) {
+    public void send(User user, Event event, Position position) {
 
         String device = "";
 
@@ -98,11 +98,6 @@ public class NotificatorPushover extends Notificator {
                 LOGGER.warn("Pushover API error", throwable);
             }
         });
-    }
-
-    @Override
-    public void sendAsync(User user, Event event, Position position) {
-        sendSync(user, event, position);
     }
 
 }

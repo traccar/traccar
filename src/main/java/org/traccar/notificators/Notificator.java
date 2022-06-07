@@ -16,28 +16,13 @@
  */
 package org.traccar.notificators;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 
-public abstract class Notificator {
+public interface Notificator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Notificator.class);
-
-    public void sendAsync(User user, Event event, Position position) {
-        new Thread(() -> {
-            try {
-                sendSync(user, event, position);
-            } catch (MessageException | InterruptedException error) {
-                LOGGER.warn("Event send error", error);
-            }
-        }).start();
-    }
-
-    public abstract void sendSync(User user, Event event, Position position)
-        throws MessageException, InterruptedException;
+    void send(User user, Event event, Position position) throws MessageException, InterruptedException;
 
 }

@@ -21,10 +21,10 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 
-public final class NotificatorWeb extends Notificator {
+public final class NotificatorWeb implements Notificator {
 
     @Override
-    public void sendSync(User user, Event event, Position position) {
+    public void send(User user, Event event, Position position) {
         Context.getConnectionManager().updateEvent(user.getId(), event);
     }
 

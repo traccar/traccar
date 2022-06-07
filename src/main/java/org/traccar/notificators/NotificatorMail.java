@@ -28,10 +28,10 @@ import org.traccar.session.cache.CacheManager;
 
 import javax.mail.MessagingException;
 
-public final class NotificatorMail extends Notificator {
+public final class NotificatorMail implements Notificator {
 
     @Override
-    public void sendSync(User user, Event event, Position position) throws MessageException {
+    public void send(User user, Event event, Position position) throws MessageException {
         try {
             NotificationMessage fullMessage = NotificationFormatter.formatMessage(
                     Main.getInjector().getInstance(CacheManager.class), user, event, position, "full");

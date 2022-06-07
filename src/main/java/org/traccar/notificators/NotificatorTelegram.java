@@ -32,7 +32,7 @@ import org.traccar.session.cache.CacheManager;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
 
-public class NotificatorTelegram extends Notificator {
+public class NotificatorTelegram implements Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorTelegram.class);
 
@@ -99,7 +99,7 @@ public class NotificatorTelegram extends Notificator {
     }
 
     @Override
-    public void sendSync(User user, Event event, Position position) {
+    public void send(User user, Event event, Position position) {
         NotificationMessage shortMessage = NotificationFormatter.formatMessage(
                 Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
 
@@ -113,11 +113,6 @@ public class NotificatorTelegram extends Notificator {
         if (sendLocation && position != null) {
             executeRequest(urlSendLocation, createLocationMessage(message.chatId, position));
         }
-    }
-
-    @Override
-    public void sendAsync(User user, Event event, Position position) {
-        sendSync(user, event, position);
     }
 
 }
