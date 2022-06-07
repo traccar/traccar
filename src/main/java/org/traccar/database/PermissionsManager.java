@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.BaseModel;
-import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
@@ -361,7 +360,6 @@ public class PermissionsManager {
         if (Context.getGeofenceManager() != null) {
             Context.getGeofenceManager().refreshUserItems();
         }
-        Context.getCalendarManager().refreshUserItems();
         Context.getDriversManager().refreshUserItems();
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refreshUserItems();
@@ -387,8 +385,6 @@ public class PermissionsManager {
                 Context.getGeofenceManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Driver.class)) {
                 Context.getDriversManager().refreshUserItems();
-            } else if (permission.getPropertyClass().equals(Calendar.class)) {
-                Context.getCalendarManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshUserItems();

@@ -24,7 +24,6 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
-import org.traccar.database.CalendarManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.DriversManager;
@@ -39,7 +38,6 @@ import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.model.BaseModel;
-import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
@@ -50,6 +48,7 @@ import org.traccar.notification.EventForwarder;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.reports.common.TripsConfig;
 import org.traccar.session.ConnectionManager;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
 import org.traccar.sms.SnsSmsClient;
@@ -147,12 +146,6 @@ public final class Context {
 
     public static GeofenceManager getGeofenceManager() {
         return geofenceManager;
-    }
-
-    private static CalendarManager calendarManager;
-
-    public static CalendarManager getCalendarManager() {
-        return calendarManager;
     }
 
     private static NotificationManager notificationManager;
@@ -291,8 +284,7 @@ public final class Context {
     private static void initEventsModule() {
 
         geofenceManager = new GeofenceManager(dataManager);
-        calendarManager = new CalendarManager(dataManager);
-        notificationManager = new NotificationManager(dataManager);
+        notificationManager = new NotificationManager(dataManager, Main.getInjector().getInstance(CacheManager.class));
         notificatorManager = new NotificatorManager();
         Properties velocityProperties = new Properties();
         velocityProperties.setProperty("file.resource.loader.path",
@@ -330,8 +322,6 @@ public final class Context {
             return (BaseObjectManager<T>) groupsManager;
         } else if (clazz.equals(User.class)) {
             return (BaseObjectManager<T>) usersManager;
-        } else if (clazz.equals(Calendar.class)) {
-            return (BaseObjectManager<T>) calendarManager;
         } else if (clazz.equals(Geofence.class)) {
             return (BaseObjectManager<T>) geofenceManager;
         } else if (clazz.equals(Driver.class)) {

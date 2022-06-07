@@ -23,7 +23,6 @@ import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.CalendarManager;
 import org.traccar.database.LdapProvider;
 import org.traccar.session.ConnectionManager;
 import org.traccar.database.DataManager;
@@ -123,11 +122,6 @@ public class MainModule extends AbstractModule {
     @Provides
     public static GeofenceManager provideGeofenceManager() {
         return Context.getGeofenceManager();
-    }
-
-    @Provides
-    public static CalendarManager provideCalendarManager() {
-        return Context.getCalendarManager();
     }
 
     @Provides

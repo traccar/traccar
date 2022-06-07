@@ -37,16 +37,20 @@ import org.traccar.model.Position;
 import org.traccar.model.Typed;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
 public class NotificationManager extends ExtendedObjectManager<Notification> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
 
+    private final CacheManager cacheManager;
+
     private final boolean geocodeOnRequest;
 
-    public NotificationManager(DataManager dataManager) {
+    public NotificationManager(DataManager dataManager, CacheManager cacheManager) {
         super(dataManager, Notification.class);
+        this.cacheManager = cacheManager;
         geocodeOnRequest = Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST);
     }
 
@@ -56,7 +60,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
         for (long itemId : getUserItems(userId)) {
             if (getById(itemId).getAlways() || deviceNotifications.contains(itemId)) {
                 long calendarId = getById(itemId).getCalendarId();
-                Calendar calendar = calendarId != 0 ? Context.getCalendarManager().getById(calendarId) : null;
+                Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
                 if (calendar == null || calendar.checkMoment(time)) {
                     result.add(itemId);
                 }
