@@ -53,22 +53,12 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
         permissionsService.checkAdmin(getUserId());
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
 
-        Device device = storage.getObject(Device.class, new Request(
+        Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(),
-                new Condition.Equals("id", "id", deviceId)));
-        if (device == null) {
-            throw new IllegalArgumentException("Device not found");
-        }
-
-        Position last = storage.getObject(Position.class, new Request(
-                new Columns.All(),
-                new Condition.Equals("id", "id", device.getPositionId())));
-        if (last == null) {
-            throw new IllegalArgumentException("Device has no last position");
-        }
+                new Condition.LatestPositions(deviceId)));
 
         Object result = new ComputedAttributesHandler(Context.getConfig(), Context.getIdentityManager(), null)
-                .computeAttribute(entity, last);
+                .computeAttribute(entity, position);
         if (result != null) {
             switch (entity.getType()) {
                 case "number":

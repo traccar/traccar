@@ -72,7 +72,7 @@ public class CommandsManager {
         long deviceId = command.getDeviceId();
         if (command.getTextChannel()) {
             Device device = storage.getObject(Device.class, new Request(
-                    new Columns.All(), new Condition.Equals("id", "id", deviceId)));
+                    new Columns.Include("positionId", "phone"), new Condition.Equals("id", "id", deviceId)));
             Position position = storage.getObject(Position.class, new Request(
                     new Columns.All(), new Condition.Equals("id", "id", device.getPositionId())));
             if (position != null) {
