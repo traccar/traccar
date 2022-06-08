@@ -20,8 +20,10 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Permission;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
@@ -39,6 +41,9 @@ import java.util.Set;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PermissionsResource  extends BaseResource {
+
+    @Inject
+    private CacheManager cacheManager;
 
     private void checkPermission(Permission permission, boolean link) throws StorageException {
         if (permissionsService.notAdmin(getUserId())) {
@@ -67,6 +72,8 @@ public class PermissionsResource  extends BaseResource {
             checkPermission(permission, true);
             Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId(), true);
+            cacheManager.invalidate(permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId());
             LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
@@ -91,6 +98,8 @@ public class PermissionsResource  extends BaseResource {
             checkPermission(permission, false);
             Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId(), false);
+            cacheManager.invalidate(permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId());
             LogAction.unlink(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }

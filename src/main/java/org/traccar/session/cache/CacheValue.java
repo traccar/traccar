@@ -22,7 +22,7 @@ import java.util.Set;
 
 class CacheValue {
 
-    private final BaseModel value;
+    private BaseModel value;
     private final Set<Long> references = new HashSet<>();
 
     CacheValue(BaseModel value) {
@@ -40,6 +40,10 @@ class CacheValue {
     @SuppressWarnings("unchecked")
     public <T extends BaseModel> T getValue() {
         return (T) value;
+    }
+
+    public void setValue(BaseModel value) {
+        this.value = value;
     }
 
     public Set<Long> getReferences() {

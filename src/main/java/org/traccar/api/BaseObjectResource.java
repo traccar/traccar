@@ -27,11 +27,13 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import javax.inject.Inject;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -41,6 +43,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
 
 public abstract class BaseObjectResource<T extends BaseModel> extends BaseResource {
+
+    @Inject
+    private CacheManager cacheManager;
 
     protected final Class<T> baseClass;
 
@@ -75,6 +80,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         LogAction.create(getUserId(), entity);
 
         storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
+        cacheManager.invalidate(User.class, getUserId(), baseClass, entity.getId());
         LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
 
         if (manager instanceof SimpleObjectManager) {
@@ -100,6 +106,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                     new Columns.Exclude("id"),
                     new Condition.Equals("id", "id")));
         }
+        cacheManager.updateOrInvalidate(baseClass, entity.getId());
 
         LogAction.edit(getUserId(), entity);
 
@@ -128,6 +135,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         } else {
             storage.removeObject(baseClass, new Request(new Condition.Equals("id", "id", id)));
         }
+        cacheManager.updateOrInvalidate(baseClass, id);
 
         LogAction.remove(getUserId(), baseClass, id);
 
