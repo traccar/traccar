@@ -17,13 +17,14 @@
 package org.traccar.notification;
 
 import org.apache.velocity.VelocityContext;
+import org.traccar.helper.UserUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
+import org.traccar.model.Server;
 import org.traccar.model.User;
-import org.traccar.reports.common.ReportUtils;
 import org.traccar.session.cache.CacheManager;
 
 public final class NotificationFormatter {
@@ -34,17 +35,18 @@ public final class NotificationFormatter {
     public static NotificationMessage formatMessage(
             CacheManager cacheManager, User user, Event event, Position position, String templatePath) {
 
+        Server server = cacheManager.getServer();
         Device device = cacheManager.getObject(Device.class, event.getDeviceId());
 
-        VelocityContext velocityContext = TextTemplateFormatter.prepareContext(user);
+        VelocityContext velocityContext = TextTemplateFormatter.prepareContext(server, user);
 
         velocityContext.put("device", device);
         velocityContext.put("event", event);
         if (position != null) {
             velocityContext.put("position", position);
-            velocityContext.put("speedUnit", ReportUtils.getSpeedUnit(user.getId()));
-            velocityContext.put("distanceUnit", ReportUtils.getDistanceUnit(user.getId()));
-            velocityContext.put("volumeUnit", ReportUtils.getVolumeUnit(user.getId()));
+            velocityContext.put("speedUnit", UserUtil.getSpeedUnit(server, user));
+            velocityContext.put("distanceUnit", UserUtil.getDistanceUnit(server, user));
+            velocityContext.put("volumeUnit", UserUtil.getVolumeUnit(server, user));
         }
         if (event.getGeofenceId() != 0) {
             velocityContext.put("geofence", cacheManager.getObject(Geofence.class, event.getGeofenceId()));

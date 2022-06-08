@@ -27,6 +27,7 @@ import java.util.Date;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
 import org.traccar.Main;
+import org.traccar.api.security.PermissionsService;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
@@ -41,10 +42,12 @@ import javax.inject.Inject;
 
 public class TripsReportProvider {
 
+    private final PermissionsService permissionsService;
     private final Storage storage;
 
     @Inject
-    public TripsReportProvider(Storage storage) {
+    public TripsReportProvider(PermissionsService permissionsService, Storage storage) {
+        this.permissionsService = permissionsService;
         this.storage = storage;
     }
 
@@ -96,7 +99,8 @@ public class TripsReportProvider {
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/trips.xlsx")) {
-            org.jxls.common.Context jxlsContext = ReportUtils.initializeContext(userId);
+            var jxlsContext = ReportUtils.initializeContext(
+                    permissionsService.getServer(), permissionsService.getUser(userId));
             jxlsContext.putVar("devices", devicesTrips);
             jxlsContext.putVar("sheetNames", sheetNames);
             jxlsContext.putVar("from", from);

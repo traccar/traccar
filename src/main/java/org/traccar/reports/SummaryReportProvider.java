@@ -27,13 +27,24 @@ import java.util.Date;
 
 import org.jxls.util.JxlsHelper;
 import org.traccar.Context;
+import org.traccar.api.security.PermissionsService;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.UserUtil;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.SummaryReportItem;
 import org.traccar.storage.StorageException;
 
+import javax.inject.Inject;
+
 public class SummaryReportProvider {
+
+    private final PermissionsService permissionsService;
+
+    @Inject
+    public SummaryReportProvider(PermissionsService permissionsService) {
+        this.permissionsService = permissionsService;
+    }
 
     private SummaryReportItem calculateSummaryResult(long deviceId, Collection<Position> positions) {
         SummaryReportItem result = new SummaryReportItem();
@@ -88,8 +99,9 @@ public class SummaryReportProvider {
         return result;
     }
 
-    private int getDay(long userId, Date date) {
-        Calendar calendar = Calendar.getInstance(ReportUtils.getTimezone(userId));
+    private int getDay(long userId, Date date) throws StorageException {
+        Calendar calendar = Calendar.getInstance(UserUtil.getTimezone(
+                permissionsService.getServer(), permissionsService.getUser(userId)));
         calendar.setTime(date);
         return calendar.get(Calendar.DAY_OF_MONTH);
     }
@@ -144,7 +156,8 @@ public class SummaryReportProvider {
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/summary.xlsx")) {
-            org.jxls.common.Context jxlsContext = ReportUtils.initializeContext(userId);
+            var jxlsContext = ReportUtils.initializeContext(
+                    permissionsService.getServer(), permissionsService.getUser(userId));
             jxlsContext.putVar("summaries", summaries);
             jxlsContext.putVar("from", from);
             jxlsContext.putVar("to", to);

@@ -26,6 +26,7 @@ import java.util.Date;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
+import org.traccar.api.security.PermissionsService;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
@@ -33,7 +34,16 @@ import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.StorageException;
 
+import javax.inject.Inject;
+
 public class RouteReportProvider {
+
+    private final PermissionsService permissionsService;
+
+    @Inject
+    public RouteReportProvider(PermissionsService permissionsService) {
+        this.permissionsService = permissionsService;
+    }
 
     public Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
@@ -72,7 +82,8 @@ public class RouteReportProvider {
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/route.xlsx")) {
-            org.jxls.common.Context jxlsContext = ReportUtils.initializeContext(userId);
+            var jxlsContext = ReportUtils.initializeContext(
+                    permissionsService.getServer(), permissionsService.getUser(userId));
             jxlsContext.putVar("devices", devicesRoutes);
             jxlsContext.putVar("sheetNames", sheetNames);
             jxlsContext.putVar("from", from);

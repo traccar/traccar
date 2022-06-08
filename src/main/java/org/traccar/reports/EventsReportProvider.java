@@ -28,6 +28,7 @@ import java.util.Iterator;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
+import org.traccar.api.security.PermissionsService;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -42,10 +43,12 @@ import javax.inject.Inject;
 
 public class EventsReportProvider {
 
+    private final PermissionsService permissionsService;
     private final Storage storage;
 
     @Inject
-    public EventsReportProvider(Storage storage) {
+    public EventsReportProvider(PermissionsService permissionsService, Storage storage) {
+        this.permissionsService = permissionsService;
         this.storage = storage;
     }
 
@@ -127,7 +130,8 @@ public class EventsReportProvider {
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/events.xlsx")) {
-            org.jxls.common.Context jxlsContext = ReportUtils.initializeContext(userId);
+            var jxlsContext = ReportUtils.initializeContext(
+                    permissionsService.getServer(), permissionsService.getUser(userId));
             jxlsContext.putVar("devices", devicesEvents);
             jxlsContext.putVar("sheetNames", sheetNames);
             jxlsContext.putVar("geofenceNames", geofenceNames);

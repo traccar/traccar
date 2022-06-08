@@ -15,6 +15,7 @@
  */
 package org.traccar.api.security;
 
+import com.google.inject.servlet.RequestScoped;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
 import org.traccar.model.Command;
@@ -34,6 +35,7 @@ import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 
+@RequestScoped
 public class PermissionsService {
 
     private final Storage storage;

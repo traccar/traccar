@@ -15,6 +15,7 @@
  */
 package org.traccar.web;
 
+import com.google.inject.servlet.GuiceFilter;
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
@@ -164,6 +165,8 @@ public class WebServer implements LifecycleObject {
     }
 
     private void initApi(Config config, ServletContextHandler servletHandler) {
+        servletHandler.addFilter(GuiceFilter.class, "/api/*", EnumSet.allOf(DispatcherType.class));
+
         servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/api/socket");
         JettyWebSocketServletContainerInitializer.configure(servletHandler, null);
 

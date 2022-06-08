@@ -412,16 +412,4 @@ public class PermissionsManager {
         return null;
     }
 
-    public Object lookupAttribute(long userId, String key, Object defaultValue) {
-        Object preference;
-        Object serverPreference = server.getAttributes().get(key);
-        Object userPreference = getUser(userId).getAttributes().get(key);
-        if (server.getForceSettings()) {
-            preference = serverPreference != null ? serverPreference : userPreference;
-        } else {
-            preference = userPreference != null ? userPreference : serverPreference;
-        }
-        return preference != null ? preference : defaultValue;
-    }
-
 }

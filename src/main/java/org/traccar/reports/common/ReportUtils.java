@@ -31,7 +31,9 @@ import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.UserUtil;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.session.DeviceState;
 import org.traccar.model.Driver;
@@ -58,7 +60,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 public final class ReportUtils {
 
@@ -79,23 +80,6 @@ public final class ReportUtils {
         if (limit > 0 && to.getTime() - from.getTime() > limit) {
             throw new IllegalArgumentException("Time period exceeds the limit");
         }
-    }
-
-    public static String getDistanceUnit(long userId) {
-        return (String) Context.getPermissionsManager().lookupAttribute(userId, "distanceUnit", "km");
-    }
-
-    public static String getSpeedUnit(long userId) {
-        return (String) Context.getPermissionsManager().lookupAttribute(userId, "speedUnit", "kn");
-    }
-
-    public static String getVolumeUnit(long userId) {
-        return (String) Context.getPermissionsManager().lookupAttribute(userId, "volumeUnit", "ltr");
-    }
-
-    public static TimeZone getTimezone(long userId) {
-        String timezone = (String) Context.getPermissionsManager().lookupAttribute(userId, "timezone", null);
-        return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
     }
 
     public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
@@ -158,15 +142,15 @@ public final class ReportUtils {
         return null;
     }
 
-    public static org.jxls.common.Context initializeContext(long userId) {
+    public static org.jxls.common.Context initializeContext(Server server, User user) {
         org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
-        jxlsContext.putVar("distanceUnit", getDistanceUnit(userId));
-        jxlsContext.putVar("speedUnit", getSpeedUnit(userId));
-        jxlsContext.putVar("volumeUnit", getVolumeUnit(userId));
+        jxlsContext.putVar("distanceUnit", UserUtil.getDistanceUnit(server, user));
+        jxlsContext.putVar("speedUnit", UserUtil.getSpeedUnit(server, user));
+        jxlsContext.putVar("volumeUnit", UserUtil.getVolumeUnit(server, user));
         jxlsContext.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
         jxlsContext.putVar("dateTool", new DateTool());
         jxlsContext.putVar("numberTool", new NumberTool());
-        jxlsContext.putVar("timezone", getTimezone(userId));
+        jxlsContext.putVar("timezone", UserUtil.getTimezone(server, user));
         jxlsContext.putVar("locale", Locale.getDefault());
         jxlsContext.putVar("bracketsRegex", "[\\{\\}\"]");
         return jxlsContext;

@@ -23,6 +23,7 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
+import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -57,12 +58,14 @@ public class CacheManager {
     private final Map<CacheKey, CacheValue> deviceCache = new HashMap<>();
     private final Map<Long, Map<Class<? extends BaseModel>, List<Long>>> deviceLinks = new HashMap<>();
 
+    private Server server;
     private final Map<Long, Position> devicePositions = new HashMap<>();
     private final Map<Long, List<User>> notificationUsers = new HashMap<>();
 
     @Inject
     public CacheManager(Storage storage) throws StorageException {
         this.storage = storage;
+        invalidateServer();
         invalidateUsers();
     }
 
@@ -91,6 +94,15 @@ public class CacheManager {
         try {
             lock.readLock().lock();
             return devicePositions.get(deviceId);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public Server getServer() {
+        try {
+            lock.readLock().lock();
+            return server;
         } finally {
             lock.readLock().unlock();
         }
@@ -152,6 +164,10 @@ public class CacheManager {
             Class<? extends BaseModel> clazz1, long id1,
             Class<? extends BaseModel> clazz2, long id2) throws StorageException {
         invalidate(new CacheKey(clazz1, id1), new CacheKey(clazz2, id2));
+    }
+
+    private void invalidateServer() throws StorageException {
+        server = storage.getObject(Server.class, new Request(new Columns.All()));
     }
 
     private void invalidateUsers() throws StorageException {
@@ -220,20 +236,28 @@ public class CacheManager {
     }
 
     private void unsafeInvalidate(CacheKey[] keys) throws StorageException {
+        boolean invalidateServer = false;
         boolean invalidateUsers = false;
         Set<Long> linkedDevices = new HashSet<>();
         for (var key : keys) {
-            if (key.classIs(User.class) || key.classIs(Notification.class)) {
-                invalidateUsers = true;
+            if (key.classIs(Server.class)) {
+                invalidateServer = true;
+            } else {
+                if (key.classIs(User.class) || key.classIs(Notification.class)) {
+                    invalidateUsers = true;
+                }
+                deviceCache.computeIfPresent(key, (k, value) -> {
+                    linkedDevices.addAll(value.getReferences());
+                    return value;
+                });
             }
-            deviceCache.computeIfPresent(key, (k, value) -> {
-                linkedDevices.addAll(value.getReferences());
-                return value;
-            });
         }
         for (long deviceId : linkedDevices) {
             unsafeRemoveDevice(deviceId);
             unsafeAddDevice(deviceId);
+        }
+        if (invalidateServer) {
+            invalidateServer();
         }
         if (invalidateUsers) {
             invalidateUsers();

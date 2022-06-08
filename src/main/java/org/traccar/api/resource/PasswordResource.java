@@ -51,7 +51,8 @@ public class PasswordResource extends BaseResource {
                 String token = UUID.randomUUID().toString().replaceAll("-", "");
                 user.set(PASSWORD_RESET_TOKEN, token);
                 Context.getUsersManager().updateItem(user);
-                VelocityContext velocityContext = TextTemplateFormatter.prepareContext(null);
+                VelocityContext velocityContext = TextTemplateFormatter.prepareContext(
+                        permissionsService.getServer(), user);
                 velocityContext.put("token", token);
                 NotificationMessage fullMessage =
                         TextTemplateFormatter.formatMessage(velocityContext, "passwordReset", "full");

@@ -17,6 +17,7 @@ package org.traccar;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.servlet.ServletModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.schedule.ScheduleManager;
@@ -111,7 +112,7 @@ public final class Main {
 
     public static void run(String configFile) {
         try {
-            injector = Guice.createInjector(new MainModule());
+            injector = Guice.createInjector(new MainModule(), new ServletModule());
             Context.init(configFile);
             logSystemInfo();
             LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());

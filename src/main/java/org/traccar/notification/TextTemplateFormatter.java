@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.helper.UserUtil;
+import org.traccar.model.Server;
 import org.traccar.model.User;
-import org.traccar.reports.common.ReportUtils;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -38,13 +39,13 @@ public final class TextTemplateFormatter {
     private TextTemplateFormatter() {
     }
 
-    public static VelocityContext prepareContext(User user) {
+    public static VelocityContext prepareContext(Server server, User user) {
 
         VelocityContext velocityContext = new VelocityContext();
 
         if (user != null) {
             velocityContext.put("user", user);
-            velocityContext.put("timezone", ReportUtils.getTimezone(user.getId()));
+            velocityContext.put("timezone", UserUtil.getTimezone(server, user));
         }
 
         velocityContext.put("webUrl", Context.getVelocityEngine().getProperty("web.url"));
