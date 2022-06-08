@@ -106,7 +106,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                     new Columns.Exclude("id"),
                     new Condition.Equals("id", "id")));
         }
-        cacheManager.updateOrInvalidate(baseClass, entity.getId());
+        cacheManager.updateOrInvalidate(entity);
 
         LogAction.edit(getUserId(), entity);
 
@@ -135,7 +135,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         } else {
             storage.removeObject(baseClass, new Request(new Condition.Equals("id", "id", id)));
         }
-        cacheManager.updateOrInvalidate(baseClass, id);
+        cacheManager.invalidate(baseClass, id);
 
         LogAction.remove(getUserId(), baseClass, id);
 

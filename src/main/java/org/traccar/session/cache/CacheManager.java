@@ -136,34 +136,41 @@ public class CacheManager {
         }
     }
 
-    public void updateOrInvalidate(Class<? extends BaseModel> clazz, long id) throws StorageException {
-        boolean invalidate = false;
-        var before = getObject(clazz, id);
-        var after = storage.getObject(clazz, new Request(
+    public <T extends BaseModel> void updateOrInvalidate(Class<T> clazz, long id) throws StorageException {
+        var object = storage.getObject(clazz, new Request(
                 new Columns.All(), new Condition.Equals("id", "id", id)));
+        if (object != null) {
+            updateOrInvalidate(object);
+        } else {
+            invalidate(clazz, id);
+        }
+    }
+
+    public <T extends BaseModel> void updateOrInvalidate(T object) throws StorageException {
+        boolean invalidate = false;
+        var before = getObject(object.getClass(), object.getId());
         if (before == null) {
             return;
-        } else if (after == null) {
-            invalidate = true;
-        } else if (clazz.isInstance(GroupedModel.class)) {
-            if (((GroupedModel) before).getGroupId() != ((GroupedModel) after).getGroupId()) {
+        } else if (object instanceof GroupedModel) {
+            if (((GroupedModel) before).getGroupId() != ((GroupedModel) object).getGroupId()) {
                 invalidate = true;
             }
         }
         if (invalidate) {
-            invalidate(new CacheKey(clazz, id));
+            invalidate(object.getClass(), object.getId());
         } else {
+            // TODO if device, also need to update geofences
             try {
                 lock.writeLock().lock();
-                var cacheValue = deviceCache.get(new CacheKey(clazz, id));
-                if (cacheValue != null) {
-                    cacheValue.setValue(after);
-                }
-                // TODO if device, also need to update geofences
+                deviceCache.get(new CacheKey(object.getClass(), object.getId())).setValue(object);
             } finally {
                 lock.writeLock().unlock();
             }
         }
+    }
+
+    public <T extends BaseModel> void invalidate(Class<T> clazz, long id) throws StorageException {
+        invalidate(new CacheKey(clazz, id));
     }
 
     public void invalidate(
