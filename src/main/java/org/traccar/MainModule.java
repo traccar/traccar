@@ -57,7 +57,6 @@ import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
-import org.traccar.reports.common.TripsConfig;
 import org.traccar.sms.SmsManager;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
@@ -108,11 +107,6 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Client provideClient() {
         return Context.getClient();
-    }
-
-    @Provides
-    public static TripsConfig provideTripsConfig() {
-        return Context.getTripsConfig();
     }
 
     @Provides

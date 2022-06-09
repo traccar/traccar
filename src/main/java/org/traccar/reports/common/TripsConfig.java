@@ -16,9 +16,27 @@
  */
 package org.traccar.reports.common;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+
+import javax.inject.Inject;
+
 public class TripsConfig {
 
-    public TripsConfig(double minimalTripDistance, long minimalTripDuration, long minimalParkingDuration,
+    @Inject
+    public TripsConfig(Config config) {
+        this(
+                config.getLong(Keys.REPORT_TRIP_MINIMAL_TRIP_DISTANCE),
+                config.getLong(Keys.REPORT_TRIP_MINIMAL_TRIP_DURATION) * 1000,
+                config.getLong(Keys.REPORT_TRIP_MINIMAL_PARKING_DURATION) * 1000,
+                config.getLong(Keys.REPORT_TRIP_MINIMAL_NO_DATA_DURATION) * 1000,
+                config.getBoolean(Keys.REPORT_TRIP_USE_IGNITION),
+                config.getBoolean(Keys.EVENT_MOTION_PROCESS_INVALID_POSITIONS),
+                config.getDouble(Keys.EVENT_MOTION_SPEED_THRESHOLD));
+    }
+
+    public TripsConfig(
+            double minimalTripDistance, long minimalTripDuration, long minimalParkingDuration,
             long minimalNoDataDuration, boolean useIgnition, boolean processInvalidPositions, double speedThreshold) {
         this.minimalTripDistance = minimalTripDistance;
         this.minimalTripDuration = minimalTripDuration;

@@ -34,6 +34,7 @@ import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.common.ReportUtils;
+import org.traccar.reports.common.TripsConfig;
 import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.storage.Storage;
@@ -45,11 +46,13 @@ public class StopsReportProvider {
 
     private final PermissionsService permissionsService;
     private final Storage storage;
+    private final TripsConfig tripsConfig;
 
     @Inject
-    public StopsReportProvider(PermissionsService permissionsService, Storage storage) {
+    public StopsReportProvider(PermissionsService permissionsService, Storage storage, TripsConfig tripsConfig) {
         this.permissionsService = permissionsService;
         this.storage = storage;
+        this.tripsConfig = tripsConfig;
     }
 
     private Collection<StopReportItem> detectStops(long deviceId, Date from, Date to) throws StorageException {
@@ -61,7 +64,7 @@ public class StopsReportProvider {
 
         return ReportUtils.detectTripsAndStops(
                 storage, identityManager, deviceManager, Context.getDataManager().getPositions(deviceId, from, to),
-                Context.getTripsConfig(), ignoreOdometer, StopReportItem.class);
+                tripsConfig, ignoreOdometer, StopReportItem.class);
     }
 
     public Collection<StopReportItem> getObjects(

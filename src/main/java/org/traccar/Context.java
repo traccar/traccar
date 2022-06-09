@@ -41,7 +41,6 @@ import org.traccar.model.Notification;
 import org.traccar.model.User;
 import org.traccar.notification.EventForwarder;
 import org.traccar.notification.NotificatorManager;
-import org.traccar.reports.common.TripsConfig;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.HttpSmsClient;
@@ -167,23 +166,6 @@ public final class Context {
         return smsManager;
     }
 
-    private static TripsConfig tripsConfig;
-
-    public static TripsConfig getTripsConfig() {
-        return tripsConfig;
-    }
-
-    public static TripsConfig initTripsConfig() {
-        return new TripsConfig(
-                config.getLong(Keys.REPORT_TRIP_MINIMAL_TRIP_DISTANCE),
-                config.getLong(Keys.REPORT_TRIP_MINIMAL_TRIP_DURATION) * 1000,
-                config.getLong(Keys.REPORT_TRIP_MINIMAL_PARKING_DURATION) * 1000,
-                config.getLong(Keys.REPORT_TRIP_MINIMAL_NO_DATA_DURATION) * 1000,
-                config.getBoolean(Keys.REPORT_TRIP_USE_IGNITION),
-                config.getBoolean(Keys.EVENT_MOTION_PROCESS_INVALID_POSITIONS),
-                config.getDouble(Keys.EVENT_MOTION_SPEED_THRESHOLD));
-    }
-
     private static class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
 
         @Override
@@ -235,8 +217,6 @@ public final class Context {
         permissionsManager = new PermissionsManager(dataManager, usersManager);
 
         connectionManager = new ConnectionManager();
-
-        tripsConfig = initTripsConfig();
 
         if (config.hasKey(Keys.SMS_HTTP_URL)) {
             smsManager = new HttpSmsClient();
