@@ -15,6 +15,7 @@
  */
 package org.traccar.session.cache;
 
+import org.traccar.helper.model.GeofenceUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
@@ -181,12 +182,15 @@ public class CacheManager {
         if (invalidate) {
             invalidate(object.getClass(), object.getId());
         } else {
-            // TODO if device, also need to update geofences
             try {
                 lock.writeLock().lock();
                 deviceCache.get(new CacheKey(object.getClass(), object.getId())).setValue(object);
             } finally {
                 lock.writeLock().unlock();
+            }
+
+            if (object instanceof Device) {
+                invalidateDeviceGeofences((Device) object);
             }
         }
     }
@@ -254,6 +258,8 @@ public class CacheManager {
             devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
                     new Columns.All(), new Condition.Equals("id", "id", device.getPositionId()))));
         }
+
+        invalidateDeviceGeofences(device);
     }
 
     private void unsafeRemoveDevice(long deviceId) {
@@ -303,6 +309,13 @@ public class CacheManager {
         }
         if (invalidateUsers) {
             invalidateUsers();
+        }
+    }
+
+    private void invalidateDeviceGeofences(Device device) {
+        Position position = getPosition(device.getId());
+        if (position != null) {
+            device.setGeofenceIds(GeofenceUtil.getCurrentGeofences(this, position));
         }
     }
 

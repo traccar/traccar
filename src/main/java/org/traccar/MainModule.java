@@ -27,7 +27,6 @@ import org.traccar.database.LdapProvider;
 import org.traccar.session.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.GeofenceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.AddressFormat;
@@ -117,11 +116,6 @@ public class MainModule extends AbstractModule {
     @Provides
     public static DeviceManager provideDeviceManager() {
         return Context.getDeviceManager();
-    }
-
-    @Provides
-    public static GeofenceManager provideGeofenceManager() {
-        return Context.getGeofenceManager();
     }
 
     @Provides

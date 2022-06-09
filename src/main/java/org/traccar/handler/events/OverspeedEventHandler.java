@@ -23,12 +23,12 @@ import io.netty.channel.ChannelHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.GeofenceManager;
 import org.traccar.model.Device;
 import org.traccar.session.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 
@@ -39,16 +39,16 @@ public class OverspeedEventHandler extends BaseEventHandler {
     public static final String ATTRIBUTE_SPEED_LIMIT = "speedLimit";
 
     private final DeviceManager deviceManager;
-    private final GeofenceManager geofenceManager;
+    private final CacheManager cacheManager;
 
     private final boolean notRepeat;
     private final long minimalDuration;
     private final boolean preferLowest;
 
     @Inject
-    public OverspeedEventHandler(Config config, DeviceManager deviceManager, GeofenceManager geofenceManager) {
+    public OverspeedEventHandler(Config config, DeviceManager deviceManager, CacheManager cacheManager) {
         this.deviceManager = deviceManager;
-        this.geofenceManager = geofenceManager;
+        this.cacheManager = cacheManager;
         notRepeat = config.getBoolean(Keys.EVENT_OVERSPEED_NOT_REPEAT);
         minimalDuration = config.getLong(Keys.EVENT_OVERSPEED_MINIMAL_DURATION) * 1000;
         preferLowest = config.getBoolean(Keys.EVENT_OVERSPEED_PREFER_LOWEST);
@@ -133,9 +133,9 @@ public class OverspeedEventHandler extends BaseEventHandler {
         double geofenceSpeedLimit = 0;
         long overspeedGeofenceId = 0;
 
-        if (geofenceManager != null && device.getGeofenceIds() != null) {
+        if (device.getGeofenceIds() != null) {
             for (long geofenceId : device.getGeofenceIds()) {
-                Geofence geofence = geofenceManager.getById(geofenceId);
+                Geofence geofence = cacheManager.getObject(Geofence.class, geofenceId);
                 if (geofence != null) {
                     double currentSpeedLimit = geofence.getDouble(ATTRIBUTE_SPEED_LIMIT);
                     if (currentSpeedLimit > 0 && geofenceSpeedLimit == 0

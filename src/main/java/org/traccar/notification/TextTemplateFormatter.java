@@ -23,7 +23,7 @@ import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.helper.UserUtil;
+import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 

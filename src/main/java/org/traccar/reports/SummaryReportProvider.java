@@ -29,7 +29,7 @@ import org.jxls.util.JxlsHelper;
 import org.traccar.Context;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.helper.UserUtil;
+import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.SummaryReportItem;

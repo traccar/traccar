@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
-import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
@@ -356,18 +355,12 @@ public class PermissionsManager {
     }
 
     public void refreshAllUsersPermissions() {
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refreshUserItems();
-        }
         if (Context.getNotificationManager() != null) {
             Context.getNotificationManager().refreshUserItems();
         }
     }
 
     public void refreshAllExtendedPermissions() {
-        if (Context.getGeofenceManager() != null) {
-            Context.getGeofenceManager().refreshExtendedPermissions();
-        }
     }
 
     public void refreshPermissions(Permission permission) {
@@ -378,16 +371,12 @@ public class PermissionsManager {
                 refreshAllExtendedPermissions();
             } else if (permission.getPropertyClass().equals(ManagedUser.class)) {
                 usersManager.refreshUserItems();
-            } else if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
-                Context.getGeofenceManager().refreshUserItems();
             } else if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshUserItems();
             }
         } else if (permission.getOwnerClass().equals(Device.class) || permission.getOwnerClass().equals(Group.class)) {
-            if (permission.getPropertyClass().equals(Geofence.class) && Context.getGeofenceManager() != null) {
-                Context.getGeofenceManager().refreshExtendedPermissions();
-            } else if (permission.getPropertyClass().equals(Notification.class)
+            if (permission.getPropertyClass().equals(Notification.class)
                     && Context.getNotificationManager() != null) {
                 Context.getNotificationManager().refreshExtendedPermissions();
             }

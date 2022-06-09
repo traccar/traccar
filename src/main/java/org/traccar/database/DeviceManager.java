@@ -218,12 +218,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     protected void addNewItem(Device device) {
         super.addNewItem(device);
         addByUniqueId(device);
-        if (Context.getGeofenceManager() != null) {
-            Position lastPosition = getLastPosition(device.getId());
-            if (lastPosition != null) {
-                device.setGeofenceIds(Context.getGeofenceManager().getCurrentDeviceGeofences(lastPosition));
-            }
-        }
     }
 
     @Override

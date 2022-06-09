@@ -17,7 +17,7 @@
 package org.traccar.notification;
 
 import org.apache.velocity.VelocityContext;
-import org.traccar.helper.UserUtil;
+import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;

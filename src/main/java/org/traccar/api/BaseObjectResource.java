@@ -151,7 +151,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                 Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
         } else if (baseClass.equals(Calendar.class)) {
-            Context.getGeofenceManager().refreshItems();
             Context.getNotificationManager().refreshItems();
         }
         return Response.noContent().build();

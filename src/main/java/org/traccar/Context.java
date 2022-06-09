@@ -26,7 +26,6 @@ import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.GeofenceManager;
 import org.traccar.database.GroupsManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MailManager;
@@ -38,7 +37,6 @@ import org.traccar.helper.Log;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
-import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.Notification;
 import org.traccar.model.User;
@@ -138,12 +136,6 @@ public final class Context {
 
     public static BroadcastService getBroadcastService() {
         return broadcastService;
-    }
-
-    private static GeofenceManager geofenceManager;
-
-    public static GeofenceManager getGeofenceManager() {
-        return geofenceManager;
     }
 
     private static NotificationManager notificationManager;
@@ -273,7 +265,6 @@ public final class Context {
 
     private static void initEventsModule() {
 
-        geofenceManager = new GeofenceManager(dataManager);
         notificationManager = new NotificationManager(dataManager, Main.getInjector().getInstance(CacheManager.class));
         notificatorManager = new NotificatorManager();
         Properties velocityProperties = new Properties();
@@ -312,8 +303,6 @@ public final class Context {
             return (BaseObjectManager<T>) groupsManager;
         } else if (clazz.equals(User.class)) {
             return (BaseObjectManager<T>) usersManager;
-        } else if (clazz.equals(Geofence.class)) {
-            return (BaseObjectManager<T>) geofenceManager;
         } else if (clazz.equals(Notification.class)) {
             return (BaseObjectManager<T>) notificationManager;
         }
