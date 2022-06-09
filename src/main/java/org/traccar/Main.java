@@ -20,6 +20,7 @@ import com.google.inject.Injector;
 import com.google.inject.servlet.ServletModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.schedule.ScheduleManager;
 
 import java.io.File;
@@ -122,7 +123,7 @@ public final class Main {
             services.add(injector.getInstance(ServerManager.class));
             services.add(Context.getWebServer());
             services.add(injector.getInstance(ScheduleManager.class));
-            services.add(Context.getBroadcastService());
+            services.add(injector.getInstance(BroadcastService.class));
 
             for (LifecycleObject service : services) {
                 if (service != null) {

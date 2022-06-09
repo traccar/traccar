@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
 import org.apache.velocity.app.VelocityEngine;
 import org.eclipse.jetty.util.URIUtil;
-import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
@@ -130,12 +129,6 @@ public final class Context {
 
     public static WebServer getWebServer() {
         return webServer;
-    }
-
-    private static BroadcastService broadcastService;
-
-    public static BroadcastService getBroadcastService() {
-        return broadcastService;
     }
 
     private static NotificationManager notificationManager;
@@ -253,10 +246,6 @@ public final class Context {
 
         initEventsModule();
 
-        if (config.hasKey(Keys.BROADCAST_ADDRESS)) {
-            broadcastService = new BroadcastService(config, objectMapper);
-        }
-
         if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
             eventForwarder = new EventForwarder(config);
         }
@@ -286,14 +275,6 @@ public final class Context {
 
         velocityEngine = new VelocityEngine();
         velocityEngine.init(velocityProperties);
-    }
-
-    public static void init(IdentityManager testIdentityManager) {
-        config = new Config();
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JSR353Module());
-        client = ClientBuilder.newClient().register(new ObjectMapperContextResolver());
-        identityManager = testIdentityManager;
     }
 
     public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {

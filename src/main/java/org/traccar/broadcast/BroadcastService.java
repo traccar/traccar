@@ -22,7 +22,6 @@ import org.traccar.LifecycleObject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -46,7 +45,6 @@ public class BroadcastService implements LifecycleObject {
     private final ExecutorService service = Executors.newSingleThreadExecutor();
     private final byte[] receiverBuffer = new byte[4096];
 
-    @Inject
     public BroadcastService(Config config, ObjectMapper objectMapper) throws IOException {
         this.objectMapper = objectMapper;
         address = InetAddress.getByName(config.getString(Keys.BROADCAST_ADDRESS));

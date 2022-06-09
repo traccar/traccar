@@ -21,6 +21,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
@@ -65,6 +66,7 @@ import org.traccar.storage.Storage;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
+import java.io.IOException;
 
 public class MainModule extends AbstractModule {
 
@@ -243,6 +245,15 @@ public class MainModule extends AbstractModule {
     public static SpeedLimitHandler provideSpeedLimitHandler(@Nullable SpeedLimitProvider speedLimitProvider) {
         if (speedLimitProvider != null) {
             return new SpeedLimitHandler(speedLimitProvider);
+        }
+        return null;
+    }
+
+    @Provides
+    public static BroadcastService provideBroadcastService(
+            Config config, ObjectMapper objectMapper) throws IOException {
+        if (config.hasKey(Keys.BROADCAST_ADDRESS)) {
+            return new BroadcastService(config, objectMapper);
         }
         return null;
     }
