@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.Main;
 import org.traccar.config.Config;
 import org.traccar.Context;
 import org.traccar.config.Keys;
@@ -36,6 +37,7 @@ import org.traccar.model.DeviceAccumulators;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
 public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager {
@@ -406,6 +408,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             }
             getDataManager().addObject(last);
             updateLatestPosition(last);
+            Main.getInjector().getInstance(CacheManager.class).updatePosition(last);
         } else {
             throw new IllegalArgumentException();
         }

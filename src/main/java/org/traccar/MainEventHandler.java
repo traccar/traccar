@@ -28,6 +28,7 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.NetworkUtil;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
@@ -60,6 +61,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             Position position = (Position) msg;
             try {
                 Context.getDeviceManager().updateLatestPosition(position);
+                Main.getInjector().getInstance(CacheManager.class).updatePosition(position);
             } catch (StorageException error) {
                 LOGGER.warn("Failed to update device", error);
             }

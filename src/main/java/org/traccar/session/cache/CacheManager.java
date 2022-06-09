@@ -23,6 +23,7 @@ import org.traccar.model.Geofence;
 import org.traccar.model.GroupedModel;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
+import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
@@ -57,6 +58,7 @@ public class CacheManager {
 
     private final Map<CacheKey, CacheValue> deviceCache = new HashMap<>();
     private final Map<Long, Map<Class<? extends BaseModel>, List<Long>>> deviceLinks = new HashMap<>();
+    private final Map<Long, Position> devicePositions = new HashMap<>();
 
     private Server server;
     private final Map<Long, List<User>> notificationUsers = new HashMap<>();
@@ -84,6 +86,15 @@ public class CacheManager {
             return deviceLinks.get(deviceId).get(clazz).stream()
                     .map(id -> deviceCache.get(new CacheKey(clazz, id)).<T>getValue())
                     .collect(Collectors.toList());
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
+    public Position getPosition(long deviceId) {
+        try {
+            lock.readLock().lock();
+            return devicePositions.get(deviceId);
         } finally {
             lock.readLock().unlock();
         }
@@ -130,6 +141,17 @@ public class CacheManager {
             lock.writeLock().lock();
             if (deviceLinks.containsKey(deviceId)) {
                 unsafeRemoveDevice(deviceId);
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
+    public void updatePosition(Position position) {
+        try {
+            lock.writeLock().lock();
+            if (deviceLinks.containsKey(position.getDeviceId())) {
+                devicePositions.put(position.getDeviceId(), position);
             }
         } finally {
             lock.writeLock().unlock();
@@ -201,8 +223,9 @@ public class CacheManager {
     private void unsafeAddDevice(long deviceId) throws StorageException {
         Map<Class<? extends BaseModel>, List<Long>> links = new HashMap<>();
 
-        addObject(deviceId, storage.getObject(Device.class, new Request(
-                new Columns.All(), new Condition.Equals("id", "id", deviceId))));
+        Device device = storage.getObject(Device.class, new Request(
+                new Columns.All(), new Condition.Equals("id", "id", deviceId)));
+        addObject(deviceId, device);
 
         for (Class<? extends BaseModel> clazz : CLASSES) {
             var objects = storage.getObjects(clazz, new Request(
@@ -226,6 +249,11 @@ public class CacheManager {
         }
 
         deviceLinks.put(deviceId, links);
+
+        if (device.getPositionId() > 0) {
+            devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
+                    new Columns.All(), new Condition.Equals("id", "id", device.getPositionId()))));
+        }
     }
 
     private void unsafeRemoveDevice(long deviceId) {
@@ -237,6 +265,7 @@ public class CacheManager {
                 return value.getReferences().size() > 0 ? value : null;
             });
         }));
+        devicePositions.remove(deviceId);
     }
 
     private void invalidate(CacheKey... keys) throws StorageException {
