@@ -2,7 +2,11 @@ package org.traccar.reports;
 
 import org.junit.Test;
 import org.traccar.BaseTest;
+import org.traccar.api.security.PermissionsService;
+import org.traccar.config.Config;
+import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
@@ -63,20 +67,23 @@ public class ReportUtilsTest extends BaseTest {
         startPosition.set(Position.KEY_TOTAL_DISTANCE, 500.0);
         Position endPosition = new Position();
         endPosition.set(Position.KEY_TOTAL_DISTANCE, 700.0);
-        assertEquals(ReportUtils.calculateDistance(startPosition, endPosition), 200.0, 10);
+        assertEquals(PositionUtil.calculateDistance(startPosition, endPosition, true), 200.0, 10);
         startPosition.set(Position.KEY_ODOMETER, 50000);
         endPosition.set(Position.KEY_ODOMETER, 51000);
-        assertEquals(ReportUtils.calculateDistance(startPosition, endPosition), 1000.0, 10);
+        assertEquals(PositionUtil.calculateDistance(startPosition, endPosition, true), 1000.0, 10);
     }
 
     @Test
     public void testCalculateSpentFuel() {
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), mock(Storage.class), mock(PermissionsService.class),
+                mockIdentityManager(), mock(DeviceManager.class), mock(TripsConfig.class), null);
         Position startPosition = new Position();
         Position endPosition = new Position();
-        assertEquals(ReportUtils.calculateFuel(startPosition, endPosition), 0.0, 0.01);
+        assertEquals(reportUtils.calculateFuel(startPosition, endPosition), 0.0, 0.01);
         startPosition.set(Position.KEY_FUEL_LEVEL, 0.7);
         endPosition.set(Position.KEY_FUEL_LEVEL, 0.5);
-        assertEquals(ReportUtils.calculateFuel(startPosition, endPosition), 0.2, 0.01);
+        assertEquals(reportUtils.calculateFuel(startPosition, endPosition), 0.2, 0.01);
     }
 
     @Test
@@ -93,9 +100,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:07:00.000", 0, 3000));
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), mock(Storage.class), mock(PermissionsService.class),
+                mockIdentityManager(), mock(DeviceManager.class), tripsConfig, null);
 
-        Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
+        Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -109,8 +118,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+        Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -147,9 +155,11 @@ public class ReportUtilsTest extends BaseTest {
         data.get(5).set(Position.KEY_IGNITION, false);
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, true, false, 0.01);
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), mock(Storage.class), mock(PermissionsService.class),
+                mockIdentityManager(), mock(DeviceManager.class), tripsConfig, null);
 
-        Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
+        Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -163,8 +173,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        trips = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
+        trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -178,8 +187,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+        Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -218,9 +226,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:11:00.000", 0, 7000));
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), mock(Storage.class), mock(PermissionsService.class),
+                mockIdentityManager(), mock(DeviceManager.class), tripsConfig, null);
 
-        Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
+        Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -234,8 +244,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(7000, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+        Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -268,9 +277,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:05:00.000", 0, 0));
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), mock(Storage.class), mock(PermissionsService.class),
+                mockIdentityManager(), mock(DeviceManager.class), tripsConfig, null);
 
-        Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+        Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -295,9 +306,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:05:00.000", 2, 0));
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), mock(Storage.class), mock(PermissionsService.class),
+                mockIdentityManager(), mock(DeviceManager.class), tripsConfig, null);
 
-        Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+        Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -322,9 +335,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:05:00.000", 0, 0));
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), mock(Storage.class), mock(PermissionsService.class),
+                mockIdentityManager(), mock(DeviceManager.class), tripsConfig, null);
 
-        Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+        Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -349,9 +364,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:05:00.000", 5, 0));
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), mock(Storage.class), mock(PermissionsService.class),
+                mockIdentityManager(), mock(DeviceManager.class), tripsConfig, null);
 
-        Collection<StopReportItem> result = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+        Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -372,9 +389,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:25:00.000", 5, 900));
 
         TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, 900000, false, false, 0.01);
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), mock(Storage.class), mock(PermissionsService.class),
+                mockIdentityManager(), mock(DeviceManager.class), tripsConfig, null);
 
-        Collection<TripReportItem> trips = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, TripReportItem.class);
+        Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -388,8 +407,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(7, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(600, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReportItem> stops = ReportUtils.detectTripsAndStops(
-                mock(Storage.class), mockIdentityManager(), null, data, tripsConfig, false, StopReportItem.class);
+        Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());

@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.database.MailManager;
+import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Server;
 import org.traccar.storage.Storage;
@@ -25,6 +26,7 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
+import javax.annotation.Nullable;
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -50,6 +52,10 @@ public class ServerResource extends BaseResource {
     @Inject
     private MailManager mailManager;
 
+    @Inject
+    @Nullable
+    private Geocoder geocoder;
+
     @PermitAll
     @GET
     public Server get() throws StorageException {
@@ -69,8 +75,8 @@ public class ServerResource extends BaseResource {
     @Path("geocode")
     @GET
     public String geocode(@QueryParam("latitude") double latitude, @QueryParam("longitude") double longitude) {
-        if (Context.getGeocoder() != null) {
-            return Context.getGeocoder().getAddress(latitude, longitude, null);
+        if (geocoder != null) {
+            return geocoder.getAddress(latitude, longitude, null);
         } else {
             throw new RuntimeException("Reverse geocoding is not enabled");
         }

@@ -14,9 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.traccar.reports;
 
+import org.apache.poi.ss.util.WorkbookUtil;
+import org.traccar.Context;
+import org.traccar.model.Device;
+import org.traccar.model.Group;
+import org.traccar.reports.common.ReportUtils;
+import org.traccar.reports.model.DeviceReportSection;
+import org.traccar.reports.model.StopReportItem;
+import org.traccar.storage.StorageException;
+
+import javax.inject.Inject;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,54 +34,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
-import org.apache.poi.ss.util.WorkbookUtil;
-import org.traccar.Context;
-import org.traccar.Main;
-import org.traccar.api.security.PermissionsService;
-import org.traccar.database.DeviceManager;
-import org.traccar.database.IdentityManager;
-import org.traccar.model.Device;
-import org.traccar.model.Group;
-import org.traccar.reports.common.ReportUtils;
-import org.traccar.reports.common.TripsConfig;
-import org.traccar.reports.model.DeviceReportSection;
-import org.traccar.reports.model.StopReportItem;
-import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
-
-import javax.inject.Inject;
-
 public class StopsReportProvider {
 
-    private final PermissionsService permissionsService;
-    private final Storage storage;
-    private final TripsConfig tripsConfig;
+    private final ReportUtils reportUtils;
 
     @Inject
-    public StopsReportProvider(PermissionsService permissionsService, Storage storage, TripsConfig tripsConfig) {
-        this.permissionsService = permissionsService;
-        this.storage = storage;
-        this.tripsConfig = tripsConfig;
+    public StopsReportProvider(ReportUtils reportUtils) {
+        this.reportUtils = reportUtils;
     }
 
     private Collection<StopReportItem> detectStops(long deviceId, Date from, Date to) throws StorageException {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
-
-        IdentityManager identityManager = Main.getInjector().getInstance(IdentityManager.class);
-        DeviceManager deviceManager = Main.getInjector().getInstance(DeviceManager.class);
-
-        return ReportUtils.detectTripsAndStops(
-                storage, identityManager, deviceManager, Context.getDataManager().getPositions(deviceId, from, to),
-                tripsConfig, ignoreOdometer, StopReportItem.class);
+        return reportUtils.detectTripsAndStops(
+                Context.getDataManager().getPositions(deviceId, from, to), ignoreOdometer, StopReportItem.class);
     }
 
     public Collection<StopReportItem> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
-        ReportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPeriodLimit(from, to);
         ArrayList<StopReportItem> result = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             result.addAll(detectStops(deviceId, from, to));
         }
@@ -82,10 +65,10 @@ public class StopsReportProvider {
     public void getExcel(
             OutputStream outputStream, long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
-        ReportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReportSection> devicesStops = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<StopReportItem> stops = detectStops(deviceId, from, to);
             DeviceReportSection deviceStops = new DeviceReportSection();
@@ -104,13 +87,12 @@ public class StopsReportProvider {
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/stops.xlsx")) {
-            var jxlsContext = ReportUtils.initializeContext(
-                    permissionsService.getServer(), permissionsService.getUser(userId));
-            jxlsContext.putVar("devices", devicesStops);
-            jxlsContext.putVar("sheetNames", sheetNames);
-            jxlsContext.putVar("from", from);
-            jxlsContext.putVar("to", to);
-            ReportUtils.processTemplateWithSheets(inputStream, outputStream, jxlsContext);
+            var context = reportUtils.initializeContext(userId);
+            context.putVar("devices", devicesStops);
+            context.putVar("sheetNames", sheetNames);
+            context.putVar("from", from);
+            context.putVar("to", to);
+            reportUtils.processTemplateWithSheets(inputStream, outputStream, context);
         }
     }
 

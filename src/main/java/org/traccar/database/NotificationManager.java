@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.config.Keys;
+import org.traccar.geocoder.Geocoder;
 import org.traccar.model.Calendar;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
@@ -41,20 +42,25 @@ import org.traccar.notification.NotificatorManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
+import javax.annotation.Nullable;
+
 public class NotificationManager extends ExtendedObjectManager<Notification> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
 
     private final CacheManager cacheManager;
     private final NotificatorManager notificatorManager;
+    private final Geocoder geocoder;
 
     private final boolean geocodeOnRequest;
 
     public NotificationManager(
-            DataManager dataManager, CacheManager cacheManager, NotificatorManager notificatorManager) {
+            DataManager dataManager, CacheManager cacheManager,
+            NotificatorManager notificatorManager, @Nullable Geocoder geocoder) {
         super(dataManager, Notification.class);
         this.cacheManager = cacheManager;
         this.notificatorManager = notificatorManager;
+        this.geocoder = geocoder;
         geocodeOnRequest = Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST);
     }
 
@@ -110,10 +116,8 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 }
             }
 
-            if (position != null && position.getAddress() == null
-                    && geocodeOnRequest && Context.getGeocoder() != null) {
-                position.setAddress(Context.getGeocoder()
-                        .getAddress(position.getLatitude(), position.getLongitude(), null));
+            if (position != null && position.getAddress() == null && geocodeOnRequest && geocoder != null) {
+                position.setAddress(geocoder.getAddress(position.getLatitude(), position.getLongitude(), null));
             }
 
             User user = Context.getUsersManager().getById(userId);

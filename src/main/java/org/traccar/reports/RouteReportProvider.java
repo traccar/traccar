@@ -16,17 +16,8 @@
  */
 package org.traccar.reports;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
-import org.traccar.api.security.PermissionsService;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
@@ -35,21 +26,28 @@ import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 
 public class RouteReportProvider {
 
-    private final PermissionsService permissionsService;
+    private final ReportUtils reportUtils;
 
     @Inject
-    public RouteReportProvider(PermissionsService permissionsService) {
-        this.permissionsService = permissionsService;
+    public RouteReportProvider(ReportUtils reportUtils) {
+        this.reportUtils = reportUtils;
     }
 
     public Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
-        ReportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPeriodLimit(from, to);
         ArrayList<Position> result = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             result.addAll(Context.getDataManager().getPositions(deviceId, from, to));
         }
@@ -59,10 +57,10 @@ public class RouteReportProvider {
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
-        ReportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReportSection> devicesRoutes = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<Position> positions = Context.getDataManager()
                     .getPositions(deviceId, from, to);
@@ -82,13 +80,12 @@ public class RouteReportProvider {
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/route.xlsx")) {
-            var jxlsContext = ReportUtils.initializeContext(
-                    permissionsService.getServer(), permissionsService.getUser(userId));
-            jxlsContext.putVar("devices", devicesRoutes);
-            jxlsContext.putVar("sheetNames", sheetNames);
-            jxlsContext.putVar("from", from);
-            jxlsContext.putVar("to", to);
-            ReportUtils.processTemplateWithSheets(inputStream, outputStream, jxlsContext);
+            var context = reportUtils.initializeContext(userId);
+            context.putVar("devices", devicesRoutes);
+            context.putVar("sheetNames", sheetNames);
+            context.putVar("from", from);
+            context.putVar("to", to);
+            reportUtils.processTemplateWithSheets(inputStream, outputStream, context);
         }
     }
 }

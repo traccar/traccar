@@ -16,20 +16,19 @@
  */
 package org.traccar.handler.events;
 
-import java.util.Collections;
-import java.util.Map;
-
 import io.netty.channel.ChannelHandler;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
-import org.traccar.session.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.common.TripsConfig;
+import org.traccar.session.DeviceState;
 
 import javax.inject.Inject;
+import java.util.Collections;
+import java.util.Map;
 
 @ChannelHandler.Sharable
 public class MotionEventHandler extends BaseEventHandler {
@@ -89,7 +88,7 @@ public class MotionEventHandler extends BaseEventHandler {
         Position motionPosition = deviceState.getMotionPosition();
         if (motionPosition != null) {
             long motionTime = motionPosition.getFixTime().getTime();
-            double distance = ReportUtils.calculateDistance(motionPosition, position, false);
+            double distance = PositionUtil.calculateDistance(motionPosition, position, false);
             Boolean ignition = null;
             if (tripsConfig.getUseIgnition()
                     && position.getAttributes().containsKey(Position.KEY_IGNITION)) {

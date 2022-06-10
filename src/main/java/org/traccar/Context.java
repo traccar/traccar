@@ -109,10 +109,6 @@ public final class Context {
         return permissionsManager;
     }
 
-    public static Geocoder getGeocoder() {
-        return Main.getInjector() != null ? Main.getInjector().getInstance(Geocoder.class) : null;
-    }
-
     private static NotificationManager notificationManager;
 
     public static NotificationManager getNotificationManager() {
@@ -196,7 +192,8 @@ public final class Context {
         notificationManager = new NotificationManager(
                 dataManager,
                 Main.getInjector().getInstance(CacheManager.class),
-                Main.getInjector().getInstance(NotificatorManager.class));
+                Main.getInjector().getInstance(NotificatorManager.class),
+                Main.getInjector().getInstance(Geocoder.class));
         Properties velocityProperties = new Properties();
         velocityProperties.setProperty("file.resource.loader.path",
                 Context.getConfig().getString("templates.rootPath", "templates") + "/");

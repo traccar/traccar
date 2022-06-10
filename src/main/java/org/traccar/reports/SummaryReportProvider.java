@@ -16,6 +16,18 @@
  */
 package org.traccar.reports;
 
+import org.jxls.util.JxlsHelper;
+import org.traccar.Context;
+import org.traccar.api.security.PermissionsService;
+import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.PositionUtil;
+import org.traccar.helper.model.UserUtil;
+import org.traccar.model.Position;
+import org.traccar.reports.common.ReportUtils;
+import org.traccar.reports.model.SummaryReportItem;
+import org.traccar.storage.StorageException;
+
+import javax.inject.Inject;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,24 +37,14 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
-import org.jxls.util.JxlsHelper;
-import org.traccar.Context;
-import org.traccar.api.security.PermissionsService;
-import org.traccar.helper.UnitsConverter;
-import org.traccar.helper.model.UserUtil;
-import org.traccar.model.Position;
-import org.traccar.reports.common.ReportUtils;
-import org.traccar.reports.model.SummaryReportItem;
-import org.traccar.storage.StorageException;
-
-import javax.inject.Inject;
-
 public class SummaryReportProvider {
 
+    private final ReportUtils reportUtils;
     private final PermissionsService permissionsService;
 
     @Inject
-    public SummaryReportProvider(PermissionsService permissionsService) {
+    public SummaryReportProvider(ReportUtils reportUtils, PermissionsService permissionsService) {
+        this.reportUtils = reportUtils;
         this.permissionsService = permissionsService;
     }
 
@@ -64,8 +66,8 @@ public class SummaryReportProvider {
             }
             boolean ignoreOdometer = Context.getDeviceManager()
                     .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
-            result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
-            result.setSpentFuel(ReportUtils.calculateFuel(firstPosition, previousPosition));
+            result.setDistance(PositionUtil.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
+            result.setSpentFuel(reportUtils.calculateFuel(firstPosition, previousPosition));
 
             long durationMilliseconds;
             if (firstPosition.getAttributes().containsKey(Position.KEY_HOURS)
@@ -134,9 +136,9 @@ public class SummaryReportProvider {
     public Collection<SummaryReportItem> getObjects(
             long userId, Collection<Long> deviceIds,
             Collection<Long> groupIds, Date from, Date to, boolean daily) throws StorageException {
-        ReportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPeriodLimit(from, to);
         ArrayList<SummaryReportItem> result = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<SummaryReportItem> deviceResults = calculateSummaryResults(userId, deviceId, from, to, daily);
             for (SummaryReportItem summaryReport : deviceResults) {
@@ -151,18 +153,17 @@ public class SummaryReportProvider {
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to, boolean daily) throws StorageException, IOException {
-        ReportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPeriodLimit(from, to);
         Collection<SummaryReportItem> summaries = getObjects(userId, deviceIds, groupIds, from, to, daily);
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/summary.xlsx")) {
-            var jxlsContext = ReportUtils.initializeContext(
-                    permissionsService.getServer(), permissionsService.getUser(userId));
-            jxlsContext.putVar("summaries", summaries);
-            jxlsContext.putVar("from", from);
-            jxlsContext.putVar("to", to);
+            var context = reportUtils.initializeContext(userId);
+            context.putVar("summaries", summaries);
+            context.putVar("from", from);
+            context.putVar("to", to);
             JxlsHelper.getInstance().setUseFastFormulaProcessor(false)
-                    .processTemplate(inputStream, outputStream, jxlsContext);
+                    .processTemplate(inputStream, outputStream, context);
         }
     }
 }

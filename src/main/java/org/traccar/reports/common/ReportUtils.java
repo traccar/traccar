@@ -26,28 +26,33 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.Context;
+import org.traccar.api.security.PermissionsService;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.geocoder.Geocoder;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.BaseModel;
-import org.traccar.model.Server;
-import org.traccar.model.User;
-import org.traccar.session.DeviceState;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.reports.model.BaseReportItem;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.TripReportItem;
+import org.traccar.session.DeviceState;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import javax.annotation.Nullable;
+import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -61,13 +66,31 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public final class ReportUtils {
+public class ReportUtils {
 
-    private ReportUtils() {
+    private final Config config;
+    private final Storage storage;
+    private final PermissionsService permissionsService;
+    private final IdentityManager identityManager;
+    private final DeviceManager deviceManager;
+    private final TripsConfig tripsConfig;
+    private final Geocoder geocoder;
+
+    @Inject
+    public ReportUtils(
+            Config config, Storage storage, PermissionsService permissionsService, IdentityManager identityManager,
+            DeviceManager deviceManager, TripsConfig tripsConfig, @Nullable Geocoder geocoder) {
+        this.config = config;
+        this.storage = storage;
+        this.permissionsService = permissionsService;
+        this.identityManager = identityManager;
+        this.deviceManager = deviceManager;
+        this.tripsConfig = tripsConfig;
+        this.geocoder = geocoder;
     }
 
-    public static <T extends BaseModel> T getObject(
-            Storage storage, long userId, Class<T> clazz, long objectId) throws StorageException, SecurityException {
+    public <T extends BaseModel> T getObject(
+            long userId, Class<T> clazz, long objectId) throws StorageException, SecurityException {
         return storage.getObject(clazz, new Request(
                 new Columns.Include("id"),
                 new Condition.And(
@@ -75,14 +98,14 @@ public final class ReportUtils {
                         new Condition.Permission(User.class, userId, clazz))));
     }
 
-    public static void checkPeriodLimit(Date from, Date to) {
-        long limit = Context.getConfig().getLong(Keys.REPORT_PERIOD_LIMIT) * 1000;
+    public void checkPeriodLimit(Date from, Date to) {
+        long limit = config.getLong(Keys.REPORT_PERIOD_LIMIT) * 1000;
         if (limit > 0 && to.getTime() - from.getTime() > limit) {
             throw new IllegalArgumentException("Time period exceeds the limit");
         }
     }
 
-    public static Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
+    public Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
         Collection<Long> result = new LinkedHashSet<>(deviceIds);
         for (long groupId : groupIds) {
             result.addAll(Context.getPermissionsManager().getGroupDevices(groupId));
@@ -90,26 +113,7 @@ public final class ReportUtils {
         return result;
     }
 
-    public static double calculateDistance(Position firstPosition, Position lastPosition) {
-        return calculateDistance(firstPosition, lastPosition, true);
-    }
-
-    public static double calculateDistance(Position firstPosition, Position lastPosition, boolean useOdometer) {
-        double distance = 0.0;
-        double firstOdometer = firstPosition.getDouble(Position.KEY_ODOMETER);
-        double lastOdometer = lastPosition.getDouble(Position.KEY_ODOMETER);
-
-        if (useOdometer && firstOdometer != 0.0 && lastOdometer != 0.0) {
-            distance = lastOdometer - firstOdometer;
-        } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
-                && lastPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
-            distance = lastPosition.getDouble(Position.KEY_TOTAL_DISTANCE)
-                    - firstPosition.getDouble(Position.KEY_TOTAL_DISTANCE);
-        }
-        return distance;
-    }
-
-    public static double calculateFuel(Position firstPosition, Position lastPosition) {
+    public double calculateFuel(Position firstPosition, Position lastPosition) {
 
         if (firstPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null
                 && lastPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
@@ -121,7 +125,7 @@ public final class ReportUtils {
         return 0;
     }
 
-    public static String findDriver(Position firstPosition, Position lastPosition) {
+    public String findDriver(Position firstPosition, Position lastPosition) {
         if (firstPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
             return firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
         } else if (lastPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
@@ -130,7 +134,7 @@ public final class ReportUtils {
         return null;
     }
 
-    public static String findDriverName(Storage storage, String driverUniqueId) throws StorageException {
+    public String findDriverName(String driverUniqueId) throws StorageException {
         if (driverUniqueId != null) {
             Driver driver = storage.getObject(Driver.class, new Request(
                     new Columns.All(),
@@ -142,28 +146,29 @@ public final class ReportUtils {
         return null;
     }
 
-    public static org.jxls.common.Context initializeContext(Server server, User user) {
-        org.jxls.common.Context jxlsContext = PoiTransformer.createInitialContext();
-        jxlsContext.putVar("distanceUnit", UserUtil.getDistanceUnit(server, user));
-        jxlsContext.putVar("speedUnit", UserUtil.getSpeedUnit(server, user));
-        jxlsContext.putVar("volumeUnit", UserUtil.getVolumeUnit(server, user));
-        jxlsContext.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
-        jxlsContext.putVar("dateTool", new DateTool());
-        jxlsContext.putVar("numberTool", new NumberTool());
-        jxlsContext.putVar("timezone", UserUtil.getTimezone(server, user));
-        jxlsContext.putVar("locale", Locale.getDefault());
-        jxlsContext.putVar("bracketsRegex", "[\\{\\}\"]");
-        return jxlsContext;
+    public org.jxls.common.Context initializeContext(long userId) throws StorageException {
+        var server = permissionsService.getServer();
+        var user = permissionsService.getUser(userId);
+        var context = PoiTransformer.createInitialContext();
+        context.putVar("distanceUnit", UserUtil.getDistanceUnit(server, user));
+        context.putVar("speedUnit", UserUtil.getSpeedUnit(server, user));
+        context.putVar("volumeUnit", UserUtil.getVolumeUnit(server, user));
+        context.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
+        context.putVar("dateTool", new DateTool());
+        context.putVar("numberTool", new NumberTool());
+        context.putVar("timezone", UserUtil.getTimezone(server, user));
+        context.putVar("locale", Locale.getDefault());
+        context.putVar("bracketsRegex", "[\\{\\}\"]");
+        return context;
     }
 
-    public static void processTemplateWithSheets(
-            InputStream templateStream, OutputStream targetStream,
-            org.jxls.common.Context jxlsContext) throws IOException {
+    public void processTemplateWithSheets(
+            InputStream templateStream, OutputStream targetStream, org.jxls.common.Context context) throws IOException {
 
         Transformer transformer = TransformerFactory.createTransformer(templateStream, targetStream);
         List<Area> xlsAreas = new XlsCommentAreaBuilder(transformer).build();
         for (Area xlsArea : xlsAreas) {
-            xlsArea.applyAt(new CellRef(xlsArea.getStartCellRef().getCellName()), jxlsContext);
+            xlsArea.applyAt(new CellRef(xlsArea.getStartCellRef().getCellName()), context);
             xlsArea.setFormulaProcessor(new StandardFormulaProcessor());
             xlsArea.processFormulas();
         }
@@ -171,9 +176,9 @@ public final class ReportUtils {
         transformer.write();
     }
 
-    private static TripReportItem calculateTrip(
-            Storage storage, IdentityManager identityManager, ArrayList<Position> positions,
-            int startIndex, int endIndex, boolean ignoreOdometer) throws StorageException {
+    private TripReportItem calculateTrip(
+            ArrayList<Position> positions, int startIndex, int endIndex,
+            boolean ignoreOdometer) throws StorageException {
 
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
@@ -198,9 +203,8 @@ public final class ReportUtils {
         trip.setStartLon(startTrip.getLongitude());
         trip.setStartTime(startTrip.getFixTime());
         String startAddress = startTrip.getAddress();
-        if (startAddress == null && Context.getGeocoder() != null
-                && Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST)) {
-            startAddress = Context.getGeocoder().getAddress(startTrip.getLatitude(), startTrip.getLongitude(), null);
+        if (startAddress == null && geocoder != null && config.getBoolean(Keys.GEOCODER_ON_REQUEST)) {
+            startAddress = geocoder.getAddress(startTrip.getLatitude(), startTrip.getLongitude(), null);
         }
         trip.setStartAddress(startAddress);
 
@@ -209,13 +213,12 @@ public final class ReportUtils {
         trip.setEndLon(endTrip.getLongitude());
         trip.setEndTime(endTrip.getFixTime());
         String endAddress = endTrip.getAddress();
-        if (endAddress == null && Context.getGeocoder() != null
-                && Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST)) {
-            endAddress = Context.getGeocoder().getAddress(endTrip.getLatitude(), endTrip.getLongitude(), null);
+        if (endAddress == null && geocoder != null && config.getBoolean(Keys.GEOCODER_ON_REQUEST)) {
+            endAddress = geocoder.getAddress(endTrip.getLatitude(), endTrip.getLongitude(), null);
         }
         trip.setEndAddress(endAddress);
 
-        trip.setDistance(calculateDistance(startTrip, endTrip, !ignoreOdometer));
+        trip.setDistance(PositionUtil.calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
         if (tripDuration > 0) {
             trip.setAverageSpeed(UnitsConverter.knotsFromMps(trip.getDistance() * 1000 / tripDuration));
@@ -224,7 +227,7 @@ public final class ReportUtils {
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));
-        trip.setDriverName(findDriverName(storage, trip.getDriverUniqueId()));
+        trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
 
         if (!ignoreOdometer
                 && startTrip.getDouble(Position.KEY_ODOMETER) != 0
@@ -239,9 +242,8 @@ public final class ReportUtils {
         return trip;
     }
 
-    private static StopReportItem calculateStop(
-            IdentityManager identityManager, ArrayList<Position> positions,
-            int startIndex, int endIndex, boolean ignoreOdometer) {
+    private StopReportItem calculateStop(
+            ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
 
         Position startStop = positions.get(startIndex);
         Position endStop = positions.get(endIndex);
@@ -257,9 +259,8 @@ public final class ReportUtils {
         stop.setLongitude(startStop.getLongitude());
         stop.setStartTime(startStop.getFixTime());
         String address = startStop.getAddress();
-        if (address == null && Context.getGeocoder() != null
-                && Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST)) {
-            address = Context.getGeocoder().getAddress(stop.getLatitude(), stop.getLongitude(), null);
+        if (address == null && geocoder != null && config.getBoolean(Keys.GEOCODER_ON_REQUEST)) {
+            address = geocoder.getAddress(stop.getLatitude(), stop.getLongitude(), null);
         }
         stop.setAddress(address);
 
@@ -288,18 +289,19 @@ public final class ReportUtils {
 
     }
 
-    private static <T extends BaseReportItem> T calculateTripOrStop(
-            Storage storage, IdentityManager identityManager, ArrayList<Position> positions,
-            int startIndex, int endIndex, boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
+    @SuppressWarnings("unchecked")
+    private <T extends BaseReportItem> T calculateTripOrStop(
+            ArrayList<Position> positions, int startIndex, int endIndex,
+            boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
 
         if (reportClass.equals(TripReportItem.class)) {
-            return (T) calculateTrip(storage, identityManager, positions, startIndex, endIndex, ignoreOdometer);
+            return (T) calculateTrip(positions, startIndex, endIndex, ignoreOdometer);
         } else {
-            return (T) calculateStop(identityManager, positions, startIndex, endIndex, ignoreOdometer);
+            return (T) calculateStop(positions, startIndex, endIndex, ignoreOdometer);
         }
     }
 
-    private static boolean isMoving(ArrayList<Position> positions, int index, TripsConfig tripsConfig) {
+    private boolean isMoving(ArrayList<Position> positions, int index, TripsConfig tripsConfig) {
         if (tripsConfig.getMinimalNoDataDuration() > 0) {
             boolean beforeGap = index < positions.size() - 1
                     && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
@@ -319,17 +321,16 @@ public final class ReportUtils {
         }
     }
 
-    public static <T extends BaseReportItem> Collection<T> detectTripsAndStops(
-            Storage storage, IdentityManager identityManager, DeviceManager deviceManager,
-            Collection<Position> positionCollection,
-            TripsConfig tripsConfig, boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
+    public <T extends BaseReportItem> Collection<T> detectTripsAndStops(
+            Collection<Position> positionCollection, boolean ignoreOdometer,
+            Class<T> reportClass) throws StorageException {
 
         Collection<T> result = new ArrayList<>();
 
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (!positions.isEmpty()) {
             boolean trips = reportClass.equals(TripReportItem.class);
-            MotionEventHandler  motionHandler = new MotionEventHandler(identityManager, deviceManager, tripsConfig);
+            MotionEventHandler motionHandler = new MotionEventHandler(identityManager, deviceManager, tripsConfig);
             DeviceState deviceState = new DeviceState();
             deviceState.setMotionState(isMoving(positions, 0, tripsConfig));
             int startEventIndex = trips == deviceState.getMotionState() ? 0 : -1;
@@ -355,15 +356,15 @@ public final class ReportUtils {
                 }
                 if (startEventIndex != -1 && startNoEventIndex != -1 && event != null
                         && trips != deviceState.getMotionState()) {
-                    result.add(calculateTripOrStop(storage, identityManager, positions,
-                            startEventIndex, startNoEventIndex, ignoreOdometer, reportClass));
+                    result.add(calculateTripOrStop(
+                            positions, startEventIndex, startNoEventIndex, ignoreOdometer, reportClass));
                     startEventIndex = -1;
                 }
             }
             if (startEventIndex != -1 && (startNoEventIndex != -1 || !trips)) {
-                result.add(calculateTripOrStop(storage, identityManager, positions,
-                        startEventIndex, startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1,
-                        ignoreOdometer, reportClass));
+                int endIndex = startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1;
+                result.add(calculateTripOrStop(
+                        positions, startEventIndex, endIndex, ignoreOdometer, reportClass));
             }
         }
 

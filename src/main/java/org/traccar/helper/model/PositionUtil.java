@@ -28,4 +28,17 @@ public final class PositionUtil {
         return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) >= 0;
     }
 
+    public static double calculateDistance(Position first, Position last, boolean useOdometer) {
+        double distance;
+        double firstOdometer = first.getDouble(Position.KEY_ODOMETER);
+        double lastOdometer = last.getDouble(Position.KEY_ODOMETER);
+
+        if (useOdometer && firstOdometer != 0.0 && lastOdometer != 0.0) {
+            distance = lastOdometer - firstOdometer;
+        } else {
+            distance = last.getDouble(Position.KEY_TOTAL_DISTANCE) - first.getDouble(Position.KEY_TOTAL_DISTANCE);
+        }
+        return distance;
+    }
+
 }

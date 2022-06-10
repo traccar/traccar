@@ -16,6 +16,19 @@
  */
 package org.traccar.reports;
 
+import org.apache.poi.ss.util.WorkbookUtil;
+import org.traccar.Context;
+import org.traccar.Main;
+import org.traccar.database.DeviceManager;
+import org.traccar.database.IdentityManager;
+import org.traccar.model.Device;
+import org.traccar.model.Group;
+import org.traccar.reports.common.ReportUtils;
+import org.traccar.reports.model.DeviceReportSection;
+import org.traccar.reports.model.TripReportItem;
+import org.traccar.storage.StorageException;
+
+import javax.inject.Inject;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,34 +37,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
-import org.apache.poi.ss.util.WorkbookUtil;
-import org.traccar.Context;
-import org.traccar.Main;
-import org.traccar.api.security.PermissionsService;
-import org.traccar.database.DeviceManager;
-import org.traccar.database.IdentityManager;
-import org.traccar.model.Device;
-import org.traccar.model.Group;
-import org.traccar.reports.common.ReportUtils;
-import org.traccar.reports.common.TripsConfig;
-import org.traccar.reports.model.DeviceReportSection;
-import org.traccar.reports.model.TripReportItem;
-import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
-
-import javax.inject.Inject;
-
 public class TripsReportProvider {
 
-    private final PermissionsService permissionsService;
-    private final Storage storage;
-    private final TripsConfig tripsConfig;
+    private final ReportUtils reportUtils;
 
     @Inject
-    public TripsReportProvider(PermissionsService permissionsService, Storage storage, TripsConfig tripsConfig) {
-        this.permissionsService = permissionsService;
-        this.storage = storage;
-        this.tripsConfig = tripsConfig;
+    public TripsReportProvider(ReportUtils reportUtils) {
+        this.reportUtils = reportUtils;
     }
 
     private Collection<TripReportItem> detectTrips(long deviceId, Date from, Date to) throws StorageException {
@@ -61,16 +53,15 @@ public class TripsReportProvider {
         IdentityManager identityManager = Main.getInjector().getInstance(IdentityManager.class);
         DeviceManager deviceManager = Main.getInjector().getInstance(DeviceManager.class);
 
-        return ReportUtils.detectTripsAndStops(
-                storage, identityManager, deviceManager, Context.getDataManager().getPositions(deviceId, from, to),
-                tripsConfig, ignoreOdometer, TripReportItem.class);
+        return reportUtils.detectTripsAndStops(
+                Context.getDataManager().getPositions(deviceId, from, to), ignoreOdometer, TripReportItem.class);
     }
 
     public Collection<TripReportItem> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
                                                         Date from, Date to) throws StorageException {
-        ReportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPeriodLimit(from, to);
         ArrayList<TripReportItem> result = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             result.addAll(detectTrips(deviceId, from, to));
         }
@@ -80,10 +71,10 @@ public class TripsReportProvider {
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
-        ReportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPeriodLimit(from, to);
         ArrayList<DeviceReportSection> devicesTrips = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
+        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<TripReportItem> trips = detectTrips(deviceId, from, to);
             DeviceReportSection deviceTrips = new DeviceReportSection();
@@ -102,13 +93,12 @@ public class TripsReportProvider {
         String templatePath = Context.getConfig().getString("report.templatesPath",
                 "templates/export/");
         try (InputStream inputStream = new FileInputStream(templatePath + "/trips.xlsx")) {
-            var jxlsContext = ReportUtils.initializeContext(
-                    permissionsService.getServer(), permissionsService.getUser(userId));
-            jxlsContext.putVar("devices", devicesTrips);
-            jxlsContext.putVar("sheetNames", sheetNames);
-            jxlsContext.putVar("from", from);
-            jxlsContext.putVar("to", to);
-            ReportUtils.processTemplateWithSheets(inputStream, outputStream, jxlsContext);
+            var context = reportUtils.initializeContext(userId);
+            context.putVar("devices", devicesTrips);
+            context.putVar("sheetNames", sheetNames);
+            context.putVar("from", from);
+            context.putVar("to", to);
+            reportUtils.processTemplateWithSheets(inputStream, outputStream, context);
         }
     }
 
