@@ -17,24 +17,22 @@
 package org.traccar.notificators;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.Main;
-import org.traccar.model.User;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.notification.NotificationMessage;
 import org.traccar.session.cache.CacheManager;
 
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
 
 public class NotificatorTelegram implements Notificator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorTelegram.class);
+    private final CacheManager cacheManager;
+    private final Client client;
 
     private final String urlSendText;
     private final String urlSendLocation;
@@ -63,29 +61,16 @@ public class NotificatorTelegram implements Notificator {
         private int bearing;
     }
 
-    public NotificatorTelegram() {
+    @Inject
+    public NotificatorTelegram(Config config, CacheManager cacheManager, Client client) {
+        this.cacheManager = cacheManager;
+        this.client = client;
         urlSendText = String.format(
-                "https://api.telegram.org/bot%s/sendMessage",
-                Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+                "https://api.telegram.org/bot%s/sendMessage", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         urlSendLocation = String.format(
-                "https://api.telegram.org/bot%s/sendLocation",
-                Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
-        chatId = Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
-        sendLocation = Context.getConfig().getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
-    }
-
-    private void executeRequest(String url, Object message) {
-        Context.getClient().target(url).request()
-                .async().post(Entity.json(message), new InvocationCallback<Object>() {
-            @Override
-            public void completed(Object o) {
-            }
-
-            @Override
-            public void failed(Throwable throwable) {
-                LOGGER.warn("Telegram API error", throwable);
-            }
-        });
+                "https://api.telegram.org/bot%s/sendLocation", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+        chatId = config.getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
+        sendLocation = config.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
     }
 
     private LocationMessage createLocationMessage(String messageChatId, Position position) {
@@ -100,8 +85,7 @@ public class NotificatorTelegram implements Notificator {
 
     @Override
     public void send(User user, Event event, Position position) {
-        NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
+        var shortMessage = NotificationFormatter.formatMessage(cacheManager, user, event, position, "short");
 
         TextMessage message = new TextMessage();
         message.chatId = user.getString("telegramChatId");
@@ -109,9 +93,10 @@ public class NotificatorTelegram implements Notificator {
             message.chatId = chatId;
         }
         message.text = shortMessage.getBody();
-        executeRequest(urlSendText, message);
+        client.target(urlSendText).request().post(Entity.json(message)).close();
         if (sendLocation && position != null) {
-            executeRequest(urlSendLocation, createLocationMessage(message.chatId, position));
+            client.target(urlSendLocation).request().post(
+                    Entity.json(createLocationMessage(message.chatId, position))).close();
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,20 @@
  */
 package org.traccar.notificators;
 
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.session.cache.CacheManager;
+
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
 
 public class NotificatorTraccar extends NotificatorFirebase {
 
-    public NotificatorTraccar() {
+    @Inject
+    public NotificatorTraccar(Config config, CacheManager cacheManager, Client client) {
         super(
-                "https://www.traccar.org/push/",
-                Context.getConfig().getString(Keys.NOTIFICATOR_TRACCAR_KEY));
+                cacheManager, client, "https://www.traccar.org/push/",
+                config.getString(Keys.NOTIFICATOR_TRACCAR_KEY));
     }
 
 }

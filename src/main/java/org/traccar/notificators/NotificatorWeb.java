@@ -16,16 +16,25 @@
  */
 package org.traccar.notificators;
 
-import org.traccar.Context;
-import org.traccar.Main;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.notification.NotificationMessage;
+import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 
+import javax.inject.Inject;
+
 public final class NotificatorWeb implements Notificator {
+
+    private final ConnectionManager connectionManager;
+    private final CacheManager cacheManager;
+
+    @Inject
+    public NotificatorWeb(ConnectionManager connectionManager, CacheManager cacheManager) {
+        this.connectionManager = connectionManager;
+        this.cacheManager = cacheManager;
+    }
 
     @Override
     public void send(User user, Event event, Position position) {
@@ -40,11 +49,10 @@ public final class NotificatorWeb implements Notificator {
         copy.setMaintenanceId(event.getMaintenanceId());
         copy.getAttributes().putAll(event.getAttributes());
 
-        NotificationMessage message = NotificationFormatter.formatMessage(
-                Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
+        var message = NotificationFormatter.formatMessage(cacheManager, user, event, position, "short");
         copy.set("message", message.getBody());
 
-        Context.getConnectionManager().updateEvent(user.getId(), copy);
+        connectionManager.updateEvent(user.getId(), copy);
     }
 
 }

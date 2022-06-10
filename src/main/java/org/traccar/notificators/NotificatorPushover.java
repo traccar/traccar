@@ -16,24 +16,22 @@
 package org.traccar.notificators;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.Main;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.notification.NotificationMessage;
 import org.traccar.session.cache.CacheManager;
 
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
 
 public class NotificatorPushover implements Notificator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorPushover.class);
+    private final CacheManager cacheManager;
+    private final Client client;
 
     private final String url;
     private final String token;
@@ -52,33 +50,27 @@ public class NotificatorPushover implements Notificator {
         private String message;
     }
 
-    public NotificatorPushover() {
+    @Inject
+    public NotificatorPushover(Config config, CacheManager cacheManager, Client client) {
+        this.cacheManager = cacheManager;
+        this.client = client;
         url = "https://api.pushover.net/1/messages.json";
-        token = Context.getConfig().getString(Keys.NOTIFICATOR_PUSHOVER_TOKEN);
-        user = Context.getConfig().getString(Keys.NOTIFICATOR_PUSHOVER_USER);
+        token = config.getString(Keys.NOTIFICATOR_PUSHOVER_TOKEN);
+        user = config.getString(Keys.NOTIFICATOR_PUSHOVER_USER);
+        if (token == null || user == null) {
+            throw new RuntimeException("Pushover token or user missing");
+        }
     }
 
     @Override
     public void send(User user, Event event, Position position) {
 
         String device = "";
-
         if (user.getAttributes().containsKey("notificator.pushover.device")) {
             device = user.getString("notificator.pushover.device").replaceAll(" *, *", ",");
         }
 
-        if (token == null) {
-            LOGGER.warn("Pushover token not found");
-            return;
-        }
-
-        if (this.user == null) {
-            LOGGER.warn("Pushover user not found");
-            return;
-        }
-
-        NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
+        var shortMessage = NotificationFormatter.formatMessage(cacheManager, user, event, position, "short");
 
         Message message = new Message();
         message.token = token;
@@ -87,17 +79,7 @@ public class NotificatorPushover implements Notificator {
         message.title = shortMessage.getSubject();
         message.message = shortMessage.getBody();
 
-        Context.getClient().target(url).request()
-                .async().post(Entity.json(message), new InvocationCallback<Object>() {
-            @Override
-            public void completed(Object o) {
-            }
-
-            @Override
-            public void failed(Throwable throwable) {
-                LOGGER.warn("Pushover API error", throwable);
-            }
-        });
+        client.target(url).request().post(Entity.json(message)).close();
     }
 
 }

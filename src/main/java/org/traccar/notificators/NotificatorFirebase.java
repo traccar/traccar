@@ -17,24 +17,22 @@
 package org.traccar.notificators;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.Main;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.notification.NotificationMessage;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.session.cache.CacheManager;
 
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
 
 public class NotificatorFirebase implements Notificator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorFirebase.class);
+    private final CacheManager cacheManager;
+    private final Client client;
 
     private final String url;
     private final String key;
@@ -55,13 +53,16 @@ public class NotificatorFirebase implements Notificator {
         private Notification notification;
     }
 
-    public NotificatorFirebase() {
+    @Inject
+    public NotificatorFirebase(Config config, CacheManager cacheManager, Client client) {
         this(
-                "https://fcm.googleapis.com/fcm/send",
-                Context.getConfig().getString(Keys.NOTIFICATOR_FIREBASE_KEY));
+                cacheManager, client, "https://fcm.googleapis.com/fcm/send",
+                config.getString(Keys.NOTIFICATOR_FIREBASE_KEY));
     }
 
-    protected NotificatorFirebase(String url, String key) {
+    protected NotificatorFirebase(CacheManager cacheManager, Client client, String url, String key) {
+        this.cacheManager = cacheManager;
+        this.client = client;
         this.url = url;
         this.key = key;
     }
@@ -70,8 +71,7 @@ public class NotificatorFirebase implements Notificator {
     public void send(User user, Event event, Position position) {
         if (user.getAttributes().containsKey("notificationTokens")) {
 
-            NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                    Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
+            var shortMessage = NotificationFormatter.formatMessage(cacheManager, user, event, position, "short");
 
             Notification notification = new Notification();
             notification.title = shortMessage.getSubject();
@@ -82,18 +82,7 @@ public class NotificatorFirebase implements Notificator {
             message.tokens = user.getString("notificationTokens").split("[, ]");
             message.notification = notification;
 
-            Context.getClient().target(url).request()
-                    .header("Authorization", "key=" + key)
-                    .async().post(Entity.json(message), new InvocationCallback<Object>() {
-                @Override
-                public void completed(Object o) {
-                }
-
-                @Override
-                public void failed(Throwable throwable) {
-                    LOGGER.warn("Firebase notification error", throwable);
-                }
-            });
+            client.target(url).request().header("Authorization", "key=" + key).post(Entity.json(message)).close();
         }
     }
 
