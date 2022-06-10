@@ -16,8 +16,6 @@
  */
 package org.traccar.notificators;
 
-import org.traccar.Context;
-import org.traccar.Main;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -26,16 +24,30 @@ import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 import org.traccar.session.cache.CacheManager;
+import org.traccar.sms.SmsManager;
 
-public final class NotificatorSms implements Notificator {
+import javax.inject.Inject;
+
+public class NotificatorSms implements Notificator {
+
+    private final SmsManager smsManager;
+    private final CacheManager cacheManager;
+    private final StatisticsManager statisticsManager;
+
+    @Inject
+    public NotificatorSms(SmsManager smsManager, CacheManager cacheManager, StatisticsManager statisticsManager) {
+        this.smsManager = smsManager;
+        this.cacheManager = cacheManager;
+        this.statisticsManager = statisticsManager;
+    }
 
     @Override
     public void send(User user, Event event, Position position) throws MessageException, InterruptedException {
         if (user.getPhone() != null) {
             NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                    Main.getInjector().getInstance(CacheManager.class), user, event, position, "short");
-            Main.getInjector().getInstance(StatisticsManager.class).registerSms();
-            Context.getSmsManager().sendMessage(user.getPhone(), shortMessage.getBody(), false);
+                    cacheManager, user, event, position, "short");
+            statisticsManager.registerSms();
+            smsManager.sendMessage(user.getPhone(), shortMessage.getBody(), false);
         }
     }
 

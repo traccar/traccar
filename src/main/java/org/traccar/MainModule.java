@@ -57,7 +57,9 @@ import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
+import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
+import org.traccar.sms.SnsSmsClient;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
 import org.traccar.storage.Storage;
@@ -115,9 +117,15 @@ public class MainModule extends AbstractModule {
         return Context.getDeviceManager();
     }
 
+    @Singleton
     @Provides
-    public static SmsManager provideSmsManager() {
-        return Context.getSmsManager();
+    public static SmsManager provideSmsManager(Config config) {
+        if (config.hasKey(Keys.SMS_HTTP_URL)) {
+            return new HttpSmsClient();
+        } else if (config.hasKey(Keys.SMS_AWS_REGION)) {
+            return new SnsSmsClient();
+        }
+        return null;
     }
 
     @Singleton

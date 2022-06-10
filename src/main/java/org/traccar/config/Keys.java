@@ -754,6 +754,14 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Enabled notification options. Comma-separated string is expected.
+     * Example: web,mail,sms
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TYPES = new ConfigKey<>(
+            "notificator.types",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
      * Traccar notification API key.
      */
     public static final ConfigKey<String> NOTIFICATOR_TRACCAR_KEY = new ConfigKey<>(

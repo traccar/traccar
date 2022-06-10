@@ -43,9 +43,6 @@ import org.traccar.notification.EventForwarder;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
-import org.traccar.sms.HttpSmsClient;
-import org.traccar.sms.SmsManager;
-import org.traccar.sms.SnsSmsClient;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -153,12 +150,6 @@ public final class Context {
         return eventForwarder;
     }
 
-    private static SmsManager smsManager;
-
-    public static SmsManager getSmsManager() {
-        return smsManager;
-    }
-
     private static class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
 
         @Override
@@ -206,12 +197,6 @@ public final class Context {
         permissionsManager = new PermissionsManager(dataManager, usersManager);
 
         connectionManager = new ConnectionManager();
-
-        if (config.hasKey(Keys.SMS_HTTP_URL)) {
-            smsManager = new HttpSmsClient();
-        } else if (config.hasKey(Keys.SMS_AWS_REGION)) {
-            smsManager = new SnsSmsClient();
-        }
 
         initEventsModule();
 

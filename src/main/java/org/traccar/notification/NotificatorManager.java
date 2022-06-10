@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,6 +24,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
+import org.traccar.Main;
+import org.traccar.config.Keys;
 import org.traccar.model.Typed;
 import org.traccar.notificators.NotificatorFirebase;
 import org.traccar.notificators.NotificatorMail;
@@ -39,45 +41,25 @@ public final class NotificatorManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorManager.class);
 
-    private static final Notificator NULL_NOTIFICATOR = new NotificatorNull();
+    private static final Map<String, Class<? extends Notificator>> NOTIFICATORS_ALL = Map.of(
+            "web", NotificatorWeb.class,
+            "mail", NotificatorMail.class,
+            "sms", NotificatorSms.class,
+            "firebase", NotificatorFirebase.class,
+            "traccar", NotificatorTraccar.class,
+            "telegram", NotificatorTelegram.class,
+            "pushover", NotificatorPushover.class);
 
     private final Map<String, Notificator> notificators = new HashMap<>();
 
     public NotificatorManager() {
-        final String[] types = Context.getConfig().getString("notificator.types", "").split(",");
-        for (String type : types) {
-            String defaultNotificator = "";
-            switch (type) {
-                case "web":
-                    defaultNotificator = NotificatorWeb.class.getCanonicalName();
-                    break;
-                case "mail":
-                    defaultNotificator = NotificatorMail.class.getCanonicalName();
-                    break;
-                case "sms":
-                    defaultNotificator = NotificatorSms.class.getCanonicalName();
-                    break;
-                case "firebase":
-                    defaultNotificator = NotificatorFirebase.class.getCanonicalName();
-                    break;
-                case "traccar":
-                    defaultNotificator = NotificatorTraccar.class.getCanonicalName();
-                    break;
-                case "telegram":
-                    defaultNotificator = NotificatorTelegram.class.getCanonicalName();
-                    break;
-                case "pushover":
-                    defaultNotificator = NotificatorPushover.class.getCanonicalName();
-                    break;
-                default:
-                    break;
-            }
-            final String className = Context.getConfig()
-                    .getString("notificator." + type + ".class", defaultNotificator);
-            try {
-                notificators.put(type, (Notificator) Class.forName(className).newInstance());
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                LOGGER.warn("Unable to load notificator class for " + type + " " + className + " " + e.getMessage());
+        String types = Context.getConfig().getString(Keys.NOTIFICATOR_TYPES);
+        if (types != null) {
+            for (String type : types.split(",")) {
+                var notificatorClass = NOTIFICATORS_ALL.get(type);
+                if (notificatorClass != null) {
+                    notificators.put(type, Main.getInjector().getInstance(notificatorClass));
+                }
             }
         }
     }
@@ -86,7 +68,7 @@ public final class NotificatorManager {
         final Notificator notificator = notificators.get(type);
         if (notificator == null) {
             LOGGER.warn("No notificator configured for type : " + type);
-            return NULL_NOTIFICATOR;
+            return new NotificatorNull();
         }
         return notificator;
     }
