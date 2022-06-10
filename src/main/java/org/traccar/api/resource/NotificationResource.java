@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -33,12 +34,16 @@ import org.traccar.model.Notification;
 import org.traccar.model.Typed;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
+import org.traccar.notification.NotificatorManager;
 import org.traccar.storage.StorageException;
 
 @Path("notifications")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class NotificationResource extends ExtendedObjectResource<Notification> {
+
+    @Inject
+    private NotificatorManager notificatorManager;
 
     public NotificationResource() {
         super(Notification.class);
@@ -53,16 +58,15 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @GET
     @Path("notificators")
     public Collection<Typed> getNotificators() {
-        return Context.getNotificatorManager().getAllNotificatorTypes();
+        return notificatorManager.getAllNotificatorTypes();
     }
 
     @POST
     @Path("test")
     public Response testMessage() throws MessageException, InterruptedException, StorageException {
         User user = permissionsService.getUser(getUserId());
-        for (Typed method : Context.getNotificatorManager().getAllNotificatorTypes()) {
-            Context.getNotificatorManager()
-                    .getNotificator(method.getType()).send(user, new Event("test", 0), null);
+        for (Typed method : notificatorManager.getAllNotificatorTypes()) {
+            notificatorManager.getNotificator(method.getType()).send(user, new Event("test", 0), null);
         }
         return Response.noContent().build();
     }
@@ -72,7 +76,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     public Response testMessage(@PathParam("notificator") String notificator)
             throws MessageException, InterruptedException, StorageException {
         User user = permissionsService.getUser(getUserId());
-        Context.getNotificatorManager().getNotificator(notificator).send(user, new Event("test", 0), null);
+        notificatorManager.getNotificator(notificator).send(user, new Event("test", 0), null);
         return Response.noContent().build();
     }
 

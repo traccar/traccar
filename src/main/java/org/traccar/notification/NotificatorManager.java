@@ -23,8 +23,8 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
 import org.traccar.Main;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Typed;
 import org.traccar.notificators.NotificatorFirebase;
@@ -37,7 +37,11 @@ import org.traccar.notificators.NotificatorWeb;
 import org.traccar.notificators.NotificatorTelegram;
 import org.traccar.notificators.NotificatorPushover;
 
-public final class NotificatorManager {
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
+public class NotificatorManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorManager.class);
 
@@ -52,8 +56,9 @@ public final class NotificatorManager {
 
     private final Map<String, Notificator> notificators = new HashMap<>();
 
-    public NotificatorManager() {
-        String types = Context.getConfig().getString(Keys.NOTIFICATOR_TYPES);
+    @Inject
+    public NotificatorManager(Config config) {
+        String types = config.getString(Keys.NOTIFICATOR_TYPES);
         if (types != null) {
             for (String type : types.split(",")) {
                 var notificatorClass = NOTIFICATORS_ALL.get(type);

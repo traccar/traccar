@@ -126,12 +126,6 @@ public final class Context {
         return notificationManager;
     }
 
-    private static NotificatorManager notificatorManager;
-
-    public static NotificatorManager getNotificatorManager() {
-        return notificatorManager;
-    }
-
     private static VelocityEngine velocityEngine;
 
     public static VelocityEngine getVelocityEngine() {
@@ -208,8 +202,10 @@ public final class Context {
 
     private static void initEventsModule() {
 
-        notificationManager = new NotificationManager(dataManager, Main.getInjector().getInstance(CacheManager.class));
-        notificatorManager = new NotificatorManager();
+        notificationManager = new NotificationManager(
+                dataManager,
+                Main.getInjector().getInstance(CacheManager.class),
+                Main.getInjector().getInstance(NotificatorManager.class));
         Properties velocityProperties = new Properties();
         velocityProperties.setProperty("file.resource.loader.path",
                 Context.getConfig().getString("templates.rootPath", "templates") + "/");

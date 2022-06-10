@@ -37,6 +37,7 @@ import org.traccar.model.Position;
 import org.traccar.model.Typed;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
+import org.traccar.notification.NotificatorManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
@@ -45,12 +46,15 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
 
     private final CacheManager cacheManager;
+    private final NotificatorManager notificatorManager;
 
     private final boolean geocodeOnRequest;
 
-    public NotificationManager(DataManager dataManager, CacheManager cacheManager) {
+    public NotificationManager(
+            DataManager dataManager, CacheManager cacheManager, NotificatorManager notificatorManager) {
         super(dataManager, Notification.class);
         this.cacheManager = cacheManager;
+        this.notificatorManager = notificatorManager;
         geocodeOnRequest = Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST);
     }
 
@@ -116,7 +120,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
             new Thread(() -> {
                 for (String notificator : notificators) {
                     try {
-                        Context.getNotificatorManager().getNotificator(notificator).send(user, event, position);
+                        notificatorManager.getNotificator(notificator).send(user, event, position);
                     } catch (MessageException | InterruptedException exception) {
                         LOGGER.warn("Notification failed", exception);
                     }
