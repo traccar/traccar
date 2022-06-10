@@ -60,6 +60,7 @@ import org.traccar.api.security.SecurityRequestFilter;
 import org.traccar.api.resource.ServerResource;
 import org.traccar.config.Keys;
 
+import javax.inject.Inject;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
@@ -79,6 +80,7 @@ public class WebServer implements LifecycleObject {
 
     private final Server server;
 
+    @Inject
     public WebServer(Config config) {
         String address = config.getString(Keys.WEB_ADDRESS);
         int port = config.getInteger(Keys.WEB_PORT);

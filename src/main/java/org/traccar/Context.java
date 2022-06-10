@@ -46,7 +46,6 @@ import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
 import org.traccar.sms.SnsSmsClient;
-import org.traccar.web.WebServer;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -122,12 +121,6 @@ public final class Context {
 
     public static Geocoder getGeocoder() {
         return Main.getInjector() != null ? Main.getInjector().getInstance(Geocoder.class) : null;
-    }
-
-    private static WebServer webServer;
-
-    public static WebServer getWebServer() {
-        return webServer;
     }
 
     private static NotificationManager notificationManager;
@@ -209,10 +202,6 @@ public final class Context {
         }
 
         identityManager = deviceManager;
-
-        if (config.hasKey(Keys.WEB_PORT)) {
-            webServer = new WebServer(config);
-        }
 
         permissionsManager = new PermissionsManager(dataManager, usersManager);
 

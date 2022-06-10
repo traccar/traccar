@@ -61,6 +61,7 @@ import org.traccar.sms.SmsManager;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
 import org.traccar.storage.Storage;
+import org.traccar.web.WebServer;
 
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
@@ -124,6 +125,14 @@ public class MainModule extends AbstractModule {
     public static LdapProvider provideLdapProvider(Config config) {
         if (config.hasKey(Keys.LDAP_URL)) {
             return new LdapProvider(config);
+        }
+        return null;
+    }
+
+    @Provides
+    public static WebServer provideWebServer(Config config) {
+        if (config.hasKey(Keys.WEB_PORT)) {
+            return new WebServer(config);
         }
         return null;
     }
