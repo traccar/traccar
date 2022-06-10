@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.database.MailManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Server;
 import org.traccar.storage.Storage;
@@ -46,10 +47,15 @@ public class ServerResource extends BaseResource {
     @Inject
     private Storage storage;
 
+    @Inject
+    private MailManager mailManager;
+
     @PermitAll
     @GET
     public Server get() throws StorageException {
-        return storage.getObject(Server.class, new Request(new Columns.All()));
+        Server server = storage.getObject(Server.class, new Request(new Columns.All()));
+        server.setEmailEnabled(mailManager.getEmailEnabled());
+        return server;
     }
 
     @PUT

@@ -27,7 +27,6 @@ import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.GroupsManager;
 import org.traccar.database.IdentityManager;
-import org.traccar.database.MailManager;
 import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.UsersManager;
@@ -78,12 +77,6 @@ public final class Context {
 
     public static DataManager getDataManager() {
         return dataManager;
-    }
-
-    private static MailManager mailManager;
-
-    public static MailManager getMailManager() {
-        return mailManager;
     }
 
     private static UsersManager usersManager;
@@ -177,8 +170,6 @@ public final class Context {
         if (config.hasKey(Keys.DATABASE_URL)) {
             dataManager = new DataManager(config);
         }
-
-        mailManager = new MailManager();
 
         if (dataManager != null) {
             usersManager = new UsersManager(dataManager);

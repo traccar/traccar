@@ -16,7 +16,6 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.traccar.Context;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
@@ -193,9 +192,16 @@ public class Server extends ExtendedModel implements UserRestrictions {
         return getClass().getPackage().getImplementationVersion();
     }
 
+    private boolean emailEnabled;
+
+    @QueryIgnore
+    public void setEmailEnabled(boolean emailEnabled) {
+        this.emailEnabled = emailEnabled;
+    }
+
     @QueryIgnore
     public Boolean getEmailEnabled() {
-        return Context.getMailManager().getEmailEnabled();
+        return emailEnabled;
     }
 
 }

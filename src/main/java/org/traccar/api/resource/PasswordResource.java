@@ -18,12 +18,14 @@ package org.traccar.api.resource;
 import org.apache.velocity.VelocityContext;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.database.MailManager;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationMessage;
 import org.traccar.notification.TextTemplateFormatter;
 import org.traccar.storage.StorageException;
 
 import javax.annotation.security.PermitAll;
+import javax.inject.Inject;
 import javax.mail.MessagingException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -41,6 +43,9 @@ public class PasswordResource extends BaseResource {
 
     private static final String PASSWORD_RESET_TOKEN = "passwordToken";
 
+    @Inject
+    private MailManager mailManager;
+
     @Path("reset")
     @PermitAll
     @POST
@@ -56,7 +61,7 @@ public class PasswordResource extends BaseResource {
                 velocityContext.put("token", token);
                 NotificationMessage fullMessage =
                         TextTemplateFormatter.formatMessage(velocityContext, "passwordReset", "full");
-                Context.getMailManager().sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
+                mailManager.sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
                 break;
             }
         }

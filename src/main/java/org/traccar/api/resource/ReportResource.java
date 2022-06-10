@@ -38,8 +38,8 @@ import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.database.MailManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -80,6 +80,9 @@ public class ReportResource extends BaseResource {
     @Inject
     private TripsReportProvider tripsReportProvider;
 
+    @Inject
+    private MailManager mailManager;
+
     private interface ReportExecutor {
         void execute(ByteArrayOutputStream stream) throws StorageException, IOException;
     }
@@ -99,8 +102,7 @@ public class ReportResource extends BaseResource {
                             stream.toByteArray(), "application/octet-stream")));
 
                     User user = permissionsService.getUser(userId);
-                    Context.getMailManager().sendMessage(
-                            user, "Report", "The report is in the attachment.", attachment);
+                    mailManager.sendMessage(user, "Report", "The report is in the attachment.", attachment);
                 } catch (StorageException | IOException | MessagingException e) {
                     LOGGER.warn("Report failed", e);
                 }

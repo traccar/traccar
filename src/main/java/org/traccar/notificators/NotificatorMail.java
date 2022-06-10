@@ -16,8 +16,7 @@
  */
 package org.traccar.notificators;
 
-import org.traccar.Context;
-import org.traccar.Main;
+import org.traccar.database.MailManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -26,16 +25,26 @@ import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.session.cache.CacheManager;
 
+import javax.inject.Inject;
 import javax.mail.MessagingException;
 
-public final class NotificatorMail implements Notificator {
+public class NotificatorMail implements Notificator {
+
+    private final MailManager mailManager;
+    private final CacheManager cacheManager;
+
+    @Inject
+    public NotificatorMail(MailManager mailManager, CacheManager cacheManager) {
+        this.mailManager = mailManager;
+        this.cacheManager = cacheManager;
+    }
 
     @Override
     public void send(User user, Event event, Position position) throws MessageException {
         try {
             NotificationMessage fullMessage = NotificationFormatter.formatMessage(
-                    Main.getInjector().getInstance(CacheManager.class), user, event, position, "full");
-            Context.getMailManager().sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
+                    cacheManager, user, event, position, "full");
+            mailManager.sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
         } catch (MessagingException e) {
             throw new MessageException(e);
         }
