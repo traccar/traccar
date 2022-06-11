@@ -16,6 +16,7 @@
 package org.traccar.storage;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
@@ -45,13 +46,18 @@ public final class QueryBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryBuilder.class);
 
+    private final ObjectMapper objectMapper;
+
     private final Map<String, List<Integer>> indexMap = new HashMap<>();
     private Connection connection;
     private PreparedStatement statement;
     private final String query;
     private final boolean returnGeneratedKeys;
 
-    private QueryBuilder(DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
+    private QueryBuilder(
+            DataSource dataSource, ObjectMapper objectMapper,
+            String query, boolean returnGeneratedKeys) throws SQLException {
+        this.objectMapper = objectMapper;
         this.query = query;
         this.returnGeneratedKeys = returnGeneratedKeys;
         if (query != null) {
@@ -126,13 +132,15 @@ public final class QueryBuilder {
         return parsedQuery.toString();
     }
 
-    public static QueryBuilder create(DataSource dataSource, String query) throws SQLException {
-        return new QueryBuilder(dataSource, query, false);
+    public static QueryBuilder create(
+            DataSource dataSource, ObjectMapper objectMapper, String query) throws SQLException {
+        return new QueryBuilder(dataSource, objectMapper, query, false);
     }
 
     public static QueryBuilder create(
-            DataSource dataSource, String query, boolean returnGeneratedKeys) throws SQLException {
-        return new QueryBuilder(dataSource, query, returnGeneratedKeys);
+            DataSource dataSource, ObjectMapper objectMapper, String query,
+            boolean returnGeneratedKeys) throws SQLException {
+        return new QueryBuilder(dataSource, objectMapper, query, returnGeneratedKeys);
     }
 
     private List<Integer> indexes(String name) {
@@ -295,7 +303,7 @@ public final class QueryBuilder {
                     } else if (method.getReturnType().equals(byte[].class)) {
                         setBlob(name, (byte[]) method.invoke(object));
                     } else {
-                        setString(name, Context.getObjectMapper().writeValueAsString(method.invoke(object)));
+                        setString(name, objectMapper.writeValueAsString(method.invoke(object)));
                     }
                 } catch (IllegalAccessException | InvocationTargetException | JsonProcessingException error) {
                     LOGGER.warn("Get property error", error);
@@ -378,7 +386,7 @@ public final class QueryBuilder {
                 String value = resultSet.getString(name);
                 if (value != null && !value.isEmpty()) {
                     try {
-                        method.invoke(object, Context.getObjectMapper().readValue(value, parameterType));
+                        method.invoke(object, objectMapper.readValue(value, parameterType));
                     } catch (InvocationTargetException | IllegalAccessException | IOException error) {
                         LOGGER.warn("Set property error", error);
                     }

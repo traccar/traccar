@@ -15,6 +15,7 @@
  */
 package org.traccar.database;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import liquibase.Contexts;
@@ -78,7 +79,7 @@ public class DataManager {
         initDatabase();
         initDatabaseSchema();
 
-        storage = new DatabaseStorage(dataSource);
+        storage = new DatabaseStorage(dataSource, Main.getInjector().getInstance(ObjectMapper.class));
     }
 
     private void initDatabase() throws Exception {

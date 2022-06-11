@@ -16,7 +16,9 @@
 package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import io.netty.util.HashedWheelTimer;
@@ -28,6 +30,7 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
+import org.traccar.helper.SanitizerModule;
 import org.traccar.notification.EventForwarder;
 import org.traccar.session.ConnectionManager;
 import org.traccar.database.DataManager;
@@ -85,8 +88,14 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
-    public static ObjectMapper provideObjectMapper() {
-        return Context.getObjectMapper();
+    public static ObjectMapper provideObjectMapper(Config config) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        if (config.getBoolean(Keys.WEB_SANITIZE)) {
+            objectMapper.registerModule(new SanitizerModule());
+        }
+        objectMapper.setConfig(objectMapper
+                .getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
+        return objectMapper;
     }
 
     @Provides
@@ -145,9 +154,9 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
-    public static WebServer provideWebServer(Config config) {
+    public static WebServer provideWebServer(Injector injector, Config config) {
         if (config.hasKey(Keys.WEB_PORT)) {
-            return new WebServer(config);
+            return new WebServer(injector, config);
         }
         return null;
     }

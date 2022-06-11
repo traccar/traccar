@@ -16,7 +16,6 @@
 package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
@@ -29,7 +28,6 @@ import org.traccar.database.PermissionsManager;
 import org.traccar.database.UsersManager;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
-import org.traccar.helper.SanitizerModule;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
@@ -53,12 +51,6 @@ public final class Context {
 
     public static Config getConfig() {
         return config;
-    }
-
-    private static ObjectMapper objectMapper;
-
-    public static ObjectMapper getObjectMapper() {
-        return objectMapper;
     }
 
     private static IdentityManager identityManager;
@@ -119,7 +111,7 @@ public final class Context {
 
         @Override
         public ObjectMapper getContext(Class<?> clazz) {
-            return objectMapper;
+            return Main.getInjector().getInstance(ObjectMapper.class);
         }
 
     }
@@ -134,13 +126,6 @@ public final class Context {
             Log.setupDefaultLogger();
             throw e;
         }
-
-        objectMapper = new ObjectMapper();
-        if (config.getBoolean(Keys.WEB_SANITIZE)) {
-            objectMapper.registerModule(new SanitizerModule());
-        }
-        objectMapper.setConfig(
-                objectMapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
 
         client = ClientBuilder.newClient().register(new ObjectMapperContextResolver());
 

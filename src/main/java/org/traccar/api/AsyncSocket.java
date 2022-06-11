@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.slf4j.Logger;
@@ -39,9 +40,11 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private static final String KEY_POSITIONS = "positions";
     private static final String KEY_EVENTS = "events";
 
+    private final ObjectMapper objectMapper;
     private final long userId;
 
-    public AsyncSocket(long userId) {
+    public AsyncSocket(ObjectMapper objectMapper, long userId) {
+        this.objectMapper = objectMapper;
         this.userId = userId;
     }
 
@@ -92,7 +95,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private void sendData(Map<String, Collection<?>> data) {
         if (isConnected()) {
             try {
-                getRemote().sendString(Context.getObjectMapper().writeValueAsString(data), null);
+                getRemote().sendString(objectMapper.writeValueAsString(data), null);
             } catch (JsonProcessingException e) {
                 LOGGER.warn("Socket JSON formatting error", e);
             }

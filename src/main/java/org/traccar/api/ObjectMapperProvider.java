@@ -16,7 +16,7 @@
 package org.traccar.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.traccar.Context;
+import org.traccar.Main;
 
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Provider;
@@ -26,7 +26,7 @@ public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
     @Override
     public ObjectMapper getContext(Class<?> type) {
-        return Context.getObjectMapper();
+        return Main.getInjector().getInstance(ObjectMapper.class);
     }
 
 }

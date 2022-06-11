@@ -15,6 +15,7 @@
  */
 package org.traccar.web;
 
+import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpMethod;
@@ -78,10 +79,12 @@ public class WebServer implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
 
+    private final Injector injector;
     private final Server server;
 
     @Inject
-    public WebServer(Config config) {
+    public WebServer(Injector injector, Config config) {
+        this.injector = injector;
         String address = config.getString(Keys.WEB_ADDRESS);
         int port = config.getInteger(Keys.WEB_PORT);
         if (address == null) {
@@ -169,7 +172,7 @@ public class WebServer implements LifecycleObject {
     private void initApi(Config config, ServletContextHandler servletHandler) {
         servletHandler.addFilter(GuiceFilter.class, "/api/*", EnumSet.allOf(DispatcherType.class));
 
-        servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/api/socket");
+        servletHandler.addServlet(new ServletHolder(injector.getInstance(AsyncSocketServlet.class)), "/api/socket");
         JettyWebSocketServletContainerInitializer.configure(servletHandler, null);
 
         String mediaPath = config.getString(Keys.MEDIA_PATH);

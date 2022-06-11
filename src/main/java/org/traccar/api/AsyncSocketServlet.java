@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,25 @@
  */
 package org.traccar.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
 import org.traccar.Context;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.config.Keys;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
 import java.time.Duration;
 
 public class AsyncSocketServlet extends JettyWebSocketServlet {
+
+    private final ObjectMapper objectMapper;
+
+    @Inject
+    public AsyncSocketServlet(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public void configure(JettyWebSocketServletFactory factory) {
@@ -32,7 +41,7 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
         factory.setCreator((req, resp) -> {
             if (req.getSession() != null) {
                 long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
-                return new AsyncSocket(userId);
+                return new AsyncSocket(objectMapper, userId);
             } else {
                 return null;
             }
