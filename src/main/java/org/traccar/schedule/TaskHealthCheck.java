@@ -19,23 +19,31 @@ import com.sun.jna.Library;
 import com.sun.jna.Native;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class TaskHealthCheck implements Runnable {
+public class TaskHealthCheck implements ScheduleTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskHealthCheck.class);
+
+    private final Config config;
+    private final Client client;
 
     private SystemD systemD;
 
     private boolean enabled;
     private long period;
 
-    public TaskHealthCheck() {
-        if (!Context.getConfig().getBoolean(Keys.WEB_DISABLE_HEALTH_CHECK)
+    @Inject
+    public TaskHealthCheck(Config config, Client client) {
+        this.config = config;
+        this.client = client;
+        if (!config.getBoolean(Keys.WEB_DISABLE_HEALTH_CHECK)
                 && System.getProperty("os.name").toLowerCase().startsWith("linux")) {
             try {
                 systemD = Native.load("systemd", SystemD.class);
@@ -54,11 +62,12 @@ public class TaskHealthCheck implements Runnable {
     }
 
     private String getUrl() {
-        String address = Context.getConfig().getString(Keys.WEB_ADDRESS, "localhost");
-        int port = Context.getConfig().getInteger(Keys.WEB_PORT);
+        String address = config.getString(Keys.WEB_ADDRESS, "localhost");
+        int port = config.getInteger(Keys.WEB_PORT);
         return "http://" + address + ":" + port + "/api/server";
     }
 
+    @Override
     public void schedule(ScheduledExecutorService executor) {
         if (enabled) {
             executor.scheduleAtFixedRate(this, period, period, TimeUnit.MILLISECONDS);
@@ -68,7 +77,7 @@ public class TaskHealthCheck implements Runnable {
     @Override
     public void run() {
         LOGGER.debug("Health check running");
-        int status = Context.getClient().target(getUrl()).request().get().getStatus();
+        int status = client.target(getUrl()).request().get().getStatus();
         if (status == 200) {
             int result = systemD.sd_notify(0, "WATCHDOG=1");
             if (result < 0) {

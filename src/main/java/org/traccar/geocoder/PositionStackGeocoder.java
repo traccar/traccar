@@ -17,6 +17,7 @@ package org.traccar.geocoder;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 
 public class PositionStackGeocoder extends JsonGeocoder {
 
@@ -24,8 +25,8 @@ public class PositionStackGeocoder extends JsonGeocoder {
         return "http://api.positionstack.com/v1/reverse?access_key=" + key + "&query=%f,%f";
     }
 
-    public PositionStackGeocoder(String key, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(key), cacheSize, addressFormat);
+    public PositionStackGeocoder(Client client, String key, int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(key), cacheSize, addressFormat);
     }
 
     @Override

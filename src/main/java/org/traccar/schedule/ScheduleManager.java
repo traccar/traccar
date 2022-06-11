@@ -15,24 +15,31 @@
  */
 package org.traccar.schedule;
 
+import com.google.inject.Injector;
 import org.traccar.LifecycleObject;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 @Singleton
 public class ScheduleManager implements LifecycleObject {
 
+    private final Injector injector;
     private ScheduledExecutorService executor;
+
+    @Inject
+    public ScheduleManager(Injector injector) {
+        this.injector = injector;
+    }
 
     @Override
     public void start() {
         executor = Executors.newSingleThreadScheduledExecutor();
-
-        new TaskDeviceInactivityCheck().schedule(executor);
-        new TaskWebSocketKeepalive().schedule(executor);
-        new TaskHealthCheck().schedule(executor);
+        List.of(TaskDeviceInactivityCheck.class, TaskWebSocketKeepalive.class, TaskHealthCheck.class)
+                .forEach(task -> injector.getInstance(task).schedule(executor));
     }
 
     @Override

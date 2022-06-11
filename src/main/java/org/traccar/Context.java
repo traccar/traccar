@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
@@ -37,10 +36,6 @@ import org.traccar.notification.EventForwarder;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
-
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.ext.ContextResolver;
 
 public final class Context {
 
@@ -101,21 +96,6 @@ public final class Context {
         return notificationManager;
     }
 
-    private static Client client = ClientBuilder.newClient();
-
-    public static Client getClient() {
-        return client;
-    }
-
-    private static class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
-
-        @Override
-        public ObjectMapper getContext(Class<?> clazz) {
-            return Main.getInjector().getInstance(ObjectMapper.class);
-        }
-
-    }
-
     public static void init(String configFile) throws Exception {
 
         try {
@@ -126,8 +106,6 @@ public final class Context {
             Log.setupDefaultLogger();
             throw e;
         }
-
-        client = ClientBuilder.newClient().register(new ObjectMapperContextResolver());
 
         if (config.hasKey(Keys.DATABASE_URL)) {
             dataManager = new DataManager(config);

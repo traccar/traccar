@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,20 @@
  */
 package org.traccar.geolocation;
 
-import org.traccar.Context;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.InvocationCallback;
 
 public class OpenCellIdGeolocationProvider implements GeolocationProvider {
 
-    private String url;
+    private final Client client;
+    private final String url;
 
-    public OpenCellIdGeolocationProvider(String url, String key) {
+    public OpenCellIdGeolocationProvider(Client client, String url, String key) {
+        this.client = client;
         if (url == null) {
             url = "http://opencellid.org/cell/get";
         }
@@ -41,7 +43,7 @@ public class OpenCellIdGeolocationProvider implements GeolocationProvider {
             String request = String.format(url, cellTower.getMobileCountryCode(), cellTower.getMobileNetworkCode(),
                     cellTower.getLocationAreaCode(), cellTower.getCellId());
 
-            Context.getClient().target(request).request().async().get(new InvocationCallback<JsonObject>() {
+            client.target(request).request().async().get(new InvocationCallback<JsonObject>() {
                 @Override
                 public void completed(JsonObject json) {
                     if (json.containsKey("lat") && json.containsKey("lon")) {

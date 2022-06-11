@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,19 @@
  */
 package org.traccar.schedule;
 
-import org.traccar.Context;
+import org.traccar.database.DeviceManager;
+import org.traccar.database.NotificationManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class TaskDeviceInactivityCheck implements Runnable {
+public class TaskDeviceInactivityCheck implements ScheduleTask {
 
     public static final String ATTRIBUTE_DEVICE_INACTIVITY_START = "deviceInactivityStart";
     public static final String ATTRIBUTE_DEVICE_INACTIVITY_PERIOD = "deviceInactivityPeriod";
@@ -33,6 +35,16 @@ public class TaskDeviceInactivityCheck implements Runnable {
 
     private static final long CHECK_PERIOD_MINUTES = 15;
 
+    private final DeviceManager deviceManager;
+    private final NotificationManager notificationManager;
+
+    @Inject
+    public TaskDeviceInactivityCheck(DeviceManager deviceManager, NotificationManager notificationManager) {
+        this.deviceManager = deviceManager;
+        this.notificationManager = notificationManager;
+    }
+
+    @Override
     public void schedule(ScheduledExecutorService executor) {
         executor.scheduleAtFixedRate(this, CHECK_PERIOD_MINUTES, CHECK_PERIOD_MINUTES, TimeUnit.MINUTES);
     }
@@ -43,7 +55,7 @@ public class TaskDeviceInactivityCheck implements Runnable {
         long checkPeriod = TimeUnit.MINUTES.toMillis(CHECK_PERIOD_MINUTES);
 
         Map<Event, Position> events = new HashMap<>();
-        for (Device device : Context.getDeviceManager().getAllDevices()) {
+        for (Device device : deviceManager.getAllDevices()) {
             if (device.getLastUpdate() != null && checkDevice(device, currentTime, checkPeriod)) {
                 Event event = new Event(Event.TYPE_DEVICE_INACTIVE, device.getId());
                 event.set(ATTRIBUTE_LAST_UPDATE, device.getLastUpdate().getTime());
@@ -51,7 +63,7 @@ public class TaskDeviceInactivityCheck implements Runnable {
             }
         }
 
-        Context.getNotificationManager().updateEvents(events);
+        notificationManager.updateEvents(events);
     }
 
     private boolean checkDevice(Device device, long currentTime, long checkPeriod) {

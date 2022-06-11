@@ -17,10 +17,9 @@ package org.traccar.notification;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.Main;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.database.UsersManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -28,6 +27,7 @@ import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.InvocationCallback;
@@ -42,12 +42,16 @@ public class EventForwarder {
     private final String url;
     private final String header;
 
+    private final Client client;
     private final CacheManager cacheManager;
+    private final UsersManager usersManager;
 
-    public EventForwarder(Config config) {
+    public EventForwarder(Config config, Client client, CacheManager cacheManager, UsersManager usersManager) {
+        this.client = client;
+        this.cacheManager = cacheManager;
+        this.usersManager = usersManager;
         url = config.getString(Keys.EVENT_FORWARD_URL);
         header = config.getString(Keys.EVENT_FORWARD_HEADERS);
-        cacheManager = Main.getInjector().getInstance(CacheManager.class);
     }
 
     private static final String KEY_POSITION = "position";
@@ -59,7 +63,7 @@ public class EventForwarder {
 
     public final void forwardEvent(Event event, Position position, Set<Long> users) {
 
-        Invocation.Builder requestBuilder = Context.getClient().target(url).request();
+        Invocation.Builder requestBuilder = client.target(url).request();
 
         if (header != null && !header.isEmpty()) {
             for (String line: header.split("\\r?\\n")) {
@@ -105,7 +109,7 @@ public class EventForwarder {
                 data.put(KEY_MAINTENANCE, maintenance);
             }
         }
-        data.put(KEY_USERS, Context.getUsersManager().getItems(users));
+        data.put(KEY_USERS, usersManager.getItems(users));
         return data;
     }
 

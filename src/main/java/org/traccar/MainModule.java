@@ -30,6 +30,7 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
+import org.traccar.database.UsersManager;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.notification.EventForwarder;
 import org.traccar.session.ConnectionManager;
@@ -64,6 +65,7 @@ import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
 import org.traccar.sms.SnsSmsClient;
@@ -75,6 +77,8 @@ import org.traccar.web.WebServer;
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.ext.ContextResolver;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -125,7 +129,8 @@ public class MainModule extends AbstractModule {
 
     @Provides
     public static Client provideClient() {
-        return Context.getClient();
+        return ClientBuilder.newClient().register(
+                (ContextResolver<ObjectMapper>) clazz -> Main.getInjector().getInstance(ObjectMapper.class));
     }
 
     @Provides
@@ -135,11 +140,11 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static SmsManager provideSmsManager(Config config) {
+    public static SmsManager provideSmsManager(Config config, Client client) {
         if (config.hasKey(Keys.SMS_HTTP_URL)) {
-            return new HttpSmsClient();
+            return new HttpSmsClient(config, client);
         } else if (config.hasKey(Keys.SMS_AWS_REGION)) {
-            return new SnsSmsClient();
+            return new SnsSmsClient(config);
         }
         return null;
     }
@@ -163,7 +168,7 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static Geocoder provideGeocoder(Config config) {
+    public static Geocoder provideGeocoder(Config config, Client client) {
         if (config.getBoolean(Keys.GEOCODER_ENABLE)) {
             String type = config.getString(Keys.GEOCODER_TYPE, "google");
             String url = config.getString(Keys.GEOCODER_URL);
@@ -176,39 +181,39 @@ public class MainModule extends AbstractModule {
             int cacheSize = config.getInteger(Keys.GEOCODER_CACHE_SIZE);
             switch (type) {
                 case "nominatim":
-                    return new NominatimGeocoder(url, key, language, cacheSize, addressFormat);
+                    return new NominatimGeocoder(client, url, key, language, cacheSize, addressFormat);
                 case "gisgraphy":
-                    return new GisgraphyGeocoder(url, cacheSize, addressFormat);
+                    return new GisgraphyGeocoder(client, url, cacheSize, addressFormat);
                 case "mapquest":
-                    return new MapQuestGeocoder(url, key, cacheSize, addressFormat);
+                    return new MapQuestGeocoder(client, url, key, cacheSize, addressFormat);
                 case "opencage":
-                    return new OpenCageGeocoder(url, key, language, cacheSize, addressFormat);
+                    return new OpenCageGeocoder(client, url, key, language, cacheSize, addressFormat);
                 case "bingmaps":
-                    return new BingMapsGeocoder(url, key, cacheSize, addressFormat);
+                    return new BingMapsGeocoder(client, url, key, cacheSize, addressFormat);
                 case "factual":
-                    return new FactualGeocoder(url, key, cacheSize, addressFormat);
+                    return new FactualGeocoder(client, url, key, cacheSize, addressFormat);
                 case "geocodefarm":
-                    return new GeocodeFarmGeocoder(key, language, cacheSize, addressFormat);
+                    return new GeocodeFarmGeocoder(client, key, language, cacheSize, addressFormat);
                 case "geocodexyz":
-                    return new GeocodeXyzGeocoder(key, cacheSize, addressFormat);
+                    return new GeocodeXyzGeocoder(client, key, cacheSize, addressFormat);
                 case "ban":
-                    return new BanGeocoder(cacheSize, addressFormat);
+                    return new BanGeocoder(client, cacheSize, addressFormat);
                 case "here":
-                    return new HereGeocoder(url, id, key, language, cacheSize, addressFormat);
+                    return new HereGeocoder(client, url, id, key, language, cacheSize, addressFormat);
                 case "mapmyindia":
-                    return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
+                    return new MapmyIndiaGeocoder(client, url, key, cacheSize, addressFormat);
                 case "tomtom":
-                    return new TomTomGeocoder(url, key, cacheSize, addressFormat);
+                    return new TomTomGeocoder(client, url, key, cacheSize, addressFormat);
                 case "positionstack":
-                    return new PositionStackGeocoder(key, cacheSize, addressFormat);
+                    return new PositionStackGeocoder(client, key, cacheSize, addressFormat);
                 case "mapbox":
-                    return new MapboxGeocoder(key, cacheSize, addressFormat);
+                    return new MapboxGeocoder(client, key, cacheSize, addressFormat);
                 case "maptiler":
-                    return new MapTilerGeocoder(key, cacheSize, addressFormat);
+                    return new MapTilerGeocoder(client, key, cacheSize, addressFormat);
                 case "geoapify":
-                    return new GeoapifyGeocoder(key, language, cacheSize, addressFormat);
+                    return new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
                 default:
-                    return new GoogleGeocoder(key, language, cacheSize, addressFormat);
+                    return new GoogleGeocoder(client, key, language, cacheSize, addressFormat);
             }
         }
         return null;
@@ -216,20 +221,20 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static GeolocationProvider provideGeolocationProvider(Config config) {
+    public static GeolocationProvider provideGeolocationProvider(Config config, Client client) {
         if (config.getBoolean(Keys.GEOLOCATION_ENABLE)) {
             String type = config.getString(Keys.GEOLOCATION_TYPE, "mozilla");
             String url = config.getString(Keys.GEOLOCATION_URL);
             String key = config.getString(Keys.GEOLOCATION_KEY);
             switch (type) {
                 case "google":
-                    return new GoogleGeolocationProvider(key);
+                    return new GoogleGeolocationProvider(client, key);
                 case "opencellid":
-                    return new OpenCellIdGeolocationProvider(url, key);
+                    return new OpenCellIdGeolocationProvider(client, url, key);
                 case "unwired":
-                    return new UnwiredGeolocationProvider(url, key);
+                    return new UnwiredGeolocationProvider(client, url, key);
                 default:
-                    return new MozillaGeolocationProvider(key);
+                    return new MozillaGeolocationProvider(client, key);
             }
         }
         return null;
@@ -237,14 +242,14 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static SpeedLimitProvider provideSpeedLimitProvider(Config config) {
+    public static SpeedLimitProvider provideSpeedLimitProvider(Config config, Client client) {
         if (config.getBoolean(Keys.SPEED_LIMIT_ENABLE)) {
             String type = config.getString(Keys.SPEED_LIMIT_TYPE, "overpass");
             String url = config.getString(Keys.SPEED_LIMIT_URL);
             switch (type) {
                 case "overpass":
                 default:
-                    return new OverpassSpeedLimitProvider(url);
+                    return new OverpassSpeedLimitProvider(client, url);
             }
         }
         return null;
@@ -286,9 +291,10 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
-    public static EventForwarder provideEventForwarder(Config config) {
+    public static EventForwarder provideEventForwarder(
+            Config config, Client client, CacheManager cacheManager, UsersManager usersManager) {
         if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
-            return new EventForwarder(config);
+            return new EventForwarder(config, client, cacheManager, usersManager);
         }
         return null;
     }

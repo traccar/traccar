@@ -16,11 +16,12 @@
  */
 package org.traccar.sms;
 
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DataConverter;
 import org.traccar.notification.MessageException;
 
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.MediaType;
@@ -31,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 
 public class HttpSmsClient implements SmsManager {
 
+    private final Client client;
     private final String url;
     private final String authorizationHeader;
     private final String authorization;
@@ -38,14 +40,15 @@ public class HttpSmsClient implements SmsManager {
     private final boolean encode;
     private final MediaType mediaType;
 
-    public HttpSmsClient() {
-        url = Context.getConfig().getString(Keys.SMS_HTTP_URL);
-        authorizationHeader = Context.getConfig().getString(Keys.SMS_HTTP_AUTHORIZATION_HEADER);
-        if (Context.getConfig().hasKey(Keys.SMS_HTTP_AUTHORIZATION)) {
-            authorization = Context.getConfig().getString(Keys.SMS_HTTP_AUTHORIZATION);
+    public HttpSmsClient(Config config, Client client) {
+        this.client = client;
+        url = config.getString(Keys.SMS_HTTP_URL);
+        authorizationHeader = config.getString(Keys.SMS_HTTP_AUTHORIZATION_HEADER);
+        if (config.hasKey(Keys.SMS_HTTP_AUTHORIZATION)) {
+            authorization = config.getString(Keys.SMS_HTTP_AUTHORIZATION);
         } else {
-            String user = Context.getConfig().getString(Keys.SMS_HTTP_USER);
-            String password = Context.getConfig().getString(Keys.SMS_HTTP_PASSWORD);
+            String user = config.getString(Keys.SMS_HTTP_USER);
+            String password = config.getString(Keys.SMS_HTTP_PASSWORD);
             if (user != null && password != null) {
                 authorization = "Basic "
                         + DataConverter.printBase64((user + ":" + password).getBytes(StandardCharsets.UTF_8));
@@ -53,7 +56,7 @@ public class HttpSmsClient implements SmsManager {
                 authorization = null;
             }
         }
-        template = Context.getConfig().getString(Keys.SMS_HTTP_TEMPLATE).trim();
+        template = config.getString(Keys.SMS_HTTP_TEMPLATE).trim();
         if (template.charAt(0) == '{' || template.charAt(0) == '[') {
             encode = false;
             mediaType = MediaType.APPLICATION_JSON_TYPE;
@@ -78,7 +81,7 @@ public class HttpSmsClient implements SmsManager {
     }
 
     private Invocation.Builder getRequestBuilder() {
-        Invocation.Builder builder = Context.getClient().target(url).request();
+        Invocation.Builder builder = client.target(url).request();
         if (authorization != null) {
             builder = builder.header(authorizationHeader, authorization);
         }
