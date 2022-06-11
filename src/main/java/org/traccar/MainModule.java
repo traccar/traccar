@@ -118,6 +118,11 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
+    public static UsersManager provideUsersManager() {
+        return Context.getUsersManager();
+    }
+
+    @Provides
     public static IdentityManager provideIdentityManager() {
         return Context.getIdentityManager();
     }
