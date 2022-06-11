@@ -123,7 +123,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 || BitUtil.check(value, 10) || BitUtil.check(value, 11)) {
             return Position.ALARM_FAULT;
         }
-        if (BitUtil.check(value, 7)) {
+        if (BitUtil.check(value, 7) || BitUtil.check(value, 18)) {
             return Position.ALARM_LOW_BATTERY;
         }
         if (BitUtil.check(value, 8)) {
@@ -376,6 +376,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
         position.set(Position.KEY_BLOCKED, BitUtil.check(status, 10));
+        position.set(Position.KEY_CHARGE, BitUtil.check(status, 26));
 
         position.setValid(BitUtil.check(status, 1));
 
@@ -539,6 +540,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 0x00CE:
                                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                                    break;
+                                case 0xE1:
+                                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                                     break;
                                 default:
                                     buf.skipBytes(extendedLength - 2);
