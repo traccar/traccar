@@ -22,8 +22,6 @@ import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.notification.NotificationMessage;
-import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.SmsManager;
 
 import javax.inject.Inject;
@@ -31,21 +29,21 @@ import javax.inject.Inject;
 public class NotificatorSms implements Notificator {
 
     private final SmsManager smsManager;
-    private final CacheManager cacheManager;
+    private final NotificationFormatter notificationFormatter;
     private final StatisticsManager statisticsManager;
 
     @Inject
-    public NotificatorSms(SmsManager smsManager, CacheManager cacheManager, StatisticsManager statisticsManager) {
+    public NotificatorSms(
+            SmsManager smsManager, NotificationFormatter notificationFormatter, StatisticsManager statisticsManager) {
         this.smsManager = smsManager;
-        this.cacheManager = cacheManager;
+        this.notificationFormatter = notificationFormatter;
         this.statisticsManager = statisticsManager;
     }
 
     @Override
     public void send(User user, Event event, Position position) throws MessageException, InterruptedException {
         if (user.getPhone() != null) {
-            NotificationMessage shortMessage = NotificationFormatter.formatMessage(
-                    cacheManager, user, event, position, "short");
+            var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
             statisticsManager.registerSms();
             smsManager.sendMessage(user.getPhone(), shortMessage.getBody(), false);
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,10 @@
  */
 package org.traccar.api.resource;
 
-import org.apache.velocity.VelocityContext;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.database.MailManager;
 import org.traccar.model.User;
-import org.traccar.notification.NotificationMessage;
 import org.traccar.notification.TextTemplateFormatter;
 import org.traccar.storage.StorageException;
 
@@ -46,6 +44,9 @@ public class PasswordResource extends BaseResource {
     @Inject
     private MailManager mailManager;
 
+    @Inject
+    private TextTemplateFormatter textTemplateFormatter;
+
     @Path("reset")
     @PermitAll
     @POST
@@ -56,11 +57,9 @@ public class PasswordResource extends BaseResource {
                 String token = UUID.randomUUID().toString().replaceAll("-", "");
                 user.set(PASSWORD_RESET_TOKEN, token);
                 Context.getUsersManager().updateItem(user);
-                VelocityContext velocityContext = TextTemplateFormatter.prepareContext(
-                        permissionsService.getServer(), user);
+                var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
                 velocityContext.put("token", token);
-                NotificationMessage fullMessage =
-                        TextTemplateFormatter.formatMessage(velocityContext, "passwordReset", "full");
+                var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "passwordReset", "full");
                 mailManager.sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
                 break;
             }

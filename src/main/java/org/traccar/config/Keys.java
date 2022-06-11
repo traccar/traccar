@@ -688,6 +688,14 @@ public final class Keys {
             Collections.singletonList(KeyType.GLOBAL));
 
     /**
+     * Root folder for all template files.
+     */
+    public static final ConfigKey<String> TEMPLATES_ROOT = new ConfigKey<>(
+            "templates.root",
+            Collections.singletonList(KeyType.GLOBAL),
+            "templates");
+
+    /**
      * SMS API service full URL. Enables SMS commands and notifications.
      */
     public static final ConfigKey<String> SMS_HTTP_URL = new ConfigKey<>(
@@ -1243,6 +1251,15 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> WEB_PERSIST_SESSION = new ConfigKey<>(
             "web.persistSession",
+            Collections.singletonList(KeyType.GLOBAL));
+
+    /**
+     * Public URL for the web app. Used for notification and report link.
+     *
+     * If not provided, Traccar will attempt to get a URL from the server IP address, but it might be a local address.
+     */
+    public static final ConfigKey<String> WEB_URL = new ConfigKey<>(
+            "web.url",
             Collections.singletonList(KeyType.GLOBAL));
 
     /**

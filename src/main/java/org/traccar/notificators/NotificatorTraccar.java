@@ -17,7 +17,7 @@ package org.traccar.notificators;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.session.cache.CacheManager;
+import org.traccar.notification.NotificationFormatter;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -25,9 +25,9 @@ import javax.ws.rs.client.Client;
 public class NotificatorTraccar extends NotificatorFirebase {
 
     @Inject
-    public NotificatorTraccar(Config config, CacheManager cacheManager, Client client) {
+    public NotificatorTraccar(Config config, NotificationFormatter notificationFormatter, Client client) {
         super(
-                cacheManager, client, "https://www.traccar.org/push/",
+                notificationFormatter, client, "https://www.traccar.org/push/",
                 config.getString(Keys.NOTIFICATOR_TRACCAR_KEY));
     }
 

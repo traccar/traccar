@@ -23,7 +23,6 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -31,7 +30,7 @@ import javax.ws.rs.client.Entity;
 
 public class NotificatorTelegram implements Notificator {
 
-    private final CacheManager cacheManager;
+    private final NotificationFormatter notificationFormatter;
     private final Client client;
 
     private final String urlSendText;
@@ -62,8 +61,8 @@ public class NotificatorTelegram implements Notificator {
     }
 
     @Inject
-    public NotificatorTelegram(Config config, CacheManager cacheManager, Client client) {
-        this.cacheManager = cacheManager;
+    public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter, Client client) {
+        this.notificationFormatter = notificationFormatter;
         this.client = client;
         urlSendText = String.format(
                 "https://api.telegram.org/bot%s/sendMessage", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
@@ -85,7 +84,7 @@ public class NotificatorTelegram implements Notificator {
 
     @Override
     public void send(User user, Event event, Position position) {
-        var shortMessage = NotificationFormatter.formatMessage(cacheManager, user, event, position, "short");
+        var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 
         TextMessage message = new TextMessage();
         message.chatId = user.getString("telegramChatId");

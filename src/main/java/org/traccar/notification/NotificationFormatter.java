@@ -27,18 +27,26 @@ import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.session.cache.CacheManager;
 
-public final class NotificationFormatter {
+import javax.inject.Inject;
 
-    private NotificationFormatter() {
+public class NotificationFormatter {
+
+    private final CacheManager cacheManager;
+    private final TextTemplateFormatter textTemplateFormatter;
+
+    @Inject
+    public NotificationFormatter(
+            CacheManager cacheManager, TextTemplateFormatter textTemplateFormatter) {
+        this.cacheManager = cacheManager;
+        this.textTemplateFormatter = textTemplateFormatter;
     }
 
-    public static NotificationMessage formatMessage(
-            CacheManager cacheManager, User user, Event event, Position position, String templatePath) {
+    public NotificationMessage formatMessage(User user, Event event, Position position, String templatePath) {
 
         Server server = cacheManager.getServer();
         Device device = cacheManager.getObject(Device.class, event.getDeviceId());
 
-        VelocityContext velocityContext = TextTemplateFormatter.prepareContext(server, user);
+        VelocityContext velocityContext = textTemplateFormatter.prepareContext(server, user);
 
         velocityContext.put("device", device);
         velocityContext.put("event", event);
@@ -59,7 +67,7 @@ public final class NotificationFormatter {
             velocityContext.put("driver", cacheManager.findDriverByUniqueId(device.getId(), driverUniqueId));
         }
 
-        return TextTemplateFormatter.formatMessage(velocityContext, event.getType(), templatePath);
+        return textTemplateFormatter.formatMessage(velocityContext, event.getType(), templatePath);
     }
 
 }

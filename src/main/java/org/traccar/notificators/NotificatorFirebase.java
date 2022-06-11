@@ -23,7 +23,6 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -31,7 +30,7 @@ import javax.ws.rs.client.Entity;
 
 public class NotificatorFirebase implements Notificator {
 
-    private final CacheManager cacheManager;
+    private final NotificationFormatter notificationFormatter;
     private final Client client;
 
     private final String url;
@@ -54,14 +53,15 @@ public class NotificatorFirebase implements Notificator {
     }
 
     @Inject
-    public NotificatorFirebase(Config config, CacheManager cacheManager, Client client) {
+    public NotificatorFirebase(Config config, NotificationFormatter notificationFormatter, Client client) {
         this(
-                cacheManager, client, "https://fcm.googleapis.com/fcm/send",
+                notificationFormatter, client, "https://fcm.googleapis.com/fcm/send",
                 config.getString(Keys.NOTIFICATOR_FIREBASE_KEY));
     }
 
-    protected NotificatorFirebase(CacheManager cacheManager, Client client, String url, String key) {
-        this.cacheManager = cacheManager;
+    protected NotificatorFirebase(
+            NotificationFormatter notificationFormatter, Client client, String url, String key) {
+        this.notificationFormatter = notificationFormatter;
         this.client = client;
         this.url = url;
         this.key = key;
@@ -71,7 +71,7 @@ public class NotificatorFirebase implements Notificator {
     public void send(User user, Event event, Position position) {
         if (user.getAttributes().containsKey("notificationTokens")) {
 
-            var shortMessage = NotificationFormatter.formatMessage(cacheManager, user, event, position, "short");
+            var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 
             Notification notification = new Notification();
             notification.title = shortMessage.getSubject();

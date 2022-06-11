@@ -22,7 +22,6 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -30,7 +29,7 @@ import javax.ws.rs.client.Entity;
 
 public class NotificatorPushover implements Notificator {
 
-    private final CacheManager cacheManager;
+    private final NotificationFormatter notificationFormatter;
     private final Client client;
 
     private final String url;
@@ -51,8 +50,8 @@ public class NotificatorPushover implements Notificator {
     }
 
     @Inject
-    public NotificatorPushover(Config config, CacheManager cacheManager, Client client) {
-        this.cacheManager = cacheManager;
+    public NotificatorPushover(Config config, NotificationFormatter notificationFormatter, Client client) {
+        this.notificationFormatter = notificationFormatter;
         this.client = client;
         url = "https://api.pushover.net/1/messages.json";
         token = config.getString(Keys.NOTIFICATOR_PUSHOVER_TOKEN);
@@ -70,7 +69,7 @@ public class NotificatorPushover implements Notificator {
             device = user.getString("notificator.pushover.device").replaceAll(" *, *", ",");
         }
 
-        var shortMessage = NotificationFormatter.formatMessage(cacheManager, user, event, position, "short");
+        var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 
         Message message = new Message();
         message.token = token;

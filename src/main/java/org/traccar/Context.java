@@ -18,8 +18,6 @@ package org.traccar;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
-import org.apache.velocity.app.VelocityEngine;
-import org.eclipse.jetty.util.URIUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
@@ -46,9 +44,6 @@ import org.traccar.session.cache.CacheManager;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.ext.ContextResolver;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.Properties;
 
 public final class Context {
 
@@ -115,12 +110,6 @@ public final class Context {
         return notificationManager;
     }
 
-    private static VelocityEngine velocityEngine;
-
-    public static VelocityEngine getVelocityEngine() {
-        return velocityEngine;
-    }
-
     private static Client client = ClientBuilder.newClient();
 
     public static Client getClient() {
@@ -185,25 +174,6 @@ public final class Context {
                 Main.getInjector().getInstance(EventForwarder.class),
                 Main.getInjector().getInstance(NotificatorManager.class),
                 Main.getInjector().getInstance(Geocoder.class));
-        Properties velocityProperties = new Properties();
-        velocityProperties.setProperty("file.resource.loader.path",
-                Context.getConfig().getString("templates.rootPath", "templates") + "/");
-        velocityProperties.setProperty("runtime.log.logsystem.class",
-                "org.apache.velocity.runtime.log.NullLogChute");
-
-        String address;
-        try {
-            address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
-        } catch (UnknownHostException e) {
-            address = "localhost";
-        }
-
-        String webUrl = URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
-        webUrl = Context.getConfig().getString("web.url", webUrl);
-        velocityProperties.setProperty("web.url", webUrl);
-
-        velocityEngine = new VelocityEngine();
-        velocityEngine.init(velocityProperties);
     }
 
     public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {

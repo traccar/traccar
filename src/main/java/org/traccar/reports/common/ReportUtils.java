@@ -16,6 +16,7 @@
  */
 package org.traccar.reports.common;
 
+import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.jxls.area.Area;
@@ -74,18 +75,21 @@ public class ReportUtils {
     private final IdentityManager identityManager;
     private final DeviceManager deviceManager;
     private final TripsConfig tripsConfig;
+    private final VelocityEngine velocityEngine;
     private final Geocoder geocoder;
 
     @Inject
     public ReportUtils(
             Config config, Storage storage, PermissionsService permissionsService, IdentityManager identityManager,
-            DeviceManager deviceManager, TripsConfig tripsConfig, @Nullable Geocoder geocoder) {
+            DeviceManager deviceManager, TripsConfig tripsConfig, VelocityEngine velocityEngine,
+            @Nullable Geocoder geocoder) {
         this.config = config;
         this.storage = storage;
         this.permissionsService = permissionsService;
         this.identityManager = identityManager;
         this.deviceManager = deviceManager;
         this.tripsConfig = tripsConfig;
+        this.velocityEngine = velocityEngine;
         this.geocoder = geocoder;
     }
 
@@ -153,7 +157,7 @@ public class ReportUtils {
         context.putVar("distanceUnit", UserUtil.getDistanceUnit(server, user));
         context.putVar("speedUnit", UserUtil.getSpeedUnit(server, user));
         context.putVar("volumeUnit", UserUtil.getVolumeUnit(server, user));
-        context.putVar("webUrl", Context.getVelocityEngine().getProperty("web.url"));
+        context.putVar("webUrl", velocityEngine.getProperty("web.url"));
         context.putVar("dateTool", new DateTool());
         context.putVar("numberTool", new NumberTool());
         context.putVar("timezone", UserUtil.getTimezone(server, user));

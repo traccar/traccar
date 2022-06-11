@@ -21,6 +21,9 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.log.NullLogChute;
+import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -70,6 +73,9 @@ import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Properties;
 
 public class MainModule extends AbstractModule {
 
@@ -276,6 +282,29 @@ public class MainModule extends AbstractModule {
             return new EventForwarder(config);
         }
         return null;
+    }
+
+    @Singleton
+    @Provides
+    public static VelocityEngine provideVelocityEngine(Config config) {
+        Properties properties = new Properties();
+        properties.setProperty("file.resource.loader.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
+        properties.setProperty("runtime.log.logsystem.class", NullLogChute.class.getName());
+
+        String address;
+        try {
+            address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
+        } catch (UnknownHostException e) {
+            address = "localhost";
+        }
+
+        String url = config.getString(
+                Keys.WEB_URL, URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", ""));
+        properties.setProperty("web.url", url);
+
+        VelocityEngine velocityEngine = new VelocityEngine();
+        velocityEngine.init(properties);
+        return velocityEngine;
     }
 
 }
