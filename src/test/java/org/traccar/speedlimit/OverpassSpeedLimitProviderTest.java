@@ -15,10 +15,6 @@ public class OverpassSpeedLimitProviderTest {
 
     @Ignore
     @Test
-    public void test() throws Exception {
-        testOverpass();
-    }
-
     public void testOverpass() throws Exception {
         SpeedLimitProvider provider = new OverpassSpeedLimitProvider(client, "http://8.8.8.8/api/interpreter");
 

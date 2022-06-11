@@ -18,10 +18,6 @@ public class GeolocationProviderTest extends BaseTest {
 
     @Ignore
     @Test
-    public void test() throws Exception {
-        testMozilla();
-    }
-
     public void testMozilla() throws Exception {
         MozillaGeolocationProvider provider = new MozillaGeolocationProvider(client, null);
 
