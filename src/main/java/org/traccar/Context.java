@@ -17,7 +17,6 @@ package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
@@ -140,7 +139,6 @@ public final class Context {
         if (config.getBoolean(Keys.WEB_SANITIZE)) {
             objectMapper.registerModule(new SanitizerModule());
         }
-        objectMapper.registerModule(new JSR353Module());
         objectMapper.setConfig(
                 objectMapper.getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
 

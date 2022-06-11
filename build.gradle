@@ -63,7 +63,6 @@ dependencies {
     implementation "org.glassfish.jersey.inject:jersey-hk2:$jerseyVersion"
     implementation "org.glassfish.hk2:guice-bridge:2.6.1" // same version as jersey-hk2
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
-    implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr353:$jacksonVersion"
     implementation "org.liquibase:liquibase-core:4.7.0"
     implementation "com.sun.mail:javax.mail:1.6.2"
     implementation "org.jxls:jxls:2.4.7" // needs upgrade (wait for jexl 4)
