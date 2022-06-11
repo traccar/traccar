@@ -30,6 +30,7 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
+import org.traccar.database.NotificationManager;
 import org.traccar.database.UsersManager;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.notification.EventForwarder;
@@ -120,6 +121,11 @@ public class MainModule extends AbstractModule {
     @Provides
     public static UsersManager provideUsersManager() {
         return Context.getUsersManager();
+    }
+
+    @Provides
+    public static NotificationManager provideNotificationManager() {
+        return Context.getNotificationManager();
     }
 
     @Provides
