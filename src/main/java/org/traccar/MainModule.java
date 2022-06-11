@@ -25,6 +25,7 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
+import org.traccar.notification.EventForwarder;
 import org.traccar.session.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
@@ -265,6 +266,14 @@ public class MainModule extends AbstractModule {
             Config config, ObjectMapper objectMapper) throws IOException {
         if (config.hasKey(Keys.BROADCAST_ADDRESS)) {
             return new BroadcastService(config, objectMapper);
+        }
+        return null;
+    }
+
+    @Provides
+    public static EventForwarder provideEventForwarder(Config config) {
+        if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
+            return new EventForwarder(config);
         }
         return null;
     }

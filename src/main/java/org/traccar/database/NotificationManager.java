@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,6 +37,7 @@ import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Typed;
 import org.traccar.model.User;
+import org.traccar.notification.EventForwarder;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.session.cache.CacheManager;
@@ -49,16 +50,18 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
 
     private final CacheManager cacheManager;
+    private final EventForwarder eventForwarder;
     private final NotificatorManager notificatorManager;
     private final Geocoder geocoder;
 
     private final boolean geocodeOnRequest;
 
     public NotificationManager(
-            DataManager dataManager, CacheManager cacheManager,
+            DataManager dataManager, CacheManager cacheManager, @Nullable EventForwarder eventForwarder,
             NotificatorManager notificatorManager, @Nullable Geocoder geocoder) {
         super(dataManager, Notification.class);
         this.cacheManager = cacheManager;
+        this.eventForwarder = eventForwarder;
         this.notificatorManager = notificatorManager;
         this.geocoder = geocoder;
         geocodeOnRequest = Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST);
@@ -88,14 +91,9 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
 
         long deviceId = event.getDeviceId();
         Set<Long> users = Context.getPermissionsManager().getDeviceUsers(deviceId);
-        Set<Long> usersToForward = null;
-        if (Context.getEventForwarder() != null) {
-            usersToForward = new HashSet<>();
-        }
+        Set<Long> usersToForward = new HashSet<>();
         for (long userId : users) {
-            if (usersToForward != null) {
-                usersToForward.add(userId);
-            }
+            usersToForward.add(userId);
             final Set<String> notificators = new HashSet<>();
             for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getEventTime())) {
                 Notification notification = getById(notificationId);
@@ -131,8 +129,8 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 }
             }).start();
         }
-        if (Context.getEventForwarder() != null) {
-            Context.getEventForwarder().forwardEvent(event, position, usersToForward);
+        if (eventForwarder != null) {
+            eventForwarder.forwardEvent(event, position, usersToForward);
         }
     }
 

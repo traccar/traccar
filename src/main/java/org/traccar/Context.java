@@ -127,12 +127,6 @@ public final class Context {
         return client;
     }
 
-    private static EventForwarder eventForwarder;
-
-    public static EventForwarder getEventForwarder() {
-        return eventForwarder;
-    }
-
     private static class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
 
         @Override
@@ -181,10 +175,6 @@ public final class Context {
 
         initEventsModule();
 
-        if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
-            eventForwarder = new EventForwarder(config);
-        }
-
     }
 
     private static void initEventsModule() {
@@ -192,6 +182,7 @@ public final class Context {
         notificationManager = new NotificationManager(
                 dataManager,
                 Main.getInjector().getInstance(CacheManager.class),
+                Main.getInjector().getInstance(EventForwarder.class),
                 Main.getInjector().getInstance(NotificatorManager.class),
                 Main.getInjector().getInstance(Geocoder.class));
         Properties velocityProperties = new Properties();
