@@ -12,6 +12,10 @@
       <column name="uniqueid" />
     </createIndex>
 
+    <addColumn tableName="tc_servers">
+      <column name="overlayurl" type="VARCHAR(512)" />
+    </addColumn>
+
   </changeSet>
 
 </databaseChangeLog>

@@ -85,6 +85,16 @@ public class Server extends ExtendedModel implements UserRestrictions {
         this.mapUrl = mapUrl;
     }
 
+    private String overlayUrl;
+
+    public String getOverlayUrl() {
+        return overlayUrl;
+    }
+
+    public void setOverlayUrl(String overlayUrl) {
+        this.overlayUrl = overlayUrl;
+    }
+
     private double latitude;
 
     public double getLatitude() {
