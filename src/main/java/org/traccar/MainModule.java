@@ -17,6 +17,7 @@ package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -98,6 +99,7 @@ public class MainModule extends AbstractModule {
         if (config.getBoolean(Keys.WEB_SANITIZE)) {
             objectMapper.registerModule(new SanitizerModule());
         }
+        objectMapper.registerModule(new JSR353Module());
         objectMapper.setConfig(objectMapper
                 .getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
         return objectMapper;
