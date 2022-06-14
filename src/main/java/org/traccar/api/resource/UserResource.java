@@ -21,6 +21,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.UsersManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.ManagedUser;
+import org.traccar.model.Permission;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
@@ -86,7 +87,7 @@ public class UserResource extends BaseObjectResource<User> {
         Context.getUsersManager().addItem(entity);
         LogAction.create(getUserId(), entity);
         if (Context.getPermissionsManager().getUserManager(getUserId())) {
-            Context.getDataManager().linkObject(User.class, getUserId(), ManagedUser.class, entity.getId(), true);
+            storage.addPermission(new Permission(User.class, getUserId(), ManagedUser.class, entity.getId()));
             LogAction.link(getUserId(), User.class, getUserId(), ManagedUser.class, entity.getId());
         }
         Context.getUsersManager().refreshUserItems();

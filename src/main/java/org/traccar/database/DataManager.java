@@ -208,22 +208,6 @@ public class DataManager {
         return storage.getPermissions(owner, property);
     }
 
-    public void linkObject(
-            Class<? extends BaseModel> owner, long ownerId,
-            Class<? extends BaseModel> property, long propertyId, boolean link) throws StorageException {
-        if (link) {
-            storage.addPermission(new Permission(owner, ownerId, property, propertyId));
-        } else {
-            storage.removePermission(new Permission(owner, ownerId, property, propertyId));
-        }
-    }
-
-    public <T extends BaseModel> T getObject(Class<T> clazz, long entityId) throws StorageException {
-        return storage.getObject(clazz, new Request(
-                new Columns.All(),
-                new Condition.Equals("id", "id", entityId)));
-    }
-
     public <T extends BaseModel> Collection<T> getObjects(Class<T> clazz) throws StorageException {
         return storage.getObjects(clazz, new Request(new Columns.All()));
     }

@@ -19,6 +19,9 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Event;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -37,7 +40,8 @@ public class EventResource extends BaseResource {
     @Path("{id}")
     @GET
     public Event get(@PathParam("id") long id) throws StorageException {
-        Event event = Context.getDataManager().getObject(Event.class, id);
+        Event event = storage.getObject(Event.class, new Request(
+                new Columns.All(), new Condition.Equals("id", "id", id)));
         if (event == null) {
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
         }

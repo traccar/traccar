@@ -70,8 +70,7 @@ public class PermissionsResource  extends BaseResource {
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission, true);
-            Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
-                    permission.getPropertyClass(), permission.getPropertyId(), true);
+            storage.addPermission(permission);
             cacheManager.invalidate(permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
             LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
@@ -96,8 +95,7 @@ public class PermissionsResource  extends BaseResource {
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission, false);
-            Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
-                    permission.getPropertyClass(), permission.getPropertyId(), false);
+            storage.removePermission(permission);
             cacheManager.invalidate(permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
             LogAction.unlink(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
