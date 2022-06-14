@@ -34,7 +34,6 @@ import org.traccar.model.Device;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
-import org.traccar.model.Statistics;
 import org.traccar.model.User;
 import org.traccar.storage.DatabaseStorage;
 import org.traccar.storage.Storage;
@@ -202,13 +201,6 @@ public class DataManager {
 
     public Server getServer() throws StorageException {
         return storage.getObject(Server.class, new Request(new Columns.All()));
-    }
-
-    public Collection<Statistics> getStatistics(Date from, Date to) throws StorageException {
-        return storage.getObjects(Statistics.class, new Request(
-                new Columns.All(),
-                new Condition.Between("captureTime", "from", from, "to", to),
-                new Order("captureTime")));
     }
 
     public Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)
