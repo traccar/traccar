@@ -18,11 +18,13 @@ package org.traccar.reports;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.reports.model.StopReportItem;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
@@ -37,17 +39,19 @@ import java.util.Date;
 public class StopsReportProvider {
 
     private final ReportUtils reportUtils;
+    private final Storage storage;
 
     @Inject
-    public StopsReportProvider(ReportUtils reportUtils) {
+    public StopsReportProvider(ReportUtils reportUtils, Storage storage) {
         this.reportUtils = reportUtils;
+        this.storage = storage;
     }
 
     private Collection<StopReportItem> detectStops(long deviceId, Date from, Date to) throws StorageException {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
         return reportUtils.detectTripsAndStops(
-                Context.getDataManager().getPositions(deviceId, from, to), ignoreOdometer, StopReportItem.class);
+                PositionUtil.getPositions(storage, deviceId, from, to), ignoreOdometer, StopReportItem.class);
     }
 
     public Collection<StopReportItem> getObjects(

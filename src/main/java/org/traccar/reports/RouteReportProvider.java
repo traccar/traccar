@@ -18,11 +18,13 @@ package org.traccar.reports;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReportSection;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
@@ -37,10 +39,12 @@ import java.util.Date;
 public class RouteReportProvider {
 
     private final ReportUtils reportUtils;
+    private final Storage storage;
 
     @Inject
-    public RouteReportProvider(ReportUtils reportUtils) {
+    public RouteReportProvider(ReportUtils reportUtils, Storage storage) {
         this.reportUtils = reportUtils;
+        this.storage = storage;
     }
 
     public Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
@@ -49,7 +53,7 @@ public class RouteReportProvider {
         ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            result.addAll(Context.getDataManager().getPositions(deviceId, from, to));
+            result.addAll(PositionUtil.getPositions(storage, deviceId, from, to));
         }
         return result;
     }
@@ -62,8 +66,7 @@ public class RouteReportProvider {
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<Position> positions = Context.getDataManager()
-                    .getPositions(deviceId, from, to);
+            var positions = PositionUtil.getPositions(storage, deviceId, from, to);
             DeviceReportSection deviceRoutes = new DeviceReportSection();
             Device device = Context.getIdentityManager().getById(deviceId);
             deviceRoutes.setDeviceName(device.getName());

@@ -25,6 +25,7 @@ import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.SummaryReportItem;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
@@ -41,11 +42,13 @@ public class SummaryReportProvider {
 
     private final ReportUtils reportUtils;
     private final PermissionsService permissionsService;
+    private final Storage storage;
 
     @Inject
-    public SummaryReportProvider(ReportUtils reportUtils, PermissionsService permissionsService) {
+    public SummaryReportProvider(ReportUtils reportUtils, PermissionsService permissionsService, Storage storage) {
         this.reportUtils = reportUtils;
         this.permissionsService = permissionsService;
+        this.storage = storage;
     }
 
     private SummaryReportItem calculateSummaryResult(long deviceId, Collection<Position> positions) {
@@ -111,9 +114,8 @@ public class SummaryReportProvider {
     private Collection<SummaryReportItem> calculateSummaryResults(
             long userId, long deviceId, Date from, Date to, boolean daily) throws StorageException {
 
-        ArrayList<Position> positions = new ArrayList<>(Context.getDataManager().getPositions(deviceId, from, to));
-
-        ArrayList<SummaryReportItem> results = new ArrayList<>();
+        var positions = PositionUtil.getPositions(storage, deviceId, from, to);
+        var results = new ArrayList<SummaryReportItem>();
         if (daily && !positions.isEmpty()) {
             int startIndex = 0;
             int startDay = getDay(userId, positions.iterator().next().getFixTime());

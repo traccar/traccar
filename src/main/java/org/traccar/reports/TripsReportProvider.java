@@ -18,14 +18,13 @@ package org.traccar.reports;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
-import org.traccar.Main;
-import org.traccar.database.DeviceManager;
-import org.traccar.database.IdentityManager;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.reports.model.TripReportItem;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
@@ -40,21 +39,20 @@ import java.util.Date;
 public class TripsReportProvider {
 
     private final ReportUtils reportUtils;
+    private final Storage storage;
 
     @Inject
-    public TripsReportProvider(ReportUtils reportUtils) {
+    public TripsReportProvider(ReportUtils reportUtils, Storage storage) {
         this.reportUtils = reportUtils;
+        this.storage = storage;
     }
 
     private Collection<TripReportItem> detectTrips(long deviceId, Date from, Date to) throws StorageException {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
 
-        IdentityManager identityManager = Main.getInjector().getInstance(IdentityManager.class);
-        DeviceManager deviceManager = Main.getInjector().getInstance(DeviceManager.class);
-
         return reportUtils.detectTripsAndStops(
-                Context.getDataManager().getPositions(deviceId, from, to), ignoreOdometer, TripReportItem.class);
+                PositionUtil.getPositions(storage, deviceId, from, to), ignoreOdometer, TripReportItem.class);
     }
 
     public Collection<TripReportItem> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,

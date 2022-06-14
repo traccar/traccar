@@ -176,15 +176,6 @@ public class DataManager {
                 new Condition.Equals("id", "id")));
     }
 
-    public Collection<Position> getPositions(long deviceId, Date from, Date to) throws StorageException {
-        return storage.getObjects(Position.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("deviceId", "deviceId", deviceId),
-                        new Condition.Between("fixTime", "from", from, "to", to)),
-                new Order("fixTime")));
-    }
-
     public Position getPrecedingPosition(long deviceId, Date date) throws StorageException {
         return storage.getObject(Position.class, new Request(
                 new Columns.All(),

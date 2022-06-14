@@ -17,6 +17,15 @@ package org.traccar.helper.model;
 
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Request;
+
+import java.util.Date;
+import java.util.List;
 
 public final class PositionUtil {
 
@@ -39,6 +48,16 @@ public final class PositionUtil {
             distance = last.getDouble(Position.KEY_TOTAL_DISTANCE) - first.getDouble(Position.KEY_TOTAL_DISTANCE);
         }
         return distance;
+    }
+
+    public static List<Position> getPositions(
+            Storage storage, long deviceId, Date from, Date to) throws StorageException {
+        return storage.getObjects(Position.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("deviceId", "deviceId", deviceId),
+                        new Condition.Between("fixTime", "from", from, "to", to)),
+                new Order("fixTime")));
     }
 
 }

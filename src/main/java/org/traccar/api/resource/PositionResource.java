@@ -17,9 +17,13 @@ package org.traccar.api.resource;
 
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Position;
 import org.traccar.model.UserRestrictions;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -29,7 +33,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -57,9 +60,10 @@ public class PositionResource extends BaseResource {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
             if (from != null && to != null) {
                 permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
-                return Context.getDataManager().getPositions(deviceId, from, to);
+                return PositionUtil.getPositions(storage, deviceId, from, to);
             } else {
-                return Collections.singleton(Context.getDeviceManager().getLastPosition(deviceId));
+                return storage.getObjects(Position.class, new Request(
+                        new Columns.All(), new Condition.LatestPositions(deviceId)));
             }
         }
     }
