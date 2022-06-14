@@ -31,7 +31,6 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
-import org.traccar.model.Event;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
@@ -203,15 +202,6 @@ public class DataManager {
 
     public Server getServer() throws StorageException {
         return storage.getObject(Server.class, new Request(new Columns.All()));
-    }
-
-    public Collection<Event> getEvents(long deviceId, Date from, Date to) throws StorageException {
-        return storage.getObjects(Event.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("deviceId", "deviceId", deviceId),
-                        new Condition.Between("eventTime", "from", from, "to", to)),
-                new Order("eventTime")));
     }
 
     public Collection<Statistics> getStatistics(Date from, Date to) throws StorageException {

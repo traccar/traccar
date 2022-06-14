@@ -27,7 +27,12 @@ import org.traccar.model.Group;
 import org.traccar.model.Maintenance;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReportSection;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -41,16 +46,28 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 public class EventsReportProvider {
 
     private final Config config;
     private final ReportUtils reportUtils;
+    private final Storage storage;
 
     @Inject
-    public EventsReportProvider(Config config, ReportUtils reportUtils) {
+    public EventsReportProvider(Config config, ReportUtils reportUtils, Storage storage) {
         this.config = config;
         this.reportUtils = reportUtils;
+        this.storage = storage;
+    }
+
+    private List<Event> getEvents(long deviceId, Date from, Date to) throws StorageException {
+        return storage.getObjects(Event.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("deviceId", "deviceId", deviceId),
+                        new Condition.Between("eventTime", "from", from, "to", to)),
+                new Order("eventTime")));
     }
 
     public Collection<Event> getObjects(
@@ -60,7 +77,7 @@ public class EventsReportProvider {
         ArrayList<Event> result = new ArrayList<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
+            Collection<Event> events = getEvents(deviceId, from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Event event : events) {
                 if (all || types.contains(event.getType())) {
@@ -87,7 +104,7 @@ public class EventsReportProvider {
         HashMap<Long, String> maintenanceNames = new HashMap<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<Event> events = Context.getDataManager().getEvents(deviceId, from, to);
+            Collection<Event> events = getEvents(deviceId, from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
                 Event event = iterator.next();
