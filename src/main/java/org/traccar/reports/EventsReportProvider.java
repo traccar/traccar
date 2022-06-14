@@ -18,6 +18,8 @@ package org.traccar.reports;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -28,10 +30,12 @@ import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -40,10 +44,12 @@ import java.util.Iterator;
 
 public class EventsReportProvider {
 
+    private final Config config;
     private final ReportUtils reportUtils;
 
     @Inject
-    public EventsReportProvider(ReportUtils reportUtils) {
+    public EventsReportProvider(Config config, ReportUtils reportUtils) {
+        this.config = config;
         this.reportUtils = reportUtils;
     }
 
@@ -120,9 +126,9 @@ public class EventsReportProvider {
             deviceEvents.setObjects(events);
             devicesEvents.add(deviceEvents);
         }
-        String templatePath = Context.getConfig().getString("report.templatesPath",
-                "templates/export/");
-        try (InputStream inputStream = new FileInputStream(templatePath + "/events.xlsx")) {
+
+        File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "events.xlsx").toFile();
+        try (InputStream inputStream = new FileInputStream(file)) {
             var context = reportUtils.initializeContext(userId);
             context.putVar("devices", devicesEvents);
             context.putVar("sheetNames", sheetNames);

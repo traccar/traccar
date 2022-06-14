@@ -19,6 +19,8 @@ package org.traccar.reports;
 import org.jxls.util.JxlsHelper;
 import org.traccar.Context;
 import org.traccar.api.security.PermissionsService;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
@@ -29,10 +31,12 @@ import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -40,12 +44,15 @@ import java.util.Date;
 
 public class SummaryReportProvider {
 
+    private final Config config;
     private final ReportUtils reportUtils;
     private final PermissionsService permissionsService;
     private final Storage storage;
 
     @Inject
-    public SummaryReportProvider(ReportUtils reportUtils, PermissionsService permissionsService, Storage storage) {
+    public SummaryReportProvider(
+            Config config, ReportUtils reportUtils, PermissionsService permissionsService, Storage storage) {
+        this.config = config;
         this.reportUtils = reportUtils;
         this.permissionsService = permissionsService;
         this.storage = storage;
@@ -157,9 +164,9 @@ public class SummaryReportProvider {
             Date from, Date to, boolean daily) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
         Collection<SummaryReportItem> summaries = getObjects(userId, deviceIds, groupIds, from, to, daily);
-        String templatePath = Context.getConfig().getString("report.templatesPath",
-                "templates/export/");
-        try (InputStream inputStream = new FileInputStream(templatePath + "/summary.xlsx")) {
+
+        File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "summary.xlsx").toFile();
+        try (InputStream inputStream = new FileInputStream(file)) {
             var context = reportUtils.initializeContext(userId);
             context.putVar("summaries", summaries);
             context.putVar("from", from);

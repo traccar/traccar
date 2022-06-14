@@ -18,6 +18,8 @@ package org.traccar.reports;
 
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.Context;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
@@ -28,21 +30,25 @@ import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
 public class RouteReportProvider {
 
+    private final Config config;
     private final ReportUtils reportUtils;
     private final Storage storage;
 
     @Inject
-    public RouteReportProvider(ReportUtils reportUtils, Storage storage) {
+    public RouteReportProvider(Config config, ReportUtils reportUtils, Storage storage) {
+        this.config = config;
         this.reportUtils = reportUtils;
         this.storage = storage;
     }
@@ -80,9 +86,9 @@ public class RouteReportProvider {
             deviceRoutes.setObjects(positions);
             devicesRoutes.add(deviceRoutes);
         }
-        String templatePath = Context.getConfig().getString("report.templatesPath",
-                "templates/export/");
-        try (InputStream inputStream = new FileInputStream(templatePath + "/route.xlsx")) {
+
+        File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "route.xlsx").toFile();
+        try (InputStream inputStream = new FileInputStream(file)) {
             var context = reportUtils.initializeContext(userId);
             context.putVar("devices", devicesRoutes);
             context.putVar("sheetNames", sheetNames);
