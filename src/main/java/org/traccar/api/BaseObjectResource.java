@@ -19,7 +19,6 @@ package org.traccar.api;
 import org.traccar.Context;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.ExtendedObjectManager;
-import org.traccar.database.SimpleObjectManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
@@ -82,9 +81,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         cacheManager.invalidate(User.class, getUserId(), baseClass, entity.getId());
         LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
 
-        if (manager instanceof SimpleObjectManager) {
-            ((SimpleObjectManager<T>) manager).refreshUserItems();
-        } else if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
+        if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
         }
         return Response.ok(entity).build();
@@ -95,6 +92,11 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     public Response update(T entity) throws StorageException {
         permissionsService.checkEdit(getUserId(), entity, false);
         permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
+        if (entity instanceof User) {
+            User before = storage.getObject(User.class, new Request(
+                    new Columns.All(), new Condition.Equals("id", "id", entity.getId())));
+            permissionsService.checkUserUpdate(getUserId(), before, (User) entity);
+        }
 
         BaseObjectManager<T> manager = Context.getManager(baseClass);
         if (manager != null) {
@@ -123,11 +125,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         BaseObjectManager<T> manager = Context.getManager(baseClass);
         if (manager != null) {
             manager.removeItem(id);
-            if (manager instanceof SimpleObjectManager) {
-                ((SimpleObjectManager<T>) manager).refreshUserItems();
-                if (manager instanceof ExtendedObjectManager) {
-                    ((ExtendedObjectManager<T>) manager).refreshExtendedPermissions();
-                }
+            if (manager instanceof ExtendedObjectManager) {
+                ((ExtendedObjectManager<T>) manager).refreshExtendedPermissions();
             }
         } else {
             storage.removeObject(baseClass, new Request(new Condition.Equals("id", "id", id)));

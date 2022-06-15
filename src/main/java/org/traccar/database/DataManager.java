@@ -25,7 +25,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import org.traccar.Context;
 import org.traccar.Main;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -155,7 +154,7 @@ public class DataManager {
         } else {
             if (ldapProvider != null && ldapProvider.login(email, password)) {
                 user = ldapProvider.getUser(email);
-                Context.getUsersManager().addItem(user);
+                user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
                 return user;
             }
         }

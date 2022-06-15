@@ -15,12 +15,14 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.database.MailManager;
 import org.traccar.model.User;
 import org.traccar.notification.TextTemplateFormatter;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
@@ -51,18 +53,17 @@ public class PasswordResource extends BaseResource {
     @PermitAll
     @POST
     public Response reset(@FormParam("email") String email) throws StorageException, MessagingException {
-        for (long userId : Context.getUsersManager().getAllItems()) {
-            User user = Context.getUsersManager().getById(userId);
-            if (email.equals(user.getEmail())) {
-                String token = UUID.randomUUID().toString().replaceAll("-", "");
-                user.set(PASSWORD_RESET_TOKEN, token);
-                Context.getUsersManager().updateItem(user);
-                var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
-                velocityContext.put("token", token);
-                var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "passwordReset", "full");
-                mailManager.sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
-                break;
-            }
+        User user = storage.getObject(User.class, new Request(
+                new Columns.All(), new Condition.Equals("email", "email", email)));
+        if (user != null) {
+            String token = UUID.randomUUID().toString().replaceAll("-", "");
+            user.set(PASSWORD_RESET_TOKEN, token);
+            storage.updateObject(user, new Request(new Columns.Exclude("id"), new Condition.Equals("id", "id")));
+
+            var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
+            velocityContext.put("token", token);
+            var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "passwordReset", "full");
+            mailManager.sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
         }
         return Response.ok().build();
     }
@@ -72,14 +73,14 @@ public class PasswordResource extends BaseResource {
     @POST
     public Response update(
             @FormParam("token") String token, @FormParam("password") String password) throws StorageException {
-        for (long userId : Context.getUsersManager().getAllItems()) {
-            User user = Context.getUsersManager().getById(userId);
-            if (token.equals(user.getString(PASSWORD_RESET_TOKEN))) {
-                user.getAttributes().remove(PASSWORD_RESET_TOKEN);
-                user.setPassword(password);
-                Context.getUsersManager().updateItem(user);
-                return Response.ok().build();
-            }
+        User user = storage.getObjects(User.class, new Request(new Columns.All())).stream()
+                .filter(it -> token.equals(it.getString(PASSWORD_RESET_TOKEN)))
+                .findFirst().orElse(null);
+        if (user != null) {
+            user.getAttributes().remove(PASSWORD_RESET_TOKEN);
+            user.setPassword(password);
+            storage.updateObject(user, new Request(new Columns.Exclude("id"), new Condition.Equals("id", "id")));
+            return Response.ok().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
     }

@@ -177,22 +177,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         }
     }
 
-    public Set<Long> getAllManagedItems(long userId) {
-        Set<Long> result = new HashSet<>(getAllUserItems(userId));
-        for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
-            result.addAll(getAllUserItems(managedUserId));
-        }
-        return result;
-    }
-
-    public Set<Long> getManagedItems(long userId) {
-        Set<Long> result = new HashSet<>(getUserItems(userId));
-        for (long managedUserId : Context.getUsersManager().getUserItems(userId)) {
-            result.addAll(getUserItems(managedUserId));
-        }
-        return result;
-    }
-
     private void addByUniqueId(Device device) {
         try {
             writeLock();

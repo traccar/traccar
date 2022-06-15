@@ -49,7 +49,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds) {
+            @QueryParam("id") List<Long> deviceIds) throws StorageException {
         DeviceManager deviceManager = Context.getDeviceManager();
         Set<Long> result;
         if (all) {
@@ -57,13 +57,13 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 result = deviceManager.getAllItems();
             } else {
                 Context.getPermissionsManager().checkManager(getUserId());
-                result = deviceManager.getManagedItems(getUserId());
+                result = deviceManager.getUserItems(getUserId());
             }
         } else if (uniqueIds.isEmpty() && deviceIds.isEmpty()) {
             if (userId == 0) {
                 userId = getUserId();
             }
-            Context.getPermissionsManager().checkUser(getUserId(), userId);
+            permissionsService.checkUser(getUserId(), userId);
             if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
                 result = deviceManager.getAllUserItems(userId);
             } else {
@@ -73,11 +73,11 @@ public class DeviceResource extends BaseObjectResource<Device> {
             result = new HashSet<>();
             for (String uniqueId : uniqueIds) {
                 Device device = deviceManager.getByUniqueId(uniqueId);
-                Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
+                permissionsService.checkPermission(Device.class, getUserId(), device.getId());
                 result.add(device.getId());
             }
             for (Long deviceId : deviceIds) {
-                Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+                permissionsService.checkPermission(Device.class, getUserId(), deviceId);
                 result.add(deviceId);
             }
         }
@@ -87,9 +87,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
     @Path("{id}/accumulators")
     @PUT
     public Response updateAccumulators(DeviceAccumulators entity) throws StorageException {
-        if (!Context.getPermissionsManager().getUserAdmin(getUserId())) {
-            Context.getPermissionsManager().checkManager(getUserId());
-            Context.getPermissionsManager().checkPermission(Device.class, getUserId(), entity.getDeviceId());
+        if (permissionsService.notAdmin(getUserId())) {
+            permissionsService.checkManager(getUserId());
+            permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
         }
         Context.getDeviceManager().resetDeviceAccumulators(entity);
         LogAction.resetDeviceAccumulators(getUserId(), entity.getDeviceId());

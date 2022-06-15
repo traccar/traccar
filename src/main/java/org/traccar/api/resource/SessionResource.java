@@ -22,6 +22,9 @@ import org.traccar.helper.ServletHelper;
 import org.traccar.helper.LogAction;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import javax.annotation.security.PermitAll;
 import javax.servlet.http.Cookie;
@@ -59,7 +62,8 @@ public class SessionResource extends BaseResource {
     public User get(@QueryParam("token") String token) throws StorageException, UnsupportedEncodingException {
 
         if (token != null) {
-            User user = Context.getUsersManager().getUserByToken(token);
+            User user = storage.getObject(User.class, new Request(
+                    new Columns.All(), new Condition.Equals("token", "token", token)));
             if (user != null) {
                 Context.getPermissionsManager().checkUserEnabled(user.getId());
                 request.getSession().setAttribute(USER_ID_KEY, user.getId());

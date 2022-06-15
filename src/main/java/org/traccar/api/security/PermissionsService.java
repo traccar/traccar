@@ -57,7 +57,7 @@ public class PermissionsService {
     }
 
     public User getUser(long userId) throws StorageException {
-        if (user == null) {
+        if (user == null && userId > 0) {
             user = storage.getObject(
                     User.class, new Request(new Columns.All(), new Condition.Equals("id", "id", userId)));
         }
@@ -71,6 +71,12 @@ public class PermissionsService {
     public void checkAdmin(long userId) throws StorageException, SecurityException {
         if (!getUser(userId).getAdministrator()) {
             throw new SecurityException("Administrator access required");
+        }
+    }
+
+    public void checkManager(long userId) throws StorageException, SecurityException {
+        if (!getUser(userId).getAdministrator() && getUser(userId).getUserLimit() == 0) {
+            throw new SecurityException("Manager access required");
         }
     }
 
@@ -133,6 +139,31 @@ public class PermissionsService {
             if (!getUser(userId).getManager()
                     || storage.getPermissions(User.class, userId, ManagedUser.class, managedUserId).isEmpty()) {
                 throw new SecurityException("User access denied");
+            }
+        }
+    }
+
+    public void checkUserUpdate(long userId, User before, User after) throws StorageException, SecurityException {
+        if (before.getAdministrator() != after.getAdministrator()
+                || before.getDeviceLimit() != after.getDeviceLimit()
+                || before.getUserLimit() != after.getUserLimit()) {
+            checkAdmin(userId);
+        }
+        User user = getUser(userId);
+        if (user != null && user.getExpirationTime() != null
+                && (after.getExpirationTime() == null
+                || user.getExpirationTime().compareTo(after.getExpirationTime()) < 0)) {
+            checkAdmin(userId);
+        }
+        if (before.getReadonly() != after.getReadonly()
+                || before.getDeviceReadonly() != after.getDeviceReadonly()
+                || before.getDisabled() != after.getDisabled()
+                || before.getLimitCommands() != after.getLimitCommands()
+                || before.getDisableReports() != after.getDisableReports()) {
+            if (userId == after.getId()) {
+                checkAdmin(userId);
+            } else {
+                checkUser(userId, after.getId());
             }
         }
     }

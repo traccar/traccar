@@ -31,7 +31,6 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
-import org.traccar.database.UsersManager;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.notification.EventForwarder;
 import org.traccar.database.DataManager;
@@ -116,11 +115,6 @@ public class MainModule extends AbstractModule {
     @Provides
     public static DataManager provideDataManager() {
         return Context.getDataManager();
-    }
-
-    @Provides
-    public static UsersManager provideUsersManager() {
-        return Context.getUsersManager();
     }
 
     @Provides
@@ -292,8 +286,7 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
-    public static EventForwarder provideEventForwarder(
-            Config config, Client client, CacheManager cacheManager, UsersManager usersManager) {
+    public static EventForwarder provideEventForwarder(Config config, Client client, CacheManager cacheManager) {
         if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
             return new EventForwarder(config, client, cacheManager);
         }

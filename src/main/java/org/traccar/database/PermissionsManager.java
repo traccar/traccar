@@ -18,14 +18,17 @@ package org.traccar.database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.model.BaseModel;
+import org.traccar.api.security.PermissionsService;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
-import org.traccar.model.ManagedUser;
 import org.traccar.model.Permission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -39,7 +42,7 @@ public class PermissionsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsManager.class);
 
     private final DataManager dataManager;
-    private final UsersManager usersManager;
+    private final Storage storage;
 
     private volatile Server server;
 
@@ -50,9 +53,9 @@ public class PermissionsManager {
     private final Map<Long, Set<Long>> deviceUsers = new HashMap<>();
     private final Map<Long, Set<Long>> groupDevices = new HashMap<>();
 
-    public PermissionsManager(DataManager dataManager, UsersManager usersManager) {
+    public PermissionsManager(DataManager dataManager, Storage storage) {
         this.dataManager = dataManager;
-        this.usersManager = usersManager;
+        this.storage = storage;
         refreshServer();
         refreshDeviceAndGroupPermissions();
     }
@@ -74,11 +77,11 @@ public class PermissionsManager {
     }
 
     public User getUser(long userId) {
-        readLock();
         try {
-            return usersManager.getById(userId);
-        } finally {
-            readUnlock();
+            return storage.getObject(User.class, new Request(
+                    new Columns.All(), new Condition.Equals("id", "id", userId)));
+        } catch (StorageException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -222,20 +225,6 @@ public class PermissionsManager {
         }
     }
 
-    public void checkManager(long userId, long managedUserId) throws SecurityException {
-        checkManager(userId);
-        if (!usersManager.getUserItems(userId).contains(managedUserId)) {
-            throw new SecurityException("User access denied");
-        }
-    }
-
-    public void checkUserLimit(long userId) throws SecurityException {
-        int userLimit = getUser(userId).getUserLimit();
-        if (userLimit != -1 && usersManager.getUserItems(userId).size() >= userLimit) {
-            throw new SecurityException("Manager user limit reached");
-        }
-    }
-
     public boolean getUserReadonly(long userId) {
         User user = getUser(userId);
         return user != null && user.getReadonly();
@@ -260,64 +249,11 @@ public class PermissionsManager {
         }
     }
 
-    public void checkUserUpdate(long userId, User before, User after) throws SecurityException {
-        if (before.getAdministrator() != after.getAdministrator()
-                || before.getDeviceLimit() != after.getDeviceLimit()
-                || before.getUserLimit() != after.getUserLimit()) {
-            checkAdmin(userId);
-        }
-        User user = getUser(userId);
-        if (user != null && user.getExpirationTime() != null
-                && (after.getExpirationTime() == null
-                || user.getExpirationTime().compareTo(after.getExpirationTime()) < 0)) {
-            checkAdmin(userId);
-        }
-        if (before.getReadonly() != after.getReadonly()
-                || before.getDeviceReadonly() != after.getDeviceReadonly()
-                || before.getDisabled() != after.getDisabled()
-                || before.getLimitCommands() != after.getLimitCommands()
-                || before.getDisableReports() != after.getDisableReports()) {
-            if (userId == after.getId()) {
-                checkAdmin(userId);
-            }
-            if (!getUserAdmin(userId)) {
-                checkManager(userId);
-            }
-        }
-    }
-
-    public void checkUser(long userId, long managedUserId) throws SecurityException {
-        if (userId != managedUserId && !getUserAdmin(userId)) {
-            checkManager(userId, managedUserId);
-        }
-    }
-
     public void checkDevice(long userId, long deviceId) throws SecurityException {
-        if (!Context.getDeviceManager().getUserItems(userId).contains(deviceId) && !getUserAdmin(userId)) {
-            checkManager(userId);
-            for (long managedUserId : usersManager.getUserItems(userId)) {
-                if (Context.getDeviceManager().getUserItems(managedUserId).contains(deviceId)) {
-                    return;
-                }
-            }
-            throw new SecurityException("Device access denied");
-        }
-    }
-
-    public void checkRegistration(long userId) {
-        if (!server.getRegistration() && !getUserAdmin(userId)) {
-            throw new SecurityException("Registration disabled");
-        }
-    }
-
-    public void checkPermission(Class<?> object, long userId, long objectId)
-            throws SecurityException {
-        SimpleObjectManager<? extends BaseModel> manager = null;
-
-        if (object.equals(Device.class)) {
-            checkDevice(userId, objectId);
-        } else {
-            throw new IllegalArgumentException("Unknown object type");
+        try {
+            new PermissionsService(storage).checkPermission(Device.class, userId, deviceId);
+        } catch (StorageException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -326,8 +262,6 @@ public class PermissionsManager {
             if (permission.getPropertyClass().equals(Device.class)
                     || permission.getPropertyClass().equals(Group.class)) {
                 refreshDeviceAndGroupPermissions();
-            } else if (permission.getPropertyClass().equals(ManagedUser.class)) {
-                usersManager.refreshUserItems();
             }
         }
     }

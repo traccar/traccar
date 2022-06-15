@@ -23,12 +23,10 @@ import org.traccar.database.DeviceManager;
 import org.traccar.database.GroupsManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.PermissionsManager;
-import org.traccar.database.UsersManager;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
-import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
 
 public final class Context {
@@ -52,12 +50,6 @@ public final class Context {
 
     public static DataManager getDataManager() {
         return dataManager;
-    }
-
-    private static UsersManager usersManager;
-
-    public static UsersManager getUsersManager() {
-        return usersManager;
     }
 
     private static GroupsManager groupsManager;
@@ -94,7 +86,6 @@ public final class Context {
         }
 
         if (dataManager != null) {
-            usersManager = new UsersManager(dataManager);
             groupsManager = new GroupsManager(dataManager);
             deviceManager = new DeviceManager(
                     config, dataManager, Main.getInjector().getInstance(ConnectionManager.class));
@@ -102,7 +93,7 @@ public final class Context {
 
         identityManager = deviceManager;
 
-        permissionsManager = new PermissionsManager(dataManager, usersManager);
+        permissionsManager = new PermissionsManager(dataManager, dataManager.getStorage());
 
     }
 
@@ -111,8 +102,6 @@ public final class Context {
             return (BaseObjectManager<T>) deviceManager;
         } else if (clazz.equals(Group.class)) {
             return (BaseObjectManager<T>) groupsManager;
-        } else if (clazz.equals(User.class)) {
-            return (BaseObjectManager<T>) usersManager;
         }
         return null;
     }
