@@ -22,7 +22,6 @@ import org.traccar.database.ExtendedObjectManager;
 import org.traccar.database.SimpleObjectManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
-import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Permission;
@@ -87,7 +86,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             ((SimpleObjectManager<T>) manager).refreshUserItems();
         } else if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-            Context.getPermissionsManager().refreshAllExtendedPermissions();
         }
         return Response.ok(entity).build();
     }
@@ -112,7 +110,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-            Context.getPermissionsManager().refreshAllExtendedPermissions();
         }
         return Response.ok(entity).build();
     }
@@ -145,13 +142,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                 Context.getDeviceManager().updateDeviceCache(true);
             }
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-            if (baseClass.equals(User.class)) {
-                Context.getPermissionsManager().refreshAllUsersPermissions();
-            } else {
-                Context.getPermissionsManager().refreshAllExtendedPermissions();
-            }
-        } else if (baseClass.equals(Calendar.class)) {
-            Context.getNotificationManager().refreshItems();
         }
         return Response.noContent().build();
     }

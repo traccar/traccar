@@ -25,6 +25,7 @@ import org.traccar.Main;
 import org.traccar.Protocol;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.database.NotificationManager;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
@@ -63,6 +64,7 @@ public class ConnectionManager {
     private final Config config;
     private final CacheManager cacheManager;
     private final Storage storage;
+    private final NotificationManager notificationManager;
     private final Timer timer;
 
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
@@ -70,10 +72,12 @@ public class ConnectionManager {
 
     @Inject
     public ConnectionManager(
-            Config config, CacheManager cacheManager, Storage storage, Timer timer) {
+            Config config, CacheManager cacheManager, Storage storage,
+            NotificationManager notificationManager, Timer timer) {
         this.config = config;
         this.cacheManager = cacheManager;
         this.storage = storage;
+        this.notificationManager = notificationManager;
         this.timer = timer;
         deviceTimeout = config.getLong(Keys.STATUS_TIMEOUT) * 1000;
         updateDeviceState = config.getBoolean(Keys.STATUS_UPDATE_DEVICE_STATE);
@@ -163,7 +167,6 @@ public class ConnectionManager {
 
             if (defaultGroupId != 0) {
                 Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-                Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
 
             return device;
@@ -236,7 +239,7 @@ public class ConnectionManager {
                     break;
             }
             events.put(new Event(eventType, deviceId), null);
-            Context.getNotificationManager().updateEvents(events);
+            notificationManager.updateEvents(events);
         }
 
         Timeout timeout = timeouts.remove(deviceId);

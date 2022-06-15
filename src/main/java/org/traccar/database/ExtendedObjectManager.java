@@ -44,34 +44,6 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
         refreshExtendedPermissions();
     }
 
-    public final Set<Long> getGroupItems(long groupId) {
-        try {
-            readLock();
-            Set<Long> result = groupItems.get(groupId);
-            if (result != null) {
-                return new HashSet<>(result);
-            } else {
-                return new HashSet<>();
-            }
-        } finally {
-            readUnlock();
-        }
-    }
-
-    public final Set<Long> getDeviceItems(long deviceId) {
-        try {
-            readLock();
-            Set<Long> result = deviceItems.get(deviceId);
-            if (result != null) {
-                return new HashSet<>(result);
-            } else {
-                return new HashSet<>();
-            }
-        } finally {
-            readUnlock();
-        }
-    }
-
     public Set<Long> getAllDeviceItems(long deviceId) {
         try {
             readLock();
@@ -122,7 +94,7 @@ public abstract class ExtendedObjectManager<T extends BaseModel> extends SimpleO
                             .add(devicePermission.getPropertyId());
                 }
 
-                for (Device device : Context.getDeviceManager().getAllDevices()) {
+                for (Device device : getDataManager().getObjects(Device.class)) {
                     long groupId = device.getGroupId();
                     while (groupId > 0) {
                         deviceItemsWithGroups

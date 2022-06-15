@@ -91,7 +91,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
             if (defaultGroupId != 0) {
                 Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-                Context.getPermissionsManager().refreshAllExtendedPermissions();
             }
 
             return device;

@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.UsersManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -33,7 +32,6 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.InvocationCallback;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class EventForwarder {
 
@@ -44,12 +42,10 @@ public class EventForwarder {
 
     private final Client client;
     private final CacheManager cacheManager;
-    private final UsersManager usersManager;
 
-    public EventForwarder(Config config, Client client, CacheManager cacheManager, UsersManager usersManager) {
+    public EventForwarder(Config config, Client client, CacheManager cacheManager) {
         this.client = client;
         this.cacheManager = cacheManager;
-        this.usersManager = usersManager;
         url = config.getString(Keys.EVENT_FORWARD_URL);
         header = config.getString(Keys.EVENT_FORWARD_HEADERS);
     }
@@ -59,9 +55,8 @@ public class EventForwarder {
     private static final String KEY_GEOFENCE = "geofence";
     private static final String KEY_DEVICE = "device";
     private static final String KEY_MAINTENANCE = "maintenance";
-    private static final String KEY_USERS = "users";
 
-    public final void forwardEvent(Event event, Position position, Set<Long> users) {
+    public final void forwardEvent(Event event, Position position) {
 
         Invocation.Builder requestBuilder = client.target(url).request();
 
@@ -74,7 +69,7 @@ public class EventForwarder {
 
         LOGGER.debug("Event forwarding initiated");
         requestBuilder.async().post(
-                Entity.json(preparePayload(event, position, users)), new InvocationCallback<Object>() {
+                Entity.json(preparePayload(event, position)), new InvocationCallback<Object>() {
                     @Override
                     public void completed(Object o) {
                         LOGGER.debug("Event forwarding succeeded");
@@ -87,7 +82,7 @@ public class EventForwarder {
                 });
     }
 
-    protected Map<String, Object> preparePayload(Event event, Position position, Set<Long> users) {
+    protected Map<String, Object> preparePayload(Event event, Position position) {
         Map<String, Object> data = new HashMap<>();
         data.put(KEY_EVENT, event);
         if (position != null) {
@@ -109,7 +104,6 @@ public class EventForwarder {
                 data.put(KEY_MAINTENANCE, maintenance);
             }
         }
-        data.put(KEY_USERS, usersManager.getItems(users));
         return data;
     }
 

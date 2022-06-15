@@ -22,20 +22,14 @@ import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.GroupsManager;
 import org.traccar.database.IdentityManager;
-import org.traccar.database.NotificationManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.database.UsersManager;
-import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
-import org.traccar.model.Notification;
 import org.traccar.model.User;
-import org.traccar.notification.EventForwarder;
-import org.traccar.notification.NotificatorManager;
 import org.traccar.session.ConnectionManager;
-import org.traccar.session.cache.CacheManager;
 
 public final class Context {
 
@@ -84,12 +78,6 @@ public final class Context {
         return permissionsManager;
     }
 
-    private static NotificationManager notificationManager;
-
-    public static NotificationManager getNotificationManager() {
-        return notificationManager;
-    }
-
     public static void init(String configFile) throws Exception {
 
         try {
@@ -116,18 +104,6 @@ public final class Context {
 
         permissionsManager = new PermissionsManager(dataManager, usersManager);
 
-        initEventsModule();
-
-    }
-
-    private static void initEventsModule() {
-
-        notificationManager = new NotificationManager(
-                dataManager,
-                Main.getInjector().getInstance(CacheManager.class),
-                Main.getInjector().getInstance(EventForwarder.class),
-                Main.getInjector().getInstance(NotificatorManager.class),
-                Main.getInjector().getInstance(Geocoder.class));
     }
 
     public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {
@@ -137,8 +113,6 @@ public final class Context {
             return (BaseObjectManager<T>) groupsManager;
         } else if (clazz.equals(User.class)) {
             return (BaseObjectManager<T>) usersManager;
-        } else if (clazz.equals(Notification.class)) {
-            return (BaseObjectManager<T>) notificationManager;
         }
         return null;
     }

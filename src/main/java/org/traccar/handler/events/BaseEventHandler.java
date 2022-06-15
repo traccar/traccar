@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,26 @@ package org.traccar.handler.events;
 import java.util.Map;
 
 import org.traccar.BaseDataHandler;
-import org.traccar.Context;
+import org.traccar.database.NotificationManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
+
 public abstract class BaseEventHandler extends BaseDataHandler {
+
+    private NotificationManager notificationManager;
+
+    @Inject
+    public void setNotificationManager(NotificationManager notificationManager) {
+        this.notificationManager = notificationManager;
+    }
 
     @Override
     protected Position handlePosition(Position position) {
         Map<Event, Position> events = analyzePosition(position);
-        if (events != null && Context.getNotificationManager() != null) {
-            Context.getNotificationManager().updateEvents(events);
+        if (events != null) {
+            notificationManager.updateEvents(events);
         }
         return position;
     }

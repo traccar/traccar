@@ -22,7 +22,6 @@ import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.ManagedUser;
-import org.traccar.model.Notification;
 import org.traccar.model.Permission;
 import org.traccar.model.Server;
 import org.traccar.model.User;
@@ -237,29 +236,9 @@ public class PermissionsManager {
         }
     }
 
-    public void checkDeviceLimit(long userId) throws SecurityException {
-        int deviceLimit = getUser(userId).getDeviceLimit();
-        if (deviceLimit != -1) {
-            int deviceCount;
-            if (getUserManager(userId)) {
-                deviceCount = Context.getDeviceManager().getAllManagedItems(userId).size();
-            } else {
-                deviceCount = Context.getDeviceManager().getAllUserItems(userId).size();
-            }
-            if (deviceCount >= deviceLimit) {
-                throw new SecurityException("User device limit reached");
-            }
-        }
-    }
-
     public boolean getUserReadonly(long userId) {
         User user = getUser(userId);
         return user != null && user.getReadonly();
-    }
-
-    public boolean getUserLimitCommands(long userId) {
-        User user = getUser(userId);
-        return user != null && user.getLimitCommands();
     }
 
     public void checkReadonly(long userId) throws SecurityException {
@@ -313,18 +292,6 @@ public class PermissionsManager {
         }
     }
 
-    public void checkGroup(long userId, long groupId) throws SecurityException {
-        if (!getGroupPermissions(userId).contains(groupId) && !getUserAdmin(userId)) {
-            checkManager(userId);
-            for (long managedUserId : usersManager.getUserItems(userId)) {
-                if (getGroupPermissions(managedUserId).contains(groupId)) {
-                    return;
-                }
-            }
-            throw new SecurityException("Group access denied");
-        }
-    }
-
     public void checkDevice(long userId, long deviceId) throws SecurityException {
         if (!Context.getDeviceManager().getUserItems(userId).contains(deviceId) && !getUserAdmin(userId)) {
             checkManager(userId);
@@ -354,31 +321,13 @@ public class PermissionsManager {
         }
     }
 
-    public void refreshAllUsersPermissions() {
-        if (Context.getNotificationManager() != null) {
-            Context.getNotificationManager().refreshUserItems();
-        }
-    }
-
-    public void refreshAllExtendedPermissions() {
-    }
-
     public void refreshPermissions(Permission permission) {
         if (permission.getOwnerClass().equals(User.class)) {
             if (permission.getPropertyClass().equals(Device.class)
                     || permission.getPropertyClass().equals(Group.class)) {
                 refreshDeviceAndGroupPermissions();
-                refreshAllExtendedPermissions();
             } else if (permission.getPropertyClass().equals(ManagedUser.class)) {
                 usersManager.refreshUserItems();
-            } else if (permission.getPropertyClass().equals(Notification.class)
-                    && Context.getNotificationManager() != null) {
-                Context.getNotificationManager().refreshUserItems();
-            }
-        } else if (permission.getOwnerClass().equals(Device.class) || permission.getOwnerClass().equals(Group.class)) {
-            if (permission.getPropertyClass().equals(Notification.class)
-                    && Context.getNotificationManager() != null) {
-                Context.getNotificationManager().refreshExtendedPermissions();
             }
         }
     }

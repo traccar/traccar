@@ -15,7 +15,11 @@
  */
 package org.traccar.api.resource;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -27,7 +31,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.traccar.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
@@ -42,6 +47,8 @@ import org.traccar.storage.StorageException;
 @Consumes(MediaType.APPLICATION_JSON)
 public class NotificationResource extends ExtendedObjectResource<Notification> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationResource.class);
+
     @Inject
     private NotificatorManager notificatorManager;
 
@@ -52,7 +59,18 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @GET
     @Path("types")
     public Collection<Typed> get() {
-        return Context.getNotificationManager().getAllNotificationTypes();
+        Set<Typed> types = new HashSet<>();
+        Field[] fields = Event.class.getDeclaredFields();
+        for (Field field : fields) {
+            if (Modifier.isStatic(field.getModifiers()) && field.getName().startsWith("TYPE_")) {
+                try {
+                    types.add(new Typed(field.get(null).toString()));
+                } catch (IllegalArgumentException | IllegalAccessException error) {
+                    LOGGER.warn("Get event types error", error);
+                }
+            }
+        }
+        return types;
     }
 
     @GET

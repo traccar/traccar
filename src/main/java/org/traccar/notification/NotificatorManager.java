@@ -16,29 +16,29 @@
  */
 package org.traccar.notification;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Main;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Typed;
+import org.traccar.notificators.Notificator;
 import org.traccar.notificators.NotificatorFirebase;
 import org.traccar.notificators.NotificatorMail;
 import org.traccar.notificators.NotificatorNull;
-import org.traccar.notificators.Notificator;
+import org.traccar.notificators.NotificatorPushover;
 import org.traccar.notificators.NotificatorSms;
+import org.traccar.notificators.NotificatorTelegram;
 import org.traccar.notificators.NotificatorTraccar;
 import org.traccar.notificators.NotificatorWeb;
-import org.traccar.notificators.NotificatorTelegram;
-import org.traccar.notificators.NotificatorPushover;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Singleton
 public class NotificatorManager {
@@ -54,36 +54,33 @@ public class NotificatorManager {
             "telegram", NotificatorTelegram.class,
             "pushover", NotificatorPushover.class);
 
-    private final Map<String, Notificator> notificators = new HashMap<>();
+    private final Injector injector;
+
+    private final Set<String> types = new HashSet<>();
 
     @Inject
-    public NotificatorManager(Config config) {
+    public NotificatorManager(Injector injector, Config config) {
+        this.injector = injector;
         String types = config.getString(Keys.NOTIFICATOR_TYPES);
         if (types != null) {
-            for (String type : types.split(",")) {
-                var notificatorClass = NOTIFICATORS_ALL.get(type);
-                if (notificatorClass != null) {
-                    notificators.put(type, Main.getInjector().getInstance(notificatorClass));
-                }
-            }
+            this.types.addAll(Arrays.asList(types.split(",")));
         }
     }
 
     public Notificator getNotificator(String type) {
-        final Notificator notificator = notificators.get(type);
-        if (notificator == null) {
-            LOGGER.warn("No notificator configured for type : " + type);
-            return new NotificatorNull();
+        var clazz = NOTIFICATORS_ALL.get(type);
+        if (clazz != null) {
+            var notificator = injector.getInstance(clazz);
+            if (notificator != null) {
+                return notificator;
+            }
         }
-        return notificator;
+        LOGGER.warn("Failed to get notificator {}", type);
+        return new NotificatorNull();
     }
 
     public Set<Typed> getAllNotificatorTypes() {
-        Set<Typed> result = new HashSet<>();
-        for (String notificator : notificators.keySet()) {
-            result.add(new Typed(notificator));
-        }
-        return result;
+        return types.stream().map(Typed::new).collect(Collectors.toUnmodifiableSet());
     }
 
 }
