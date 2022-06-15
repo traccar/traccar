@@ -41,10 +41,12 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private static final String KEY_EVENTS = "events";
 
     private final ObjectMapper objectMapper;
+    private final ConnectionManager connectionManager;
     private final long userId;
 
-    public AsyncSocket(ObjectMapper objectMapper, long userId) {
+    public AsyncSocket(ObjectMapper objectMapper, ConnectionManager connectionManager, long userId) {
         this.objectMapper = objectMapper;
+        this.connectionManager = connectionManager;
         this.userId = userId;
     }
 
@@ -56,14 +58,14 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
         data.put(KEY_POSITIONS, Context.getDeviceManager().getInitialState(userId));
         sendData(data);
 
-        Context.getConnectionManager().addListener(userId, this);
+        connectionManager.addListener(userId, this);
     }
 
     @Override
     public void onWebSocketClose(int statusCode, String reason) {
         super.onWebSocketClose(statusCode, reason);
 
-        Context.getConnectionManager().removeListener(userId, this);
+        connectionManager.removeListener(userId, this);
     }
 
     @Override

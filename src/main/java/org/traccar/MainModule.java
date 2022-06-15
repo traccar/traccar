@@ -35,7 +35,6 @@ import org.traccar.database.NotificationManager;
 import org.traccar.database.UsersManager;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.notification.EventForwarder;
-import org.traccar.session.ConnectionManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
@@ -133,11 +132,6 @@ public class MainModule extends AbstractModule {
     @Provides
     public static IdentityManager provideIdentityManager() {
         return Context.getIdentityManager();
-    }
-
-    @Provides
-    public static ConnectionManager provideConnectionManager() {
-        return Context.getConnectionManager();
     }
 
     @Provides

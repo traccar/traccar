@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.Main;
 import org.traccar.Protocol;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
@@ -30,8 +31,14 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Date;
@@ -42,6 +49,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+@Singleton
 public class ConnectionManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionManager.class);
@@ -52,18 +60,23 @@ public class ConnectionManager {
     private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
     private final Map<Endpoint, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
 
+    private final Config config;
     private final CacheManager cacheManager;
+    private final Storage storage;
+    private final Timer timer;
 
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
     private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
 
-    private final Timer timer;
-
-    public ConnectionManager() {
-        deviceTimeout = Context.getConfig().getLong(Keys.STATUS_TIMEOUT) * 1000;
-        updateDeviceState = Context.getConfig().getBoolean(Keys.STATUS_UPDATE_DEVICE_STATE);
-        timer = Main.getInjector().getInstance(Timer.class);
-        cacheManager = Main.getInjector().getInstance(CacheManager.class);
+    @Inject
+    public ConnectionManager(
+            Config config, CacheManager cacheManager, Storage storage, Timer timer) {
+        this.config = config;
+        this.cacheManager = cacheManager;
+        this.storage = storage;
+        this.timer = timer;
+        deviceTimeout = config.getLong(Keys.STATUS_TIMEOUT) * 1000;
+        updateDeviceState = config.getBoolean(Keys.STATUS_UPDATE_DEVICE_STATE);
     }
 
     public DeviceSession getDeviceSession(long deviceId) {
@@ -91,7 +104,8 @@ public class ConnectionManager {
         Device device = null;
         try {
             for (String uniqueId : uniqueIds) {
-                device = Context.getIdentityManager().getByUniqueId(uniqueId);
+                device = storage.getObject(Device.class, new Request(
+                        new Columns.All(), new Condition.Equals("uniqueId", "uniqueId", uniqueId)));
                 if (device != null) {
                     break;
                 }
@@ -100,8 +114,8 @@ public class ConnectionManager {
             LOGGER.warn("Find device error", e);
         }
 
-        if (device == null && Context.getConfig().getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
-            device = Context.getIdentityManager().addUnknownDevice(uniqueIds[0]);
+        if (device == null && config.getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
+            device = addUnknownDevice(uniqueIds[0]);
         }
 
         if (device != null && !device.getDisabled()) {
@@ -131,6 +145,34 @@ public class ConnectionManager {
         }
     }
 
+    private Device addUnknownDevice(String uniqueId) {
+        Device device = new Device();
+        device.setName(uniqueId);
+        device.setUniqueId(uniqueId);
+        device.setCategory(config.getString(Keys.DATABASE_REGISTER_UNKNOWN_DEFAULT_CATEGORY));
+
+        long defaultGroupId = config.getLong(Keys.DATABASE_REGISTER_UNKNOWN_DEFAULT_GROUP_ID);
+        if (defaultGroupId != 0) {
+            device.setGroupId(defaultGroupId);
+        }
+
+        try {
+            device.setId(storage.addObject(device, new Request(new Columns.Exclude("id"))));
+
+            LOGGER.info("Automatically registered device " + uniqueId);
+
+            if (defaultGroupId != 0) {
+                Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
+                Context.getPermissionsManager().refreshAllExtendedPermissions();
+            }
+
+            return device;
+        } catch (StorageException e) {
+            LOGGER.warn("Automatic device registration error", e);
+            return null;
+        }
+    }
+
     public void deviceDisconnected(Channel channel) {
         Endpoint endpoint = new Endpoint(channel, channel.remoteAddress());
         Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(endpoint);
@@ -156,10 +198,18 @@ public class ConnectionManager {
         }
     }
 
-    public void updateDevice(final long deviceId, String status, Date time) {
-        Device device = Context.getIdentityManager().getById(deviceId);
+    public void updateDevice(long deviceId, String status, Date time) {
+        Device device = cacheManager.getObject(Device.class, deviceId);
         if (device == null) {
-            return;
+            try {
+                device = storage.getObject(Device.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", "id", deviceId)));
+            } catch (StorageException e) {
+                LOGGER.warn("Failed to get device", e);
+            }
+            if (device == null) {
+                return;
+            }
         }
 
         String oldStatus = device.getStatus();

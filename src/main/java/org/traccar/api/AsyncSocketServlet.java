@@ -21,6 +21,7 @@ import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
 import org.traccar.Context;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.config.Keys;
+import org.traccar.session.ConnectionManager;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
@@ -29,10 +30,12 @@ import java.time.Duration;
 public class AsyncSocketServlet extends JettyWebSocketServlet {
 
     private final ObjectMapper objectMapper;
+    private final ConnectionManager connectionManager;
 
     @Inject
-    public AsyncSocketServlet(ObjectMapper objectMapper) {
+    public AsyncSocketServlet(ObjectMapper objectMapper, ConnectionManager connectionManager) {
         this.objectMapper = objectMapper;
+        this.connectionManager = connectionManager;
     }
 
     @Override
@@ -41,7 +44,7 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
         factory.setCreator((req, resp) -> {
             if (req.getSession() != null) {
                 long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
-                return new AsyncSocket(objectMapper, userId);
+                return new AsyncSocket(objectMapper, connectionManager, userId);
             } else {
                 return null;
             }

@@ -78,12 +78,6 @@ public final class Context {
         return deviceManager;
     }
 
-    private static ConnectionManager connectionManager;
-
-    public static ConnectionManager getConnectionManager() {
-        return connectionManager;
-    }
-
     private static PermissionsManager permissionsManager;
 
     public static PermissionsManager getPermissionsManager() {
@@ -114,14 +108,13 @@ public final class Context {
         if (dataManager != null) {
             usersManager = new UsersManager(dataManager);
             groupsManager = new GroupsManager(dataManager);
-            deviceManager = new DeviceManager(dataManager);
+            deviceManager = new DeviceManager(
+                    config, dataManager, Main.getInjector().getInstance(ConnectionManager.class));
         }
 
         identityManager = deviceManager;
 
         permissionsManager = new PermissionsManager(dataManager, usersManager);
-
-        connectionManager = new ConnectionManager();
 
         initEventsModule();
 

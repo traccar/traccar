@@ -32,6 +32,7 @@ import org.traccar.Context;
 import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
+import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceState;
 import org.traccar.model.DeviceAccumulators;
 import org.traccar.model.Group;
@@ -45,6 +46,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceManager.class);
 
     private final Config config;
+    private final ConnectionManager connectionManager;
     private final long dataRefreshDelay;
 
     private Map<String, Device> devicesByUniqueId;
@@ -54,9 +56,10 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
 
-    public DeviceManager(DataManager dataManager) {
+    public DeviceManager(Config config, DataManager dataManager, ConnectionManager connectionManager) {
         super(dataManager, Device.class);
-        this.config = Context.getConfig();
+        this.config = config;
+        this.connectionManager = connectionManager;
         try {
             writeLock();
             if (devicesByUniqueId == null) {
@@ -287,9 +290,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
             positions.put(position.getDeviceId(), position);
 
-            if (Context.getConnectionManager() != null) {
-                Context.getConnectionManager().updatePosition(position);
-            }
+            connectionManager.updatePosition(position);
         }
     }
 

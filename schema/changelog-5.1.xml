@@ -12,6 +12,10 @@
       <column name="uniqueid" />
     </createIndex>
 
+    <createIndex tableName="tc_devices" indexName="idx_devices_uniqueid">
+      <column name="uniqueid" />
+    </createIndex>
+
     <addColumn tableName="tc_servers">
       <column name="overlayurl" type="VARCHAR(512)" />
     </addColumn>

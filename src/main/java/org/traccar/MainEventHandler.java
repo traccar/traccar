@@ -28,6 +28,7 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.NetworkUtil;
 import org.traccar.model.Position;
+import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
@@ -44,8 +45,11 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     private final Set<String> connectionlessProtocols = new HashSet<>();
     private final Set<String> logAttributes = new LinkedHashSet<>();
 
+    private final ConnectionManager connectionManager;
+
     @Inject
-    public MainEventHandler() {
+    public MainEventHandler(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
         String connectionlessProtocolList = Context.getConfig().getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split("[, ]")));
@@ -132,7 +136,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
         if (BasePipelineFactory.getHandler(ctx.pipeline(), HttpRequestDecoder.class) == null
                 && !connectionlessProtocols.contains(ctx.pipeline().get(BaseProtocolDecoder.class).getProtocolName())) {
-            Context.getConnectionManager().deviceDisconnected(ctx.channel());
+            connectionManager.deviceDisconnected(ctx.channel());
         }
     }
 
