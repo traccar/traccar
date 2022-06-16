@@ -15,16 +15,6 @@
  */
 package org.traccar.database;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
-import liquibase.Contexts;
-import liquibase.Liquibase;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 import org.traccar.Main;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -34,7 +24,6 @@ import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
-import org.traccar.storage.DatabaseStorage;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -43,100 +32,18 @@ import org.traccar.storage.query.Limit;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import javax.sql.DataSource;
-import java.io.File;
-import java.lang.reflect.Method;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Date;
 
 public class DataManager {
 
-    private final Config config;
-
-    private DataSource dataSource;
-
-    public DataSource getDataSource() {
-        return dataSource;
-    }
-
     private final Storage storage;
-
-    public Storage getStorage() {
-        return storage;
-    }
 
     private final boolean forceLdap;
 
-    public DataManager(Config config) throws Exception {
-        this.config = config;
-
+    public DataManager(Config config, Storage storage) throws Exception {
+        this.storage = storage;
         forceLdap = config.getBoolean(Keys.LDAP_FORCE);
-
-        initDatabase();
-        initDatabaseSchema();
-
-        storage = new DatabaseStorage(dataSource, Main.getInjector().getInstance(ObjectMapper.class));
-    }
-
-    private void initDatabase() throws Exception {
-
-        String driverFile = config.getString(Keys.DATABASE_DRIVER_FILE);
-        if (driverFile != null) {
-            ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-            try {
-                Method method = classLoader.getClass().getDeclaredMethod("addURL", URL.class);
-                method.setAccessible(true);
-                method.invoke(classLoader, new File(driverFile).toURI().toURL());
-            } catch (NoSuchMethodException e) {
-                Method method = classLoader.getClass()
-                        .getDeclaredMethod("appendToClassPathForInstrumentation", String.class);
-                method.setAccessible(true);
-                method.invoke(classLoader, driverFile);
-            }
-        }
-
-        String driver = config.getString(Keys.DATABASE_DRIVER);
-        if (driver != null) {
-            Class.forName(driver);
-        }
-
-        HikariConfig hikariConfig = new HikariConfig();
-        hikariConfig.setDriverClassName(driver);
-        hikariConfig.setJdbcUrl(config.getString(Keys.DATABASE_URL));
-        hikariConfig.setUsername(config.getString(Keys.DATABASE_USER));
-        hikariConfig.setPassword(config.getString(Keys.DATABASE_PASSWORD));
-        hikariConfig.setConnectionInitSql(config.getString(Keys.DATABASE_CHECK_CONNECTION));
-        hikariConfig.setIdleTimeout(600000);
-
-        int maxPoolSize = config.getInteger(Keys.DATABASE_MAX_POOL_SIZE);
-        if (maxPoolSize != 0) {
-            hikariConfig.setMaximumPoolSize(maxPoolSize);
-        }
-
-        dataSource = new HikariDataSource(hikariConfig);
-    }
-
-    private void initDatabaseSchema() throws LiquibaseException {
-
-        if (config.hasKey(Keys.DATABASE_CHANGELOG)) {
-
-            ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(new File("."));
-
-            Database database = DatabaseFactory.getInstance().openDatabase(
-                    config.getString(Keys.DATABASE_URL),
-                    config.getString(Keys.DATABASE_USER),
-                    config.getString(Keys.DATABASE_PASSWORD),
-                    config.getString(Keys.DATABASE_DRIVER),
-                    null, null, null, resourceAccessor);
-
-            String changelog = config.getString(Keys.DATABASE_CHANGELOG);
-
-            try (Liquibase liquibase = new Liquibase(changelog, resourceAccessor, database)) {
-                liquibase.clearCheckSums();
-                liquibase.update(new Contexts());
-            }
-        }
     }
 
     public User login(String email, String password) throws StorageException {

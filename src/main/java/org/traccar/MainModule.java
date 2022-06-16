@@ -30,12 +30,10 @@ import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.LdapProvider;
-import org.traccar.helper.SanitizerModule;
-import org.traccar.notification.EventForwarder;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
+import org.traccar.database.LdapProvider;
 import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
@@ -64,17 +62,21 @@ import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
+import org.traccar.helper.SanitizerModule;
+import org.traccar.notification.EventForwarder;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
 import org.traccar.sms.SnsSmsClient;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
+import org.traccar.storage.DatabaseStorage;
 import org.traccar.storage.Storage;
 import org.traccar.web.WebServer;
 
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
+import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.ext.ContextResolver;
@@ -108,8 +110,8 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
-    public static Storage provideStorage() {
-        return Context.getDataManager().getStorage();
+    public static Storage provideStorage(DataSource dataSource, ObjectMapper objectMapper) {
+        return new DatabaseStorage(dataSource, objectMapper);
     }
 
     @Provides

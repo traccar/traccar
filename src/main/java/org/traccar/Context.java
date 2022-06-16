@@ -28,6 +28,7 @@ import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.session.ConnectionManager;
+import org.traccar.storage.Storage;
 
 public final class Context {
 
@@ -82,7 +83,7 @@ public final class Context {
         }
 
         if (config.hasKey(Keys.DATABASE_URL)) {
-            dataManager = new DataManager(config);
+            dataManager = new DataManager(config, Main.getInjector().getInstance(Storage.class));
         }
 
         if (dataManager != null) {
@@ -93,7 +94,8 @@ public final class Context {
 
         identityManager = deviceManager;
 
-        permissionsManager = new PermissionsManager(dataManager, dataManager.getStorage());
+        permissionsManager = new PermissionsManager(
+                dataManager, Main.getInjector().getInstance(Storage.class));
 
     }
 

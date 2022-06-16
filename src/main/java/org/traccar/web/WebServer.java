@@ -47,7 +47,6 @@ import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
 import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
 import org.traccar.LifecycleObject;
 import org.traccar.Main;
 import org.traccar.api.DateParameterConverterProvider;
@@ -67,6 +66,7 @@ import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
@@ -80,11 +80,13 @@ public class WebServer implements LifecycleObject {
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
 
     private final Injector injector;
+    private final Config config;
     private final Server server;
 
     @Inject
     public WebServer(Injector injector, Config config) {
         this.injector = injector;
+        this.config = config;
         String address = config.getString(Keys.WEB_ADDRESS);
         int port = config.getInteger(Keys.WEB_PORT);
         if (address == null) {
@@ -95,14 +97,14 @@ public class WebServer implements LifecycleObject {
 
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
 
-        initApi(config, servletHandler);
-        initSessionConfig(config, servletHandler);
+        initApi(servletHandler);
+        initSessionConfig(servletHandler);
 
         if (config.getBoolean(Keys.WEB_CONSOLE)) {
             servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/console/*");
         }
 
-        initWebApp(config, servletHandler);
+        initWebApp(servletHandler);
 
         servletHandler.setErrorHandler(new ErrorHandler() {
             @Override
@@ -119,7 +121,7 @@ public class WebServer implements LifecycleObject {
         });
 
         HandlerList handlers = new HandlerList();
-        initClientProxy(config, handlers);
+        initClientProxy(handlers);
         handlers.addHandler(servletHandler);
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
@@ -133,7 +135,7 @@ public class WebServer implements LifecycleObject {
         }
     }
 
-    private void initClientProxy(Config config, HandlerList handlers) {
+    private void initClientProxy(HandlerList handlers) {
         int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix("osmand"));
         if (port != 0) {
             ServletContextHandler servletHandler = new ServletContextHandler() {
@@ -153,7 +155,7 @@ public class WebServer implements LifecycleObject {
         }
     }
 
-    private void initWebApp(Config config, ServletContextHandler servletHandler) {
+    private void initWebApp(ServletContextHandler servletHandler) {
         ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
         servletHolder.setInitParameter("resourceBase", new File(config.getString(Keys.WEB_PATH)).getAbsolutePath());
         servletHolder.setInitParameter("dirAllowed", "false");
@@ -169,7 +171,7 @@ public class WebServer implements LifecycleObject {
         servletHandler.addServlet(servletHolder, "/*");
     }
 
-    private void initApi(Config config, ServletContextHandler servletHandler) {
+    private void initApi(ServletContextHandler servletHandler) {
         servletHandler.addFilter(GuiceFilter.class, "/api/*", EnumSet.allOf(DispatcherType.class));
 
         servletHandler.addServlet(new ServletHolder(injector.getInstance(AsyncSocketServlet.class)), "/api/socket");
@@ -211,10 +213,10 @@ public class WebServer implements LifecycleObject {
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
     }
 
-    private void initSessionConfig(Config config, ServletContextHandler servletHandler) {
+    private void initSessionConfig(ServletContextHandler servletHandler) {
         if (config.getBoolean(Keys.WEB_PERSIST_SESSION)) {
             DatabaseAdaptor databaseAdaptor = new DatabaseAdaptor();
-            databaseAdaptor.setDatasource(Context.getDataManager().getDataSource());
+            databaseAdaptor.setDatasource(injector.getInstance(DataSource.class));
             JDBCSessionDataStoreFactory jdbcSessionDataStoreFactory = new JDBCSessionDataStoreFactory();
             jdbcSessionDataStoreFactory.setDatabaseAdaptor(databaseAdaptor);
             SessionHandler sessionHandler = servletHandler.getSessionHandler();
