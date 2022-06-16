@@ -15,15 +15,11 @@
  */
 package org.traccar.database;
 
-import org.traccar.Main;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
-import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -40,34 +36,9 @@ public class DataManager {
 
     private final Storage storage;
 
-    private final boolean forceLdap;
-
     @Inject
-    public DataManager(Config config, Storage storage) throws Exception {
+    public DataManager(Storage storage) throws Exception {
         this.storage = storage;
-        forceLdap = config.getBoolean(Keys.LDAP_FORCE);
-    }
-
-    public User login(String email, String password) throws StorageException {
-        User user = storage.getObject(User.class, new Request(
-                new Columns.Include("id", "login", "hashedPassword", "salt"),
-                new Condition.Or(
-                        new Condition.Equals("email", "email", email.trim()),
-                        new Condition.Equals("login", "email"))));
-        LdapProvider ldapProvider = Main.getInjector().getInstance(LdapProvider.class);
-        if (user != null) {
-            if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
-                    || !forceLdap && user.isPasswordValid(password)) {
-                return user;
-            }
-        } else {
-            if (ldapProvider != null && ldapProvider.login(email, password)) {
-                user = ldapProvider.getUser(email);
-                user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
-                return user;
-            }
-        }
-        return null;
     }
 
     public void updateDeviceStatus(Device device) throws StorageException {

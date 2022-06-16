@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ package org.traccar.api.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
 import org.traccar.Main;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.database.LoginService;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.User;
@@ -77,7 +77,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
                 try {
                     String[] auth = decodeBasicAuth(authHeader);
-                    User user = Context.getPermissionsManager().login(auth[0], auth[1]);
+                    User user = Main.getInjector().getInstance(LoginService.class).login(auth[0], auth[1]);
                     if (user != null) {
                         Main.getInjector().getInstance(StatisticsManager.class).registerRequest(user.getId());
                         securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
@@ -90,7 +90,6 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
                 Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
-                    Context.getPermissionsManager().checkUserEnabled(userId);
                     Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
                     securityContext = new UserSecurityContext(new UserPrincipal(userId));
                 }

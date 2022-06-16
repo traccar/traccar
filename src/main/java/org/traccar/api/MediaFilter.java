@@ -61,7 +61,6 @@ public class MediaFilter implements Filter {
             if (session != null) {
                 userId = (Long) session.getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
-                    permissionsService.checkUserEnabled(userId);
                     statisticsManager.registerRequest(userId);
                 }
             }

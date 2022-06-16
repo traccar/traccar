@@ -190,19 +190,6 @@ public class PermissionsManager {
         }
     }
 
-    public void checkUserEnabled(long userId) throws SecurityException {
-        User user = getUser(userId);
-        if (user == null) {
-            throw new SecurityException("Unknown account");
-        }
-        if (user.getDisabled()) {
-            throw new SecurityException("Account is disabled");
-        }
-        if (user.getExpirationTime() != null && System.currentTimeMillis() > user.getExpirationTime().getTime()) {
-            throw new SecurityException("Account has expired");
-        }
-    }
-
     public void refreshPermissions(Permission permission) {
         if (permission.getOwnerClass().equals(User.class)) {
             if (permission.getPropertyClass().equals(Device.class)
@@ -210,15 +197,6 @@ public class PermissionsManager {
                 refreshDeviceAndGroupPermissions();
             }
         }
-    }
-
-    public User login(String email, String password) throws StorageException {
-        User user = dataManager.login(email, password);
-        if (user != null) {
-            checkUserEnabled(user.getId());
-            return getUser(user.getId());
-        }
-        return null;
     }
 
 }

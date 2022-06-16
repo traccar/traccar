@@ -15,18 +15,16 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.database.LoginService;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.ServletHelper;
 import org.traccar.helper.LogAction;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
 
 import javax.annotation.security.PermitAll;
+import javax.inject.Inject;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -54,6 +52,9 @@ public class SessionResource extends BaseResource {
     public static final String USER_COOKIE_KEY = "user";
     public static final String PASS_COOKIE_KEY = "password";
 
+    @Inject
+    private LoginService loginService;
+
     @javax.ws.rs.core.Context
     private HttpServletRequest request;
 
@@ -62,11 +63,10 @@ public class SessionResource extends BaseResource {
     public User get(@QueryParam("token") String token) throws StorageException, UnsupportedEncodingException {
 
         if (token != null) {
-            User user = storage.getObject(User.class, new Request(
-                    new Columns.All(), new Condition.Equals("token", "token", token)));
+            User user = loginService.login(token);
             if (user != null) {
-                Context.getPermissionsManager().checkUserEnabled(user.getId());
                 request.getSession().setAttribute(USER_ID_KEY, user.getId());
+                LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
                 return user;
             }
         }
@@ -90,18 +90,17 @@ public class SessionResource extends BaseResource {
                 }
             }
             if (email != null && password != null) {
-                User user = Context.getPermissionsManager().login(email, password);
+                User user = loginService.login(email, password);
                 if (user != null) {
-                    Context.getPermissionsManager().checkUserEnabled(user.getId());
                     request.getSession().setAttribute(USER_ID_KEY, user.getId());
+                    LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
                     return user;
                 }
             }
 
         } else {
 
-            Context.getPermissionsManager().checkUserEnabled(userId);
-            return Context.getPermissionsManager().getUser(userId);
+            return permissionsService.getUser(userId);
 
         }
 
@@ -112,7 +111,7 @@ public class SessionResource extends BaseResource {
     @POST
     public User add(
             @FormParam("email") String email, @FormParam("password") String password) throws StorageException {
-        User user = Context.getPermissionsManager().login(email, password);
+        User user = loginService.login(email, password);
         if (user != null) {
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
             LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
