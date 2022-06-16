@@ -59,9 +59,10 @@ public class RouteReportProvider {
     public Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPermissions(userId, deviceIds, groupIds);
+
         ArrayList<Position> result = new ArrayList<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
             result.addAll(PositionUtil.getPositions(storage, deviceId, from, to));
         }
         return result;
@@ -71,10 +72,11 @@ public class RouteReportProvider {
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPermissions(userId, deviceIds, groupIds);
+
         ArrayList<DeviceReportSection> devicesRoutes = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
             var positions = PositionUtil.getPositions(storage, deviceId, from, to);
             DeviceReportSection deviceRoutes = new DeviceReportSection();
             Device device = Context.getIdentityManager().getById(deviceId);

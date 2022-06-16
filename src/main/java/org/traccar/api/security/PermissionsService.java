@@ -92,6 +92,19 @@ public class PermissionsService {
         }
     }
 
+    public void checkUserEnabled(long userId) throws StorageException, SecurityException {
+        User user = getUser(userId);
+        if (user == null) {
+            throw new SecurityException("Unknown account");
+        }
+        if (user.getDisabled()) {
+            throw new SecurityException("Account is disabled");
+        }
+        if (user.getExpirationTime() != null && System.currentTimeMillis() > user.getExpirationTime().getTime()) {
+            throw new SecurityException("Account has expired");
+        }
+    }
+
     public void checkEdit(long userId, Class<?> clazz, boolean addition) throws StorageException, SecurityException {
         if (!getUser(userId).getAdministrator()) {
             boolean denied = false;

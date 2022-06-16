@@ -67,9 +67,10 @@ public class StopsReportProvider {
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPermissions(userId, deviceIds, groupIds);
+
         ArrayList<StopReportItem> result = new ArrayList<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
             result.addAll(detectStops(deviceId, from, to));
         }
         return result;
@@ -79,10 +80,11 @@ public class StopsReportProvider {
             OutputStream outputStream, long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPermissions(userId, deviceIds, groupIds);
+
         ArrayList<DeviceReportSection> devicesStops = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<StopReportItem> stops = detectStops(deviceId, from, to);
             DeviceReportSection deviceStops = new DeviceReportSection();
             Device device = Context.getIdentityManager().getById(deviceId);

@@ -146,9 +146,10 @@ public class SummaryReportProvider {
             long userId, Collection<Long> deviceIds,
             Collection<Long> groupIds, Date from, Date to, boolean daily) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPermissions(userId, deviceIds, groupIds);
+
         ArrayList<SummaryReportItem> result = new ArrayList<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<SummaryReportItem> deviceResults = calculateSummaryResults(userId, deviceId, from, to, daily);
             for (SummaryReportItem summaryReport : deviceResults) {
                 if (summaryReport.getStartTime() != null && summaryReport.getEndTime() != null) {
@@ -162,7 +163,6 @@ public class SummaryReportProvider {
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to, boolean daily) throws StorageException, IOException {
-        reportUtils.checkPeriodLimit(from, to);
         Collection<SummaryReportItem> summaries = getObjects(userId, deviceIds, groupIds, from, to, daily);
 
         File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "summary.xlsx").toFile();

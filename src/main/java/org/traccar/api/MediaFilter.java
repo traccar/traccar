@@ -28,12 +28,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.traccar.Context;
 import org.traccar.Main;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.api.security.PermissionsService;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 public class MediaFilter implements Filter {
 
@@ -44,6 +49,11 @@ public class MediaFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
+        PermissionsService permissionsService = Main.getInjector().getInstance(PermissionsService.class);
+        Storage storage = Main.getInjector().getInstance(Storage.class);
+        StatisticsManager statisticsManager = Main.getInjector().getInstance(StatisticsManager.class);
+
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         try {
             HttpSession session = ((HttpServletRequest) request).getSession(false);
@@ -51,8 +61,8 @@ public class MediaFilter implements Filter {
             if (session != null) {
                 userId = (Long) session.getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
-                    Context.getPermissionsManager().checkUserEnabled(userId);
-                    Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
+                    permissionsService.checkUserEnabled(userId);
+                    statisticsManager.registerRequest(userId);
                 }
             }
             if (userId == null) {
@@ -63,16 +73,17 @@ public class MediaFilter implements Filter {
             String path = ((HttpServletRequest) request).getPathInfo();
             String[] parts = path != null ? path.split("/") : null;
             if (parts != null && parts.length >= 2) {
-                Device device = Context.getDeviceManager().getByUniqueId(parts[1]);
+                Device device = storage.getObject(Device.class, new Request(
+                        new Columns.All(), new Condition.Equals("uniqueId", "uniqueId", parts[1])));
                 if (device != null) {
-                    Context.getPermissionsManager().checkDevice(userId, device.getId());
+                    permissionsService.checkPermission(Device.class, userId, device.getId());
                     chain.doFilter(request, response);
                     return;
                 }
             }
 
             httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
-        } catch (SecurityException e) {
+        } catch (SecurityException | StorageException e) {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
             httpResponse.getWriter().println(Log.exceptionStack(e));
         }

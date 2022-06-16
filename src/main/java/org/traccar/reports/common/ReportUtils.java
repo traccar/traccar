@@ -38,8 +38,10 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
+import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.reports.model.BaseReportItem;
@@ -106,6 +108,16 @@ public class ReportUtils {
         long limit = config.getLong(Keys.REPORT_PERIOD_LIMIT) * 1000;
         if (limit > 0 && to.getTime() - from.getTime() > limit) {
             throw new IllegalArgumentException("Time period exceeds the limit");
+        }
+    }
+
+    public void checkPermissions(
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds) throws StorageException {
+        for (long deviceId : deviceIds) {
+            permissionsService.checkPermission(Device.class, userId, deviceId);
+        }
+        for (long groupId : groupIds) {
+            permissionsService.checkPermission(Group.class, userId, groupId);
         }
     }
 

@@ -18,7 +18,6 @@ package org.traccar.database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Context;
-import org.traccar.api.security.PermissionsService;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Permission;
@@ -117,21 +116,6 @@ public class PermissionsManager {
         }
     }
 
-    public Set<Long> getDeviceUsers(long deviceId) {
-        Device device = Context.getIdentityManager().getById(deviceId);
-        if (device != null && !device.getDisabled()) {
-            return getAllDeviceUsers(deviceId);
-        } else {
-            Set<Long> result = new HashSet<>();
-            for (long userId : getAllDeviceUsers(deviceId)) {
-                if (getUserAdmin(userId)) {
-                    result.add(userId);
-                }
-            }
-            return result;
-        }
-    }
-
     public Set<Long> getGroupDevices(long groupId) {
         readLock();
         try {
@@ -195,12 +179,6 @@ public class PermissionsManager {
         return user != null && user.getAdministrator();
     }
 
-    public void checkAdmin(long userId) throws SecurityException {
-        if (!getUserAdmin(userId)) {
-            throw new SecurityException("Admin access required");
-        }
-    }
-
     public boolean getUserManager(long userId) {
         User user = getUser(userId);
         return user != null && user.getUserLimit() != 0;
@@ -210,11 +188,6 @@ public class PermissionsManager {
         if (!getUserManager(userId)) {
             throw new SecurityException("Manager access required");
         }
-    }
-
-    public boolean getUserReadonly(long userId) {
-        User user = getUser(userId);
-        return user != null && user.getReadonly();
     }
 
     public void checkUserEnabled(long userId) throws SecurityException {
@@ -227,14 +200,6 @@ public class PermissionsManager {
         }
         if (user.getExpirationTime() != null && System.currentTimeMillis() > user.getExpirationTime().getTime()) {
             throw new SecurityException("Account has expired");
-        }
-    }
-
-    public void checkDevice(long userId, long deviceId) throws SecurityException {
-        try {
-            new PermissionsService(storage).checkPermission(Device.class, userId, deviceId);
-        } catch (StorageException e) {
-            throw new RuntimeException(e);
         }
     }
 

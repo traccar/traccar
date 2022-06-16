@@ -67,9 +67,10 @@ public class TripsReportProvider {
     public Collection<TripReportItem> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
                                                         Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPermissions(userId, deviceIds, groupIds);
+
         ArrayList<TripReportItem> result = new ArrayList<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
             result.addAll(detectTrips(deviceId, from, to));
         }
         return result;
@@ -79,10 +80,11 @@ public class TripsReportProvider {
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
+        reportUtils.checkPermissions(userId, deviceIds, groupIds);
+
         ArrayList<DeviceReportSection> devicesTrips = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Context.getPermissionsManager().checkDevice(userId, deviceId);
             Collection<TripReportItem> trips = detectTrips(deviceId, from, to);
             DeviceReportSection deviceTrips = new DeviceReportSection();
             Device device = Context.getIdentityManager().getById(deviceId);

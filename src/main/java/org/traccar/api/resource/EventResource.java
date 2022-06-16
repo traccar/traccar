@@ -15,8 +15,8 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -45,7 +45,7 @@ public class EventResource extends BaseResource {
         if (event == null) {
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
         }
-        Context.getPermissionsManager().checkDevice(getUserId(), event.getDeviceId());
+        permissionsService.checkPermission(Device.class, getUserId(), event.getDeviceId());
         return event;
     }
 
