@@ -46,6 +46,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceManager.class);
 
     private final Config config;
+    private final CacheManager cacheManager;
     private final ConnectionManager connectionManager;
     private final long dataRefreshDelay;
 
@@ -56,9 +57,11 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
 
-    public DeviceManager(Config config, DataManager dataManager, ConnectionManager connectionManager) {
+    public DeviceManager(
+            Config config, CacheManager cacheManager, DataManager dataManager, ConnectionManager connectionManager) {
         super(dataManager, Device.class);
         this.config = config;
+        this.cacheManager = cacheManager;
         this.connectionManager = connectionManager;
         try {
             writeLock();
@@ -351,8 +354,8 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             result = device.getAttributes().get(attributeName);
             if (result == null) {
                 long groupId = device.getGroupId();
-                while (groupId != 0) {
-                    Group group = Context.getGroupsManager().getById(groupId);
+                while (groupId > 0) {
+                    Group group = cacheManager.getObject(Group.class, device.getGroupId());
                     if (group != null) {
                         result = group.getAttributes().get(attributeName);
                         if (result != null) {

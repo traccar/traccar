@@ -162,9 +162,8 @@ public class PermissionsManager {
             groupPermissions.clear();
             devicePermissions.clear();
             try {
-                GroupTree groupTree = new GroupTree(Context.getGroupsManager().getItems(
-                        Context.getGroupsManager().getAllItems()),
-                        Context.getDeviceManager().getAllDevices());
+                var groups = dataManager.getObjects(Group.class);
+                GroupTree groupTree = new GroupTree(groups, Context.getDeviceManager().getAllDevices());
                 for (Permission groupPermission : dataManager.getPermissions(User.class, Group.class)) {
                     Set<Long> userGroupPermissions = getGroupPermissions(groupPermission.getOwnerId());
                     Set<Long> userDevicePermissions = getDevicePermissions(groupPermission.getOwnerId());
@@ -182,9 +181,9 @@ public class PermissionsManager {
                 }
 
                 groupDevices.clear();
-                for (long groupId : Context.getGroupsManager().getAllItems()) {
-                    for (Device device : groupTree.getDevices(groupId)) {
-                        getGroupDevices(groupId).add(device.getId());
+                for (var group : groups) {
+                    for (Device device : groupTree.getDevices(group.getId())) {
+                        getGroupDevices(group.getId()).add(device.getId());
                     }
                 }
 

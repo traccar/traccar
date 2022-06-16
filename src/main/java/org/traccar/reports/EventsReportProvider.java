@@ -134,8 +134,9 @@ public class EventsReportProvider {
             Device device = Context.getIdentityManager().getById(deviceId);
             deviceEvents.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
-            if (device.getGroupId() != 0) {
-                Group group = Context.getGroupsManager().getById(device.getGroupId());
+            if (device.getGroupId() > 0) {
+                Group group = storage.getObject(Group.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", "id", device.getGroupId())));
                 if (group != null) {
                     deviceEvents.setGroupName(group.getName());
                 }

@@ -28,6 +28,9 @@ import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -85,8 +88,9 @@ public class StopsReportProvider {
             Device device = Context.getIdentityManager().getById(deviceId);
             deviceStops.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
-            if (device.getGroupId() != 0) {
-                Group group = Context.getGroupsManager().getById(device.getGroupId());
+            if (device.getGroupId() > 0) {
+                Group group = storage.getObject(Group.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", "id", device.getGroupId())));
                 if (group != null) {
                     deviceStops.setGroupName(group.getName());
                 }

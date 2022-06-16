@@ -19,14 +19,13 @@ import org.traccar.config.Config;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.GroupsManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
-import org.traccar.model.Group;
 import org.traccar.session.ConnectionManager;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 
 public final class Context {
@@ -44,12 +43,6 @@ public final class Context {
 
     public static IdentityManager getIdentityManager() {
         return identityManager;
-    }
-
-    private static GroupsManager groupsManager;
-
-    public static GroupsManager getGroupsManager() {
-        return groupsManager;
     }
 
     private static DeviceManager deviceManager;
@@ -75,9 +68,9 @@ public final class Context {
             throw e;
         }
 
-        groupsManager = new GroupsManager(Main.getInjector().getInstance(DataManager.class));
         deviceManager = new DeviceManager(
                 config,
+                Main.getInjector().getInstance(CacheManager.class),
                 Main.getInjector().getInstance(DataManager.class),
                 Main.getInjector().getInstance(ConnectionManager.class));
 
@@ -92,8 +85,6 @@ public final class Context {
     public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {
         if (clazz.equals(Device.class)) {
             return (BaseObjectManager<T>) deviceManager;
-        } else if (clazz.equals(Group.class)) {
-            return (BaseObjectManager<T>) groupsManager;
         }
         return null;
     }

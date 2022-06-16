@@ -6,6 +6,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -30,7 +31,7 @@ public class WebDataHandlerTest extends ProtocolTest {
         var identityManager = mock(IdentityManager.class);
         when(identityManager.getById(anyLong())).thenReturn(device);
 
-        WebDataHandler handler = new WebDataHandler(config, identityManager, null, null);
+        WebDataHandler handler = new WebDataHandler(config, mock(CacheManager.class), identityManager, null, null);
 
         assertEquals(
                 "http://localhost/?fixTime=1451610123000&gprmc=$GPRMC,010203.000,A,2000.0000,N,03000.0000,E,0.00,0.00,010116,,*05&name=test",

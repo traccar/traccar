@@ -31,6 +31,7 @@ import org.traccar.helper.Checksum;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.model.Group;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.HttpHeaders;
@@ -60,6 +61,7 @@ public class WebDataHandler extends BaseDataHandler {
     private static final String KEY_POSITION = "position";
     private static final String KEY_DEVICE = "device";
 
+    private final CacheManager cacheManager;
     private final IdentityManager identityManager;
     private final ObjectMapper objectMapper;
     private final Client client;
@@ -78,8 +80,10 @@ public class WebDataHandler extends BaseDataHandler {
 
     @Inject
     public WebDataHandler(
-            Config config, IdentityManager identityManager, ObjectMapper objectMapper, Client client) {
+            Config config, CacheManager cacheManager, IdentityManager identityManager,
+            ObjectMapper objectMapper, Client client) {
 
+        this.cacheManager = cacheManager;
         this.identityManager = identityManager;
         this.objectMapper = objectMapper;
         this.client = client;
@@ -171,7 +175,7 @@ public class WebDataHandler extends BaseDataHandler {
         if (request.contains("{group}")) {
             String deviceGroupName = "";
             if (device.getGroupId() != 0) {
-                Group group = Context.getGroupsManager().getById(device.getGroupId());
+                Group group = cacheManager.getObject(Group.class, device.getGroupId());
                 if (group != null) {
                     deviceGroupName = group.getName();
                 }

@@ -18,7 +18,6 @@ package org.traccar.api;
 
 import org.traccar.Context;
 import org.traccar.database.BaseObjectManager;
-import org.traccar.database.ExtendedObjectManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
@@ -92,10 +91,16 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     public Response update(T entity) throws StorageException {
         permissionsService.checkEdit(getUserId(), entity, false);
         permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
+
         if (entity instanceof User) {
             User before = storage.getObject(User.class, new Request(
                     new Columns.All(), new Condition.Equals("id", "id", entity.getId())));
             permissionsService.checkUserUpdate(getUserId(), before, (User) entity);
+        } else if (entity instanceof Group) {
+            Group group = (Group) entity;
+            if (group.getId() == group.getGroupId()) {
+                throw new IllegalArgumentException("Cycle in group hierarchy");
+            }
         }
 
         BaseObjectManager<T> manager = Context.getManager(baseClass);
@@ -125,9 +130,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         BaseObjectManager<T> manager = Context.getManager(baseClass);
         if (manager != null) {
             manager.removeItem(id);
-            if (manager instanceof ExtendedObjectManager) {
-                ((ExtendedObjectManager<T>) manager).refreshExtendedPermissions();
-            }
         } else {
             storage.removeObject(baseClass, new Request(new Condition.Equals("id", "id", id)));
         }
@@ -137,7 +139,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         if (baseClass.equals(Group.class) || baseClass.equals(Device.class) || baseClass.equals(User.class)) {
             if (baseClass.equals(Group.class)) {
-                Context.getGroupsManager().refreshItems();
                 Context.getDeviceManager().updateDeviceCache(true);
             }
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
