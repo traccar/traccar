@@ -32,6 +32,7 @@ import org.traccar.storage.query.Limit;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
+import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Date;
 
@@ -41,6 +42,7 @@ public class DataManager {
 
     private final boolean forceLdap;
 
+    @Inject
     public DataManager(Config config, Storage storage) throws Exception {
         this.storage = storage;
         forceLdap = config.getBoolean(Keys.LDAP_FORCE);
@@ -66,12 +68,6 @@ public class DataManager {
             }
         }
         return null;
-    }
-
-    public void updateUserPassword(User user) throws StorageException {
-        storage.updateObject(user, new Request(
-                new Columns.Include("hashedPassword", "salt"),
-                new Condition.Equals("id", "id")));
     }
 
     public void updateDeviceStatus(Device device) throws StorageException {

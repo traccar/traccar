@@ -30,7 +30,6 @@ import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.LdapProvider;
@@ -112,11 +111,6 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Storage provideStorage(DataSource dataSource, ObjectMapper objectMapper) {
         return new DatabaseStorage(dataSource, objectMapper);
-    }
-
-    @Provides
-    public static DataManager provideDataManager() {
-        return Context.getDataManager();
     }
 
     @Provides

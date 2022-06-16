@@ -16,7 +16,6 @@
 package org.traccar;
 
 import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
@@ -45,12 +44,6 @@ public final class Context {
 
     public static IdentityManager getIdentityManager() {
         return identityManager;
-    }
-
-    private static DataManager dataManager;
-
-    public static DataManager getDataManager() {
-        return dataManager;
     }
 
     private static GroupsManager groupsManager;
@@ -82,20 +75,17 @@ public final class Context {
             throw e;
         }
 
-        if (config.hasKey(Keys.DATABASE_URL)) {
-            dataManager = new DataManager(config, Main.getInjector().getInstance(Storage.class));
-        }
-
-        if (dataManager != null) {
-            groupsManager = new GroupsManager(dataManager);
-            deviceManager = new DeviceManager(
-                    config, dataManager, Main.getInjector().getInstance(ConnectionManager.class));
-        }
+        groupsManager = new GroupsManager(Main.getInjector().getInstance(DataManager.class));
+        deviceManager = new DeviceManager(
+                config,
+                Main.getInjector().getInstance(DataManager.class),
+                Main.getInjector().getInstance(ConnectionManager.class));
 
         identityManager = deviceManager;
 
         permissionsManager = new PermissionsManager(
-                dataManager, Main.getInjector().getInstance(Storage.class));
+                Main.getInjector().getInstance(DataManager.class),
+                Main.getInjector().getInstance(Storage.class));
 
     }
 
