@@ -20,6 +20,7 @@ import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Permission;
+import org.traccar.model.UserRestrictions;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
@@ -65,7 +66,7 @@ public class PermissionsResource  extends BaseResource {
     @Path("bulk")
     @POST
     public Response add(List<LinkedHashMap<String, Long>> entities) throws StorageException, ClassNotFoundException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
@@ -90,7 +91,7 @@ public class PermissionsResource  extends BaseResource {
     @DELETE
     @Path("bulk")
     public Response remove(List<LinkedHashMap<String, Long>> entities) throws StorageException, ClassNotFoundException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);

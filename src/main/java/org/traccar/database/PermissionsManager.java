@@ -22,7 +22,6 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Permission;
-import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -44,8 +43,6 @@ public class PermissionsManager {
     private final DataManager dataManager;
     private final Storage storage;
 
-    private volatile Server server;
-
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private final Map<Long, Set<Long>> groupPermissions = new HashMap<>();
@@ -56,7 +53,6 @@ public class PermissionsManager {
     public PermissionsManager(DataManager dataManager, Storage storage) {
         this.dataManager = dataManager;
         this.storage = storage;
-        refreshServer();
         refreshDeviceAndGroupPermissions();
     }
 
@@ -148,14 +144,6 @@ public class PermissionsManager {
         }
     }
 
-    public void refreshServer() {
-        try {
-            server = dataManager.getServer();
-        } catch (StorageException error) {
-            LOGGER.warn("Refresh server config error", error);
-        }
-    }
-
     public final void refreshDeviceAndGroupPermissions() {
         writeLock();
         try {
@@ -229,12 +217,6 @@ public class PermissionsManager {
         return user != null && user.getReadonly();
     }
 
-    public void checkReadonly(long userId) throws SecurityException {
-        if (!getUserAdmin(userId) && (server.getReadonly() || getUserReadonly(userId))) {
-            throw new SecurityException("Account is readonly");
-        }
-    }
-
     public void checkUserEnabled(long userId) throws SecurityException {
         User user = getUser(userId);
         if (user == null) {
@@ -263,15 +245,6 @@ public class PermissionsManager {
                 refreshDeviceAndGroupPermissions();
             }
         }
-    }
-
-    public Server getServer() {
-        return server;
-    }
-
-    public void updateServer(Server server) throws StorageException {
-        dataManager.updateObject(server);
-        this.server = server;
     }
 
     public User login(String email, String password) throws StorageException {

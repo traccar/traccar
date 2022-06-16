@@ -31,6 +31,7 @@ import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -297,9 +298,9 @@ public class ConnectionManager {
     }
 
     public synchronized void updateDevice(Device device) {
-        for (long userId : Context.getPermissionsManager().getDeviceUsers(device.getId())) {
-            if (listeners.containsKey(userId)) {
-                for (UpdateListener listener : listeners.get(userId)) {
+        for (User user : cacheManager.getDeviceObjects(device.getId(), User.class)) {
+            if (listeners.containsKey(user.getId())) {
+                for (UpdateListener listener : listeners.get(user.getId())) {
                     listener.onUpdateDevice(device);
                 }
             }
@@ -308,10 +309,9 @@ public class ConnectionManager {
 
     public synchronized void updatePosition(Position position) {
         long deviceId = position.getDeviceId();
-
-        for (long userId : Context.getPermissionsManager().getDeviceUsers(deviceId)) {
-            if (listeners.containsKey(userId)) {
-                for (UpdateListener listener : listeners.get(userId)) {
+        for (User user : cacheManager.getDeviceObjects(deviceId, User.class)) {
+            if (listeners.containsKey(user.getId())) {
+                for (UpdateListener listener : listeners.get(user.getId())) {
                     listener.onUpdatePosition(position);
                 }
             }

@@ -15,7 +15,6 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.database.MailManager;
 import org.traccar.geocoder.Geocoder;
@@ -66,8 +65,7 @@ public class ServerResource extends BaseResource {
 
     @PUT
     public Response update(Server entity) throws StorageException {
-        Context.getPermissionsManager().checkAdmin(getUserId());
-        Context.getPermissionsManager().updateServer(entity);
+        permissionsService.checkAdmin(getUserId());
         LogAction.edit(getUserId(), entity);
         return Response.ok(entity).build();
     }
