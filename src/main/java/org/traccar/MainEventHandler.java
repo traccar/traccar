@@ -23,6 +23,7 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
@@ -48,14 +49,13 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     private final ConnectionManager connectionManager;
 
     @Inject
-    public MainEventHandler(ConnectionManager connectionManager) {
+    public MainEventHandler(Config config, ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
-        String connectionlessProtocolList = Context.getConfig().getString(Keys.STATUS_IGNORE_OFFLINE);
+        String connectionlessProtocolList = config.getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split("[, ]")));
         }
-        logAttributes.addAll(Arrays.asList(
-                Context.getConfig().getString(Keys.LOGGER_ATTRIBUTES).split("[, ]")));
+        logAttributes.addAll(Arrays.asList(config.getString(Keys.LOGGER_ATTRIBUTES).split("[, ]")));
     }
 
     @Override

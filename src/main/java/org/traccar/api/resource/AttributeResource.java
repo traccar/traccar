@@ -16,6 +16,7 @@
  */
 package org.traccar.api.resource;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
@@ -29,6 +30,7 @@ import javax.ws.rs.core.Response;
 
 import org.traccar.Context;
 import org.traccar.api.ExtendedObjectResource;
+import org.traccar.config.Config;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -42,6 +44,9 @@ import org.traccar.storage.query.Request;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AttributeResource extends ExtendedObjectResource<Attribute> {
+
+    @Inject
+    private Config config;
 
     public AttributeResource() {
         super(Attribute.class);
@@ -57,7 +62,7 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
                 new Columns.All(),
                 new Condition.LatestPositions(deviceId)));
 
-        Object result = new ComputedAttributesHandler(Context.getConfig(), Context.getIdentityManager(), null)
+        Object result = new ComputedAttributesHandler(config, Context.getIdentityManager(), null)
                 .computeAttribute(entity, position);
         if (result != null) {
             switch (entity.getType()) {

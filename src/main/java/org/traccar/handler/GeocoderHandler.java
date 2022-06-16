@@ -20,7 +20,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
@@ -42,7 +41,7 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
             Config config, Geocoder geocoder, IdentityManager identityManager) {
         this.geocoder = geocoder;
         this.identityManager = identityManager;
-        ignorePositions = Context.getConfig().getBoolean(Keys.GEOCODER_IGNORE_POSITIONS);
+        ignorePositions = config.getBoolean(Keys.GEOCODER_IGNORE_POSITIONS);
         processInvalidPositions = config.getBoolean(Keys.GEOCODER_PROCESS_INVALID_POSITIONS);
         geocoderReuseDistance = config.getInteger(Keys.GEOCODER_REUSE_DISTANCE, 0);
     }

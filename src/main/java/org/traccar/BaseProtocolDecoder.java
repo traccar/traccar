@@ -17,7 +17,6 @@ package org.traccar;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.database.IdentityManager;
@@ -46,7 +45,6 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     private final Protocol protocol;
 
-    private Config config;
     private IdentityManager identityManager;
     private ConnectionManager connectionManager;
     private StatisticsManager statisticsManager;
@@ -55,22 +53,6 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
-    }
-
-    /**
-     * Method called when config is initialized.
-     */
-    protected void init() {
-    }
-
-    public Config getConfig() {
-        return config;
-    }
-
-    @Inject
-    public void setConfig(Config config) {
-        this.config = config;
-        init();
     }
 
     public IdentityManager getIdentityManager() {
@@ -115,7 +97,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     public String getServer(Channel channel, char delimiter) {
-        String server = config.getString(Keys.PROTOCOL_SERVER.withPrefix(getProtocolName()));
+        String server = getConfig().getString(Keys.PROTOCOL_SERVER.withPrefix(getProtocolName()));
         if (server == null && channel != null) {
             InetSocketAddress address = (InetSocketAddress) channel.localAddress();
             server = address.getAddress().getHostAddress() + ":" + address.getPort();
@@ -124,7 +106,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     protected double convertSpeed(double value, String defaultUnits) {
-        switch (config.getString(getProtocolName() + ".speed", defaultUnits)) {
+        switch (getConfig().getString(getProtocolName() + ".speed", defaultUnits)) {
             case "kmh":
                 return UnitsConverter.knotsFromKph(value);
             case "mps":
@@ -222,7 +204,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     @Override
     protected Object handleEmptyMessage(Channel channel, SocketAddress remoteAddress, Object msg) {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-        if (config.getBoolean(Keys.DATABASE_SAVE_EMPTY) && deviceSession != null) {
+        if (getConfig().getBoolean(Keys.DATABASE_SAVE_EMPTY) && deviceSession != null) {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, null);

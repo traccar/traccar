@@ -19,7 +19,6 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Position;
@@ -44,7 +43,7 @@ public class TimeHandler extends ChannelInboundHandlerAdapter {
         } else {
             useServerTime = false;
         }
-        String protocolList = Context.getConfig().getString(Keys.TIME_PROTOCOLS);
+        String protocolList = config.getString(Keys.TIME_PROTOCOLS);
         if (protocolList != null) {
             protocols = new HashSet<>(Arrays.asList(protocolList.split("[, ]")));
         } else {

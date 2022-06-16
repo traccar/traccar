@@ -54,14 +54,15 @@ public abstract class TrackerClient implements TrackerConnector {
     }
 
     public TrackerClient(String protocol) {
+        Config config = Context.getConfig();
 
-        secure = Context.getConfig().getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
-        interval = Context.getConfig().getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol));
-        address = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
-        port = Context.getConfig().getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol), secure ? 443 : 80);
-        devices = Context.getConfig().getString(Keys.PROTOCOL_DEVICES.withPrefix(protocol)).split("[, ]");
+        secure = config.getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
+        interval = config.getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol));
+        address = config.getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
+        port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol), secure ? 443 : 80);
+        devices = config.getString(Keys.PROTOCOL_DEVICES.withPrefix(protocol)).split("[, ]");
 
-        BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, protocol) {
+        BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, config, protocol) {
             @Override
             protected void addTransportHandlers(PipelineBuilder pipeline) {
                 try {
@@ -78,7 +79,7 @@ public abstract class TrackerClient implements TrackerConnector {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 try {
-                    TrackerClient.this.addProtocolHandlers(pipeline, Context.getConfig());
+                    TrackerClient.this.addProtocolHandlers(pipeline, config);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

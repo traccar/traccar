@@ -22,6 +22,7 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
@@ -58,12 +59,12 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private final String protocol;
     private int timeout;
 
-    public BasePipelineFactory(TrackerConnector connector, String protocol) {
+    public BasePipelineFactory(TrackerConnector connector, Config config, String protocol) {
         this.connector = connector;
         this.protocol = protocol;
-        timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
+        timeout = config.getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
-            timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
+            timeout = config.getInteger(Keys.SERVER_TIMEOUT);
         }
     }
 

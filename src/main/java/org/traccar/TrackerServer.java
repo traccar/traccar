@@ -58,11 +58,13 @@ public abstract class TrackerServer implements TrackerConnector {
     public TrackerServer(boolean datagram, String protocol) {
         this.datagram = datagram;
 
-        secure = Context.getConfig().getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
-        address = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
-        port = Context.getConfig().getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
+        Config config = Context.getConfig();
 
-        BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, protocol) {
+        secure = config.getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
+        address = config.getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
+        port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
+
+        BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, config, protocol) {
             @Override
             protected void addTransportHandlers(PipelineBuilder pipeline) {
                 try {
@@ -77,7 +79,7 @@ public abstract class TrackerServer implements TrackerConnector {
 
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                TrackerServer.this.addProtocolHandlers(pipeline, Context.getConfig());
+                TrackerServer.this.addProtocolHandlers(pipeline, config);
             }
         };
 
