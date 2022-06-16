@@ -15,6 +15,7 @@
  */
 package org.traccar.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import org.eclipse.jetty.http.HttpCookie;
@@ -40,13 +41,9 @@ import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerI
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.LifecycleObject;
-import org.traccar.api.AsyncSocketServlet;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.DateParameterConverterProvider;
-import org.traccar.api.MediaFilter;
 import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.resource.ServerResource;
@@ -88,6 +85,8 @@ public class WebServer implements LifecycleObject {
         }
 
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        JettyWebSocketServletContainerInitializer.configure(servletHandler, null);
+        servletHandler.addFilter(GuiceFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
 
         initApi(servletHandler);
         initSessionConfig(servletHandler);
@@ -140,7 +139,7 @@ public class WebServer implements LifecycleObject {
                     }
                 }
             };
-            ServletHolder servletHolder = new ServletHolder(new AsyncProxyServlet.Transparent());
+            ServletHolder servletHolder = new ServletHolder(AsyncProxyServlet.Transparent.class);
             servletHolder.setInitParameter("proxyTo", "http://localhost:" + port);
             servletHandler.addServlet(servletHolder, "/");
             handlers.addHandler(servletHandler);
@@ -164,11 +163,6 @@ public class WebServer implements LifecycleObject {
     }
 
     private void initApi(ServletContextHandler servletHandler) {
-        servletHandler.addFilter(GuiceFilter.class, "/api/*", EnumSet.allOf(DispatcherType.class));
-
-        servletHandler.addServlet(new ServletHolder(injector.getInstance(AsyncSocketServlet.class)), "/api/socket");
-        JettyWebSocketServletContainerInitializer.configure(servletHandler, null);
-
         String mediaPath = config.getString(Keys.MEDIA_PATH);
         if (mediaPath != null) {
             ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
@@ -176,15 +170,18 @@ public class WebServer implements LifecycleObject {
             servletHolder.setInitParameter("dirAllowed", "false");
             servletHolder.setInitParameter("pathInfoOnly", "true");
             servletHandler.addServlet(servletHolder, "/api/media/*");
-            servletHandler.addFilter(MediaFilter.class, "/api/media/*", EnumSet.allOf(DispatcherType.class));
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.registerClasses(
-                JacksonFeature.class, ObjectMapperProvider.class, ResourceErrorHandler.class,
-                SecurityRequestFilter.class, CorsResponseFilter.class, DateParameterConverterProvider.class);
-        resourceConfig.packages(ServerResource.class.getPackage().getName());
         resourceConfig.register(new GuiceBridgeInitializer(injector));
+        resourceConfig.register(new ObjectMapperProvider(injector.getInstance(ObjectMapper.class)));
+        resourceConfig.registerClasses(
+                JacksonFeature.class,
+                DateParameterConverterProvider.class,
+                SecurityRequestFilter.class,
+                CorsResponseFilter.class,
+                ResourceErrorHandler.class);
+        resourceConfig.packages(ServerResource.class.getPackage().getName());
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
     }
 

@@ -24,9 +24,11 @@ import org.traccar.config.Keys;
 import org.traccar.session.ConnectionManager;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.servlet.http.HttpSession;
 import java.time.Duration;
 
+@Singleton
 public class AsyncSocketServlet extends JettyWebSocketServlet {
 
     private final ObjectMapper objectMapper;

@@ -16,19 +16,7 @@
  */
 package org.traccar.api;
 
-import java.io.IOException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.traccar.Main;
+import com.google.inject.Provider;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.database.StatisticsManager;
@@ -40,7 +28,34 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+
+@Singleton
 public class MediaFilter implements Filter {
+
+    private final Storage storage;
+    private final StatisticsManager statisticsManager;
+    private final Provider<PermissionsService> permissionsServiceProvider;
+
+    @Inject
+    public MediaFilter(
+            Storage storage, StatisticsManager statisticsManager,
+            Provider<PermissionsService> permissionsServiceProvider) {
+        this.storage = storage;
+        this.statisticsManager = statisticsManager;
+        this.permissionsServiceProvider = permissionsServiceProvider;
+    }
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -49,10 +64,6 @@ public class MediaFilter implements Filter {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
-
-        PermissionsService permissionsService = Main.getInjector().getInstance(PermissionsService.class);
-        Storage storage = Main.getInjector().getInstance(Storage.class);
-        StatisticsManager statisticsManager = Main.getInjector().getInstance(StatisticsManager.class);
 
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         try {
@@ -75,7 +86,7 @@ public class MediaFilter implements Filter {
                 Device device = storage.getObject(Device.class, new Request(
                         new Columns.All(), new Condition.Equals("uniqueId", "uniqueId", parts[1])));
                 if (device != null) {
-                    permissionsService.checkPermission(Device.class, userId, device.getId());
+                    permissionsServiceProvider.get().checkPermission(Device.class, userId, device.getId());
                     chain.doFilter(request, response);
                     return;
                 }

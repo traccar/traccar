@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.api;
+package org.traccar.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.servlet.ServletModule;
+import org.traccar.api.AsyncSocketServlet;
+import org.traccar.api.MediaFilter;
 
-import javax.ws.rs.ext.ContextResolver;
-
-public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
-
-    private final ObjectMapper objectMapper;
-
-    public ObjectMapperProvider(ObjectMapper objectMapper) {
-        this.objectMapper = objectMapper;
-    }
+public class WebModule extends ServletModule {
 
     @Override
-    public ObjectMapper getContext(Class<?> type) {
-        return objectMapper;
+    protected void configureServlets() {
+        filter("/api/media/*").through(MediaFilter.class);
+        serve("/api/socket").with(AsyncSocketServlet.class);
     }
-
 }
