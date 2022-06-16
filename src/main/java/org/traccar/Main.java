@@ -137,7 +137,11 @@ public final class Main {
                 LOGGER.info("Stopping server...");
 
                 for (var service : services) {
-                    service.stop();
+                    try {
+                        service.stop();
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }));
         } catch (Exception e) {
