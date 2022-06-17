@@ -16,6 +16,7 @@
 package org.traccar.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.traccar.config.Config;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
@@ -27,6 +28,7 @@ import org.traccar.storage.query.Limit;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -38,10 +40,13 @@ import java.util.stream.Collectors;
 
 public class DatabaseStorage extends Storage {
 
+    private final Config config;
     private final DataSource dataSource;
     private final ObjectMapper objectMapper;
 
-    public DatabaseStorage(DataSource dataSource, ObjectMapper objectMapper) {
+    @Inject
+    public DatabaseStorage(Config config, DataSource dataSource, ObjectMapper objectMapper) {
+        this.config = config;
         this.dataSource = dataSource;
         this.objectMapper = objectMapper;
     }
@@ -55,7 +60,7 @@ public class DatabaseStorage extends Storage {
         query.append(formatOrder(request.getOrder()));
         query.append(formatLimit(request.getLimit()));
         try {
-            QueryBuilder builder = QueryBuilder.create(dataSource, objectMapper, query.toString());
+            QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
             for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
                 builder.setValue(variable.getKey(), variable.getValue());
             }
@@ -75,7 +80,7 @@ public class DatabaseStorage extends Storage {
         query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> ':' + c));
         query.append(")");
         try {
-            QueryBuilder builder = QueryBuilder.create(dataSource, objectMapper, query.toString(), true);
+            QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true);
             builder.setObject(entity);
             return builder.executeUpdate();
         } catch (SQLException e) {
@@ -91,7 +96,7 @@ public class DatabaseStorage extends Storage {
         query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> c + " = :" + c));
         query.append(formatCondition(request.getCondition()));
         try {
-            QueryBuilder builder = QueryBuilder.create(dataSource, objectMapper, query.toString());
+            QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
             builder.setObject(entity);
             for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
                 builder.setValue(variable.getKey(), variable.getValue());
@@ -108,7 +113,7 @@ public class DatabaseStorage extends Storage {
         query.append(getStorageName(clazz));
         query.append(formatCondition(request.getCondition()));
         try {
-            QueryBuilder builder = QueryBuilder.create(dataSource, objectMapper, query.toString());
+            QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
             for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
                 builder.setValue(variable.getKey(), variable.getValue());
             }
@@ -136,7 +141,7 @@ public class DatabaseStorage extends Storage {
         Condition combinedCondition = Condition.merge(conditions);
         query.append(formatCondition(combinedCondition));
         try {
-            QueryBuilder builder = QueryBuilder.create(dataSource, objectMapper, query.toString());
+            QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
             for (Map.Entry<String, Object> variable : getConditionVariables(combinedCondition).entrySet()) {
                 builder.setValue(variable.getKey(), variable.getValue());
             }
@@ -154,7 +159,7 @@ public class DatabaseStorage extends Storage {
         query.append(permission.get().keySet().stream().map(key -> ':' + key).collect(Collectors.joining(", ")));
         query.append(")");
         try {
-            QueryBuilder builder = QueryBuilder.create(dataSource, objectMapper, query.toString(), true);
+            QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true);
             for (var entry : permission.get().entrySet()) {
                 builder.setLong(entry.getKey(), entry.getValue());
             }
@@ -172,7 +177,7 @@ public class DatabaseStorage extends Storage {
         query.append(permission
                 .get().keySet().stream().map(key -> key + " = :" + key).collect(Collectors.joining(" AND ")));
         try {
-            QueryBuilder builder = QueryBuilder.create(dataSource, objectMapper, query.toString(), true);
+            QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true);
             for (var entry : permission.get().entrySet()) {
                 builder.setLong(entry.getKey(), entry.getValue());
             }

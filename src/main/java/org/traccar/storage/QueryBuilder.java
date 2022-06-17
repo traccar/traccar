@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Permission;
 
@@ -42,10 +42,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("UnusedReturnValue")
 public final class QueryBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryBuilder.class);
 
+    private final Config config;
     private final ObjectMapper objectMapper;
 
     private final Map<String, List<Integer>> indexMap = new HashMap<>();
@@ -55,8 +57,9 @@ public final class QueryBuilder {
     private final boolean returnGeneratedKeys;
 
     private QueryBuilder(
-            DataSource dataSource, ObjectMapper objectMapper,
+            Config config, DataSource dataSource, ObjectMapper objectMapper,
             String query, boolean returnGeneratedKeys) throws SQLException {
+        this.config = config;
         this.objectMapper = objectMapper;
         this.query = query;
         this.returnGeneratedKeys = returnGeneratedKeys;
@@ -133,14 +136,14 @@ public final class QueryBuilder {
     }
 
     public static QueryBuilder create(
-            DataSource dataSource, ObjectMapper objectMapper, String query) throws SQLException {
-        return new QueryBuilder(dataSource, objectMapper, query, false);
+            Config config, DataSource dataSource, ObjectMapper objectMapper, String query) throws SQLException {
+        return new QueryBuilder(config, dataSource, objectMapper, query, false);
     }
 
     public static QueryBuilder create(
-            DataSource dataSource, ObjectMapper objectMapper, String query,
+            Config config, DataSource dataSource, ObjectMapper objectMapper, String query,
             boolean returnGeneratedKeys) throws SQLException {
-        return new QueryBuilder(dataSource, objectMapper, query, returnGeneratedKeys);
+        return new QueryBuilder(config, dataSource, objectMapper, query, returnGeneratedKeys);
     }
 
     private List<Integer> indexes(String name) {
@@ -396,7 +399,7 @@ public final class QueryBuilder {
     }
 
     private void logQuery() {
-        if (Context.getConfig().getBoolean(Keys.LOGGER_QUERIES)) {
+        if (config.getBoolean(Keys.LOGGER_QUERIES)) {
             LOGGER.info(query);
         }
     }

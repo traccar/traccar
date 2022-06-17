@@ -88,6 +88,7 @@ public class MainModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        bind(Storage.class).to(DatabaseStorage.class);
         bind(Timer.class).to(HashedWheelTimer.class).in(Scopes.SINGLETON);
     }
 
@@ -106,11 +107,6 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Config provideConfig() {
         return Context.getConfig();
-    }
-
-    @Provides
-    public static Storage provideStorage(DataSource dataSource, ObjectMapper objectMapper) {
-        return new DatabaseStorage(dataSource, objectMapper);
     }
 
     @Provides

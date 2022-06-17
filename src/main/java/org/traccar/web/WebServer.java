@@ -91,7 +91,7 @@ public class WebServer implements LifecycleObject {
         initSessionConfig(servletHandler);
 
         if (config.getBoolean(Keys.WEB_CONSOLE)) {
-            servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/console/*");
+            servletHandler.addServlet(new ServletHolder(new ConsoleServlet(config)), "/console/*");
         }
 
         initWebApp(servletHandler);
