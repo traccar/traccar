@@ -75,7 +75,6 @@ import org.traccar.web.WebServer;
 
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
-import javax.sql.DataSource;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.ext.ContextResolver;

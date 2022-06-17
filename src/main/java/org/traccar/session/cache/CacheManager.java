@@ -15,6 +15,7 @@
  */
 package org.traccar.session.cache;
 
+import org.traccar.config.Config;
 import org.traccar.helper.model.GeofenceUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
@@ -53,6 +54,7 @@ public class CacheManager {
     private static final Collection<Class<? extends BaseModel>> CLASSES = Arrays.asList(
             Attribute.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
 
+    private final Config config;
     private final Storage storage;
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
@@ -65,7 +67,8 @@ public class CacheManager {
     private final Map<Long, List<User>> notificationUsers = new HashMap<>();
 
     @Inject
-    public CacheManager(Storage storage) throws StorageException {
+    public CacheManager(Config config, Storage storage) throws StorageException {
+        this.config = config;
         this.storage = storage;
         invalidateServer();
         invalidateUsers();
@@ -315,7 +318,7 @@ public class CacheManager {
     private void invalidateDeviceGeofences(Device device) {
         Position position = getPosition(device.getId());
         if (position != null) {
-            device.setGeofenceIds(GeofenceUtil.getCurrentGeofences(this, position));
+            device.setGeofenceIds(GeofenceUtil.getCurrentGeofences(config, this, position));
         }
     }
 

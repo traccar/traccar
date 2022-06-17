@@ -16,6 +16,7 @@
 package org.traccar.handler.events;
 
 import io.netty.channel.ChannelHandler;
+import org.traccar.config.Config;
 import org.traccar.helper.model.GeofenceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Calendar;
@@ -35,11 +36,13 @@ import java.util.Map;
 @ChannelHandler.Sharable
 public class GeofenceEventHandler extends BaseEventHandler {
 
+    private final Config config;
     private final CacheManager cacheManager;
     private final ConnectionManager connectionManager;
 
     @Inject
-    public GeofenceEventHandler(CacheManager cacheManager, ConnectionManager connectionManager) {
+    public GeofenceEventHandler(Config config, CacheManager cacheManager, ConnectionManager connectionManager) {
+        this.config = config;
         this.cacheManager = cacheManager;
         this.connectionManager = connectionManager;
     }
@@ -54,7 +57,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
             return null;
         }
 
-        List<Long> currentGeofences = GeofenceUtil.getCurrentGeofences(cacheManager, position);
+        List<Long> currentGeofences = GeofenceUtil.getCurrentGeofences(config, cacheManager, position);
         List<Long> oldGeofences = new ArrayList<>();
         if (device.getGeofenceIds() != null) {
             oldGeofences.addAll(device.getGeofenceIds());
