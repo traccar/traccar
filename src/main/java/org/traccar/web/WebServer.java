@@ -15,7 +15,6 @@
  */
 package org.traccar.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
 import org.eclipse.jetty.http.HttpCookie;
@@ -173,10 +172,9 @@ public class WebServer implements LifecycleObject {
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
-        resourceConfig.register(new GuiceBridgeInitializer(injector));
-        resourceConfig.register(new ObjectMapperProvider(injector.getInstance(ObjectMapper.class)));
         resourceConfig.registerClasses(
                 JacksonFeature.class,
+                ObjectMapperProvider.class,
                 DateParameterConverterProvider.class,
                 SecurityRequestFilter.class,
                 CorsResponseFilter.class,

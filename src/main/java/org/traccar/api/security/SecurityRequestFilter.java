@@ -17,7 +17,6 @@ package org.traccar.api.security;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Main;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.database.LoginService;
 import org.traccar.database.StatisticsManager;
@@ -26,11 +25,13 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
 import javax.annotation.security.PermitAll;
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ResourceInfo;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.lang.reflect.Method;
@@ -55,11 +56,17 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         return null;
     }
 
-    @javax.ws.rs.core.Context
+    @Context
     private HttpServletRequest request;
 
-    @javax.ws.rs.core.Context
+    @Context
     private ResourceInfo resourceInfo;
+
+    @Inject
+    private LoginService loginService;
+
+    @Inject
+    private StatisticsManager statisticsManager;
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
@@ -77,9 +84,9 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
                 try {
                     String[] auth = decodeBasicAuth(authHeader);
-                    User user = Main.getInjector().getInstance(LoginService.class).login(auth[0], auth[1]);
+                    User user = loginService.login(auth[0], auth[1]);
                     if (user != null) {
-                        Main.getInjector().getInstance(StatisticsManager.class).registerRequest(user.getId());
+                        statisticsManager.registerRequest(user.getId());
                         securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
                     }
                 } catch (StorageException e) {
@@ -90,7 +97,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
                 Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
-                    Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
+                    statisticsManager.registerRequest(userId);
                     securityContext = new UserSecurityContext(new UserPrincipal(userId));
                 }
 

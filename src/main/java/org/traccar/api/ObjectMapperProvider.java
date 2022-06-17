@@ -17,12 +17,14 @@ package org.traccar.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import javax.inject.Inject;
 import javax.ws.rs.ext.ContextResolver;
 
 public class ObjectMapperProvider implements ContextResolver<ObjectMapper> {
 
     private final ObjectMapper objectMapper;
 
+    @Inject
     public ObjectMapperProvider(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
     }
