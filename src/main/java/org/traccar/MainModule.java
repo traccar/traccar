@@ -146,7 +146,7 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static Geocoder provideGeocoder(Config config, Client client) {
+    public static Geocoder provideGeocoder(Config config, Client client, StatisticsManager statisticsManager) {
         if (config.getBoolean(Keys.GEOCODER_ENABLE)) {
             String type = config.getString(Keys.GEOCODER_TYPE, "google");
             String url = config.getString(Keys.GEOCODER_URL);
@@ -157,42 +157,62 @@ public class MainModule extends AbstractModule {
             AddressFormat addressFormat = formatString != null ? new AddressFormat(formatString) : new AddressFormat();
 
             int cacheSize = config.getInteger(Keys.GEOCODER_CACHE_SIZE);
+            Geocoder geocoder;
             switch (type) {
                 case "nominatim":
-                    return new NominatimGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    geocoder = new NominatimGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    break;
                 case "gisgraphy":
-                    return new GisgraphyGeocoder(client, url, cacheSize, addressFormat);
+                    geocoder = new GisgraphyGeocoder(client, url, cacheSize, addressFormat);
+                    break;
                 case "mapquest":
-                    return new MapQuestGeocoder(client, url, key, cacheSize, addressFormat);
+                    geocoder = new MapQuestGeocoder(client, url, key, cacheSize, addressFormat);
+                    break;
                 case "opencage":
-                    return new OpenCageGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    geocoder = new OpenCageGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    break;
                 case "bingmaps":
-                    return new BingMapsGeocoder(client, url, key, cacheSize, addressFormat);
+                    geocoder = new BingMapsGeocoder(client, url, key, cacheSize, addressFormat);
+                    break;
                 case "factual":
-                    return new FactualGeocoder(client, url, key, cacheSize, addressFormat);
+                    geocoder = new FactualGeocoder(client, url, key, cacheSize, addressFormat);
+                    break;
                 case "geocodefarm":
-                    return new GeocodeFarmGeocoder(client, key, language, cacheSize, addressFormat);
+                    geocoder = new GeocodeFarmGeocoder(client, key, language, cacheSize, addressFormat);
+                    break;
                 case "geocodexyz":
-                    return new GeocodeXyzGeocoder(client, key, cacheSize, addressFormat);
+                    geocoder = new GeocodeXyzGeocoder(client, key, cacheSize, addressFormat);
+                    break;
                 case "ban":
-                    return new BanGeocoder(client, cacheSize, addressFormat);
+                    geocoder = new BanGeocoder(client, cacheSize, addressFormat);
+                    break;
                 case "here":
-                    return new HereGeocoder(client, url, id, key, language, cacheSize, addressFormat);
+                    geocoder = new HereGeocoder(client, url, id, key, language, cacheSize, addressFormat);
+                    break;
                 case "mapmyindia":
-                    return new MapmyIndiaGeocoder(client, url, key, cacheSize, addressFormat);
+                    geocoder = new MapmyIndiaGeocoder(client, url, key, cacheSize, addressFormat);
+                    break;
                 case "tomtom":
-                    return new TomTomGeocoder(client, url, key, cacheSize, addressFormat);
+                    geocoder = new TomTomGeocoder(client, url, key, cacheSize, addressFormat);
+                    break;
                 case "positionstack":
-                    return new PositionStackGeocoder(client, key, cacheSize, addressFormat);
+                    geocoder = new PositionStackGeocoder(client, key, cacheSize, addressFormat);
+                    break;
                 case "mapbox":
-                    return new MapboxGeocoder(client, key, cacheSize, addressFormat);
+                    geocoder = new MapboxGeocoder(client, key, cacheSize, addressFormat);
+                    break;
                 case "maptiler":
-                    return new MapTilerGeocoder(client, key, cacheSize, addressFormat);
+                    geocoder = new MapTilerGeocoder(client, key, cacheSize, addressFormat);
+                    break;
                 case "geoapify":
-                    return new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
+                    geocoder = new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
+                    break;
                 default:
-                    return new GoogleGeocoder(client, key, language, cacheSize, addressFormat);
+                    geocoder = new GoogleGeocoder(client, key, language, cacheSize, addressFormat);
+                    break;
             }
+            geocoder.setStatisticsManager(statisticsManager);
+            return geocoder;
         }
         return null;
     }

@@ -17,7 +17,6 @@ package org.traccar.geocoder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Main;
 import org.traccar.database.StatisticsManager;
 
 import javax.json.JsonObject;
@@ -36,6 +35,7 @@ public abstract class JsonGeocoder implements Geocoder {
     private final Client client;
     private final String url;
     private final AddressFormat addressFormat;
+    private StatisticsManager statisticsManager;
 
     private Map<Map.Entry<Double, Double>, String> cache;
 
@@ -44,13 +44,18 @@ public abstract class JsonGeocoder implements Geocoder {
         this.url = url;
         this.addressFormat = addressFormat;
         if (cacheSize > 0) {
-            this.cache = Collections.synchronizedMap(new LinkedHashMap<Map.Entry<Double, Double>, String>() {
+            this.cache = Collections.synchronizedMap(new LinkedHashMap<>() {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry eldest) {
                     return size() > cacheSize;
                 }
             });
         }
+    }
+
+    @Override
+    public void setStatisticsManager(StatisticsManager statisticsManager) {
+        this.statisticsManager = statisticsManager;
     }
 
     protected String readValue(JsonObject object, String key) {
@@ -98,8 +103,8 @@ public abstract class JsonGeocoder implements Geocoder {
             }
         }
 
-        if (Main.getInjector() != null) {
-            Main.getInjector().getInstance(StatisticsManager.class).registerGeocoderRequest();
+        if (statisticsManager != null) {
+            statisticsManager.registerGeocoderRequest();
         }
 
         var request = client.target(String.format(url, latitude, longitude)).request();
