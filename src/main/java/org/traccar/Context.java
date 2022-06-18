@@ -19,7 +19,6 @@ import org.traccar.config.Config;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.PermissionsManager;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
@@ -41,12 +40,6 @@ public final class Context {
         return deviceManager;
     }
 
-    private static PermissionsManager permissionsManager;
-
-    public static PermissionsManager getPermissionsManager() {
-        return permissionsManager;
-    }
-
     public static void init(String configFile) throws Exception {
 
         try {
@@ -60,9 +53,6 @@ public final class Context {
 
         deviceManager = new DeviceManager(
                 config,
-                Main.getInjector().getInstance(DataManager.class));
-
-        permissionsManager = new PermissionsManager(
                 Main.getInjector().getInstance(DataManager.class));
 
     }

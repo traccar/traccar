@@ -16,7 +16,6 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Permission;
@@ -46,7 +45,7 @@ public class PermissionsResource  extends BaseResource {
     @Inject
     private CacheManager cacheManager;
 
-    private void checkPermission(Permission permission, boolean link) throws StorageException {
+    private void checkPermission(Permission permission) throws StorageException {
         if (permissionsService.notAdmin(getUserId())) {
             permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
             permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
@@ -70,15 +69,12 @@ public class PermissionsResource  extends BaseResource {
         checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
-            checkPermission(permission, true);
+            checkPermission(permission);
             storage.addPermission(permission);
             cacheManager.invalidate(permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
             LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
-        }
-        if (!entities.isEmpty()) {
-            Context.getPermissionsManager().refreshPermissions(new Permission(entities.get(0)));
         }
         return Response.noContent().build();
     }
@@ -95,15 +91,12 @@ public class PermissionsResource  extends BaseResource {
         checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
-            checkPermission(permission, false);
+            checkPermission(permission);
             storage.removePermission(permission);
             cacheManager.invalidate(permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
             LogAction.unlink(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
-        }
-        if (!entities.isEmpty()) {
-            Context.getPermissionsManager().refreshPermissions(new Permission(entities.get(0)));
         }
         return Response.noContent().build();
     }

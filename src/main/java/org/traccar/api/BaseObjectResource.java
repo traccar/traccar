@@ -80,9 +80,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         cacheManager.invalidate(User.class, getUserId(), baseClass, entity.getId());
         LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
 
-        if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
-            Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-        }
         return Response.ok(entity).build();
     }
 
@@ -115,9 +112,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         LogAction.edit(getUserId(), entity);
 
-        if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
-            Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-        }
         return Response.ok(entity).build();
     }
 
@@ -141,7 +135,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             if (baseClass.equals(Group.class)) {
                 Context.getDeviceManager().updateDeviceCache(true);
             }
-            Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
         }
         return Response.noContent().build();
     }

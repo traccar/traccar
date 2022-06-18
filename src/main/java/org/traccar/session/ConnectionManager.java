@@ -164,16 +164,10 @@ public class ConnectionManager {
 
         try {
             device.setId(storage.addObject(device, new Request(new Columns.Exclude("id"))));
-
-            LOGGER.info("Automatically registered device " + uniqueId);
-
-            if (defaultGroupId != 0) {
-                Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-            }
-
+            LOGGER.info("Automatically registered " + uniqueId);
             return device;
         } catch (StorageException e) {
-            LOGGER.warn("Automatic device registration error", e);
+            LOGGER.warn("Automatic registration failed", e);
             return null;
         }
     }
