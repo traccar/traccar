@@ -79,7 +79,7 @@ public class ReportUtilsTest extends BaseTest {
     public void testCalculateSpentFuel() {
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class),
-                mock(DeviceManager.class), mock(TripsConfig.class), mock(VelocityEngine.class), null);
+                mock(TripsConfig.class), mock(VelocityEngine.class), null);
         Position startPosition = new Position();
         Position endPosition = new Position();
         assertEquals(reportUtils.calculateFuel(startPosition, endPosition), 0.0, 0.01);
@@ -104,7 +104,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class),
-                mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
+                tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
 
@@ -159,7 +159,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, true, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class),
-                mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
+                tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
 
@@ -230,7 +230,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class),
-                mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
+                tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
 
@@ -281,7 +281,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class),
-                mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
+                tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
@@ -310,7 +310,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class),
-                mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
+                tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
@@ -339,7 +339,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class),
-                mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
+                tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
@@ -368,7 +368,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class),
-                mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
+                tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
 
@@ -393,7 +393,7 @@ public class ReportUtilsTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class),
-                mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
+                tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
 

@@ -20,7 +20,6 @@ import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
 import org.traccar.Main;
 import org.traccar.Protocol;
 import org.traccar.config.Config;
@@ -62,6 +61,8 @@ public class ConnectionManager {
 
     private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
     private final Map<Endpoint, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
+
+    private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
 
     private final Config config;
     private final CacheManager cacheManager;
@@ -256,7 +257,9 @@ public class ConnectionManager {
         }
 
         try {
-            Context.getDeviceManager().updateDeviceStatus(device);
+            storage.updateObject(device, new Request(
+                    new Columns.Include("lastUpdate"),
+                    new Condition.Equals("id", "id")));
         } catch (StorageException e) {
             LOGGER.warn("Update device status error", e);
         }
@@ -264,8 +267,16 @@ public class ConnectionManager {
         updateDevice(device);
     }
 
+    public DeviceState getDeviceState(long deviceId) {
+        return deviceStates.computeIfAbsent(deviceId, x -> new DeviceState());
+    }
+
+    public void setDeviceState(long deviceId, DeviceState deviceState) {
+        deviceStates.put(deviceId, deviceState);
+    }
+
     public Map<Event, Position> updateDeviceState(long deviceId) {
-        DeviceState deviceState = Context.getDeviceManager().getDeviceState(deviceId);
+        DeviceState deviceState = getDeviceState(deviceId);
         Map<Event, Position> result = new HashMap<>();
 
         Map<Event, Position> event = Main.getInjector()

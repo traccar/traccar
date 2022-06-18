@@ -17,12 +17,12 @@
 package org.traccar.handler.events;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.database.DeviceManager;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.common.TripsConfig;
+import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceState;
 import org.traccar.session.cache.CacheManager;
 
@@ -34,13 +34,14 @@ import java.util.Map;
 public class MotionEventHandler extends BaseEventHandler {
 
     private final CacheManager cacheManager;
-    private final DeviceManager deviceManager;
+    private final ConnectionManager connectionManager;
     private final TripsConfig tripsConfig;
 
     @Inject
-    public MotionEventHandler(CacheManager cacheManager, DeviceManager deviceManager, TripsConfig tripsConfig) {
+    public MotionEventHandler(
+            CacheManager cacheManager, ConnectionManager connectionManager, TripsConfig tripsConfig) {
         this.cacheManager = cacheManager;
-        this.deviceManager = deviceManager;
+        this.connectionManager = connectionManager;
         this.tripsConfig = tripsConfig;
     }
 
@@ -123,14 +124,14 @@ public class MotionEventHandler extends BaseEventHandler {
         }
 
         Map<Event, Position> result = null;
-        DeviceState deviceState = deviceManager.getDeviceState(deviceId);
+        DeviceState deviceState = connectionManager.getDeviceState(deviceId);
 
         if (deviceState.getMotionState() == null) {
             deviceState.setMotionState(position.getBoolean(Position.KEY_MOTION));
         } else {
             result = updateMotionState(deviceState, position);
         }
-        deviceManager.setDeviceState(deviceId, deviceState);
+        connectionManager.setDeviceState(deviceId, deviceState);
         return result;
     }
 

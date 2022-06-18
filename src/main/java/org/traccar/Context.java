@@ -51,9 +51,7 @@ public final class Context {
             throw e;
         }
 
-        deviceManager = new DeviceManager(
-                config,
-                Main.getInjector().getInstance(DataManager.class));
+        deviceManager = new DeviceManager(Main.getInjector().getInstance(DataManager.class));
 
     }
 

@@ -29,7 +29,6 @@ import org.jxls.util.TransformerFactory;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.DeviceManager;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.helper.UnitsConverter;
@@ -75,7 +74,6 @@ public class ReportUtils {
     private final Config config;
     private final Storage storage;
     private final PermissionsService permissionsService;
-    private final DeviceManager deviceManager;
     private final TripsConfig tripsConfig;
     private final VelocityEngine velocityEngine;
     private final Geocoder geocoder;
@@ -83,12 +81,10 @@ public class ReportUtils {
     @Inject
     public ReportUtils(
             Config config, Storage storage, PermissionsService permissionsService,
-            DeviceManager deviceManager, TripsConfig tripsConfig, VelocityEngine velocityEngine,
-            @Nullable Geocoder geocoder) {
+            TripsConfig tripsConfig, VelocityEngine velocityEngine, @Nullable Geocoder geocoder) {
         this.config = config;
         this.storage = storage;
         this.permissionsService = permissionsService;
-        this.deviceManager = deviceManager;
         this.tripsConfig = tripsConfig;
         this.velocityEngine = velocityEngine;
         this.geocoder = geocoder;
@@ -369,7 +365,7 @@ public class ReportUtils {
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (!positions.isEmpty()) {
             boolean trips = reportClass.equals(TripReportItem.class);
-            MotionEventHandler motionHandler = new MotionEventHandler(null, deviceManager, tripsConfig);
+            MotionEventHandler motionHandler = new MotionEventHandler(null, null, tripsConfig);
             DeviceState deviceState = new DeviceState();
             deviceState.setMotionState(isMoving(positions, 0, tripsConfig));
             int startEventIndex = trips == deviceState.getMotionState() ? 0 : -1;

@@ -16,7 +16,6 @@
 package org.traccar.database;
 
 import org.traccar.model.BaseModel;
-import org.traccar.model.Device;
 import org.traccar.model.Server;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -34,12 +33,6 @@ public class DataManager {
     @Inject
     public DataManager(Storage storage) {
         this.storage = storage;
-    }
-
-    public void updateDeviceStatus(Device device) throws StorageException {
-        storage.updateObject(device, new Request(
-                new Columns.Include("lastUpdate"),
-                new Condition.Equals("id", "id")));
     }
 
     public Server getServer() throws StorageException {

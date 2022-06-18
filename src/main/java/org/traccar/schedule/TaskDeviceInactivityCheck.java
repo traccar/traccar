@@ -15,11 +15,16 @@
  */
 package org.traccar.schedule;
 
-import org.traccar.database.DeviceManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.database.NotificationManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -29,18 +34,20 @@ import java.util.concurrent.TimeUnit;
 
 public class TaskDeviceInactivityCheck implements ScheduleTask {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskDeviceInactivityCheck.class);
+
     public static final String ATTRIBUTE_DEVICE_INACTIVITY_START = "deviceInactivityStart";
     public static final String ATTRIBUTE_DEVICE_INACTIVITY_PERIOD = "deviceInactivityPeriod";
     public static final String ATTRIBUTE_LAST_UPDATE = "lastUpdate";
 
     private static final long CHECK_PERIOD_MINUTES = 15;
 
-    private final DeviceManager deviceManager;
+    private final Storage storage;
     private final NotificationManager notificationManager;
 
     @Inject
-    public TaskDeviceInactivityCheck(DeviceManager deviceManager, NotificationManager notificationManager) {
-        this.deviceManager = deviceManager;
+    public TaskDeviceInactivityCheck(Storage storage, NotificationManager notificationManager) {
+        this.storage = storage;
         this.notificationManager = notificationManager;
     }
 
@@ -55,12 +62,17 @@ public class TaskDeviceInactivityCheck implements ScheduleTask {
         long checkPeriod = TimeUnit.MINUTES.toMillis(CHECK_PERIOD_MINUTES);
 
         Map<Event, Position> events = new HashMap<>();
-        for (Device device : deviceManager.getAllDevices()) {
-            if (device.getLastUpdate() != null && checkDevice(device, currentTime, checkPeriod)) {
-                Event event = new Event(Event.TYPE_DEVICE_INACTIVE, device.getId());
-                event.set(ATTRIBUTE_LAST_UPDATE, device.getLastUpdate().getTime());
-                events.put(event, null);
+
+        try {
+            for (Device device : storage.getObjects(Device.class, new Request(new Columns.All()))) {
+                if (device.getLastUpdate() != null && checkDevice(device, currentTime, checkPeriod)) {
+                    Event event = new Event(Event.TYPE_DEVICE_INACTIVE, device.getId());
+                    event.set(ATTRIBUTE_LAST_UPDATE, device.getLastUpdate().getTime());
+                    events.put(event, null);
+                }
             }
+        } catch (StorageException e) {
+            LOGGER.warn("Get devices error", e);
         }
 
         notificationManager.updateEvents(events);

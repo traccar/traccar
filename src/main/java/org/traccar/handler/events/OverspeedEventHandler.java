@@ -22,10 +22,10 @@ import java.util.Map;
 import io.netty.channel.ChannelHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.DeviceManager;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
+import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceState;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -39,7 +39,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
 
     public static final String ATTRIBUTE_SPEED = "speed";
 
-    private final DeviceManager deviceManager;
+    private final ConnectionManager connectionManager;
     private final CacheManager cacheManager;
 
     private final boolean notRepeat;
@@ -47,8 +47,8 @@ public class OverspeedEventHandler extends BaseEventHandler {
     private final boolean preferLowest;
 
     @Inject
-    public OverspeedEventHandler(Config config, DeviceManager deviceManager, CacheManager cacheManager) {
-        this.deviceManager = deviceManager;
+    public OverspeedEventHandler(Config config, ConnectionManager connectionManager, CacheManager cacheManager) {
+        this.connectionManager = connectionManager;
         this.cacheManager = cacheManager;
         notRepeat = config.getBoolean(Keys.EVENT_OVERSPEED_NOT_REPEAT);
         minimalDuration = config.getLong(Keys.EVENT_OVERSPEED_MINIMAL_DURATION) * 1000;
@@ -157,7 +157,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         }
 
         Map<Event, Position> result = null;
-        DeviceState deviceState = deviceManager.getDeviceState(deviceId);
+        DeviceState deviceState = connectionManager.getDeviceState(deviceId);
 
         if (deviceState.getOverspeedState() == null) {
             deviceState.setOverspeedState(position.getSpeed() > speedLimit);
@@ -166,7 +166,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
             result = updateOverspeedState(deviceState, position, speedLimit, overspeedGeofenceId);
         }
 
-        deviceManager.setDeviceState(deviceId, deviceState);
+        connectionManager.setDeviceState(deviceId, deviceState);
         return result;
     }
 

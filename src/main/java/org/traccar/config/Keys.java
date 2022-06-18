@@ -477,14 +477,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Minimum device refresh timeout in seconds. Default timeout is 5 minutes.
-     */
-    public static final ConfigKey<Long> DATABASE_REFRESH_DELAY = new LongConfigKey(
-            "database.refreshDelay",
-            List.of(KeyType.CONFIG),
-            300L);
-
-    /**
      * Store empty messages as positions. For example, heartbeats.
      */
     public static final ConfigKey<Boolean> DATABASE_SAVE_EMPTY = new BooleanConfigKey(
