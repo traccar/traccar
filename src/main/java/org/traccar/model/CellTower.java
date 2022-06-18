@@ -38,7 +38,7 @@ public class CellTower {
     }
 
     public static CellTower fromLacCid(Config config, int lac, long cid) {
-        return from(config.getInteger(Keys.GEOLOCATION_MCC), config.getInteger(Keys.GEOLOCATION_MCC), lac, cid);
+        return from(config.getInteger(Keys.GEOLOCATION_MCC), config.getInteger(Keys.GEOLOCATION_MNC), lac, cid);
     }
 
     public static CellTower fromCidLac(Config config, long cid, int lac) {

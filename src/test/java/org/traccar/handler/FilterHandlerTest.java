@@ -5,15 +5,16 @@ import org.junit.Test;
 import org.traccar.BaseTest;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.DataManager;
-import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import java.util.Date;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,9 +27,9 @@ public class FilterHandlerTest extends BaseTest {
     public void passingHandler() {
         var config = mock(Config.class);
         when(config.getBoolean(Keys.FILTER_ENABLE)).thenReturn(true);
-        var identityManager = mock(IdentityManager.class);
-        var dataManager = mock(DataManager.class);
-        passingHandler = new FilterHandler(config, identityManager, dataManager);
+        var cacheManager = mock(CacheManager.class);
+        when(cacheManager.getConfig()).thenReturn(config);
+        passingHandler = new FilterHandler(config, cacheManager, null);
     }
 
     @Before
@@ -45,11 +46,11 @@ public class FilterHandlerTest extends BaseTest {
         when(config.getInteger(Keys.FILTER_MAX_SPEED)).thenReturn(500);
         when(config.getLong(Keys.FILTER_SKIP_LIMIT)).thenReturn(10L);
         when(config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE)).thenReturn(true);
-        var identityManager = mock(IdentityManager.class);
-        when(identityManager.lookupAttributeString(0, "filter.skipAttributes", "", false, true)).thenReturn("alarm,result");
-        when(identityManager.getById(0)).thenReturn(mock(Device.class));
-        var dataManager = mock(DataManager.class);
-        filteringHandler = new FilterHandler(config, identityManager, dataManager);
+        when(config.getString(Keys.FILTER_SKIP_ATTRIBUTES.getKey())).thenReturn("alarm,result");
+        var cacheManager = mock(CacheManager.class);
+        when(cacheManager.getConfig()).thenReturn(config);
+        when(cacheManager.getObject(any(), anyLong())).thenReturn(mock(Device.class));
+        filteringHandler = new FilterHandler(config, cacheManager, null);
     }
 
     private Position createPosition(Date time, boolean valid, double speed) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
@@ -66,8 +68,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public String[] getFormat(long deviceId) {
-        return getIdentityManager().lookupAttributeString(
-                deviceId, getProtocolName() + ".format", format, false, false).split(",");
+        String value = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_FORMAT.withPrefix(getProtocolName()), deviceId);
+        return (value != null ? value : format).split(",");
     }
 
     public void setFormat(String format) {
@@ -75,8 +78,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public DateFormat getDateFormat(long deviceId) {
-        DateFormat dateFormat = new SimpleDateFormat(getIdentityManager().lookupAttributeString(
-                deviceId, getProtocolName() + ".dateFormat", this.dateFormat, false, false));
+        String value = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_DATE_FORMAT.withPrefix(getProtocolName()), deviceId);
+        DateFormat dateFormat = new SimpleDateFormat(value != null ? value : this.dateFormat);
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat;
     }

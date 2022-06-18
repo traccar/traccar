@@ -28,6 +28,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.NotificationManager;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -279,9 +280,9 @@ public class ConnectionManager {
             result.putAll(event);
         }
 
+        double speedLimit = AttributeUtil.lookup(cacheManager, Keys.EVENT_OVERSPEED_LIMIT, deviceId);
         event = Main.getInjector().getInstance(OverspeedEventHandler.class)
-                .updateOverspeedState(deviceState, Context.getDeviceManager().
-                        lookupAttributeDouble(deviceId, OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT, 0, true, false));
+                .updateOverspeedState(deviceState, speedLimit);
         if (event != null) {
             result.putAll(event);
         }

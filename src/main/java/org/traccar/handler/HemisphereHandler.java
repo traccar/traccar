@@ -39,7 +39,7 @@ public class HemisphereHandler extends BaseDataHandler {
                 latitudeFactor = -1;
             }
         }
-        String longitudeHemisphere = config.getString(Keys.LOCATION_LATITUDE_HEMISPHERE);
+        String longitudeHemisphere = config.getString(Keys.LOCATION_LONGITUDE_HEMISPHERE);
         if (longitudeHemisphere != null) {
             if (longitudeHemisphere.equalsIgnoreCase("E")) {
                 longitudeFactor = 1;

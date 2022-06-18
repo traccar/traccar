@@ -20,6 +20,8 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -71,8 +73,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public int getProtocolType(long deviceId) {
-        return getIdentityManager().lookupAttributeInteger(
-                deviceId, getProtocolName() + ".protocolType", protocolType, false, true);
+        Integer value = AttributeUtil.lookup(getCacheManager(), Keys.PROTOCOL_TYPE, deviceId);
+        return value != null ? value : protocolType;
     }
 
     public void setHbm(boolean hbm) {
@@ -80,8 +82,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public boolean isHbm(long deviceId) {
-        return getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".hbm", hbm, false, true);
+        Boolean value = AttributeUtil.lookup(getCacheManager(), Keys.PROTOCOL_HBM, deviceId);
+        return value != null ? value : hbm;
     }
 
     public void setIncludeAdc(boolean includeAdc) {
@@ -89,8 +91,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public boolean isIncludeAdc(long deviceId) {
-        return getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".includeAdc", includeAdc, false, true);
+        Boolean value = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_INCLUDE_ADC.withPrefix(getProtocolName()), deviceId);
+        return value != null ? value : includeAdc;
     }
 
     public void setIncludeRpm(boolean includeRpm) {
@@ -98,8 +101,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public boolean isIncludeRpm(long deviceId) {
-        return getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".includeRpm", includeRpm, false, true);
+        Boolean value = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_INCLUDE_RPM.withPrefix(getProtocolName()), deviceId);
+        return value != null ? value : includeRpm;
     }
 
     public void setIncludeTemp(boolean includeTemp) {
@@ -107,8 +111,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public boolean isIncludeTemp(long deviceId) {
-        return getIdentityManager().lookupAttributeBoolean(
-                deviceId, getProtocolName() + ".includeTemp", includeTemp, false, true);
+        Boolean value = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_INCLUDE_TEMPERATURE.withPrefix(getProtocolName()), deviceId);
+        return value != null ? value : includeTemp;
     }
 
     private Position decode9(

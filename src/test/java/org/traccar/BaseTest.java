@@ -9,6 +9,7 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.model.Device;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
+import org.traccar.session.cache.CacheManager;
 
 import java.net.SocketAddress;
 import java.util.HashSet;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -23,19 +25,18 @@ import static org.mockito.Mockito.when;
 public class BaseTest {
 
     protected <T extends BaseProtocolDecoder> T inject(T decoder) throws Exception {
-        decoder.setConfig(new Config());
+        var config = new Config();
+        decoder.setConfig(config);
         var device = mock(Device.class);
         when(device.getId()).thenReturn(1L);
         var identityManager = mock(IdentityManager.class);
         when(identityManager.getById(anyLong())).thenReturn(device);
         when(identityManager.getByUniqueId(any())).thenReturn(device);
-        when(identityManager.lookupAttributeBoolean(anyLong(), any(), anyBoolean(), anyBoolean(), anyBoolean()))
-                .thenAnswer(invocation -> invocation.getArguments()[2]);
-        when(identityManager.lookupAttributeString(anyLong(), any(), any(), anyBoolean(), anyBoolean()))
-                .thenAnswer(invocation -> invocation.getArguments()[2]);
-        when(identityManager.lookupAttributeInteger(anyLong(), any(), anyInt(), anyBoolean(), anyBoolean()))
-                .thenAnswer(invocation -> invocation.getArguments()[2]);
         decoder.setIdentityManager(identityManager);
+        var cacheManager = mock(CacheManager.class);
+        when(cacheManager.getConfig()).thenReturn(config);
+        when(cacheManager.getObject(eq(Device.class), anyLong())).thenReturn(device);
+        decoder.setCacheManager(cacheManager);
         var connectionManager = mock(ConnectionManager.class);
         var uniqueIdsProvided = new HashSet<Boolean>();
         when(connectionManager.getDeviceSession(any(), any(), any(), any())).thenAnswer(invocation -> {

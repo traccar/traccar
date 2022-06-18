@@ -73,34 +73,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         refreshLastPositions();
     }
 
-    @Override
-    public Device addUnknownDevice(String uniqueId) {
-        Device device = new Device();
-        device.setName(uniqueId);
-        device.setUniqueId(uniqueId);
-        device.setCategory(Context.getConfig().getString(Keys.DATABASE_REGISTER_UNKNOWN_DEFAULT_CATEGORY));
-
-        long defaultGroupId = Context.getConfig().getLong(Keys.DATABASE_REGISTER_UNKNOWN_DEFAULT_GROUP_ID);
-        if (defaultGroupId != 0) {
-            device.setGroupId(defaultGroupId);
-        }
-
-        try {
-            addItem(device);
-
-            LOGGER.info("Automatically registered device " + uniqueId);
-
-            if (defaultGroupId != 0) {
-                Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
-            }
-
-            return device;
-        } catch (StorageException e) {
-            LOGGER.warn("Automatic device registration error", e);
-            return null;
-        }
-    }
-
     public void updateDeviceCache(boolean force) {
         long lastUpdate = devicesLastUpdate.get();
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
@@ -314,35 +286,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             long deviceId, String attributeName, String defaultValue, boolean lookupServer, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
         return result != null ? (String) result : defaultValue;
-    }
-
-    @Override
-    public int lookupAttributeInteger(
-            long deviceId, String attributeName, int defaultValue, boolean lookupServer, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
-        if (result != null) {
-            return result instanceof String ? Integer.parseInt((String) result) : ((Number) result).intValue();
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public long lookupAttributeLong(
-            long deviceId, String attributeName, long defaultValue, boolean lookupServer, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
-        if (result != null) {
-            return result instanceof String ? Long.parseLong((String) result) : ((Number) result).longValue();
-        }
-        return defaultValue;
-    }
-
-    public double lookupAttributeDouble(
-            long deviceId, String attributeName, double defaultValue, boolean lookupServer, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
-        if (result != null) {
-            return result instanceof String ? Double.parseDouble((String) result) : ((Number) result).doubleValue();
-        }
-        return defaultValue;
     }
 
     private Object lookupAttribute(long deviceId, String attributeName, boolean lookupServer, boolean lookupConfig) {

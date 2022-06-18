@@ -20,8 +20,6 @@ import org.traccar.model.Position;
 
 public interface IdentityManager {
 
-    Device addUnknownDevice(String uniqueId);
-
     Device getById(long id);
 
     Device getByUniqueId(String uniqueId) throws Exception;
@@ -37,14 +35,5 @@ public interface IdentityManager {
 
     String lookupAttributeString(
             long deviceId, String attributeName, String defaultValue, boolean lookupServer, boolean lookupConfig);
-
-    int lookupAttributeInteger(
-            long deviceId, String attributeName, int defaultValue, boolean lookupServer, boolean lookupConfig);
-
-    long lookupAttributeLong(
-            long deviceId, String attributeName, long defaultValue, boolean lookupServer, boolean lookupConfig);
-
-    double lookupAttributeDouble(
-            long deviceId, String attributeName, double defaultValue, boolean lookupServer, boolean lookupConfig);
 
 }

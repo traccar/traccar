@@ -21,11 +21,18 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.DataManager;
-import org.traccar.database.IdentityManager;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Limit;
+import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import java.util.Date;
@@ -50,11 +57,11 @@ public class FilterHandler extends BaseDataHandler {
     private final long skipLimit;
     private final boolean skipAttributes;
 
-    private final IdentityManager identityManager;
-    private final DataManager dataManager;
+    private final CacheManager cacheManager;
+    private final Storage storage;
 
     @Inject
-    public FilterHandler(Config config, IdentityManager identityManager, DataManager dataManager) {
+    public FilterHandler(Config config, CacheManager cacheManager, Storage storage) {
         enabled = config.getBoolean(Keys.FILTER_ENABLE);
         filterInvalid = config.getBoolean(Keys.FILTER_INVALID);
         filterZero = config.getBoolean(Keys.FILTER_ZERO);
@@ -69,8 +76,18 @@ public class FilterHandler extends BaseDataHandler {
         filterRelative = config.getBoolean(Keys.FILTER_RELATIVE);
         skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
         skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
-        this.identityManager = identityManager;
-        this.dataManager = dataManager;
+        this.cacheManager = cacheManager;
+        this.storage = storage;
+    }
+
+    private Position getPrecedingPosition(long deviceId, Date date) throws StorageException {
+        return storage.getObject(Position.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("deviceId", "deviceId", deviceId),
+                        new Condition.Compare("fixTime", "<=", "time", date)),
+                new Order(true, "fixTime"),
+                new Limit(1)));
     }
 
     private boolean filterInvalid(Position position) {
@@ -144,9 +161,8 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean skipAttributes(Position position) {
         if (skipAttributes) {
-            String attributesString = identityManager.lookupAttributeString(
-                    position.getDeviceId(), "filter.skipAttributes", "", false, true);
-            for (String attribute : attributesString.split("[ ,]")) {
+            String string = AttributeUtil.lookup(cacheManager, Keys.FILTER_SKIP_ATTRIBUTES, position.getDeviceId());
+            for (String attribute : string.split("[ ,]")) {
                 if (position.getAttributes().containsKey(attribute)) {
                     return true;
                 }
@@ -183,13 +199,13 @@ public class FilterHandler extends BaseDataHandler {
             if (filterRelative) {
                 try {
                     Date newFixTime = position.getFixTime();
-                    preceding = dataManager.getPrecedingPosition(deviceId, newFixTime);
+                    preceding = getPrecedingPosition(deviceId, newFixTime);
                 } catch (StorageException e) {
                     LOGGER.warn("Error retrieving preceding position; fallbacking to last received position.", e);
-                    preceding = getLastReceivedPosition(deviceId);
+                    preceding = cacheManager.getPosition(deviceId);
                 }
             } else {
-                preceding = getLastReceivedPosition(deviceId);
+                preceding = cacheManager.getPosition(deviceId);
             }
             if (filterDuplicate(position, preceding) && !skipLimit(position, preceding) && !skipAttributes(position)) {
                 filterType.append("Duplicate ");
@@ -209,16 +225,12 @@ public class FilterHandler extends BaseDataHandler {
         }
 
         if (filterType.length() > 0) {
-            String uniqueId = identityManager.getById(deviceId).getUniqueId();
+            String uniqueId = cacheManager.getObject(Device.class, deviceId).getUniqueId();
             LOGGER.info("Position filtered by {}filters from device: {}", filterType, uniqueId);
             return true;
         }
 
         return false;
-    }
-
-    private Position getLastReceivedPosition(long deviceId) {
-        return identityManager.getLastPosition(deviceId);
     }
 
     @Override

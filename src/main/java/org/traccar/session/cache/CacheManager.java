@@ -74,6 +74,10 @@ public class CacheManager {
         invalidateUsers();
     }
 
+    public Config getConfig() {
+        return config;
+    }
+
     public <T extends BaseModel> T getObject(Class<T> clazz, long id) {
         try {
             lock.readLock().lock();

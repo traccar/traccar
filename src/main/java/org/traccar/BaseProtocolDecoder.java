@@ -23,11 +23,13 @@ import org.traccar.database.IdentityManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
@@ -46,6 +48,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private final Protocol protocol;
 
     private IdentityManager identityManager;
+    private CacheManager cacheManager;
     private ConnectionManager connectionManager;
     private StatisticsManager statisticsManager;
     private MediaManager mediaManager;
@@ -62,6 +65,15 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     @Inject
     public void setIdentityManager(IdentityManager identityManager) {
         this.identityManager = identityManager;
+    }
+
+    public CacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    @Inject
+    public void setCacheManager(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     @Inject
@@ -125,7 +137,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     protected TimeZone getTimeZone(long deviceId, String defaultTimeZone) {
         TimeZone result = TimeZone.getTimeZone(defaultTimeZone);
-        String timeZoneName = identityManager.lookupAttributeString(deviceId, "decoder.timezone", null, false, true);
+        String timeZoneName = AttributeUtil.lookup(cacheManager, Keys.DECODER_TIMEZONE, deviceId);
         if (timeZoneName != null) {
             result = TimeZone.getTimeZone(timeZoneName);
         }

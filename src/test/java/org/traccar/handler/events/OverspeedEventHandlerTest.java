@@ -61,7 +61,7 @@ public class OverspeedEventHandlerTest  extends BaseTest {
         Event event = events.keySet().iterator().next();
         assertEquals(Event.TYPE_DEVICE_OVERSPEED, event.getType());
         assertEquals(50, event.getDouble("speed"), 0.1);
-        assertEquals(40, event.getDouble(OverspeedEventHandler.ATTRIBUTE_SPEED_LIMIT), 0.1);
+        assertEquals(40, event.getDouble("speedLimit"), 0.1);
         assertEquals(geofenceId, event.getGeofenceId());
 
         assertEquals(notRepeat, deviceState.getOverspeedState());

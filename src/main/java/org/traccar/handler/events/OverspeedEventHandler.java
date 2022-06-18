@@ -23,6 +23,8 @@ import io.netty.channel.ChannelHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.DeviceManager;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.session.DeviceState;
 import org.traccar.model.Event;
@@ -36,7 +38,6 @@ import javax.inject.Inject;
 public class OverspeedEventHandler extends BaseEventHandler {
 
     public static final String ATTRIBUTE_SPEED = "speed";
-    public static final String ATTRIBUTE_SPEED_LIMIT = "speedLimit";
 
     private final DeviceManager deviceManager;
     private final CacheManager cacheManager;
@@ -58,7 +59,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         Position position = deviceState.getOverspeedPosition();
         Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position);
         event.set(ATTRIBUTE_SPEED, deviceState.getOverspeedPosition().getSpeed());
-        event.set(ATTRIBUTE_SPEED_LIMIT, speedLimit);
+        event.set(Position.KEY_SPEED_LIMIT, speedLimit);
         event.setGeofenceId(deviceState.getOverspeedGeofenceId());
         deviceState.setOverspeedState(notRepeat);
         deviceState.setOverspeedPosition(null);
@@ -115,15 +116,15 @@ public class OverspeedEventHandler extends BaseEventHandler {
     protected Map<Event, Position> analyzePosition(Position position) {
 
         long deviceId = position.getDeviceId();
-        Device device = deviceManager.getById(deviceId);
+        Device device = cacheManager.getObject(Device.class, position.getDeviceId());
         if (device == null) {
             return null;
         }
-        if (!deviceManager.isLatestPosition(position) || !position.getValid()) {
+        if (!PositionUtil.isLatest(cacheManager, position) || !position.getValid()) {
             return null;
         }
 
-        double speedLimit = deviceManager.lookupAttributeDouble(deviceId, ATTRIBUTE_SPEED_LIMIT, 0, true, false);
+        double speedLimit = AttributeUtil.lookup(cacheManager, Keys.EVENT_OVERSPEED_LIMIT, deviceId);
 
         double positionSpeedLimit = position.getDouble(Position.KEY_SPEED_LIMIT);
         if (positionSpeedLimit > 0) {
@@ -137,7 +138,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
             for (long geofenceId : device.getGeofenceIds()) {
                 Geofence geofence = cacheManager.getObject(Geofence.class, geofenceId);
                 if (geofence != null) {
-                    double currentSpeedLimit = geofence.getDouble(ATTRIBUTE_SPEED_LIMIT);
+                    double currentSpeedLimit = geofence.getDouble(Keys.EVENT_OVERSPEED_LIMIT.getKey());
                     if (currentSpeedLimit > 0 && geofenceSpeedLimit == 0
                             || preferLowest && currentSpeedLimit < geofenceSpeedLimit
                             || !preferLowest && currentSpeedLimit > geofenceSpeedLimit) {
