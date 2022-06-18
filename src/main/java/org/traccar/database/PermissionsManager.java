@@ -179,17 +179,6 @@ public class PermissionsManager {
         return user != null && user.getAdministrator();
     }
 
-    public boolean getUserManager(long userId) {
-        User user = getUser(userId);
-        return user != null && user.getUserLimit() != 0;
-    }
-
-    public void checkManager(long userId) throws SecurityException {
-        if (!getUserManager(userId)) {
-            throw new SecurityException("Manager access required");
-        }
-    }
-
     public void refreshPermissions(Permission permission) {
         if (permission.getOwnerClass().equals(User.class)) {
             if (permission.getPropertyClass().equals(Device.class)

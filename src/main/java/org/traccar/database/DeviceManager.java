@@ -15,6 +15,21 @@
  */
 package org.traccar.database;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.Context;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.model.Command;
+import org.traccar.model.Device;
+import org.traccar.model.Group;
+import org.traccar.model.Position;
+import org.traccar.model.Server;
+import org.traccar.session.ConnectionManager;
+import org.traccar.session.DeviceState;
+import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.StorageException;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -23,23 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Main;
-import org.traccar.config.Config;
-import org.traccar.Context;
-import org.traccar.config.Keys;
-import org.traccar.model.Command;
-import org.traccar.model.Device;
-import org.traccar.session.ConnectionManager;
-import org.traccar.session.DeviceState;
-import org.traccar.model.DeviceAccumulators;
-import org.traccar.model.Group;
-import org.traccar.model.Position;
-import org.traccar.model.Server;
-import org.traccar.session.cache.CacheManager;
-import org.traccar.storage.StorageException;
 
 public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager {
 
@@ -376,23 +374,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             }
         }
         return result;
-    }
-
-    public void resetDeviceAccumulators(DeviceAccumulators deviceAccumulators) throws StorageException {
-        Position last = positions.get(deviceAccumulators.getDeviceId());
-        if (last != null) {
-            if (deviceAccumulators.getTotalDistance() != null) {
-                last.getAttributes().put(Position.KEY_TOTAL_DISTANCE, deviceAccumulators.getTotalDistance());
-            }
-            if (deviceAccumulators.getHours() != null) {
-                last.getAttributes().put(Position.KEY_HOURS, deviceAccumulators.getHours());
-            }
-            getDataManager().addObject(last);
-            updateLatestPosition(last);
-            Main.getInjector().getInstance(CacheManager.class).updatePosition(last);
-        } else {
-            throw new IllegalArgumentException();
-        }
     }
 
     public DeviceState getDeviceState(long deviceId) {
