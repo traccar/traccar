@@ -245,6 +245,7 @@ public class CacheManager {
                 new Columns.All(), new Condition.Permission(User.class, Device.class, deviceId)));
         links.put(User.class, users.stream().map(BaseModel::getId).collect(Collectors.toList()));
         for (var user : users) {
+            addObject(deviceId, user);
             var notifications = storage.getObjects(Notification.class, new Request(
                     new Columns.All(), new Condition.Permission(User.class, user.getId(), Notification.class)));
             notifications.stream()

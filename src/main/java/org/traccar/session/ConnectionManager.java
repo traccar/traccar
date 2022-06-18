@@ -128,7 +128,7 @@ public class ConnectionManager {
             if (oldSession != null) {
                 Endpoint oldEndpoint = new Endpoint(oldSession.getChannel(), oldSession.getRemoteAddress());
                 Map<String, DeviceSession> oldEndpointSessions = sessionsByEndpoint.get(oldEndpoint);
-                if (oldEndpointSessions.size() > 1) {
+                if (oldEndpointSessions != null && oldEndpointSessions.size() > 1) {
                     oldEndpointSessions.remove(device.getUniqueId());
                 } else {
                     sessionsByEndpoint.remove(oldEndpoint);
