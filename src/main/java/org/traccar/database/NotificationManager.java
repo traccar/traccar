@@ -118,8 +118,17 @@ public class NotificationManager {
     }
 
     public void updateEvents(Map<Event, Position> events) {
-        for (Entry<Event, Position> event : events.entrySet()) {
-            updateEvent(event.getKey(), event.getValue());
+        for (Entry<Event, Position> entry : events.entrySet()) {
+            Event event = entry.getKey();
+            Position position = entry.getValue();
+            try {
+                cacheManager.addDevice(event.getDeviceId());
+                updateEvent(event, position);
+            } catch (StorageException e) {
+                throw new RuntimeException(e);
+            } finally {
+                cacheManager.removeDevice(event.getDeviceId());
+            }
         }
     }
 }

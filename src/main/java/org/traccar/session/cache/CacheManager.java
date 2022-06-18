@@ -60,6 +60,7 @@ public class CacheManager {
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     private final Map<CacheKey, CacheValue> deviceCache = new HashMap<>();
+    private final Map<Long, Integer> deviceReferences = new HashMap<>();
     private final Map<Long, Map<Class<? extends BaseModel>, List<Long>>> deviceLinks = new HashMap<>();
     private final Map<Long, Position> devicePositions = new HashMap<>();
 
@@ -136,9 +137,14 @@ public class CacheManager {
     public void addDevice(long deviceId) throws StorageException {
         try {
             lock.writeLock().lock();
-            if (!deviceLinks.containsKey(deviceId)) {
+            Integer references = deviceReferences.get(deviceId);
+            if (references != null) {
+                references += 1;
+            } else {
                 unsafeAddDevice(deviceId);
+                references = 1;
             }
+            deviceReferences.put(deviceId, references);
         } finally {
             lock.writeLock().unlock();
         }
@@ -147,8 +153,15 @@ public class CacheManager {
     public void removeDevice(long deviceId) {
         try {
             lock.writeLock().lock();
-            if (deviceLinks.containsKey(deviceId)) {
-                unsafeRemoveDevice(deviceId);
+            Integer references = deviceReferences.get(deviceId);
+            if (references != null) {
+                references -= 1;
+                if (references <= 0) {
+                    unsafeRemoveDevice(deviceId);
+                    deviceReferences.remove(deviceId);
+                } else {
+                    deviceReferences.put(deviceId, references);
+                }
             }
         } finally {
             lock.writeLock().unlock();

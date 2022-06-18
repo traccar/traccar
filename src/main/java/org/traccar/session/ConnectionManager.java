@@ -144,7 +144,10 @@ public class ConnectionManager {
             endpointSessions.put(device.getUniqueId(), deviceSession);
             sessionsByEndpoint.put(endpoint, endpointSessions);
             sessionsByDeviceId.put(device.getId(), deviceSession);
-            cacheManager.addDevice(device.getId());
+
+            if (oldSession == null) {
+                cacheManager.addDevice(device.getId());
+            }
 
             return deviceSession;
         } else {
@@ -190,8 +193,8 @@ public class ConnectionManager {
     public void deviceUnknown(long deviceId) {
         updateDevice(deviceId, Device.STATUS_UNKNOWN, null);
         DeviceSession deviceSession = sessionsByDeviceId.remove(deviceId);
-        cacheManager.removeDevice(deviceId);
         if (deviceSession != null) {
+            cacheManager.removeDevice(deviceId);
             Endpoint endpoint = new Endpoint(deviceSession.getChannel(), deviceSession.getRemoteAddress());
             sessionsByEndpoint.computeIfPresent(endpoint, (e, sessions) -> {
                 sessions.remove(deviceSession.getUniqueId());
