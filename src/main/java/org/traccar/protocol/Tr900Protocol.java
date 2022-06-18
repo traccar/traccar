@@ -23,10 +23,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class Tr900Protocol extends BaseProtocol {
 
-    public Tr900Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public Tr900Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
@@ -35,7 +38,7 @@ public class Tr900Protocol extends BaseProtocol {
                 pipeline.addLast(new Tr900ProtocolDecoder(Tr900Protocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());

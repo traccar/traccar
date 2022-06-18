@@ -22,16 +22,19 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class Gl200Protocol extends BaseProtocol {
 
-    public Gl200Protocol() {
+    @Inject
+    public Gl200Protocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_IDENTIFICATION,
                 Command.TYPE_REBOOT_DEVICE);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Gl200FrameDecoder());
@@ -40,7 +43,7 @@ public class Gl200Protocol extends BaseProtocol {
                 pipeline.addLast(new Gl200ProtocolDecoder(Gl200Protocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());

@@ -24,9 +24,12 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class MiniFinderProtocol extends BaseProtocol {
 
-    public MiniFinderProtocol() {
+    @Inject
+    public MiniFinderProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_VOICE_MONITORING,
@@ -39,7 +42,7 @@ public class MiniFinderProtocol extends BaseProtocol {
                 Command.TYPE_MODE_DEEP_SLEEP,
                 Command.TYPE_SOS_NUMBER,
                 Command.TYPE_SET_INDICATOR);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ";\0", ";"));

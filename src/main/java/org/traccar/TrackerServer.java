@@ -55,11 +55,7 @@ public abstract class TrackerServer implements TrackerConnector {
         return secure;
     }
 
-    public TrackerServer(boolean datagram, String protocol) {
-        this.datagram = datagram;
-
-        Config config = Main.getInjector().getInstance(Config.class);
-
+    public TrackerServer(Config config, String protocol, boolean datagram) {
         secure = config.getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
         address = config.getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
         port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
@@ -83,20 +79,17 @@ public abstract class TrackerServer implements TrackerConnector {
             }
         };
 
+        this.datagram = datagram;
         if (datagram) {
-
             bootstrap = new Bootstrap()
                     .group(EventLoopGroupFactory.getWorkerGroup())
                     .channel(NioDatagramChannel.class)
                     .handler(pipelineFactory);
-
         } else {
-
             bootstrap = new ServerBootstrap()
                     .group(EventLoopGroupFactory.getBossGroup(), EventLoopGroupFactory.getWorkerGroup())
                     .channel(NioServerSocketChannel.class)
                     .childHandler(pipelineFactory);
-
         }
     }
 

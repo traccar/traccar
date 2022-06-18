@@ -22,10 +22,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class B2316Protocol extends BaseProtocol {
 
-    public B2316Protocol() {
-        addServer(new TrackerServer(true, getName()) {
+    @Inject
+    public B2316Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());

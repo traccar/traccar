@@ -22,9 +22,12 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class KhdProtocol extends BaseProtocol {
 
-    public KhdProtocol() {
+    @Inject
+    public KhdProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
@@ -34,7 +37,7 @@ public class KhdProtocol extends BaseProtocol {
                 Command.TYPE_SET_ODOMETER,
                 Command.TYPE_POSITION_SINGLE);
 
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(512, 3, 2));

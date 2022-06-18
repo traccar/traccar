@@ -22,9 +22,12 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class WondexProtocol extends BaseProtocol {
 
-    public WondexProtocol() {
+    @Inject
+    public WondexProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_GET_DEVICE_STATUS,
                 Command.TYPE_GET_MODEM_STATUS,
@@ -40,7 +43,7 @@ public class WondexProtocol extends BaseProtocol {
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_GET_VERSION,
                 Command.TYPE_IDENTIFICATION);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new WondexFrameDecoder());
@@ -49,7 +52,7 @@ public class WondexProtocol extends BaseProtocol {
                 pipeline.addLast(new WondexProtocolDecoder(WondexProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());

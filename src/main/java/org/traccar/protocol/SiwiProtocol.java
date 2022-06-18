@@ -22,10 +22,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class SiwiProtocol extends BaseProtocol {
 
-    public SiwiProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public SiwiProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));

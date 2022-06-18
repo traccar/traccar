@@ -46,8 +46,7 @@ public class ServerManager implements LifecycleObject {
             Injector injector, Config config) throws IOException, URISyntaxException, ReflectiveOperationException {
         for (Class<?> protocolClass : ClassScanner.findSubclasses(BaseProtocol.class, "org.traccar.protocol")) {
             if (config.hasKey(Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(protocolClass)))) {
-                BaseProtocol protocol = (BaseProtocol) protocolClass.getDeclaredConstructor().newInstance();
-                injector.injectMembers(protocol);
+                BaseProtocol protocol = (BaseProtocol) injector.getInstance(protocolClass);
                 connectorList.addAll(protocol.getConnectorList());
                 protocolList.put(protocol.getName(), protocol);
             }

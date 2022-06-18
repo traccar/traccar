@@ -23,10 +23,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class ArknavX8Protocol extends BaseProtocol {
 
-    public ArknavX8Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public ArknavX8Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ';'));

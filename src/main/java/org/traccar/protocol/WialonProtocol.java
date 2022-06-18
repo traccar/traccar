@@ -27,15 +27,18 @@ import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
 
+import javax.inject.Inject;
+
 public class WialonProtocol extends BaseProtocol {
 
-    public WialonProtocol() {
+    @Inject
+    public WialonProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_REBOOT_DEVICE,
                 Command.TYPE_SEND_USSD,
                 Command.TYPE_IDENTIFICATION,
                 Command.TYPE_OUTPUT_CONTROL);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(4 * 1024));
@@ -51,7 +54,7 @@ public class WialonProtocol extends BaseProtocol {
                 pipeline.addLast(new WialonProtocolDecoder(WialonProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(4 * 1024));

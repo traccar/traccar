@@ -22,14 +22,17 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class EnforaProtocol extends BaseProtocol {
 
-    public EnforaProtocol() {
+    @Inject
+    public EnforaProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, -2, 2));
@@ -37,7 +40,7 @@ public class EnforaProtocol extends BaseProtocol {
                 pipeline.addLast(new EnforaProtocolDecoder(EnforaProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new EnforaProtocolEncoder(EnforaProtocol.this));

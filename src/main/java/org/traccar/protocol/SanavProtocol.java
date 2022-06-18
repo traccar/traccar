@@ -22,10 +22,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class SanavProtocol extends BaseProtocol {
 
-    public SanavProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public SanavProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringDecoder());
@@ -33,7 +36,7 @@ public class SanavProtocol extends BaseProtocol {
                 pipeline.addLast(new SanavProtocolDecoder(SanavProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringDecoder());

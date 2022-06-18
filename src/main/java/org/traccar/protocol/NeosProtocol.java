@@ -22,10 +22,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class NeosProtocol extends BaseProtocol {
 
-    public NeosProtocol() {
-        addServer(new TrackerServer(true, getName()) {
+    @Inject
+    public NeosProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());

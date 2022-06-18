@@ -1,6 +1,6 @@
 /*
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Nyash (nyashh@gmail.com)
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class JpKorjarProtocol extends BaseProtocol {
 
-    public JpKorjarProtocol() {
-        addServer(new TrackerServer(false, this.getName()) {
+    @Inject
+    public JpKorjarProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new JpKorjarFrameDecoder());

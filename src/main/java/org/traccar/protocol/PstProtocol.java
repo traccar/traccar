@@ -21,20 +21,23 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class PstProtocol extends BaseProtocol {
 
-    public PstProtocol() {
+    @Inject
+    public PstProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new PstProtocolEncoder(PstProtocol.this));
                 pipeline.addLast(new PstProtocolDecoder(PstProtocol.this));
             }
         });
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new PstFrameEncoder());

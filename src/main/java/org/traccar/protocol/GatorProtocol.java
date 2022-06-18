@@ -21,17 +21,20 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class GatorProtocol extends BaseProtocol {
 
-    public GatorProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public GatorProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2));
                 pipeline.addLast(new GatorProtocolDecoder(GatorProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new GatorProtocolDecoder(GatorProtocol.this));

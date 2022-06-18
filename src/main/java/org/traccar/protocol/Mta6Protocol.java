@@ -24,10 +24,13 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
+import javax.inject.Inject;
+
 public class Mta6Protocol extends BaseProtocol {
 
-    public Mta6Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public Mta6Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new HttpResponseEncoder());

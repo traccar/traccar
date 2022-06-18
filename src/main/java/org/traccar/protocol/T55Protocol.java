@@ -23,10 +23,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class T55Protocol extends BaseProtocol {
 
-    public T55Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public T55Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));
@@ -35,7 +38,7 @@ public class T55Protocol extends BaseProtocol {
                 pipeline.addLast(new T55ProtocolDecoder(T55Protocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringDecoder());

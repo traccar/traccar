@@ -21,10 +21,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class Tk102Protocol extends BaseProtocol {
 
-    public Tk102Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public Tk102Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 1 + 1 + 10, 1, 1, 0));

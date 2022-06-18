@@ -24,12 +24,15 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class XirgoProtocol extends BaseProtocol {
 
-    public XirgoProtocol() {
+    @Inject
+    public XirgoProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_OUTPUT_CONTROL);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "##"));
@@ -39,7 +42,7 @@ public class XirgoProtocol extends BaseProtocol {
                 pipeline.addLast(new XirgoProtocolDecoder(XirgoProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());

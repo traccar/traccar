@@ -26,16 +26,19 @@ import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
 
+import javax.inject.Inject;
+
 public class Xrb28Protocol extends BaseProtocol {
 
-    public Xrb28Protocol() {
+    @Inject
+    public Xrb28Protocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(1024));

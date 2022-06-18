@@ -23,10 +23,13 @@ import org.traccar.config.Config;
 
 import java.nio.ByteOrder;
 
+import javax.inject.Inject;
+
 public class Minifinder2Protocol extends BaseProtocol {
 
-    public Minifinder2Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public Minifinder2Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1200, 2, 2, 4, 0, true));

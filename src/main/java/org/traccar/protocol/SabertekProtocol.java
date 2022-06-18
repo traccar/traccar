@@ -21,10 +21,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class SabertekProtocol extends BaseProtocol {
 
-    public SabertekProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public SabertekProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new SabertekFrameDecoder());

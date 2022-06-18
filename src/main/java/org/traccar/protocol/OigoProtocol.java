@@ -20,10 +20,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class OigoProtocol extends BaseProtocol {
 
-    public OigoProtocol() {
-        addServer(new TrackerServer(true, getName()) {
+    @Inject
+    public OigoProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new OigoProtocolDecoder(OigoProtocol.this));

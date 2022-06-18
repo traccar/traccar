@@ -22,13 +22,16 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class AdmProtocol extends BaseProtocol {
 
-    public AdmProtocol() {
+    @Inject
+    public AdmProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_GET_DEVICE_STATUS,
                 Command.TYPE_CUSTOM);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new AdmFrameDecoder());

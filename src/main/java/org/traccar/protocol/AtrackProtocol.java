@@ -21,12 +21,15 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class AtrackProtocol extends BaseProtocol {
 
-    public AtrackProtocol() {
+    @Inject
+    public AtrackProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new AtrackFrameDecoder());
@@ -34,7 +37,7 @@ public class AtrackProtocol extends BaseProtocol {
                 pipeline.addLast(new AtrackProtocolDecoder(AtrackProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new AtrackProtocolEncoder(AtrackProtocol.this));

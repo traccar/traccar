@@ -22,9 +22,12 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class RuptelaProtocol extends BaseProtocol {
 
-    public RuptelaProtocol() {
+    @Inject
+    public RuptelaProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_ENGINE_STOP,
@@ -36,7 +39,7 @@ public class RuptelaProtocol extends BaseProtocol {
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_SET_CONNECTION,
                 Command.TYPE_SET_ODOMETER);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));

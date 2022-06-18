@@ -23,10 +23,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class GoSafeProtocol extends BaseProtocol {
 
-    public GoSafeProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public GoSafeProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '#'));
@@ -35,7 +38,7 @@ public class GoSafeProtocol extends BaseProtocol {
                 pipeline.addLast(new GoSafeProtocolDecoder(GoSafeProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());

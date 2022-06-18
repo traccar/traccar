@@ -23,10 +23,13 @@ import org.traccar.config.Config;
 
 import java.nio.ByteOrder;
 
+import javax.inject.Inject;
+
 public class NyitechProtocol extends BaseProtocol {
 
-    public NyitechProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public NyitechProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 2, -4, 0, true));

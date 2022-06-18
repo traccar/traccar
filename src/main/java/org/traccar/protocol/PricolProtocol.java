@@ -21,17 +21,20 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class PricolProtocol extends BaseProtocol {
 
-    public PricolProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public PricolProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new FixedLengthFrameDecoder(64));
                 pipeline.addLast(new PricolProtocolDecoder(PricolProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new PricolProtocolDecoder(PricolProtocol.this));

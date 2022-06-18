@@ -23,10 +23,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class TopflytechProtocol extends BaseProtocol {
 
-    public TopflytechProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public TopflytechProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ')'));

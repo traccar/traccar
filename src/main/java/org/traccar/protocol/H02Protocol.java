@@ -23,9 +23,12 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class H02Protocol extends BaseProtocol {
 
-    public H02Protocol() {
+    @Inject
+    public H02Protocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM,
@@ -33,7 +36,7 @@ public class H02Protocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_POSITION_PERIODIC
         );
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 int messageLength = config.getInteger(Keys.PROTOCOL_MESSAGE_LENGTH.withPrefix(getName()));
@@ -43,7 +46,7 @@ public class H02Protocol extends BaseProtocol {
                 pipeline.addLast(new H02ProtocolDecoder(H02Protocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());

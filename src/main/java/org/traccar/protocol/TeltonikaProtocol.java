@@ -21,12 +21,15 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class TeltonikaProtocol extends BaseProtocol {
 
-    public TeltonikaProtocol() {
+    @Inject
+    public TeltonikaProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new TeltonikaFrameDecoder());
@@ -34,7 +37,7 @@ public class TeltonikaProtocol extends BaseProtocol {
                 pipeline.addLast(new TeltonikaProtocolDecoder(TeltonikaProtocol.this, false));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new TeltonikaProtocolEncoder(TeltonikaProtocol.this));

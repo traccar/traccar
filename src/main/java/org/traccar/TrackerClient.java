@@ -53,9 +53,7 @@ public abstract class TrackerClient implements TrackerConnector {
         return secure;
     }
 
-    public TrackerClient(String protocol) {
-        Config config = Main.getInjector().getInstance(Config.class);
-
+    public TrackerClient(Config config, String protocol) {
         secure = config.getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
         interval = config.getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol));
         address = config.getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));

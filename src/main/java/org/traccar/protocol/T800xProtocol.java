@@ -22,12 +22,15 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class T800xProtocol extends BaseProtocol {
 
-    public T800xProtocol() {
+    @Inject
+    public T800xProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2, -5, 0));
@@ -35,7 +38,7 @@ public class T800xProtocol extends BaseProtocol {
                 pipeline.addLast(new T800xProtocolDecoder(T800xProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new T800xProtocolEncoder(T800xProtocol.this));

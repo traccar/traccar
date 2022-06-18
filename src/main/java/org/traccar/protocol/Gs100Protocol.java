@@ -20,10 +20,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class Gs100Protocol extends BaseProtocol {
 
-    public Gs100Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public Gs100Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Gs100ProtocolDecoder(Gs100Protocol.this));

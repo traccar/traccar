@@ -24,10 +24,13 @@ import org.traccar.config.Config;
 
 import java.nio.charset.StandardCharsets;
 
+import javax.inject.Inject;
+
 public class FlexApiProtocol extends BaseProtocol {
 
-    public FlexApiProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public FlexApiProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(5120));

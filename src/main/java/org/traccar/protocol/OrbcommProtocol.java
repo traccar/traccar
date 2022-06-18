@@ -23,10 +23,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerClient;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class OrbcommProtocol extends BaseProtocol {
 
-    public OrbcommProtocol() {
-        addClient(new TrackerClient(getName()) {
+    @Inject
+    public OrbcommProtocol(Config config) {
+        addClient(new TrackerClient(config, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new HttpRequestEncoder());

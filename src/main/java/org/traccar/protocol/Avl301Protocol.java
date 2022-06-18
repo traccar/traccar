@@ -21,10 +21,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class Avl301Protocol extends BaseProtocol {
 
-    public Avl301Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public Avl301Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(256, 2, 1, -3, 0));

@@ -22,9 +22,12 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
+import javax.inject.Inject;
+
 public class SuntechProtocol extends BaseProtocol {
 
-    public SuntechProtocol() {
+    @Inject
+    public SuntechProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_REBOOT_DEVICE,
@@ -33,7 +36,7 @@ public class SuntechProtocol extends BaseProtocol {
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_ALARM_ARM,
                 Command.TYPE_ALARM_DISARM);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new SuntechFrameDecoder());

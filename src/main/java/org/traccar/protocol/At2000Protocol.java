@@ -20,10 +20,13 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import javax.inject.Inject;
+
 public class At2000Protocol extends BaseProtocol {
 
-    public At2000Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public At2000Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new At2000FrameDecoder());
