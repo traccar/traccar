@@ -31,7 +31,7 @@ public class WebDataHandlerTest extends ProtocolTest {
         var cacheManager = mock(CacheManager.class);
         when(cacheManager.getObject(eq(Device.class), anyLong())).thenReturn(device);
 
-        WebDataHandler handler = new WebDataHandler(config, cacheManager, null, null);
+        WebDataHandler handler = new WebDataHandler(config, cacheManager, null, null, null);
 
         assertEquals(
                 "http://localhost/?fixTime=1451610123000&gprmc=$GPRMC,010203.000,A,2000.0000,N,03000.0000,E,0.00,0.00,010116,,*05&name=test",
