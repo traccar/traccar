@@ -65,7 +65,7 @@ public class NotificationManager {
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
     }
 
-    public void updateEvent(Event event, Position position) {
+    private void updateEvent(Event event, Position position) {
         try {
             event.setId(storage.addObject(event, new Request(new Columns.Exclude("id"))));
         } catch (StorageException error) {
