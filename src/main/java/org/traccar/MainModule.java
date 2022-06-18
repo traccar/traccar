@@ -22,7 +22,6 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
-import com.google.inject.name.Named;
 import com.google.inject.name.Names;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
@@ -61,7 +60,6 @@ import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
-import org.traccar.helper.Log;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.notification.EventForwarder;
 import org.traccar.session.cache.CacheManager;
@@ -95,6 +93,7 @@ public class MainModule extends AbstractModule {
     @Override
     protected void configure() {
         bindConstant().annotatedWith(Names.named("configFile")).to(configFile);
+        bind(Config.class).asEagerSingleton();
         bind(Storage.class).to(DatabaseStorage.class);
         bind(Timer.class).to(HashedWheelTimer.class).in(Scopes.SINGLETON);
     }
@@ -109,19 +108,6 @@ public class MainModule extends AbstractModule {
         objectMapper.setConfig(objectMapper
                 .getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
         return objectMapper;
-    }
-
-    @Singleton
-    @Provides
-    public static Config provideConfig(@Named("configFile") String configFile) throws Exception {
-        try {
-            Config config = new Config(configFile);
-            Log.setupLogger(config);
-            return config;
-        } catch (Exception e) {
-            Log.setupDefaultLogger();
-            throw e;
-        }
     }
 
     @Provides

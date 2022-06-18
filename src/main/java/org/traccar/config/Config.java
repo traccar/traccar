@@ -16,13 +16,18 @@
 package org.traccar.config;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.name.Named;
+import org.traccar.helper.Log;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.InvalidPropertiesFormatException;
 import java.util.Properties;
 
+@Singleton
 public class Config {
 
     private final Properties properties = new Properties();
@@ -32,7 +37,8 @@ public class Config {
     public Config() {
     }
 
-    public Config(String file) throws IOException {
+    @Inject
+    public Config(@Named("configFile") String file) throws IOException {
         try {
             Properties mainProperties = new Properties();
             try (InputStream inputStream = new FileInputStream(file)) {
@@ -50,8 +56,14 @@ public class Config {
 
             useEnvironmentVariables = Boolean.parseBoolean(System.getenv("CONFIG_USE_ENVIRONMENT_VARIABLES"))
                     || Boolean.parseBoolean(properties.getProperty("config.useEnvironmentVariables"));
+
+            Log.setupLogger(this);
         } catch (InvalidPropertiesFormatException e) {
+            Log.setupDefaultLogger();
             throw new RuntimeException("Configuration file is not a valid XML document", e);
+        } catch (Exception e) {
+            Log.setupDefaultLogger();
+            throw e;
         }
     }
 
