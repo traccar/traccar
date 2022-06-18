@@ -27,7 +27,7 @@ public final class Keys {
      */
     public static final ConfigSuffix<String> PROTOCOL_ADDRESS = new ConfigSuffix<>(
             ".address",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Port number for the protocol. Most protocols use TCP on the transport layer. Some protocols use UDP. Some
@@ -35,7 +35,7 @@ public final class Keys {
      */
     public static final ConfigSuffix<Integer> PROTOCOL_PORT = new ConfigSuffix<>(
             ".port",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * List of devices for polling protocols. List should contain unique ids separated by commas. Used only for polling
@@ -43,21 +43,21 @@ public final class Keys {
      */
     public static final ConfigSuffix<String> PROTOCOL_DEVICES = new ConfigSuffix<>(
             ".devices",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Polling interval in seconds. Used only for polling protocols.
      */
     public static final ConfigSuffix<Long> PROTOCOL_INTERVAL = new ConfigSuffix<>(
             ".interval",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enable SSL support for the protocol. Not all protocols support this.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_SSL = new ConfigSuffix<>(
             ".ssl",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Connection timeout value in seconds. Because sometimes there is no way to detect lost TCP connection old
@@ -67,28 +67,28 @@ public final class Keys {
      */
     public static final ConfigSuffix<Integer> PROTOCOL_TIMEOUT = new ConfigSuffix<>(
             ".timeout",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Device password. Commonly used in some protocol for sending commands.
      */
     public static final ConfigSuffix<String> PROTOCOL_DEVICE_PASSWORD = new ConfigSuffix<>(
             ".devicePassword",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Default protocol mask to use. Currently used only by Skypatrol protocol.
      */
     public static final ConfigSuffix<Integer> PROTOCOL_MASK = new ConfigSuffix<>(
             ".mask",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Custom message length. Currently used only by H2 protocol for specifying binary message length.
      */
     public static final ConfigSuffix<Integer> PROTOCOL_MESSAGE_LENGTH = new ConfigSuffix<>(
             ".messageLength",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enable extended functionality for the protocol. The reason it's disabled by default is that not all devices
@@ -96,28 +96,28 @@ public final class Keys {
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_EXTENDED = new ConfigSuffix<>(
             ".extended",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Decode string as UTF8 instead of ASCII. Only applicable for some protocols.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_UTF8 = new ConfigSuffix<>(
             ".utf8",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enable CAN decoding for the protocol. Similar to 'extended' configuration, it's not supported for some devices.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_CAN = new ConfigSuffix<>(
             ".can",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Indicates whether server acknowledgement is required. Only applicable for some protocols.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_ACK = new ConfigSuffix<>(
             ".ack",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Ignore device reported fix time. Useful in case some devices report invalid time. Currently only available for
@@ -125,91 +125,91 @@ public final class Keys {
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_IGNORE_FIX_TIME = new ConfigSuffix<>(
             ".ignoreFixTime",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Decode additional TK103 attributes. Not supported for some devices.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_DECODE_LOW = new ConfigSuffix<>(
             ".decodeLow",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Use long date format for Atrack protocol.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_LONG_DATE = new ConfigSuffix<>(
             ".longDate",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Use decimal fuel value format for Atrack protocol.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_DECIMAL_FUEL = new ConfigSuffix<>(
             ".decimalFuel",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Indicates additional custom attributes for Atrack protocol.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_CUSTOM = new ConfigSuffix<>(
             ".custom",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Custom format string for Atrack protocol.
      */
     public static final ConfigSuffix<String> PROTOCOL_FORM = new ConfigSuffix<>(
             ".form",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Protocol configuration. Required for some devices for decoding incoming data.
      */
     public static final ConfigSuffix<String> PROTOCOL_CONFIG = new ConfigSuffix<>(
             ".config",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Alarm mapping for Atrack protocol.
      */
     public static final ConfigSuffix<String> PROTOCOL_ALARM_MAP = new ConfigSuffix<>(
             ".alarmMap",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Indicates whether TAIP protocol should have prefixes for messages.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_PREFIX = new ConfigSuffix<>(
             ".prefix",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Some devices require server address confirmation. Use this parameter to configure correct public address.
      */
     public static final ConfigSuffix<String> PROTOCOL_SERVER = new ConfigSuffix<>(
             ".server",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * ORBCOMM API access id.
      */
     public static final ConfigKey<String> ORBCOMM_ACCESS_ID = new ConfigKey<>(
             "orbcomm.accessId",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * ORBCOMM API password.
      */
     public static final ConfigKey<String> ORBCOMM_PASSWORD = new ConfigKey<>(
             "orbcomm.password",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Server wide connection timeout value in seconds. See protocol timeout for more information.
      */
     public static final ConfigKey<Integer> SERVER_TIMEOUT = new ConfigKey<>(
             "server.timeout",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Address for uploading aggregated anonymous usage statistics. Uploaded information is the same you can see on the
@@ -217,63 +217,63 @@ public final class Keys {
      */
     public static final ConfigKey<String> SERVER_STATISTICS = new ConfigKey<>(
             "server.statistics",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * If true, the event is generated once at the beginning of overspeeding period.
      */
     public static final ConfigKey<Boolean> EVENT_OVERSPEED_NOT_REPEAT = new ConfigKey<>(
             "event.overspeed.notRepeat",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Minimal over speed duration to trigger the event. Value in seconds.
      */
     public static final ConfigKey<Long> EVENT_OVERSPEED_MINIMAL_DURATION = new ConfigKey<>(
             "event.overspeed.minimalDuration",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Relevant only for geofence speed limits. Use the lowest speed limit from all geofences.
      */
     public static final ConfigKey<Boolean> EVENT_OVERSPEED_PREFER_LOWEST = new ConfigKey<>(
             "event.overspeed.preferLowest",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Driver behavior acceleration threshold. Value is in meter per second squared.
      */
     public static final ConfigKey<Double> EVENT_BEHAVIOR_ACCELERATION_THRESHOLD = new ConfigKey<>(
             "event.behavior.accelerationThreshold",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Driver behavior braking threshold. Value is in meter per second squared.
      */
     public static final ConfigKey<Double> EVENT_BEHAVIOR_BRAKING_THRESHOLD = new ConfigKey<>(
             "event.behavior.brakingThreshold",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Do not generate alert event if same alert was present in last known location.
      */
     public static final ConfigKey<Boolean> EVENT_IGNORE_DUPLICATE_ALERTS = new ConfigKey<>(
             "event.ignoreDuplicateAlerts",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * If set to true, invalid positions will be considered for motion logic.
      */
     public static final ConfigKey<Boolean> EVENT_MOTION_PROCESS_INVALID_POSITIONS = new ConfigKey<>(
             "event.motion.processInvalidPositions",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * If the speed is above specified value, the object is considered to be in motion. Default value is 0.01 knots.
      */
     public static final ConfigKey<Double> EVENT_MOTION_SPEED_THRESHOLD = new ConfigKey<>(
             "event.motion.speedThreshold",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             0.01);
 
     /**
@@ -282,7 +282,7 @@ public final class Keys {
      */
     public static final ConfigKey<Double> GEOFENCE_POLYLINE_DISTANCE = new ConfigKey<>(
             "geofence.polylineDistance",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             25.0);
 
     /**
@@ -291,49 +291,49 @@ public final class Keys {
      */
     public static final ConfigKey<String> DATABASE_DRIVER_FILE = new ConfigKey<>(
             "database.driverFile",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Database driver Java class. For H2 use 'org.h2.Driver'. MySQL driver class name is 'com.mysql.jdbc.Driver'.
      */
     public static final ConfigKey<String> DATABASE_DRIVER = new ConfigKey<>(
             "database.driver",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Database connection URL. By default Traccar uses H2 database.
      */
     public static final ConfigKey<String> DATABASE_URL = new ConfigKey<>(
             "database.url",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Database user name. Default administrator user for H2 database is 'sa'.
      */
     public static final ConfigKey<String> DATABASE_USER = new ConfigKey<>(
             "database.user",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Database user password. Default password for H2 admin (sa) user is empty.
      */
     public static final ConfigKey<String> DATABASE_PASSWORD = new ConfigKey<>(
             "database.password",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Path to Liquibase master changelog file.
      */
     public static final ConfigKey<String> DATABASE_CHANGELOG = new ConfigKey<>(
             "database.changelog",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Database connection pool size. Default value is defined by the HikariCP library.
      */
     public static final ConfigKey<Integer> DATABASE_MAX_POOL_SIZE = new ConfigKey<>(
             "database.maxPoolSize",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * SQL query to check connection status. Default value is 'SELECT 1'. For Oracle database you can use
@@ -341,7 +341,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> DATABASE_CHECK_CONNECTION = new ConfigKey<>(
             "database.checkConnection",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             "SELECT 1");
 
     /**
@@ -349,7 +349,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> DATABASE_SAVE_ORIGINAL = new ConfigKey<>(
             "database.saveOriginal",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * By default server syncs with the database if it encounters and unknown device. This flag allows to disable that
@@ -357,35 +357,35 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> DATABASE_IGNORE_UNKNOWN = new ConfigKey<>(
             "database.ignoreUnknown",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Automatically register unknown devices in the database.
      */
     public static final ConfigKey<Boolean> DATABASE_REGISTER_UNKNOWN = new ConfigKey<>(
             "database.registerUnknown",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Default category for auto-registered devices.
      */
     public static final ConfigKey<String> DATABASE_REGISTER_UNKNOWN_DEFAULT_CATEGORY = new ConfigKey<>(
             "database.registerUnknown.defaultCategory",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * The group id assigned to auto-registered devices.
      */
     public static final ConfigKey<Long> DATABASE_REGISTER_UNKNOWN_DEFAULT_GROUP_ID = new ConfigKey<>(
             "database.registerUnknown.defaultGroupId",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Minimum device refresh timeout in seconds. Default timeout is 5 minutes.
      */
     public static final ConfigKey<Long> DATABASE_REFRESH_DELAY = new ConfigKey<>(
             "database.refreshDelay",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             300L);
 
     /**
@@ -393,14 +393,14 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> DATABASE_SAVE_EMPTY = new ConfigKey<>(
             "database.saveEmpty",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Device limit for self registered users. Default value is -1, which indicates no limit.
      */
     public static final ConfigKey<Integer> USERS_DEFAULT_DEVICE_LIMIT = new ConfigKey<>(
             "users.defaultDeviceLimit",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             -1);
 
     /**
@@ -408,49 +408,49 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> USERS_DEFAULT_EXPIRATION_DAYS = new ConfigKey<>(
             "users.defaultExpirationDays",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * LDAP server URL.
      */
     public static final ConfigKey<String> LDAP_URL = new ConfigKey<>(
             "ldap.url",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * LDAP server login.
      */
     public static final ConfigKey<String> LDAP_USER = new ConfigKey<>(
             "ldap.user",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * LDAP server password.
      */
     public static final ConfigKey<String> LDAP_PASSWORD = new ConfigKey<>(
             "ldap.password",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Force LDAP authentication.
      */
     public static final ConfigKey<Boolean> LDAP_FORCE = new ConfigKey<>(
             "ldap.force",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * LDAP user search base.
      */
     public static final ConfigKey<String> LDAP_BASE = new ConfigKey<>(
             "ldap.base",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * LDAP attribute used as user id. Default value is 'uid'.
      */
     public static final ConfigKey<String> LDAP_ID_ATTRIBUTE = new ConfigKey<>(
             "ldap.idAttribute",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             "uid");
 
     /**
@@ -458,7 +458,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> LDAP_NAME_ATTRIBUTE = new ConfigKey<>(
             "ldap.nameAttribute",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             "cn");
 
     /**
@@ -466,7 +466,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> LDAP_MAIN_ATTRIBUTE = new ConfigKey<>(
             "ldap.mailAttribute",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             "mail");
 
     /**
@@ -474,21 +474,21 @@ public final class Keys {
      */
     public static final ConfigKey<String> LDAP_SEARCH_FILTER = new ConfigKey<>(
             "ldap.searchFilter",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * LDAP custom admin search filter.
      */
     public static final ConfigKey<String> LDAP_ADMIN_FILTER = new ConfigKey<>(
             "ldap.adminFilter",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * LDAP admin user group. Used if custom admin filter is not specified.
      */
     public static final ConfigKey<String> LDAP_ADMIN_GROUP = new ConfigKey<>(
             "ldap.adminGroup",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * If no data is reported by a device for the given amount of time, status changes from online to unknown. Value is
@@ -496,7 +496,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> STATUS_TIMEOUT = new ConfigKey<>(
             "status.timeout",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             600L);
 
     /**
@@ -504,7 +504,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> STATUS_UPDATE_DEVICE_STATE = new ConfigKey<>(
             "status.updateDeviceState",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * List of protocol names to ignore offline status. Can be useful to not trigger status change when devices are
@@ -512,7 +512,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> STATUS_IGNORE_OFFLINE = new ConfigKey<>(
             "status.ignoreOffline",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Path to the media folder. Server stores audio, video and photo files in that folder. Sub-folders will be
@@ -520,7 +520,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> MEDIA_PATH = new ConfigKey<>(
             "media.path",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Optional parameter to specify network interface for web interface to bind to. By default server will bind to all
@@ -528,7 +528,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> WEB_ADDRESS = new ConfigKey<>(
             "web.address",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Web interface TCP port number. By default Traccar uses port 8082. To avoid specifying port in the browser you
@@ -536,7 +536,7 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> WEB_PORT = new ConfigKey<>(
             "web.port",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Sanitize all strings returned via API. This is needed to fix XSS issues in the old web interface. New React-based
@@ -544,21 +544,21 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> WEB_SANITIZE = new ConfigKey<>(
             "web.sanitize",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Path to the web app folder.
      */
     public static final ConfigKey<String> WEB_PATH = new ConfigKey<>(
             "web.path",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * WebSocket connection timeout in milliseconds. Default timeout is 10 minutes.
      */
     public static final ConfigKey<Long> WEB_TIMEOUT = new ConfigKey<>(
             "web.timeout",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             60000L);
 
     /**
@@ -566,14 +566,14 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> WEB_SESSION_TIMEOUT = new ConfigKey<>(
             "web.sessionTimeout",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enable database access console via '/console' URL. Use only for debugging. Never use in production.
      */
     public static final ConfigKey<Boolean> WEB_CONSOLE = new ConfigKey<>(
             "web.console",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Server debug version of the web app. Not recommended to use for performance reasons. It is intended to be used
@@ -581,21 +581,21 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> WEB_DEBUG = new ConfigKey<>(
             "web.debug",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Cross-origin resource sharing origin header value.
      */
     public static final ConfigKey<String> WEB_ORIGIN = new ConfigKey<>(
             "web.origin",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Cache control header value. By default resources are cached for one hour.
      */
     public static final ConfigKey<String> WEB_CACHE_CONTROL = new ConfigKey<>(
             "web.cacheControl",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             "max-age=3600,public");
 
     /**
@@ -604,21 +604,21 @@ public final class Keys {
      */
     public static final ConfigKey<String> FORWARD_URL = new ConfigKey<>(
             "forward.url",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Additional HTTP header, can be used for authorization.
      */
     public static final ConfigKey<String> FORWARD_HEADER = new ConfigKey<>(
             "forward.header",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Boolean value to enable forwarding in JSON format.
      */
     public static final ConfigKey<Boolean> FORWARD_JSON = new ConfigKey<>(
             "forward.json",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Boolean value to enable URL parameters in json mode. For example, {uniqueId} for device identifier,
@@ -626,7 +626,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> FORWARD_URL_VARIABLES = new ConfigKey<>(
             "forward.urlVariables",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions. If initial
@@ -637,7 +637,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> FORWARD_RETRY_ENABLE = new ConfigKey<>(
             "forward.retry.enable",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Position forwarding retry first delay in milliseconds.
@@ -645,7 +645,7 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FORWARD_RETRY_DELAY = new ConfigKey<>(
             "forward.retry.delay",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Position forwarding retry maximum retries.
@@ -653,7 +653,7 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FORWARD_RETRY_COUNT = new ConfigKey<>(
             "forward.retry.count",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Position forwarding retry pending positions limit.
@@ -661,14 +661,14 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FORWARD_RETRY_LIMIT = new ConfigKey<>(
             "forward.retry.limit",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Events forwarding URL.
      */
     public static final ConfigKey<String> EVENT_FORWARD_URL = new ConfigKey<>(
             "event.forward.url",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Events forwarding headers. Example value:
@@ -677,7 +677,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> EVENT_FORWARD_HEADERS = new ConfigKey<>(
             "event.forward.header",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enable commands queuing when devices are offline. Commands are buffered in memory only, so restarting service
@@ -685,14 +685,14 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> COMMANDS_QUEUEING = new ConfigKey<>(
             "commands.queueing",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Root folder for all template files.
      */
     public static final ConfigKey<String> TEMPLATES_ROOT = new ConfigKey<>(
             "templates.root",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             "templates");
 
     /**
@@ -700,14 +700,14 @@ public final class Keys {
      */
     public static final ConfigKey<String> SMS_HTTP_URL = new ConfigKey<>(
             "sms.http.url",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * SMS API authorization header name. Default value is 'Authorization'.
      */
     public static final ConfigKey<String> SMS_HTTP_AUTHORIZATION_HEADER = new ConfigKey<>(
             "sms.http.authorizationHeader",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             "Authorization");
 
     /**
@@ -715,21 +715,21 @@ public final class Keys {
      */
     public static final ConfigKey<String> SMS_HTTP_AUTHORIZATION = new ConfigKey<>(
             "sms.http.authorization",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * SMS API basic authentication user.
      */
     public static final ConfigKey<String> SMS_HTTP_USER = new ConfigKey<>(
             "sms.http.user",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * SMS API basic authentication password.
      */
     public static final ConfigKey<String> SMS_HTTP_PASSWORD = new ConfigKey<>(
             "sms.http.password",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * SMS API body template. Placeholders {phone} and {message} can be used in the template.
@@ -737,21 +737,21 @@ public final class Keys {
      */
     public static final ConfigKey<String> SMS_HTTP_TEMPLATE = new ConfigKey<>(
             "sms.http.template",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * AWS Access Key with SNS permission.
      */
     public static final ConfigKey<String> SMS_AWS_ACCESS = new ConfigKey<>(
             "sms.aws.access",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * AWS Secret Access Key with SNS permission.
      */
     public static final ConfigKey<String> SMS_AWS_SECRET = new ConfigKey<>(
             "sms.aws.secret",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * AWS Region for SNS service.
@@ -759,7 +759,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> SMS_AWS_REGION = new ConfigKey<>(
             "sms.aws.region",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enabled notification options. Comma-separated string is expected.
@@ -767,56 +767,56 @@ public final class Keys {
      */
     public static final ConfigKey<String> NOTIFICATOR_TYPES = new ConfigKey<>(
             "notificator.types",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Traccar notification API key.
      */
     public static final ConfigKey<String> NOTIFICATOR_TRACCAR_KEY = new ConfigKey<>(
             "notificator.traccar.key",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Firebase server API key for push notifications.
      */
     public static final ConfigKey<String> NOTIFICATOR_FIREBASE_KEY = new ConfigKey<>(
             "notificator.firebase.key",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Pushover notification user name.
      */
     public static final ConfigKey<String> NOTIFICATOR_PUSHOVER_USER = new ConfigKey<>(
             "notificator.pushover.user",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Pushover notification user token.
      */
     public static final ConfigKey<String> NOTIFICATOR_PUSHOVER_TOKEN = new ConfigKey<>(
             "notificator.pushover.token",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Telegram notification API key.
      */
     public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_KEY = new ConfigKey<>(
             "notificator.telegram.key",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Telegram notification chat id to post messages to.
      */
     public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_CHAT_ID = new ConfigKey<>(
             "notificator.telegram.chatId",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Telegram notification send location message.
      */
     public static final ConfigKey<Boolean> NOTIFICATOR_TELEGRAM_SEND_LOCATION = new ConfigKey<>(
             "notificator.telegram.sendLocation",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
@@ -824,14 +824,14 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_PERIOD_LIMIT = new ConfigKey<>(
             "report.periodLimit",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Trips less than minimal duration and minimal distance are ignored. 300 seconds and 500 meters are default.
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DISTANCE = new ConfigKey<>(
             "report.trip.minimalTripDistance",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             500L);
 
     /**
@@ -839,7 +839,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DURATION = new ConfigKey<>(
             "report.trip.minimalTripDuration",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             300L);
 
     /**
@@ -847,7 +847,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_PARKING_DURATION = new ConfigKey<>(
             "report.trip.minimalParkingDuration",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             300L);
 
     /**
@@ -855,7 +855,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_NO_DATA_DURATION = new ConfigKey<>(
             "report.trip.minimalNoDataDuration",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             3600L);
 
     /**
@@ -863,21 +863,21 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> REPORT_TRIP_USE_IGNITION = new ConfigKey<>(
             "report.trip.useIgnition",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Boolean flag to enable or disable position filtering.
      */
     public static final ConfigKey<Boolean> FILTER_ENABLE = new ConfigKey<>(
             "filter.enable",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Filter invalid (valid field is set to false) positions.
      */
     public static final ConfigKey<Boolean> FILTER_INVALID = new ConfigKey<>(
             "filter.invalid",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Filter zero coordinates. Zero latitude and longitude are theoretically valid values, but it practice it usually
@@ -885,14 +885,14 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> FILTER_ZERO = new ConfigKey<>(
             "filter.zero",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Filter duplicate records (duplicates are detected by time value).
      */
     public static final ConfigKey<Boolean> FILTER_DUPLICATE = new ConfigKey<>(
             "filter.duplicate",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Filter records with fix time in future. The values is specified in seconds. Records that have fix time more than
@@ -900,28 +900,28 @@ public final class Keys {
      */
     public static final ConfigKey<Long> FILTER_FUTURE = new ConfigKey<>(
             "filter.future",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Filter positions with accuracy less than specified value in meters.
      */
     public static final ConfigKey<Integer> FILTER_ACCURACY = new ConfigKey<>(
             "filter.accuracy",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Filter cell and wifi locations that are coming from geolocation provider.
      */
     public static final ConfigKey<Boolean> FILTER_APPROXIMATE = new ConfigKey<>(
             "filter.approximate",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Filter positions with exactly zero speed values.
      */
     public static final ConfigKey<Boolean> FILTER_STATIC = new ConfigKey<>(
             "filter.static",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Filter records by distance. The values is specified in meters. If the new position is less far than this value
@@ -929,7 +929,7 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FILTER_DISTANCE = new ConfigKey<>(
             "filter.distance",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Filter records by Maximum Speed value in knots. Can be used to filter jumps to far locations even if Position
@@ -940,14 +940,14 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FILTER_MAX_SPEED = new ConfigKey<>(
             "filter.maxSpeed",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Filter position if time from previous position is less than specified value in seconds.
      */
     public static final ConfigKey<Integer> FILTER_MIN_PERIOD = new ConfigKey<>(
             "filter.minPeriod",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * If false, the server expects all locations to come sequentially (for each device). Filter checks for duplicates,
@@ -959,7 +959,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> FILTER_RELATIVE = new ConfigKey<>(
             "filter.relative",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Time limit for the filtering in seconds. If the time difference between the last position was received by server
@@ -967,7 +967,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> FILTER_SKIP_LIMIT = new ConfigKey<>(
             "filter.skipLimit",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enable attributes skipping. Attribute skipping can be enabled in the config or device attributes.
@@ -975,14 +975,14 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> FILTER_SKIP_ATTRIBUTES_ENABLE = new ConfigKey<>(
             "filter.skipAttributes.enable",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Override device time. Possible values are 'deviceTime' and 'serverTime'
      */
     public static final ConfigKey<String> TIME_OVERRIDE = new ConfigKey<>(
             "time.override",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * List of protocols for overriding time. If not specified override is applied globally. List consist of protocol
@@ -990,7 +990,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> TIME_PROTOCOLS = new ConfigKey<>(
             "time.protocols",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Replaces coordinates with last known if change is less than a 'coordinates.minError' meters
@@ -999,14 +999,14 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> COORDINATES_FILTER = new ConfigKey<>(
             "coordinates.filter",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Distance in meters. Distances below this value gets handled like explained in 'coordinates.filter'.
      */
     public static final ConfigKey<Integer> COORDINATES_MIN_ERROR = new ConfigKey<>(
             "coordinates.minError",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Distance in meters. Distances above this value gets handled like explained in 'coordinates.filter', but only if
@@ -1014,14 +1014,14 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> COORDINATES_MAX_ERROR = new ConfigKey<>(
             "coordinates.maxError",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enable to save device IP addresses information. Disabled by default.
      */
     public static final ConfigKey<Boolean> PROCESSING_REMOTE_ADDRESS_ENABLE = new ConfigKey<>(
             "processing.remoteAddress.enable",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enable copying of missing attributes from last position to the current one. Might be useful if device doesn't
@@ -1029,21 +1029,21 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> PROCESSING_COPY_ATTRIBUTES_ENABLE = new ConfigKey<>(
             "processing.copyAttributes.enable",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enable computed attributes processing.
      */
     public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES = new ConfigKey<>(
             "processing.computedAttributes.deviceAttributes",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Boolean flag to enable or disable reverse geocoder.
      */
     public static final ConfigKey<Boolean> GEOCODER_ENABLE = new ConfigKey<>(
             "geocoder.enable",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Reverse geocoder type. Check reverse geocoding documentation for more info. By default (if the value is not
@@ -1051,63 +1051,63 @@ public final class Keys {
      */
     public static final ConfigKey<String> GEOCODER_TYPE = new ConfigKey<>(
             "geocoder.type",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Geocoder server URL. Applicable only to Nominatim and Gisgraphy providers.
      */
     public static final ConfigKey<String> GEOCODER_URL = new ConfigKey<>(
             "geocoder.url",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * App id for use with Here provider.
      */
     public static final ConfigKey<String> GEOCODER_ID = new ConfigKey<>(
             "geocoder.id",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Provider API key. Most providers require API keys.
      */
     public static final ConfigKey<String> GEOCODER_KEY = new ConfigKey<>(
             "geocoder.key",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Language parameter for providers that support localization (e.g. Google and Nominatim).
      */
     public static final ConfigKey<String> GEOCODER_LANGUAGE = new ConfigKey<>(
             "geocoder.language",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Address format string. Default value is %h %r, %t, %s, %c. See AddressFormat for more info.
      */
     public static final ConfigKey<String> GEOCODER_FORMAT = new ConfigKey<>(
             "geocoder.format",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Cache size for geocoding results.
      */
     public static final ConfigKey<Integer> GEOCODER_CACHE_SIZE = new ConfigKey<>(
             "geocoder.cacheSize",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Disable automatic reverse geocoding requests for all positions.
      */
     public static final ConfigKey<Boolean> GEOCODER_IGNORE_POSITIONS = new ConfigKey<>(
             "geocoder.ignorePositions",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Boolean flag to apply reverse geocoding to invalid positions.
      */
     public static final ConfigKey<Boolean> GEOCODER_PROCESS_INVALID_POSITIONS = new ConfigKey<>(
             "geocoder.processInvalidPositions",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Optional parameter to specify minimum distance for new reverse geocoding request. If distance is less than
@@ -1115,14 +1115,14 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> GEOCODER_REUSE_DISTANCE = new ConfigKey<>(
             "geocoder.reuseDistance",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Perform geocoding when preparing reports and sending notifications.
      */
     public static final ConfigKey<Boolean> GEOCODER_ON_REQUEST = new ConfigKey<>(
             "geocoder.onRequest",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Boolean flag to enable LBS location resolution. Some devices send cell towers information and WiFi point when GPS
@@ -1131,7 +1131,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> GEOLOCATION_ENABLE = new ConfigKey<>(
             "geolocation.enable",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Provider to use for LBS location. Available options: google, mozilla and opencellid. By default opencellid is
@@ -1140,63 +1140,63 @@ public final class Keys {
      */
     public static final ConfigKey<String> GEOLOCATION_TYPE = new ConfigKey<>(
             "geolocation.type",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Geolocation provider API URL address. Not required for most providers.
      */
     public static final ConfigKey<String> GEOLOCATION_URL = new ConfigKey<>(
             "geolocation.url",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Provider API key. OpenCellID service requires API key.
      */
     public static final ConfigKey<String> GEOLOCATION_KEY = new ConfigKey<>(
             "geolocation.key",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Boolean flag to apply geolocation to invalid positions.
      */
     public static final ConfigKey<Boolean> GEOLOCATION_PROCESS_INVALID_POSITIONS = new ConfigKey<>(
             "geolocation.processInvalidPositions",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Default MCC value to use if device doesn't report MCC.
      */
     public static final ConfigKey<Integer> GEOLOCATION_MCC = new ConfigKey<>(
             "geolocation.mcc",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Default MNC value to use if device doesn't report MNC.
      */
     public static final ConfigKey<Integer> GEOLOCATION_MNC = new ConfigKey<>(
             "geolocation.mnc",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Boolean flag to enable speed limit API to get speed limit values depending on location. Default value is false.
      */
     public static final ConfigKey<Boolean> SPEED_LIMIT_ENABLE = new ConfigKey<>(
             "speedLimit.enable",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Provider to use for speed limit. Available options: overpass. By default overpass is used.
      */
     public static final ConfigKey<String> SPEED_LIMIT_TYPE = new ConfigKey<>(
             "speedLimit.type",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Speed limit provider API URL address.
      */
     public static final ConfigKey<String> SPEED_LIMIT_URL = new ConfigKey<>(
             "speedLimit.url",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Override latitude sign / hemisphere. Useful in cases where value is incorrect because of device bug. Value can be
@@ -1204,7 +1204,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> LOCATION_LATITUDE_HEMISPHERE = new ConfigKey<>(
             "location.latitudeHemisphere",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Override longitude sign / hemisphere. Useful in cases where value is incorrect because of device bug. Value can
@@ -1212,7 +1212,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> LOCATION_LONGITUDE_HEMISPHERE = new ConfigKey<>(
             "location.longitudeHemisphere",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Jetty Request Log Path.
@@ -1222,21 +1222,21 @@ public final class Keys {
      */
     public static final ConfigKey<String> WEB_REQUEST_LOG_PATH = new ConfigKey<>(
             "web.requestLog.path",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Set the number of days before rotated request log files are deleted.
      */
     public static final ConfigKey<Integer> WEB_REQUEST_LOG_RETAIN_DAYS = new ConfigKey<>(
             "web.requestLog.retainDays",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Disable systemd health checks.
      */
     public static final ConfigKey<Boolean> WEB_DISABLE_HEALTH_CHECK = new ConfigKey<>(
             "web.disableHealthCheck",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Sets SameSite cookie attribute value.
@@ -1244,14 +1244,14 @@ public final class Keys {
      */
     public static final ConfigKey<String> WEB_SAME_SITE_COOKIE = new ConfigKey<>(
             "web.sameSiteCookie",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Enables persisting Jetty session to the database
      */
     public static final ConfigKey<Boolean> WEB_PERSIST_SESSION = new ConfigKey<>(
             "web.persistSession",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Public URL for the web app. Used for notification and report link.
@@ -1260,28 +1260,28 @@ public final class Keys {
      */
     public static final ConfigKey<String> WEB_URL = new ConfigKey<>(
             "web.url",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Output logging to the standard terminal output instead of a log file.
      */
     public static final ConfigKey<Boolean> LOGGER_CONSOLE = new ConfigKey<>(
             "logger.console",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Log executed SQL queries.
      */
     public static final ConfigKey<Boolean> LOGGER_QUERIES = new ConfigKey<>(
             "logger.queries",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Log file name. For rotating logs, a date is added at the end of the file name for non-current logs.
      */
     public static final ConfigKey<String> LOGGER_FILE = new ConfigKey<>(
             "logger.file",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Logging level. Default value is 'info'.
@@ -1289,14 +1289,14 @@ public final class Keys {
      */
     public static final ConfigKey<String> LOGGER_LEVEL = new ConfigKey<>(
             "logger.level",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Print full exception traces. Useful for debugging. By default shortened traces are logged.
      */
     public static final ConfigKey<Boolean> LOGGER_FULL_STACK_TRACES = new ConfigKey<>(
             "logger.fullStackTraces",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Create a new log file daily. Helps with log management. For example, downloading and cleaning logs. Enabled by
@@ -1304,14 +1304,14 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> LOGGER_ROTATE = new ConfigKey<>(
             "logger.rotate",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * A list of position attributes to log.
      */
     public static final ConfigKey<String> LOGGER_ATTRIBUTES = new ConfigKey<>(
             "logger.attributes",
-            Collections.singletonList(KeyType.GLOBAL),
+            Collections.singletonList(KeyType.CONFIG),
             "time,position,speed,course,accuracy,result");
 
     /**
@@ -1319,13 +1319,13 @@ public final class Keys {
      */
     public static final ConfigKey<String> BROADCAST_ADDRESS = new ConfigKey<>(
             "broadcast.address",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
     /**
      * Multicast port for broadcasting synchronization events.
      */
     public static final ConfigKey<Integer> BROADCAST_PORT = new ConfigKey<>(
             "broadcast.port",
-            Collections.singletonList(KeyType.GLOBAL));
+            Collections.singletonList(KeyType.CONFIG));
 
 }
