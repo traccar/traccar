@@ -58,11 +58,10 @@ public class RouteReportProvider {
     public Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
-        reportUtils.checkPermissions(userId, deviceIds, groupIds);
 
         ArrayList<Position> result = new ArrayList<>();
-        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            result.addAll(PositionUtil.getPositions(storage, deviceId, from, to));
+        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+            result.addAll(PositionUtil.getPositions(storage, device.getId(), from, to));
         }
         return result;
     }
@@ -71,14 +70,12 @@ public class RouteReportProvider {
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
-        reportUtils.checkPermissions(userId, deviceIds, groupIds);
 
         ArrayList<DeviceReportSection> devicesRoutes = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            var positions = PositionUtil.getPositions(storage, deviceId, from, to);
+        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+            var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
             DeviceReportSection deviceRoutes = new DeviceReportSection();
-            Device device = reportUtils.getDevice(deviceId);
             deviceRoutes.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceRoutes.getDeviceName()));
             if (device.getGroupId() > 0) {

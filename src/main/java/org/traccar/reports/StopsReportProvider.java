@@ -65,11 +65,10 @@ public class StopsReportProvider {
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
-        reportUtils.checkPermissions(userId, deviceIds, groupIds);
 
         ArrayList<StopReportItem> result = new ArrayList<>();
-        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            result.addAll(detectStops(deviceId, from, to));
+        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+            result.addAll(detectStops(device.getId(), from, to));
         }
         return result;
     }
@@ -78,14 +77,12 @@ public class StopsReportProvider {
             OutputStream outputStream, long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
-        reportUtils.checkPermissions(userId, deviceIds, groupIds);
 
         ArrayList<DeviceReportSection> devicesStops = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Collection<StopReportItem> stops = detectStops(deviceId, from, to);
+        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+            Collection<StopReportItem> stops = detectStops(device.getId(), from, to);
             DeviceReportSection deviceStops = new DeviceReportSection();
-            Device device = reportUtils.getDevice(deviceId);
             deviceStops.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
             if (device.getGroupId() > 0) {

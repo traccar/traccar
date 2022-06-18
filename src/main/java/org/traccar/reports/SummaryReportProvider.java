@@ -23,6 +23,7 @@ import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.SummaryReportItem;
@@ -145,11 +146,11 @@ public class SummaryReportProvider {
             long userId, Collection<Long> deviceIds,
             Collection<Long> groupIds, Date from, Date to, boolean daily) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
-        reportUtils.checkPermissions(userId, deviceIds, groupIds);
 
         ArrayList<SummaryReportItem> result = new ArrayList<>();
-        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Collection<SummaryReportItem> deviceResults = calculateSummaryResults(userId, deviceId, from, to, daily);
+        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+            Collection<SummaryReportItem> deviceResults =
+                    calculateSummaryResults(userId, device.getId(), from, to, daily);
             for (SummaryReportItem summaryReport : deviceResults) {
                 if (summaryReport.getStartTime() != null && summaryReport.getEndTime() != null) {
                     result.add(summaryReport);

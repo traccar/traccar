@@ -26,7 +26,6 @@ import org.jxls.formula.StandardFormulaProcessor;
 import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
-import org.traccar.Context;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -62,11 +61,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ReportUtils {
 
@@ -114,22 +116,39 @@ public class ReportUtils {
         }
     }
 
-    public void checkPermissions(
+    public Collection<Device> getAccessibleDevices(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds) throws StorageException {
-        for (long deviceId : deviceIds) {
-            permissionsService.checkPermission(Device.class, userId, deviceId);
-        }
-        for (long groupId : groupIds) {
-            permissionsService.checkPermission(Group.class, userId, groupId);
-        }
-    }
 
-    public Collection<Long> getDeviceList(Collection<Long> deviceIds, Collection<Long> groupIds) {
-        Collection<Long> result = new LinkedHashSet<>(deviceIds);
-        for (long groupId : groupIds) {
-            result.addAll(Context.getPermissionsManager().getGroupDevices(groupId));
+        var devices = storage.getObjects(Device.class, new Request(
+                new Columns.All(),
+                new Condition.Permission(User.class, userId, Device.class)));
+        var deviceById = devices.stream()
+                .collect(Collectors.toUnmodifiableMap(Device::getId, x -> x));
+        var devicesByGroup = devices.stream()
+                .filter(x -> x.getGroupId() > 0)
+                .collect(Collectors.groupingBy(Device::getGroupId));
+
+        var groups = storage.getObjects(Group.class, new Request(
+                new Columns.All(),
+                new Condition.Permission(User.class, userId, Group.class)));
+        var groupsByGroup = groups.stream()
+                .filter(x -> x.getGroupId() > 0)
+                .collect(Collectors.groupingBy(Group::getGroupId));
+
+        var results = deviceIds.stream()
+                .map(deviceById::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        var groupQueue = new LinkedList<>(groupIds);
+        while (!groupQueue.isEmpty()) {
+            long groupId = groupQueue.pop();
+            results.addAll(devicesByGroup.getOrDefault(groupId, Collections.emptyList()));
+            groupQueue.addAll(groupsByGroup.getOrDefault(groupId, Collections.emptyList())
+                    .stream().map(Group::getId).collect(Collectors.toUnmodifiableList()));
         }
-        return result;
+
+        return results;
     }
 
     public double calculateFuel(Position firstPosition, Position lastPosition) {

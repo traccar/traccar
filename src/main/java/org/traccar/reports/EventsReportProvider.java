@@ -73,11 +73,10 @@ public class EventsReportProvider {
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
-        reportUtils.checkPermissions(userId, deviceIds, groupIds);
 
         ArrayList<Event> result = new ArrayList<>();
-        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Collection<Event> events = getEvents(deviceId, from, to);
+        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+            Collection<Event> events = getEvents(device.getId(), from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Event event : events) {
                 if (all || types.contains(event.getType())) {
@@ -98,14 +97,13 @@ public class EventsReportProvider {
             OutputStream outputStream, long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
-        reportUtils.checkPermissions(userId, deviceIds, groupIds);
 
         ArrayList<DeviceReportSection> devicesEvents = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         HashMap<Long, String> geofenceNames = new HashMap<>();
         HashMap<Long, String> maintenanceNames = new HashMap<>();
-        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Collection<Event> events = getEvents(deviceId, from, to);
+        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+            Collection<Event> events = getEvents(device.getId(), from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
                 Event event = iterator.next();
@@ -132,7 +130,6 @@ public class EventsReportProvider {
                 }
             }
             DeviceReportSection deviceEvents = new DeviceReportSection();
-            Device device = reportUtils.getDevice(deviceId);
             deviceEvents.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
             if (device.getGroupId() > 0) {

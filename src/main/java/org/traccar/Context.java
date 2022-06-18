@@ -23,7 +23,6 @@ import org.traccar.database.PermissionsManager;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
-import org.traccar.storage.Storage;
 
 public final class Context {
 

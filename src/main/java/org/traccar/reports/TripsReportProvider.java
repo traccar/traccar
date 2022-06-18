@@ -64,11 +64,10 @@ public class TripsReportProvider {
     public Collection<TripReportItem> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
                                                         Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
-        reportUtils.checkPermissions(userId, deviceIds, groupIds);
 
         ArrayList<TripReportItem> result = new ArrayList<>();
-        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            result.addAll(detectTrips(deviceId, from, to));
+        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+            result.addAll(detectTrips(device.getId(), from, to));
         }
         return result;
     }
@@ -77,14 +76,12 @@ public class TripsReportProvider {
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
-        reportUtils.checkPermissions(userId, deviceIds, groupIds);
 
         ArrayList<DeviceReportSection> devicesTrips = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
-            Collection<TripReportItem> trips = detectTrips(deviceId, from, to);
+        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+            Collection<TripReportItem> trips = detectTrips(device.getId(), from, to);
             DeviceReportSection deviceTrips = new DeviceReportSection();
-            Device device = reportUtils.getDevice(deviceId);
             deviceTrips.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));
             if (device.getGroupId() > 0) {
