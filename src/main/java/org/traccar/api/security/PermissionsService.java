@@ -100,7 +100,9 @@ public class PermissionsService {
             } else if (clazz.equals(Device.class)) {
                 denied = getServer().getDeviceReadonly() || getUser(userId).getDeviceReadonly();
                 if (addition) {
-                    int deviceCount = storage.getPermissions(User.class, userId, Device.class).size();
+                    int deviceCount = storage.getObjects(Device.class, new Request(
+                            new Columns.Include("id"),
+                            new Condition.Permission(User.class, userId, Device.class))).size();
                     denied = deviceCount >= getUser(userId).getDeviceLimit();
                 }
             } else if (clazz.equals(Command.class)) {
