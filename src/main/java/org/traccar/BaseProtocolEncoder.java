@@ -15,7 +15,6 @@
  */
 package org.traccar;
 
-import com.google.inject.Inject;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -24,7 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.database.IdentityManager;
 import org.traccar.helper.NetworkUtil;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
+import org.traccar.session.cache.CacheManager;
+
+import javax.inject.Inject;
 
 public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter {
 
@@ -34,10 +37,21 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
 
     private final Protocol protocol;
 
+    private CacheManager cacheManager;
+
     private IdentityManager identityManager;
 
     public BaseProtocolEncoder(Protocol protocol) {
         this.protocol = protocol;
+    }
+
+    public CacheManager getCacheManager() {
+        return cacheManager;
+    }
+
+    @Inject
+    public void setCacheManager(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     public IdentityManager getIdentityManager() {
@@ -59,8 +73,8 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
 
     protected void initDevicePassword(Command command, String defaultPassword) {
         if (!command.getAttributes().containsKey(Command.KEY_DEVICE_PASSWORD)) {
-            String password = identityManager
-                .getDevicePassword(command.getDeviceId(), getProtocolName(), defaultPassword);
+            String password = AttributeUtil.getDevicePassword(
+                    cacheManager, command.getDeviceId(), getProtocolName(), defaultPassword);
             command.set(Command.KEY_DEVICE_PASSWORD, password);
         }
     }

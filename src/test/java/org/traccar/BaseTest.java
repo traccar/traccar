@@ -66,9 +66,11 @@ public class BaseTest {
         var device = mock(Device.class);
         when(device.getId()).thenReturn(1L);
         when(device.getUniqueId()).thenReturn("123456789012345");
+        var cacheManager = mock(CacheManager.class);
+        when(cacheManager.getConfig()).thenReturn(mock(Config.class));
+        when(cacheManager.getObject(eq(Device.class), anyLong())).thenReturn(device);
+        encoder.setCacheManager(cacheManager);
         var identityManager = mock(IdentityManager.class);
-        when(identityManager.getDevicePassword(anyLong(), any(), any()))
-                .thenAnswer(invocation -> invocation.getArguments()[2]);
         when(identityManager.getById(anyLong())).thenReturn(device);
         when(identityManager.getByUniqueId(any())).thenReturn(device);
         encoder.setIdentityManager(identityManager);

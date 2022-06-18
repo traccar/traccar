@@ -15,8 +15,11 @@
  */
 package org.traccar.helper.model;
 
+import org.traccar.Context;
 import org.traccar.config.ConfigKey;
 import org.traccar.config.KeyType;
+import org.traccar.config.Keys;
+import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.session.cache.CacheManager;
@@ -67,6 +70,24 @@ public final class AttributeUtil {
             }
         }
         return key.getDefaultValue();
+    }
+
+    public static String getDevicePassword(
+            CacheManager cacheManager, long deviceId, String protocol, String defaultPassword) {
+
+        String password = lookup(cacheManager, Keys.DEVICE_PASSWORD, deviceId);
+        if (password != null) {
+            return password;
+        }
+
+        if (protocol != null) {
+            password = cacheManager.getConfig().getString(Keys.PROTOCOL_DEVICE_PASSWORD.withPrefix(protocol));
+            if (password != null) {
+                return password;
+            }
+        }
+
+        return defaultPassword;
     }
 
 }

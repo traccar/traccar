@@ -20,6 +20,7 @@ import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -68,8 +69,8 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
         boolean alternative = getIdentityManager().lookupAttributeBoolean(
                 command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
 
-        String password = getIdentityManager()
-                .getDevicePassword(command.getDeviceId(), getProtocolName(), "123456");
+        String password = AttributeUtil.getDevicePassword(
+                getCacheManager(), command.getDeviceId(), getProtocolName(), "123456");
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:

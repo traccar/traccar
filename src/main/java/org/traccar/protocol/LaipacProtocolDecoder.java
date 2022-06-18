@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -252,8 +253,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
             sendAcknowledge(status, event, checksum, channel, remoteAddress);
 
-            String devicePassword = getIdentityManager()
-                .getDevicePassword(deviceSession.getDeviceId(), getProtocolName(), DEFAULT_DEVICE_PASSWORD);
+            String devicePassword = AttributeUtil.getDevicePassword(
+                    getCacheManager(), deviceSession.getDeviceId(), getProtocolName(), DEFAULT_DEVICE_PASSWORD);
             sendEventResponse(event, devicePassword, channel, remoteAddress);
         }
 

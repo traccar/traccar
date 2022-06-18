@@ -72,6 +72,13 @@ public final class Keys {
     /**
      * Device password. Commonly used in some protocol for sending commands.
      */
+    public static final ConfigKey<String> DEVICE_PASSWORD = new StringConfigKey(
+            "devicePassword",
+            List.of(KeyType.DEVICE));
+
+    /**
+     * Device password. Commonly used in some protocol for sending commands.
+     */
     public static final ConfigSuffix<String> PROTOCOL_DEVICE_PASSWORD = new StringConfigSuffix(
             ".devicePassword",
             List.of(KeyType.CONFIG));
