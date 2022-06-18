@@ -15,7 +15,6 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Main;
 import org.traccar.api.BaseObjectResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
