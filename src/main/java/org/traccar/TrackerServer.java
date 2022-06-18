@@ -58,7 +58,7 @@ public abstract class TrackerServer implements TrackerConnector {
     public TrackerServer(boolean datagram, String protocol) {
         this.datagram = datagram;
 
-        Config config = Context.getConfig();
+        Config config = Main.getInjector().getInstance(Config.class);
 
         secure = config.getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
         address = config.getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));

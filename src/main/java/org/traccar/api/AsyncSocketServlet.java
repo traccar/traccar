@@ -18,8 +18,8 @@ package org.traccar.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
-import org.traccar.Context;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
@@ -32,12 +32,15 @@ import java.time.Duration;
 @Singleton
 public class AsyncSocketServlet extends JettyWebSocketServlet {
 
+    private final Config config;
     private final ObjectMapper objectMapper;
     private final ConnectionManager connectionManager;
     private final Storage storage;
 
     @Inject
-    public AsyncSocketServlet(ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage) {
+    public AsyncSocketServlet(
+            Config config, ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage) {
+        this.config = config;
         this.objectMapper = objectMapper;
         this.connectionManager = connectionManager;
         this.storage = storage;
@@ -45,7 +48,7 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
 
     @Override
     public void configure(JettyWebSocketServletFactory factory) {
-        factory.setIdleTimeout(Duration.ofMillis(Context.getConfig().getLong(Keys.WEB_TIMEOUT)));
+        factory.setIdleTimeout(Duration.ofMillis(config.getLong(Keys.WEB_TIMEOUT)));
         factory.setCreator((req, resp) -> {
             if (req.getSession() != null) {
                 long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);

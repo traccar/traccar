@@ -115,8 +115,7 @@ public final class Main {
 
     public static void run(String configFile) {
         try {
-            injector = Guice.createInjector(new MainModule(), new DatabaseModule(), new WebModule());
-            Context.init(configFile);
+            injector = Guice.createInjector(new MainModule(configFile), new DatabaseModule(), new WebModule());
             logSystemInfo();
             LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,23 @@
 package org.traccar.api;
 
 import io.netty.handler.codec.http.HttpHeaderNames;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
+import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import java.io.IOException;
 
 public class CorsResponseFilter implements ContainerResponseFilter {
+
+    private final String allowed;
+
+    @Inject
+    public CorsResponseFilter(Config config) {
+        allowed = config.getString(Keys.WEB_ORIGIN);
+    }
 
     private static final String ORIGIN_ALL = "*";
     private static final String HEADERS_ALL = "origin, content-type, accept, authorization";
@@ -46,8 +54,6 @@ public class CorsResponseFilter implements ContainerResponseFilter {
 
         if (!response.getHeaders().containsKey(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString())) {
             String origin = request.getHeaderString(HttpHeaderNames.ORIGIN.toString());
-            String allowed = Context.getConfig().getString(Keys.WEB_ORIGIN);
-
             if (origin == null) {
                 response.getHeaders().add(HttpHeaderNames.ACCESS_CONTROL_ALLOW_ORIGIN.toString(), ORIGIN_ALL);
             } else if (allowed == null || allowed.equals(ORIGIN_ALL) || allowed.contains(origin)) {
