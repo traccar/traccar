@@ -156,7 +156,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         if (position.getDeviceId() != 0) {
             position.setOutdated(true);
 
-            Position last = identityManager.getLastPosition(position.getDeviceId());
+            Position last = cacheManager.getPosition(position.getDeviceId());
             if (last != null) {
                 position.setFixTime(last.getFixTime());
                 position.setValid(last.getValid());

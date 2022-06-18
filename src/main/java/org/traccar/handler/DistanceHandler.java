@@ -20,9 +20,9 @@ import io.netty.channel.ChannelHandler;
 import org.traccar.BaseDataHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.IdentityManager;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 import java.math.BigDecimal;
@@ -31,15 +31,15 @@ import java.math.RoundingMode;
 @ChannelHandler.Sharable
 public class DistanceHandler extends BaseDataHandler {
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
 
     private final boolean filter;
     private final int coordinatesMinError;
     private final int coordinatesMaxError;
 
     @Inject
-    public DistanceHandler(Config config, IdentityManager identityManager) {
-        this.identityManager = identityManager;
+    public DistanceHandler(Config config, CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
         this.filter = config.getBoolean(Keys.COORDINATES_FILTER);
         this.coordinatesMinError = config.getInteger(Keys.COORDINATES_MIN_ERROR);
         this.coordinatesMaxError = config.getInteger(Keys.COORDINATES_MAX_ERROR);
@@ -54,7 +54,7 @@ public class DistanceHandler extends BaseDataHandler {
         }
         double totalDistance = 0.0;
 
-        Position last = identityManager != null ? identityManager.getLastPosition(position.getDeviceId()) : null;
+        Position last = cacheManager.getPosition(position.getDeviceId());
         if (last != null) {
             totalDistance = last.getDouble(Position.KEY_TOTAL_DISTANCE);
             if (!position.getAttributes().containsKey(Position.KEY_DISTANCE)) {

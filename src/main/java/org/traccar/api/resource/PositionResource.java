@@ -17,10 +17,8 @@ package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
 import org.traccar.helper.model.PositionUtil;
-import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
-import org.traccar.model.User;
 import org.traccar.model.UserRestrictions;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -37,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Path("positions")
 @Produces(MediaType.APPLICATION_JSON)
@@ -68,16 +65,7 @@ public class PositionResource extends BaseResource {
                         new Columns.All(), new Condition.LatestPositions(deviceId)));
             }
         } else {
-            var devices = storage.getObjects(Device.class, new Request(
-                    new Columns.Include("id"),
-                    new Condition.Permission(User.class, getUserId(), Device.class)));
-            var deviceIds = devices.stream().map(BaseModel::getId).collect(Collectors.toUnmodifiableSet());
-
-            var positions = storage.getObjects(Position.class, new Request(
-                    new Columns.All(), new Condition.LatestPositions()));
-            return positions.stream()
-                    .filter(position -> deviceIds.contains(position.getDeviceId()))
-                    .collect(Collectors.toList());
+            return PositionUtil.getLatestPositions(storage, getUserId());
         }
     }
 

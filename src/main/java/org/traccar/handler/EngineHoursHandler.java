@@ -18,25 +18,25 @@ package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
 import org.traccar.BaseDataHandler;
-import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 
 @ChannelHandler.Sharable
 public class EngineHoursHandler extends BaseDataHandler {
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
 
     @Inject
-    public EngineHoursHandler(IdentityManager identityManager) {
-        this.identityManager = identityManager;
+    public EngineHoursHandler(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     @Override
     protected Position handlePosition(Position position) {
         if (!position.getAttributes().containsKey(Position.KEY_HOURS)) {
-            Position last = identityManager.getLastPosition(position.getDeviceId());
+            Position last = cacheManager.getPosition(position.getDeviceId());
             if (last != null) {
                 long hours = last.getLong(Position.KEY_HOURS);
                 if (last.getBoolean(Position.KEY_IGNITION) && position.getBoolean(Position.KEY_IGNITION)) {

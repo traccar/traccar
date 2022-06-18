@@ -16,14 +16,9 @@
 package org.traccar.database;
 
 import org.traccar.model.Device;
-import org.traccar.model.Position;
 
 public interface IdentityManager {
 
     Device getById(long id);
-
-    Position getLastPosition(long deviceId);
-
-    boolean isLatestPosition(Position position);
 
 }

@@ -22,6 +22,7 @@ import org.traccar.Context;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.config.Keys;
 import org.traccar.session.ConnectionManager;
+import org.traccar.storage.Storage;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -33,11 +34,13 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
 
     private final ObjectMapper objectMapper;
     private final ConnectionManager connectionManager;
+    private final Storage storage;
 
     @Inject
-    public AsyncSocketServlet(ObjectMapper objectMapper, ConnectionManager connectionManager) {
+    public AsyncSocketServlet(ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage) {
         this.objectMapper = objectMapper;
         this.connectionManager = connectionManager;
+        this.storage = storage;
     }
 
     @Override
@@ -46,7 +49,7 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
         factory.setCreator((req, resp) -> {
             if (req.getSession() != null) {
                 long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
-                return new AsyncSocket(objectMapper, connectionManager, userId);
+                return new AsyncSocket(objectMapper, connectionManager, storage, userId);
             } else {
                 return null;
             }

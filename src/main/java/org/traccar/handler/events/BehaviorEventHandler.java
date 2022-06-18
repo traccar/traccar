@@ -18,10 +18,10 @@ package org.traccar.handler.events;
 import io.netty.channel.ChannelHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.IdentityManager;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -33,19 +33,19 @@ public class BehaviorEventHandler extends BaseEventHandler {
     private final double accelerationThreshold;
     private final double brakingThreshold;
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
 
     @Inject
-    public BehaviorEventHandler(Config config, IdentityManager identityManager) {
+    public BehaviorEventHandler(Config config, CacheManager cacheManager) {
         accelerationThreshold = config.getDouble(Keys.EVENT_BEHAVIOR_ACCELERATION_THRESHOLD);
         brakingThreshold = config.getDouble(Keys.EVENT_BEHAVIOR_BRAKING_THRESHOLD);
-        this.identityManager = identityManager;
+        this.cacheManager = cacheManager;
     }
 
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
 
-        Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
+        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
         if (lastPosition != null && position.getFixTime().equals(lastPosition.getFixTime())) {
             double acceleration = UnitsConverter.mpsFromKnots(position.getSpeed() - lastPosition.getSpeed()) * 1000
                     / (position.getFixTime().getTime() - lastPosition.getFixTime().getTime());

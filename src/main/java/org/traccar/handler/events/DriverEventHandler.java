@@ -16,35 +16,35 @@
  */
 package org.traccar.handler.events;
 
-import java.util.Collections;
-import java.util.Map;
-
 import io.netty.channel.ChannelHandler;
-import org.traccar.database.IdentityManager;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
+import java.util.Collections;
+import java.util.Map;
 
 @ChannelHandler.Sharable
 public class DriverEventHandler extends BaseEventHandler {
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
 
     @Inject
-    public DriverEventHandler(IdentityManager identityManager) {
-        this.identityManager = identityManager;
+    public DriverEventHandler(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        if (!identityManager.isLatestPosition(position)) {
+        if (!PositionUtil.isLatest(cacheManager, position)) {
             return null;
         }
         String driverUniqueId = position.getString(Position.KEY_DRIVER_UNIQUE_ID);
         if (driverUniqueId != null) {
             String oldDriverUniqueId = null;
-            Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
+            Position lastPosition = cacheManager.getPosition(position.getDeviceId());
             if (lastPosition != null) {
                 oldDriverUniqueId = lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
             }

@@ -22,9 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.IdentityManager;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 @ChannelHandler.Sharable
 public class GeocoderHandler extends ChannelInboundHandlerAdapter {
@@ -32,15 +32,14 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(GeocoderHandler.class);
 
     private final Geocoder geocoder;
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
     private final boolean ignorePositions;
     private final boolean processInvalidPositions;
     private final int geocoderReuseDistance;
 
-    public GeocoderHandler(
-            Config config, Geocoder geocoder, IdentityManager identityManager) {
+    public GeocoderHandler(Config config, Geocoder geocoder, CacheManager cacheManager) {
         this.geocoder = geocoder;
-        this.identityManager = identityManager;
+        this.cacheManager = cacheManager;
         ignorePositions = config.getBoolean(Keys.GEOCODER_IGNORE_POSITIONS);
         processInvalidPositions = config.getBoolean(Keys.GEOCODER_PROCESS_INVALID_POSITIONS);
         geocoderReuseDistance = config.getInteger(Keys.GEOCODER_REUSE_DISTANCE, 0);
@@ -52,7 +51,7 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
             final Position position = (Position) message;
             if (processInvalidPositions || position.getValid()) {
                 if (geocoderReuseDistance != 0) {
-                    Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
+                    Position lastPosition = cacheManager.getPosition(position.getDeviceId());
                     if (lastPosition != null && lastPosition.getAddress() != null
                             && position.getDouble(Position.KEY_DISTANCE) <= geocoderReuseDistance) {
                         position.setAddress(lastPosition.getAddress());

@@ -2,9 +2,9 @@ package org.traccar.handler.events;
 
 import org.junit.Test;
 import org.traccar.BaseTest;
-import org.traccar.database.IdentityManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import java.util.Map;
 
@@ -16,7 +16,7 @@ public class IgnitionEventHandlerTest extends BaseTest {
     @Test
     public void testIgnitionEventHandler() {
         
-        IgnitionEventHandler ignitionEventHandler = new IgnitionEventHandler(mock(IdentityManager.class));
+        IgnitionEventHandler ignitionEventHandler = new IgnitionEventHandler(mock(CacheManager.class));
         
         Position position = new Position();
         position.set(Position.KEY_IGNITION, true);

@@ -21,21 +21,21 @@ import java.util.Map;
 import io.netty.channel.ChannelHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.IdentityManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 
 @ChannelHandler.Sharable
 public class AlertEventHandler extends BaseEventHandler {
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
     private final boolean ignoreDuplicateAlerts;
 
     @Inject
-    public AlertEventHandler(Config config, IdentityManager identityManager) {
-        this.identityManager = identityManager;
+    public AlertEventHandler(Config config, CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
         ignoreDuplicateAlerts = config.getBoolean(Keys.EVENT_IGNORE_DUPLICATE_ALERTS);
     }
 
@@ -45,7 +45,7 @@ public class AlertEventHandler extends BaseEventHandler {
         if (alarm != null) {
             boolean ignoreAlert = false;
             if (ignoreDuplicateAlerts) {
-                Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
+                Position lastPosition = cacheManager.getPosition(position.getDeviceId());
                 if (lastPosition != null && alarm.equals(lastPosition.getAttributes().get(Position.KEY_ALARM))) {
                     ignoreAlert = true;
                 }

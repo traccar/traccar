@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
@@ -40,7 +39,7 @@ public class MaintenanceEventHandler extends BaseEventHandler {
 
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        Position lastPosition = Context.getIdentityManager().getLastPosition(position.getDeviceId());
+        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
         if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) < 0) {
             return null;
         }

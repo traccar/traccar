@@ -15,21 +15,13 @@
  */
 package org.traccar.database;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Device;
-import org.traccar.model.Position;
-import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceState;
 import org.traccar.storage.StorageException;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,23 +29,15 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeviceManager.class);
-
-    private final ConnectionManager connectionManager;
     private final long dataRefreshDelay;
 
     private final AtomicLong devicesLastUpdate = new AtomicLong();
 
-    private final Map<Long, Position> positions = new ConcurrentHashMap<>();
-
     private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
 
-    public DeviceManager(
-            Config config, DataManager dataManager, ConnectionManager connectionManager) {
+    public DeviceManager(Config config, DataManager dataManager) {
         super(dataManager, Device.class);
-        this.connectionManager = connectionManager;
         dataRefreshDelay = config.getLong(Keys.DATABASE_REFRESH_DELAY) * 1000;
-        refreshLastPositions();
     }
 
     public void updateDeviceCache(boolean force) {
@@ -78,25 +62,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return getItems(getAllItems());
     }
 
-    public Set<Long> getAllUserItems(long userId) {
-        return Context.getPermissionsManager().getDevicePermissions(userId);
-    }
-
-    public Set<Long> getUserItems(long userId) {
-        if (Context.getPermissionsManager() != null) {
-            Set<Long> result = new HashSet<>();
-            for (long deviceId : Context.getPermissionsManager().getDevicePermissions(userId)) {
-                Device device = getById(deviceId);
-                if (device != null && !device.getDisabled()) {
-                    result.add(deviceId);
-                }
-            }
-            return result;
-        } else {
-            return new HashSet<>();
-        }
-    }
-
     @Override
     protected void updateCachedItem(Device device) {
         Device cachedDevice = getById(device.getId());
@@ -117,7 +82,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         if (cachedDevice != null) {
             super.removeCachedItem(deviceId);
         }
-        positions.remove(deviceId);
     }
 
     public void updateDeviceStatus(Device device) throws StorageException {
@@ -126,61 +90,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         if (cachedDevice != null) {
             cachedDevice.setStatus(device.getStatus());
         }
-    }
-
-    private void refreshLastPositions() {
-        if (getDataManager() != null) {
-            try {
-                for (Position position : getDataManager().getLatestPositions()) {
-                    positions.put(position.getDeviceId(), position);
-                }
-            } catch (StorageException error) {
-                LOGGER.warn("Load latest positions error", error);
-            }
-        }
-    }
-
-    public boolean isLatestPosition(Position position) {
-        Position lastPosition = getLastPosition(position.getDeviceId());
-        return lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) >= 0;
-    }
-
-    public void updateLatestPosition(Position position) throws StorageException {
-
-        if (isLatestPosition(position)) {
-
-            getDataManager().updateLatestPosition(position);
-
-            Device device = getById(position.getDeviceId());
-            if (device != null) {
-                device.setPositionId(position.getId());
-            }
-
-            positions.put(position.getDeviceId(), position);
-
-            connectionManager.updatePosition(position);
-        }
-    }
-
-    @Override
-    public Position getLastPosition(long deviceId) {
-        return positions.get(deviceId);
-    }
-
-    public Collection<Position> getInitialState(long userId) {
-
-        List<Position> result = new LinkedList<>();
-
-        if (Context.getPermissionsManager() != null) {
-            for (long deviceId : Context.getPermissionsManager().getUserAdmin(userId)
-                    ? getAllUserItems(userId) : getUserItems(userId)) {
-                if (positions.containsKey(deviceId)) {
-                    result.add(positions.get(deviceId));
-                }
-            }
-        }
-
-        return result;
     }
 
     public DeviceState getDeviceState(long deviceId) {

@@ -24,7 +24,6 @@ import org.traccar.database.PermissionsManager;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
-import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 
 public final class Context {
@@ -69,8 +68,7 @@ public final class Context {
 
         deviceManager = new DeviceManager(
                 config,
-                Main.getInjector().getInstance(DataManager.class),
-                Main.getInjector().getInstance(ConnectionManager.class));
+                Main.getInjector().getInstance(DataManager.class));
 
         identityManager = deviceManager;
 

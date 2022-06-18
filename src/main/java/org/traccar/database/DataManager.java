@@ -24,45 +24,23 @@ import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Limit;
-import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import java.util.Collection;
-import java.util.Date;
 
 public class DataManager {
 
     private final Storage storage;
 
     @Inject
-    public DataManager(Storage storage) throws Exception {
+    public DataManager(Storage storage) {
         this.storage = storage;
     }
 
     public void updateDeviceStatus(Device device) throws StorageException {
         storage.updateObject(device, new Request(
                 new Columns.Include("lastUpdate"),
-                new Condition.Equals("id", "id")));
-    }
-
-    public Position getPrecedingPosition(long deviceId, Date date) throws StorageException {
-        return storage.getObject(Position.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("deviceId", "deviceId", deviceId),
-                        new Condition.Compare("fixTime", "<=", "time", date)),
-                new Order(true, "fixTime"),
-                new Limit(1)));
-    }
-
-    public void updateLatestPosition(Position position) throws StorageException {
-        Device device = new Device();
-        device.setId(position.getDeviceId());
-        device.setPositionId(position.getId());
-        storage.updateObject(device, new Request(
-                new Columns.Include("positionId"),
                 new Condition.Equals("id", "id")));
     }
 

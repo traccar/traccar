@@ -20,27 +20,28 @@ import java.util.Collections;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
-import org.traccar.database.IdentityManager;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 
 @ChannelHandler.Sharable
 public class IgnitionEventHandler extends BaseEventHandler {
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
 
     @Inject
-    public IgnitionEventHandler(IdentityManager identityManager) {
-        this.identityManager = identityManager;
+    public IgnitionEventHandler(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        Device device = identityManager.getById(position.getDeviceId());
-        if (device == null || !identityManager.isLatestPosition(position)) {
+        Device device = cacheManager.getObject(Device.class, position.getDeviceId());
+        if (device == null || !PositionUtil.isLatest(cacheManager, position)) {
             return null;
         }
 
@@ -49,7 +50,7 @@ public class IgnitionEventHandler extends BaseEventHandler {
         if (position.getAttributes().containsKey(Position.KEY_IGNITION)) {
             boolean ignition = position.getBoolean(Position.KEY_IGNITION);
 
-            Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
+            Position lastPosition = cacheManager.getPosition(position.getDeviceId());
             if (lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_IGNITION)) {
                 boolean oldIgnition = lastPosition.getBoolean(Position.KEY_IGNITION);
 

@@ -28,10 +28,16 @@ import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.NetworkUtil;
+import org.traccar.helper.model.PositionUtil;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -46,10 +52,15 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     private final Set<String> connectionlessProtocols = new HashSet<>();
     private final Set<String> logAttributes = new LinkedHashSet<>();
 
+    private final CacheManager cacheManager;
+    private final Storage storage;
     private final ConnectionManager connectionManager;
 
     @Inject
-    public MainEventHandler(Config config, ConnectionManager connectionManager) {
+    public MainEventHandler(
+            Config config, CacheManager cacheManager, Storage storage, ConnectionManager connectionManager) {
+        this.cacheManager = cacheManager;
+        this.storage = storage;
         this.connectionManager = connectionManager;
         String connectionlessProtocolList = config.getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {
@@ -64,8 +75,19 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
             Position position = (Position) msg;
             try {
-                Context.getDeviceManager().updateLatestPosition(position);
-                Main.getInjector().getInstance(CacheManager.class).updatePosition(position);
+                if (PositionUtil.isLatest(cacheManager, position)) {
+                    Device device = new Device();
+                    device.setId(position.getDeviceId());
+                    device.setPositionId(position.getId());
+                    storage.updateObject(device, new Request(
+                            new Columns.Include("positionId"),
+                            new Condition.Equals("id", "id")));
+
+                    cacheManager.updatePosition(position);
+                    cacheManager.getObject(Device.class, position.getDeviceId()).setPositionId(position.getId());
+
+                    connectionManager.updatePosition(position);
+                }
             } catch (StorageException error) {
                 LOGGER.warn("Failed to update device", error);
             }

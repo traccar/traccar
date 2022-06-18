@@ -18,13 +18,13 @@ package org.traccar.handler.events;
 
 import io.netty.channel.ChannelHandler;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.IdentityManager;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.common.TripsConfig;
 import org.traccar.session.DeviceState;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -33,13 +33,13 @@ import java.util.Map;
 @ChannelHandler.Sharable
 public class MotionEventHandler extends BaseEventHandler {
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
     private final DeviceManager deviceManager;
     private final TripsConfig tripsConfig;
 
     @Inject
-    public MotionEventHandler(IdentityManager identityManager, DeviceManager deviceManager, TripsConfig tripsConfig) {
-        this.identityManager = identityManager;
+    public MotionEventHandler(CacheManager cacheManager, DeviceManager deviceManager, TripsConfig tripsConfig) {
+        this.cacheManager = cacheManager;
         this.deviceManager = deviceManager;
         this.tripsConfig = tripsConfig;
     }
@@ -113,11 +113,11 @@ public class MotionEventHandler extends BaseEventHandler {
     protected Map<Event, Position> analyzePosition(Position position) {
 
         long deviceId = position.getDeviceId();
-        Device device = identityManager.getById(deviceId);
+        Device device = cacheManager.getObject(Device.class, deviceId);
         if (device == null) {
             return null;
         }
-        if (!identityManager.isLatestPosition(position)
+        if (!PositionUtil.isLatest(cacheManager, position)
                 || !tripsConfig.getProcessInvalidPositions() && !position.getValid()) {
             return null;
         }
