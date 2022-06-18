@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ public class WebDataHandler extends BaseDataHandler {
     private final CacheManager cacheManager;
     private final ObjectMapper objectMapper;
     private final Client client;
+    private final Timer timer;
 
     private final String url;
     private final String header;
@@ -78,11 +79,12 @@ public class WebDataHandler extends BaseDataHandler {
 
     @Inject
     public WebDataHandler(
-            Config config, CacheManager cacheManager, ObjectMapper objectMapper, Client client) {
+            Config config, CacheManager cacheManager, ObjectMapper objectMapper, Client client, Timer timer) {
 
         this.cacheManager = cacheManager;
         this.objectMapper = objectMapper;
         this.client = client;
+        this.timer = timer;
         this.url = config.getString(Keys.FORWARD_URL);
         this.header = config.getString(Keys.FORWARD_HEADER);
         this.json = config.getBoolean(Keys.FORWARD_JSON);
@@ -248,8 +250,7 @@ public class WebDataHandler extends BaseDataHandler {
         }
 
         private void schedule() {
-            Main.getInjector().getInstance(Timer.class).newTimeout(
-                this, retryDelay * (long) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
+            timer.newTimeout(this, retryDelay * (long) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
         }
 
         @Override

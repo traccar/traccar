@@ -28,6 +28,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
@@ -44,6 +45,9 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class DeviceResource extends BaseObjectResource<Device> {
+
+    @Inject
+    private CacheManager cacheManager;
 
     public DeviceResource() {
         super(Device.class);
@@ -122,7 +126,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
                     new Columns.Include("positionId"),
                     new Condition.Equals("id", "id")));
 
-            Main.getInjector().getInstance(CacheManager.class).updatePosition(position);
+            cacheManager.updatePosition(position);
         } else {
             throw new IllegalArgumentException();
         }

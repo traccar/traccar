@@ -18,7 +18,6 @@ package org.traccar.database;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Main;
 import org.traccar.config.Config;
 import org.traccar.model.User;
 import org.traccar.notification.PropertiesProvider;
@@ -42,10 +41,12 @@ public final class MailManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(MailManager.class);
 
     private final Config config;
+    private final StatisticsManager statisticsManager;
 
     @Inject
-    public MailManager(Config config) {
+    public MailManager(Config config, StatisticsManager statisticsManager) {
         this.config = config;
+        this.statisticsManager = statisticsManager;
     }
 
     private static Properties getProperties(PropertiesProvider provider) {
@@ -145,7 +146,7 @@ public final class MailManager {
         }
 
         try (Transport transport = session.getTransport()) {
-            Main.getInjector().getInstance(StatisticsManager.class).registerMail();
+            statisticsManager.registerMail();
             transport.connect(
                     properties.getProperty("mail.smtp.host"),
                     properties.getProperty("mail.smtp.username"),

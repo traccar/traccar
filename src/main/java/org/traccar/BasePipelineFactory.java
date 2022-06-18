@@ -15,6 +15,7 @@
  */
 package org.traccar;
 
+import com.google.inject.Injector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInboundHandler;
@@ -55,11 +56,13 @@ import java.util.Map;
 
 public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
+    private final Injector injector;
     private final TrackerConnector connector;
     private final String protocol;
     private int timeout;
 
     public BasePipelineFactory(TrackerConnector connector, Config config, String protocol) {
+        this.injector = Main.getInjector();
         this.connector = connector;
         this.protocol = protocol;
         timeout = config.getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
@@ -76,7 +79,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private void addHandlers(ChannelPipeline pipeline, Class<? extends ChannelHandler>... handlerClasses) {
         for (Class<? extends ChannelHandler> handlerClass : handlerClasses) {
             if (handlerClass != null) {
-                pipeline.addLast(Main.getInjector().getInstance(handlerClass));
+                pipeline.addLast(injector.getInstance(handlerClass));
             }
         }
     }
@@ -111,7 +114,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
         addProtocolHandlers(handler -> {
             if (handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder) {
-                Main.getInjector().injectMembers(handler);
+                injector.injectMembers(handler);
             } else {
                 if (handler instanceof ChannelInboundHandler) {
                     handler = new WrapperInboundHandler((ChannelInboundHandler) handler);

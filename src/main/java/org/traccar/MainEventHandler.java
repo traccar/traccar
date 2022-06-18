@@ -55,13 +55,16 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     private final CacheManager cacheManager;
     private final Storage storage;
     private final ConnectionManager connectionManager;
+    private final StatisticsManager statisticsManager;
 
     @Inject
     public MainEventHandler(
-            Config config, CacheManager cacheManager, Storage storage, ConnectionManager connectionManager) {
+            Config config, CacheManager cacheManager, Storage storage,
+            ConnectionManager connectionManager, StatisticsManager statisticsManager) {
         this.cacheManager = cacheManager;
         this.storage = storage;
         this.connectionManager = connectionManager;
+        this.statisticsManager = statisticsManager;
         String connectionlessProtocolList = config.getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split("[, ]")));
@@ -139,8 +142,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             }
             LOGGER.info(builder.toString());
 
-            Main.getInjector().getInstance(StatisticsManager.class)
-                    .registerMessageStored(position.getDeviceId(), position.getProtocol());
+            statisticsManager.registerMessageStored(position.getDeviceId(), position.getProtocol());
         }
     }
 

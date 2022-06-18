@@ -15,12 +15,12 @@
  */
 package org.traccar.session;
 
+import com.google.inject.Injector;
 import io.netty.channel.Channel;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Main;
 import org.traccar.Protocol;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -64,6 +64,7 @@ public class ConnectionManager {
 
     private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
 
+    private final Injector injector;
     private final Config config;
     private final CacheManager cacheManager;
     private final Storage storage;
@@ -75,8 +76,9 @@ public class ConnectionManager {
 
     @Inject
     public ConnectionManager(
-            Config config, CacheManager cacheManager, Storage storage,
+            Injector injector, Config config, CacheManager cacheManager, Storage storage,
             NotificationManager notificationManager, Timer timer) {
+        this.injector = injector;
         this.config = config;
         this.cacheManager = cacheManager;
         this.storage = storage;
@@ -279,15 +281,13 @@ public class ConnectionManager {
         DeviceState deviceState = getDeviceState(deviceId);
         Map<Event, Position> result = new HashMap<>();
 
-        Map<Event, Position> event = Main.getInjector()
-                .getInstance(MotionEventHandler.class).updateMotionState(deviceState);
+        Map<Event, Position> event = injector.getInstance(MotionEventHandler.class).updateMotionState(deviceState);
         if (event != null) {
             result.putAll(event);
         }
 
         double speedLimit = AttributeUtil.lookup(cacheManager, Keys.EVENT_OVERSPEED_LIMIT, deviceId);
-        event = Main.getInjector().getInstance(OverspeedEventHandler.class)
-                .updateOverspeedState(deviceState, speedLimit);
+        event = injector.getInstance(OverspeedEventHandler.class).updateOverspeedState(deviceState, speedLimit);
         if (event != null) {
             result.putAll(event);
         }

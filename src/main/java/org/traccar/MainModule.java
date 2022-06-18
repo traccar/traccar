@@ -111,9 +111,8 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
-    public static Client provideClient() {
-        return ClientBuilder.newClient().register(
-                (ContextResolver<ObjectMapper>) clazz -> Main.getInjector().getInstance(ObjectMapper.class));
+    public static Client provideClient(ObjectMapper objectMapper) {
+        return ClientBuilder.newClient().register((ContextResolver<ObjectMapper>) clazz -> objectMapper);
     }
 
     @Singleton
