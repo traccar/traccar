@@ -67,10 +67,6 @@ public class BaseObjectManager<T extends BaseModel> {
         return dataManager;
     }
 
-    protected final Class<T> getBaseClass() {
-        return baseClass;
-    }
-
     public T getById(long itemId) {
         try {
             readLock();

@@ -25,7 +25,6 @@ import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.session.ConnectionManager;
-import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 
 public final class Context {
@@ -70,7 +69,6 @@ public final class Context {
 
         deviceManager = new DeviceManager(
                 config,
-                Main.getInjector().getInstance(CacheManager.class),
                 Main.getInjector().getInstance(DataManager.class),
                 Main.getInjector().getInstance(ConnectionManager.class));
 

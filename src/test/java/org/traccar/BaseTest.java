@@ -31,7 +31,6 @@ public class BaseTest {
         when(device.getId()).thenReturn(1L);
         var identityManager = mock(IdentityManager.class);
         when(identityManager.getById(anyLong())).thenReturn(device);
-        when(identityManager.getByUniqueId(any())).thenReturn(device);
         decoder.setIdentityManager(identityManager);
         var cacheManager = mock(CacheManager.class);
         when(cacheManager.getConfig()).thenReturn(config);
@@ -72,7 +71,6 @@ public class BaseTest {
         encoder.setCacheManager(cacheManager);
         var identityManager = mock(IdentityManager.class);
         when(identityManager.getById(anyLong())).thenReturn(device);
-        when(identityManager.getByUniqueId(any())).thenReturn(device);
         encoder.setIdentityManager(identityManager);
         return encoder;
     }

@@ -22,8 +22,6 @@ public interface IdentityManager {
 
     Device getById(long id);
 
-    Device getByUniqueId(String uniqueId) throws Exception;
-
     Position getLastPosition(long deviceId);
 
     boolean isLatestPosition(Position position);

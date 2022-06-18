@@ -20,14 +20,10 @@ import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.model.Command;
 import org.traccar.model.Device;
-import org.traccar.model.Group;
 import org.traccar.model.Position;
-import org.traccar.model.Server;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceState;
-import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
 import java.util.Collection;
@@ -43,12 +39,9 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeviceManager.class);
 
-    private final Config config;
-    private final CacheManager cacheManager;
     private final ConnectionManager connectionManager;
     private final long dataRefreshDelay;
 
-    private Map<String, Device> devicesByUniqueId;
     private final AtomicLong devicesLastUpdate = new AtomicLong();
 
     private final Map<Long, Position> positions = new ConcurrentHashMap<>();
@@ -56,19 +49,9 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
 
     public DeviceManager(
-            Config config, CacheManager cacheManager, DataManager dataManager, ConnectionManager connectionManager) {
+            Config config, DataManager dataManager, ConnectionManager connectionManager) {
         super(dataManager, Device.class);
-        this.config = config;
-        this.cacheManager = cacheManager;
         this.connectionManager = connectionManager;
-        try {
-            writeLock();
-            if (devicesByUniqueId == null) {
-                devicesByUniqueId = new ConcurrentHashMap<>();
-            }
-        } finally {
-            writeUnlock();
-        }
         dataRefreshDelay = config.getLong(Keys.DATABASE_REFRESH_DELAY) * 1000;
         refreshLastPositions();
     }
@@ -78,24 +61,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         if ((force || System.currentTimeMillis() - lastUpdate > dataRefreshDelay)
                 && devicesLastUpdate.compareAndSet(lastUpdate, System.currentTimeMillis())) {
             refreshItems();
-        }
-    }
-
-    @Override
-    public Device getByUniqueId(String uniqueId) {
-        boolean forceUpdate;
-        try {
-            readLock();
-            forceUpdate = !devicesByUniqueId.containsKey(uniqueId) && !config.getBoolean(Keys.DATABASE_IGNORE_UNKNOWN);
-        } finally {
-            readUnlock();
-        }
-        updateDeviceCache(forceUpdate);
-        try {
-            readLock();
-            return devicesByUniqueId.get(uniqueId);
-        } finally {
-            readUnlock();
         }
     }
 
@@ -132,35 +97,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         }
     }
 
-    private void addByUniqueId(Device device) {
-        try {
-            writeLock();
-            if (devicesByUniqueId == null) {
-                devicesByUniqueId = new ConcurrentHashMap<>();
-            }
-            devicesByUniqueId.put(device.getUniqueId(), device);
-        } finally {
-            writeUnlock();
-        }
-    }
-
-    private void removeByUniqueId(String deviceUniqueId) {
-        try {
-            writeLock();
-            if (devicesByUniqueId != null) {
-                devicesByUniqueId.remove(deviceUniqueId);
-            }
-        } finally {
-            writeUnlock();
-        }
-    }
-
-    @Override
-    protected void addNewItem(Device device) {
-        super.addNewItem(device);
-        addByUniqueId(device);
-    }
-
     @Override
     protected void updateCachedItem(Device device) {
         Device cachedDevice = getById(device.getId());
@@ -172,20 +108,14 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         cachedDevice.setModel(device.getModel());
         cachedDevice.setDisabled(device.getDisabled());
         cachedDevice.setAttributes(device.getAttributes());
-        if (!device.getUniqueId().equals(cachedDevice.getUniqueId())) {
-            removeByUniqueId(cachedDevice.getUniqueId());
-            cachedDevice.setUniqueId(device.getUniqueId());
-            addByUniqueId(cachedDevice);
-        }
+        cachedDevice.setUniqueId(device.getUniqueId());
     }
 
     @Override
     protected void removeCachedItem(long deviceId) {
         Device cachedDevice = getById(deviceId);
         if (cachedDevice != null) {
-            String deviceUniqueId = cachedDevice.getUniqueId();
             super.removeCachedItem(deviceId);
-            removeByUniqueId(deviceUniqueId);
         }
         positions.remove(deviceId);
     }

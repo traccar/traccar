@@ -15,11 +15,9 @@
  */
 package org.traccar.helper.model;
 
-import org.traccar.Context;
 import org.traccar.config.ConfigKey;
 import org.traccar.config.KeyType;
 import org.traccar.config.Keys;
-import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.session.cache.CacheManager;
