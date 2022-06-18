@@ -23,7 +23,10 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Statistics;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -46,7 +49,7 @@ public class StatisticsManager {
     private static final int SPLIT_MODE = Calendar.DAY_OF_MONTH;
 
     private final Config config;
-    private final DataManager dataManager;
+    private final Storage storage;
     private final Client client;
     private final ObjectMapper objectMapper;
 
@@ -64,9 +67,9 @@ public class StatisticsManager {
     private int geolocationRequests;
 
     @Inject
-    public StatisticsManager(Config config, DataManager dataManager, Client client, ObjectMapper objectMapper) {
+    public StatisticsManager(Config config, Storage storage, Client client, ObjectMapper objectMapper) {
         this.config = config;
-        this.dataManager = dataManager;
+        this.storage = storage;
         this.client = client;
         this.objectMapper = objectMapper;
     }
@@ -107,7 +110,7 @@ public class StatisticsManager {
             }
 
             try {
-                dataManager.addObject(statistics);
+                storage.addObject(statistics, new Request(new Columns.Exclude("id")));
             } catch (StorageException e) {
                 LOGGER.warn("Error saving statistics", e);
             }
