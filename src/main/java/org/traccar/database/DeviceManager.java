@@ -253,54 +253,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return result;
     }
 
-    @Override
-    public boolean lookupAttributeBoolean(
-            long deviceId, String attributeName, boolean defaultValue, boolean lookupServer, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
-        if (result != null) {
-            return result instanceof String ? Boolean.parseBoolean((String) result) : (Boolean) result;
-        }
-        return defaultValue;
-    }
-
-    @Override
-    public String lookupAttributeString(
-            long deviceId, String attributeName, String defaultValue, boolean lookupServer, boolean lookupConfig) {
-        Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
-        return result != null ? (String) result : defaultValue;
-    }
-
-    private Object lookupAttribute(long deviceId, String attributeName, boolean lookupServer, boolean lookupConfig) {
-        Object result = null;
-        Device device = getById(deviceId);
-        if (device != null) {
-            result = device.getAttributes().get(attributeName);
-            if (result == null) {
-                long groupId = device.getGroupId();
-                while (groupId > 0) {
-                    Group group = cacheManager.getObject(Group.class, device.getGroupId());
-                    if (group != null) {
-                        result = group.getAttributes().get(attributeName);
-                        if (result != null) {
-                            break;
-                        }
-                        groupId = group.getGroupId();
-                    } else {
-                        groupId = 0;
-                    }
-                }
-            }
-            if (result == null && lookupServer) {
-                Server server = cacheManager.getServer();
-                result = server.getAttributes().get(attributeName);
-            }
-            if (result == null && lookupConfig) {
-                result = Context.getConfig().getString(attributeName);
-            }
-        }
-        return result;
-    }
-
     public DeviceState getDeviceState(long deviceId) {
         DeviceState deviceState = deviceStates.get(deviceId);
         if (deviceState == null) {

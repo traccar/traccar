@@ -19,8 +19,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -58,8 +60,8 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        boolean alternative = getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
+        boolean alternative = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()), command.getDeviceId());
 
         int outputControlMessageType = alternative
                 ? MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL_1

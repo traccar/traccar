@@ -57,9 +57,7 @@ public class TripsReportProvider {
     }
 
     private Collection<TripReportItem> detectTrips(long deviceId, Date from, Date to) throws StorageException {
-        boolean ignoreOdometer = Context.getDeviceManager()
-                .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
-
+        boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
         return reportUtils.detectTripsAndStops(
                 PositionUtil.getPositions(storage, deviceId, from, to), ignoreOdometer, TripReportItem.class);
     }

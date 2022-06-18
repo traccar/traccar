@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
@@ -33,8 +34,8 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
     private ByteBuf encodeContent(long deviceId, String content) {
 
-        boolean language = getIdentityManager()
-            .lookupAttributeBoolean(deviceId, getProtocolName() + ".language", false, false, true);
+        boolean language = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_LANGUAGE.withPrefix(getProtocolName()), deviceId);
 
         ByteBuf buf = Unpooled.buffer();
 
@@ -66,8 +67,8 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        boolean alternative = getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
+        boolean alternative = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()), command.getDeviceId());
 
         String password = AttributeUtil.getDevicePassword(
                 getCacheManager(), command.getDeviceId(), getProtocolName(), "123456");

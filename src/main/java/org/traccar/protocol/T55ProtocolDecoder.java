@@ -17,6 +17,8 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -128,10 +130,12 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeGprmc(
             DeviceSession deviceSession, String sentence, SocketAddress remoteAddress, Channel channel) {
 
-        if (deviceSession != null && channel != null && !(channel instanceof DatagramChannel)
-                && getIdentityManager().lookupAttributeBoolean(
-                        deviceSession.getDeviceId(), getProtocolName() + ".ack", false, false, true)) {
-            channel.writeAndFlush(new NetworkMessage("OK1\r\n", remoteAddress));
+        if (deviceSession != null && channel != null && !(channel instanceof DatagramChannel)) {
+            boolean ack = AttributeUtil.lookup(
+                    getCacheManager(), Keys.PROTOCOL_ACK.withPrefix(getProtocolName()), deviceSession.getDeviceId());
+            if (ack) {
+                channel.writeAndFlush(new NetworkMessage("OK1\r\n", remoteAddress));
+            }
         }
 
         Parser parser = new Parser(PATTERN_GPRMC, sentence);

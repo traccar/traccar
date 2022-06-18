@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,11 +27,5 @@ public interface IdentityManager {
     Position getLastPosition(long deviceId);
 
     boolean isLatestPosition(Position position);
-
-    boolean lookupAttributeBoolean(
-            long deviceId, String attributeName, boolean defaultValue, boolean lookupServer, boolean lookupConfig);
-
-    String lookupAttributeString(
-            long deviceId, String attributeName, String defaultValue, boolean lookupServer, boolean lookupConfig);
 
 }

@@ -74,8 +74,7 @@ public class SummaryReportProvider {
                     result.setMaxSpeed(position.getSpeed());
                 }
             }
-            boolean ignoreOdometer = Context.getDeviceManager()
-                    .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
+            boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
             result.setDistance(PositionUtil.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
             result.setSpentFuel(reportUtils.calculateFuel(firstPosition, previousPosition));
 

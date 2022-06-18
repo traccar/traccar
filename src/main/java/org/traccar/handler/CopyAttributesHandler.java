@@ -20,8 +20,9 @@ import io.netty.channel.ChannelHandler;
 import org.traccar.BaseDataHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.IdentityManager;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 
@@ -29,20 +30,20 @@ import javax.inject.Inject;
 public class CopyAttributesHandler extends BaseDataHandler {
 
     private final boolean enabled;
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
 
     @Inject
-    public CopyAttributesHandler(Config config, IdentityManager identityManager) {
+    public CopyAttributesHandler(Config config, CacheManager cacheManager) {
         enabled = config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE);
-        this.identityManager = identityManager;
+        this.cacheManager = cacheManager;
     }
 
     @Override
     protected Position handlePosition(Position position) {
         if (enabled) {
-            String attributesString = identityManager.lookupAttributeString(
-                    position.getDeviceId(), "processing.copyAttributes", "", false, true);
-            Position last = identityManager.getLastPosition(position.getDeviceId());
+            String attributesString = AttributeUtil.lookup(
+                    cacheManager, Keys.PROCESSING_COPY_ATTRIBUTES, position.getDeviceId());
+            Position last = cacheManager.getPosition(position.getDeviceId());
             if (last != null) {
                 for (String attribute : attributesString.split("[ ,]")) {
                     if (last.getAttributes().containsKey(attribute)

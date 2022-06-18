@@ -124,7 +124,8 @@ public final class Keys {
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_ACK = new BooleanConfigSuffix(
             ".ack",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            false);
 
     /**
      * Ignore device reported fix time. Useful in case some devices report invalid time. Currently only available for
@@ -267,6 +268,22 @@ public final class Keys {
     public static final ConfigKey<String> ORBCOMM_PASSWORD = new StringConfigKey(
             "orbcomm.password",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Use alternative format for the protocol of commands.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_ALTERNATIVE = new BooleanConfigSuffix(
+            ".alternative",
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            false);
+
+    /**
+     * Protocol format includes a language field.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_LANGUAGE = new BooleanConfigSuffix(
+            ".language",
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            false);
 
     /**
      * Server wide connection timeout value in seconds. See protocol timeout for more information.
@@ -945,6 +962,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Ignore odometer value reported by the device and use server-calculated total distance instead. This is useful
+     * if device reports invalid or zero odometer values.
+     */
+    public static final ConfigKey<Boolean> REPORT_IGNORE_ODOMETER = new BooleanConfigKey(
+            "report.ignoreOdometer",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Boolean flag to enable or disable position filtering.
      */
     public static final ConfigKey<Boolean> FILTER_ENABLE = new BooleanConfigKey(
@@ -1118,6 +1143,14 @@ public final class Keys {
     public static final ConfigKey<Boolean> PROCESSING_COPY_ATTRIBUTES_ENABLE = new BooleanConfigKey(
             "processing.copyAttributes.enable",
             List.of(KeyType.CONFIG));
+
+    /**
+     * List of attributes to copy. Attributes should be separated by a comma without any spacing.
+     * For example: alarm,ignition
+     */
+    public static final ConfigKey<String> PROCESSING_COPY_ATTRIBUTES = new StringConfigKey(
+            "processing.copyAttributes",
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Enable computed attributes processing.
