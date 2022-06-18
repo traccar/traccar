@@ -16,12 +16,7 @@
 package org.traccar;
 
 import org.traccar.config.Config;
-import org.traccar.database.BaseObjectManager;
-import org.traccar.database.DataManager;
-import org.traccar.database.DeviceManager;
 import org.traccar.helper.Log;
-import org.traccar.model.BaseModel;
-import org.traccar.model.Device;
 
 public final class Context {
 
@@ -32,12 +27,6 @@ public final class Context {
 
     public static Config getConfig() {
         return config;
-    }
-
-    private static DeviceManager deviceManager;
-
-    public static DeviceManager getDeviceManager() {
-        return deviceManager;
     }
 
     public static void init(String configFile) throws Exception {
@@ -51,15 +40,6 @@ public final class Context {
             throw e;
         }
 
-        deviceManager = new DeviceManager(Main.getInjector().getInstance(DataManager.class));
-
-    }
-
-    public static <T extends BaseModel> BaseObjectManager<T> getManager(Class<T> clazz) {
-        if (clazz.equals(Device.class)) {
-            return (BaseObjectManager<T>) deviceManager;
-        }
-        return null;
     }
 
 }

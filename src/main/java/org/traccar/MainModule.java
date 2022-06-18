@@ -30,7 +30,6 @@ import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.DeviceManager;
 import org.traccar.database.LdapProvider;
 import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.AddressFormat;
@@ -111,11 +110,6 @@ public class MainModule extends AbstractModule {
     public static Client provideClient() {
         return ClientBuilder.newClient().register(
                 (ContextResolver<ObjectMapper>) clazz -> Main.getInjector().getInstance(ObjectMapper.class));
-    }
-
-    @Provides
-    public static DeviceManager provideDeviceManager() {
-        return Context.getDeviceManager();
     }
 
     @Singleton

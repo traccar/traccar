@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.traccar.BaseTest;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
-import org.traccar.database.DeviceManager;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;

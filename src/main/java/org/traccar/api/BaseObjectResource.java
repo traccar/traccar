@@ -16,11 +16,8 @@
  */
 package org.traccar.api;
 
-import org.traccar.Context;
-import org.traccar.database.BaseObjectManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
-import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
@@ -67,15 +64,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     public Response add(T entity) throws StorageException {
         permissionsService.checkEdit(getUserId(), entity, true);
 
-        BaseObjectManager<T> manager = Context.getManager(baseClass);
-        if (manager != null) {
-            manager.addItem(entity);
-        } else {
-            entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
-        }
-
+        entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
         LogAction.create(getUserId(), entity);
-
         storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
         cacheManager.invalidate(User.class, getUserId(), baseClass, entity.getId());
         LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
@@ -100,16 +90,10 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             }
         }
 
-        BaseObjectManager<T> manager = Context.getManager(baseClass);
-        if (manager != null) {
-            manager.updateItem(entity);
-        } else {
-            storage.updateObject(entity, new Request(
-                    new Columns.Exclude("id"),
-                    new Condition.Equals("id", "id")));
-        }
+        storage.updateObject(entity, new Request(
+                new Columns.Exclude("id"),
+                new Condition.Equals("id", "id")));
         cacheManager.updateOrInvalidate(entity);
-
         LogAction.edit(getUserId(), entity);
 
         return Response.ok(entity).build();
@@ -121,21 +105,11 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         permissionsService.checkEdit(getUserId(), baseClass, false);
         permissionsService.checkPermission(baseClass, getUserId(), id);
 
-        BaseObjectManager<T> manager = Context.getManager(baseClass);
-        if (manager != null) {
-            manager.removeItem(id);
-        } else {
-            storage.removeObject(baseClass, new Request(new Condition.Equals("id", "id", id)));
-        }
+        storage.removeObject(baseClass, new Request(new Condition.Equals("id", "id", id)));
         cacheManager.invalidate(baseClass, id);
 
         LogAction.remove(getUserId(), baseClass, id);
 
-        if (baseClass.equals(Group.class) || baseClass.equals(Device.class) || baseClass.equals(User.class)) {
-            if (baseClass.equals(Group.class)) {
-                Context.getDeviceManager().updateDeviceCache(true);
-            }
-        }
         return Response.noContent().build();
     }
 
