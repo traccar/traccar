@@ -40,7 +40,6 @@ public class PermissionsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(PermissionsManager.class);
 
     private final DataManager dataManager;
-    private final Storage storage;
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -49,9 +48,8 @@ public class PermissionsManager {
     private final Map<Long, Set<Long>> deviceUsers = new HashMap<>();
     private final Map<Long, Set<Long>> groupDevices = new HashMap<>();
 
-    public PermissionsManager(DataManager dataManager, Storage storage) {
+    public PermissionsManager(DataManager dataManager) {
         this.dataManager = dataManager;
-        this.storage = storage;
         refreshDeviceAndGroupPermissions();
     }
 
@@ -69,15 +67,6 @@ public class PermissionsManager {
 
     protected final void writeUnlock() {
         lock.writeLock().unlock();
-    }
-
-    public User getUser(long userId) {
-        try {
-            return storage.getObject(User.class, new Request(
-                    new Columns.All(), new Condition.Equals("id", "id", userId)));
-        } catch (StorageException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public Set<Long> getGroupPermissions(long userId) {
@@ -172,11 +161,6 @@ public class PermissionsManager {
         } finally {
             writeUnlock();
         }
-    }
-
-    public boolean getUserAdmin(long userId) {
-        User user = getUser(userId);
-        return user != null && user.getAdministrator();
     }
 
     public void refreshPermissions(Permission permission) {

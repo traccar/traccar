@@ -64,8 +64,7 @@ public final class Context {
                 Main.getInjector().getInstance(DataManager.class));
 
         permissionsManager = new PermissionsManager(
-                Main.getInjector().getInstance(DataManager.class),
-                Main.getInjector().getInstance(Storage.class));
+                Main.getInjector().getInstance(DataManager.class));
 
     }
 
