@@ -306,14 +306,16 @@ public final class Keys {
      */
     public static final ConfigKey<Double> EVENT_FUEL_DROP_THRESHOLD = new DoubleConfigKey(
             "fuelDropThreshold",
-            List.of(KeyType.SERVER, KeyType.DEVICE));
+            List.of(KeyType.SERVER, KeyType.DEVICE),
+            0.0);
 
     /**
      * Speed limit value in knots.
      */
     public static final ConfigKey<Double> EVENT_OVERSPEED_LIMIT = new DoubleConfigKey(
             "speedLimit",
-            List.of(KeyType.SERVER, KeyType.DEVICE));
+            List.of(KeyType.SERVER, KeyType.DEVICE),
+            0.0);
 
     /**
      * If true, the event is generated once at the beginning of overspeeding period.
