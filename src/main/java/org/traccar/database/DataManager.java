@@ -17,8 +17,6 @@ package org.traccar.database;
 
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
-import org.traccar.model.Permission;
-import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -44,19 +42,8 @@ public class DataManager {
                 new Condition.Equals("id", "id")));
     }
 
-    public Collection<Position> getLatestPositions() throws StorageException {
-        return storage.getObjects(Position.class, new Request(
-                new Columns.All(),
-                new Condition.LatestPositions()));
-    }
-
     public Server getServer() throws StorageException {
         return storage.getObject(Server.class, new Request(new Columns.All()));
-    }
-
-    public Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)
-            throws StorageException, ClassNotFoundException {
-        return storage.getPermissions(owner, property);
     }
 
     public <T extends BaseModel> Collection<T> getObjects(Class<T> clazz) throws StorageException {
