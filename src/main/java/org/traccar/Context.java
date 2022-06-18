@@ -19,7 +19,6 @@ import org.traccar.config.Config;
 import org.traccar.database.BaseObjectManager;
 import org.traccar.database.DataManager;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.IdentityManager;
 import org.traccar.database.PermissionsManager;
 import org.traccar.helper.Log;
 import org.traccar.model.BaseModel;
@@ -35,12 +34,6 @@ public final class Context {
 
     public static Config getConfig() {
         return config;
-    }
-
-    private static IdentityManager identityManager;
-
-    public static IdentityManager getIdentityManager() {
-        return identityManager;
     }
 
     private static DeviceManager deviceManager;
@@ -69,8 +62,6 @@ public final class Context {
         deviceManager = new DeviceManager(
                 config,
                 Main.getInjector().getInstance(DataManager.class));
-
-        identityManager = deviceManager;
 
         permissionsManager = new PermissionsManager(
                 Main.getInjector().getInstance(DataManager.class),

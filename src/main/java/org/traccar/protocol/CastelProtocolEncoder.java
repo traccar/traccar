@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class CastelProtocolEncoder extends BaseProtocolEncoder {
     private ByteBuf encodeContent(long deviceId, short type, ByteBuf content) {
 
         ByteBuf buf = Unpooled.buffer(0);
-        String uniqueId = getIdentityManager().getById(deviceId).getUniqueId();
+        String uniqueId = getUniqueId(deviceId);
 
         buf.writeByte('@');
         buf.writeByte('@');

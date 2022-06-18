@@ -17,7 +17,6 @@
 package org.traccar.reports;
 
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Device;
@@ -133,7 +132,7 @@ public class EventsReportProvider {
                 }
             }
             DeviceReportSection deviceEvents = new DeviceReportSection();
-            Device device = Context.getIdentityManager().getById(deviceId);
+            Device device = reportUtils.getDevice(deviceId);
             deviceEvents.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
             if (device.getGroupId() > 0) {

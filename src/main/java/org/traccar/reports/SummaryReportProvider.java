@@ -17,7 +17,6 @@
 package org.traccar.reports;
 
 import org.jxls.util.JxlsHelper;
-import org.traccar.Context;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -58,10 +57,11 @@ public class SummaryReportProvider {
         this.storage = storage;
     }
 
-    private SummaryReportItem calculateSummaryResult(long deviceId, Collection<Position> positions) {
+    private SummaryReportItem calculateSummaryResult(
+            long deviceId, Collection<Position> positions) throws StorageException {
         SummaryReportItem result = new SummaryReportItem();
         result.setDeviceId(deviceId);
-        result.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
+        result.setDeviceName(reportUtils.getDevice(deviceId).getName());
         if (positions != null && !positions.isEmpty()) {
             Position firstPosition = null;
             Position previousPosition = null;

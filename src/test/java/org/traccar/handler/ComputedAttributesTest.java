@@ -14,7 +14,7 @@ public class ComputedAttributesTest {
     @Test
     public void testComputedAttributes() {
 
-        ComputedAttributesHandler handler = new ComputedAttributesHandler(new Config(), null, null);
+        ComputedAttributesHandler handler = new ComputedAttributesHandler(new Config(), null);
 
         Date date = new Date();
         Position position = new Position();

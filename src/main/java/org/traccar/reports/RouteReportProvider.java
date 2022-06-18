@@ -17,7 +17,6 @@
 package org.traccar.reports;
 
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
@@ -79,7 +78,7 @@ public class RouteReportProvider {
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             var positions = PositionUtil.getPositions(storage, deviceId, from, to);
             DeviceReportSection deviceRoutes = new DeviceReportSection();
-            Device device = Context.getIdentityManager().getById(deviceId);
+            Device device = reportUtils.getDevice(deviceId);
             deviceRoutes.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceRoutes.getDeviceName()));
             if (device.getGroupId() > 0) {

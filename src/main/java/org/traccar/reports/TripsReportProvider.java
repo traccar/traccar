@@ -17,7 +17,6 @@
 package org.traccar.reports;
 
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
@@ -85,7 +84,7 @@ public class TripsReportProvider {
         for (long deviceId: reportUtils.getDeviceList(deviceIds, groupIds)) {
             Collection<TripReportItem> trips = detectTrips(deviceId, from, to);
             DeviceReportSection deviceTrips = new DeviceReportSection();
-            Device device = Context.getIdentityManager().getById(deviceId);
+            Device device = reportUtils.getDevice(deviceId);
             deviceTrips.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));
             if (device.getGroupId() > 0) {

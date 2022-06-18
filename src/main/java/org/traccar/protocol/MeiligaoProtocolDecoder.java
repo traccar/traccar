@@ -468,10 +468,9 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             } else if (command == MSG_POSITION_IMAGE) {
                 byte imageIndex = buf.readByte();
                 buf.readUnsignedByte(); // image upload type
-                String uniqueId = getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
                 ByteBuf photo = photos.remove(imageIndex);
                 try {
-                    position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, photo, "jpg"));
+                    position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
                 } finally {
                     photo.release();
                 }

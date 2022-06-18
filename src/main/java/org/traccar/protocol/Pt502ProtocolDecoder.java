@@ -174,14 +174,13 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
                 } else {
 
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-                    String uniqueId = getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
 
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
 
                     getLastLocation(position, null);
 
-                    position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, photo, "jpg"));
+                    position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
                     photo.release();
                     photo = null;
 

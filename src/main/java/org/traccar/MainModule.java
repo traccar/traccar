@@ -31,7 +31,6 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.IdentityManager;
 import org.traccar.database.LdapProvider;
 import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.AddressFormat;
@@ -106,11 +105,6 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Config provideConfig() {
         return Context.getConfig();
-    }
-
-    @Provides
-    public static IdentityManager provideIdentityManager() {
-        return Context.getIdentityManager();
     }
 
     @Provides

@@ -21,10 +21,10 @@ import io.netty.channel.ChannelOutboundHandlerAdapter;
 import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.database.IdentityManager;
 import org.traccar.helper.NetworkUtil;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
+import org.traccar.model.Device;
 import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
@@ -39,8 +39,6 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
 
     private CacheManager cacheManager;
 
-    private IdentityManager identityManager;
-
     public BaseProtocolEncoder(Protocol protocol) {
         this.protocol = protocol;
     }
@@ -54,21 +52,12 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
         this.cacheManager = cacheManager;
     }
 
-    public IdentityManager getIdentityManager() {
-        return identityManager;
-    }
-
-    @Inject
-    public void setIdentityManager(IdentityManager identityManager) {
-        this.identityManager = identityManager;
-    }
-
     public String getProtocolName() {
         return protocol != null ? protocol.getName() : PROTOCOL_UNKNOWN;
     }
 
     protected String getUniqueId(long deviceId) {
-        return identityManager.getById(deviceId).getUniqueId();
+        return cacheManager.getObject(Device.class, deviceId).getUniqueId();
     }
 
     protected void initDevicePassword(Command command, String defaultPassword) {

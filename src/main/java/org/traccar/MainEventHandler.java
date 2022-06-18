@@ -74,12 +74,14 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof Position) {
 
             Position position = (Position) msg;
+            Device device = cacheManager.getObject(Device.class, position.getDeviceId());
+
             try {
                 if (PositionUtil.isLatest(cacheManager, position)) {
-                    Device device = new Device();
-                    device.setId(position.getDeviceId());
-                    device.setPositionId(position.getId());
-                    storage.updateObject(device, new Request(
+                    Device updatedDevice = new Device();
+                    updatedDevice.setId(position.getDeviceId());
+                    updatedDevice.setPositionId(position.getId());
+                    storage.updateObject(updatedDevice, new Request(
                             new Columns.Include("positionId"),
                             new Condition.Equals("id", "id")));
 
@@ -92,11 +94,9 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
                 LOGGER.warn("Failed to update device", error);
             }
 
-            String uniqueId = Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();
-
             StringBuilder builder = new StringBuilder();
             builder.append("[").append(NetworkUtil.session(ctx.channel())).append("] ");
-            builder.append("id: ").append(uniqueId);
+            builder.append("id: ").append(device.getUniqueId());
             for (String attribute : logAttributes) {
                 switch (attribute) {
                     case "time":

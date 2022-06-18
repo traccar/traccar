@@ -31,7 +31,6 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.IdentityManager;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.helper.UnitsConverter;
@@ -74,7 +73,6 @@ public class ReportUtils {
     private final Config config;
     private final Storage storage;
     private final PermissionsService permissionsService;
-    private final IdentityManager identityManager;
     private final DeviceManager deviceManager;
     private final TripsConfig tripsConfig;
     private final VelocityEngine velocityEngine;
@@ -82,13 +80,12 @@ public class ReportUtils {
 
     @Inject
     public ReportUtils(
-            Config config, Storage storage, PermissionsService permissionsService, IdentityManager identityManager,
+            Config config, Storage storage, PermissionsService permissionsService,
             DeviceManager deviceManager, TripsConfig tripsConfig, VelocityEngine velocityEngine,
             @Nullable Geocoder geocoder) {
         this.config = config;
         this.storage = storage;
         this.permissionsService = permissionsService;
-        this.identityManager = identityManager;
         this.deviceManager = deviceManager;
         this.tripsConfig = tripsConfig;
         this.velocityEngine = velocityEngine;
@@ -102,6 +99,12 @@ public class ReportUtils {
                 new Condition.And(
                         new Condition.Equals("id", "id", objectId),
                         new Condition.Permission(User.class, userId, clazz))));
+    }
+
+    public Device getDevice(long deviceId) throws StorageException {
+        return storage.getObject(Device.class, new Request(
+                new Columns.Include("id"),
+                new Condition.Equals("id", "id", deviceId)));
     }
 
     public void checkPeriodLimit(Date from, Date to) {
@@ -212,7 +215,7 @@ public class ReportUtils {
         long tripDuration = endTrip.getFixTime().getTime() - startTrip.getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
-        trip.setDeviceName(identityManager.getById(deviceId).getName());
+        trip.setDeviceName(getDevice(deviceId).getName());
 
         trip.setStartPositionId(startTrip.getId());
         trip.setStartLat(startTrip.getLatitude());
@@ -259,7 +262,8 @@ public class ReportUtils {
     }
 
     private StopReportItem calculateStop(
-            ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
+            ArrayList<Position> positions, int startIndex, int endIndex,
+            boolean ignoreOdometer) throws StorageException {
 
         Position startStop = positions.get(startIndex);
         Position endStop = positions.get(endIndex);
@@ -268,7 +272,7 @@ public class ReportUtils {
 
         long deviceId = startStop.getDeviceId();
         stop.setDeviceId(deviceId);
-        stop.setDeviceName(identityManager.getById(deviceId).getName());
+        stop.setDeviceName(getDevice(deviceId).getName());
 
         stop.setPositionId(startStop.getId());
         stop.setLatitude(startStop.getLatitude());

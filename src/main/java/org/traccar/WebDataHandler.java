@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.IdentityManager;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -62,7 +61,6 @@ public class WebDataHandler extends BaseDataHandler {
     private static final String KEY_DEVICE = "device";
 
     private final CacheManager cacheManager;
-    private final IdentityManager identityManager;
     private final ObjectMapper objectMapper;
     private final Client client;
 
@@ -80,11 +78,9 @@ public class WebDataHandler extends BaseDataHandler {
 
     @Inject
     public WebDataHandler(
-            Config config, CacheManager cacheManager, IdentityManager identityManager,
-            ObjectMapper objectMapper, Client client) {
+            Config config, CacheManager cacheManager, ObjectMapper objectMapper, Client client) {
 
         this.cacheManager = cacheManager;
-        this.identityManager = identityManager;
         this.objectMapper = objectMapper;
         this.client = client;
         this.url = config.getString(Keys.FORWARD_URL);
@@ -138,7 +134,7 @@ public class WebDataHandler extends BaseDataHandler {
 
     public String formatRequest(Position position) throws UnsupportedEncodingException, JsonProcessingException {
 
-        Device device = identityManager.getById(position.getDeviceId());
+        Device device = cacheManager.getObject(Device.class, position.getDeviceId());
 
         String request = url
                 .replace("{name}", URLEncoder.encode(device.getName(), StandardCharsets.UTF_8.name()))
@@ -302,7 +298,7 @@ public class WebDataHandler extends BaseDataHandler {
     private Map<String, Object> prepareJsonPayload(Position position) {
 
         Map<String, Object> data = new HashMap<>();
-        Device device = identityManager.getById(position.getDeviceId());
+        Device device = cacheManager.getObject(Device.class, position.getDeviceId());
 
         data.put(KEY_POSITION, position);
 

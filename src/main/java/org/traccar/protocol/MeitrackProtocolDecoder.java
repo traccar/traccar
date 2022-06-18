@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Device;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -203,7 +204,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
             }
 
-            String deviceModel = getIdentityManager().getById(deviceSession.getDeviceId()).getModel();
+            String deviceModel = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
             if (deviceModel == null) {
                 deviceModel = "";
             }

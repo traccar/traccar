@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.IdentityManager;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -47,7 +46,6 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputedAttributesHandler.class);
 
-    private final IdentityManager identityManager;
     private final CacheManager cacheManager;
 
     private final JexlEngine engine;
@@ -55,9 +53,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
     private final boolean includeDeviceAttributes;
 
     @Inject
-    public ComputedAttributesHandler(
-            Config config, IdentityManager identityManager, CacheManager cacheManager) {
-        this.identityManager = identityManager;
+    public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
         engine = new JexlEngine();
         engine.setStrict(true);
@@ -68,7 +64,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
     private MapContext prepareContext(Position position) {
         MapContext result = new MapContext();
         if (includeDeviceAttributes) {
-            Device device = identityManager.getById(position.getDeviceId());
+            Device device = cacheManager.getObject(Device.class, position.getDeviceId());
             if (device != null) {
                 for (Object key : device.getAttributes().keySet()) {
                     result.set((String) key, device.getAttributes().get(key));

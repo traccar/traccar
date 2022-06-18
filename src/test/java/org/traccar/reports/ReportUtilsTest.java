@@ -1,20 +1,21 @@
 package org.traccar.reports;
 
 import org.apache.velocity.app.VelocityEngine;
+import org.junit.Before;
 import org.junit.Test;
 import org.traccar.BaseTest;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.database.DeviceManager;
-import org.traccar.database.IdentityManager;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
+import org.traccar.reports.common.TripsConfig;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.TripReportItem;
-import org.traccar.reports.common.TripsConfig;
 import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -30,11 +31,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class ReportUtilsTest extends BaseTest {
+    
+    private Storage storage;
+    
+    @Before
+    public void init() throws StorageException {
+        storage = mock(Storage.class);
+        when(storage.getObject(any(), any())).thenReturn(mock(Device.class));
+    }
 
     private Date date(String time) throws ParseException {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -53,15 +62,7 @@ public class ReportUtilsTest extends BaseTest {
 
         return position;
     }
-
-    private IdentityManager mockIdentityManager() {
-        var device = mock(Device.class);
-        when(device.getName()).thenReturn("test");
-        var identityManager = mock(IdentityManager.class);
-        when(identityManager.getById(anyLong())).thenReturn(device);
-        return identityManager;
-    }
-
+    
     @Test
     public void testCalculateDistance() {
         Position startPosition = new Position();
@@ -77,7 +78,7 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testCalculateSpentFuel() {
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), mock(Storage.class), mock(PermissionsService.class), mockIdentityManager(),
+                mock(Config.class), storage, mock(PermissionsService.class),
                 mock(DeviceManager.class), mock(TripsConfig.class), mock(VelocityEngine.class), null);
         Position startPosition = new Position();
         Position endPosition = new Position();
@@ -102,7 +103,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), mock(Storage.class), mock(PermissionsService.class), mockIdentityManager(),
+                mock(Config.class), storage, mock(PermissionsService.class),
                 mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
@@ -157,7 +158,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, true, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), mock(Storage.class), mock(PermissionsService.class), mockIdentityManager(),
+                mock(Config.class), storage, mock(PermissionsService.class),
                 mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
@@ -228,7 +229,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), mock(Storage.class), mock(PermissionsService.class), mockIdentityManager(),
+                mock(Config.class), storage, mock(PermissionsService.class),
                 mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);
@@ -279,7 +280,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), mock(Storage.class), mock(PermissionsService.class), mockIdentityManager(),
+                mock(Config.class), storage, mock(PermissionsService.class),
                 mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
@@ -308,7 +309,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), mock(Storage.class), mock(PermissionsService.class), mockIdentityManager(),
+                mock(Config.class), storage, mock(PermissionsService.class),
                 mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
@@ -337,7 +338,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), mock(Storage.class), mock(PermissionsService.class), mockIdentityManager(),
+                mock(Config.class), storage, mock(PermissionsService.class),
                 mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
@@ -366,7 +367,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), mock(Storage.class), mock(PermissionsService.class), mockIdentityManager(),
+                mock(Config.class), storage, mock(PermissionsService.class),
                 mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<StopReportItem> result = reportUtils.detectTripsAndStops(data, false, StopReportItem.class);
@@ -391,7 +392,7 @@ public class ReportUtilsTest extends BaseTest {
 
         TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), mock(Storage.class), mock(PermissionsService.class), mockIdentityManager(),
+                mock(Config.class), storage, mock(PermissionsService.class),
                 mock(DeviceManager.class), tripsConfig, mock(VelocityEngine.class), null);
 
         Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(data, false, TripReportItem.class);

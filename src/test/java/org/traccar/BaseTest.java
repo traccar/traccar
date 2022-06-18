@@ -3,7 +3,6 @@ package org.traccar;
 import io.netty.channel.Channel;
 import org.traccar.config.Config;
 import org.traccar.database.CommandsManager;
-import org.traccar.database.IdentityManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Device;
@@ -14,8 +13,6 @@ import org.traccar.session.cache.CacheManager;
 import java.net.SocketAddress;
 import java.util.HashSet;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -29,9 +26,6 @@ public class BaseTest {
         decoder.setConfig(config);
         var device = mock(Device.class);
         when(device.getId()).thenReturn(1L);
-        var identityManager = mock(IdentityManager.class);
-        when(identityManager.getById(anyLong())).thenReturn(device);
-        decoder.setIdentityManager(identityManager);
         var cacheManager = mock(CacheManager.class);
         when(cacheManager.getConfig()).thenReturn(config);
         when(cacheManager.getObject(eq(Device.class), anyLong())).thenReturn(device);
@@ -69,9 +63,6 @@ public class BaseTest {
         when(cacheManager.getConfig()).thenReturn(mock(Config.class));
         when(cacheManager.getObject(eq(Device.class), anyLong())).thenReturn(device);
         encoder.setCacheManager(cacheManager);
-        var identityManager = mock(IdentityManager.class);
-        when(identityManager.getById(anyLong())).thenReturn(device);
-        encoder.setIdentityManager(identityManager);
         return encoder;
     }
 

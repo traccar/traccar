@@ -28,7 +28,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.traccar.Context;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.config.Config;
 import org.traccar.model.Attribute;
@@ -62,8 +61,7 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
                 new Columns.All(),
                 new Condition.LatestPositions(deviceId)));
 
-        Object result = new ComputedAttributesHandler(config, Context.getIdentityManager(), null)
-                .computeAttribute(entity, position);
+        Object result = new ComputedAttributesHandler(config, null).computeAttribute(entity, position);
         if (result != null) {
             switch (entity.getType()) {
                 case "number":

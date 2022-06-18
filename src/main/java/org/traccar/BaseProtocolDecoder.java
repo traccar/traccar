@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
-import org.traccar.database.IdentityManager;
 import org.traccar.database.MediaManager;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
@@ -47,7 +46,6 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     private final Protocol protocol;
 
-    private IdentityManager identityManager;
     private CacheManager cacheManager;
     private ConnectionManager connectionManager;
     private StatisticsManager statisticsManager;
@@ -56,15 +54,6 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
 
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
-    }
-
-    public IdentityManager getIdentityManager() {
-        return identityManager;
-    }
-
-    @Inject
-    public void setIdentityManager(IdentityManager identityManager) {
-        this.identityManager = identityManager;
     }
 
     public CacheManager getCacheManager() {

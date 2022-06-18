@@ -119,7 +119,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         return printable;
     }
 
-    private void decodeSerial(Channel channel, SocketAddress remoteAddress, Position position, ByteBuf buf) {
+    private void decodeSerial(
+            Channel channel, SocketAddress remoteAddress, DeviceSession deviceSession, Position position, ByteBuf buf) {
 
         getLastLocation(position, null);
 
@@ -148,10 +149,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                             channel, remoteAddress, photoId,
                             photo.writerIndex(), Math.min(IMAGE_PACKET_MAX, photo.writableBytes()));
                 } else {
-                    String uniqueId = getIdentityManager().getById(position.getDeviceId()).getUniqueId();
                     photos.remove(photoId);
                     try {
-                        position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, photo, "jpg"));
+                        position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
                     } finally {
                         photo.release();
                     }
@@ -601,7 +601,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                             ByteBufUtil.hexDump(buf.readSlice(length)));
                 }
             } else if (codec == CODEC_12) {
-                decodeSerial(channel, remoteAddress, position, buf);
+                decodeSerial(channel, remoteAddress, deviceSession, position, buf);
             } else {
                 decodeLocation(position, buf, codec);
             }

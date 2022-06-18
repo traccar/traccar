@@ -27,7 +27,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class DeviceManager extends BaseObjectManager<Device> implements IdentityManager {
+public class DeviceManager extends BaseObjectManager<Device> {
 
     private final long dataRefreshDelay;
 
