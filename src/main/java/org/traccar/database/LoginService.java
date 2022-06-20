@@ -73,7 +73,6 @@ public class LoginService {
         return null;
     }
 
-
     private void checkUserEnabled(User user) throws SecurityException {
         if (user == null) {
             throw new SecurityException("Unknown account");
