@@ -52,7 +52,7 @@ public class LoginService {
 
     public User login(String email, String password) throws StorageException {
         User user = storage.getObject(User.class, new Request(
-                new Columns.Include("id", "login", "hashedPassword", "salt"),
+                new Columns.All(),
                 new Condition.Or(
                         new Condition.Equals("email", "email", email.trim()),
                         new Condition.Equals("login", "email"))));
