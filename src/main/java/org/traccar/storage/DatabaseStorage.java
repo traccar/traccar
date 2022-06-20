@@ -54,7 +54,11 @@ public class DatabaseStorage extends Storage {
     @Override
     public <T> List<T> getObjects(Class<T> clazz, Request request) throws StorageException {
         StringBuilder query = new StringBuilder("SELECT ");
-        query.append(formatColumns(request.getColumns(), clazz, "get", c -> c));
+        if (request.getColumns() instanceof Columns.All) {
+            query.append('*');
+        } else {
+            query.append(formatColumns(request.getColumns(), clazz, "get", c -> c));
+        }
         query.append(" FROM ").append(getStorageName(clazz));
         query.append(formatCondition(request.getCondition()));
         query.append(formatOrder(request.getOrder()));
