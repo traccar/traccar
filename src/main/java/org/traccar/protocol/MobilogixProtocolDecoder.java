@@ -51,7 +51,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]+,")                // protocol version
             .expression("([^,]+),")              // serial number
             .number("(xx),")                     // status
-            .number("(-?d+.d+)?")                // battery
+            .number("(-?d+.d+)")                // battery
             .groupBegin()
             .text(",")
             .number("(d)")                       // satellites
