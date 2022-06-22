@@ -18,7 +18,6 @@ package org.traccar.api.security;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.api.resource.SessionResource;
-import org.traccar.database.LoginService;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.User;

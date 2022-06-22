@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.database;
+package org.traccar.api.security;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.database.LdapProvider;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -32,16 +33,21 @@ public class LoginService {
     private final Storage storage;
     private final LdapProvider ldapProvider;
 
+    private final String serviceAccountToken;
     private final boolean forceLdap;
 
     @Inject
     public LoginService(Config config, Storage storage, @Nullable LdapProvider ldapProvider) {
         this.storage = storage;
         this.ldapProvider = ldapProvider;
+        serviceAccountToken = config.getString(Keys.WEB_SERVICE_ACCOUNT_TOKEN);
         forceLdap = config.getBoolean(Keys.LDAP_FORCE);
     }
 
     public User login(String token) throws StorageException {
+        if (serviceAccountToken != null && serviceAccountToken.equals(token)) {
+            return new ServiceAccountUser();
+        }
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("token", "token", token)));
         if (user != null) {

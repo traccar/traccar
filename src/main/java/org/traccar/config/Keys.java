@@ -674,6 +674,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * A token to login as a virtual admin account. Can be used to restore access in case of issues with regular admin
+     * login. For example, if password is lost and can't be restored.
+     */
+    public static final ConfigKey<String> WEB_SERVICE_ACCOUNT_TOKEN = new StringConfigKey(
+            "web.serviceAccountToken",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Cross-origin resource sharing origin header value.
      */
     public static final ConfigKey<String> WEB_ORIGIN = new StringConfigKey(

@@ -58,8 +58,12 @@ public class PermissionsService {
 
     public User getUser(long userId) throws StorageException {
         if (user == null && userId > 0) {
-            user = storage.getObject(
-                    User.class, new Request(new Columns.All(), new Condition.Equals("id", "id", userId)));
+            if (userId == ServiceAccountUser.ID) {
+                user = new ServiceAccountUser();
+            } else {
+                user = storage.getObject(
+                        User.class, new Request(new Columns.All(), new Condition.Equals("id", "id", userId)));
+            }
         }
         return user;
     }

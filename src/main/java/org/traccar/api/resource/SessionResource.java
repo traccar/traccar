@@ -16,7 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
-import org.traccar.database.LoginService;
+import org.traccar.api.security.LoginService;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.ServletHelper;
 import org.traccar.helper.LogAction;
