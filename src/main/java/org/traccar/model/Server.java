@@ -214,4 +214,16 @@ public class Server extends ExtendedModel implements UserRestrictions {
         return emailEnabled;
     }
 
+    private long[] storageSpace;
+
+    @QueryIgnore
+    public long[] getStorageSpace() {
+        return storageSpace;
+    }
+
+    @QueryIgnore
+    public void setStorageSpace(long[] storageSpace) {
+        this.storageSpace = storageSpace;
+    }
+
 }

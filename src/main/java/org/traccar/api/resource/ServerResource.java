@@ -18,8 +18,10 @@ package org.traccar.api.resource;
 import org.traccar.api.BaseResource;
 import org.traccar.database.MailManager;
 import org.traccar.geocoder.Geocoder;
+import org.traccar.helper.Log;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Server;
+import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -60,6 +62,10 @@ public class ServerResource extends BaseResource {
     public Server get() throws StorageException {
         Server server = storage.getObject(Server.class, new Request(new Columns.All()));
         server.setEmailEnabled(mailManager.getEmailEnabled());
+        User user = permissionsService.getUser(getUserId());
+        if (user != null && user.getAdministrator()) {
+            server.setStorageSpace(Log.getStorageSpace());
+        }
         return server;
     }
 

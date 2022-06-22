@@ -28,6 +28,10 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileStore;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.ConsoleHandler;
@@ -267,6 +271,20 @@ public final class Log {
             s.append(")");
         }
         return s.toString();
+    }
+
+    public static long[] getStorageSpace() {
+        long usable = 0;
+        long total = 0;
+        for (Path root : FileSystems.getDefault().getRootDirectories()) {
+            try {
+                FileStore store = Files.getFileStore(root);
+                usable += store.getUsableSpace();
+                total += store.getTotalSpace();
+            } catch (IOException ignored) {
+            }
+        }
+        return new long[]{usable, total};
     }
 
 }
