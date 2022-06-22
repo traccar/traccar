@@ -22,6 +22,9 @@ import org.traccar.helper.ServletHelper;
 import org.traccar.helper.LogAction;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
@@ -33,6 +36,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
@@ -105,6 +109,17 @@ public class SessionResource extends BaseResource {
         }
 
         throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+    }
+
+    @Path("{id}")
+    @GET
+    public User get(@PathParam("id") long userId) throws StorageException {
+        permissionsService.checkAdmin(getUserId());
+        User user = storage.getObject(User.class, new Request(
+                new Columns.All(), new Condition.Equals("id", "id", userId)));
+        request.getSession().setAttribute(USER_ID_KEY, user.getId());
+        LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
+        return user;
     }
 
     @PermitAll
