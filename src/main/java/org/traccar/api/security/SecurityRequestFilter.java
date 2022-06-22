@@ -43,6 +43,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
     public static final String BASIC_REALM = "Basic realm=\"api\"";
+    public static final String BEARER_PREFIX = "Bearer ";
     public static final String X_REQUESTED_WITH = "X-Requested-With";
     public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
 
@@ -82,8 +83,13 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
             if (authHeader != null) {
 
                 try {
-                    String[] auth = decodeBasicAuth(authHeader);
-                    User user = loginService.login(auth[0], auth[1]);
+                    User user;
+                    if (authHeader.startsWith(BEARER_PREFIX)) {
+                        user = loginService.login(authHeader.substring(BEARER_PREFIX.length()));
+                    } else {
+                        String[] auth = decodeBasicAuth(authHeader);
+                        user = loginService.login(auth[0], auth[1]);
+                    }
                     if (user != null) {
                         statisticsManager.registerRequest(user.getId());
                         securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
