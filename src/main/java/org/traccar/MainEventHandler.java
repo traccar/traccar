@@ -89,8 +89,6 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
                             new Condition.Equals("id", "id")));
 
                     cacheManager.updatePosition(position);
-                    cacheManager.getObject(Device.class, position.getDeviceId()).setPositionId(position.getId());
-
                     connectionManager.updatePosition(position);
                 }
             } catch (StorageException error) {

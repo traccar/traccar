@@ -21,6 +21,7 @@ import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -47,6 +48,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Inject
     private CacheManager cacheManager;
+
+    @Inject
+    private ConnectionManager connectionManager;
 
     public DeviceResource() {
         super(Device.class);
@@ -125,7 +129,13 @@ public class DeviceResource extends BaseObjectResource<Device> {
                     new Columns.Include("positionId"),
                     new Condition.Equals("id", "id")));
 
-            cacheManager.updatePosition(position);
+            try {
+                cacheManager.addDevice(position.getDeviceId());
+                cacheManager.updatePosition(position);
+                connectionManager.updatePosition(position);
+            } finally {
+                cacheManager.removeDevice(position.getDeviceId());
+            }
         } else {
             throw new IllegalArgumentException();
         }
