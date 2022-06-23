@@ -375,7 +375,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                         }
                     } else if (attribute.startsWith("GTSL")) {
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, attribute.split("\\|")[4]);
-                    } else {
+                    } else if (attribute.contains("=")) {
                         String[] pair = attribute.split("=");
                         if (pair.length >= 2) {
                             String value = pair[1].trim();
@@ -398,6 +398,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                             }
                         }
+                    } else {
+                        position.set("serial", attribute);
                     }
                     remaining -= attribute.length() + 1;
                 }
