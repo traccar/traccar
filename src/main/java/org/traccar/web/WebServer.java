@@ -40,6 +40,8 @@ import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerI
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.LifecycleObject;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.DateParameterConverterProvider;
@@ -66,6 +68,8 @@ import java.nio.file.Paths;
 import java.util.EnumSet;
 
 public class WebServer implements LifecycleObject {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
 
     private final Injector injector;
     private final Config config;
@@ -180,6 +184,9 @@ public class WebServer implements LifecycleObject {
                 CorsResponseFilter.class,
                 ResourceErrorHandler.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
+        if (resourceConfig.getClasses().stream().filter(ServerResource.class::equals).findAny().isEmpty()) {
+            LOGGER.warn("Failed to load API resources");
+        }
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
     }
 
