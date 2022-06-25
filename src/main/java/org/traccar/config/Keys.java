@@ -629,6 +629,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Maximum API requests per second. Above this limit requests and delayed and throttled.
+     */
+    public static final ConfigKey<Integer> WEB_MAX_REQUESTS_PER_SECOND = new IntegerConfigKey(
+            "web.maxRequestsPerSec",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Sanitize all strings returned via API. This is needed to fix XSS issues in the old web interface. New React-based
      * interface doesn't require this.
      */

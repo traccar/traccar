@@ -54,6 +54,7 @@ dependencies {
     implementation "org.glassfish:javax.json:1.1.4"
     implementation "org.eclipse.jetty:jetty-server:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-servlet:$jettyVersion"
+    implementation "org.eclipse.jetty:jetty-servlets:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-webapp:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-jndi:$jettyVersion"
     implementation "org.eclipse.jetty:jetty-proxy:$jettyVersion"

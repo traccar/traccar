@@ -23,6 +23,7 @@ public class WebModule extends ServletModule {
 
     @Override
     protected void configureServlets() {
+        filter("/api/*").through(ThrottlingFilter.class);
         filter("/api/media/*").through(MediaFilter.class);
         serve("/api/socket").with(AsyncSocketServlet.class);
     }
