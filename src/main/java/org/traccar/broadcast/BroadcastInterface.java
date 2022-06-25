@@ -22,13 +22,13 @@ import org.traccar.model.Position;
 
 public interface BroadcastInterface {
 
-    default void updateDevice(Device device) {
+    default void updateDevice(boolean local, Device device) {
     }
 
-    default void updatePosition(Position position) {
+    default void updatePosition(boolean local, Position position) {
     }
 
-    default void updateEvent(long userId, Event event) {
+    default void updateEvent(boolean local, long userId, Event event) {
     }
 
     default void invalidateObject(Class<? extends BaseModel> clazz, long id) {

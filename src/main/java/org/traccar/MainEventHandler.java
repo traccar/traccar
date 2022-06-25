@@ -92,8 +92,8 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
                             new Condition.Equals("id", "id")));
 
                     cacheManager.updatePosition(position);
-                    connectionManager.updatePosition(position);
-                    broadcastService.updatePosition(position);
+                    connectionManager.updatePosition(true, position);
+                    broadcastService.updatePosition(true, position);
                 }
             } catch (StorageException error) {
                 LOGGER.warn("Failed to update device", error);

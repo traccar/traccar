@@ -58,15 +58,14 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     public void onWebSocketConnect(Session session) {
         super.onWebSocketConnect(session);
 
-        Map<String, Collection<?>> data = new HashMap<>();
         try {
+            Map<String, Collection<?>> data = new HashMap<>();
             data.put(KEY_POSITIONS, PositionUtil.getLatestPositions(storage, userId));
+            sendData(data);
+            connectionManager.addListener(userId, this);
         } catch (StorageException e) {
             throw new RuntimeException(e);
         }
-        sendData(data);
-
-        connectionManager.addListener(userId, this);
     }
 
     @Override

@@ -66,21 +66,21 @@ public class MulticastBroadcastService implements BroadcastService {
     }
 
     @Override
-    public void updateDevice(Device device) {
+    public void updateDevice(boolean local, Device device) {
         BroadcastMessage message = new BroadcastMessage();
         message.setDevice(device);
         sendMessage(message);
     }
 
     @Override
-    public void updatePosition(Position position) {
+    public void updatePosition(boolean local, Position position) {
         BroadcastMessage message = new BroadcastMessage();
         message.setPosition(position);
         sendMessage(message);
     }
 
     @Override
-    public void updateEvent(long userId, Event event) {
+    public void updateEvent(boolean local, long userId, Event event) {
         BroadcastMessage message = new BroadcastMessage();
         message.setUserId(userId);
         message.setEvent(event);
@@ -115,11 +115,11 @@ public class MulticastBroadcastService implements BroadcastService {
 
     private void handleMessage(BroadcastMessage message) {
         if (message.getDevice() != null) {
-            listeners.forEach(listener -> listener.updateDevice(message.getDevice()));
+            listeners.forEach(listener -> listener.updateDevice(false, message.getDevice()));
         } else if (message.getPosition() != null) {
-            listeners.forEach(listener -> listener.updatePosition(message.getPosition()));
+            listeners.forEach(listener -> listener.updatePosition(false, message.getPosition()));
         } else if (message.getUserId() != null && message.getEvent() != null) {
-            listeners.forEach(listener -> listener.updateEvent(message.getUserId(), message.getEvent()));
+            listeners.forEach(listener -> listener.updateEvent(false, message.getUserId(), message.getEvent()));
         } else if (message.getChanges() != null) {
             var iterator = message.getChanges().entrySet().iterator();
             if (iterator.hasNext()) {

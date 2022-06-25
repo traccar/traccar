@@ -137,8 +137,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
             try {
                 cacheManager.addDevice(position.getDeviceId());
                 cacheManager.updatePosition(position);
-                connectionManager.updatePosition(position);
-                broadcastService.updatePosition(position);
+                connectionManager.updatePosition(true, position);
+                broadcastService.updatePosition(true, position);
             } finally {
                 cacheManager.removeDevice(position.getDeviceId());
             }

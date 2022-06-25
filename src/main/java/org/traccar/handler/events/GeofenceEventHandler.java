@@ -68,7 +68,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
         device.setGeofenceIds(currentGeofences);
         if (!oldGeofences.isEmpty() || !newGeofences.isEmpty()) {
-            connectionManager.updateDevice(device);
+            connectionManager.updateDevice(true, device);
         }
 
         Map<Event, Position> events = new HashMap<>();
