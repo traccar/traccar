@@ -57,7 +57,6 @@ public final class NotificatorWeb implements Notificator {
         copy.set("message", message.getBody());
 
         connectionManager.updateEvent(true, user.getId(), copy);
-        broadcastService.updateEvent(true, user.getId(), copy);
     }
 
 }

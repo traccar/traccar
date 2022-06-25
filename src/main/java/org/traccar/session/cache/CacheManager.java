@@ -58,6 +58,7 @@ public class CacheManager implements BroadcastInterface {
 
     private final Config config;
     private final Storage storage;
+    private final BroadcastService broadcastService;
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -73,9 +74,10 @@ public class CacheManager implements BroadcastInterface {
     public CacheManager(Config config, Storage storage, BroadcastService broadcastService) throws StorageException {
         this.config = config;
         this.storage = storage;
-        broadcastService.registerListener(this);
+        this.broadcastService = broadcastService;
         invalidateServer();
         invalidateUsers();
+        broadcastService.registerListener(this);
     }
 
     public Config getConfig() {
@@ -198,6 +200,8 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public <T extends BaseModel> void updateOrInvalidate(T object) throws StorageException {
+        broadcastService.invalidateObject(object.getClass(), object.getId());
+
         boolean invalidate = false;
         var before = getObject(object.getClass(), object.getId());
         if (before == null) {
@@ -231,6 +235,8 @@ public class CacheManager implements BroadcastInterface {
     public void invalidatePermission(
             Class<? extends BaseModel> clazz1, long id1,
             Class<? extends BaseModel> clazz2, long id2) {
+        broadcastService.invalidatePermission(clazz1, id1, clazz2, id2);
+
         try {
             invalidate(new CacheKey(clazz1, id1), new CacheKey(clazz2, id2));
         } catch (StorageException e) {

@@ -93,7 +93,6 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
                     cacheManager.updatePosition(position);
                     connectionManager.updatePosition(true, position);
-                    broadcastService.updatePosition(true, position);
                 }
             } catch (StorageException error) {
                 LOGGER.warn("Failed to update device", error);

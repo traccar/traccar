@@ -285,7 +285,6 @@ public class ConnectionManager implements BroadcastInterface {
         }
 
         updateDevice(true, device);
-        broadcastService.updateDevice(true, device);
     }
 
     public DeviceState getDeviceState(long deviceId) {
@@ -324,7 +323,9 @@ public class ConnectionManager implements BroadcastInterface {
 
     @Override
     public synchronized void updateDevice(boolean local, Device device) {
-        if (!local && Device.STATUS_ONLINE.equals(device.getStatus())) {
+        if (local) {
+            broadcastService.updateDevice(true, device);
+        } else if (Device.STATUS_ONLINE.equals(device.getStatus())) {
             timeouts.remove(device.getId());
             removeDeviceSession(device.getId());
         }
@@ -339,6 +340,9 @@ public class ConnectionManager implements BroadcastInterface {
 
     @Override
     public synchronized void updatePosition(boolean local, Position position) {
+        if (local) {
+            broadcastService.updatePosition(true, position);
+        }
         for (long userId : deviceUsers.getOrDefault(position.getDeviceId(), Collections.emptySet())) {
             if (listeners.containsKey(userId)) {
                 for (UpdateListener listener : listeners.get(userId)) {
@@ -350,6 +354,9 @@ public class ConnectionManager implements BroadcastInterface {
 
     @Override
     public synchronized void updateEvent(boolean local, long userId, Event event) {
+        if (local) {
+            broadcastService.updateEvent(true, userId, event);
+        }
         if (listeners.containsKey(userId)) {
             for (UpdateListener listener : listeners.get(userId)) {
                 listener.onUpdateEvent(event);

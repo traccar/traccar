@@ -16,7 +16,6 @@
  */
 package org.traccar.api;
 
-import org.traccar.broadcast.BroadcastService;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Group;
@@ -41,9 +40,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Inject
     private CacheManager cacheManager;
-
-    @Inject
-    private BroadcastService broadcastService;
 
     protected final Class<T> baseClass;
 
@@ -72,7 +68,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         LogAction.create(getUserId(), entity);
         storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
         cacheManager.invalidatePermission(User.class, getUserId(), baseClass, entity.getId());
-        broadcastService.invalidatePermission(User.class, getUserId(), baseClass, entity.getId());
         LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
 
         return Response.ok(entity).build();
@@ -99,7 +94,6 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                 new Columns.Exclude("id"),
                 new Condition.Equals("id", "id")));
         cacheManager.updateOrInvalidate(entity);
-        broadcastService.invalidateObject(entity.getClass(), entity.getId());
         LogAction.edit(getUserId(), entity);
 
         return Response.ok(entity).build();
