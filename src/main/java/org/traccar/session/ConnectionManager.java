@@ -22,6 +22,8 @@ import io.netty.util.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.Protocol;
+import org.traccar.broadcast.BroadcastInterface;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.NotificationManager;
@@ -52,7 +54,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 @Singleton
-public class ConnectionManager {
+public class ConnectionManager implements BroadcastInterface {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionManager.class);
 
@@ -70,6 +72,7 @@ public class ConnectionManager {
     private final Storage storage;
     private final NotificationManager notificationManager;
     private final Timer timer;
+    private final BroadcastService broadcastService;
 
     private final Map<Long, Set<UpdateListener>> listeners = new ConcurrentHashMap<>();
     private final Map<Long, Timeout> timeouts = new ConcurrentHashMap<>();
@@ -77,15 +80,17 @@ public class ConnectionManager {
     @Inject
     public ConnectionManager(
             Injector injector, Config config, CacheManager cacheManager, Storage storage,
-            NotificationManager notificationManager, Timer timer) {
+            NotificationManager notificationManager, Timer timer, BroadcastService broadcastService) {
         this.injector = injector;
         this.config = config;
         this.cacheManager = cacheManager;
         this.storage = storage;
         this.notificationManager = notificationManager;
         this.timer = timer;
+        this.broadcastService = broadcastService;
         deviceTimeout = config.getLong(Keys.STATUS_TIMEOUT) * 1000;
         updateDeviceState = config.getBoolean(Keys.STATUS_UPDATE_DEVICE_STATE);
+        broadcastService.registerListener(this);
     }
 
     public DeviceSession getDeviceSession(long deviceId) {
@@ -270,6 +275,7 @@ public class ConnectionManager {
         }
 
         updateDevice(device);
+        broadcastService.updateDevice(device);
     }
 
     public DeviceState getDeviceState(long deviceId) {
@@ -306,6 +312,7 @@ public class ConnectionManager {
         }
     }
 
+    @Override
     public synchronized void updateDevice(Device device) {
         for (User user : cacheManager.getDeviceObjects(device.getId(), User.class)) {
             if (listeners.containsKey(user.getId())) {
@@ -316,6 +323,7 @@ public class ConnectionManager {
         }
     }
 
+    @Override
     public synchronized void updatePosition(Position position) {
         long deviceId = position.getDeviceId();
         for (User user : cacheManager.getDeviceObjects(deviceId, User.class)) {
@@ -327,6 +335,7 @@ public class ConnectionManager {
         }
     }
 
+    @Override
     public synchronized void updateEvent(long userId, Event event) {
         if (listeners.containsKey(userId)) {
             for (UpdateListener listener : listeners.get(userId)) {

@@ -15,38 +15,17 @@
  */
 package org.traccar.broadcast;
 
-import java.util.Date;
+public class NullBroadcastService implements BroadcastService {
 
-public class DeviceStatus {
-
-    private long deviceId;
-
-    public long getDeviceId() {
-        return deviceId;
+    @Override
+    public void registerListener(BroadcastInterface listener) {
     }
 
-    public void setDeviceId(long deviceId) {
-        this.deviceId = deviceId;
+    @Override
+    public void start() throws Exception {
     }
 
-    private String status;
-
-    public String getStatus() {
-        return status;
+    @Override
+    public void stop() throws Exception {
     }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    private Date lastUpdate;
-
-    public Date getLastUpdate() {
-        return this.lastUpdate;
-    }
-
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
-
 }

@@ -29,6 +29,8 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.log.NullLogChute;
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
+import org.traccar.broadcast.MulticastBroadcastService;
+import org.traccar.broadcast.NullBroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
@@ -278,13 +280,14 @@ public class MainModule extends AbstractModule {
         return null;
     }
 
+    @Singleton
     @Provides
     public static BroadcastService provideBroadcastService(
             Config config, ObjectMapper objectMapper) throws IOException {
         if (config.hasKey(Keys.BROADCAST_ADDRESS)) {
-            return new BroadcastService(config, objectMapper);
+            return new MulticastBroadcastService(config, objectMapper);
         }
-        return null;
+        return new NullBroadcastService();
     }
 
     @Provides

@@ -54,10 +54,10 @@ public class Permission {
         this.data = data;
         var iterator = data.entrySet().iterator();
         var owner = iterator.next();
-        ownerClass = CLASSES.get(owner.getKey().substring(0, owner.getKey().length() - 2));
+        ownerClass = getKeyClass(owner.getKey());
         ownerId = owner.getValue();
         var property = iterator.next();
-        propertyClass = CLASSES.get(property.getKey().substring(0, property.getKey().length() - 2));
+        propertyClass = getKeyClass(property.getKey());
         propertyId = property.getValue();
     }
 
@@ -71,6 +71,10 @@ public class Permission {
         data = new LinkedHashMap<>();
         data.put(getKey(ownerClass), ownerId);
         data.put(getKey(propertyClass), propertyId);
+    }
+
+    public static Class<? extends BaseModel> getKeyClass(String key) {
+        return CLASSES.get(key.substring(0, key.length() - 2));
     }
 
     public static String getKey(Class<?> clazz) {

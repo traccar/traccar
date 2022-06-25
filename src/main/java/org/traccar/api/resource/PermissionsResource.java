@@ -17,6 +17,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Permission;
 import org.traccar.model.UserRestrictions;
@@ -45,6 +46,9 @@ public class PermissionsResource  extends BaseResource {
     @Inject
     private CacheManager cacheManager;
 
+    @Inject
+    private BroadcastService broadcastService;
+
     private void checkPermission(Permission permission) throws StorageException {
         if (permissionsService.notAdmin(getUserId())) {
             permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
@@ -71,9 +75,14 @@ public class PermissionsResource  extends BaseResource {
             Permission permission = new Permission(entity);
             checkPermission(permission);
             storage.addPermission(permission);
-            cacheManager.invalidate(permission.getOwnerClass(), permission.getOwnerId(),
+            cacheManager.invalidatePermission(
+                    permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
-            LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
+            broadcastService.invalidatePermission(
+                    permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId());
+            LogAction.link(getUserId(),
+                    permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
         return Response.noContent().build();
@@ -93,9 +102,14 @@ public class PermissionsResource  extends BaseResource {
             Permission permission = new Permission(entity);
             checkPermission(permission);
             storage.removePermission(permission);
-            cacheManager.invalidate(permission.getOwnerClass(), permission.getOwnerId(),
+            cacheManager.invalidatePermission(
+                    permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
-            LogAction.unlink(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
+            broadcastService.invalidatePermission(
+                    permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId());
+            LogAction.unlink(getUserId(),
+                    permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
         return Response.noContent().build();

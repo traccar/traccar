@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseObjectResource;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
@@ -37,6 +38,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,6 +53,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Inject
     private ConnectionManager connectionManager;
+
+    @Inject
+    private BroadcastService broadcastService;
 
     public DeviceResource() {
         super(Device.class);
@@ -105,7 +110,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Path("{id}/accumulators")
     @PUT
-    public Response updateAccumulators(DeviceAccumulators entity) throws StorageException {
+    public Response updateAccumulators(DeviceAccumulators entity) throws StorageException, IOException {
         if (permissionsService.notAdmin(getUserId())) {
             permissionsService.checkManager(getUserId());
             permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
@@ -133,6 +138,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 cacheManager.addDevice(position.getDeviceId());
                 cacheManager.updatePosition(position);
                 connectionManager.updatePosition(position);
+                broadcastService.updatePosition(position);
             } finally {
                 cacheManager.removeDevice(position.getDeviceId());
             }

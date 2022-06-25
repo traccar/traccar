@@ -15,18 +15,22 @@
  */
 package org.traccar.broadcast;
 
+import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
+
+import java.util.Map;
 
 public class BroadcastMessage {
 
-    private DeviceStatus deviceStatus;
+    private Device device;
 
-    public DeviceStatus getDeviceStatus() {
-        return deviceStatus;
+    public Device getDevice() {
+        return device;
     }
 
-    public void setDeviceStatus(DeviceStatus deviceStatus) {
-        this.deviceStatus = deviceStatus;
+    public void setDevice(Device device) {
+        this.device = device;
     }
 
     private Position position;
@@ -39,4 +43,33 @@ public class BroadcastMessage {
         this.position = position;
     }
 
+    private Long userId;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
+    private Event event;
+
+    public Event getEvent() {
+        return event;
+    }
+
+    public void setEvent(Event event) {
+        this.event = event;
+    }
+
+    private Map<String, Long> changes;
+
+    public Map<String, Long> getChanges() {
+        return changes;
+    }
+
+    public void setChanges(Map<String, Long> changes) {
+        this.changes = changes;
+    }
 }

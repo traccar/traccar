@@ -15,8 +15,27 @@
  */
 package org.traccar.broadcast;
 
-import org.traccar.LifecycleObject;
+import org.traccar.model.BaseModel;
+import org.traccar.model.Device;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
 
-public interface BroadcastService extends LifecycleObject, BroadcastInterface {
-    void registerListener(BroadcastInterface listener);
+public interface BroadcastInterface {
+
+    default void updateDevice(Device device) {
+    }
+
+    default void updatePosition(Position position) {
+    }
+
+    default void updateEvent(long userId, Event event) {
+    }
+
+    default void invalidateObject(Class<? extends BaseModel> clazz, long id) {
+    }
+
+    default void invalidatePermission(
+            Class<? extends BaseModel> clazz1, long id1,
+            Class<? extends BaseModel> clazz2, long id2) {
+    }
 }

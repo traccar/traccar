@@ -15,6 +15,8 @@
  */
 package org.traccar.session.cache;
 
+import org.traccar.broadcast.BroadcastInterface;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.helper.model.GeofenceUtil;
 import org.traccar.model.Attribute;
@@ -49,7 +51,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 @Singleton
-public class CacheManager {
+public class CacheManager implements BroadcastInterface {
 
     private static final Collection<Class<? extends BaseModel>> CLASSES = Arrays.asList(
             Attribute.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
@@ -68,9 +70,10 @@ public class CacheManager {
     private final Map<Long, List<User>> notificationUsers = new HashMap<>();
 
     @Inject
-    public CacheManager(Config config, Storage storage) throws StorageException {
+    public CacheManager(Config config, Storage storage, BroadcastService broadcastService) throws StorageException {
         this.config = config;
         this.storage = storage;
+        broadcastService.registerListener(this);
         invalidateServer();
         invalidateUsers();
     }
@@ -179,13 +182,18 @@ public class CacheManager {
         }
     }
 
-    public <T extends BaseModel> void updateOrInvalidate(Class<T> clazz, long id) throws StorageException {
-        var object = storage.getObject(clazz, new Request(
-                new Columns.All(), new Condition.Equals("id", "id", id)));
-        if (object != null) {
-            updateOrInvalidate(object);
-        } else {
-            invalidate(clazz, id);
+    @Override
+    public void invalidateObject(Class<? extends BaseModel> clazz, long id) {
+        try {
+            var object = storage.getObject(clazz, new Request(
+                    new Columns.All(), new Condition.Equals("id", "id", id)));
+            if (object != null) {
+                updateOrInvalidate(object);
+            } else {
+                invalidate(clazz, id);
+            }
+        } catch (StorageException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -219,10 +227,15 @@ public class CacheManager {
         invalidate(new CacheKey(clazz, id));
     }
 
-    public void invalidate(
+    @Override
+    public void invalidatePermission(
             Class<? extends BaseModel> clazz1, long id1,
-            Class<? extends BaseModel> clazz2, long id2) throws StorageException {
-        invalidate(new CacheKey(clazz1, id1), new CacheKey(clazz2, id2));
+            Class<? extends BaseModel> clazz2, long id2) {
+        try {
+            invalidate(new CacheKey(clazz1, id1), new CacheKey(clazz2, id2));
+        } catch (StorageException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void invalidateServer() throws StorageException {

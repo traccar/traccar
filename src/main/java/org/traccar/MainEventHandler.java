@@ -23,6 +23,7 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
@@ -56,15 +57,17 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     private final Storage storage;
     private final ConnectionManager connectionManager;
     private final StatisticsManager statisticsManager;
+    private final BroadcastService broadcastService;
 
     @Inject
     public MainEventHandler(
-            Config config, CacheManager cacheManager, Storage storage,
-            ConnectionManager connectionManager, StatisticsManager statisticsManager) {
+            Config config, CacheManager cacheManager, Storage storage, ConnectionManager connectionManager,
+            StatisticsManager statisticsManager, BroadcastService broadcastService) {
         this.cacheManager = cacheManager;
         this.storage = storage;
         this.connectionManager = connectionManager;
         this.statisticsManager = statisticsManager;
+        this.broadcastService = broadcastService;
         String connectionlessProtocolList = config.getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split("[, ]")));
@@ -90,6 +93,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
                     cacheManager.updatePosition(position);
                     connectionManager.updatePosition(position);
+                    broadcastService.updatePosition(position);
                 }
             } catch (StorageException error) {
                 LOGGER.warn("Failed to update device", error);
