@@ -16,8 +16,6 @@
  */
 package org.traccar.database;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.model.User;
 import org.traccar.notification.PropertiesProvider;
@@ -37,8 +35,6 @@ import java.util.Date;
 import java.util.Properties;
 
 public final class MailManager {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MailManager.class);
 
     private final Config config;
     private final StatisticsManager statisticsManager;
@@ -115,8 +111,7 @@ public final class MailManager {
             properties = getProperties(new PropertiesProvider(config));
         }
         if (!properties.containsKey("mail.smtp.host")) {
-            LOGGER.warn("No SMTP configuration found");
-            return;
+            throw new RuntimeException("No SMTP configuration found");
         }
 
         Session session = Session.getInstance(properties);
