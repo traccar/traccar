@@ -14,6 +14,7 @@ import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -316,6 +317,12 @@ public class ProtocolTest extends BaseTest {
                 checkInteger(cellTower.getMobileNetworkCode(), 0, 999);
                 checkInteger(cellTower.getLocationAreaCode(), 1, 65535);
                 checkInteger(cellTower.getCellId(), 0, 268435455);
+            }
+        }
+
+        if (position.getNetwork() != null && position.getNetwork().getWifiAccessPoints() != null) {
+            for (WifiAccessPoint wifiAccessPoint : position.getNetwork().getWifiAccessPoints()) {
+                assertTrue("validation failed for mac address with zero value",!wifiAccessPoint.getMacAddress().equals("0"));
             }
         }
 
