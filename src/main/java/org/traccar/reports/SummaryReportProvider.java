@@ -58,11 +58,10 @@ public class SummaryReportProvider {
         this.storage = storage;
     }
 
-    private SummaryReportItem calculateSummaryResult(
-            long deviceId, Collection<Position> positions) throws StorageException {
+    private SummaryReportItem calculateSummaryResult(Device device, Collection<Position> positions) {
         SummaryReportItem result = new SummaryReportItem();
-        result.setDeviceId(deviceId);
-        result.setDeviceName(reportUtils.getDevice(deviceId).getName());
+        result.setDeviceId(device.getId());
+        result.setDeviceName(device.getName());
         if (positions != null && !positions.isEmpty()) {
             Position firstPosition = null;
             Position previousPosition = null;
@@ -119,9 +118,9 @@ public class SummaryReportProvider {
     }
 
     private Collection<SummaryReportItem> calculateSummaryResults(
-            long userId, long deviceId, Date from, Date to, boolean daily) throws StorageException {
+            long userId, Device device, Date from, Date to, boolean daily) throws StorageException {
 
-        var positions = PositionUtil.getPositions(storage, deviceId, from, to);
+        var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
         var results = new ArrayList<SummaryReportItem>();
         if (daily && !positions.isEmpty()) {
             int startIndex = 0;
@@ -129,14 +128,14 @@ public class SummaryReportProvider {
             for (int i = 0; i < positions.size(); i++) {
                 int currentDay = getDay(userId, positions.get(i).getFixTime());
                 if (currentDay != startDay) {
-                    results.add(calculateSummaryResult(deviceId, positions.subList(startIndex, i)));
+                    results.add(calculateSummaryResult(device, positions.subList(startIndex, i)));
                     startIndex = i;
                     startDay = currentDay;
                 }
             }
-            results.add(calculateSummaryResult(deviceId, positions.subList(startIndex, positions.size())));
+            results.add(calculateSummaryResult(device, positions.subList(startIndex, positions.size())));
         } else {
-            results.add(calculateSummaryResult(deviceId, positions));
+            results.add(calculateSummaryResult(device, positions));
         }
 
         return results;
@@ -149,8 +148,7 @@ public class SummaryReportProvider {
 
         ArrayList<SummaryReportItem> result = new ArrayList<>();
         for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
-            Collection<SummaryReportItem> deviceResults =
-                    calculateSummaryResults(userId, device.getId(), from, to, daily);
+            Collection<SummaryReportItem> deviceResults = calculateSummaryResults(userId, device, from, to, daily);
             for (SummaryReportItem summaryReport : deviceResults) {
                 if (summaryReport.getStartTime() != null && summaryReport.getEndTime() != null) {
                     result.add(summaryReport);

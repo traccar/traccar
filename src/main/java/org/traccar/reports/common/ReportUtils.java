@@ -99,12 +99,6 @@ public class ReportUtils {
                         new Condition.Permission(User.class, userId, clazz))));
     }
 
-    public Device getDevice(long deviceId) throws StorageException {
-        return storage.getObject(Device.class, new Request(
-                new Columns.Include("id"),
-                new Condition.Equals("id", "id", deviceId)));
-    }
-
     public void checkPeriodLimit(Date from, Date to) {
         long limit = config.getLong(Keys.REPORT_PERIOD_LIMIT) * 1000;
         if (limit > 0 && to.getTime() - from.getTime() > limit) {
@@ -211,7 +205,7 @@ public class ReportUtils {
     }
 
     private TripReportItem calculateTrip(
-            ArrayList<Position> positions, int startIndex, int endIndex,
+            Device device, ArrayList<Position> positions, int startIndex, int endIndex,
             boolean ignoreOdometer) throws StorageException {
 
         Position startTrip = positions.get(startIndex);
@@ -230,7 +224,7 @@ public class ReportUtils {
         long tripDuration = endTrip.getFixTime().getTime() - startTrip.getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
         trip.setDeviceId(deviceId);
-        trip.setDeviceName(getDevice(deviceId).getName());
+        trip.setDeviceName(device.getName());
 
         trip.setStartPositionId(startTrip.getId());
         trip.setStartLat(startTrip.getLatitude());
@@ -277,8 +271,7 @@ public class ReportUtils {
     }
 
     private StopReportItem calculateStop(
-            ArrayList<Position> positions, int startIndex, int endIndex,
-            boolean ignoreOdometer) throws StorageException {
+            Device device, ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
 
         Position startStop = positions.get(startIndex);
         Position endStop = positions.get(endIndex);
@@ -287,7 +280,7 @@ public class ReportUtils {
 
         long deviceId = startStop.getDeviceId();
         stop.setDeviceId(deviceId);
-        stop.setDeviceName(getDevice(deviceId).getName());
+        stop.setDeviceName(device.getName());
 
         stop.setPositionId(startStop.getId());
         stop.setLatitude(startStop.getLatitude());
@@ -326,13 +319,13 @@ public class ReportUtils {
 
     @SuppressWarnings("unchecked")
     private <T extends BaseReportItem> T calculateTripOrStop(
-            ArrayList<Position> positions, int startIndex, int endIndex,
+            Device device, ArrayList<Position> positions, int startIndex, int endIndex,
             boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
 
         if (reportClass.equals(TripReportItem.class)) {
-            return (T) calculateTrip(positions, startIndex, endIndex, ignoreOdometer);
+            return (T) calculateTrip(device, positions, startIndex, endIndex, ignoreOdometer);
         } else {
-            return (T) calculateStop(positions, startIndex, endIndex, ignoreOdometer);
+            return (T) calculateStop(device, positions, startIndex, endIndex, ignoreOdometer);
         }
     }
 
@@ -357,7 +350,7 @@ public class ReportUtils {
     }
 
     public <T extends BaseReportItem> Collection<T> detectTripsAndStops(
-            Collection<Position> positionCollection, boolean ignoreOdometer,
+            Device device, Collection<Position> positionCollection, boolean ignoreOdometer,
             Class<T> reportClass) throws StorageException {
 
         Collection<T> result = new ArrayList<>();
@@ -392,14 +385,14 @@ public class ReportUtils {
                 if (startEventIndex != -1 && startNoEventIndex != -1 && event != null
                         && trips != deviceState.getMotionState()) {
                     result.add(calculateTripOrStop(
-                            positions, startEventIndex, startNoEventIndex, ignoreOdometer, reportClass));
+                            device, positions, startEventIndex, startNoEventIndex, ignoreOdometer, reportClass));
                     startEventIndex = -1;
                 }
             }
             if (startEventIndex != -1 && (startNoEventIndex != -1 || !trips)) {
                 int endIndex = startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1;
                 result.add(calculateTripOrStop(
-                        positions, startEventIndex, endIndex, ignoreOdometer, reportClass));
+                        device, positions, startEventIndex, endIndex, ignoreOdometer, reportClass));
             }
         }
 

@@ -55,19 +55,20 @@ public class TripsReportProvider {
         this.storage = storage;
     }
 
-    private Collection<TripReportItem> detectTrips(long deviceId, Date from, Date to) throws StorageException {
+    private Collection<TripReportItem> detectTrips(Device device, Date from, Date to) throws StorageException {
         boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
-        return reportUtils.detectTripsAndStops(
-                PositionUtil.getPositions(storage, deviceId, from, to), ignoreOdometer, TripReportItem.class);
+        var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
+        return reportUtils.detectTripsAndStops(device, positions, ignoreOdometer, TripReportItem.class);
     }
 
-    public Collection<TripReportItem> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-                                                        Date from, Date to) throws StorageException {
+    public Collection<TripReportItem> getObjects(
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+            Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
 
         ArrayList<TripReportItem> result = new ArrayList<>();
         for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
-            result.addAll(detectTrips(device.getId(), from, to));
+            result.addAll(detectTrips(device, from, to));
         }
         return result;
     }
@@ -80,7 +81,7 @@ public class TripsReportProvider {
         ArrayList<DeviceReportSection> devicesTrips = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
-            Collection<TripReportItem> trips = detectTrips(device.getId(), from, to);
+            Collection<TripReportItem> trips = detectTrips(device, from, to);
             DeviceReportSection deviceTrips = new DeviceReportSection();
             deviceTrips.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));
