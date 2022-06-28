@@ -364,6 +364,18 @@ public class ConnectionManager implements BroadcastInterface {
         }
     }
 
+    @Override
+    public synchronized void invalidatePermission(
+            Class<? extends BaseModel> clazz1, long id1,
+            Class<? extends BaseModel> clazz2, long id2) {
+        if (clazz1.equals(User.class) && clazz2.equals(Device.class)) {
+            if (listeners.containsKey(id1)) {
+                userDevices.get(id1).add(id2);
+                deviceUsers.put(id2, Set.of(id1));
+            }
+        }
+    }
+
     public interface UpdateListener {
         void onKeepalive();
         void onUpdateDevice(Device device);
@@ -379,7 +391,7 @@ public class ConnectionManager implements BroadcastInterface {
 
             var devices = storage.getObjects(Device.class, new Request(
                     new Columns.Include("id"), new Condition.Permission(User.class, userId, Device.class)));
-            userDevices.put(userId, devices.stream().map(BaseModel::getId).collect(Collectors.toUnmodifiableSet()));
+            userDevices.put(userId, devices.stream().map(BaseModel::getId).collect(Collectors.toSet()));
             devices.forEach(device -> deviceUsers.computeIfAbsent(device.getId(), id -> new HashSet<>()).add(userId));
         }
         set.add(listener);

@@ -21,6 +21,7 @@ import org.traccar.model.BaseModel;
 import org.traccar.model.Group;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
+import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -40,6 +41,9 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Inject
     private CacheManager cacheManager;
+
+    @Inject
+    private ConnectionManager connectionManager;
 
     protected final Class<T> baseClass;
 
@@ -68,6 +72,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         LogAction.create(getUserId(), entity);
         storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
         cacheManager.invalidatePermission(User.class, getUserId(), baseClass, entity.getId());
+        connectionManager.invalidatePermission(User.class, getUserId(), baseClass, entity.getId());
         LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
 
         return Response.ok(entity).build();
