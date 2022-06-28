@@ -322,7 +322,7 @@ public class ProtocolTest extends BaseTest {
 
         if (position.getNetwork() != null && position.getNetwork().getWifiAccessPoints() != null) {
             for (WifiAccessPoint wifiAccessPoint : position.getNetwork().getWifiAccessPoints()) {
-                assertTrue("validation failed for mac address with zero value",!wifiAccessPoint.getMacAddress().equals("0"));
+                assertTrue("validation failed for mac address with zero value", !wifiAccessPoint.getMacAddress().equals("0"));
             }
         }
 
