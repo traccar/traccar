@@ -72,8 +72,8 @@ public class UserResource extends BaseObjectResource<User> {
     @PermitAll
     @POST
     public Response add(User entity) throws StorageException {
-        User currentUser = permissionsService.getUser(getUserId());
-        if (permissionsService.notAdmin(getUserId())) {
+        User currentUser = getUserId() > 0 ? permissionsService.getUser(getUserId()) : null;
+        if (currentUser == null || !currentUser.getAdministrator()) {
             permissionsService.checkUserUpdate(getUserId(), new User(), entity);
             if (currentUser != null && currentUser.getUserLimit() != 0) {
                 int userLimit = currentUser.getUserLimit();
