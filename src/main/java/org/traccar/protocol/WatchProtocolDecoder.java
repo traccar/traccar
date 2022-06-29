@@ -142,8 +142,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         Network network = new Network();
 
         int cellCount = Integer.parseInt(values[index++]);
-        index += 1; // timing advance
         if (cellCount > 0) {
+            index += 1; // timing advance
             int mcc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
             int mnc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
 
@@ -164,8 +164,11 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             for (int i = 0; i < wifiCount; i++) {
                 index += 1; // wifi name
-                network.addWifiAccessPoint(WifiAccessPoint.from(
-                        values[index++], Integer.parseInt(values[index++])));
+                String macAddress = values[index++];
+                String rssi = values[index++];
+                if (!macAddress.isEmpty() && !macAddress.equals("0") && !rssi.isEmpty()) {
+                    network.addWifiAccessPoint(WifiAccessPoint.from(macAddress, Integer.parseInt(rssi)));
+                }
             }
         }
 
