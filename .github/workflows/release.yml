@@ -41,7 +41,7 @@ jobs:
       - run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install innoextract makeself wine wine32
+          sudo apt-get install innoextract makeself wine32
       - name: Build installers
         working-directory: ./setup
         run: |
