@@ -29,6 +29,9 @@ jobs:
         with:
           node-version: 14
           cache: npm
+          cache-dependency-path: |
+            traccar-web/package-lock.json
+            traccar-web/modern/package-lock.json
       - run: |
           wget -q http://cdn.sencha.com/cmd/7.1.0.15/no-jre/SenchaCmd-7.1.0.15-linux-i386.sh.zip
           unzip SenchaCmd-*.zip
