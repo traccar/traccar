@@ -39,8 +39,9 @@ jobs:
           echo "$HOME/bin/Sencha/Cmd/" >> $GITHUB_PATH
       - run: ./traccar-web/tools/package.sh
       - run: |
+          sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install innoextract wine makeself
+          sudo apt-get install innoextract makeself wine wine32
       - name: Build installers
         working-directory: ./setup
         run: |
