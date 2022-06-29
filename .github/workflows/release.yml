@@ -17,6 +17,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
+      - run: git --git-dir ./traccar-web/.git checkout ${{ github.ref_name }}
       - uses: actions/setup-java@v3
         with:
           distribution: zulu
@@ -33,7 +34,7 @@ jobs:
       - run: ./traccar-web/tools/package.sh
       - run: |
           sudo apt-get update
-          sudo apt-get install innoextract wine wine32
+          sudo apt-get install innoextract wine
       - run: |
           cd setup
           wget http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
