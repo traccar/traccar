@@ -23,10 +23,12 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
+          cache: gradle
       - run: ./gradlew build
       - uses: actions/setup-node@v3
         with:
           node-version: 14
+          cache: npm
       - run: |
           wget -q http://cdn.sencha.com/cmd/7.1.0.15/no-jre/SenchaCmd-7.1.0.15-linux-i386.sh.zip
           unzip SenchaCmd-*.zip
@@ -43,4 +45,4 @@ jobs:
           wget -q https://github.com/ojdkbuild/ojdkbuild/releases/download/java-11-openjdk-11.0.13.8-1/java-11-openjdk-11.0.13.8-1.windows.ojdkbuild.x86_64.zip
           wget -q https://github.com/ojdkbuild/contrib_jdk11u-ci/releases/download/jdk-11.0.13%2B8/jdk-11.0.13-ojdkbuild-linux-x64.zip
           wget -q https://github.com/ojdkbuild/contrib_jdk11u-arm32-ci/releases/download/jdk-11.0.13%2B8/jdk-11.0.13-ojdkbuild-linux-armhf.zip
-          ./package ${{ github.event.inputs.version }}
+          ./package.sh ${{ github.event.inputs.version }}
