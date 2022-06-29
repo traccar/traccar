@@ -40,7 +40,7 @@ jobs:
       - run: ./traccar-web/tools/package.sh
       - run: |
           sudo apt-get update
-          sudo apt-get install innoextract wine
+          sudo apt-get install innoextract wine makeself
       - name: Build installers
         working-directory: ./setup
         run: |
