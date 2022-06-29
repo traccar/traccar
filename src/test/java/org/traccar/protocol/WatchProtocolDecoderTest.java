@@ -142,6 +142,9 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "[ZJ*014111001350304*0038*008a*UD,070318,021027,V,00.000000,N,000.000000,E,0,0,0,0,100,18,1000,50,00000000,4,255,460,0,9346,5223,42,9346,5214,20,9784,4083,11,9346,5221,5]"));
+        
+        verifyPosition(decoder, buffer(
+                "[3G*8800000015*00DD*UD,010120,025946,V,0.0,N,0.0,E,22.0,0,-1,0,100,98,0,0,00000000,0,5,eduroam,f4:db:e6:d2:a8:00,-53,eduroam,f4:db:e6:da:d0:80,-79,eduroam,78:0c:f0:24:f9:80,-82,Lions,b0:be:76:0a:05:9a,-82,tubs-guest,f4:db:e6:d2:a8:01,-53,0.0]"));
 
     }
 
