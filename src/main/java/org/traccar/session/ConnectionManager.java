@@ -26,6 +26,7 @@ import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.database.DeviceLookupService;
 import org.traccar.database.NotificationManager;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
@@ -76,6 +77,7 @@ public class ConnectionManager implements BroadcastInterface {
     private final NotificationManager notificationManager;
     private final Timer timer;
     private final BroadcastService broadcastService;
+    private final DeviceLookupService deviceLookupService;
 
     private final Map<Long, Set<UpdateListener>> listeners = new HashMap<>();
     private final Map<Long, Set<Long>> userDevices = new HashMap<>();
@@ -86,7 +88,8 @@ public class ConnectionManager implements BroadcastInterface {
     @Inject
     public ConnectionManager(
             Injector injector, Config config, CacheManager cacheManager, Storage storage,
-            NotificationManager notificationManager, Timer timer, BroadcastService broadcastService) {
+            NotificationManager notificationManager, Timer timer, BroadcastService broadcastService,
+            DeviceLookupService deviceLookupService) {
         this.injector = injector;
         this.config = config;
         this.cacheManager = cacheManager;
@@ -94,6 +97,7 @@ public class ConnectionManager implements BroadcastInterface {
         this.notificationManager = notificationManager;
         this.timer = timer;
         this.broadcastService = broadcastService;
+        this.deviceLookupService = deviceLookupService;
         deviceTimeout = config.getLong(Keys.STATUS_TIMEOUT) * 1000;
         updateDeviceState = config.getBoolean(Keys.STATUS_UPDATE_DEVICE_STATE);
         broadcastService.registerListener(this);
@@ -121,18 +125,7 @@ public class ConnectionManager implements BroadcastInterface {
             return endpointSessions.values().stream().findAny().orElse(null);
         }
 
-        Device device = null;
-        try {
-            for (String uniqueId : uniqueIds) {
-                device = storage.getObject(Device.class, new Request(
-                        new Columns.All(), new Condition.Equals("uniqueId", "uniqueId", uniqueId)));
-                if (device != null) {
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Find device error", e);
-        }
+        Device device = deviceLookupService.lookup(uniqueIds);
 
         if (device == null && config.getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
             device = addUnknownDevice(uniqueIds[0]);
