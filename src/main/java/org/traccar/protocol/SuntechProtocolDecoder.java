@@ -21,6 +21,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.config.Keys;
+import org.traccar.helper.BufferUtil;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
@@ -673,19 +674,11 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 11)) {
-            long value = buf.readUnsignedInt();
-            if (BitUtil.check(value, 31)) {
-                value = -BitUtil.to(value, 31);
-            }
-            position.setLatitude(value / 1000000.0);
+            position.setLatitude(BufferUtil.readSignedMagnitudeInt(buf) / 1000000.0);
         }
 
         if (BitUtil.check(mask, 12)) {
-            long value = buf.readUnsignedInt();
-            if (BitUtil.check(value, 31)) {
-                value = -BitUtil.to(value, 31);
-            }
-            position.setLongitude(value / 1000000.0);
+            position.setLongitude(BufferUtil.readSignedMagnitudeInt(buf) / 1000000.0);
         }
 
         if (BitUtil.check(mask, 13)) {

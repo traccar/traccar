@@ -11,6 +11,12 @@ import static org.junit.Assert.assertEquals;
 public class BufferUtilTest {
 
     @Test
+    public void testReadSignedMagnitudeInt() {
+        ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex("80000001"));
+        assertEquals(-1, BufferUtil.readSignedMagnitudeInt(buf));
+    }
+
+    @Test
     public void test1() {
         ByteBuf buf = Unpooled.copiedBuffer("abcdef", StandardCharsets.US_ASCII);
         assertEquals(2, BufferUtil.indexOf("cd", buf));
