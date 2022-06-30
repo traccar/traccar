@@ -268,38 +268,40 @@ public class CacheManager implements BroadcastInterface {
 
         Device device = storage.getObject(Device.class, new Request(
                 new Columns.All(), new Condition.Equals("id", "id", deviceId)));
-        addObject(deviceId, device);
+        if (device != null) {
+            addObject(deviceId, device);
 
-        for (Class<? extends BaseModel> clazz : CLASSES) {
-            var objects = storage.getObjects(clazz, new Request(
-                    new Columns.All(), new Condition.Permission(Device.class, deviceId, clazz)));
-            links.put(clazz, objects.stream().map(BaseModel::getId).collect(Collectors.toList()));
-            objects.forEach(object -> addObject(deviceId, object));
+            for (Class<? extends BaseModel> clazz : CLASSES) {
+                var objects = storage.getObjects(clazz, new Request(
+                        new Columns.All(), new Condition.Permission(Device.class, deviceId, clazz)));
+                links.put(clazz, objects.stream().map(BaseModel::getId).collect(Collectors.toList()));
+                objects.forEach(object -> addObject(deviceId, object));
+            }
+
+            var users = storage.getObjects(User.class, new Request(
+                    new Columns.All(), new Condition.Permission(User.class, Device.class, deviceId)));
+            links.put(User.class, users.stream().map(BaseModel::getId).collect(Collectors.toList()));
+            for (var user : users) {
+                addObject(deviceId, user);
+                var notifications = storage.getObjects(Notification.class, new Request(
+                        new Columns.All(), new Condition.Permission(User.class, user.getId(), Notification.class)));
+                notifications.stream()
+                        .filter(Notification::getAlways)
+                        .forEach(object -> {
+                            links.computeIfAbsent(Notification.class, k -> new LinkedList<>()).add(object.getId());
+                            addObject(deviceId, object);
+                        });
+            }
+
+            deviceLinks.put(deviceId, links);
+
+            if (device.getPositionId() > 0) {
+                devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", "id", device.getPositionId()))));
+            }
+
+            invalidateDeviceGeofences(device);
         }
-
-        var users = storage.getObjects(User.class, new Request(
-                new Columns.All(), new Condition.Permission(User.class, Device.class, deviceId)));
-        links.put(User.class, users.stream().map(BaseModel::getId).collect(Collectors.toList()));
-        for (var user : users) {
-            addObject(deviceId, user);
-            var notifications = storage.getObjects(Notification.class, new Request(
-                    new Columns.All(), new Condition.Permission(User.class, user.getId(), Notification.class)));
-            notifications.stream()
-                    .filter(Notification::getAlways)
-                    .forEach(object -> {
-                        links.computeIfAbsent(Notification.class, k -> new LinkedList<>()).add(object.getId());
-                        addObject(deviceId, object);
-                    });
-        }
-
-        deviceLinks.put(deviceId, links);
-
-        if (device.getPositionId() > 0) {
-            devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
-                    new Columns.All(), new Condition.Equals("id", "id", device.getPositionId()))));
-        }
-
-        invalidateDeviceGeofences(device);
     }
 
     private void unsafeRemoveDevice(long deviceId) {
