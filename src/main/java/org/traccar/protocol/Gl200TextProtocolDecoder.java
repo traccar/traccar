@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -360,15 +360,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("d*,")
             .number("(x{1,2}),")                 // report type
             .number("d{1,2},")                   // count
+            .number("d*,").optional()            // reserved
             .expression(PATTERN_LOCATION.pattern())
             .groupBegin()
-            .number("(d{1,7}.d)?,").optional()   // odometer
+            .number("(?:(d{1,7}.d)|0)?,").optional() // odometer
             .number("(d{1,3})?,")                // battery
             .or()
             .number("(d{1,7}.d)?,")              // odometer
             .groupEnd()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)")  // time (hhmmss)
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .text(",")
             .number("(xxxx)")                    // count number
             .text("$").optional()
