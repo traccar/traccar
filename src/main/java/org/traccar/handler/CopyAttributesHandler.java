@@ -44,7 +44,7 @@ public class CopyAttributesHandler extends BaseDataHandler {
             String attributesString = AttributeUtil.lookup(
                     cacheManager, Keys.PROCESSING_COPY_ATTRIBUTES, position.getDeviceId());
             Position last = cacheManager.getPosition(position.getDeviceId());
-            if (last != null) {
+            if (last != null && attributesString != null) {
                 for (String attribute : attributesString.split("[ ,]")) {
                     if (last.getAttributes().containsKey(attribute)
                             && !position.getAttributes().containsKey(attribute)) {
