@@ -19,6 +19,7 @@ import org.traccar.config.ConfigKey;
 import org.traccar.config.KeyType;
 import org.traccar.config.Keys;
 import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.session.cache.CacheManager;
 
 public final class AttributeUtil {
@@ -30,6 +31,16 @@ public final class AttributeUtil {
     public static <T> T lookup(CacheManager cacheManager, ConfigKey<T> key, long deviceId) {
         Device device = cacheManager.getObject(Device.class, deviceId);
         Object result = device.getAttributes().get(key.getKey());
+        long groupId = device.getGroupId();
+        while (result == null && groupId > 0) {
+            Group group = cacheManager.getObject(Group.class, groupId);
+            if (group != null) {
+                result = group.getAttributes().get(key.getKey());
+                groupId = group.getGroupId();
+            } else {
+                groupId = 0;
+            }
+        }
         if (result == null && key.hasType(KeyType.SERVER)) {
             result = cacheManager.getServer().getAttributes().get(key.getKey());
         }
