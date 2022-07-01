@@ -249,6 +249,7 @@ public class CacheManager implements BroadcastInterface {
     }
 
     private void invalidateUsers() throws StorageException {
+        notificationUsers.clear();
         Map<Long, User> users = new HashMap<>();
         storage.getObjects(User.class, new Request(new Columns.All()))
                 .forEach(user -> users.put(user.getId(), user));
