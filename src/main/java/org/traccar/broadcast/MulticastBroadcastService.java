@@ -159,6 +159,7 @@ public class MulticastBroadcastService implements BroadcastService {
                     DatagramPacket packet = new DatagramPacket(receiverBuffer, receiverBuffer.length);
                     socket.receive(packet);
                     String data = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
+                    LOGGER.info("Broadcast received: {}", data);
                     handleMessage(objectMapper.readValue(data, BroadcastMessage.class));
                 }
                 socket.leaveGroup(address);
