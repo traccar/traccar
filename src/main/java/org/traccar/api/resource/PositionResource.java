@@ -20,17 +20,22 @@ import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.model.UserRestrictions;
+import org.traccar.reports.KmlExportProvider;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -40,6 +45,9 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PositionResource extends BaseResource {
+
+    @Inject
+    private KmlExportProvider kmlExportProvider;
 
     @GET
     public Collection<Position> getJson(
@@ -67,6 +75,19 @@ public class PositionResource extends BaseResource {
         } else {
             return PositionUtil.getLatestPositions(storage, getUserId());
         }
+    }
+
+    @Path("kml")
+    @GET
+    @Produces("application/vnd.google-earth.kml+xml")
+    public Response getKml(
+            @QueryParam("deviceId") long deviceId,
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        kmlExportProvider.generateKml(stream, deviceId, from, to);
+        return Response.ok(stream.toByteArray())
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions.kml").build();
     }
 
 }
