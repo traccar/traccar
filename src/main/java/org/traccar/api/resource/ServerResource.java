@@ -22,9 +22,10 @@ import org.traccar.helper.Log;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Server;
 import org.traccar.model.User;
-import org.traccar.storage.Storage;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import javax.annotation.Nullable;
@@ -48,7 +49,7 @@ import java.util.TimeZone;
 public class ServerResource extends BaseResource {
 
     @Inject
-    private Storage storage;
+    private CacheManager cacheManager;
 
     @Inject
     private MailManager mailManager;
@@ -72,6 +73,10 @@ public class ServerResource extends BaseResource {
     @PUT
     public Response update(Server entity) throws StorageException {
         permissionsService.checkAdmin(getUserId());
+        storage.updateObject(entity, new Request(
+                new Columns.Exclude("id"),
+                new Condition.Equals("id", "id")));
+        cacheManager.updateOrInvalidate(entity);
         LogAction.edit(getUserId(), entity);
         return Response.ok(entity).build();
     }
