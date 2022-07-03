@@ -63,6 +63,7 @@ public class ServerResource extends BaseResource {
     public Server get() throws StorageException {
         Server server = storage.getObject(Server.class, new Request(new Columns.All()));
         server.setEmailEnabled(mailManager.getEmailEnabled());
+        server.setGeocoderEnabled(geocoder != null);
         User user = permissionsService.getUser(getUserId());
         if (user != null && user.getAdministrator()) {
             server.setStorageSpace(Log.getStorageSpace());

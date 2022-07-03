@@ -214,6 +214,18 @@ public class Server extends ExtendedModel implements UserRestrictions {
         return emailEnabled;
     }
 
+    private boolean geocoderEnabled;
+
+    @QueryIgnore
+    public void setGeocoderEnabled(boolean geocoderEnabled) {
+        this.geocoderEnabled = geocoderEnabled;
+    }
+
+    @QueryIgnore
+    public boolean getGeocoderEnabled() {
+        return geocoderEnabled;
+    }
+
     private long[] storageSpace;
 
     @QueryIgnore
