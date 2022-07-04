@@ -51,7 +51,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .expression("[^,]+,")                // protocol version
             .expression("([^,]+),")              // serial number
             .number("(xx),")                     // status
-            .number("(-?d+.d+)").optional()                   // battery
+            .number("(-?d+.d+)")                 // battery
             .groupBegin()
             .text(",")
             .number("(d)")                       // satellites
@@ -148,11 +148,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INPUT, BitUtil.check(status, 5));
         position.set(Position.KEY_STATUS, status);
 
-        try {
-            position.set(Position.KEY_BATTERY, parser.nextDouble());
-        } catch(Exception e) {
-
-        }
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
 
         if (parser.hasNext(7)) {
 
