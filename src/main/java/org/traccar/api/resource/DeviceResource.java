@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.api.BaseObjectResource;
 import org.traccar.broadcast.BroadcastService;
+import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
@@ -32,12 +33,18 @@ import org.traccar.storage.query.Request;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -56,6 +63,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Inject
     private BroadcastService broadcastService;
+
+    @Inject
+    private MediaManager mediaManager;
 
     public DeviceResource() {
         super(Device.class);
@@ -110,7 +120,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Path("{id}/accumulators")
     @PUT
-    public Response updateAccumulators(DeviceAccumulators entity) throws StorageException, IOException {
+    public Response updateAccumulators(DeviceAccumulators entity) throws StorageException {
         if (permissionsService.notAdmin(getUserId())) {
             permissionsService.checkManager(getUserId());
             permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
@@ -147,6 +157,30 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
         LogAction.resetDeviceAccumulators(getUserId(), entity.getDeviceId());
         return Response.noContent().build();
+    }
+
+    @Path("{id}/image")
+    @POST
+    @Consumes("image/*")
+    public Response uploadImage(
+            @PathParam("id") long deviceId, File file,
+            @HeaderParam(HttpHeaders.CONTENT_TYPE) String type) throws StorageException, IOException {
+
+        Device device = storage.getObject(Device.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("id", "id", deviceId),
+                        new Condition.Permission(User.class, getUserId(), Device.class))));
+        if (device != null) {
+            String name = "device";
+            String extension = type.substring("image/".length());
+            try (var input = new FileInputStream(file);
+                    var output = mediaManager.createFileStream(device.getUniqueId(), name, extension)) {
+                input.transferTo(output);
+            }
+            return Response.ok(name + "." + extension).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
 }

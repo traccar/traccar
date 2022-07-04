@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -51,6 +52,10 @@ public class MediaManager {
             Files.createDirectories(directoryPath);
         }
         return filePath.toFile();
+    }
+
+    public OutputStream createFileStream(String uniqueId, String name, String extension) throws IOException {
+        return new FileOutputStream(createFile(uniqueId, name + "." + extension));
     }
 
     public String writeFile(String uniqueId, ByteBuf buf, String extension) {
