@@ -38,6 +38,7 @@ import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
+import org.traccar.handler.DigitalPortHandler;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
@@ -136,6 +137,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 MotionHandler.class,
                 CopyAttributesHandler.class,
                 EngineHoursHandler.class,
+                DigitalPortHandler.class,
                 ComputedAttributesHandler.class,
                 WebDataHandler.class,
                 DefaultDataHandler.class);
