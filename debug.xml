@@ -11,6 +11,8 @@
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
 
+    <entry key='media.path'>./target/media</entry>
+
     <entry key='logger.console'>true</entry>
     <entry key='logger.queries'>true</entry>
 
