@@ -414,7 +414,6 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         return defaultValue;
     }
 
-
     public double lookupAttributeDouble(
             long deviceId, String attributeName, double defaultValue, boolean lookupServer, boolean lookupConfig) {
         Object result = lookupAttribute(deviceId, attributeName, lookupServer, lookupConfig);
