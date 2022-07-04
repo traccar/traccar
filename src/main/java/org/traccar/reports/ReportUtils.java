@@ -215,7 +215,9 @@ public final class ReportUtils {
 
         trip.setDistance(calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
-        trip.setAverageSpeed(speedSum / (endIndex - startIndex));
+
+        trip.setAverageSpeed(speedSum / (endIndex - startIndex + 0));
+
         trip.setMaxSpeed(speedMax);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 
