@@ -39,7 +39,7 @@ public class KmlExportProvider {
         this.storage = storage;
     }
 
-    public void generateKml(
+    public void generate(
             OutputStream outputStream, long deviceId, Date from, Date to) throws StorageException {
 
         var device = storage.getObject(Device.class, new Request(

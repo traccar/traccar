@@ -20,6 +20,7 @@ import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.model.UserRestrictions;
+import org.traccar.reports.CsvExportProvider;
 import org.traccar.reports.KmlExportProvider;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -32,10 +33,11 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.ByteArrayOutputStream;
+import javax.ws.rs.core.StreamingOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -48,6 +50,9 @@ public class PositionResource extends BaseResource {
 
     @Inject
     private KmlExportProvider kmlExportProvider;
+
+    @Inject
+    private CsvExportProvider csvExportProvider;
 
     @GET
     public Collection<Position> getJson(
@@ -84,10 +89,33 @@ public class PositionResource extends BaseResource {
             @QueryParam("deviceId") long deviceId,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        kmlExportProvider.generateKml(stream, deviceId, from, to);
-        return Response.ok(stream.toByteArray())
+        StreamingOutput stream = output -> {
+            try {
+                kmlExportProvider.generate(output, deviceId, from, to);
+            } catch (StorageException e) {
+                throw new WebApplicationException(e);
+            }
+        };
+        return Response.ok(stream)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions.kml").build();
+    }
+
+    @Path("csv")
+    @GET
+    @Produces("text/csv")
+    public Response getCsv(
+            @QueryParam("deviceId") long deviceId,
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        StreamingOutput stream = output -> {
+            try {
+                csvExportProvider.generate(output, deviceId, from, to);
+            } catch (StorageException e) {
+                throw new WebApplicationException(e);
+            }
+        };
+        return Response.ok(stream)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions.csv").build();
     }
 
 }

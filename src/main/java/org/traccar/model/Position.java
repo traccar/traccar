@@ -150,7 +150,6 @@ public class Position extends Message {
 
     public Position(String protocol) {
         this.protocol = protocol;
-        this.serverTime = new Date();
     }
 
     private String protocol;
