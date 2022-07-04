@@ -215,7 +215,7 @@ public final class ReportUtils {
 
         trip.setDistance(calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
-        trip.setAverageSpeed(speedSum / (endIndex - startIndex + 1));
+        trip.setAverageSpeed(speedSum / (endIndex - startIndex));
         trip.setMaxSpeed(speedMax);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 
@@ -316,6 +316,7 @@ public final class ReportUtils {
                 return false;
             }
         }
+        if (!positions.get(index).getValid()) return false;
         if (positions.get(index).getAttributes().containsKey(Position.KEY_MOTION)
                 && positions.get(index).getAttributes().get(Position.KEY_MOTION) instanceof Boolean) {
             return positions.get(index).getBoolean(Position.KEY_MOTION);
