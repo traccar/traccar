@@ -400,7 +400,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                             }
                         }
                     } else {
-                        position.set("serial", attribute);
+                        position.set("serial", attribute.trim());
                     }
                     remaining -= attribute.length() + 1;
                 }
