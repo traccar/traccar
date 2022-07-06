@@ -57,6 +57,7 @@ public class ReportUtilsTest extends BaseTest {
         position.setTime(date(time));
         position.setValid(true);
         position.setSpeed(speed);
+        position.set(Position.KEY_MOTION, speed > 0);
         position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);
 
         return position;

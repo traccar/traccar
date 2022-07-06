@@ -341,12 +341,7 @@ public class ReportUtils {
                 return false;
             }
         }
-        if (positions.get(index).getAttributes().containsKey(Position.KEY_MOTION)
-                && positions.get(index).getAttributes().get(Position.KEY_MOTION) instanceof Boolean) {
-            return positions.get(index).getBoolean(Position.KEY_MOTION);
-        } else {
-            return positions.get(index).getSpeed() > tripsConfig.getSpeedThreshold();
-        }
+        return positions.get(index).getBoolean(Position.KEY_MOTION);
     }
 
     public <T extends BaseReportItem> Collection<T> detectTripsAndStops(
