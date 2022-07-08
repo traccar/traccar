@@ -59,6 +59,17 @@ public class DataManager {
 
     private DataSource dataSource;
 
+
+    private final String dbHost = System.getenv("DB_HOST");
+
+    private final String dbName = System.getenv("DB_NAME");
+
+    private final String dbUser = System.getenv("DB_USER");
+
+    private final String dbPassword = System.getenv("DB_PASSWORD");
+
+    private final String dbUrl = "jdbc:postgresql://".concat(dbHost).concat(":5432/").concat(dbName);
+
     public DataSource getDataSource() {
         return dataSource;
     }
@@ -106,9 +117,9 @@ public class DataManager {
 
         HikariConfig hikariConfig = new HikariConfig();
         hikariConfig.setDriverClassName(driver);
-        hikariConfig.setJdbcUrl(config.getString(Keys.DATABASE_URL));
-        hikariConfig.setUsername(config.getString(Keys.DATABASE_USER));
-        hikariConfig.setPassword(config.getString(Keys.DATABASE_PASSWORD));
+        hikariConfig.setJdbcUrl(dbUrl);
+        hikariConfig.setUsername(dbUser);
+        hikariConfig.setPassword(dbPassword);
         hikariConfig.setConnectionInitSql(config.getString(Keys.DATABASE_CHECK_CONNECTION));
         hikariConfig.setIdleTimeout(600000);
 
