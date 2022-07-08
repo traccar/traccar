@@ -18,6 +18,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttribute(decoder, binary(
+                "79790019941b524649443a3030384642324245424133390d0a000c14930d0a"),
+                "serial", "RFID:008FB2BEBA39");
+
+        verifyAttribute(decoder, binary(
                 "7878241216040e102c22cf00915ffb04c6016300195a02d402283b00753f400571040001dda4880d0a"),
                 Position.KEY_IGNITION, false);
 

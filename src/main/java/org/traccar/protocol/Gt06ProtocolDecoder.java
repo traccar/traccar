@@ -1004,11 +1004,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (subType == 0x1b) {
 
-                buf.readUnsignedByte(); // header
-                buf.readUnsignedByte(); // type
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(4)));
-                buf.readUnsignedByte(); // checksum
-                buf.readUnsignedByte(); // footer
+                if (Character.isLetter(buf.getUnsignedByte(buf.readerIndex()))) {
+                    String data = buf.readCharSequence(buf.readableBytes() - 6, StandardCharsets.US_ASCII).toString();
+                    position.set("serial", data.trim());
+                } else {
+                    buf.readUnsignedByte(); // header
+                    buf.readUnsignedByte(); // type
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(4)));
+                    buf.readUnsignedByte(); // checksum
+                    buf.readUnsignedByte(); // footer
+                }
                 return position;
 
             }
