@@ -112,6 +112,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private enum Variant {
         VXT01,
         WANWAY_S20,
+        SR411_MINI,
         GT06E_CARD,
         BENWAY,
         S5,
@@ -643,6 +644,18 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             position.set(Position.KEY_POWER, buf.readShort() * 0.01);
+
+            return position;
+
+        } else if (type == MSG_LBS_MULTIPLE_3 && variant == Variant.SR411_MINI) {
+
+            decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
+
+            decodeLbs(position, buf, type, false);
+
+            position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
 
             return position;
 
@@ -1323,6 +1336,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.VXT01;
         } else if (header == 0x7878 && type == MSG_LBS_MULTIPLE_3 && length == 0x31) {
             variant = Variant.WANWAY_S20;
+        } else if (header == 0x7878 && type == MSG_LBS_MULTIPLE_3 && length == 0x2e) {
+            variant = Variant.SR411_MINI;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length >= 0x71) {
             variant = Variant.GT06E_CARD;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x21) {
