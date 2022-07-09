@@ -142,7 +142,7 @@ def send_message(port, message):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', port))
     s.send(message)
-    time.sleep(5)
+    time.sleep(0.5)
     s.close()
 
 def get_protocols(cookie, device_id):
@@ -178,14 +178,8 @@ if __name__ == "__main__":
     print 'Missing: %d' % len(all - protocols)
     print 'Covered: %d' % len(protocols)
 
-    #if all - protocols:
-    #    print '\nMissing: %s\n' % repr(list((all - protocols)))
-
     for protocol in messages:
-        thread = threading.Thread(target = send_message, args = (ports[protocol], messages[protocol]))
-        thread.start()
-
-    time.sleep(10)
+        send_message(ports[protocol], messages[protocol])
 
     for device in devices:
         protocols -= set(get_protocols(cookie, devices[device]))
