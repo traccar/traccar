@@ -39,7 +39,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_ANY = new PatternBuilder()
-            .expression("([^#]*)?")              // imei
+            .expression("([^#]+)?")              // imei
             .text("#")                           // start byte
             .expression("([^#]+)")               // type
             .text("#")                           // separator
