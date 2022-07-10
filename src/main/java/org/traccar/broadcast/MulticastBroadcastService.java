@@ -30,7 +30,9 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
+import java.net.NetworkInterface;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Map;
@@ -44,8 +46,9 @@ public class MulticastBroadcastService implements BroadcastService {
 
     private final ObjectMapper objectMapper;
 
-    private final InetAddress address;
+    private final NetworkInterface networkInterface;
     private final int port;
+    private final InetSocketAddress group;
 
     private DatagramSocket publisherSocket;
 
@@ -56,8 +59,15 @@ public class MulticastBroadcastService implements BroadcastService {
 
     public MulticastBroadcastService(Config config, ObjectMapper objectMapper) throws IOException {
         this.objectMapper = objectMapper;
-        address = InetAddress.getByName(config.getString(Keys.BROADCAST_ADDRESS));
         port = config.getInteger(Keys.BROADCAST_PORT);
+        String interfaceName = config.getString(Keys.BROADCAST_INTERFACE);
+        if (interfaceName.indexOf('.') >= 0 || interfaceName.indexOf(':') >= 0) {
+            networkInterface = NetworkInterface.getByInetAddress(InetAddress.getByName(interfaceName));
+        } else {
+            networkInterface = NetworkInterface.getByName(interfaceName);
+        }
+        InetAddress address = InetAddress.getByName(config.getString(Keys.BROADCAST_ADDRESS));
+        group = new InetSocketAddress(address, port);
     }
 
     @Override
@@ -106,7 +116,7 @@ public class MulticastBroadcastService implements BroadcastService {
     private void sendMessage(BroadcastMessage message) {
         try {
             byte[] buffer = objectMapper.writeValueAsString(message).getBytes(StandardCharsets.UTF_8);
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, port);
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length, group);
             publisherSocket.send(packet);
         } catch (IOException e) {
             LOGGER.warn("Broadcast failed", e);
@@ -150,11 +160,10 @@ public class MulticastBroadcastService implements BroadcastService {
     }
 
     private final Runnable receiver = new Runnable() {
-        @SuppressWarnings("deprecation")
         @Override
         public void run() {
             try (MulticastSocket socket = new MulticastSocket(port)) {
-                socket.joinGroup(address);
+                socket.joinGroup(group, networkInterface);
                 while (!service.isShutdown()) {
                     DatagramPacket packet = new DatagramPacket(receiverBuffer, receiverBuffer.length);
                     socket.receive(packet);
@@ -162,10 +171,11 @@ public class MulticastBroadcastService implements BroadcastService {
                     LOGGER.info("Broadcast received: {}", data);
                     handleMessage(objectMapper.readValue(data, BroadcastMessage.class));
                 }
-                socket.leaveGroup(address);
+                socket.leaveGroup(group, networkInterface);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
     };
+
 }

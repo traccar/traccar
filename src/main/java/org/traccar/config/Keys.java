@@ -1445,6 +1445,13 @@ public final class Keys {
             "time,position,speed,course,accuracy,result");
 
     /**
+     * Multicast interface. It can be either an IP address or an interface name.
+     */
+    public static final ConfigKey<String> BROADCAST_INTERFACE = new StringConfigKey(
+            "broadcast.interface",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Multicast address for broadcasting synchronization events.
      */
     public static final ConfigKey<String> BROADCAST_ADDRESS = new StringConfigKey(
