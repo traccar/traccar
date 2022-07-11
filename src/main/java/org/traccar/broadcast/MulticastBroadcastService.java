@@ -150,12 +150,10 @@ public class MulticastBroadcastService implements BroadcastService {
     @Override
     public void start() throws IOException {
         service.submit(receiver);
-        publisherSocket = new DatagramSocket();
     }
 
     @Override
     public void stop() {
-        publisherSocket.close();
         service.shutdown();
     }
 
@@ -163,6 +161,7 @@ public class MulticastBroadcastService implements BroadcastService {
         @Override
         public void run() {
             try (MulticastSocket socket = new MulticastSocket(port)) {
+                publisherSocket = socket;
                 socket.joinGroup(group, networkInterface);
                 while (!service.isShutdown()) {
                     DatagramPacket packet = new DatagramPacket(receiverBuffer, receiverBuffer.length);
@@ -172,6 +171,7 @@ public class MulticastBroadcastService implements BroadcastService {
                     handleMessage(objectMapper.readValue(data, BroadcastMessage.class));
                 }
                 socket.leaveGroup(group, networkInterface);
+                publisherSocket = null;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
