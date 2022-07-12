@@ -99,15 +99,13 @@ public class NotificationManager {
 
             notifications.forEach(notification -> {
                 cacheManager.getNotificationUsers(notification.getId()).forEach(user -> {
-                    new Thread(() -> {
-                        for (String notificator : notification.getNotificatorsTypes()) {
-                            try {
-                                notificatorManager.getNotificator(notificator).send(user, event, position);
-                            } catch (MessageException | InterruptedException exception) {
-                                LOGGER.warn("Notification failed", exception);
-                            }
+                    for (String notificator : notification.getNotificatorsTypes()) {
+                        try {
+                            notificatorManager.getNotificator(notificator).send(user, event, position);
+                        } catch (MessageException | InterruptedException exception) {
+                            LOGGER.warn("Notification failed", exception);
                         }
-                    }).start();
+                    }
                 });
             });
         }
