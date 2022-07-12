@@ -18,7 +18,6 @@ package org.traccar.model;
 import java.util.Date;
 import java.util.List;
 
-import org.traccar.storage.QueryExtended;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
@@ -67,7 +66,7 @@ public class Device extends GroupedModel {
         return this.lastUpdate;
     }
 
-    @QueryExtended
+    @QueryIgnore
     public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
