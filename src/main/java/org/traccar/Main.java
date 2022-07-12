@@ -141,8 +141,8 @@ public final class Main {
             Context.init(configFile);
             initInjector();
             logSystemInfo();
-            LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
-            LOGGER.info("Starting server...");
+            LOGGER.warn("Version: " + Main.class.getPackage().getImplementationVersion());
+            LOGGER.warn("Starting server...");
 
             Context.getServerManager().start();
             if (Context.getWebServer() != null) {
