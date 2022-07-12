@@ -100,7 +100,7 @@ public class ConnectionManager implements BroadcastInterface {
         this.timer = timer;
         this.broadcastService = broadcastService;
         this.deviceLookupService = deviceLookupService;
-        deviceTimeout = config.getLong(Keys.STATUS_TIMEOUT) * 1000;
+        deviceTimeout = config.getLong(Keys.STATUS_TIMEOUT);
         updateDeviceState = config.getBoolean(Keys.STATUS_UPDATE_DEVICE_STATE);
         broadcastService.registerListener(this);
     }
@@ -270,7 +270,7 @@ public class ConnectionManager implements BroadcastInterface {
                 if (!timeout1.isCancelled()) {
                     deviceUnknown(deviceId);
                 }
-            }, deviceTimeout, TimeUnit.MILLISECONDS));
+            }, deviceTimeout, TimeUnit.SECONDS));
         }
 
         try {
