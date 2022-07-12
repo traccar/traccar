@@ -161,17 +161,17 @@ public class MulticastBroadcastService implements BroadcastService {
         @Override
         public void run() {
             try (MulticastSocket socket = new MulticastSocket(port)) {
-                publisherSocket = socket;
+                socket.setNetworkInterface(networkInterface);
                 socket.joinGroup(group, networkInterface);
+                publisherSocket = socket;
                 while (!service.isShutdown()) {
                     DatagramPacket packet = new DatagramPacket(receiverBuffer, receiverBuffer.length);
                     socket.receive(packet);
                     String data = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
-                    LOGGER.info("Broadcast received: {}", data);
                     handleMessage(objectMapper.readValue(data, BroadcastMessage.class));
                 }
-                socket.leaveGroup(group, networkInterface);
                 publisherSocket = null;
+                socket.leaveGroup(group, networkInterface);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
