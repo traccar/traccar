@@ -93,9 +93,13 @@ public class ExtendedModel extends BaseModel {
     }
 
     public double getDouble(String key) {
-        if (attributes.containsKey(key)) {
-            return ((Number) attributes.get(key)).doubleValue();
-        } else {
+        try {
+            if (attributes.containsKey(key)) {
+                return ((Number) attributes.get(key)).doubleValue();
+            } else {
+                return 0.0;
+            }
+        } catch (Exception e) {
             return 0.0;
         }
     }
