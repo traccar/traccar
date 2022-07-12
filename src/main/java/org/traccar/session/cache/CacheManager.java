@@ -123,10 +123,14 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
-    public List<User> getNotificationUsers(long notificationId) {
+    public List<User> getNotificationUsers(long notificationId, long deviceId) {
         try {
             lock.readLock().lock();
-            return notificationUsers.get(notificationId);
+            var users = deviceLinks.get(deviceId).get(User.class).stream()
+                    .collect(Collectors.toUnmodifiableSet());
+            return notificationUsers.get(notificationId).stream()
+                    .filter(user -> users.contains(user.getId()))
+                    .collect(Collectors.toUnmodifiableList());
         } finally {
             lock.readLock().unlock();
         }
