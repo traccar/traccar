@@ -167,8 +167,10 @@ public class MulticastBroadcastService implements BroadcastService {
                 while (!service.isShutdown()) {
                     DatagramPacket packet = new DatagramPacket(receiverBuffer, receiverBuffer.length);
                     socket.receive(packet);
-                    String data = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
-                    handleMessage(objectMapper.readValue(data, BroadcastMessage.class));
+                    if (networkInterface.inetAddresses().noneMatch(a -> a.equals(packet.getAddress()))) {
+                        String data = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
+                        handleMessage(objectMapper.readValue(data, BroadcastMessage.class));
+                    }
                 }
                 publisherSocket = null;
                 socket.leaveGroup(group, networkInterface);
