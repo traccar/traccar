@@ -65,7 +65,7 @@ public class NotificatorPushover implements Notificator {
     public void send(User user, Event event, Position position) {
 
         String device = "";
-        if (user.getAttributes().containsKey("notificator.pushover.device")) {
+        if (user.hasAttribute("notificator.pushover.device")) {
             device = user.getString("notificator.pushover.device").replaceAll(" *, *", ",");
         }
 

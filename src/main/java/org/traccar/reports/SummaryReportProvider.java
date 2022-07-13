@@ -79,8 +79,7 @@ public class SummaryReportProvider {
             result.setSpentFuel(reportUtils.calculateFuel(firstPosition, previousPosition));
 
             long durationMilliseconds;
-            if (firstPosition.getAttributes().containsKey(Position.KEY_HOURS)
-                    && previousPosition.getAttributes().containsKey(Position.KEY_HOURS)) {
+            if (firstPosition.hasAttribute(Position.KEY_HOURS) && previousPosition.hasAttribute(Position.KEY_HOURS)) {
                 durationMilliseconds =
                         previousPosition.getLong(Position.KEY_HOURS) - firstPosition.getLong(Position.KEY_HOURS);
                 result.setEngineHours(durationMilliseconds);

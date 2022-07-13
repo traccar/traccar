@@ -22,6 +22,10 @@ public class ExtendedModel extends BaseModel {
 
     private Map<String, Object> attributes = new LinkedHashMap<>();
 
+    public boolean hasAttribute(String key) {
+        return attributes.containsKey(key);
+    }
+
     public Map<String, Object> getAttributes() {
         return attributes;
     }

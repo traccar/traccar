@@ -202,7 +202,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(alarm.substring(2)));
         } else if (alarm.startsWith("oil ")) {
             position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(alarm.substring(4)));
-        } else if (!position.getAttributes().containsKey(Position.KEY_ALARM) && !alarm.equals("tracker")) {
+        } else if (!position.hasAttribute(Position.KEY_ALARM) && !alarm.equals("tracker")) {
             position.set(Position.KEY_EVENT, alarm);
         }
 

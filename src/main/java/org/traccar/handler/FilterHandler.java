@@ -103,7 +103,7 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterDuplicate(Position position, Position last) {
         if (filterDuplicate && last != null && position.getFixTime().equals(last.getFixTime())) {
             for (String key : position.getAttributes().keySet()) {
-                if (!last.getAttributes().containsKey(key)) {
+                if (!last.hasAttribute(key)) {
                     return false;
                 }
             }
@@ -163,7 +163,7 @@ public class FilterHandler extends BaseDataHandler {
         if (skipAttributes) {
             String string = AttributeUtil.lookup(cacheManager, Keys.FILTER_SKIP_ATTRIBUTES, position.getDeviceId());
             for (String attribute : string.split("[ ,]")) {
-                if (position.getAttributes().containsKey(attribute)) {
+                if (position.hasAttribute(attribute)) {
                     return true;
                 }
             }

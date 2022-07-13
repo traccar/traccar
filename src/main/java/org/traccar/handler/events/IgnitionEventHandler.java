@@ -47,11 +47,11 @@ public class IgnitionEventHandler extends BaseEventHandler {
 
         Map<Event, Position> result = null;
 
-        if (position.getAttributes().containsKey(Position.KEY_IGNITION)) {
+        if (position.hasAttribute(Position.KEY_IGNITION)) {
             boolean ignition = position.getBoolean(Position.KEY_IGNITION);
 
             Position lastPosition = cacheManager.getPosition(position.getDeviceId());
-            if (lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_IGNITION)) {
+            if (lastPosition != null && lastPosition.hasAttribute(Position.KEY_IGNITION)) {
                 boolean oldIgnition = lastPosition.getBoolean(Position.KEY_IGNITION);
 
                 if (ignition && !oldIgnition) {

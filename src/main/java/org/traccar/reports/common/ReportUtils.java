@@ -154,9 +154,9 @@ public class ReportUtils {
     }
 
     public String findDriver(Position firstPosition, Position lastPosition) {
-        if (firstPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
+        if (firstPosition.hasAttribute(Position.KEY_DRIVER_UNIQUE_ID)) {
             return firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
-        } else if (lastPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
+        } else if (lastPosition.hasAttribute(Position.KEY_DRIVER_UNIQUE_ID)) {
             return lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
         }
         return null;
@@ -298,8 +298,7 @@ public class ReportUtils {
         stop.setDuration(stopDuration);
         stop.setSpentFuel(calculateFuel(startStop, endStop));
 
-        if (startStop.getAttributes().containsKey(Position.KEY_HOURS)
-                && endStop.getAttributes().containsKey(Position.KEY_HOURS)) {
+        if (startStop.hasAttribute(Position.KEY_HOURS) && endStop.hasAttribute(Position.KEY_HOURS)) {
             stop.setEngineHours(endStop.getLong(Position.KEY_HOURS) - startStop.getLong(Position.KEY_HOURS));
         }
 
