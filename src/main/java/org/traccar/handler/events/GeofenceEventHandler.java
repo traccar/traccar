@@ -26,6 +26,11 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -39,12 +44,15 @@ public class GeofenceEventHandler extends BaseEventHandler {
     private final Config config;
     private final CacheManager cacheManager;
     private final ConnectionManager connectionManager;
+    private final Storage storage;
 
     @Inject
-    public GeofenceEventHandler(Config config, CacheManager cacheManager, ConnectionManager connectionManager) {
+    public GeofenceEventHandler(
+            Config config, CacheManager cacheManager, ConnectionManager connectionManager, Storage storage) {
         this.config = config;
         this.cacheManager = cacheManager;
         this.connectionManager = connectionManager;
+        this.storage = storage;
     }
 
     @Override
@@ -66,8 +74,17 @@ public class GeofenceEventHandler extends BaseEventHandler {
         newGeofences.removeAll(oldGeofences);
         oldGeofences.removeAll(currentGeofences);
 
-        device.setGeofenceIds(currentGeofences);
+
         if (!oldGeofences.isEmpty() || !newGeofences.isEmpty()) {
+            device.setGeofenceIds(currentGeofences.isEmpty() ? null : currentGeofences);
+
+            try {
+                storage.updateObject(device, new Request(
+                        new Columns.Include("geofenceIds"), new Condition.Equals("id", "id")));
+            } catch (StorageException e) {
+                throw new RuntimeException("Update device geofences error", e);
+            }
+
             connectionManager.updateDevice(true, device);
         }
 

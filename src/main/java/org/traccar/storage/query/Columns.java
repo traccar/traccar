@@ -15,7 +15,6 @@
  */
 package org.traccar.storage.query;
 
-import org.traccar.storage.QueryExtended;
 import org.traccar.storage.QueryIgnore;
 
 import java.lang.reflect.Method;
@@ -36,7 +35,6 @@ public abstract class Columns {
             int parameterCount = type.equals("set") ? 1 : 0;
             if (method.getName().startsWith(type) && method.getParameterTypes().length == parameterCount
                     && !method.isAnnotationPresent(QueryIgnore.class)
-                    && !method.isAnnotationPresent(QueryExtended.class)
                     && !method.getName().equals("getClass")) {
                 columns.add(method.getName().substring(3).toLowerCase());
             }

@@ -31,6 +31,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
 
@@ -88,6 +89,10 @@ public final class MailManager {
             if (from != null) {
                 properties.put("mail.smtp.from", from);
             }
+            String fromName = provider.getString("mail.smtp.fromName");
+            if (fromName != null) {
+                properties.put("mail.smtp.fromName", fromName);
+            }
         }
         return properties;
     }
@@ -120,7 +125,16 @@ public final class MailManager {
 
         String from = properties.getProperty("mail.smtp.from");
         if (from != null) {
-            message.setFrom(new InternetAddress(from));
+            String fromName = properties.getProperty("mail.smtp.fromName");
+            if (fromName != null) {
+                try {
+                    message.setFrom(new InternetAddress(from, fromName));
+                } catch (UnsupportedEncodingException e) {
+                    throw new MessagingException("Email address issue");
+                }
+            } else {
+                message.setFrom(new InternetAddress(from));
+            }
         }
 
         message.addRecipient(Message.RecipientType.TO, new InternetAddress(user.getEmail()));

@@ -98,7 +98,7 @@ public class NotificationManager {
             }
 
             notifications.forEach(notification -> {
-                cacheManager.getNotificationUsers(notification.getId()).forEach(user -> {
+                cacheManager.getNotificationUsers(notification.getId(), event.getDeviceId()).forEach(user -> {
                     for (String notificator : notification.getNotificatorsTypes()) {
                         try {
                             notificatorManager.getNotificator(notificator).send(user, event, position);

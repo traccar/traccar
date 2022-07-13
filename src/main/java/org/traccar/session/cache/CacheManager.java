@@ -18,7 +18,6 @@ package org.traccar.session.cache;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
-import org.traccar.helper.model.GeofenceUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
@@ -123,10 +122,14 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
-    public List<User> getNotificationUsers(long notificationId) {
+    public List<User> getNotificationUsers(long notificationId, long deviceId) {
         try {
             lock.readLock().lock();
-            return notificationUsers.get(notificationId);
+            var users = deviceLinks.get(deviceId).get(User.class).stream()
+                    .collect(Collectors.toUnmodifiableSet());
+            return notificationUsers.get(notificationId).stream()
+                    .filter(user -> users.contains(user.getId()))
+                    .collect(Collectors.toUnmodifiableList());
         } finally {
             lock.readLock().unlock();
         }
@@ -220,10 +223,6 @@ public class CacheManager implements BroadcastInterface {
             } finally {
                 lock.writeLock().unlock();
             }
-
-            if (object instanceof Device) {
-                invalidateDeviceGeofences((Device) object);
-            }
         }
     }
 
@@ -300,8 +299,6 @@ public class CacheManager implements BroadcastInterface {
                 devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
                         new Columns.All(), new Condition.Equals("id", "id", device.getPositionId()))));
             }
-
-            invalidateDeviceGeofences(device);
         }
     }
 
@@ -352,13 +349,6 @@ public class CacheManager implements BroadcastInterface {
         }
         if (invalidateUsers) {
             invalidateUsers();
-        }
-    }
-
-    private void invalidateDeviceGeofences(Device device) {
-        Position position = getPosition(device.getId());
-        if (position != null) {
-            device.setGeofenceIds(GeofenceUtil.getCurrentGeofences(config, this, position));
         }
     }
 
