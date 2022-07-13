@@ -50,14 +50,13 @@ public class Device extends GroupedModel {
 
     private String status;
 
-    @QueryIgnore
     public String getStatus() {
         return status != null ? status : STATUS_OFFLINE;
     }
 
     @QueryIgnore
     public void setStatus(String status) {
-        this.status = status;
+        this.status = status.trim();
     }
 
     private Date lastUpdate;
@@ -85,7 +84,6 @@ public class Device extends GroupedModel {
 
     private List<Long> geofenceIds;
 
-    @QueryIgnore
     public List<Long> getGeofenceIds() {
         return geofenceIds;
     }

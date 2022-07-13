@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -256,13 +257,13 @@ public class ConnectionManager implements BroadcastInterface {
             notificationManager.updateEvents(events);
         }
 
+        if (time != null) {
+            device.setLastUpdate(time);
+        }
+
         Timeout timeout = timeouts.remove(deviceId);
         if (timeout != null) {
             timeout.cancel();
-        }
-
-        if (time != null) {
-            device.setLastUpdate(time);
         }
 
         if (status.equals(Device.STATUS_ONLINE)) {
@@ -275,7 +276,7 @@ public class ConnectionManager implements BroadcastInterface {
 
         try {
             storage.updateObject(device, new Request(
-                    new Columns.Include("lastUpdate"),
+                    new Columns.Include("status", "lastUpdate"),
                     new Condition.Equals("id", "id")));
         } catch (StorageException e) {
             LOGGER.warn("Update device status error", e);
@@ -368,7 +369,7 @@ public class ConnectionManager implements BroadcastInterface {
         if (clazz1.equals(User.class) && clazz2.equals(Device.class)) {
             if (listeners.containsKey(id1)) {
                 userDevices.get(id1).add(id2);
-                deviceUsers.put(id2, Set.of(id1));
+                deviceUsers.put(id2, new HashSet<>(List.of(id1)));
             }
         }
     }
