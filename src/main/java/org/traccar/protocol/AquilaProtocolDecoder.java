@@ -121,18 +121,18 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[01],){4}")              // reserved
             .number("(d+),")                     // external voltage
             .number("(d+),")                     // internal voltage
-            .or()                                   // EXTENDED for OBD Devices
+            .or()
             .number("(d+),")                     // course
             .number("(d+),")                     // satellites
             .number("(d+.d+),")                  // hdop
-            .number("(?:d+,){2}")                // reserved - skip
-            .number("(d+),")                     // voltage of analog I/P - skip in code
-            .number("(?:d+),")                   // event flag - skip
+            .number("(?:d+,){2}")                // reserved
+            .number("(?:d+),")                   // adc
+            .number("(?:d+),")                   // event flag
             .number("(d+),")                     // external voltage
             .number("(d+),")                     // internal voltage
-            .number("(?:d+),")                   // trip time - skip
+            .number("(?:d+),")                   // trip time
             .number("(d+),")                     // sensor id
-            .expression("([^,]+|)")              // sensor data - pipe separated
+            .expression("([^,]+|)")              // sensor data
             .groupEnd()
             .or()
             .number("(d+),")                     // sensor id
@@ -219,13 +219,11 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, parser.nextInt(0));
 
         } else if (parser.hasNext(8)) {
-            // OBD Devices
 
             position.setCourse(parser.nextInt(0));
 
             position.set(Position.KEY_SATELLITES, parser.nextInt(0));
             position.set(Position.KEY_HDOP, parser.nextDouble(0));
-            parser.skip(1);
             position.set(Position.KEY_POWER, parser.nextInt(0));
             position.set(Position.KEY_BATTERY, parser.nextInt(0));
             position.set("sensorId", parser.nextInt());
