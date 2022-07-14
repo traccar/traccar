@@ -91,7 +91,11 @@ public class Device extends GroupedModel {
 
     @QueryIgnore
     public void setGeofenceIds(List<? extends Number> geofenceIds) {
-        this.geofenceIds = geofenceIds.stream().map(Number::longValue).collect(Collectors.toList());
+        if (geofenceIds != null) {
+            this.geofenceIds = geofenceIds.stream().map(Number::longValue).collect(Collectors.toList());
+        } else {
+            this.geofenceIds = null;
+        }
     }
 
     private String phone;
