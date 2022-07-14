@@ -140,8 +140,12 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{8})")                    // status
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
+            .groupBegin()
             .number("(dd)")                      // battery
             .number("(dd)")                      // external power
+            .or()
+            .number("(ddd)")                     // battery
+            .groupEnd()
             .number("(dddd)")                    // adc 1
             .groupBegin()
             .groupBegin()
@@ -166,6 +170,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{7})")                    // odometer
             .number("(dd)(dd.dddd)([NS])")       // latitude
             .number("(ddd)(dd.dddd)([EW])")      // longitude
+            .number("dddd").optional()           // temperature
             .number("dddd")                      // serial number
             .number("xx")                        // checksum
             .any()
@@ -379,8 +384,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime());
 
-        position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
-        position.set(Position.KEY_POWER, parser.nextDouble());
+        if (parser.hasNext(2)) {
+            position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
+            position.set(Position.KEY_POWER, parser.nextDouble());
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.01);
+        }
 
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
