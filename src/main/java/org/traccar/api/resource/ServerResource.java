@@ -77,7 +77,7 @@ public class ServerResource extends BaseResource {
         storage.updateObject(entity, new Request(
                 new Columns.Exclude("id"),
                 new Condition.Equals("id", "id")));
-        cacheManager.updateOrInvalidate(entity);
+        cacheManager.updateOrInvalidate(true, entity);
         LogAction.edit(getUserId(), entity);
         return Response.ok(entity).build();
     }
