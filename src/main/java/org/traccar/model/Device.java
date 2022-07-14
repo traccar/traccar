@@ -17,6 +17,7 @@ package org.traccar.model;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
@@ -56,7 +57,7 @@ public class Device extends GroupedModel {
 
     @QueryIgnore
     public void setStatus(String status) {
-        this.status = status.trim();
+        this.status = status != null ? status.trim() : null;
     }
 
     private Date lastUpdate;
@@ -89,8 +90,8 @@ public class Device extends GroupedModel {
     }
 
     @QueryIgnore
-    public void setGeofenceIds(List<Long> geofenceIds) {
-        this.geofenceIds = geofenceIds;
+    public void setGeofenceIds(List<? extends Number> geofenceIds) {
+        this.geofenceIds = geofenceIds.stream().map(Number::longValue).collect(Collectors.toList());
     }
 
     private String phone;

@@ -107,7 +107,7 @@ public class S168ProtocolDecoder extends BaseProtocolDecoder {
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
             position.setNetwork(network);
         }
-        if (!position.getAttributes().containsKey(Position.KEY_SATELLITES)) {
+        if (!position.hasAttribute(Position.KEY_SATELLITES)) {
             getLastLocation(position, null);
         }
 

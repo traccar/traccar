@@ -69,7 +69,7 @@ public class NotificatorFirebase implements Notificator {
 
     @Override
     public void send(User user, Event event, Position position) {
-        if (user.getAttributes().containsKey("notificationTokens")) {
+        if (user.hasAttribute("notificationTokens")) {
 
             var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 

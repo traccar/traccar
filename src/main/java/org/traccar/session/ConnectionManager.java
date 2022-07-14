@@ -364,6 +364,7 @@ public class ConnectionManager implements BroadcastInterface {
 
     @Override
     public synchronized void invalidatePermission(
+            boolean local,
             Class<? extends BaseModel> clazz1, long id1,
             Class<? extends BaseModel> clazz2, long id2) {
         if (clazz1.equals(User.class) && clazz2.equals(Device.class)) {

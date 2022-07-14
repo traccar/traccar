@@ -71,8 +71,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
         LogAction.create(getUserId(), entity);
         storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
-        cacheManager.invalidatePermission(User.class, getUserId(), baseClass, entity.getId());
-        connectionManager.invalidatePermission(User.class, getUserId(), baseClass, entity.getId());
+        cacheManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId());
+        connectionManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId());
         LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
 
         return Response.ok(entity).build();
@@ -98,7 +98,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         storage.updateObject(entity, new Request(
                 new Columns.Exclude("id"),
                 new Condition.Equals("id", "id")));
-        cacheManager.updateOrInvalidate(entity);
+        cacheManager.updateOrInvalidate(true, entity);
         LogAction.edit(getUserId(), entity);
 
         return Response.ok(entity).build();

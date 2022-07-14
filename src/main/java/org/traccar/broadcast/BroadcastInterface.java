@@ -31,10 +31,11 @@ public interface BroadcastInterface {
     default void updateEvent(boolean local, long userId, Event event) {
     }
 
-    default void invalidateObject(Class<? extends BaseModel> clazz, long id) {
+    default void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
     }
 
     default void invalidatePermission(
+            boolean local,
             Class<? extends BaseModel> clazz1, long id1,
             Class<? extends BaseModel> clazz2, long id2) {
     }

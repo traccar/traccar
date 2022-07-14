@@ -125,7 +125,7 @@ public class WebDataHandler extends BaseDataHandler {
     }
 
     private String calculateStatus(Position position) {
-        if (position.getAttributes().containsKey(Position.KEY_ALARM)) {
+        if (position.hasAttribute(Position.KEY_ALARM)) {
             return "0xF841"; // STATUS_PANIC_ON
         } else if (position.getSpeed() < 1.0) {
             return "0xF020"; // STATUS_LOCATION

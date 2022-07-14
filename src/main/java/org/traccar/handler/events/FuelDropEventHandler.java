@@ -53,8 +53,8 @@ public class FuelDropEventHandler extends BaseEventHandler {
                 cacheManager, Keys.EVENT_FUEL_DROP_THRESHOLD, position.getDeviceId());
         if (fuelDropThreshold > 0) {
             Position lastPosition = cacheManager.getPosition(position.getDeviceId());
-            if (position.getAttributes().containsKey(Position.KEY_FUEL_LEVEL)
-                    && lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_FUEL_LEVEL)) {
+            if (position.hasAttribute(Position.KEY_FUEL_LEVEL)
+                    && lastPosition != null && lastPosition.hasAttribute(Position.KEY_FUEL_LEVEL)) {
 
                 double drop = lastPosition.getDouble(Position.KEY_FUEL_LEVEL)
                         - position.getDouble(Position.KEY_FUEL_LEVEL);

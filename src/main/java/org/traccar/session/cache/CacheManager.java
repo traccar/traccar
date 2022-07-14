@@ -188,12 +188,12 @@ public class CacheManager implements BroadcastInterface {
     }
 
     @Override
-    public void invalidateObject(Class<? extends BaseModel> clazz, long id) {
+    public void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
         try {
             var object = storage.getObject(clazz, new Request(
                     new Columns.All(), new Condition.Equals("id", "id", id)));
             if (object != null) {
-                updateOrInvalidate(object);
+                updateOrInvalidate(local, object);
             } else {
                 invalidate(clazz, id);
             }
@@ -202,8 +202,10 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
-    public <T extends BaseModel> void updateOrInvalidate(T object) throws StorageException {
-        broadcastService.invalidateObject(object.getClass(), object.getId());
+    public <T extends BaseModel> void updateOrInvalidate(boolean local, T object) throws StorageException {
+        if (local) {
+            broadcastService.invalidateObject(true, object.getClass(), object.getId());
+        }
 
         boolean invalidate = false;
         var before = getObject(object.getClass(), object.getId());
@@ -232,9 +234,12 @@ public class CacheManager implements BroadcastInterface {
 
     @Override
     public void invalidatePermission(
+            boolean local,
             Class<? extends BaseModel> clazz1, long id1,
             Class<? extends BaseModel> clazz2, long id2) {
-        broadcastService.invalidatePermission(clazz1, id1, clazz2, id2);
+        if (local) {
+            broadcastService.invalidatePermission(true, clazz1, id1, clazz2, id2);
+        }
 
         try {
             invalidate(new CacheKey(clazz1, id1), new CacheKey(clazz2, id2));

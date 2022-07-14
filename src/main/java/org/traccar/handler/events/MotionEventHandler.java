@@ -92,7 +92,7 @@ public class MotionEventHandler extends BaseEventHandler {
             double distance = PositionUtil.calculateDistance(motionPosition, position, false);
             Boolean ignition = null;
             if (tripsConfig.getUseIgnition()
-                    && position.getAttributes().containsKey(Position.KEY_IGNITION)) {
+                    && position.hasAttribute(Position.KEY_IGNITION)) {
                 ignition = position.getBoolean(Position.KEY_IGNITION);
             }
             if (newMotion) {

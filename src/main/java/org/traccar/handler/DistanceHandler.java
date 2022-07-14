@@ -49,7 +49,7 @@ public class DistanceHandler extends BaseDataHandler {
     protected Position handlePosition(Position position) {
 
         double distance = 0.0;
-        if (position.getAttributes().containsKey(Position.KEY_DISTANCE)) {
+        if (position.hasAttribute(Position.KEY_DISTANCE)) {
             distance = position.getDouble(Position.KEY_DISTANCE);
         }
         double totalDistance = 0.0;
@@ -57,7 +57,7 @@ public class DistanceHandler extends BaseDataHandler {
         Position last = cacheManager.getPosition(position.getDeviceId());
         if (last != null) {
             totalDistance = last.getDouble(Position.KEY_TOTAL_DISTANCE);
-            if (!position.getAttributes().containsKey(Position.KEY_DISTANCE)) {
+            if (!position.hasAttribute(Position.KEY_DISTANCE)) {
                 distance = DistanceCalculator.distance(
                         position.getLatitude(), position.getLongitude(),
                         last.getLatitude(), last.getLongitude());

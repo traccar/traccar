@@ -284,7 +284,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         if (hasLocation && position.getFixTime() != null) {
             positions.add(position);
-        } else if (position.getAttributes().containsKey(Position.KEY_RESULT)) {
+        } else if (position.hasAttribute(Position.KEY_RESULT)) {
             position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, null);
             positions.add(position);

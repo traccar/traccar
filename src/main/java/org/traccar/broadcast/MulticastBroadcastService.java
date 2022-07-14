@@ -98,7 +98,7 @@ public class MulticastBroadcastService implements BroadcastService {
     }
 
     @Override
-    public void invalidateObject(Class<? extends BaseModel> clazz, long id) {
+    public void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
         BroadcastMessage message = new BroadcastMessage();
         message.setChanges(Map.of(Permission.getKey(clazz), id));
         sendMessage(message);
@@ -106,6 +106,7 @@ public class MulticastBroadcastService implements BroadcastService {
 
     @Override
     public void invalidatePermission(
+            boolean local,
             Class<? extends BaseModel> clazz1, long id1,
             Class<? extends BaseModel> clazz2, long id2) {
         BroadcastMessage message = new BroadcastMessage();
@@ -137,10 +138,12 @@ public class MulticastBroadcastService implements BroadcastService {
                 if (iterator.hasNext()) {
                     var second = iterator.next();
                     listeners.forEach(listener -> listener.invalidatePermission(
+                            false,
                             Permission.getKeyClass(first.getKey()), first.getValue(),
                             Permission.getKeyClass(second.getKey()), second.getValue()));
                 } else {
                     listeners.forEach(listener -> listener.invalidateObject(
+                            false,
                             Permission.getKeyClass(first.getKey()), first.getValue()));
                 }
             }
@@ -167,8 +170,10 @@ public class MulticastBroadcastService implements BroadcastService {
                 while (!service.isShutdown()) {
                     DatagramPacket packet = new DatagramPacket(receiverBuffer, receiverBuffer.length);
                     socket.receive(packet);
-                    String data = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
-                    handleMessage(objectMapper.readValue(data, BroadcastMessage.class));
+                    if (networkInterface.inetAddresses().noneMatch(a -> a.equals(packet.getAddress()))) {
+                        String data = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
+                        handleMessage(objectMapper.readValue(data, BroadcastMessage.class));
+                    }
                 }
                 publisherSocket = null;
                 socket.leaveGroup(group, networkInterface);
