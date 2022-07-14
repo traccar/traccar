@@ -57,7 +57,7 @@ public class Device extends GroupedModel {
 
     @QueryIgnore
     public void setStatus(String status) {
-        this.status = status.trim();
+        this.status = status != null ? status.trim() : null;
     }
 
     private Date lastUpdate;
