@@ -121,8 +121,12 @@ public class Network {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Network network = (Network) o;
         return Objects.equals(homeMobileCountryCode, network.homeMobileCountryCode)
                 && Objects.equals(homeMobileNetworkCode, network.homeMobileNetworkCode)

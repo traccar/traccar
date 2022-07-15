@@ -115,8 +115,12 @@ public class CellTower {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         CellTower cellTower = (CellTower) o;
         return Objects.equals(radioType, cellTower.radioType)
                 && Objects.equals(cellId, cellTower.cellId)

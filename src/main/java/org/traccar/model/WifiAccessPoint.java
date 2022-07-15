@@ -67,8 +67,12 @@ public class WifiAccessPoint {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         WifiAccessPoint that = (WifiAccessPoint) o;
         return Objects.equals(macAddress, that.macAddress)
                 && Objects.equals(signalStrength, that.signalStrength)
