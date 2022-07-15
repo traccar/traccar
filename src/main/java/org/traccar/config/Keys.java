@@ -1104,11 +1104,19 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Filter records with fix time in future. The values is specified in seconds. Records that have fix time more than
-     * specified number of seconds later than current server time would be filtered out.
+     * Filter records with fix time in the future. The value is specified in seconds. Records that have fix time more
+     * than the specified number of seconds later than current server time would be filtered out.
      */
     public static final ConfigKey<Long> FILTER_FUTURE = new LongConfigKey(
             "filter.future",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Filter records with fix time in the past. The value is specified in seconds. Records that have fix time more
+     * than the specified number of seconds before current server time would be filtered out.
+     */
+    public static final ConfigKey<Long> FILTER_PAST = new LongConfigKey(
+            "filter.past",
             List.of(KeyType.CONFIG));
 
     /**

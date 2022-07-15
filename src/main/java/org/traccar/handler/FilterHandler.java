@@ -47,6 +47,7 @@ public class FilterHandler extends BaseDataHandler {
     private final boolean filterZero;
     private final boolean filterDuplicate;
     private final long filterFuture;
+    private final long filterPast;
     private final boolean filterApproximate;
     private final int filterAccuracy;
     private final boolean filterStatic;
@@ -67,6 +68,7 @@ public class FilterHandler extends BaseDataHandler {
         filterZero = config.getBoolean(Keys.FILTER_ZERO);
         filterDuplicate = config.getBoolean(Keys.FILTER_DUPLICATE);
         filterFuture = config.getLong(Keys.FILTER_FUTURE) * 1000;
+        filterPast = config.getLong(Keys.FILTER_PAST) * 1000;
         filterAccuracy = config.getInteger(Keys.FILTER_ACCURACY);
         filterApproximate = config.getBoolean(Keys.FILTER_APPROXIMATE);
         filterStatic = config.getBoolean(Keys.FILTER_STATIC);
@@ -114,6 +116,10 @@ public class FilterHandler extends BaseDataHandler {
 
     private boolean filterFuture(Position position) {
         return filterFuture != 0 && position.getFixTime().getTime() > System.currentTimeMillis() + filterFuture;
+    }
+
+    private boolean filterPast(Position position) {
+        return filterPast != 0 && position.getFixTime().getTime() < System.currentTimeMillis() - filterPast;
     }
 
     private boolean filterAccuracy(Position position) {
@@ -184,6 +190,9 @@ public class FilterHandler extends BaseDataHandler {
         }
         if (filterFuture(position)) {
             filterType.append("Future ");
+        }
+        if (filterPast(position)) {
+            filterType.append("Past ");
         }
         if (filterAccuracy(position)) {
             filterType.append("Accuracy ");
