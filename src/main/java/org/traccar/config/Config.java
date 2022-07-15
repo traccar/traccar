@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.InvalidPropertiesFormatException;
+import java.util.Objects;
 import java.util.Properties;
 
 @Singleton
@@ -71,8 +72,7 @@ public class Config {
         return hasKey(key.getKey());
     }
 
-    @Deprecated
-    public boolean hasKey(String key) {
+    private boolean hasKey(String key) {
         return useEnvironmentVariables && System.getenv().containsKey(getEnvironmentVariableName(key))
                 || properties.containsKey(key);
     }
@@ -102,12 +102,7 @@ public class Config {
     }
 
     public boolean getBoolean(ConfigKey<Boolean> key) {
-        return getBoolean(key.getKey());
-    }
-
-    @Deprecated
-    public boolean getBoolean(String key) {
-        return Boolean.parseBoolean(getString(key));
+        return Boolean.parseBoolean(getString(key.getKey()));
     }
 
     public int getInteger(ConfigKey<Integer> key) {
@@ -116,11 +111,7 @@ public class Config {
             return Integer.parseInt(value);
         } else {
             Integer defaultValue = key.getDefaultValue();
-            if (defaultValue != null) {
-                return defaultValue;
-            } else {
-                return 0;
-            }
+            return Objects.requireNonNullElse(defaultValue, 0);
         }
     }
 
@@ -139,11 +130,7 @@ public class Config {
             return Long.parseLong(value);
         } else {
             Long defaultValue = key.getDefaultValue();
-            if (defaultValue != null) {
-                return defaultValue;
-            } else {
-                return 0;
-            }
+            return Objects.requireNonNullElse(defaultValue, 0L);
         }
     }
 
@@ -153,11 +140,7 @@ public class Config {
             return Double.parseDouble(value);
         } else {
             Double defaultValue = key.getDefaultValue();
-            if (defaultValue != null) {
-                return defaultValue;
-            } else {
-                return 0;
-            }
+            return Objects.requireNonNullElse(defaultValue, 0.0);
         }
     }
 

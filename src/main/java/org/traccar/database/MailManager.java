@@ -17,6 +17,8 @@
 package org.traccar.database;
 
 import org.traccar.config.Config;
+import org.traccar.config.ConfigKey;
+import org.traccar.config.Keys;
 import org.traccar.model.User;
 import org.traccar.notification.PropertiesProvider;
 
@@ -37,6 +39,8 @@ import java.util.Properties;
 
 public final class MailManager {
 
+    private static final String CONTENT_TYPE = "text/html; charset=utf-8";
+
     private final Config config;
     private final StatisticsManager statisticsManager;
 
@@ -46,59 +50,48 @@ public final class MailManager {
         this.statisticsManager = statisticsManager;
     }
 
-    private static Properties getProperties(PropertiesProvider provider) {
-        Properties properties = new Properties();
-        String host = provider.getString("mail.smtp.host");
-        if (host != null) {
-            properties.put("mail.transport.protocol", provider.getString("mail.transport.protocol", "smtp"));
-            properties.put("mail.smtp.host", host);
-            properties.put("mail.smtp.port", String.valueOf(provider.getInteger("mail.smtp.port", 25)));
-
-            Boolean starttlsEnable = provider.getBoolean("mail.smtp.starttls.enable");
-            if (starttlsEnable != null) {
-                properties.put("mail.smtp.starttls.enable", String.valueOf(starttlsEnable));
-            }
-            Boolean starttlsRequired = provider.getBoolean("mail.smtp.starttls.required");
-            if (starttlsRequired != null) {
-                properties.put("mail.smtp.starttls.required", String.valueOf(starttlsRequired));
-            }
-
-            Boolean sslEnable = provider.getBoolean("mail.smtp.ssl.enable");
-            if (sslEnable != null) {
-                properties.put("mail.smtp.ssl.enable", String.valueOf(sslEnable));
-            }
-            String sslTrust = provider.getString("mail.smtp.ssl.trust");
-            if (sslTrust != null) {
-                properties.put("mail.smtp.ssl.trust", sslTrust);
-            }
-
-            String sslProtocols = provider.getString("mail.smtp.ssl.protocols");
-            if (sslProtocols != null) {
-                properties.put("mail.smtp.ssl.protocols", sslProtocols);
-            }
-
-            String username = provider.getString("mail.smtp.username");
-            if (username != null) {
-                properties.put("mail.smtp.username", username);
-            }
-            String password = provider.getString("mail.smtp.password");
-            if (password != null) {
-                properties.put("mail.smtp.password", password);
-            }
-            String from = provider.getString("mail.smtp.from");
-            if (from != null) {
-                properties.put("mail.smtp.from", from);
-            }
-            String fromName = provider.getString("mail.smtp.fromName");
-            if (fromName != null) {
-                properties.put("mail.smtp.fromName", fromName);
-            }
+    private static void copyBooleanProperty(
+            Properties properties, PropertiesProvider provider, ConfigKey<Boolean> key) {
+        Boolean value = provider.getBoolean(key);
+        if (value != null) {
+            properties.put(key.getKey(), String.valueOf(value));
         }
-        return properties;
+    }
+
+    private static void copyStringProperty(
+            Properties properties, PropertiesProvider provider, ConfigKey<String> key) {
+        String value = provider.getString(key);
+        if (value != null) {
+            properties.put(key.getKey(), value);
+        }
+    }
+
+    private static Properties getProperties(PropertiesProvider provider) {
+        String host = provider.getString(Keys.MAIL_SMTP_HOST);
+        if (host != null) {
+            Properties properties = new Properties();
+
+            properties.put(Keys.MAIL_TRANSPORT_PROTOCOL.getKey(), provider.getString(Keys.MAIL_TRANSPORT_PROTOCOL));
+            properties.put(Keys.MAIL_SMTP_HOST.getKey(), host);
+            properties.put(Keys.MAIL_SMTP_PORT.getKey(), String.valueOf(provider.getInteger(Keys.MAIL_SMTP_PORT)));
+
+            copyBooleanProperty(properties, provider, Keys.MAIL_SMTP_STARTTLS_ENABLE);
+            copyBooleanProperty(properties, provider, Keys.MAIL_SMTP_STARTTLS_REQUIRED);
+            copyBooleanProperty(properties, provider, Keys.MAIL_SMTP_SSL_ENABLE);
+            copyStringProperty(properties, provider, Keys.MAIL_SMTP_SSL_TRUST);
+            copyStringProperty(properties, provider, Keys.MAIL_SMTP_SSL_PROTOCOLS);
+            copyStringProperty(properties, provider, Keys.MAIL_SMTP_USERNAME);
+            copyStringProperty(properties, provider, Keys.MAIL_SMTP_PASSWORD);
+            copyStringProperty(properties, provider, Keys.MAIL_SMTP_FROM);
+            copyStringProperty(properties, provider, Keys.MAIL_SMTP_FROM_NAME);
+
+            return properties;
+        }
+        return null;
     }
 
     public boolean getEmailEnabled() {
-        return config.hasKey("mail.smtp.host");
+        return config.hasKey(Keys.MAIL_SMTP_HOST);
     }
 
     public void sendMessage(
@@ -108,24 +101,25 @@ public final class MailManager {
 
     public void sendMessage(
             User user, String subject, String body, MimeBodyPart attachment) throws MessagingException {
+
         Properties properties = null;
-        if (!config.getBoolean("mail.smtp.ignoreUserConfig")) {
+        if (!config.getBoolean(Keys.MAIL_SMTP_IGNORE_USER_CONFIG)) {
             properties = getProperties(new PropertiesProvider(user));
         }
-        if (properties == null || !properties.containsKey("mail.smtp.host")) {
+        if (properties == null) {
             properties = getProperties(new PropertiesProvider(config));
         }
-        if (!properties.containsKey("mail.smtp.host")) {
-            throw new RuntimeException("No SMTP configuration found");
+        if (properties == null) {
+            throw new MessagingException("No SMTP configuration found");
         }
 
         Session session = Session.getInstance(properties);
 
         MimeMessage message = new MimeMessage(session);
 
-        String from = properties.getProperty("mail.smtp.from");
+        String from = properties.getProperty(Keys.MAIL_SMTP_FROM.getKey());
         if (from != null) {
-            String fromName = properties.getProperty("mail.smtp.fromName");
+            String fromName = properties.getProperty(Keys.MAIL_SMTP_FROM_NAME.getKey());
             if (fromName != null) {
                 try {
                     message.setFrom(new InternetAddress(from, fromName));
@@ -145,21 +139,21 @@ public final class MailManager {
             Multipart multipart = new MimeMultipart();
 
             BodyPart messageBodyPart = new MimeBodyPart();
-            messageBodyPart.setContent(body, "text/html; charset=utf-8");
+            messageBodyPart.setContent(body, CONTENT_TYPE);
             multipart.addBodyPart(messageBodyPart);
             multipart.addBodyPart(attachment);
 
             message.setContent(multipart);
         } else {
-            message.setContent(body, "text/html; charset=utf-8");
+            message.setContent(body, CONTENT_TYPE);
         }
 
         try (Transport transport = session.getTransport()) {
             statisticsManager.registerMail();
             transport.connect(
-                    properties.getProperty("mail.smtp.host"),
-                    properties.getProperty("mail.smtp.username"),
-                    properties.getProperty("mail.smtp.password"));
+                    properties.getProperty(Keys.MAIL_SMTP_HOST.getKey()),
+                    properties.getProperty(Keys.MAIL_SMTP_USERNAME.getKey()),
+                    properties.getProperty(Keys.MAIL_SMTP_PASSWORD.getKey()));
             transport.sendMessage(message, message.getAllRecipients());
         }
     }

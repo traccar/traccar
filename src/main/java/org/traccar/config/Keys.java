@@ -801,6 +801,102 @@ public final class Keys {
             "templates");
 
     /**
+     * Force SMTP settings from the config file and ignore user attributes.
+     */
+    public static final ConfigKey<Boolean> MAIL_SMTP_IGNORE_USER_CONFIG = new BooleanConfigKey(
+            "mail.smtp.ignoreUserConfig",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * The SMTP server to connect to.
+     */
+    public static final ConfigKey<String> MAIL_SMTP_HOST = new StringConfigKey(
+            "mail.smtp.host",
+            List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
+     * The SMTP server port to connect. Defaults to 25.
+     */
+    public static final ConfigKey<Integer> MAIL_SMTP_PORT = new IntegerConfigKey(
+            "mail.smtp.port",
+            List.of(KeyType.CONFIG, KeyType.USER),
+            25);
+
+    /**
+     * Email transport protocol. Default value is "smtp".
+     */
+    public static final ConfigKey<String> MAIL_TRANSPORT_PROTOCOL = new StringConfigKey(
+            "mail.transport.protocol",
+            List.of(KeyType.CONFIG, KeyType.USER),
+            "smtp");
+
+    /**
+     * If true, enables the use of the STARTTLS command (if supported by the server) to switch the connection to a
+     * TLS-protected connection before issuing any login commands.
+     */
+    public static final ConfigKey<Boolean> MAIL_SMTP_STARTTLS_ENABLE = new BooleanConfigKey(
+            "mail.smtp.starttls.enable",
+            List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
+     * If true, requires the use of the STARTTLS command. If the server doesn't support the STARTTLS command, or the
+     * command fails, the connect method will fail.
+     */
+    public static final ConfigKey<Boolean> MAIL_SMTP_STARTTLS_REQUIRED = new BooleanConfigKey(
+            "mail.smtp.starttls.required",
+            List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
+     * If set to true, use SSL to connect and use the SSL port by default.
+     */
+    public static final ConfigKey<Boolean> MAIL_SMTP_SSL_ENABLE = new BooleanConfigKey(
+            "mail.smtp.ssl.enable",
+            List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
+     * If set to "*", all hosts are trusted. If set to a whitespace separated list of hosts, those hosts are trusted.
+     * Otherwise, trust depends on the certificate the server presents.
+     */
+    public static final ConfigKey<String> MAIL_SMTP_SSL_TRUST = new StringConfigKey(
+            "mail.smtp.ssl.trust",
+            List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
+     * Specifies the SSL protocols that will be enabled for SSL connections.
+     */
+    public static final ConfigKey<String> MAIL_SMTP_SSL_PROTOCOLS = new StringConfigKey(
+            "mail.smtp.ssl.protocols",
+            List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
+     * SMTP connection username.
+     */
+    public static final ConfigKey<String> MAIL_SMTP_USERNAME = new StringConfigKey(
+            "mail.smtp.username",
+            List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
+     * SMTP connection password.
+     */
+    public static final ConfigKey<String> MAIL_SMTP_PASSWORD = new StringConfigKey(
+            "mail.smtp.password",
+            List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
+     * Email address to use for SMTP MAIL command.
+     */
+    public static final ConfigKey<String> MAIL_SMTP_FROM = new StringConfigKey(
+            "mail.smtp.from",
+            List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
+     * The personal name for the email from address.
+     */
+    public static final ConfigKey<String> MAIL_SMTP_FROM_NAME = new StringConfigKey(
+            "mail.smtp.fromName",
+            List.of(KeyType.CONFIG, KeyType.USER));
+
+    /**
      * SMS API service full URL. Enables SMS commands and notifications.
      */
     public static final ConfigKey<String> SMS_HTTP_URL = new StringConfigKey(
