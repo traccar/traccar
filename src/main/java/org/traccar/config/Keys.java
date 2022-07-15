@@ -1294,6 +1294,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Reuse last geolocation result if network details have not changed.
+     */
+    public static final ConfigKey<Boolean> GEOLOCATION_REUSE = new BooleanConfigKey(
+            "geolocation.reuse",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Default MCC value to use if device doesn't report MCC.
      */
     public static final ConfigKey<Integer> GEOLOCATION_MCC = new IntegerConfigKey(

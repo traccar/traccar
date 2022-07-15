@@ -19,6 +19,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
+import java.util.Objects;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CellTower {
 
@@ -109,6 +111,24 @@ public class CellTower {
         String operatorString = String.valueOf(operator);
         mobileCountryCode = Integer.parseInt(operatorString.substring(0, 3));
         mobileNetworkCode = Integer.parseInt(operatorString.substring(3));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CellTower cellTower = (CellTower) o;
+        return Objects.equals(radioType, cellTower.radioType)
+                && Objects.equals(cellId, cellTower.cellId)
+                && Objects.equals(locationAreaCode, cellTower.locationAreaCode)
+                && Objects.equals(mobileCountryCode, cellTower.mobileCountryCode)
+                && Objects.equals(mobileNetworkCode, cellTower.mobileNetworkCode)
+                && Objects.equals(signalStrength, cellTower.signalStrength);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(radioType, cellId, locationAreaCode, mobileCountryCode, mobileNetworkCode, signalStrength);
     }
 
 }

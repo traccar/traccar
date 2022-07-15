@@ -35,14 +35,14 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
     private final CacheManager cacheManager;
     private final boolean ignorePositions;
     private final boolean processInvalidPositions;
-    private final int geocoderReuseDistance;
+    private final int reuseDistance;
 
     public GeocoderHandler(Config config, Geocoder geocoder, CacheManager cacheManager) {
         this.geocoder = geocoder;
         this.cacheManager = cacheManager;
         ignorePositions = config.getBoolean(Keys.GEOCODER_IGNORE_POSITIONS);
         processInvalidPositions = config.getBoolean(Keys.GEOCODER_PROCESS_INVALID_POSITIONS);
-        geocoderReuseDistance = config.getInteger(Keys.GEOCODER_REUSE_DISTANCE, 0);
+        reuseDistance = config.getInteger(Keys.GEOCODER_REUSE_DISTANCE, 0);
     }
 
     @Override
@@ -50,10 +50,10 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
         if (message instanceof Position && !ignorePositions) {
             final Position position = (Position) message;
             if (processInvalidPositions || position.getValid()) {
-                if (geocoderReuseDistance != 0) {
+                if (reuseDistance != 0) {
                     Position lastPosition = cacheManager.getPosition(position.getDeviceId());
                     if (lastPosition != null && lastPosition.getAddress() != null
-                            && position.getDouble(Position.KEY_DISTANCE) <= geocoderReuseDistance) {
+                            && position.getDouble(Position.KEY_DISTANCE) <= reuseDistance) {
                         position.setAddress(lastPosition.getAddress());
                         ctx.fireChannelRead(position);
                         return;

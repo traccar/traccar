@@ -256,9 +256,10 @@ public class MainModule extends AbstractModule {
 
     @Provides
     public static GeolocationHandler provideGeolocationHandler(
-            Config config, @Nullable GeolocationProvider geolocationProvider, StatisticsManager statisticsManager) {
+            Config config, @Nullable GeolocationProvider geolocationProvider, CacheManager cacheManager,
+            StatisticsManager statisticsManager) {
         if (geolocationProvider != null) {
-            return new GeolocationHandler(config, geolocationProvider, statisticsManager);
+            return new GeolocationHandler(config, geolocationProvider, cacheManager, statisticsManager);
         }
         return null;
     }
