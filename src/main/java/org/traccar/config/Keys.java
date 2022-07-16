@@ -978,10 +978,10 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Firebase server API key for push notifications.
+     * Firebase service account JSON.
      */
-    public static final ConfigKey<String> NOTIFICATOR_FIREBASE_KEY = new StringConfigKey(
-            "notificator.firebase.key",
+    public static final ConfigKey<String> NOTIFICATOR_FIREBASE_SERVICE_ACCOUNT = new StringConfigKey(
+            "notificator.firebase.serviceAccount",
             List.of(KeyType.CONFIG));
 
     /**

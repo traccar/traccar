@@ -16,73 +16,77 @@
  */
 package org.traccar.notificators;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.MulticastMessage;
+import com.google.firebase.messaging.Notification;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
+import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 
 import javax.inject.Inject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
+import javax.inject.Singleton;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
+@Singleton
 public class NotificatorFirebase implements Notificator {
 
     private final NotificationFormatter notificationFormatter;
-    private final Client client;
-
-    private final String url;
-    private final String key;
-
-    public static class Notification {
-        @JsonProperty("title")
-        private String title;
-        @JsonProperty("body")
-        private String body;
-        @JsonProperty("sound")
-        private String sound;
-    }
-
-    public static class Message {
-        @JsonProperty("registration_ids")
-        private String[] tokens;
-        @JsonProperty("notification")
-        private Notification notification;
-    }
 
     @Inject
-    public NotificatorFirebase(Config config, NotificationFormatter notificationFormatter, Client client) {
-        this(
-                notificationFormatter, client, "https://fcm.googleapis.com/fcm/send",
-                config.getString(Keys.NOTIFICATOR_FIREBASE_KEY));
-    }
+    public NotificatorFirebase(Config config, NotificationFormatter notificationFormatter) throws IOException {
 
-    protected NotificatorFirebase(
-            NotificationFormatter notificationFormatter, Client client, String url, String key) {
         this.notificationFormatter = notificationFormatter;
-        this.client = client;
-        this.url = url;
-        this.key = key;
+
+        InputStream serviceAccount = new ByteArrayInputStream(
+                config.getString(Keys.NOTIFICATOR_FIREBASE_SERVICE_ACCOUNT).getBytes());
+
+        FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .build();
+
+        FirebaseApp.initializeApp(options);
     }
 
     @Override
-    public void send(User user, Event event, Position position) {
+    public void send(User user, Event event, Position position) throws MessageException {
         if (user.hasAttribute("notificationTokens")) {
 
             var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 
-            Notification notification = new Notification();
-            notification.title = shortMessage.getSubject();
-            notification.body = shortMessage.getBody();
-            notification.sound = "default";
+            List<String> registrationTokens = Arrays.asList(user.getString("notificationTokens").split("[, ]"));
 
-            Message message = new Message();
-            message.tokens = user.getString("notificationTokens").split("[, ]");
-            message.notification = notification;
+            MulticastMessage message = MulticastMessage.builder()
+                    .setNotification(Notification.builder()
+                            .setTitle(shortMessage.getSubject())
+                            .setBody(shortMessage.getBody())
+                            .build())
+                    .setAndroidConfig(AndroidConfig.builder()
+                            .setNotification(AndroidNotification.builder()
+                                    .setSound("default")
+                                    .build())
+                            .build())
+                    .addAllTokens(registrationTokens)
+                    .build();
 
-            client.target(url).request().header("Authorization", "key=" + key).post(Entity.json(message)).close();
+            try {
+                FirebaseMessaging.getInstance().sendMulticast(message);
+            } catch (FirebaseMessagingException e) {
+                throw new MessageException(e);
+            }
         }
     }
 
