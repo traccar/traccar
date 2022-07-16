@@ -98,6 +98,10 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         storage.updateObject(entity, new Request(
                 new Columns.Exclude("id"),
                 new Condition.Equals("id", "id")));
+        if (entity instanceof User) {
+            storage.updateObject(entity, new Request(
+                    new Columns.Include("hashedPassword", "salt"), new Condition.Equals("id", "id")));
+        }
         cacheManager.updateOrInvalidate(true, entity);
         LogAction.edit(getUserId(), entity);
 
