@@ -28,9 +28,12 @@ import java.io.IOException;
 import java.net.BindException;
 import java.net.ConnectException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
@@ -44,11 +47,18 @@ public class ServerManager implements LifecycleObject {
     @Inject
     public ServerManager(
             Injector injector, Config config) throws IOException, URISyntaxException, ReflectiveOperationException {
+        Set<String> enabledProtocols = null;
+        if (config.hasKey(Keys.PROTOCOLS_ENABLE)) {
+            enabledProtocols = new HashSet<>(Arrays.asList(config.getString(Keys.PROTOCOLS_ENABLE).split("[, ]")));
+        }
         for (Class<?> protocolClass : ClassScanner.findSubclasses(BaseProtocol.class, "org.traccar.protocol")) {
-            if (config.hasKey(Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(protocolClass)))) {
-                BaseProtocol protocol = (BaseProtocol) injector.getInstance(protocolClass);
-                connectorList.addAll(protocol.getConnectorList());
-                protocolList.put(protocol.getName(), protocol);
+            String protocolName = BaseProtocol.nameFromClass(protocolClass);
+            if (enabledProtocols == null || enabledProtocols.contains(protocolName)) {
+                if (config.hasKey(Keys.PROTOCOL_PORT.withPrefix(protocolName))) {
+                    BaseProtocol protocol = (BaseProtocol) injector.getInstance(protocolClass);
+                    connectorList.addAll(protocol.getConnectorList());
+                    protocolList.put(protocol.getName(), protocol);
+                }
             }
         }
     }

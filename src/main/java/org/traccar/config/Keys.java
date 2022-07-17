@@ -1211,6 +1211,16 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * List of protocols to enable. If not specified, Traccar enabled all protocols that have port numbers listed.
+     * The value is a comma-separated list of protocol names.
+     *
+     * Example value: teltonika,osmand
+     */
+    public static final ConfigKey<String> PROTOCOLS_ENABLE = new StringConfigKey(
+            "protocols.enable",
+            List.of(KeyType.CONFIG));
+
+    /**
      * List of protocols for overriding time. If not specified override is applied globally. List consist of protocol
      * names that can be separated by comma or single space character.
      */
