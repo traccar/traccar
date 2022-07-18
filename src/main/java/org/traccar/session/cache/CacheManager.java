@@ -23,6 +23,7 @@ import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
+import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
 @Singleton
 public class CacheManager implements BroadcastInterface {
 
+    private static final int GROUP_DEPTH_LIMIT = 3;
     private static final Collection<Class<? extends BaseModel>> CLASSES = Arrays.asList(
             Attribute.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
 
@@ -275,6 +277,17 @@ public class CacheManager implements BroadcastInterface {
                 new Columns.All(), new Condition.Equals("id", "id", deviceId)));
         if (device != null) {
             addObject(deviceId, device);
+
+            int groupDepth = 0;
+            long groupId = device.getGroupId();
+            while (groupDepth < GROUP_DEPTH_LIMIT && groupId > 0) {
+                Group group = storage.getObject(Group.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", "id", groupId)));
+                links.computeIfAbsent(Group.class, k -> new LinkedList<>()).add(group.getId());
+                addObject(deviceId, group);
+                groupId = group.getGroupId();
+                groupDepth += 1;
+            }
 
             for (Class<? extends BaseModel> clazz : CLASSES) {
                 var objects = storage.getObjects(clazz, new Request(
