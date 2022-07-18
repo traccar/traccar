@@ -177,6 +177,17 @@ public class Server extends ExtendedModel implements UserRestrictions {
         this.disableReports = disableReports;
     }
 
+    private boolean fixedEmail;
+
+    @Override
+    public boolean getFixedEmail() {
+        return fixedEmail;
+    }
+
+    public void setFixedEmail(boolean fixedEmail) {
+        this.fixedEmail = fixedEmail;
+    }
+
     private String poiLayer;
 
     public String getPoiLayer() {

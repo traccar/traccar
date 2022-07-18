@@ -20,4 +20,5 @@ public interface UserRestrictions {
     boolean getDeviceReadonly();
     boolean getLimitCommands();
     boolean getDisableReports();
+    boolean getFixedEmail();
 }

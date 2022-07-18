@@ -166,12 +166,16 @@ public class PermissionsService {
                 || before.getDeviceReadonly() != after.getDeviceReadonly()
                 || before.getDisabled() != after.getDisabled()
                 || before.getLimitCommands() != after.getLimitCommands()
-                || before.getDisableReports() != after.getDisableReports()) {
+                || before.getDisableReports() != after.getDisableReports()
+                || before.getFixedEmail() != after.getFixedEmail()) {
             if (userId == after.getId()) {
                 checkAdmin(userId);
             } else {
                 checkUser(userId, after.getId());
             }
+        }
+        if (before.getFixedEmail() && !before.getEmail().equals(after.getEmail())) {
+            checkAdmin(userId);
         }
     }
 

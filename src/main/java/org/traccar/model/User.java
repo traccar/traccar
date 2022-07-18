@@ -232,8 +232,6 @@ public class User extends ExtendedModel implements UserRestrictions {
         this.limitCommands = limitCommands;
     }
 
-    private String poiLayer;
-
     private boolean disableReports;
 
     @Override
@@ -244,6 +242,19 @@ public class User extends ExtendedModel implements UserRestrictions {
     public void setDisableReports(boolean disableReports) {
         this.disableReports = disableReports;
     }
+
+    private boolean fixedEmail;
+
+    @Override
+    public boolean getFixedEmail() {
+        return fixedEmail;
+    }
+
+    public void setFixedEmail(boolean fixedEmail) {
+        this.fixedEmail = fixedEmail;
+    }
+
+    private String poiLayer;
 
     public String getPoiLayer() {
         return poiLayer;
