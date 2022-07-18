@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,8 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
         position.setValid(true);
 
         Network network = new Network();
+        Double latitude = null;
+        Double longitude = null;
 
         for (Map.Entry<String, List<String>> entry : params.entrySet()) {
             for (String value : entry.getValue()) {
@@ -92,15 +94,15 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         }
                         break;
                     case "lat":
-                        position.setLatitude(Double.parseDouble(value));
+                        latitude = Double.parseDouble(value);
                         break;
                     case "lon":
-                        position.setLongitude(Double.parseDouble(value));
+                        longitude = Double.parseDouble(value);
                         break;
                     case "location":
                         String[] location = value.split(",");
-                        position.setLatitude(Double.parseDouble(location[0]));
-                        position.setLongitude(Double.parseDouble(location[1]));
+                        latitude = Double.parseDouble(location[0]);
+                        longitude = Double.parseDouble(location[1]);
                         break;
                     case "cell":
                         String[] cell = value.split(",");
@@ -170,7 +172,10 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setNetwork(network);
         }
 
-        if (position.getLatitude() == 0 && position.getLongitude() == 0) {
+        if (latitude != null && longitude != null) {
+            position.setLatitude(latitude);
+            position.setLongitude(longitude);
+        } else {
             getLastLocation(position, position.getDeviceTime());
         }
 
