@@ -54,8 +54,8 @@ public class UserResource extends BaseObjectResource<User> {
 
     @GET
     public Collection<User> get(@QueryParam("userId") long userId) throws StorageException {
-        permissionsService.checkUser(getUserId(), userId);
         if (userId > 0) {
+            permissionsService.checkUser(getUserId(), userId);
             return storage.getObjects(baseClass, new Request(
                     new Columns.All(),
                     new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups()));
