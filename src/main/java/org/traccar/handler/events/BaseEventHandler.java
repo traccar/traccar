@@ -36,7 +36,7 @@ public abstract class BaseEventHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
         Map<Event, Position> events = analyzePosition(position);
-        if (events != null) {
+        if (events != null && !events.isEmpty()) {
             notificationManager.updateEvents(events);
         }
         return position;

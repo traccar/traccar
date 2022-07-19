@@ -62,10 +62,9 @@ public class Event extends Message {
     public static final String TYPE_IGNITION_OFF = "ignitionOff";
 
     public static final String TYPE_MAINTENANCE = "maintenance";
-
     public static final String TYPE_TEXT_MESSAGE = "textMessage";
-
     public static final String TYPE_DRIVER_CHANGED = "driverChanged";
+    public static final String TYPE_MEDIA = "media";
 
     private Date eventTime;
 

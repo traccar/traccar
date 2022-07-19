@@ -49,6 +49,7 @@ import org.traccar.handler.events.FuelDropEventHandler;
 import org.traccar.handler.events.GeofenceEventHandler;
 import org.traccar.handler.events.IgnitionEventHandler;
 import org.traccar.handler.events.MaintenanceEventHandler;
+import org.traccar.handler.events.MediaEventHandler;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 
@@ -141,6 +142,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 ComputedAttributesHandler.class,
                 WebDataHandler.class,
                 DefaultDataHandler.class,
+                MediaEventHandler.class,
                 CommandResultEventHandler.class,
                 OverspeedEventHandler.class,
                 BehaviorEventHandler.class,
