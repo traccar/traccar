@@ -18,6 +18,11 @@ package org.traccar.broadcast;
 public class NullBroadcastService implements BroadcastService {
 
     @Override
+    public boolean singleInstance() {
+        return true;
+    }
+
+    @Override
     public void registerListener(BroadcastInterface listener) {
     }
 

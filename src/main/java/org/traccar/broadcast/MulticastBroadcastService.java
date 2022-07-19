@@ -71,6 +71,11 @@ public class MulticastBroadcastService implements BroadcastService {
     }
 
     @Override
+    public boolean singleInstance() {
+        return false;
+    }
+
+    @Override
     public void registerListener(BroadcastInterface listener) {
         listeners.add(listener);
     }

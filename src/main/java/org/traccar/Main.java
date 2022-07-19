@@ -20,8 +20,10 @@ import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastService;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.schedule.ScheduleManager;
 import org.traccar.storage.DatabaseModule;
+import org.traccar.storage.Storage;
 import org.traccar.web.WebModule;
 import org.traccar.web.WebServer;
 
@@ -119,6 +121,10 @@ public final class Main {
             logSystemInfo();
             LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");
+
+            if (injector.getInstance(BroadcastService.class).singleInstance()) {
+                DeviceUtil.resetStatus(injector.getInstance(Storage.class));
+            }
 
             var services = Stream.of(
                     ServerManager.class, WebServer.class, ScheduleManager.class, BroadcastService.class)

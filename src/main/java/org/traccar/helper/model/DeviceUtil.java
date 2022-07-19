@@ -13,11 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.broadcast;
+package org.traccar.helper.model;
 
-import org.traccar.LifecycleObject;
+import org.traccar.model.Device;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Request;
 
-public interface BroadcastService extends LifecycleObject, BroadcastInterface {
-    boolean singleInstance();
-    void registerListener(BroadcastInterface listener);
+public final class DeviceUtil {
+
+    private DeviceUtil() {
+    }
+
+    public static void resetStatus(Storage storage) throws StorageException {
+        storage.updateObject(new Device(), new Request(new Columns.Include("status")));
+    }
+
 }
