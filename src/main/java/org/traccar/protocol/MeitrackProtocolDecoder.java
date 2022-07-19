@@ -211,11 +211,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             switch (deviceModel.toUpperCase()) {
                 case "MVT340":
                 case "MVT380":
-                    position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.0 * 2.0 / 1024.0);
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.0 * 2.0 / 1024.0);
                     position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.0 * 16.0 / 1024.0);
                     break;
                 case "MT90":
-                    position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.3 * 2.0 / 4096.0);
                     position.set(Position.KEY_POWER, parser.nextHexInt(0));
                     break;
                 case "T1":
@@ -225,19 +225,18 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 case "MVT800":
                 case "TC68":
                 case "TC68S":
-                    position.set(Position.KEY_BATTERY, parser.nextHexInt(0) * 3.3 * 2.0 / 4096.0);
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.3 * 2.0 / 4096.0);
                     position.set(Position.KEY_POWER, parser.nextHexInt(0) * 3.3 * 16.0 / 4096.0);
                     break;
                 case "T311":
                 case "T322X":
                 case "T333":
                 case "T355":
-                    position.set(Position.KEY_BATTERY, parser.nextHexInt(0) / 100.0);
-                    position.set(Position.KEY_POWER, parser.nextHexInt(0) / 100.0);
-                    break;
+                case "T366":
+                case "T366G":
                 default:
-                    position.set(Position.KEY_BATTERY, parser.nextHexInt(0));
-                    position.set(Position.KEY_POWER, parser.nextHexInt(0));
+                    position.set(Position.KEY_BATTERY, parser.nextHexInt() / 100.0);
+                    position.set(Position.KEY_POWER, parser.nextHexInt(0) / 100.0);
                     break;
             }
 
