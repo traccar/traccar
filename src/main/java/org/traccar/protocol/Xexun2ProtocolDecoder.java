@@ -67,6 +67,9 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 0)) {
             return Position.ALARM_SOS;
         }
+        if (BitUtil.check(value, 1)) {
+            return Position.ALARM_REMOVING;
+        }
         if (BitUtil.check(value, 15)) {
             return Position.ALARM_FALL_DOWN;
         }
