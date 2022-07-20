@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -227,7 +227,9 @@ public class Position extends Message {
     }
 
     public void setLatitude(double latitude) {
-        this.latitude = latitude;
+        if (latitude >= -90 && latitude <= 90) {
+            this.latitude = latitude;
+        }
     }
 
     private double longitude;
@@ -237,7 +239,9 @@ public class Position extends Message {
     }
 
     public void setLongitude(double longitude) {
-        this.longitude = longitude;
+        if (longitude >= -180 && longitude <= 180) {
+            this.longitude = longitude;
+        }
     }
 
     private double altitude; // value in meters
