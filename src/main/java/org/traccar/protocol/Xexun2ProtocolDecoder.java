@@ -178,17 +178,25 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setLatitude(convertCoordinate(buf.readDouble()));
                     }
                     if (BitUtil.check(positionMask, 7)) {
-                        buf.skipBytes(2); // length = 30
-                        buf.skipBytes(1); // marker = 'G'
-                        buf.skipBytes(2); // length = 27
-                        position.setLongitude(convertCoordinate(buf.readDouble()));
-                        position.setLatitude(convertCoordinate(buf.readDouble()));
-                        position.setValid(buf.readUnsignedByte() > 0); // 0=invalid,1=normal,2=sub-meter,3=differential
-                        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-                        buf.skipBytes(1); // SNR
-                        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
-                        position.setCourse(buf.readUnsignedShort() * 0.1);
-                        position.setAltitude(buf.readFloat());
+                        if (buf.readUnsignedShort() > 0) {
+                            if (buf.readByte() != 'G') {
+                                buf.skipBytes(buf.readUnsignedShort());
+                            } else {
+                                int gpsDataLen = buf.readUnsignedShort();
+                                if (gpsDataLen != 27) {
+                                    buf.skipBytes(gpsDataLen);
+                                } else {
+                                    position.setLongitude(convertCoordinate(buf.readDouble()));
+                                    position.setLatitude(convertCoordinate(buf.readDouble()));
+                                    position.setValid(buf.readUnsignedByte() > 0);
+                                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                                    buf.readUnsignedByte(1); // satellite signal to noise ratio
+                                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
+                                    position.setCourse(buf.readUnsignedShort() * 0.1);
+                                    position.setAltitude(buf.readFloat());
+                                }
+                            }
+                        }
                     }
                 }
                 if (BitUtil.check(mask, 3)) {
