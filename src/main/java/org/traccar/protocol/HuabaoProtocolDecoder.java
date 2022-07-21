@@ -65,6 +65,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TIME_SYNC_RESPONSE = 0x8109;
     public static final int MSG_PHOTO = 0x8888;
     public static final int MSG_TRANSPARENT = 0x0900;
+    public static final int MSG_CANBUS_DATA = 0x0705;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -282,6 +283,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_TRANSPARENT) {
 
             return decodeTransparent(deviceSession, buf);
+
+        } else if (type == MSG_CANBUS_DATA) {
+
+            return decodeCanbusData(deviceSession, buf);
 
         }
 
@@ -752,4 +757,18 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private Position decodeCanbusData(DeviceSession deviceSession, ByteBuf buf) {
+
+        int count = buf.readShort();
+        ByteBuf time = buf.readSlice(5); // reception time
+
+        while (buf.readableBytes() > 2) {
+
+            ByteBuf canId = buf.readSlice(4);
+            ByteBuf canData = buf.readSlice(8);
+
+        }
+
+        return null;
+    }
 }
