@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -65,7 +66,7 @@ public class CacheManager implements BroadcastInterface {
 
     private final Map<CacheKey, CacheValue> deviceCache = new HashMap<>();
     private final Map<Long, Integer> deviceReferences = new HashMap<>();
-    private final Map<Long, Map<Class<? extends BaseModel>, List<Long>>> deviceLinks = new HashMap<>();
+    private final Map<Long, Map<Class<? extends BaseModel>, Set<Long>>> deviceLinks = new HashMap<>();
     private final Map<Long, Position> devicePositions = new HashMap<>();
 
     private Server server;
@@ -271,7 +272,7 @@ public class CacheManager implements BroadcastInterface {
     }
 
     private void unsafeAddDevice(long deviceId) throws StorageException {
-        Map<Class<? extends BaseModel>, List<Long>> links = new HashMap<>();
+        Map<Class<? extends BaseModel>, Set<Long>> links = new HashMap<>();
 
         Device device = storage.getObject(Device.class, new Request(
                 new Columns.All(), new Condition.Equals("id", "id", deviceId)));
@@ -283,7 +284,7 @@ public class CacheManager implements BroadcastInterface {
             while (groupDepth < GROUP_DEPTH_LIMIT && groupId > 0) {
                 Group group = storage.getObject(Group.class, new Request(
                         new Columns.All(), new Condition.Equals("id", "id", groupId)));
-                links.computeIfAbsent(Group.class, k -> new LinkedList<>()).add(group.getId());
+                links.computeIfAbsent(Group.class, k -> new LinkedHashSet<>()).add(group.getId());
                 addObject(deviceId, group);
                 groupId = group.getGroupId();
                 groupDepth += 1;
@@ -292,13 +293,13 @@ public class CacheManager implements BroadcastInterface {
             for (Class<? extends BaseModel> clazz : CLASSES) {
                 var objects = storage.getObjects(clazz, new Request(
                         new Columns.All(), new Condition.Permission(Device.class, deviceId, clazz)));
-                links.put(clazz, objects.stream().map(BaseModel::getId).collect(Collectors.toList()));
+                links.put(clazz, objects.stream().map(BaseModel::getId).collect(Collectors.toSet()));
                 objects.forEach(object -> addObject(deviceId, object));
             }
 
             var users = storage.getObjects(User.class, new Request(
                     new Columns.All(), new Condition.Permission(User.class, Device.class, deviceId)));
-            links.put(User.class, users.stream().map(BaseModel::getId).collect(Collectors.toList()));
+            links.put(User.class, users.stream().map(BaseModel::getId).collect(Collectors.toSet()));
             for (var user : users) {
                 addObject(deviceId, user);
                 var notifications = storage.getObjects(Notification.class, new Request(
@@ -306,7 +307,7 @@ public class CacheManager implements BroadcastInterface {
                 notifications.stream()
                         .filter(Notification::getAlways)
                         .forEach(object -> {
-                            links.computeIfAbsent(Notification.class, k -> new LinkedList<>()).add(object.getId());
+                            links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>()).add(object.getId());
                             addObject(deviceId, object);
                         });
             }
