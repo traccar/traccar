@@ -64,7 +64,7 @@ public class NotificatorPushover implements Notificator {
 
         Message message = new Message();
         message.token = token;
-        
+
         message.user = user.getString("pushoverUserKey");
         if (message.user == null) {
             message.user = this.user;
