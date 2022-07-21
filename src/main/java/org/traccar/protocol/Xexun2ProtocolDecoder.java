@@ -183,7 +183,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                         buf.skipBytes(2); // length = 27
                         position.setLongitude(convertCoordinate(buf.readDouble()));
                         position.setLatitude(convertCoordinate(buf.readDouble()));
-                        position.setValid(buf.readUnsignedByte()>0); // 0=invalid,1=normal,2=sub-meter,3=differential
+                        position.setValid(buf.readUnsignedByte() > 0); // 0=invalid,1=normal,2=sub-meter,3=differential
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                         buf.skipBytes(1); // SNR
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
