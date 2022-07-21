@@ -287,6 +287,42 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 241:
                 position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
                 break;
+            case 247:
+                switch ((int) readValue(buf, length, false)) {
+                    case 1:
+                        position.set(Position.KEY_ALARM, Position.crash);
+                        break;
+                    case 2:
+                        position.set(Position.KEY_ALARM, Position.limited_crash_trace_nc);
+                        break;
+                    case 3:
+                        position.set(Position.KEY_ALARM, Position.limited_crash_trace_c);
+                        break;
+                    case 4:
+                        position.set(Position.KEY_ALARM, Position.full_crash_trace_cn);
+                        break;
+                    case 5:
+                        position.set(Position.KEY_ALARM, Position.full_crash_trace_n);
+                        break;
+                    case 6:
+                        position.set(Position.KEY_ALARM, Position.crash_detected);
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            case 252:
+                switch ((int) readValue(buf, length, false)) {
+                    case 0:
+                        position.set(Position.KEY_ALARM, Position.battery_present);
+                        break;
+                    case 1:
+                        position.set(Position.KEY_ALARM, Position.battery_unplug);
+                        break;
+                    default:
+                        break;
+                }
+                break;
             case 253:
                 switch ((int) readValue(buf, length, false)) {
                     case 1:
