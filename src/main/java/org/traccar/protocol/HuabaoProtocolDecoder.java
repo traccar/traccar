@@ -31,6 +31,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.Event;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -759,6 +760,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeCanbusData(DeviceSession deviceSession, ByteBuf buf) {
 
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        getLastLocation(position, null);
+
         int count = buf.readShort();
         ByteBuf time = buf.readSlice(5); // reception time
 
@@ -769,6 +774,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        return null;
+        return position;
     }
 }
