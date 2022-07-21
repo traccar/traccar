@@ -15,6 +15,8 @@
  */
 package org.traccar.protocol;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -42,6 +44,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
@@ -758,21 +762,32 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Position decodeCanbusData(DeviceSession deviceSession, ByteBuf buf) {
+    private Position decodeCanbusData(DeviceSession deviceSession, ByteBuf buf) throws JsonProcessingException {
+
+        String key = "canbusData";
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
         getLastLocation(position, null);
 
+        Map<String, String> data = new HashMap<>();
+
         int count = buf.readShort();
         ByteBuf time = buf.readSlice(5); // reception time
 
+        data.put("count", Integer.toString(count));
+        data.put("time", ByteBufUtil.hexDump(time));
+
         while (buf.readableBytes() > 2) {
 
-            ByteBuf canId = buf.readSlice(4);
-            ByteBuf canData = buf.readSlice(8);
+            String canId = ByteBufUtil.hexDump(buf.readSlice(4));
+            String canData = ByteBufUtil.hexDump(buf.readSlice(8));
+            data.put(canId, canData);
 
         }
+
+        String json = new ObjectMapper().writeValueAsString(data);
+        position.set(key, json);
 
         return position;
     }
