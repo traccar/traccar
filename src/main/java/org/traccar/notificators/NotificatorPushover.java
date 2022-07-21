@@ -56,25 +56,24 @@ public class NotificatorPushover implements Notificator {
         url = "https://api.pushover.net/1/messages.json";
         token = config.getString(Keys.NOTIFICATOR_PUSHOVER_TOKEN);
         user = config.getString(Keys.NOTIFICATOR_PUSHOVER_USER);
-        if (token == null || user == null) {
-            throw new RuntimeException("Pushover token or user missing");
-        }
     }
 
     @Override
     public void send(User user, Event event, Position position) {
-
-        String device = "";
-        if (user.hasAttribute("notificator.pushover.device")) {
-            device = user.getString("notificator.pushover.device").replaceAll(" *, *", ",");
-        }
-
         var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 
         Message message = new Message();
         message.token = token;
-        message.user = this.user;
-        message.device = device;
+        
+        message.user = user.getString("pushoverUserKey");
+        if (message.user == null) {
+            message.user = this.user;
+        }
+
+        if (user.hasAttribute("pushoverDeviceNames")) {
+            message.device = user.getString("pushoverDeviceNames").replaceAll(" *, *", ",");
+        }
+
         message.title = shortMessage.getSubject();
         message.message = shortMessage.getBody();
 
