@@ -146,8 +146,10 @@ public class HuabaoProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "7e0002000004304832546500b7ca7e"));
 
-        verifyPosition(decoder, binary(
-                "7e0705011b25197510983700730017111241000058ecff0f20130003ffe1fe0058ebff0001c012b6c044d24058f0000f507d017d01ff007d01ff7d0158feca0003ff00000000ffff58fedf0085f8010effffffff58fee400fffffffcfcffffff58feef00ffffff4effffffff58fef121f7000004ff0000ff58fef100f3000004ff0000ff58fef20032000000ffffffff58fef717ffffffff4102ffff58a7001700cd5103403cfc5a58fed921000100000000000058ffe117fdffffffffffffff58fff200007d020458024c360058fff3008ef61e00cb2000ff4cf00400f07d018fc01200f38f58fff10058022304000000004cf00300c1001fffffffffff4cf00400f07d018fc01200f38f58fff20000340558024c360058fff3008f3d1f00b92000ff58fef100f3000004ff0000ffb57e"));
+        verifyAttribute(decoder, binary(
+                "7e0705011b25197510983700730001111241000058ecff0f20130003ffe1fe00b57e"),
+                "canBusData",
+                "[{\"collectWay\":\"average\",\"canData\":\"20130003ffe1fe00\",\"channel\":\"CAN2\",\"canId\":\"18ecff0f\",\"frame\":\"extended\"}]");
 
     }
 
