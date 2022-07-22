@@ -800,6 +800,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
+        if (data.size() == 0) {
+            return null;
+        }
+
         String json = new ObjectMapper().writeValueAsString(data);
         position.set(key, json);
 
