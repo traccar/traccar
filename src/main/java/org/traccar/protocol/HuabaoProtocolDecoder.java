@@ -770,19 +770,33 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
         getLastLocation(position, null);
 
-        Map<String, String> data = new HashMap<>();
+        buf.skipBytes(2); // count, can just check data.length
 
-        int count = buf.readShort();
-        ByteBuf time = buf.readSlice(5); // reception time
+        List<Map<String, String>> data = new LinkedList<>();
 
-        data.put("count", Integer.toString(count));
-        data.put("time", ByteBufUtil.hexDump(time));
+        TimeZone deviceTZ = deviceSession.get(DeviceSession.KEY_TIMEZONE);
+        DateBuilder dateBuilder = new DateBuilder(deviceTZ)
+                .setCurrentDate()
+                .setHour(BcdUtil.readInteger(buf, 2))
+                .setMinute(BcdUtil.readInteger(buf, 2))
+                .setSecond(BcdUtil.readInteger(buf, 2))
+                .setMillis(BcdUtil.readInteger(buf, 2) * 100 + BcdUtil.readInteger(buf, 2) * 10);
+
+        position.setTime(dateBuilder.getDate());  // reception time of can data
 
         while (buf.readableBytes() > 2) {
 
-            String canId = ByteBufUtil.hexDump(buf.readSlice(4));
-            String canData = ByteBufUtil.hexDump(buf.readSlice(8));
-            data.put(canId, canData);
+            Map<String, String> dataItem = new HashMap<>();
+
+            Long canId = buf.readUnsignedInt();
+
+            dataItem.put("channel", BitUtil.check(canId, 0) ? "CAN1" : "CAN2");
+            dataItem.put("frame", BitUtil.check(canId, 1) ? "standard" : "extended");
+            dataItem.put("collectWay", BitUtil.check(canId, 2) ? "original" : "average");
+            dataItem.put("canId", Long.toHexString(canId & 0x1fffffff));  // make it 29 bit
+            dataItem.put("canData", ByteBufUtil.hexDump(buf.readSlice(8)));
+
+            data.add(dataItem);
 
         }
 
