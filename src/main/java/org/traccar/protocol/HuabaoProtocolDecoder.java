@@ -784,7 +784,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(dateBuilder.getDate());  // reception time of can data
 
-        while (buf.readableBytes() > 2) {
+        while (buf.readableBytes() > 2 + 4 + 8) {  // end marker, can id length, can data length
 
             Map<String, String> dataItem = new HashMap<>();
 
