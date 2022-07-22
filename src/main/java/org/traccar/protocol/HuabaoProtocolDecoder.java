@@ -770,10 +770,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
         getLastLocation(position, null);
 
-        buf.skipBytes(2); // count, can just check data.length
-
-        List<Map<String, String>> data = new LinkedList<>();
-
         TimeZone deviceTZ = deviceSession.get(DeviceSession.KEY_TIMEZONE);
         DateBuilder dateBuilder = new DateBuilder(deviceTZ)
                 .setCurrentDate()
@@ -781,10 +777,17 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 .setMinute(BcdUtil.readInteger(buf, 2))
                 .setSecond(BcdUtil.readInteger(buf, 2))
                 .setMillis(BcdUtil.readInteger(buf, 4) / 10);
-
         position.setTime(dateBuilder.getDate());  // reception time of can data
 
-        while (buf.readableBytes() > 2 + 4 + 8) {  // end marker, can id length, can data length
+        buf.skipBytes(2); // count, can just check data.length
+
+        List<Map<String, String>> data = new LinkedList<>();
+
+        while (buf.readableBytes() > 2) {
+
+            if (buf.readableBytes() < 4 + 8) {  // can id length, can data length
+                break;
+            }
 
             Map<String, String> dataItem = new HashMap<>();
 
