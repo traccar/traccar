@@ -780,7 +780,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 .setHour(BcdUtil.readInteger(buf, 2))
                 .setMinute(BcdUtil.readInteger(buf, 2))
                 .setSecond(BcdUtil.readInteger(buf, 2))
-                .setMillis(BcdUtil.readInteger(buf, 2) * 100 + BcdUtil.readInteger(buf, 2) * 10);
+                .setMillis(BcdUtil.readInteger(buf, 4) / 10);
 
         position.setTime(dateBuilder.getDate());  // reception time of can data
 
