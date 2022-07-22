@@ -70,7 +70,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TIME_SYNC_RESPONSE = 0x8109;
     public static final int MSG_PHOTO = 0x8888;
     public static final int MSG_TRANSPARENT = 0x0900;
-    public static final int MSG_CANBUS_DATA = 0x0705;
+    public static final int MSG_CAN_BUS_DATA = 0x0705;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -289,9 +289,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
             return decodeTransparent(deviceSession, buf);
 
-        } else if (type == MSG_CANBUS_DATA) {
+        } else if (type == MSG_CAN_BUS_DATA) {
 
-            return decodeCanbusData(deviceSession, buf);
+            return decodeCanBusData(deviceSession, buf);
 
         }
 
@@ -762,9 +762,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Position decodeCanbusData(DeviceSession deviceSession, ByteBuf buf) throws JsonProcessingException {
+    private Position decodeCanBusData(DeviceSession deviceSession, ByteBuf buf) throws JsonProcessingException {
 
-        String key = "canbusData";
+        String key = "canBusData";
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
