@@ -180,25 +180,20 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                     if (BitUtil.check(positionMask, 7)) {
                         int dataLength = buf.readUnsignedShort();
                         if (dataLength > 0) {
-                            if (buf.readByte() != 'G') {
-                                buf.skipBytes(dataLength - 1);
-                            } else {
-                                int gpsDataLen = buf.readUnsignedShort();
-                                if (gpsDataLen != 27) {
-                                    buf.skipBytes(dataLength - 3);
-                                } else {
-                                    position.setFixTime(position.getDeviceTime());
-                                    position.setLongitude(convertCoordinate(buf.readDouble()));
-                                    position.setLatitude(convertCoordinate(buf.readDouble()));
-                                    position.setValid(buf.readUnsignedByte() > 0);
-                                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-                                    buf.readUnsignedByte(); // satellite signal to noise ratio
-                                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
-                                    position.setCourse(buf.readUnsignedShort() * 0.1);
-                                    position.setAltitude(buf.readFloat());
-                                    buf.skipBytes(dataLength - 30);
-                                }
+                            int dataType = buf.readUnsignedByte();
+                            int dataEndIndex = buf.readerIndex() + buf.readUnsignedShort();
+                            if (dataType == 'G') {
+                                position.setFixTime(position.getDeviceTime());
+                                position.setLongitude(convertCoordinate(buf.readDouble()));
+                                position.setLatitude(convertCoordinate(buf.readDouble()));
+                                position.setValid(buf.readUnsignedByte() > 0);
+                                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                                buf.readUnsignedByte(); // satellite signal-to-noise ratio
+                                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
+                                position.setCourse(buf.readUnsignedShort() * 0.1);
+                                position.setAltitude(buf.readFloat());
                             }
+                            buf.readerIndex(dataEndIndex);
                         }
                     }
                 }
