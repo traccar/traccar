@@ -147,9 +147,9 @@ public class HuabaoProtocolDecoderTest extends ProtocolTest {
                 "7e0002000004304832546500b7ca7e"));
 
         verifyAttribute(decoder, binary(
-                "7e0705011b25197510983700730001111241000058ecff0f20130003ffe1fe00b57e"),
+                "7e0705011b00003333444400730001111241000058ecff0f20130003ffe1fe00b57e"),
                 "canBusData",
-                "[{\"collectWay\":\"average\",\"canData\":\"20130003ffe1fe00\",\"channel\":\"CAN2\",\"canId\":\"18ecff0f\",\"frame\":\"extended\"}]");
+                "[{\"collectWay\":\"original\",\"canData\":\"20130003ffe1fe00\",\"channel\":\"CAN1\",\"canId\":\"18ecff0f\",\"frame\":\"extended\"}]");
 
     }
 
