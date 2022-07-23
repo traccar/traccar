@@ -136,7 +136,9 @@ public class ConnectionManager implements BroadcastInterface {
             device = addUnknownDevice(uniqueIds[0]);
         }
 
-        if (device != null && !device.getDisabled()) {
+        if (device != null) {
+            device.checkDisabled();
+
             DeviceSession oldSession = sessionsByDeviceId.remove(device.getId());
             if (oldSession != null) {
                 Endpoint oldEndpoint = new Endpoint(oldSession.getChannel(), oldSession.getRemoteAddress());
@@ -160,7 +162,7 @@ public class ConnectionManager implements BroadcastInterface {
 
             return deviceSession;
         } else {
-            LOGGER.warn((device == null ? "Unknown" : "Disabled") + " device - " + String.join(" ", uniqueIds)
+            LOGGER.warn("Unknown device - " + String.join(" ", uniqueIds)
                     + " (" + ((InetSocketAddress) remoteAddress).getHostString() + ")");
             return null;
         }

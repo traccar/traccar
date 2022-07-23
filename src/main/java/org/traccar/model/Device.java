@@ -23,7 +23,7 @@ import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
 @StorageName("tc_devices")
-public class Device extends GroupedModel {
+public class Device extends GroupedModel implements Disableable {
 
     private String name;
 
@@ -140,12 +140,26 @@ public class Device extends GroupedModel {
 
     private boolean disabled;
 
+    @Override
     public boolean getDisabled() {
         return disabled;
     }
 
+    @Override
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
+    }
+
+    private Date expirationTime;
+
+    @Override
+    public Date getExpirationTime() {
+        return expirationTime;
+    }
+
+    @Override
+    public void setExpirationTime(Date expirationTime) {
+        this.expirationTime = expirationTime;
     }
 
 }

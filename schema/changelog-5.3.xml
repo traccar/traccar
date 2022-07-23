@@ -16,6 +16,10 @@
       <column name="fixedemail" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
+    <addColumn tableName="tc_devices">
+      <column name="expirationtime" type="TIMESTAMP" />
+    </addColumn>
+
   </changeSet>
 
 </databaseChangeLog>

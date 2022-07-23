@@ -24,7 +24,7 @@ import org.traccar.storage.StorageName;
 import java.util.Date;
 
 @StorageName("tc_users")
-public class User extends ExtendedModel implements UserRestrictions {
+public class User extends ExtendedModel implements UserRestrictions, Disableable {
 
     private String name;
 
@@ -155,20 +155,24 @@ public class User extends ExtendedModel implements UserRestrictions {
 
     private boolean disabled;
 
+    @Override
     public boolean getDisabled() {
         return disabled;
     }
 
+    @Override
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }
 
     private Date expirationTime;
 
+    @Override
     public Date getExpirationTime() {
         return expirationTime;
     }
 
+    @Override
     public void setExpirationTime(Date expirationTime) {
         this.expirationTime = expirationTime;
     }

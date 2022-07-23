@@ -83,12 +83,7 @@ public class LoginService {
         if (user == null) {
             throw new SecurityException("Unknown account");
         }
-        if (user.getDisabled()) {
-            throw new SecurityException("Account is disabled");
-        }
-        if (user.getExpirationTime() != null && System.currentTimeMillis() > user.getExpirationTime().getTime()) {
-            throw new SecurityException("Account has expired");
-        }
+        user.checkDisabled();
     }
 
 }
