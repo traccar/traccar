@@ -42,6 +42,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")                       // length
             .number("(d+),")                     // imei
             .expression("(.+)")                  // content
+            .number("xx")                        // checksum
             .compile();
 
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
@@ -73,22 +74,26 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .text(",")
             .number("d,")                        // extended
-            .expression("([^,]+)?,")             // fuel
+            .expression("([^,]+)?")              // fuel
+            .groupBegin()
+            .text(",")
             .expression("([^,]+)?")              // temperature
             .groupBegin()
             .text(",")
-            .number("(d+)|")                     // rpm
-            .number("(d+)|")                     // engine load
-            .number("d+|")                       // maf flow
-            .number("d+|")                       // intake pressure
-            .number("d+|")                       // intake temperature
-            .number("(d+)|")                     // throttle
-            .number("(d+)|")                     // coolant temperature
-            .number("(d+)|")                     // instant fuel
-            .number("(d+)")                      // fuel level
+            .groupBegin()
+            .number("(d+)?|")                    // rpm
+            .number("(d+)?|")                    // engine load
+            .number("d*|")                       // maf flow
+            .number("d*|")                       // intake pressure
+            .number("d*|")                       // intake temperature
+            .number("(d+)?|")                    // throttle
+            .number("(d+)?|")                    // coolant temperature
+            .number("(d+)?|")                    // instant fuel
+            .number("(d+)[%L]").optional()       // fuel level
             .groupEnd("?")
             .groupEnd("?")
-            .any()
+            .groupEnd("?")
+            .groupEnd("?")
             .compile();
 
     private String decodeAlarm(int value) {
@@ -122,9 +127,6 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String content = parser.next();
-        if (content.charAt(content.length() - 2 - 1) != '|') {
-            content = content.substring(0, content.length() - 2);
-        }
         if (content.length() < 100) {
 
             Position position = new Position(getProtocolName());
@@ -223,8 +225,12 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_RPM, parser.nextInt());
             position.set(Position.KEY_ENGINE_LOAD, parser.nextInt());
             position.set(Position.KEY_THROTTLE, parser.nextInt());
-            position.set(Position.KEY_COOLANT_TEMP, parser.nextInt() - 40);
-            position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt() * 0.1);
+            if (parser.hasNext()) {
+                position.set(Position.KEY_COOLANT_TEMP, parser.nextInt() - 40);
+            }
+            if (parser.hasNext()) {
+                position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt() * 0.1);
+            }
             position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
         }
 
