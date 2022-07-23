@@ -783,11 +783,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         List<Map<String, String>> data = new LinkedList<>();
 
-        while (buf.readableBytes() > 2) {
-
-            if (buf.readableBytes() < 4 + 8) {  // can id length, can data length
-                break;
-            }
+        while (buf.readableBytes() >= 2 + 4 + 8) {  // end marker, can id length, can data length
 
             Map<String, String> dataItem = new HashMap<>();
 
