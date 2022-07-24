@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,13 +49,13 @@ public class Calendar extends ExtendedModel {
     private byte[] data;
 
     public byte[] getData() {
-        return data.clone();
+        return data;
     }
 
     public void setData(byte[] data) throws IOException, ParserException {
         CalendarBuilder builder = new CalendarBuilder();
         calendar = builder.build(new ByteArrayInputStream(data));
-        this.data = data.clone();
+        this.data = data;
     }
 
     private net.fortuna.ical4j.model.Calendar calendar;
