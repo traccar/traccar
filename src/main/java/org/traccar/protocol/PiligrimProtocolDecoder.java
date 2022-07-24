@@ -30,6 +30,7 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -150,6 +151,33 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
             }
 
             return positions;
+        } else if (uri.startsWith("/push.do")) {
+            /* Getting payload */
+            ByteBuf content_stream = request.content();
+            byte[] payload_bytes = new byte[Integer.parseInt(request.headers().get("Content-Length"))];
+            content_stream.readBytes(payload_bytes);
+            String payload = new String(payload_bytes);
+
+            /* Payload structure:
+             * &phone&message
+             */
+            String[] payload_parts = payload.split("&");
+            System.out.println("Payload parts: " + Arrays.toString(payload_parts));
+            String phone_number = payload_parts[1].substring(12);
+            String message = payload_parts[2].substring(8);
+            System.out.println("Phone number: " + phone_number);
+            System.out.println("Message: " + message);
+
+            /* Supported message structure:
+             * GPS NMEA Command; GSM info; Unknown; Battery voltage?
+             */
+            if (message.startsWith("$GPRMC")) {
+                System.out.println("Supported message");
+            } else {
+                System.out.println("Unsupported message");
+            }
+
+            System.out.println("Finish");
         }
 
         return null;
