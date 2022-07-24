@@ -26,6 +26,7 @@ import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.NMEA;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -163,7 +164,7 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
              */
             String[] payload_parts = payload.split("&");
             System.out.println("Payload parts: " + Arrays.toString(payload_parts));
-            String phone_number = payload_parts[1].substring(12);
+            String phone_number = payload_parts[1].substring(15);
             String message = payload_parts[2].substring(8);
             System.out.println("Phone number: " + phone_number);
             System.out.println("Message: " + message);
@@ -184,6 +185,14 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
                 /* Getting rid of checksum */
                 String gps_command = unprocessed_gps_command.replaceFirst("A,V[*].*", "");
                 System.out.println("GPS command: " + gps_command);
+
+                NMEA gps_parser = new NMEA();
+
+                NMEA.GPSPosition gps_position = gps_parser.parse(gps_command);
+
+                System.out.println("Time: " + gps_position.time);
+                System.out.println("Coordinates: " + gps_position.lat + " " + gps_position.lon);
+                System.out.println("Speed over ground: " + gps_position.velocity + " knots");
 
                 /* Parsing other fields */
                 /* String gsm_info = message_parts[1]; */
