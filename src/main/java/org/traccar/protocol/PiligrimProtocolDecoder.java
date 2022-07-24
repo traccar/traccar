@@ -172,11 +172,11 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
              * &phone&message
              */
             String[] payload_parts = payload.split("&");
-            System.out.println("Payload parts: " + Arrays.toString(payload_parts));
+            /* System.out.println("Payload parts: " + Arrays.toString(payload_parts)); */
             String phone_number = payload_parts[1].substring(15);
             String message = payload_parts[2].substring(8);
-            System.out.println("Phone number: " + phone_number);
-            System.out.println("Message: " + message);
+            /* System.out.println("Phone number: " + phone_number); */
+            /* System.out.println("Message: " + message); */
 
             if (message.startsWith("$GPRMC")) {
                 /* Supported message structure:
@@ -186,28 +186,28 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
                 System.out.println("Supported message");
 
                 String[] message_parts = message.split(";");
-                System.out.println("Message parts: " + Arrays.toString(message_parts));
+                /* System.out.println("Message parts: " + Arrays.toString(message_parts)); */
 
                 /* Parsing GPS */
                 String unprocessed_gps_command = message_parts[0];
 
                 /* Getting rid of checksum */
                 String gps_command = unprocessed_gps_command.replaceFirst("A,V[*].*", "");
-                System.out.println("GPS command: " + gps_command);
+                /* System.out.println("GPS command: " + gps_command); */
 
                 NMEA gps_parser = new NMEA();
 
                 NMEA.GPSPosition gps_position = gps_parser.parse(gps_command);
 
-                System.out.println("Time: " + gps_position.time);
-                System.out.println("Coordinates: " + gps_position.lat + " " + gps_position.lon);
-                System.out.println("Speed over ground: " + gps_position.velocity + " knots");
+                /* System.out.println("Time: " + gps_position.time); */
+                /* System.out.println("Coordinates: " + gps_position.lat + " " + gps_position.lon); */
+                /* System.out.println("Speed over ground: " + gps_position.velocity + " knots"); */
 
                 /* Parsing other fields */
                 /* String gsm_info = message_parts[1]; */
                 /* String unknown = message_parts[2]; */
                 String battery_info = message_parts[3].substring(7).substring(0, 3);
-                System.out.println("Battery: " + battery_info);
+                /* System.out.println("Battery: " + battery_info); */
 
                 /* Constructing response */
                 Position position = new Position(getProtocolName());
