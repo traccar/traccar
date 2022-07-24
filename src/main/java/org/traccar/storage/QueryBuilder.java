@@ -288,7 +288,8 @@ public final class QueryBuilder {
         Method[] methods = object.getClass().getMethods();
 
         for (Method method : methods) {
-            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
+            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0
+                    && !method.getName().equals("getClass")) {
                 String name = method.getName().substring(3);
                 try {
                     if (method.getReturnType().equals(boolean.class)) {
