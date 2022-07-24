@@ -355,41 +355,45 @@ public class DatabaseStorage extends Storage {
 
             result.append("SELECT DISTINCT ");
             if (!expandDevices) {
-                result.append(groupStorageName).append('.');
+                if (outputKey.equals("groupId")) {
+                    result.append("all_groups.");
+                } else {
+                    result.append(groupStorageName).append('.');
+                }
             }
             result.append(outputKey);
             result.append(" FROM ");
             result.append(groupStorageName);
 
             result.append(" INNER JOIN (");
-            result.append("SELECT id as parentid, id as groupid FROM ");
+            result.append("SELECT id as parentId, id as groupId FROM ");
             result.append(getStorageName(Group.class));
             result.append(" UNION ");
-            result.append("SELECT groupid as parentid, id as groupid FROM ");
+            result.append("SELECT groupId as parentId, id as groupId FROM ");
             result.append(getStorageName(Group.class));
-            result.append(" WHERE groupid IS NOT NULL");
+            result.append(" WHERE groupId IS NOT NULL");
             result.append(" UNION ");
-            result.append("SELECT g2.groupid as parentid, g1.id as groupid FROM ");
+            result.append("SELECT g2.groupId as parentId, g1.id as groupId FROM ");
             result.append(getStorageName(Group.class));
             result.append(" AS g2");
             result.append(" INNER JOIN ");
             result.append(getStorageName(Group.class));
-            result.append(" AS g1 ON g2.id = g1.groupid");
-            result.append(" WHERE g2.groupid IS NOT NULL");
+            result.append(" AS g1 ON g2.id = g1.groupId");
+            result.append(" WHERE g2.groupId IS NOT NULL");
             result.append(") AS all_groups ON ");
             result.append(groupStorageName);
-            result.append(".groupid = all_groups.parentid");
+            result.append(".groupId = all_groups.parentId");
 
             if (expandDevices) {
                 result.append(" INNER JOIN (");
-                result.append("SELECT groupid as parentid, id as deviceid FROM ");
+                result.append("SELECT groupId as parentId, id as deviceId FROM ");
                 result.append(getStorageName(Device.class));
-                result.append(" WHERE groupid IS NOT NULL");
-                result.append(") AS devices ON all_groups.groupid = devices.parentid");
+                result.append(" WHERE groupId IS NOT NULL");
+                result.append(") AS devices ON all_groups.groupId = devices.parentId");
             }
 
             result.append(" WHERE ");
-            result.append(conditionKey); // TODO handle search for device / group
+            result.append(conditionKey);
             result.append(" = :");
             result.append(conditionKey);
 
