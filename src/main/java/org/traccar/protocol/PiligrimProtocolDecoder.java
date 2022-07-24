@@ -168,11 +168,28 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
             System.out.println("Phone number: " + phone_number);
             System.out.println("Message: " + message);
 
-            /* Supported message structure:
-             * GPS NMEA Command; GSM info; Unknown; Battery voltage?
-             */
             if (message.startsWith("$GPRMC")) {
+                /* Supported message structure:
+                 * GPS NMEA Command; GSM info; Unknown; Battery voltage?
+                 * Example: $GPRMC,180752.000,A,5314.0857,N,03421.8173,E,0.00,104.74,220722,,,A,V* 29,05; GSM: 250-01 0b54-0519,1c30,3e96,3ebe,412e 25;  S; Batt: 405,M
+                 */
                 System.out.println("Supported message");
+
+                String[] message_parts = message.split(";");
+                System.out.println("Message parts: " + Arrays.toString(message_parts));
+
+                /* Parsing GPS */
+                String unprocessed_gps_command = message_parts[0];
+
+                /* Getting rid of checksum */
+                String gps_command = unprocessed_gps_command.replaceFirst("A,V[*].*", "");
+                System.out.println("GPS command: " + gps_command);
+
+                /* Parsing other fields */
+                /* String gsm_info = message_parts[1]; */
+                /* String unknown = message_parts[2]; */
+                String battery_info = message_parts[3].substring(7).substring(0, 3);
+                System.out.println("Battery: " + battery_info);
             } else {
                 System.out.println("Unsupported message");
             }
