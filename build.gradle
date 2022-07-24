@@ -12,8 +12,8 @@ repositories {
 ext {
     guiceVersion = "5.0.1"
     jettyVersion = "10.0.7" // jetty 11 javax to jakarta
-    jerseyVersion = "2.35" // jersey 3 javax to jakarta
-    jacksonVersion = "2.12.2" // same version as jersey-media-json-jackson dependency
+    jerseyVersion = "2.36" // jersey 3 javax to jakarta
+    jacksonVersion = "2.13.3" // same version as jersey-media-json-jackson dependency
     protobufVersion = "3.19.3"
 }
 
