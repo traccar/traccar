@@ -21,6 +21,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import net.fortuna.ical4j.model.DateTime;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
@@ -32,6 +33,7 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -153,6 +155,13 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
 
             return positions;
         } else if (uri.startsWith("/push.do")) {
+            sendResponse(channel, "PUSH.DO: OK");
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, "123456");
+            if (deviceSession == null) {
+                return null;
+            }
+
             /* Getting payload */
             ByteBuf content_stream = request.content();
             byte[] payload_bytes = new byte[Integer.parseInt(request.headers().get("Content-Length"))];
@@ -199,11 +208,26 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
                 /* String unknown = message_parts[2]; */
                 String battery_info = message_parts[3].substring(7).substring(0, 3);
                 System.out.println("Battery: " + battery_info);
+
+                /* Constructing response */
+                Position position = new Position(getProtocolName());
+
+                position.setDeviceId(deviceSession.getDeviceId());
+                position.setValid(true);
+                position.setLatitude(gps_position.lat);
+                position.setLongitude(gps_position.lon);
+                position.setTime(new Date(System.currentTimeMillis()));
+                position.setSpeed(gps_position.velocity);
+                position.setCourse(gps_position.dir);
+                position.setAccuracy(gps_position.quality);
+                position.set(Position.KEY_BATTERY, Integer.parseInt(battery_info) / 100);
+
+                System.out.println("Supported message finish");
+
+                return position;
             } else {
                 System.out.println("Unsupported message");
             }
-
-            System.out.println("Finish");
         }
 
         return null;
