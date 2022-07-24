@@ -173,8 +173,8 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
              */
             String[] payload_parts = payload.split("&");
             /* System.out.println("Payload parts: " + Arrays.toString(payload_parts)); */
-            String phone_number = payload_parts[1].substring(15);
-            String message = payload_parts[2].substring(8);
+            /* String phone_number = payload_parts[1].substring(15); */
+            String message = payload_parts[2].substring(8).replaceFirst("ALARM KEY; ", "");
             /* System.out.println("Phone number: " + phone_number); */
             /* System.out.println("Message: " + message); */
 
@@ -220,6 +220,7 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.setSpeed(gps_position.velocity);
                 position.setCourse(gps_position.dir);
                 position.setAccuracy(gps_position.quality);
+                position.setAltitude(gps_position.altitude);
                 position.set(Position.KEY_BATTERY, Integer.parseInt(battery_info) / 100);
 
                 System.out.println("Supported message finish");
