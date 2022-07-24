@@ -20,6 +20,18 @@
       <column name="expirationtime" type="TIMESTAMP" />
     </addColumn>
 
+    <createTable tableName="tc_keystore">
+      <column autoIncrement="true" name="id" type="INT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="publickey" type="BLOB">
+        <constraints nullable="false" />
+      </column>
+      <column name="privatekey" type="BLOB">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
   </changeSet>
 
 </databaseChangeLog>
