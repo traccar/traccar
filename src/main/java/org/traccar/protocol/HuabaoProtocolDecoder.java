@@ -291,6 +291,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_CAN_BUS_DATA) {
 
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
             return decodeCanBusData(deviceSession, buf);
 
         }
