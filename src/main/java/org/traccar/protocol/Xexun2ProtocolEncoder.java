@@ -32,8 +32,8 @@ public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
     }
 
     private static ByteBuf encodeFrame(ByteBuf buf) {
-        buf.clear();
-        if (buf.readableBytes() < 5) {
+        int bufLength = buf.readableBytes();
+        if (bufLength < 5) {
             return null;
         }
 
@@ -41,7 +41,7 @@ public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
 
         result.writeBytes(buf.readBytes(2));
 
-        while (buf.readerIndex() < buf.capacity() - 2) {
+        while (buf.readerIndex() < bufLength - 2) {
             int b = buf.readUnsignedByte();
             if (b == 0xfa && buf.isReadable() && buf.getUnsignedByte(buf.readerIndex()) == 0xaf) {
                 buf.readUnsignedByte();
