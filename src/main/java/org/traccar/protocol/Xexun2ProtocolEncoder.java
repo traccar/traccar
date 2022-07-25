@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 Stefan Clark (stefan@stefanclark.co.uk)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,14 @@ import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
 import org.traccar.Protocol;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-
 public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
 
     public Xexun2ProtocolEncoder(Protocol protocol) {
         super(protocol);
     }
+
+    public static final int FLAG = 0xfaaf;
+    public static final int MSG_COMMAND = 0x07;
 
     private static ByteBuf encodeFrame(ByteBuf buf) {
         int bufLength = buf.readableBytes();
@@ -62,8 +62,7 @@ public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
         return result;
     }
 
-    private static int checksum(byte[] data)
-    {
+    private static int checksum(byte[] data) {
         int sum = 0;
         int len = data.length;
         for (int j = 0; len > 1; len--) {
@@ -88,14 +87,14 @@ public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
 
         byte[] message = content.getBytes();
 
-        buf.writeShort(0xFAAF);
-        buf.writeShort(0x0007);
-        buf.writeShort(0x0001);
-        buf.writeBytes(DataConverter.parseHex(uniqueId + "0"),0,8);
+        buf.writeShort(FLAG);
+        buf.writeShort(MSG_COMMAND);
+        buf.writeShort(1); // index
+        buf.writeBytes(DataConverter.parseHex(uniqueId + "0"));
         buf.writeShort(message.length);
         buf.writeShort(checksum(message));
         buf.writeBytes(message);
-        buf.writeShort(0xFAAF);
+        buf.writeShort(FLAG);
 
         return encodeFrame(buf);
     }
@@ -108,7 +107,8 @@ public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_CUSTOM:
                 return encodeContent(uniqueId, command.getString(Command.KEY_DATA));
             case Command.TYPE_POSITION_PERIODIC:
-                return encodeContent(uniqueId, String.format("tracking_send=%1$d,%1$d", command.getInteger(Command.KEY_FREQUENCY)));
+                return encodeContent(uniqueId,
+                    String.format("tracking_send=%1$d,%1$d", command.getInteger(Command.KEY_FREQUENCY)));
             case Command.TYPE_POWER_OFF:
                 return encodeContent(uniqueId, "of=1");
             case Command.TYPE_REBOOT_DEVICE:

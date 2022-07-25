@@ -100,12 +100,14 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        if (type != MSG_COMMAND) {
+            sendResponse(channel, type, index, imei);
+        }
+
         buf.readUnsignedShort(); // attributes
         buf.readUnsignedShort(); // checksum
 
         if (type == MSG_POSITION) {
-            sendResponse(channel, type, index, imei);
-
             List<Integer> lengths = new ArrayList<>();
             List<Position> positions = new ArrayList<>();
 
