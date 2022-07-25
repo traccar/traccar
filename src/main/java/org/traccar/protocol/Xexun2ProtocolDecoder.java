@@ -42,6 +42,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_POSITION = 0x14;
+    public static final int MSG_COMMAND = 0x07;
 
     private void sendResponse(Channel channel, int type, int index, ByteBuf imei) {
         if (channel != null) {
@@ -99,12 +100,12 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        sendResponse(channel, type, index, imei);
-
         buf.readUnsignedShort(); // attributes
         buf.readUnsignedShort(); // checksum
 
         if (type == MSG_POSITION) {
+            sendResponse(channel, type, index, imei);
+
             List<Integer> lengths = new ArrayList<>();
             List<Position> positions = new ArrayList<>();
 
