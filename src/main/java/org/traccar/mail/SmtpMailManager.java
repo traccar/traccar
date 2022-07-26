@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.database;
+package org.traccar.mail;
 
 import org.traccar.config.Config;
 import org.traccar.config.ConfigKey;
 import org.traccar.config.Keys;
+import org.traccar.database.StatisticsManager;
 import org.traccar.model.User;
 import org.traccar.notification.PropertiesProvider;
 
@@ -37,7 +38,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
 
-public final class MailManager {
+public final class SmtpMailManager implements MailManager {
 
     private static final String CONTENT_TYPE = "text/html; charset=utf-8";
 
@@ -45,7 +46,7 @@ public final class MailManager {
     private final StatisticsManager statisticsManager;
 
     @Inject
-    public MailManager(Config config, StatisticsManager statisticsManager) {
+    public SmtpMailManager(Config config, StatisticsManager statisticsManager) {
         this.config = config;
         this.statisticsManager = statisticsManager;
     }
