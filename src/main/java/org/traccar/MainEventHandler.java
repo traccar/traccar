@@ -159,10 +159,9 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
         LOGGER.info("[{}] disconnected", NetworkUtil.session(ctx.channel()));
         closeChannel(ctx.channel());
 
-        if (BasePipelineFactory.getHandler(ctx.pipeline(), HttpRequestDecoder.class) == null
-                && !connectionlessProtocols.contains(ctx.pipeline().get(BaseProtocolDecoder.class).getProtocolName())) {
-            connectionManager.deviceDisconnected(ctx.channel());
-        }
+        boolean supportsOffline = BasePipelineFactory.getHandler(ctx.pipeline(), HttpRequestDecoder.class) == null
+                && !connectionlessProtocols.contains(ctx.pipeline().get(BaseProtocolDecoder.class).getProtocolName());
+        connectionManager.deviceDisconnected(ctx.channel(), supportsOffline);
     }
 
     @Override

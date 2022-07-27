@@ -189,12 +189,14 @@ public class ConnectionManager implements BroadcastInterface {
         }
     }
 
-    public void deviceDisconnected(Channel channel) {
+    public void deviceDisconnected(Channel channel, boolean supportsOffline) {
         Endpoint endpoint = new Endpoint(channel, channel.remoteAddress());
         Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(endpoint);
         if (endpointSessions != null) {
             for (DeviceSession deviceSession : endpointSessions.values()) {
-                updateDevice(deviceSession.getDeviceId(), Device.STATUS_OFFLINE, null);
+                if (supportsOffline) {
+                    updateDevice(deviceSession.getDeviceId(), Device.STATUS_OFFLINE, null);
+                }
                 sessionsByDeviceId.remove(deviceSession.getDeviceId());
                 cacheManager.removeDevice(deviceSession.getDeviceId());
             }
