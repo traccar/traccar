@@ -16,7 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
-import org.traccar.database.MailManager;
+import org.traccar.mail.MailManager;
 import org.traccar.model.User;
 import org.traccar.notification.TextTemplateFormatter;
 import org.traccar.storage.StorageException;

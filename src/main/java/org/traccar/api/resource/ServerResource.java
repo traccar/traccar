@@ -16,7 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
-import org.traccar.database.MailManager;
+import org.traccar.mail.MailManager;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
 import org.traccar.helper.LogAction;

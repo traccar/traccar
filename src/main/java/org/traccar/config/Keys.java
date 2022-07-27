@@ -801,6 +801,13 @@ public final class Keys {
             "templates");
 
     /**
+     * Log emails instead of sending them via SMTP. Intended for testing purposes only.
+     */
+    public static final ConfigKey<Boolean> MAIL_DEBUG = new BooleanConfigKey(
+            "mail.debug",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Force SMTP settings from the config file and ignore user attributes.
      */
     public static final ConfigKey<Boolean> MAIL_SMTP_IGNORE_USER_CONFIG = new BooleanConfigKey(

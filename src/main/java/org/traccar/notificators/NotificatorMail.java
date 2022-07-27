@@ -16,7 +16,7 @@
  */
 package org.traccar.notificators;
 
-import org.traccar.database.MailManager;
+import org.traccar.mail.MailManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;

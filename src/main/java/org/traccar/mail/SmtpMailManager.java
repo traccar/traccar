@@ -23,7 +23,6 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.model.User;
 import org.traccar.notification.PropertiesProvider;
 
-import javax.inject.Inject;
 import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -45,7 +44,6 @@ public final class SmtpMailManager implements MailManager {
     private final Config config;
     private final StatisticsManager statisticsManager;
 
-    @Inject
     public SmtpMailManager(Config config, StatisticsManager statisticsManager) {
         this.config = config;
         this.statisticsManager = statisticsManager;

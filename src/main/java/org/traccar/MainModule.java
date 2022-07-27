@@ -63,6 +63,9 @@ import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.helper.SanitizerModule;
+import org.traccar.mail.LogMailManager;
+import org.traccar.mail.MailManager;
+import org.traccar.mail.SmtpMailManager;
 import org.traccar.notification.EventForwarder;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.HttpSmsClient;
@@ -126,6 +129,15 @@ public class MainModule extends AbstractModule {
             return new SnsSmsClient(config);
         }
         return null;
+    }
+
+    @Provides
+    public static MailManager provideMailManager(Config config, StatisticsManager statisticsManager) {
+        if (config.getBoolean(Keys.MAIL_DEBUG)) {
+            return new LogMailManager();
+        } else {
+            return new SmtpMailManager(config, statisticsManager);
+        }
     }
 
     @Singleton

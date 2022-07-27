@@ -19,7 +19,7 @@ package org.traccar.api.resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.api.BaseResource;
-import org.traccar.database.MailManager;
+import org.traccar.mail.MailManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
