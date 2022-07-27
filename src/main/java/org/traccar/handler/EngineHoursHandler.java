@@ -40,9 +40,11 @@ public class EngineHoursHandler extends BaseDataHandler {
             if (last != null) {
                 long hours = last.getLong(Position.KEY_HOURS);
                 long idleTime = last.getLong(Position.KEY_IDLE_TIME);
+                long tripTime = last.getLong(Position.KEY_TRIP_TIME);
                 if (last.getBoolean(Position.KEY_IGNITION) && position.getBoolean(Position.KEY_IGNITION)) {
                     long diff = position.getFixTime().getTime() - last.getFixTime().getTime();
                     hours += diff;
+                    tripTime += diff;
                     if (position.getSpeed() < speedThreshold) {
                         idleTime += diff;
                     } else {
@@ -50,11 +52,13 @@ public class EngineHoursHandler extends BaseDataHandler {
                     }
                 } else {
                     idleTime = 0;
+                    tripTime = 0;
                 }
                 if (hours != 0) {
                     position.set(Position.KEY_HOURS, hours);
                 }
                 position.set(Position.KEY_IDLE_TIME, idleTime);
+                position.set(Position.KEY_TRIP_TIME, tripTime);
             }
         }
         return position;
