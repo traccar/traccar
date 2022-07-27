@@ -62,17 +62,17 @@ public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
         return result;
     }
 
-    private static int checksum(byte[] data) {
+    private static int udpchecksum(ByteBuf data) {
         int sum = 0;
-        int len = data.length;
+        int len = data.capacity();
         for (int j = 0; len > 1; len--) {
-            sum += data[j++] & 0xff;
+            sum += data.readByte() & 0xff;
             if ((sum & 0x80000000) > 0) {
                 sum = (sum & 0xffff) + (sum >> 16);
             }
         }
         if (len == 1) {
-            sum += data[data.length - 1] & 0xff;
+            sum += data.readByte() & 0xff;
         }
         while ((sum >> 16) > 0) {
             sum = (sum & 0xffff) + sum >> 16;
@@ -85,14 +85,15 @@ public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
     private static ByteBuf encodeContent(String uniqueId, String content) {
         ByteBuf buf = Unpooled.buffer();
 
-        byte[] message = content.getBytes();
+        ByteBuf message = Unpooled.copiedBuffer(content.getBytes());
 
         buf.writeShort(FLAG);
         buf.writeShort(MSG_COMMAND);
         buf.writeShort(1); // index
         buf.writeBytes(DataConverter.parseHex(uniqueId + "0"));
-        buf.writeShort(message.length);
-        buf.writeShort(checksum(message));
+        buf.writeShort(message.capacity());
+        buf.writeShort(udpchecksum(message));
+        message.resetReaderIndex();
         buf.writeBytes(message);
         buf.writeShort(FLAG);
 
