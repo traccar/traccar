@@ -58,7 +58,8 @@ public class PasswordResource extends BaseResource {
         if (user != null) {
             String token = UUID.randomUUID().toString().replaceAll("-", "");
             user.set(PASSWORD_RESET_TOKEN, token);
-            storage.updateObject(user, new Request(new Columns.Exclude("id"), new Condition.Equals("id", "id")));
+            storage.updateObject(user, new Request(
+                    new Columns.Include("attributes"), new Condition.Equals("id", "id")));
 
             var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
             velocityContext.put("token", token);
@@ -79,7 +80,8 @@ public class PasswordResource extends BaseResource {
         if (user != null) {
             user.getAttributes().remove(PASSWORD_RESET_TOKEN);
             user.setPassword(password);
-            storage.updateObject(user, new Request(new Columns.Exclude("id"), new Condition.Equals("id", "id")));
+            storage.updateObject(user, new Request(
+                    new Columns.Include("attributes", "hashedPassword", "salt"), new Condition.Equals("id", "id")));
             return Response.ok().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
