@@ -24,6 +24,7 @@ import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -97,12 +98,16 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        int payloadSize = buf.readUnsignedShort() & 0x03ff;
+        int checksum = buf.readUnsignedShort(); // checksum
+
+        if (checksum != Checksum.udp(buf.nioBuffer(buf.readerIndex(), payloadSize))) {
+            return null;
+        }
+
         if (type != Xexun2ProtocolEncoder.MSG_COMMAND) {
             sendResponse(channel, type, index, imei);
         }
-
-        buf.readUnsignedShort(); // attributes
-        buf.readUnsignedShort(); // checksum
 
         if (type == MSG_POSITION) {
             List<Integer> lengths = new ArrayList<>();

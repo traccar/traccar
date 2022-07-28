@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
 import org.traccar.Protocol;
@@ -62,26 +63,6 @@ public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
         return result;
     }
 
-    private static int udpchecksum(ByteBuf data) {
-        int sum = 0;
-        int len = data.capacity();
-        for (int j = 0; len > 1; len--) {
-            sum += data.readByte() & 0xff;
-            if ((sum & 0x80000000) > 0) {
-                sum = (sum & 0xffff) + (sum >> 16);
-            }
-        }
-        if (len == 1) {
-            sum += data.readByte() & 0xff;
-        }
-        while ((sum >> 16) > 0) {
-            sum = (sum & 0xffff) + sum >> 16;
-        }
-        sum = (sum == 0xffff) ? sum & 0xffff : (~sum) & 0xffff;
-        return sum;
-    }
-
-
     private static ByteBuf encodeContent(String uniqueId, String content) {
         ByteBuf buf = Unpooled.buffer();
 
@@ -92,8 +73,7 @@ public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
         buf.writeShort(1); // index
         buf.writeBytes(DataConverter.parseHex(uniqueId + "0"));
         buf.writeShort(message.capacity());
-        buf.writeShort(udpchecksum(message));
-        message.resetReaderIndex();
+        buf.writeShort(Checksum.udp(message.nioBuffer()));
         buf.writeBytes(message);
         buf.writeShort(FLAG);
 

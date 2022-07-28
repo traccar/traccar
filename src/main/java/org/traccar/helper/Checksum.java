@@ -200,4 +200,23 @@ public final class Checksum {
         return (10 - (checksum % 10)) % 10;
     }
 
+    public static int udp(ByteBuffer data) {
+        int sum = 0;
+        int len = data.capacity();
+        for (int j = 0; len > 1; len--) {
+            sum += data.get() & 0xff;
+            if ((sum & 0x80000000) > 0) {
+                sum = (sum & 0xffff) + (sum >> 16);
+            }
+        }
+        if (len == 1) {
+            sum += data.get() & 0xff;
+        }
+        while ((sum >> 16) > 0) {
+            sum = (sum & 0xffff) + sum >> 16;
+        }
+        sum = (sum == 0xffff) ? sum & 0xffff : (~sum) & 0xffff;
+        return sum;
+    }
+
 }
