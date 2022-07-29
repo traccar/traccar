@@ -764,13 +764,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Position decodeCanBusData(DeviceSession deviceSession, ByteBuf buf) throws JsonProcessingException {
+    private List<Position> decodeCanBusData(DeviceSession deviceSession, ByteBuf buf) throws JsonProcessingException {
 
         String key = "canBusData";
-
-        Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
-        getLastLocation(position, null);
 
         TimeZone deviceTZ = deviceSession.get(DeviceSession.KEY_TIMEZONE);
         DateBuilder dateBuilder = new DateBuilder(deviceTZ)
@@ -779,13 +775,19 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 .setMinute(BcdUtil.readInteger(buf, 2))
                 .setSecond(BcdUtil.readInteger(buf, 2))
                 .setMillis(BcdUtil.readInteger(buf, 4) / 10);
-        position.setTime(dateBuilder.getDate());  // reception time of can data
+        Date receptionTime = dateBuilder.getDate();  // reception time of can data
 
-        buf.skipBytes(2); // count, can just check data.length
+        // sample frame: {"collectWay":"original","canData":"20130003ffe1fe00","channel":"CAN1","canId":"18ecff0f","frame":"extended"}
+        int singleFrameJsonLength = 120;  // the sample frame above is 109 chars long
+        int maxFramesPerPosition = 4000 / singleFrameJsonLength;  // database limit for attributes is 4000
+        int ignoreLastNBytes = 2 + 4 + 8;  // end marker, can id length, can data length
 
+        List<Position> positions = new LinkedList<>();
         List<Map<String, String>> data = new LinkedList<>();
 
-        while (buf.readableBytes() >= 2 + 4 + 8) {  // end marker, can id length, can data length
+        buf.skipBytes(2); // count, can just check data.size()
+
+        while (buf.readableBytes() >= ignoreLastNBytes) {
 
             Map<String, String> dataItem = new HashMap<>();
 
@@ -799,15 +801,24 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
             data.add(dataItem);
 
+            if (data.size() + 1 < maxFramesPerPosition && buf.readableBytes() >= ignoreLastNBytes) {
+                continue;
+            }
+
+            // last position or position full
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            position.setTime(receptionTime);
+
+            String json = new ObjectMapper().writeValueAsString(data);
+            position.set(key, json);
+            positions.add(position);
+            data = new LinkedList<>();
+
         }
 
-        if (data.size() == 0) {
-            return null;
-        }
-
-        String json = new ObjectMapper().writeValueAsString(data);
-        position.set(key, json);
-
-        return position;
+        return positions;
     }
 }
