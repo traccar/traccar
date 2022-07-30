@@ -3,6 +3,8 @@ package org.traccar.protocol;
 import org.junit.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
+import java.util.Map;
+import java.util.List;
 
 public class HuabaoProtocolDecoderTest extends ProtocolTest {
 
@@ -146,10 +148,19 @@ public class HuabaoProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "7e0002000004304832546500b7ca7e"));
 
+
         verifyAttribute(decoder, binary(
                 "7e0705011b00003333444400730001111241000058ecff0f20130003ffe1fe00b57e"),
                 "canBusData",
-                "[{\"collectWay\":\"original\",\"canData\":\"20130003ffe1fe00\",\"channel\":\"CAN1\",\"canId\":\"18ecff0f\",\"frame\":\"extended\"}]");
+                List.of(
+                    Map.of(
+                        "channel", "CAN1",
+                        "frame", "extended",
+                        "collectWay", "original",
+                        "canId", "18ecff0f",
+                        "canData", "20130003ffe1fe00"
+                    )
+                ));
 
     }
 

@@ -15,8 +15,6 @@
  */
 package org.traccar.protocol;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -764,7 +762,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private List<Position> decodeCanBusData(DeviceSession deviceSession, ByteBuf buf) throws JsonProcessingException {
+    private List<Position> decodeCanBusData(DeviceSession deviceSession, ByteBuf buf) {
 
         String key = "canBusData";
 
@@ -812,8 +810,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
             position.setTime(receptionTime);
 
-            String json = new ObjectMapper().writeValueAsString(data);
-            position.set(key, json);
+            position.set(key, data);
             positions.add(position);
             data = new LinkedList<>();
 
