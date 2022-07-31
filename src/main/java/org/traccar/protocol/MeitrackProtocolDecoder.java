@@ -204,11 +204,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
             }
 
-            String deviceModel = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
-            if (deviceModel == null) {
-                deviceModel = "";
+            String model = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
+            if (model == null) {
+                model = "";
             }
-            switch (deviceModel.toUpperCase()) {
+            switch (model.toUpperCase()) {
                 case "MVT340":
                 case "MVT380":
                     position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.0 * 2.0 / 1024.0);
