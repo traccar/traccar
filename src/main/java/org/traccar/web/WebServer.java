@@ -64,6 +64,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.EnumSet;
 
@@ -104,9 +105,9 @@ public class WebServer implements LifecycleObject {
             @Override
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
-                if (code == HttpStatus.NOT_FOUND_404 && request.getPathInfo().startsWith("/modern")) {
-                    writer.write(Files.readString(
-                            Paths.get(config.getString(Keys.WEB_PATH), "modern", "index.html")));
+                Path index = Paths.get(config.getString(Keys.WEB_PATH), "index.html");
+                if (code == HttpStatus.NOT_FOUND_404 && Files.exists(index)) {
+                    writer.write(Files.readString(index));
                 } else {
                     writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
                             + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
