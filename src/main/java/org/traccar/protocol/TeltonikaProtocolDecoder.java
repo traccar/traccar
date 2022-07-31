@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,13 +197,13 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeOtherParameter(Position position, int id, ByteBuf buf, int length) {
+    private void decodeUniversalParameter(Position position, int id, ByteBuf buf, int length) {
         switch (id) {
             case 1:
             case 2:
             case 3:
             case 4:
-                position.set("di" + id, readValue(buf, length, false));
+                position.set(Position.PREFIX_IN + id, readValue(buf, length, false));
                 break;
             case 9:
                 position.set(Position.PREFIX_ADC + 1, readValue(buf, length, false));
@@ -355,7 +355,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (codec == CODEC_GH3000) {
             decodeGh3000Parameter(position, id, buf, length);
         } else {
-            decodeOtherParameter(position, id, buf, length);
+            decodeUniversalParameter(position, id, buf, length);
         }
     }
 
@@ -508,7 +508,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (codec == CODEC_8 || codec == CODEC_8_EXT || codec == CODEC_16) {
             int cnt = readExtByte(buf, codec, CODEC_8_EXT);
             for (int j = 0; j < cnt; j++) {
-                decodeOtherParameter(position, readExtByte(buf, codec, CODEC_8_EXT, CODEC_16), buf, 8);
+                decodeParameter(position, readExtByte(buf, codec, CODEC_8_EXT, CODEC_16), buf, 8, codec);
             }
         }
 
