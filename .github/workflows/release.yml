@@ -46,9 +46,9 @@ jobs:
         working-directory: ./setup
         run: |
           wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
-          wget -q https://github.com/ojdkbuild/ojdkbuild/releases/download/java-11-openjdk-11.0.13.8-1/java-11-openjdk-11.0.13.8-1.windows.ojdkbuild.x86_64.zip
-          wget -q https://github.com/ojdkbuild/contrib_jdk11u-ci/releases/download/jdk-11.0.13%2B8/jdk-11.0.13-ojdkbuild-linux-x64.zip
-          wget -q https://github.com/ojdkbuild/contrib_jdk11u-arm32-ci/releases/download/jdk-11.0.13%2B8/jdk-11.0.13-ojdkbuild-linux-armhf.zip
+          wget -q https://github.com/ojdkbuild/ojdkbuild/releases/download/java-11-openjdk-11.0.15.9-1/java-11-openjdk-11.0.15.9-1.windows.ojdkbuild.x86_64.zip
+          wget -q https://github.com/ojdkbuild/contrib_jdk11u-ci/releases/download/jdk-11.0.15%2B10/jdk-11.0.15-ojdkbuild-linux-x64.zip
+          wget -q https://github.com/ojdkbuild/contrib_jdk11u-arm32-ci/releases/download/jdk-11.0.15%2B10/jdk-11.0.15-ojdkbuild-linux-armhf.zip
           ./package.sh ${{ github.event.inputs.version }}
       - name: Upload installers
         working-directory: ./setup
