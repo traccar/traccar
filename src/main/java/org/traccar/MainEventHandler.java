@@ -138,6 +138,9 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
         LOGGER.warn(formatChannel(ctx.channel()) + " error", cause);
         closeChannel(ctx.channel());
     }
