@@ -170,18 +170,27 @@ public final class ReportUtils {
 
     private static TripReport calculateTrip(
             ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
+        double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
 
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
 
         double speedMax = 0.0;
         double speedSum = 0.0;
+        long idleTime = 0;
+        Position last = startTrip;
         for (int i = startIndex; i <= endIndex; i++) {
             double speed = positions.get(i).getSpeed();
             speedSum += speed;
             if (speed > speedMax) {
                 speedMax = speed;
             }
+            Position position = positions.get(i);
+            long diff = position.getFixTime().getTime() - last.getFixTime().getTime();
+            if (position.getSpeed() < speedThreshold) {
+                idleTime += diff;
+            }
+            last = position;
         }
 
         TripReport trip = new TripReport();
@@ -217,6 +226,7 @@ public final class ReportUtils {
         trip.setDuration(tripDuration);
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));
         trip.setMaxSpeed(speedMax);
+        trip.setIdleTime(idleTime);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));

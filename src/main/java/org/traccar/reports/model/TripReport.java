@@ -149,4 +149,10 @@ public class TripReport extends BaseReport {
     public void setDriverName(String driverName) {
         this.driverName = driverName;
     }
+
+    private long idleTime;
+
+    public void setIdleTime(long idleTime) { this.idleTime = idleTime; }
+
+    public long getIdleTime() { return this.idleTime; }
 }
