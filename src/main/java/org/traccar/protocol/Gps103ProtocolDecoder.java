@@ -56,9 +56,12 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd()
             .expression("([^,]+)?,")             // rfid
             .groupBegin()
-            .text("L,,,")
+            .text("L,")
+            .groupBegin()
+            .text(",,")
             .number("(x+),,")                    // lac
             .number("(x+),,,")                   // cid
+            .groupEnd("?")
             .or()
             .text("F,")
             .groupBegin()
@@ -218,13 +221,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(2)) {
-
-            getLastLocation(position, null);
-
             position.setNetwork(new Network(CellTower.fromLacCid(
                     getConfig(), parser.nextHexInt(0), parser.nextHexInt(0))));
+        }
 
-        } else {
+        if (parser.hasNext(20)) {
 
             String utcHours = parser.next();
             String utcMinutes = parser.next();
@@ -261,6 +262,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set("fuel1", parser.nextDouble());
             position.set("fuel2", parser.nextDouble());
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+
+        } else {
+
+            getLastLocation(position, null);
 
         }
 
