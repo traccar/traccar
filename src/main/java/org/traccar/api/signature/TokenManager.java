@@ -46,6 +46,10 @@ public class TokenManager {
         this.cryptoManager = cryptoManager;
     }
 
+    public String generateToken(long userId) throws IOException, GeneralSecurityException, StorageException {
+        return generateToken(userId, null);
+    }
+
     public String generateToken(
             long userId, Date expiration) throws IOException, GeneralSecurityException, StorageException {
         Data data = new Data();

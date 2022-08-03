@@ -23,14 +23,18 @@ import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.api.signature.TokenManager;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.security.GeneralSecurityException;
 import java.util.Locale;
 
 public class TextTemplateFormatter {
@@ -38,10 +42,12 @@ public class TextTemplateFormatter {
     private static final Logger LOGGER = LoggerFactory.getLogger(TextTemplateFormatter.class);
 
     private final VelocityEngine velocityEngine;
+    private final TokenManager tokenManager;
 
     @Inject
-    public TextTemplateFormatter(VelocityEngine velocityEngine) {
+    public TextTemplateFormatter(VelocityEngine velocityEngine, TokenManager tokenManager) {
         this.velocityEngine = velocityEngine;
+        this.tokenManager = tokenManager;
     }
 
     public VelocityContext prepareContext(Server server, User user) {
@@ -51,6 +57,11 @@ public class TextTemplateFormatter {
         if (user != null) {
             velocityContext.put("user", user);
             velocityContext.put("timezone", UserUtil.getTimezone(server, user));
+            try {
+                velocityContext.put("token", tokenManager.generateToken(user.getId()));
+            } catch (IOException | GeneralSecurityException | StorageException e) {
+                LOGGER.warn("Token generation failed", e);
+            }
         }
 
         velocityContext.put("webUrl", velocityEngine.getProperty("web.url"));
