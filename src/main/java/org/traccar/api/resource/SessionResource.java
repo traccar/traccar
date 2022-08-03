@@ -19,8 +19,8 @@ import org.traccar.api.BaseResource;
 import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.helper.DataConverter;
-import org.traccar.helper.ServletHelper;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.ServletHelper;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -44,13 +44,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 @Path("session")
 @Produces(MediaType.APPLICATION_JSON)
