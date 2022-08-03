@@ -21,6 +21,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.model.UserRestrictions;
 import org.traccar.reports.CsvExportProvider;
+import org.traccar.reports.GpxExportProvider;
 import org.traccar.reports.KmlExportProvider;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -53,6 +54,9 @@ public class PositionResource extends BaseResource {
 
     @Inject
     private CsvExportProvider csvExportProvider;
+
+    @Inject
+    private GpxExportProvider gpxExportProvider;
 
     @GET
     public Collection<Position> getJson(
@@ -116,6 +120,24 @@ public class PositionResource extends BaseResource {
         };
         return Response.ok(stream)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions.csv").build();
+    }
+
+    @Path("gpx")
+    @GET
+    @Produces("application/gpx+xml")
+    public Response getGpx(
+            @QueryParam("deviceId") long deviceId,
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        StreamingOutput stream = output -> {
+            try {
+                gpxExportProvider.generate(output, deviceId, from, to);
+            } catch (StorageException e) {
+                throw new WebApplicationException(e);
+            }
+        };
+        return Response.ok(stream)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions.gpx").build();
     }
 
 }
