@@ -188,8 +188,8 @@ public final class ReportUtils {
             }
             if (position.getSpeed() < speedThreshold
                     && last.getSpeed() < speedThreshold
-                    && (position.getAttributes().containsKey(Position.KEY_IGNITION) && position.getBoolean(Position.KEY_IGNITION))
-                    && (last.getAttributes().containsKey(Position.KEY_IGNITION) && last.getBoolean(Position.KEY_IGNITION))) {
+                    && position.getBoolean(Position.KEY_IGNITION)
+                    && last.getBoolean(Position.KEY_IGNITION)) {
                 idleTime += position.getFixTime().getTime() - last.getFixTime().getTime();
             }
             last = position;
