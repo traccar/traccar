@@ -244,6 +244,7 @@ public final class ReportUtils {
 
     private static StopReport calculateStop(
             ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
+
         Position startStop = positions.get(startIndex);
         Position endStop = positions.get(endIndex);
 
