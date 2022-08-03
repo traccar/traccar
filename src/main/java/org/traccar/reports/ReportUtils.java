@@ -186,12 +186,7 @@ public final class ReportUtils {
             if (speed > speedMax) {
                 speedMax = speed;
             }
-            if (position.getSpeed() < speedThreshold
-                    && last.getSpeed() < speedThreshold
-                    && position.getBoolean(Position.KEY_IGNITION)
-                    && last.getBoolean(Position.KEY_IGNITION)) {
-                idleTime += position.getFixTime().getTime() - last.getFixTime().getTime();
-            }
+            idleTime += getIdleTime(speedThreshold, position, last);
             last = position;
         }
 
@@ -297,12 +292,7 @@ public final class ReportUtils {
         Position last = startStop;
         for (int i = startIndex; i <= endIndex; i++) {
             Position position = positions.get(i);
-            if (position.getSpeed() < speedThreshold
-                    && last.getSpeed() < speedThreshold
-                    && position.getBoolean(Position.KEY_IGNITION)
-                    && last.getBoolean(Position.KEY_IGNITION)) {
-                idleTime += position.getFixTime().getTime() - last.getFixTime().getTime();
-            }
+            idleTime += getIdleTime(speedThreshold, position, last);
             last = position;
         }
         stop.setIdleTime(idleTime);
@@ -319,6 +309,16 @@ public final class ReportUtils {
 
         return stop;
 
+    }
+
+    private static long getIdleTime(double speedThreshold, Position position, Position last) {
+        if (position.getSpeed() < speedThreshold
+                && last.getSpeed() < speedThreshold
+                && position.getBoolean(Position.KEY_IGNITION)
+                && last.getBoolean(Position.KEY_IGNITION)) {
+            return position.getFixTime().getTime() - last.getFixTime().getTime();
+        }
+        return 0;
     }
 
     private static <T extends BaseReport> T calculateTripOrStop(
