@@ -186,7 +186,10 @@ public final class ReportUtils {
             if (speed > speedMax) {
                 speedMax = speed;
             }
-            if (position.getSpeed() < speedThreshold && last.getSpeed() < speedThreshold) {
+            if (position.getSpeed() < speedThreshold
+                    && last.getSpeed() < speedThreshold
+                    && position.getBoolean(Position.KEY_IGNITION)
+                    && last.getBoolean(Position.KEY_IGNITION)) {
                 idleTime += position.getFixTime().getTime() - last.getFixTime().getTime();
             }
             last = position;
