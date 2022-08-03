@@ -249,6 +249,7 @@ public final class ReportUtils {
 
     private static StopReport calculateStop(
             ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
+        double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
 
         Position startStop = positions.get(startIndex);
         Position endStop = positions.get(endIndex);
@@ -291,6 +292,20 @@ public final class ReportUtils {
             }
         }
         stop.setEngineHours(engineHours);
+
+        long idleTime = 0;
+        Position last = startStop;
+        for (int i = startIndex; i <= endIndex; i++) {
+            Position position = positions.get(i);
+            if (position.getSpeed() < speedThreshold
+                    && last.getSpeed() < speedThreshold
+                    && position.getBoolean(Position.KEY_IGNITION)
+                    && last.getBoolean(Position.KEY_IGNITION)) {
+                idleTime += position.getFixTime().getTime() - last.getFixTime().getTime();
+            }
+            last = position;
+        }
+        stop.setIdleTime(idleTime);
 
         if (!ignoreOdometer
                 && startStop.getDouble(Position.KEY_ODOMETER) != 0
