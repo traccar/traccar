@@ -180,15 +180,14 @@ public final class ReportUtils {
         long idleTime = 0;
         Position last = startTrip;
         for (int i = startIndex; i <= endIndex; i++) {
-            double speed = positions.get(i).getSpeed();
+            Position position = positions.get(i);
+            double speed = position.getSpeed();
             speedSum += speed;
             if (speed > speedMax) {
                 speedMax = speed;
             }
-            Position position = positions.get(i);
-            long diff = position.getFixTime().getTime() - last.getFixTime().getTime();
-            if (position.getSpeed() < speedThreshold) {
-                idleTime += diff;
+            if (position.getSpeed() < speedThreshold && last.getSpeed() < speedThreshold) {
+                idleTime += position.getFixTime().getTime() - last.getFixTime().getTime();
             }
             last = position;
         }
