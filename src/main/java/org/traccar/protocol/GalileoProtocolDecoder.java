@@ -239,7 +239,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodePositions(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
-        int length = (buf.readUnsignedShortLE() & 0x7fff) + 3;
+        int endIndex = (buf.readUnsignedShortLE() & 0x7fff) + buf.readerIndex();
 
         List<Position> positions = new LinkedList<>();
         Set<Integer> tags = new HashSet<>();
@@ -248,7 +248,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = null;
         Position position = new Position(getProtocolName());
 
-        while (buf.readerIndex() < length) {
+        while (buf.readerIndex() < endIndex) {
 
             int tag = buf.readUnsignedByte();
             if (tags.contains(tag)) {
