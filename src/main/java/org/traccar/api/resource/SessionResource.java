@@ -156,9 +156,6 @@ public class SessionResource extends BaseResource {
     @POST
     public String requestToken(
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-        if (expiration == null) {
-            expiration = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(7));
-        }
         return tokenManager.generateToken(getUserId(), expiration);
     }
 

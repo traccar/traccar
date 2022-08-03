@@ -24,8 +24,11 @@ import javax.inject.Inject;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class TokenManager {
+
+    private static final int DEFAULT_EXPIRATION_DAYS = 7;
 
     private final ObjectMapper objectMapper;
     private final CryptoManager cryptoManager;
@@ -47,7 +50,11 @@ public class TokenManager {
             long userId, Date expiration) throws IOException, GeneralSecurityException, StorageException {
         Data data = new Data();
         data.userId = userId;
-        data.expiration = expiration;
+        if (expiration != null) {
+            data.expiration = expiration;
+        } else {
+            data.expiration = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(DEFAULT_EXPIRATION_DAYS));
+        }
         byte[] encoded = objectMapper.writeValueAsBytes(data);
         return Base64.encodeBase64URLSafeString(cryptoManager.sign(encoded));
     }

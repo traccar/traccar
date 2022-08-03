@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.api.signature.TokenManager;
 import org.traccar.mail.MailManager;
 import org.traccar.model.User;
 import org.traccar.notification.TextTemplateFormatter;
@@ -34,17 +35,19 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.UUID;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 @Path("password")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class PasswordResource extends BaseResource {
 
-    private static final String PASSWORD_RESET_TOKEN = "passwordToken";
-
     @Inject
     private MailManager mailManager;
+
+    @Inject
+    private TokenManager tokenManager;
 
     @Inject
     private TextTemplateFormatter textTemplateFormatter;
@@ -52,17 +55,14 @@ public class PasswordResource extends BaseResource {
     @Path("reset")
     @PermitAll
     @POST
-    public Response reset(@FormParam("email") String email) throws StorageException, MessagingException {
+    public Response reset(@FormParam("email") String email)
+            throws StorageException, MessagingException, GeneralSecurityException, IOException {
+
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("email", "email", email)));
         if (user != null) {
-            String token = UUID.randomUUID().toString().replaceAll("-", "");
-            user.set(PASSWORD_RESET_TOKEN, token);
-            storage.updateObject(user, new Request(
-                    new Columns.Include("attributes"), new Condition.Equals("id", "id")));
-
             var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
-            velocityContext.put("token", token);
+            velocityContext.put("token", tokenManager.generateToken(user.getId(), null));
             var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "passwordReset", "full");
             mailManager.sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
         }
@@ -73,15 +73,16 @@ public class PasswordResource extends BaseResource {
     @PermitAll
     @POST
     public Response update(
-            @FormParam("token") String token, @FormParam("password") String password) throws StorageException {
-        User user = storage.getObjects(User.class, new Request(new Columns.All())).stream()
-                .filter(it -> token.equals(it.getString(PASSWORD_RESET_TOKEN)))
-                .findFirst().orElse(null);
+            @FormParam("token") String token, @FormParam("password") String password)
+            throws StorageException, GeneralSecurityException, IOException {
+
+        long userId = tokenManager.verifyToken(token);
+        User user = storage.getObject(User.class, new Request(
+                new Columns.All(), new Condition.Equals("id", "id", userId)));
         if (user != null) {
-            user.getAttributes().remove(PASSWORD_RESET_TOKEN);
             user.setPassword(password);
             storage.updateObject(user, new Request(
-                    new Columns.Include("attributes", "hashedPassword", "salt"), new Condition.Equals("id", "id")));
+                    new Columns.Include("hashedPassword", "salt"), new Condition.Equals("id", "id")));
             return Response.ok().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
