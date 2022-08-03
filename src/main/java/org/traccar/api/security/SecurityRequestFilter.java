@@ -33,8 +33,10 @@ import javax.ws.rs.container.ResourceInfo;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 
 public class SecurityRequestFilter implements ContainerRequestFilter {
 
@@ -94,7 +96,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                         statisticsManager.registerRequest(user.getId());
                         securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
                     }
-                } catch (StorageException e) {
+                } catch (StorageException | GeneralSecurityException | IOException e) {
                     throw new WebApplicationException(e);
                 }
 

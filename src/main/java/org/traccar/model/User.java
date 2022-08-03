@@ -208,23 +208,6 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         this.deviceReadonly = deviceReadonly;
     }
 
-    private String token;
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        if (token != null && !token.isEmpty()) {
-            if (!token.matches("^[a-zA-Z0-9-]{16,}$")) {
-                throw new IllegalArgumentException("Illegal token");
-            }
-            this.token = token;
-        } else {
-            this.token = null;
-        }
-    }
-
     private boolean limitCommands;
 
     @Override

@@ -15,7 +15,6 @@
  */
 package org.traccar.api.signature;
 
-import org.traccar.helper.DataConverter;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -46,28 +45,32 @@ public class CryptoManager {
         this.storage = storage;
     }
 
-    public String sign(String data) throws GeneralSecurityException, StorageException {
+    public byte[] sign(byte[] data) throws GeneralSecurityException, StorageException {
         if (privateKey == null) {
             initializeKeys();
         }
         Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initSign(privateKey);
-        signature.update(data.getBytes());
-        return data + '.' + DataConverter.printBase64(signature.sign());
+        signature.update(data);
+        byte[] block = signature.sign();
+        byte[] combined = new byte[1 + block.length + data.length];
+        combined[0] = (byte) block.length;
+        System.arraycopy(block, 0, combined, 1, block.length);
+        System.arraycopy(data, 0, combined, 1 + block.length, data.length);
+        return combined;
     }
 
-    public String verify(String data) throws GeneralSecurityException, StorageException {
+    public byte[] verify(byte[] data) throws GeneralSecurityException, StorageException {
         if (publicKey == null) {
             initializeKeys();
         }
         Signature signature = Signature.getInstance("SHA256withECDSA");
         signature.initVerify(publicKey);
-
-        int delimiter = data.lastIndexOf('.');
-        String originalData = data.substring(0, delimiter);
-
-        signature.update(originalData.getBytes());
-        if (!signature.verify(DataConverter.parseBase64(data.substring(delimiter + 1)))) {
+        int length = data[0];
+        byte[] originalData = new byte[data.length - 1 - length];
+        System.arraycopy(data, 1 + length, originalData, 0, originalData.length);
+        signature.update(originalData);
+        if (!signature.verify(data, 1, length)) {
             throw new SecurityException("Invalid signature");
         }
         return originalData;

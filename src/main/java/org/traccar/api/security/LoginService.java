@@ -15,6 +15,7 @@
  */
 package org.traccar.api.security;
 
+import org.traccar.api.signature.TokenManager;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
@@ -27,29 +28,35 @@ import org.traccar.storage.query.Request;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 public class LoginService {
 
     private final Storage storage;
+    private final TokenManager tokenManager;
     private final LdapProvider ldapProvider;
 
     private final String serviceAccountToken;
     private final boolean forceLdap;
 
     @Inject
-    public LoginService(Config config, Storage storage, @Nullable LdapProvider ldapProvider) {
+    public LoginService(
+            Config config, Storage storage, TokenManager tokenManager, @Nullable LdapProvider ldapProvider) {
         this.storage = storage;
+        this.tokenManager = tokenManager;
         this.ldapProvider = ldapProvider;
         serviceAccountToken = config.getString(Keys.WEB_SERVICE_ACCOUNT_TOKEN);
         forceLdap = config.getBoolean(Keys.LDAP_FORCE);
     }
 
-    public User login(String token) throws StorageException {
+    public User login(String token) throws StorageException, GeneralSecurityException, IOException {
         if (serviceAccountToken != null && serviceAccountToken.equals(token)) {
             return new ServiceAccountUser();
         }
+        long userId = tokenManager.verifyToken(token);
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("token", "token", token)));
+                new Columns.All(), new Condition.Equals("id", "id", userId)));
         if (user != null) {
             checkUserEnabled(user);
         }

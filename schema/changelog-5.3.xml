@@ -32,6 +32,8 @@
       </column>
     </createTable>
 
+    <dropColumn tableName="tc_users" columnName="token" />
+
   </changeSet>
 
 </databaseChangeLog>
