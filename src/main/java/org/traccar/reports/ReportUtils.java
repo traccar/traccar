@@ -53,6 +53,8 @@ import java.util.TimeZone;
 
 public final class ReportUtils {
 
+    private static double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
+
     private ReportUtils() {
     }
 
@@ -170,8 +172,6 @@ public final class ReportUtils {
 
     private static TripReport calculateTrip(
             ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
-        double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
-
         Position startTrip = positions.get(startIndex);
         Position endTrip = positions.get(endIndex);
 
@@ -244,8 +244,6 @@ public final class ReportUtils {
 
     private static StopReport calculateStop(
             ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
-        double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
-
         Position startStop = positions.get(startIndex);
         Position endStop = positions.get(endIndex);
 
