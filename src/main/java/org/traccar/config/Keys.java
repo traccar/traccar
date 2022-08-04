@@ -310,6 +310,15 @@ public final class Keys {
             0.0);
 
     /**
+     * Fuel increase threshold value. When fuel level increases from one position to another for more the value, an
+     * event is generated.
+     */
+    public static final ConfigKey<Double> EVENT_FUEL_INCREASE_THRESHOLD = new DoubleConfigKey(
+            "fuelIncreaseThreshold",
+            List.of(KeyType.SERVER, KeyType.DEVICE),
+            0.0);
+
+    /**
      * Speed limit value in knots.
      */
     public static final ConfigKey<Double> EVENT_OVERSPEED_LIMIT = new DoubleConfigKey(
