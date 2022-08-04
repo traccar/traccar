@@ -49,11 +49,11 @@ public class Position extends Message {
     public static final String KEY_VIDEO = "video";
     public static final String KEY_AUDIO = "audio";
 
-    // The units for the below four KEYs currently vary.
+    // The units for the below six KEYs currently vary.
     // The preferred units of measure are specified in the comment for each.
-    public static final String KEY_POWER = "power"; // volts
-    public static final String KEY_BATTERY = "battery"; // volts
-    public static final String KEY_BATTERY_LEVEL = "batteryLevel"; // percentage
+    public static final String KEY_POWER = "power"; // volts (external/vehicle power)
+    public static final String KEY_BATTERY = "battery"; // volts (internal/device battery)
+    public static final String KEY_BATTERY_LEVEL = "batteryLevel"; // percentage (internal/device battery)
     public static final String KEY_FUEL_LEVEL = "fuel"; // liters
     public static final String KEY_FUEL_USED = "fuelUsed"; // liters
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
@@ -113,8 +113,8 @@ public class Position extends Message {
     public static final String ALARM_LOW_SPEED = "lowspeed";
     public static final String ALARM_OVERSPEED = "overspeed";
     public static final String ALARM_FALL_DOWN = "fallDown";
-    public static final String ALARM_LOW_POWER = "lowPower";
-    public static final String ALARM_LOW_BATTERY = "lowBattery";
+    public static final String ALARM_LOW_POWER = "lowPower"; // external/vehicle power
+    public static final String ALARM_LOW_BATTERY = "lowBattery"; // internal/device battery
     public static final String ALARM_FAULT = "fault";
     public static final String ALARM_POWER_OFF = "powerOff";
     public static final String ALARM_POWER_ON = "powerOn";

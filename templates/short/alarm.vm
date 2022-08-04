@@ -1,2 +1,23 @@
 #set($subject = "$device.name: alarm!")
-$device.name alarm: $position.getString("alarm") at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)
+#{if} ($position.getString("alarm") == "lowBattery")
+    #set($batteryPercentage = $position.getString('batteryLevel'))
+    #set($batteryVoltage = $position.getString('battery'))
+    #{if} ($batteryPercentage || $batteryVoltage)
+        #set($batteryInfo = " (${batteryPercentage}%${batteryVoltage}V)")
+    #{else}
+        #set($batteryInfo = "")
+    #{end}
+#{else}
+    #set($batteryInfo = "")
+#{end}
+#{if} ($position.getString("alarm") == "lowPower")
+    #set($powerVoltage = $position.getString('power'))
+    #{if} (${powerVoltage})
+        #set($powerInfo = $numberTool.format(" (0.0V)", $powerVoltage))
+    #{else}
+        #set($powerInfo = "")
+    #{end}
+#{else}
+    #set($powerInfo = "")
+#{end}
+$device.name alarm: $position.getString("alarm")$batteryInfo$powerInfo at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)
