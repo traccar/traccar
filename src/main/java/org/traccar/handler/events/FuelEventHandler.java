@@ -29,12 +29,12 @@ import java.util.Collections;
 import java.util.Map;
 
 @ChannelHandler.Sharable
-public class FuelDropEventHandler extends BaseEventHandler {
+public class FuelEventHandler extends BaseEventHandler {
 
     private final CacheManager cacheManager;
 
     @Inject
-    public FuelDropEventHandler(CacheManager cacheManager) {
+    public FuelEventHandler(CacheManager cacheManager) {
         this.cacheManager = cacheManager;
     }
 
