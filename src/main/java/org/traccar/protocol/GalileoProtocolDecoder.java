@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -229,7 +230,11 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         int header = buf.readUnsignedByte();
         if (header == 0x01) {
-            return decodePositions(channel, remoteAddress, buf);
+            if (buf.getUnsignedMedium(buf.readerIndex() + 2) == 0x01001c) {
+                return decodeIridiumPosition(channel, remoteAddress, buf);
+            } else {
+                return decodePositions(channel, remoteAddress, buf);
+            }
         } else if (header == 0x07) {
             return decodePhoto(channel, remoteAddress, buf);
         }
@@ -237,7 +242,38 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Object decodePositions(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+    private Position decodeIridiumPosition(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        buf.readUnsignedShortLE(); // length
+
+        buf.skipBytes(3); // identification header
+        buf.readUnsignedIntLE(); // index
+
+        DeviceSession deviceSession = getDeviceSession(
+                channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII));
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        buf.readUnsignedByte(); // session status
+        buf.skipBytes(4); // reserved
+        position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
+
+        buf.skipBytes(3); // coordinates header
+        int flags = buf.readUnsignedByte();
+        double latitude = buf.readUnsignedByte() + buf.readUnsignedShortLE() / 60000.0;
+        double longitude = buf.readUnsignedByte() + buf.readUnsignedShortLE() / 60000.0;
+        position.setLatitude(BitUtil.check(flags, 1) ? -latitude : latitude);
+        position.setLongitude(BitUtil.check(flags, 0) ? -longitude : longitude);
+        position.setAccuracy(buf.readUnsignedIntLE());
+
+        return position;
+    }
+
+    private List<Position> decodePositions(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         int endIndex = (buf.readUnsignedShortLE() & 0x7fff) + buf.readerIndex();
 
