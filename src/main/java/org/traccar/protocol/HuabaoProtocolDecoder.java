@@ -787,17 +787,15 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() >= ignoreLastNBytes) {
 
-            Map<String, String> dataItem = new HashMap<>();
-
             Integer canId = buf.readInt();
 
-            dataItem.put("channel", BitUtil.check(canId, 31) ? "CAN2" : "CAN1");
-            dataItem.put("frame", BitUtil.check(canId, 30) ? "extended" : "standard");
-            dataItem.put("collectWay", BitUtil.check(canId, 29) ? "average" : "original");
-            dataItem.put("canId", Integer.toHexString(canId & 0x1fffffff));  // make it 29 bit
-            dataItem.put("canData", ByteBufUtil.hexDump(buf.readSlice(8)));
-
-            data.add(dataItem);
+            data.add(Map.of(
+                "channel", BitUtil.check(canId, 31) ? "CAN2" : "CAN1",
+                "frame", BitUtil.check(canId, 30) ? "extended" : "standard",
+                "collectWay", BitUtil.check(canId, 29) ? "average" : "original",
+                "canId", Integer.toHexString(canId & 0x1fffffff),  // make it 29 bit
+                "canData", ByteBufUtil.hexDump(buf.readSlice(8))
+            ));
 
             if (data.size() + 1 < maxFramesPerPosition && buf.readableBytes() >= ignoreLastNBytes) {
                 continue;
