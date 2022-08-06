@@ -42,12 +42,14 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    public static final int FLAG = 0xfaaf;
+    public static final int MSG_COMMAND = 0x07;
     public static final int MSG_POSITION = 0x14;
 
     private void sendResponse(Channel channel, int type, int index, ByteBuf imei) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
-            response.writeShort(Xexun2ProtocolEncoder.FLAG);
+            response.writeShort(FLAG);
 
             response.writeShort(type);
             response.writeShort(index);
@@ -56,7 +58,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(0xfffe); // checksum
             response.writeByte(1); // response
 
-            response.writeShort(Xexun2ProtocolEncoder.FLAG);
+            response.writeShort(FLAG);
 
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
@@ -99,13 +101,13 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int payloadSize = buf.readUnsignedShort() & 0x03ff;
-        int checksum = buf.readUnsignedShort(); // checksum
+        int checksum = buf.readUnsignedShort();
 
-        if (checksum != Checksum.udp(buf.nioBuffer(buf.readerIndex(), payloadSize))) {
+        if (checksum != Checksum.ip(buf.nioBuffer(buf.readerIndex(), payloadSize))) {
             return null;
         }
 
-        if (type != Xexun2ProtocolEncoder.MSG_COMMAND) {
+        if (type != MSG_COMMAND) {
             sendResponse(channel, type, index, imei);
         }
 

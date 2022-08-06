@@ -35,6 +35,7 @@ public class Xexun2Protocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new Xexun2FrameEncoder());
                 pipeline.addLast(new Xexun2FrameDecoder());
                 pipeline.addLast(new Xexun2ProtocolDecoder(Xexun2Protocol.this));
                 pipeline.addLast(new Xexun2ProtocolEncoder(Xexun2Protocol.this));

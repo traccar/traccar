@@ -23,61 +23,29 @@ import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
 import org.traccar.Protocol;
 
+import java.nio.charset.StandardCharsets;
+
 public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
 
     public Xexun2ProtocolEncoder(Protocol protocol) {
         super(protocol);
     }
 
-    public static final int FLAG = 0xfaaf;
-    public static final int MSG_COMMAND = 0x07;
-
-    private static ByteBuf encodeFrame(ByteBuf buf) {
-        int bufLength = buf.readableBytes();
-        if (bufLength < 5) {
-            return null;
-        }
-
-        ByteBuf result = Unpooled.buffer();
-
-        result.writeBytes(buf.readBytes(2));
-
-        while (buf.readerIndex() < bufLength - 2) {
-            int b = buf.readUnsignedByte();
-            if (b == 0xfa && buf.isReadable() && buf.getUnsignedByte(buf.readerIndex()) == 0xaf) {
-                buf.readUnsignedByte();
-                result.writeByte(0xfb);
-                result.writeByte(0xbf);
-                result.writeByte(0x01);
-            } else if (b == 0xfb && buf.isReadable() && buf.getUnsignedByte(buf.readerIndex()) == 0xbf) {
-                buf.readUnsignedByte();
-                result.writeByte(0xfb);
-                result.writeByte(0xbf);
-                result.writeByte(0x02);
-            } else {
-                result.writeByte(b);
-            }
-        }
-        result.writeBytes(buf.readBytes(2));
-
-        return result;
-    }
-
     private static ByteBuf encodeContent(String uniqueId, String content) {
         ByteBuf buf = Unpooled.buffer();
 
-        ByteBuf message = Unpooled.copiedBuffer(content.getBytes());
+        ByteBuf message = Unpooled.copiedBuffer(content.getBytes(StandardCharsets.US_ASCII));
 
-        buf.writeShort(FLAG);
-        buf.writeShort(MSG_COMMAND);
+        buf.writeShort(Xexun2ProtocolDecoder.FLAG);
+        buf.writeShort(Xexun2ProtocolDecoder.MSG_COMMAND);
         buf.writeShort(1); // index
         buf.writeBytes(DataConverter.parseHex(uniqueId + "0"));
         buf.writeShort(message.capacity());
-        buf.writeShort(Checksum.udp(message.nioBuffer()));
+        buf.writeShort(Checksum.ip(message.nioBuffer()));
         buf.writeBytes(message);
-        buf.writeShort(FLAG);
+        buf.writeShort(Xexun2ProtocolDecoder.FLAG);
 
-        return encodeFrame(buf);
+        return buf;
     }
 
     @Override
