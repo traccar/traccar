@@ -106,7 +106,8 @@ public class WebServer implements LifecycleObject {
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
                 Path index = Paths.get(config.getString(Keys.WEB_PATH), "index.html");
-                if (code == HttpStatus.NOT_FOUND_404 && Files.exists(index)) {
+                if (code == HttpStatus.NOT_FOUND_404
+                        && !request.getPathInfo().startsWith("/api/") && Files.exists(index)) {
                     writer.write(Files.readString(index));
                 } else {
                     writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
