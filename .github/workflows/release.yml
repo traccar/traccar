@@ -21,8 +21,8 @@ jobs:
         working-directory: ./traccar-web
       - uses: actions/setup-java@v3
         with:
-          distribution: zulu
-          java-version: 11
+          distribution: temurin
+          java-version: 11.0.15
           cache: gradle
       - run: ./gradlew build
       - uses: actions/setup-node@v3
