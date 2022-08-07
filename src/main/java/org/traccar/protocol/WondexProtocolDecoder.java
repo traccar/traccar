@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -74,6 +74,9 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
                 || buf.toString(StandardCharsets.US_ASCII).startsWith("$MSG:")) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -89,12 +92,12 @@ public class WondexProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            Position position = new Position(getProtocolName());
-
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
             if (deviceSession == null) {
                 return null;
             }
+
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.setTime(parser.nextDateTime());
