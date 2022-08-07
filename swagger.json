@@ -2718,9 +2718,6 @@
           "poiLayer": {
             "type": "string"
           },
-          "token": {
-            "type": "string"
-          },
           "attributes": {
             "type": "object",
             "properties": {}
