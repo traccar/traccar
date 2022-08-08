@@ -32,6 +32,8 @@
       </column>
     </createTable>
 
+    <dropIndex indexName="idx_users_token" tableName="tc_users" />
+
     <dropColumn tableName="tc_users" columnName="token" />
 
   </changeSet>
