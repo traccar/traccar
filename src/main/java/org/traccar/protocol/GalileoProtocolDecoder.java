@@ -262,7 +262,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         buf.skipBytes(4); // reserved
         position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
 
-        buf.skipBytes(3); // coordinates header
+        buf.skipBytes(2); // coordinates header
         int flags = buf.readUnsignedByte();
         double latitude = buf.readUnsignedByte() + buf.readUnsignedShortLE() / 60000.0;
         double longitude = buf.readUnsignedByte() + buf.readUnsignedShortLE() / 60000.0;
