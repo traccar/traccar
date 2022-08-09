@@ -16,6 +16,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          fetch-depth: 0
           submodules: true
       - run: git checkout ${{ github.ref_name }}
         working-directory: ./traccar-web
