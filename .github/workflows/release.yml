@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-java@v3
         with:
           distribution: temurin
-          java-version: 11.0.15
+          java-version: 17
           cache: gradle
       - run: ./gradlew build
       - uses: actions/setup-node@v3
@@ -47,9 +47,9 @@ jobs:
         working-directory: ./setup
         run: |
           wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
-          wget -q https://github.com/ojdkbuild/ojdkbuild/releases/download/java-11-openjdk-11.0.15.9-1/java-11-openjdk-11.0.15.9-1.windows.ojdkbuild.x86_64.zip
-          wget -q https://github.com/ojdkbuild/contrib_jdk11u-ci/releases/download/jdk-11.0.15%2B10/jdk-11.0.15-ojdkbuild-linux-x64.zip
-          wget -q https://github.com/ojdkbuild/contrib_jdk11u-arm32-ci/releases/download/jdk-11.0.15%2B10/jdk-11.0.15-ojdkbuild-linux-armhf.zip
+          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4+8/OpenJDK17U-jdk_x64_windows_hotspot_17.0.4_8.zip
+          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4+8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.4_8.tar.gz
+          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4+8/OpenJDK17U-jdk_arm_linux_hotspot_17.0.4_8.tar.gz
           ./package.sh ${{ github.event.inputs.version }}
       - name: Upload installers
         working-directory: ./setup
