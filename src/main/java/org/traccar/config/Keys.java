@@ -1168,7 +1168,6 @@ public final class Keys {
      * Filter records by Maximum Speed value in knots. Can be used to filter jumps to far locations even if Position
      * appears valid or if Position `speed` field reported by the device is also within limits. Calculates speed from
      * the distance to the previous position and the elapsed time.
-     *
      * Tip: Shouldn't be too low. Start testing with values at about 25000.
      */
     public static final ConfigKey<Integer> FILTER_MAX_SPEED = new IntegerConfigKey(
@@ -1185,7 +1184,6 @@ public final class Keys {
     /**
      * If false, the server expects all locations to come sequentially (for each device). Filter checks for duplicates,
      * distance, speed, or time period only against the location that was last received by server.
-     *
      * If true, the server expects locations to come at random order (since tracking device might go offline).
      * Filter checks for duplicates, distance, speed, or time period against the preceding Position's.
      * Important: setting to true can cause potential performance issues.
@@ -1229,7 +1227,6 @@ public final class Keys {
     /**
      * List of protocols to enable. If not specified, Traccar enabled all protocols that have port numbers listed.
      * The value is a comma-separated list of protocol names.
-     *
      * Example value: teltonika,osmand
      */
     public static final ConfigKey<String> PROTOCOLS_ENABLE = new StringConfigKey(
@@ -1522,7 +1519,6 @@ public final class Keys {
 
     /**
      * Public URL for the web app. Used for notification and report link.
-     *
      * If not provided, Traccar will attempt to get a URL from the server IP address, but it might be a local address.
      */
     public static final ConfigKey<String> WEB_URL = new StringConfigKey(
