@@ -318,16 +318,18 @@ public class MainModule extends AbstractModule {
         properties.setProperty("file.resource.loader.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
         properties.setProperty("runtime.log.logsystem.class", NullLogChute.class.getName());
 
-        String address;
-        try {
-            address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
-        } catch (UnknownHostException e) {
-            address = "localhost";
+        if (config.hasKey(Keys.WEB_URL)) {
+            properties.setProperty("web.url", config.getString(Keys.WEB_URL).replaceAll("/$", ""));
+        } else {
+            String address;
+            try {
+                address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
+            } catch (UnknownHostException e) {
+                address = "localhost";
+            }
+            String url = URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
+            properties.setProperty("web.url", url);
         }
-
-        String url = config.getString(
-                Keys.WEB_URL, URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", ""));
-        properties.setProperty("web.url", url);
 
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.init(properties);
