@@ -61,14 +61,14 @@ fi
 if [ $PLATFORM = "all" -o $PLATFORM = "windows-64" ]; then
   check_requirement "Inno Extractor" "which innoextract" "Missing innoextract binary"
   check_requirement "Inno Setup" "ls i*setup-*.exe" "Missing Inno Setup (http://www.jrsoftware.org/isdl.php)"
-  check_requirement "Windows 64 Java" "ls OpenJDK*x64_windows*.zip" "Missing Windows 64 JDK (https://adoptium.net/)"
+  check_requirement "Windows 64 Java" "ls OpenJDK*64_windows*.zip" "Missing Windows 64 JDK (https://adoptium.net/)"
   check_requirement "Wine" "which wine" "Missing wine binary"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" -o $PLATFORM = "linux-arm" ]; then
   check_requirement "Makeself" "which makeself" "Missing makeself binary"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" ]; then
-  check_requirement "Linux 64 Java" "ls OpenJDK*x64_linux*.tar.gz" "Missing Linux 64 JDK (https://adoptium.net/)"
+  check_requirement "Linux 64 Java" "ls OpenJDK*64_linux*.tar.gz" "Missing Linux 64 JDK (https://adoptium.net/)"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-arm" ]; then
   check_requirement "Linux ARM Java" "ls OpenJDK*arm_linux*.tar.gz" "Missing Linux ARM JDK (https://adoptium.net/)"
@@ -119,7 +119,7 @@ package_other () {
 
 package_windows () {
   info "Building Windows 64 installer"
-  unzip -q OpenJDK*x64_windows*.zip
+  unzip -q OpenJDK*64_windows*.zip
   jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec --output out/jre
   rm -rf jdk-*
   wine app/ISCC.exe traccar.iss >/dev/null
@@ -148,7 +148,7 @@ package_linux () {
 
 package_linux_64 () {
   info "Building Linux 64 installer"
-  package_linux x64
+  package_linux 64
   ok "Created Linux 64 installer"
 }
 
