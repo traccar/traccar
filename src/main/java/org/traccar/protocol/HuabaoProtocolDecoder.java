@@ -31,7 +31,6 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
-import org.traccar.model.Event;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
