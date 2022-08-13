@@ -260,7 +260,7 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
             MqttSubscribeMessage message = (MqttSubscribeMessage) msg;
 
             MqttMessage response = MqttMessageBuilders.subAck()
-                    .packetId((short) message.variableHeader().messageId())
+                    .packetId(message.variableHeader().messageId())
                     .build();
 
             if (channel != null) {
