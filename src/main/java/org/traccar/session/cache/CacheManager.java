@@ -20,6 +20,7 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
@@ -28,6 +29,7 @@ import org.traccar.model.GroupedModel;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
+import org.traccar.model.ScheduledModel;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
@@ -218,6 +220,10 @@ public class CacheManager implements BroadcastInterface {
             if (((GroupedModel) before).getGroupId() != ((GroupedModel) object).getGroupId()) {
                 invalidate = true;
             }
+        } else if (object instanceof ScheduledModel) {
+            if (((ScheduledModel) before).getCalendarId() != ((ScheduledModel) object).getCalendarId()) {
+                invalidate = true;
+            }
         }
         if (invalidate) {
             invalidate(object.getClass(), object.getId());
@@ -294,7 +300,19 @@ public class CacheManager implements BroadcastInterface {
                 var objects = storage.getObjects(clazz, new Request(
                         new Columns.All(), new Condition.Permission(Device.class, deviceId, clazz)));
                 links.put(clazz, objects.stream().map(BaseModel::getId).collect(Collectors.toSet()));
-                objects.forEach(object -> addObject(deviceId, object));
+                for (var object : objects) {
+                    addObject(deviceId, object);
+                    if (object instanceof ScheduledModel) {
+                        var scheduled = (ScheduledModel) object;
+                        if (scheduled.getCalendarId() > 0) {
+                            var calendar = storage.getObject(Calendar.class, new Request(
+                                    new Columns.All(), new Condition.Equals("id", "id", scheduled.getCalendarId())));
+                            links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>())
+                                    .add(calendar.getId());
+                            addObject(deviceId, calendar);
+                        }
+                    }
+                }
             }
 
             var users = storage.getObjects(User.class, new Request(
@@ -303,13 +321,22 @@ public class CacheManager implements BroadcastInterface {
             for (var user : users) {
                 addObject(deviceId, user);
                 var notifications = storage.getObjects(Notification.class, new Request(
-                        new Columns.All(), new Condition.Permission(User.class, user.getId(), Notification.class)));
-                notifications.stream()
+                        new Columns.All(),
+                        new Condition.Permission(User.class, user.getId(), Notification.class))).stream()
                         .filter(Notification::getAlways)
-                        .forEach(object -> {
-                            links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>()).add(object.getId());
-                            addObject(deviceId, object);
-                        });
+                        .collect(Collectors.toList());
+                for (var notification : notifications) {
+                    links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>())
+                            .add(notification.getId());
+                    addObject(deviceId, notification);
+                    if (notification.getCalendarId() > 0) {
+                        var calendar = storage.getObject(Calendar.class, new Request(
+                                new Columns.All(), new Condition.Equals("id", "id", notification.getCalendarId())));
+                        links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>())
+                                .add(calendar.getId());
+                        addObject(deviceId, calendar);
+                    }
+                }
             }
 
             deviceLinks.put(deviceId, links);
