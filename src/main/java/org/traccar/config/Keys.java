@@ -1036,6 +1036,20 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Gotify notification url.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_GOTIFY_URL = new StringConfigKey(
+            "notificator.gotify.url",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Gotify notification token.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_GOTIFY_TOKEN = new StringConfigKey(
+            "notificator.gotify.token",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
      * By default there is no limit.
      */
