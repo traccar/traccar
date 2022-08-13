@@ -44,7 +44,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeByte(1 + 1 + 4 + content.length() + 2 + 2 + (language ? 2 : 0)); // message length
 
-        buf.writeByte(0x80); // message type
+        buf.writeByte(Gt06ProtocolDecoder.MSG_COMMAND_0);
 
         buf.writeByte(4 + content.length()); // command length
         buf.writeInt(0);
