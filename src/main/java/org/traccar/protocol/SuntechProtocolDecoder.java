@@ -570,7 +570,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (BitUtil.check(mask, 17)) {
-                position.set(Position.KEY_INPUT, Integer.parseInt(values[index++]));
+                int input = Integer.parseInt(values[index++]);
+                position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
+                position.set(Position.KEY_INPUT, input);
             }
 
             if (BitUtil.check(mask, 18)) {
