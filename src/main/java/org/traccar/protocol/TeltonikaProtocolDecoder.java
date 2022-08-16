@@ -244,7 +244,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 p.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
             }
         });
-        register(80, null, (p, b) -> p.set("dataMode", b.readUnsignedByte()));
+        register(80, fmbXXX, (p, b) -> p.set("dataMode", b.readUnsignedByte()));
         register(90, null, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedShort()));
         register(115, fmbXXX, (p, b) -> p.set(Position.KEY_COOLANT_TEMP, b.readShort() * 0.1));
         register(179, null, (p, b) -> p.set(Position.PREFIX_OUT + 1, b.readUnsignedByte() > 0));
