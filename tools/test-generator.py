@@ -74,7 +74,7 @@ while True:
     speed = device_speed if (index % len(points)) != 0 else 0
     alarm = (index % 10) == 0
     battery = random.randint(0, 100)
-    ignition = (index % len(points)) != 0
+    ignition = (index / 10 % 2) != 0
     accuracy = 100 if (index % 10) == 0 else 0
     rpm = random.randint(500, 4000)
     fuel = random.randint(0, 80)
