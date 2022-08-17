@@ -490,7 +490,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
                     break;
                 case 0xD4:
-                case 0xFE:
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     break;
                 case 0xD5:
@@ -560,6 +559,43 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    break;
+                case 0xFE:
+                    if (length == 1) {
+                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    } else {
+                        int mark = buf.readUnsignedByte();
+                        if (mark == 0x7C) {
+                            while (buf.readerIndex() < endIndex) {
+                                int extendedType = buf.readUnsignedByte();
+                                int extendedLength = buf.readUnsignedByte();
+                                switch (extendedType) {
+                                    case 0x01:
+                                        long alarms = buf.readUnsignedInt();
+                                        if (BitUtil.check(alarms, 0)) {
+                                            position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                                        }
+                                        if (BitUtil.check(alarms, 1)) {
+                                            position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                                        }
+                                        if (BitUtil.check(alarms, 2)) {
+                                            position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                                        }
+                                        if (BitUtil.check(alarms, 3)) {
+                                            position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                                        }
+                                        if (BitUtil.check(alarms, 4)) {
+                                            position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                                        }
+                                        break;
+                                    default:
+                                        buf.skipBytes(extendedLength);
+                                        break;
+                                }
+                            }
+                        }
+                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    }
                     break;
                 default:
                     break;
