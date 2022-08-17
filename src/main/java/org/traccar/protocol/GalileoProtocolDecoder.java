@@ -20,15 +20,16 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.helper.BitUtil;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitBuffer;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,6 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
@@ -242,6 +244,27 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private void decodeMinimalDataSet(Position position, ByteBuf buf) {
+        BitBuffer bits = new BitBuffer(buf.readSlice(10));
+        bits.readUnsigned(1);
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.DAY_OF_YEAR, 1);
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
+        calendar.add(Calendar.SECOND, bits.readUnsigned(25));
+        position.setTime(calendar.getTime());
+
+        position.setValid(bits.readUnsigned(1) == 0);
+        position.setLongitude(360 * bits.readUnsigned(22) / 4194304.0 - 180);
+        position.setLatitude(360 * bits.readUnsigned(21) / 2097152.0 - 90);
+        if (bits.readUnsigned(1) > 0) {
+            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+        }
+    }
+
     private Position decodeIridiumPosition(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         buf.readUnsignedShortLE(); // length
@@ -260,15 +283,12 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // session status
         buf.skipBytes(4); // reserved
-        position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
+        buf.readUnsignedIntLE(); // date and time
 
-        buf.skipBytes(2); // coordinates header
-        int flags = buf.readUnsignedByte();
-        double latitude = buf.readUnsignedByte() + buf.readUnsignedShortLE() / 60000.0;
-        double longitude = buf.readUnsignedByte() + buf.readUnsignedShortLE() / 60000.0;
-        position.setLatitude(BitUtil.check(flags, 1) ? -latitude : latitude);
-        position.setLongitude(BitUtil.check(flags, 0) ? -longitude : longitude);
-        position.setAccuracy(buf.readUnsignedIntLE());
+        buf.skipBytes(23); // coordinates block
+
+        buf.skipBytes(3); // data tag header
+        decodeMinimalDataSet(position, buf);
 
         return position;
     }
