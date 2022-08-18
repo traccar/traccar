@@ -15,6 +15,8 @@
  */
 package org.traccar.protocol;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 
 import io.netty.buffer.ByteBuf;
@@ -25,6 +27,7 @@ import java.net.SocketAddress;
 
 public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Gl200ProtocolDecoder.class);
     private final Gl200TextProtocolDecoder textProtocolDecoder;
     private final Gl200BinaryProtocolDecoder binaryProtocolDecoder;
 
@@ -39,7 +42,7 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
-
+        LOGGER.warn("decoding" + ((ByteBuf) msg).toString());
         if (Gl200FrameDecoder.isBinary(buf)) {
             return binaryProtocolDecoder.decode(channel, remoteAddress, msg);
         } else {
