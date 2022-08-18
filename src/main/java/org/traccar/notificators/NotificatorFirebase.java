@@ -80,6 +80,7 @@ public class NotificatorFirebase implements Notificator {
                                     .build())
                             .build())
                     .addAllTokens(registrationTokens)
+                    .putData("eventId", String.valueOf(event.getId()))
                     .build();
 
             try {
