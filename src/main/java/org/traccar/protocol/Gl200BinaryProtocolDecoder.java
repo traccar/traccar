@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
@@ -36,8 +35,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
-
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Gl200BinaryProtocolDecoder.class);
 
     public Gl200BinaryProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -390,7 +387,7 @@ public class Gl200BinaryProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
-        LOGGER.warn("decoding" + buf.toString());
+
         switch (buf.readSlice(4).toString(StandardCharsets.US_ASCII)) {
             case "+RSP":
                 return decodeLocation(channel, remoteAddress, buf);
