@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.DeviceSession;
@@ -45,6 +46,7 @@ import java.util.regex.Pattern;
 
 public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(Gl200TextProtocolDecoder.class);
     private final boolean ignoreFixTime;
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
@@ -1224,7 +1226,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = ((ByteBuf) msg).toString(StandardCharsets.US_ASCII);
-
+        LOGGER.warn("decoding " + sentence);
         int typeIndex = sentence.indexOf(":GT");
         if (typeIndex < 0) {
             return null;
