@@ -93,7 +93,7 @@ public class ReportUtils {
     public <T extends BaseModel> T getObject(
             long userId, Class<T> clazz, long objectId) throws StorageException, SecurityException {
         return storage.getObject(clazz, new Request(
-                new Columns.Include("id"),
+                new Columns.All(),
                 new Condition.And(
                         new Condition.Equals("id", "id", objectId),
                         new Condition.Permission(User.class, userId, clazz))));
