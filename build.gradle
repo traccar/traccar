@@ -83,7 +83,9 @@ dependencies {
     implementation "com.sun.xml.bind:jaxb-impl:3.0.2"
     implementation "javax.activation:activation:1.1.1"
     implementation "com.amazonaws:aws-java-sdk-sns:1.12.141"
-    implementation "com.google.firebase:firebase-admin:9.0.0"
+    implementation ("com.google.firebase:firebase-admin:9.0.0") {
+        exclude group: 'com.google.cloud', module: 'google-cloud-firestore'
+    }
     testImplementation "junit:junit:4.13.2"
     testImplementation "org.mockito:mockito-core:3.+"
 }
