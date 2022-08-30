@@ -97,7 +97,15 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     @Path("send")
     public Response send(Command entity) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
-        permissionsService.checkRestriction(getUserId(), UserRestrictions::getLimitCommands);
+        if (entity.getId() > 0) {
+            permissionsService.checkPermission(Command.class, getUserId(), entity.getId());
+            long deviceId = entity.getDeviceId();
+            entity = storage.getObject(baseClass, new Request(
+                    new Columns.All(), new Condition.Equals("id", "id", entity.getId())));
+            entity.setDeviceId(deviceId);
+        } else {
+            permissionsService.checkRestriction(getUserId(), UserRestrictions::getLimitCommands);
+        }
         permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
         if (!commandsManager.sendCommand(entity)) {
             return Response.accepted(entity).build();
