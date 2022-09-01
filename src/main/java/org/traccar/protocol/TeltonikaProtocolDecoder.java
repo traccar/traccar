@@ -45,6 +45,9 @@ import java.util.function.BiConsumer;
 public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     private static final int IMAGE_PACKET_MAX = 2048;
+    private static final int GNSS_IN_SLEEP_STATE = 3;
+    private static final int SLEEP_GPS = 1;
+    private static final int SLEEP_DEEP = 2;
 
     private static final Map<Integer, Map<Set<String>, BiConsumer<Position, ByteBuf>>> PARAMETERS = new HashMap<>();
 
@@ -543,7 +546,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
 
         decodeNetwork(position);
-
+        checkGPSStatus(position);
     }
 
     private List<Position> parseData(
@@ -644,4 +647,22 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
+    private void checkGPSStatus(Position position) {
+        // checks if unit is in gps sleep mode, if so consider coordinates as still valid
+        long sat = position.getInteger(Position.KEY_SATELLITES);
+        long gpsStatus = position.getInteger(Position.KEY_GPS_STATUS);
+        long sleep = position.getInteger(Position.KEY_SLEEP); // returns 0 if not found
+
+        // possible values for GNSS Status AVL_ID = 69 - https://wiki.teltonika.lt/view/FMB_AVL_ID
+        // mark positions in GNSS sleep mode as valid
+        if (!position.getValid() && sat == 0
+                &&
+                (gpsStatus == GNSS_IN_SLEEP_STATE
+                        || sleep == SLEEP_GPS
+                        || sleep == SLEEP_DEEP
+                )
+        ) {
+            position.setValid(true);
+        }
+    }
 }
