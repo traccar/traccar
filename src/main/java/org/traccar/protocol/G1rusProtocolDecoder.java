@@ -63,6 +63,8 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
     private static final int G1RUS_GPS_VDOP_MASK = 0b01000000;
     private static final int G1RUS_GPS_STAT_MASK = 0b10000000;
 
+    private static final int G1RUS_ADC_DATA_MASK = 0b0000111111111111;
+
     private static final int G1RUS_ESCAPE_CHAR = 0x1B;
 
 
@@ -101,7 +103,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
     }
 
 
-    private short readUnsignedShortUnescaped(ByteBuf buf) {
+    private int readUnsignedShortUnescaped(ByteBuf buf) {
         byte[] shortBuf = new byte[2];
         readBytesUnescaped(buf, shortBuf);
         return Shorts.fromByteArray(shortBuf);
@@ -155,7 +157,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
 
         skipBytesUnescaped(buf, 1); /* Total length */
 
-        short subMask = readUnsignedShortUnescaped(buf);
+        int subMask = readUnsignedShortUnescaped(buf);
         if ((subMask & G1RUS_GPS_SIGN_MASK) == G1RUS_GPS_SIGN_MASK) {
             skipBytesUnescaped(buf, 1);
         }
@@ -192,8 +194,36 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
     }
 
 
-    private void decodeADCSub(ByteBuf buf, Position position) {
+    private int getADValue(int rawValue) {
+        final int AD_MIN = -10;
+        final int AD_MAX = 100;
 
+        return rawValue * (AD_MAX - AD_MIN) / 4096 + AD_MIN;
+    }
+
+
+    private void decodeADCSub(ByteBuf buf, Position position) {
+        LOGGER.info("<ADC>");
+
+        skipBytesUnescaped(buf, 1);
+
+        /* NOTE: assuming order:
+         * External battery voltage -> Backup battery voltage -> Device temperature voltage.
+         * TODO: actually check this.
+         */
+
+        int externalVoltage = readUnsignedShortUnescaped(buf) & G1RUS_ADC_DATA_MASK;
+        LOGGER.info("External voltage: " + getADValue(externalVoltage) + "V [" + externalVoltage + "]");
+
+        int backupVoltage = readUnsignedShortUnescaped(buf) & G1RUS_ADC_DATA_MASK;
+        LOGGER.info("Backup voltage: " + getADValue(backupVoltage) + "V [" + backupVoltage + "]");
+        position.set(Position.KEY_BATTERY, getADValue(backupVoltage));
+
+        int temperature = readUnsignedShortUnescaped(buf) & G1RUS_ADC_DATA_MASK;
+        LOGGER.info("Device temperature: " + getADValue(temperature) + "°C [" + temperature + "]");
+        position.set(Position.KEY_DEVICE_TEMP, getADValue(temperature));
+
+        LOGGER.info("</ADC>");
     }
 
 
@@ -209,7 +239,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = null;
         Position position = null;
 
-        short dataUploadingMask = readUnsignedShortUnescaped(buf);
+        int dataUploadingMask = readUnsignedShortUnescaped(buf);
         if ((dataUploadingMask & G1RUS_DATA_SYS_MASK) == G1RUS_DATA_SYS_MASK) {
             decodeSYSSub(buf);
         }
@@ -231,12 +261,11 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
             skipBytesUnescaped(buf, readUnsignedByteUnescaped(buf));
         }
         if ((dataUploadingMask & G1RUS_DATA_ADC_MASK) == G1RUS_DATA_ADC_MASK) {
-            /*if (deviceSession == null) {
-                return null;
-            }*/
-
-            skipBytesUnescaped(buf, readUnsignedByteUnescaped(buf));
-            // decodeADCSub(buf, position);
+            if (deviceSession == null) {
+                skipBytesUnescaped(buf, readUnsignedByteUnescaped(buf));
+            } else {
+                decodeADCSub(buf, position);
+            }
         }
         if ((dataUploadingMask & G1RUS_DATA_DTT_MASK) == G1RUS_DATA_DTT_MASK) {
             skipBytesUnescaped(buf, readUnsignedByteUnescaped(buf));
@@ -303,7 +332,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
             positions = new LinkedList<>();
 
             while (buf.readableBytes() > 5) {
-                short subPacketLength = readUnsignedShortUnescaped(buf);
+                int subPacketLength = readUnsignedShortUnescaped(buf);
                 short subPacketType = readUnsignedByteUnescaped(buf);
                 printPacketType(subPacketType);
 
