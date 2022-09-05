@@ -159,16 +159,20 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
 
         int subMask = readUnsignedShortUnescaped(buf);
         if ((subMask & G1RUS_GPS_SIGN_MASK) == G1RUS_GPS_SIGN_MASK) {
-            skipBytesUnescaped(buf, 1);
+            short signValid = readUnsignedByteUnescaped(buf);
+            LOGGER.info("Fix sign: " + ((signValid & 0b1100000) >> 5));
+            LOGGER.info("Satellite number: " + (signValid & 0b0011111));
+            position.setValid(((signValid & 0b1100000) >> 5) == 2);
+            position.set(Position.KEY_SATELLITES, signValid & 0b0011111);
         }
         if ((subMask & G1RUS_GPS_POS_MASK) == G1RUS_GPS_POS_MASK) {
-            byte[] pos_buf = new byte[4];
-            readBytesUnescaped(buf, pos_buf);
-            position.setLatitude((float) Ints.fromByteArray(pos_buf) / 1000000);
+            byte[] posBuf = new byte[4];
+            readBytesUnescaped(buf, posBuf);
+            position.setLatitude((float) Ints.fromByteArray(posBuf) / 1000000);
             LOGGER.info("Latitude: " + position.getLatitude());
 
-            readBytesUnescaped(buf, pos_buf);
-            position.setLongitude((float) Ints.fromByteArray(pos_buf) / 1000000);
+            readBytesUnescaped(buf, posBuf);
+            position.setLongitude((float) Ints.fromByteArray(posBuf) / 1000000);
             LOGGER.info("Longitude: " + position.getLongitude());
         }
         if ((subMask & G1RUS_GPS_SPD_MASK) == G1RUS_GPS_SPD_MASK) {
@@ -184,10 +188,12 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
             LOGGER.info("Altitude: " + position.getAltitude());
         }
         if ((subMask & G1RUS_GPS_HDOP_MASK) == G1RUS_GPS_HDOP_MASK) {
-            skipBytesUnescaped(buf, 2);
+            position.set(Position.KEY_HDOP, readUnsignedShortUnescaped(buf));
+            LOGGER.info("HDOP: " + position.getAttributes().get(Position.KEY_HDOP));
         }
         if ((subMask & G1RUS_GPS_VDOP_MASK) == G1RUS_GPS_VDOP_MASK) {
-            skipBytesUnescaped(buf, 2);
+            position.set(Position.KEY_VDOP, readUnsignedShortUnescaped(buf));
+            LOGGER.info("VDOP: " + position.getAttributes().get(Position.KEY_VDOP));
         }
 
         LOGGER.info("</GPS>");
@@ -311,8 +317,8 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
 
         byte[] imei = new byte[8];
         readBytesUnescaped(buf, imei, 0, 7);
-        long imei_long = Longs.fromByteArray(imei);
-        LOGGER.info("IMEI: " + imei_long);
+        long imeiLong = Longs.fromByteArray(imei);
+        LOGGER.info("IMEI: " + imeiLong);
 
         List<Position> positions = null;
 
@@ -320,7 +326,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
             return null;
         } else if ((packetType & G1RUS_TYPE_BCD_MASK) == G1RUS_TYPE_REGULAR) {
             positions = new LinkedList<>();
-            Position position = decodeRegular(channel, remoteAddress, buf, imei_long, packetType);
+            Position position = decodeRegular(channel, remoteAddress, buf, imeiLong, packetType);
             if (position != null) {
                 positions.add(position);
             }
@@ -337,7 +343,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
                 printPacketType(subPacketType);
 
                 if ((subPacketType & G1RUS_TYPE_BCD_MASK) == G1RUS_TYPE_REGULAR) {
-                    Position position = decodeRegular(channel, remoteAddress, buf, imei_long, subPacketType);
+                    Position position = decodeRegular(channel, remoteAddress, buf, imeiLong, subPacketType);
                     if (position != null) {
                         positions.add(position);
                     }
