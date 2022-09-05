@@ -1,6 +1,5 @@
 package org.traccar.protocol;
 
-import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.Shorts;
@@ -329,7 +328,6 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
         }
 
         skipBytesUnescaped(buf, 2); /* CRC */ /* TODO: actually check it */
-        // skipBytesUnescaped(buf, 1); /* Tail */
         short tail = buf.readUnsignedByte();
         if (tail == G1RUS_HEAD_TAIL) {
             LOGGER.info("Tail: OK");
