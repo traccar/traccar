@@ -3,6 +3,7 @@ package org.traccar.protocol;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
+import com.google.common.primitives.Shorts;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -63,6 +64,50 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
     private static final int G1RUS_GPS_VDOP_MASK = 0b01000000;
     private static final int G1RUS_GPS_STAT_MASK = 0b10000000;
 
+    private static final int G1RUS_ESCAPE_CHAR = 0x1B;
+
+
+    private byte readUnsignedByteUnescaped(ByteBuf buf) {
+        byte first = (byte) buf.readUnsignedByte();
+        if (first != G1RUS_ESCAPE_CHAR) {
+            return first;
+        } else { /* first == 0x1B */
+            byte second = (byte) buf.readUnsignedByte();
+            if (second == 0x00) {
+                return first;
+            } else { /* second == 0xE3 */
+                return (byte) 0xF8;
+            }
+        }
+    }
+
+
+    private void readBytesUnescaped(ByteBuf buf, byte[] to) {
+        for (int i = 0; i < to.length; ++i) {
+            to[i] = readUnsignedByteUnescaped(buf);
+        }
+    }
+
+    private void readBytesUnescaped(ByteBuf buf, byte[] to, int dstIndex, int length) {
+        for (int i = dstIndex; i < length; ++i) {
+            to[i] = readUnsignedByteUnescaped(buf);
+        }
+    }
+
+
+    private short readUnsignedShortUnescaped(ByteBuf buf) {
+        byte[] shortBuf = new byte[2];
+        readBytesUnescaped(buf, shortBuf);
+        return Shorts.fromByteArray(shortBuf);
+    }
+
+
+    private int readIntUnescaped(ByteBuf buf) {
+        byte[] intBuf = new byte[4];
+        readBytesUnescaped(buf, intBuf);
+        return Ints.fromByteArray(intBuf);
+    }
+
 
     private void decodeSYSSub(ByteBuf buf) {
         LOGGER.info("<SYS>");
@@ -75,23 +120,23 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
          */
 
         /* Device name */
-        byte devNameLen = (byte) buf.readUnsignedByte();
+        byte devNameLen = readUnsignedByteUnescaped(buf);
         byte[] devName = new byte[devNameLen & 0xF];
-        buf.readBytes(devName);
+        readBytesUnescaped(buf, devName);
         String devNameString = new String(devName);
         LOGGER.info("Device name: " + devNameString);
 
         /* Firmware version */
-        byte firmwareLen = (byte) buf.readUnsignedByte();
+        byte firmwareLen = readUnsignedByteUnescaped(buf);
         byte[] firmware = new byte[firmwareLen & 0xF];
-        buf.readBytes(firmware);
+        readBytesUnescaped(buf, firmware);
         String firmwareString = new String(firmware);
         LOGGER.info("Firmware version: " + firmwareString);
 
         /* Hardware version */
-        byte hardwareLen = (byte) buf.readUnsignedByte();
+        byte hardwareLen = readUnsignedByteUnescaped(buf);
         byte[] hardware = new byte[hardwareLen & 0xF];
-        buf.readBytes(hardware);
+        readBytesUnescaped(buf, hardware);
         String hardwareString = new String(hardware);
         LOGGER.info("Hardware version: " + hardwareString);
 
@@ -104,30 +149,30 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
 
         buf.skipBytes(1); /* Total length */
 
-        short subMask = (short) buf.readUnsignedShort();
+        short subMask = readUnsignedShortUnescaped(buf);
         if ((subMask & G1RUS_GPS_SIGN_MASK) == G1RUS_GPS_SIGN_MASK) {
             buf.skipBytes(1);
         }
         if ((subMask & G1RUS_GPS_POS_MASK) == G1RUS_GPS_POS_MASK) {
             byte[] pos_buf = new byte[4];
-            buf.readBytes(pos_buf);
+            readBytesUnescaped(buf, pos_buf);
             position.setLatitude((float) Ints.fromByteArray(pos_buf) / 1000000);
             LOGGER.info("Latitude: " + position.getLatitude());
 
-            buf.readBytes(pos_buf);
+            readBytesUnescaped(buf, pos_buf);
             position.setLongitude((float) Ints.fromByteArray(pos_buf) / 1000000);
             LOGGER.info("Longitude: " + position.getLongitude());
         }
         if ((subMask & G1RUS_GPS_SPD_MASK) == G1RUS_GPS_SPD_MASK) {
-            position.setSpeed(buf.readUnsignedShort());
+            position.setSpeed(readUnsignedShortUnescaped(buf));
             LOGGER.info("Speed: " + position.getSpeed());
         }
         if ((subMask & G1RUS_GPS_AZTH_MASK) == G1RUS_GPS_AZTH_MASK) {
-            position.setCourse(buf.readUnsignedShort());
+            position.setCourse(readUnsignedShortUnescaped(buf));
             LOGGER.info("Course: " + position.getCourse());
         }
         if ((subMask & G1RUS_GPS_ALT_MASK) == G1RUS_GPS_ALT_MASK) {
-            position.setAltitude(buf.readUnsignedShort());
+            position.setAltitude(readUnsignedShortUnescaped(buf));
             LOGGER.info("Altitude: " + position.getAltitude());
         }
         if ((subMask & G1RUS_GPS_HDOP_MASK) == G1RUS_GPS_HDOP_MASK) {
@@ -147,7 +192,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
 
 
     private Position decodeRegular(Channel channel, SocketAddress remoteAddress, ByteBuf buf, long imei, byte packetType) {
-        int timestamp_ = buf.readInt();
+        int timestamp_ = readIntUnescaped(buf);
         long timestamp = (946684800 + timestamp_) * 1000L; /* Convert received time to proper UNIX timestamp */
         LOGGER.info("Date and time: " + new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date(timestamp)));
 
@@ -158,7 +203,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = null;
         Position position = null;
 
-        short dataUploadingMask = (short) buf.readUnsignedShort();
+        short dataUploadingMask = readUnsignedShortUnescaped(buf);
         if ((dataUploadingMask & G1RUS_DATA_SYS_MASK) == G1RUS_DATA_SYS_MASK) {
             decodeSYSSub(buf);
         }
@@ -174,24 +219,24 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
             decodeGPSSub(buf, position);
         }
         if ((dataUploadingMask & G1RUS_DATA_GSM_MASK) == G1RUS_DATA_GSM_MASK) {
-            buf.skipBytes(buf.readUnsignedByte());
+            buf.skipBytes(readUnsignedByteUnescaped(buf));
         }
         if ((dataUploadingMask & G1RUS_DATA_COT_MASK) == G1RUS_DATA_COT_MASK) {
-            buf.skipBytes(buf.readUnsignedByte());
+            buf.skipBytes(readUnsignedByteUnescaped(buf));
         }
         if ((dataUploadingMask & G1RUS_DATA_ADC_MASK) == G1RUS_DATA_ADC_MASK) {
             /*if (deviceSession == null) {
                 return null;
             }*/
 
-            buf.skipBytes(buf.readUnsignedByte());
+            buf.skipBytes(readUnsignedByteUnescaped(buf));
             // decodeADCSub(buf, position);
         }
         if ((dataUploadingMask & G1RUS_DATA_DTT_MASK) == G1RUS_DATA_DTT_MASK) {
-            buf.skipBytes(buf.readUnsignedByte());
+            buf.skipBytes(readUnsignedByteUnescaped(buf));
         }
         if ((dataUploadingMask & G1RUS_DATA_ETD_MASK) == G1RUS_DATA_ETD_MASK) {
-            buf.skipBytes(buf.readUnsignedByte());
+            buf.skipBytes(readUnsignedByteUnescaped(buf));
         }
 
         return position;
@@ -220,15 +265,17 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf) msg;
 
-        buf.skipBytes(1); /* Head */
+        if (buf.readUnsignedByte() != G1RUS_HEAD_TAIL) {
+            return null;
+        }
 
-        LOGGER.info("Protocol version: " + buf.readUnsignedByte());
+        LOGGER.info("Protocol version: " + readUnsignedByteUnescaped(buf));
 
-        byte packetType = (byte) buf.readUnsignedByte();
+        byte packetType = readUnsignedByteUnescaped(buf);
         printPacketType(packetType);
 
         byte[] imei = new byte[8];
-        buf.readBytes(imei, 0, 7);
+        readBytesUnescaped(buf, imei, 0, 7);
         long imei_long = Longs.fromByteArray(imei);
         LOGGER.info("IMEI: " + imei_long);
 
@@ -249,22 +296,18 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
         } else if ((packetType & G1RUS_TYPE_BCD_MASK) == G1RUS_TYPE_MIXED) {
             positions = new LinkedList<>();
 
-            while (buf.readableBytes() > 3) {
-                short subPacketLength = (short) buf.readUnsignedShort();
-                byte subPacketType = (byte) buf.readUnsignedByte();
+            while (buf.readableBytes() > 5) {
+                short subPacketLength = readUnsignedShortUnescaped(buf);
+                byte subPacketType = readUnsignedByteUnescaped(buf);
                 printPacketType(subPacketType);
 
                 if ((subPacketType & G1RUS_TYPE_BCD_MASK) == G1RUS_TYPE_REGULAR) {
-                    Position position = decodeRegular(channel, remoteAddress, buf, imei_long, packetType);
+                    Position position = decodeRegular(channel, remoteAddress, buf, imei_long, subPacketType);
                     if (position != null) {
                         positions.add(position);
                     }
                 } else {
-                    try {
-                        buf.skipBytes(subPacketLength - 1);
-                    } catch (Exception e) {
-                        return positions;
-                    }
+                    buf.skipBytes(subPacketLength - 1);
                 }
                 /* else if ((subPacketType & G1RUS_TYPE_BCD_MASK) == G1RUS_TYPE_SMS_FORWARD) {
                     buf.skipBytes(subPacketLength - 1);
