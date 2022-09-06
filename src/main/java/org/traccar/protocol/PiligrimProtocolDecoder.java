@@ -157,11 +157,6 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
         } else if (uri.startsWith("/push.do")) {
             sendResponse(channel, "PUSH.DO: OK");
 
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, "123456");
-            if (deviceSession == null) {
-                return null;
-            }
-
             /* Getting payload */
             ByteBuf content_stream = request.content();
             byte[] payload_bytes = new byte[Integer.parseInt(request.headers().get("Content-Length"))];
@@ -173,7 +168,15 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
              */
             String[] payload_parts = payload.split("&");
             /* System.out.println("Payload parts: " + Arrays.toString(payload_parts)); */
-            /* String phone_number = payload_parts[1].substring(15); */
+            String phone_number = payload_parts[1].substring(15);
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, phone_number);
+            if (deviceSession == null) {
+                return null;
+            }
+
+            /* TODO: generalize this process;
+             * TODO: use keys for flags in 'positions'.
+             */
             String message = payload_parts[2].substring(8).replaceFirst("ALARM KEY; ", "");
             /* System.out.println("Phone number: " + phone_number); */
             /* System.out.println("Message: " + message); */
