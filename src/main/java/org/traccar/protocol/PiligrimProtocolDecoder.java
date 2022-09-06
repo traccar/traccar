@@ -172,15 +172,13 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
             String[] payloadParts = payload.split("&");
             /* LOGGER.info("Payload parts: " + Arrays.toString(payloadParts)); */
             String phoneNumber = payloadParts[1].substring(15);
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, phoneNumber);
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, phoneNumber.substring(1));
             if (deviceSession == null) {
                 return null;
             }
 
-            /* TODO: generalize this process;
-             * TODO: use keys for flags in 'positions'.
-             */
-            String message = payloadParts[2].substring(8).replaceFirst("ALARM KEY; ", "");
+            /* TODO: use keys for flags in 'positions'. */
+            String message = payloadParts[2].substring(8).replaceFirst("[A-Z]* KEY; ", "");
             /* LOGGER.info("Phone number: " + phoneNumber); */
             /* LOGGER.info("Message: " + message); */
 
