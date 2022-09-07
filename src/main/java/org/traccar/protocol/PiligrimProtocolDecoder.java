@@ -170,7 +170,7 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
              * &phone&message
              */
             String[] payloadParts = payload.split("&");
-            /* LOGGER.info("Payload parts: " + Arrays.toString(payloadParts)); */
+            /* LOGGER.debug("Payload parts: " + Arrays.toString(payloadParts)); */
             String phoneNumber = payloadParts[1].substring(15);
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, phoneNumber.substring(1));
             if (deviceSession == null) {
@@ -179,39 +179,39 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
 
             /* TODO: use keys for flags in 'positions'. */
             String message = payloadParts[2].substring(8).replaceFirst("[a-zA-Z! ]*; ", "");
-            /* LOGGER.info("Phone number: " + phoneNumber); */
-            /* LOGGER.info("Message: " + message); */
+            /* LOGGER.debug("Phone number: " + phoneNumber); */
+            /* LOGGER.debug("Message: " + message); */
 
             if (message.startsWith("$GPRMC")) {
                 /* Supported message structure:
                  * GPS NMEA Command; GSM info; Unknown; Battery voltage?
                  * Example: $GPRMC,180752.000,A,5314.0857,N,03421.8173,E,0.00,104.74,220722,,,A,V* 29,05; GSM: 250-01 0b54-0519,1c30,3e96,3ebe,412e 25;  S; Batt: 405,M
                  */
-                LOGGER.info("Supported message");
+                LOGGER.debug("Supported message");
 
                 String[] messageParts = message.split(";");
-                /* LOGGER.info("Message parts: " + Arrays.toString(messageParts)); */
+                /* LOGGER.debug("Message parts: " + Arrays.toString(messageParts)); */
 
                 /* Parsing GPS */
                 String unprocessedGpsCommand = messageParts[0];
 
                 /* Getting rid of checksum */
                 String gpsCommand = unprocessedGpsCommand.replaceFirst("A,V[*].*", "");
-                /* LOGGER.info("GPS command: " + gpsCommand); */
+                /* LOGGER.debug("GPS command: " + gpsCommand); */
 
                 NMEA gpsParser = new NMEA();
 
                 NMEA.GPSPosition gpsPosition = gpsParser.parse(gpsCommand);
 
-                /* LOGGER.info("Time: " + gpsPosition.time); */
-                /* LOGGER.info("Coordinates: " + gpsPosition.lat + " " + gpsPosition.lon); */
-                /* LOGGER.info("Speed over ground: " + gpsPosition.velocity + " knots"); */
+                /* LOGGER.debug("Time: " + gpsPosition.time); */
+                /* LOGGER.debug("Coordinates: " + gpsPosition.lat + " " + gpsPosition.lon); */
+                /* LOGGER.debug("Speed over ground: " + gpsPosition.velocity + " knots"); */
 
                 /* Parsing other fields */
                 /* String gsmInfo = messageParts[1]; */
                 /* String unknown = messageParts[2]; */
                 String batteryInfo = messageParts[messageParts.length - 1].substring(7).substring(0, 3);
-                /* LOGGER.info("Battery: " + batteryInfo); */
+                /* LOGGER.debug("Battery: " + batteryInfo); */
 
                 /* Constructing response */
                 Position position = new Position(getProtocolName());
@@ -227,7 +227,7 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.setAltitude(gpsPosition.altitude);
                 position.set(Position.KEY_BATTERY, Integer.parseInt(batteryInfo) / 100);
 
-                LOGGER.info("Supported message finish");
+                LOGGER.debug("Supported message finish");
 
                 return position;
             } else {
