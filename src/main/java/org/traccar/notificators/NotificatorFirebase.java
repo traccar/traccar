@@ -84,7 +84,12 @@ public class NotificatorFirebase implements Notificator {
                     .build();
 
             try {
-                FirebaseMessaging.getInstance().sendMulticast(message);
+                var result = FirebaseMessaging.getInstance().sendMulticast(message);
+                for (var response : result.getResponses()) {
+                    if (!response.isSuccessful()) {
+                        throw new MessageException(response.getException());
+                    }
+                }
             } catch (FirebaseMessagingException e) {
                 throw new MessageException(e);
             }
