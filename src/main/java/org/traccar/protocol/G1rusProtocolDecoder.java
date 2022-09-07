@@ -118,7 +118,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
 
 
     private void decodeSYSSub(ByteBuf buf) {
-        LOGGER.info("<SYS>");
+        LOGGER.debug("<SYS>");
 
         skipBytesUnescaped(buf, 1); /* Total length */
 
@@ -132,36 +132,36 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
         byte[] devName = new byte[devNameLen & 0xF];
         readBytesUnescaped(buf, devName);
         String devNameString = new String(devName);
-        LOGGER.info("Device name: " + devNameString);
+        LOGGER.debug("Device name: " + devNameString);
 
         /* Firmware version */
         short firmwareLen = readUnsignedByteUnescaped(buf);
         byte[] firmware = new byte[firmwareLen & 0xF];
         readBytesUnescaped(buf, firmware);
         String firmwareString = new String(firmware);
-        LOGGER.info("Firmware version: " + firmwareString);
+        LOGGER.debug("Firmware version: " + firmwareString);
 
         /* Hardware version */
         short hardwareLen = readUnsignedByteUnescaped(buf);
         byte[] hardware = new byte[hardwareLen & 0xF];
         readBytesUnescaped(buf, hardware);
         String hardwareString = new String(hardware);
-        LOGGER.info("Hardware version: " + hardwareString);
+        LOGGER.debug("Hardware version: " + hardwareString);
 
-        LOGGER.info("</SYS>");
+        LOGGER.debug("</SYS>");
     }
 
 
     private void decodeGPSSub(ByteBuf buf, Position position) {
-        LOGGER.info("<GPS>");
+        LOGGER.debug("<GPS>");
 
         skipBytesUnescaped(buf, 1); /* Total length */
 
         int subMask = readUnsignedShortUnescaped(buf);
         if ((subMask & G1RUS_GPS_SIGN_MASK) == G1RUS_GPS_SIGN_MASK) {
             short signValid = readUnsignedByteUnescaped(buf);
-            LOGGER.info("Fix sign: " + ((signValid & 0b1100000) >> 5));
-            LOGGER.info("Satellite number: " + (signValid & 0b0011111));
+            LOGGER.debug("Fix sign: " + ((signValid & 0b1100000) >> 5));
+            LOGGER.debug("Satellite number: " + (signValid & 0b0011111));
             position.setValid(((signValid & 0b1100000) >> 5) == 2);
             position.set(Position.KEY_SATELLITES, signValid & 0b0011111);
         }
@@ -169,34 +169,34 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
             byte[] posBuf = new byte[4];
             readBytesUnescaped(buf, posBuf);
             position.setLatitude((float) Ints.fromByteArray(posBuf) / 1000000);
-            LOGGER.info("Latitude: " + position.getLatitude());
+            LOGGER.debug("Latitude: " + position.getLatitude());
 
             readBytesUnescaped(buf, posBuf);
             position.setLongitude((float) Ints.fromByteArray(posBuf) / 1000000);
-            LOGGER.info("Longitude: " + position.getLongitude());
+            LOGGER.debug("Longitude: " + position.getLongitude());
         }
         if ((subMask & G1RUS_GPS_SPD_MASK) == G1RUS_GPS_SPD_MASK) {
             position.setSpeed(readUnsignedShortUnescaped(buf));
-            LOGGER.info("Speed: " + position.getSpeed());
+            LOGGER.debug("Speed: " + position.getSpeed());
         }
         if ((subMask & G1RUS_GPS_AZTH_MASK) == G1RUS_GPS_AZTH_MASK) {
             position.setCourse(readUnsignedShortUnescaped(buf));
-            LOGGER.info("Course: " + position.getCourse());
+            LOGGER.debug("Course: " + position.getCourse());
         }
         if ((subMask & G1RUS_GPS_ALT_MASK) == G1RUS_GPS_ALT_MASK) {
             position.setAltitude(readUnsignedShortUnescaped(buf));
-            LOGGER.info("Altitude: " + position.getAltitude());
+            LOGGER.debug("Altitude: " + position.getAltitude());
         }
         if ((subMask & G1RUS_GPS_HDOP_MASK) == G1RUS_GPS_HDOP_MASK) {
             position.set(Position.KEY_HDOP, readUnsignedShortUnescaped(buf));
-            LOGGER.info("HDOP: " + position.getAttributes().get(Position.KEY_HDOP));
+            LOGGER.debug("HDOP: " + position.getAttributes().get(Position.KEY_HDOP));
         }
         if ((subMask & G1RUS_GPS_VDOP_MASK) == G1RUS_GPS_VDOP_MASK) {
             position.set(Position.KEY_VDOP, readUnsignedShortUnescaped(buf));
-            LOGGER.info("VDOP: " + position.getAttributes().get(Position.KEY_VDOP));
+            LOGGER.debug("VDOP: " + position.getAttributes().get(Position.KEY_VDOP));
         }
 
-        LOGGER.info("</GPS>");
+        LOGGER.debug("</GPS>");
     }
 
 
@@ -209,7 +209,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
 
 
     private void decodeADCSub(ByteBuf buf, Position position) {
-        LOGGER.info("<ADC>");
+        LOGGER.debug("<ADC>");
 
         skipBytesUnescaped(buf, 1);
 
@@ -219,24 +219,24 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
          */
 
         int externalVoltage = readUnsignedShortUnescaped(buf) & G1RUS_ADC_DATA_MASK;
-        LOGGER.info("External voltage: " + getADValue(externalVoltage) + "V [" + externalVoltage + "]");
+        LOGGER.debug("External voltage: " + getADValue(externalVoltage) + "V [" + externalVoltage + "]");
 
         int backupVoltage = readUnsignedShortUnescaped(buf) & G1RUS_ADC_DATA_MASK;
-        LOGGER.info("Backup voltage: " + getADValue(backupVoltage) + "V [" + backupVoltage + "]");
+        LOGGER.debug("Backup voltage: " + getADValue(backupVoltage) + "V [" + backupVoltage + "]");
         position.set(Position.KEY_BATTERY, getADValue(backupVoltage));
 
         int temperature = readUnsignedShortUnescaped(buf) & G1RUS_ADC_DATA_MASK;
-        LOGGER.info("Device temperature: " + getADValue(temperature) + "°C [" + temperature + "]");
+        LOGGER.debug("Device temperature: " + getADValue(temperature) + "°C [" + temperature + "]");
         position.set(Position.KEY_DEVICE_TEMP, getADValue(temperature));
 
-        LOGGER.info("</ADC>");
+        LOGGER.debug("</ADC>");
     }
 
 
     private Position decodeRegular(Channel channel, SocketAddress remoteAddress, ByteBuf buf, long imei, short packetType) {
         int timestamp_ = readIntUnescaped(buf);
         long timestamp = (946684800 + timestamp_) * 1000L; /* Convert received time to proper UNIX timestamp */
-        LOGGER.info("Date and time: " + new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date(timestamp)));
+        LOGGER.debug("Date and time: " + new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(new Date(timestamp)));
 
         if ((packetType & G1RUS_TYPE_EVENT_MASK) != G1RUS_TYPE_NON_EVENT) {
             skipBytesUnescaped(buf, 1); /* Event ID */
@@ -295,7 +295,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
 
 
     private void printPacketType(short packetType) {
-        LOGGER.info("Packet type: " + (packetType == G1RUS_TYPE_HEARTBEAT ? "HEARTBEAT" :
+        LOGGER.debug("Packet type: " + (packetType == G1RUS_TYPE_HEARTBEAT ? "HEARTBEAT" :
                     "[" + ((packetType & G1RUS_TYPE_IMEI_MASK) == G1RUS_TYPE_IMEI_LONG ? "IMEI_LONG" : "IMEI_SHORT") + "]" +
                     "[" + ((packetType & G1RUS_TYPE_EVENT_MASK) == G1RUS_TYPE_NON_EVENT ? "NON-EVENT" : "EVENT") + "]" +
                     "[" + ((packetType & G1RUS_TYPE_BCD_MASK) == G1RUS_TYPE_REGULAR ? "REGULAR" : (packetType & G1RUS_TYPE_BCD_MASK) == G1RUS_TYPE_SMS_FORWARD ? "SMS FORWARD" : (packetType & G1RUS_TYPE_BCD_MASK) == G1RUS_TYPE_SERIAL_PASS_THROUGH ? "PASS THROUGH" : (packetType & G1RUS_TYPE_BCD_MASK) == G1RUS_TYPE_MIXED ? "MIXED PACKED" : "RESERVED/INVALID") + "]"));
@@ -310,7 +310,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        LOGGER.info("Protocol version: " + readUnsignedByteUnescaped(buf));
+        LOGGER.debug("Protocol version: " + readUnsignedByteUnescaped(buf));
 
         short packetType = readUnsignedByteUnescaped(buf);
         printPacketType(packetType);
@@ -318,7 +318,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
         byte[] imei = new byte[8];
         readBytesUnescaped(buf, imei, 0, 7);
         long imeiLong = Longs.fromByteArray(imei);
-        LOGGER.info("IMEI: " + imeiLong);
+        LOGGER.debug("IMEI: " + imeiLong);
 
         List<Position> positions = null;
 
@@ -365,7 +365,7 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
         skipBytesUnescaped(buf, 2); /* CRC */ /* TODO: actually check it */
         short tail = buf.readUnsignedByte();
         if (tail == G1RUS_HEAD_TAIL) {
-            LOGGER.info("Tail: OK");
+            LOGGER.debug("Tail: OK");
         } else {
             LOGGER.error("Tail: FAIL!");
         }
