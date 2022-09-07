@@ -178,7 +178,7 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
             }
 
             /* TODO: use keys for flags in 'positions'. */
-            String message = payloadParts[2].substring(8).replaceFirst("[A-Z]* KEY; ", "");
+            String message = payloadParts[2].substring(8).replaceFirst("[a-zA-Z! ]*; ", "");
             /* LOGGER.info("Phone number: " + phoneNumber); */
             /* LOGGER.info("Message: " + message); */
 
@@ -210,7 +210,7 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
                 /* Parsing other fields */
                 /* String gsmInfo = messageParts[1]; */
                 /* String unknown = messageParts[2]; */
-                String batteryInfo = messageParts[3].substring(7).substring(0, 3);
+                String batteryInfo = messageParts[messageParts.length - 1].substring(7).substring(0, 3);
                 /* LOGGER.info("Battery: " + batteryInfo); */
 
                 /* Constructing response */
@@ -231,7 +231,7 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
 
                 return position;
             } else {
-                LOGGER.info("Unsupported message");
+                LOGGER.error("Unsupported message");
             }
         }
 
