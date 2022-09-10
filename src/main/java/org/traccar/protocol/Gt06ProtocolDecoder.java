@@ -987,6 +987,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (subType == 0x05) {
 
+                if (buf.readableBytes() >= 6 + 1 + 6) {
+                    DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
+                            .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                            .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                    position.setDeviceTime(dateBuilder.getDate());
+                }
+
                 int flags = buf.readUnsignedByte();
                 position.set(Position.KEY_DOOR, BitUtil.check(flags, 0));
                 position.set(Position.PREFIX_IO + 1, BitUtil.check(flags, 2));
