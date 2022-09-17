@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -293,7 +293,9 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 51:
                                 case 52:
                                     value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + (j + 2 - 45), (value != 0x80) ? value : null);
+                                    position.set(
+                                            Position.PREFIX_TEMP + (j + 2 - 45),
+                                            (value != (byte) 0x80) ? value : null);
                                     break;
                                 default:
                                     buf.skipBytes(getItemLength(j + 1));
