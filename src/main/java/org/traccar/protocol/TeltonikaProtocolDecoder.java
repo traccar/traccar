@@ -325,6 +325,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (codec == CODEC_GH3000) {
             decodeGh3000Parameter(position, id, buf, length);
         } else {
+            int index = buf.readerIndex();
             boolean decoded = false;
             for (var entry : PARAMETERS.getOrDefault(id, new HashMap<>()).entrySet()) {
                 if (entry.getKey() == null || model != null && entry.getKey().contains(model)) {
@@ -333,7 +334,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
             }
-            if (!decoded) {
+            if (decoded) {
+                buf.readerIndex(index + length);
+            } else {
                 position.set(Position.PREFIX_IO + id, readValue(buf, length));
             }
         }
