@@ -514,14 +514,16 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set("cover", BitUtil.check(deviceStatus, 3));
                     break;
                 case 0xE6:
-                    int sensorIndex = buf.readUnsignedByte();
-                    buf.skipBytes(6); // mac
-                    position.set(
-                            Position.PREFIX_TEMP + sensorIndex,
-                            buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
-                    position.set(
-                            "humidity" + sensorIndex,
-                            buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
+                    while (buf.readerIndex() < endIndex) {
+                        int sensorIndex = buf.readUnsignedByte();
+                        buf.skipBytes(6); // mac
+                        position.set(
+                                Position.PREFIX_TEMP + sensorIndex,
+                                buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
+                        position.set(
+                                "humidity" + sensorIndex,
+                                buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
+                    }
                     break;
                 case 0xEB:
                     if (buf.getUnsignedShort(buf.readerIndex()) > 200) {
