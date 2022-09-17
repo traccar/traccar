@@ -196,7 +196,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                     for (int j = 0; j < bits.length(); j++) {
                         if (bits.get(j)) {
 
-                            int value = 0;
+                            int value;
 
                             switch (j + 1) {
                                 case 1:
