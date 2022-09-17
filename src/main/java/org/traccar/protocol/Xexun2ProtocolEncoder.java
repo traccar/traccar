@@ -40,7 +40,7 @@ public class Xexun2ProtocolEncoder extends BaseProtocolEncoder {
         buf.writeShort(Xexun2ProtocolDecoder.MSG_COMMAND);
         buf.writeShort(1); // index
         buf.writeBytes(DataConverter.parseHex(uniqueId + "0"));
-        buf.writeShort(message.capacity());
+        buf.writeShort(message.readableBytes());
         buf.writeShort(Checksum.ip(message.nioBuffer()));
         buf.writeBytes(message);
         buf.writeShort(Xexun2ProtocolDecoder.FLAG);
