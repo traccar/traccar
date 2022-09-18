@@ -21,19 +21,26 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseHttpProtocolDecoder;
+import org.traccar.WebDataHandler;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
+import org.traccar.helper.NMEA;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebDataHandler.class);
 
     public PiligrimProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -150,6 +157,82 @@ public class PiligrimProtocolDecoder extends BaseHttpProtocolDecoder {
             }
 
             return positions;
+        } else if (uri.startsWith("/push.do")) {
+            sendResponse(channel, "PUSH.DO: OK");
+
+            /* Getting payload */
+            ByteBuf contentStream = request.content();
+            byte[] payloadBytes = new byte[Integer.parseInt(request.headers().get("Content-Length"))];
+            contentStream.readBytes(payloadBytes);
+            String payload = new String(payloadBytes);
+
+            /* Payload structure:
+             * &phone&message
+             */
+            String[] payloadParts = payload.split("&");
+            /* LOGGER.debug("Payload parts: " + Arrays.toString(payloadParts)); */
+            String phoneNumber = payloadParts[1].substring(15);
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, phoneNumber.substring(1));
+            if (deviceSession == null) {
+                return null;
+            }
+
+            /* TODO: use keys for flags in 'positions'. */
+            String message = payloadParts[2].substring(8).replaceFirst("[a-zA-Z! ]*; ", "");
+            /* LOGGER.debug("Phone number: " + phoneNumber); */
+            /* LOGGER.debug("Message: " + message); */
+
+            if (message.startsWith("$GPRMC")) {
+                /* Supported message structure:
+                 * GPS NMEA Command; GSM info; Unknown; Battery voltage?
+                 * Example: $GPRMC,180752.000,A,5314.0857,N,03421.8173,E,0.00,104.74,220722,,,A,V* 29,05; GSM: 250-01 0b54-0519,1c30,3e96,3ebe,412e 25;  S; Batt: 405,M
+                 */
+                LOGGER.debug("Supported message");
+
+                String[] messageParts = message.split(";");
+                /* LOGGER.debug("Message parts: " + Arrays.toString(messageParts)); */
+
+                /* Parsing GPS */
+                String unprocessedGpsCommand = messageParts[0];
+
+                /* Getting rid of checksum */
+                String gpsCommand = unprocessedGpsCommand.replaceFirst("A,V[*].*", "");
+                /* LOGGER.debug("GPS command: " + gpsCommand); */
+
+                NMEA gpsParser = new NMEA();
+
+                NMEA.GPSPosition gpsPosition = gpsParser.parse(gpsCommand);
+
+                /* LOGGER.debug("Time: " + gpsPosition.time); */
+                /* LOGGER.debug("Coordinates: " + gpsPosition.lat + " " + gpsPosition.lon); */
+                /* LOGGER.debug("Speed over ground: " + gpsPosition.velocity + " knots"); */
+
+                /* Parsing other fields */
+                /* String gsmInfo = messageParts[1]; */
+                /* String unknown = messageParts[2]; */
+                String batteryInfo = messageParts[messageParts.length - 1].substring(7).substring(0, 3);
+                /* LOGGER.debug("Battery: " + batteryInfo); */
+
+                /* Constructing response */
+                Position position = new Position(getProtocolName());
+
+                position.setDeviceId(deviceSession.getDeviceId());
+                position.setValid(true);
+                position.setLatitude(gpsPosition.lat);
+                position.setLongitude(gpsPosition.lon);
+                position.setTime(new Date(System.currentTimeMillis()));
+                position.setSpeed(gpsPosition.velocity);
+                position.setCourse(gpsPosition.dir);
+                position.setAccuracy(gpsPosition.quality);
+                position.setAltitude(gpsPosition.altitude);
+                position.set(Position.KEY_BATTERY, Integer.parseInt(batteryInfo) / 100);
+
+                LOGGER.debug("Supported message finish");
+
+                return position;
+            } else {
+                LOGGER.error("Unsupported message");
+            }
         }
 
         return null;
