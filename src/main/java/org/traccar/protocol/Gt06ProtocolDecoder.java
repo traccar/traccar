@@ -411,9 +411,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case 0x11:
                 return Position.ALARM_POWER_OFF;
             case 0x13:
+            case 0x25:
                 return Position.ALARM_TAMPERING;
             case 0x14:
                 return Position.ALARM_DOOR;
+            case 0x23:
+                return Position.ALARM_FALL_DOWN;
             case 0x29:
                 return Position.ALARM_ACCELERATION;
             case 0x30:
@@ -423,8 +426,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_CORNERING;
             case 0x2C:
                 return Position.ALARM_ACCIDENT;
-            case 0x23:
-                return Position.ALARM_FALL_DOWN;
             default:
                 return null;
         }
@@ -985,6 +986,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return position;
 
             } else if (subType == 0x05) {
+
+                if (buf.readableBytes() >= 6 + 1 + 6) {
+                    DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
+                            .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                            .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+                    position.setDeviceTime(dateBuilder.getDate());
+                }
 
                 int flags = buf.readUnsignedByte();
                 position.set(Position.KEY_DOOR, BitUtil.check(flags, 0));
