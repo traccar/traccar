@@ -278,11 +278,11 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 42:
                                 case 43:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs485Fuel" + (j + 2 - 38), (value < 65500) ? value : null);
+                                    position.set("fuel" + (j + 2 - 38), (value < 65500) ? value : null);
                                     break;
                                 case 44:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs232Fuel", (value < 65500) ? value : null);
+                                    position.set(Position.KEY_FUEL_LEVEL, (value < 65500) ? value : null);
                                     break;
                                 case 45:
                                 case 46:
@@ -296,6 +296,14 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     position.set(
                                             Position.PREFIX_TEMP + (j + 2 - 45),
                                             (value != (byte) 0x80) ? value : null);
+                                    break;
+                                case 78:
+                                case 79:
+                                case 80:
+                                case 81:
+                                case 82:
+                                case 83:
+                                    position.set("fuelTemp" + (j + 2 - 78), (int) buf.readByte());
                                     break;
                                 default:
                                     buf.skipBytes(getItemLength(j + 1));
