@@ -342,16 +342,40 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeNetwork(Position position) {
-        Integer cid = (Integer) position.getAttributes().remove("cid");
-        Integer lac = (Integer) position.getAttributes().remove("lac");
-        if (cid != null && lac != null) {
-            CellTower cellTower = CellTower.fromLacCid(getConfig(), lac, cid);
-            long operator = position.getInteger(Position.KEY_OPERATOR);
-            if (operator >= 1000) {
-                cellTower.setOperator(operator);
+    private void decodeCell(
+            Position position, Network network, String mncKey, String lacKey, String cidKey, String rssiKey) {
+        if (position.hasAttribute(mncKey) && position.hasAttribute(lacKey) && position.hasAttribute(cidKey)) {
+            CellTower cellTower = CellTower.from(
+                    getConfig().getInteger(Keys.GEOLOCATION_MCC),
+                    (Integer) position.getAttributes().remove(mncKey),
+                    (Integer) position.getAttributes().remove(lacKey),
+                    (Integer) position.getAttributes().remove(cidKey));
+            cellTower.setSignalStrength((Integer) position.getAttributes().remove(rssiKey));
+            network.addCellTower(cellTower);
+        }
+    }
+
+    private void decodeNetwork(Position position, String model) {
+        if ("TAT100".equals(model)) {
+            Network network = new Network();
+            decodeCell(position, network, "io1200", "io287", "io288", "io289");
+            decodeCell(position, network, "io1201", "io290", "io291", "io292");
+            decodeCell(position, network, "io1202", "io293", "io294", "io295");
+            decodeCell(position, network, "io1203", "io296", "io297", "io298");
+            if (network.getCellTowers() != null) {
+                position.setNetwork(network);
             }
-            position.setNetwork(new Network(cellTower));
+        } else {
+            Integer cid = (Integer) position.getAttributes().remove("cid");
+            Integer lac = (Integer) position.getAttributes().remove("lac");
+            if (cid != null && lac != null) {
+                CellTower cellTower = CellTower.fromLacCid(getConfig(), lac, cid);
+                long operator = position.getInteger(Position.KEY_OPERATOR);
+                if (operator >= 1000) {
+                    cellTower.setOperator(operator);
+                }
+                position.setNetwork(new Network(cellTower));
+            }
         }
     }
 
@@ -545,7 +569,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        decodeNetwork(position);
+        decodeNetwork(position, model);
 
     }
 
