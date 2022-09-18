@@ -170,8 +170,10 @@ public class PermissionsService {
                 || before.getFixedEmail() != after.getFixedEmail()) {
             if (userId == after.getId()) {
                 checkAdmin(userId);
-            } else {
+            } else if (after.getId() > 0) {
                 checkUser(userId, after.getId());
+            } else {
+                checkManager(userId);
             }
         }
         if (before.getFixedEmail() && !before.getEmail().equals(after.getEmail())) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.Checksum.Algorithm;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -591,10 +590,8 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
 
     private void sendFlexReply(Channel channel, ByteBuf data) {
         if (channel != null) {
-            ByteBuf cs = Unpooled.buffer(1);
-            cs.writeByte(Checksum.crc8(new Algorithm(8, 0x31, 0xFF, false, false, 0x00), data.nioBuffer()));
-
-            channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(data, cs), channel.remoteAddress()));
+            data.writeByte(Checksum.crc8(Checksum.CRC8_EGTS, data.nioBuffer()));
+            channel.writeAndFlush(new NetworkMessage(data, channel.remoteAddress()));
         }
     }
 

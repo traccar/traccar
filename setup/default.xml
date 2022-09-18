@@ -284,5 +284,8 @@
     <entry key='teratrack.port'>5239</entry>
     <entry key='envotech.port'>5240</entry>
     <entry key='bstpl.port'>5241</entry>
-    <entry key='g1rus.port'>5242</entry>
+    <entry key='thuraya.port'>5242</entry>
+    <entry key='ndtpv6.port'>5243</entry>
+    <entry key='g1rus.port'>5244</entry>
+
 </properties>
