@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,8 @@
 package org.traccar.session;
 
 import org.traccar.model.Position;
+
+import java.util.Date;
 
 public class DeviceState {
 
@@ -40,24 +42,24 @@ public class DeviceState {
         return motionPosition;
     }
 
-    private Boolean overspeedState;
+    private boolean overspeedState;
 
     public void setOverspeedState(boolean overspeedState) {
         this.overspeedState = overspeedState;
     }
 
-    public Boolean getOverspeedState() {
+    public boolean getOverspeedState() {
         return overspeedState;
     }
 
-    private Position overspeedPosition;
+    private Date overspeedTime;
 
-    public void setOverspeedPosition(Position overspeedPosition) {
-        this.overspeedPosition = overspeedPosition;
+    public Date getOverspeedTime() {
+        return overspeedTime;
     }
 
-    public Position getOverspeedPosition() {
-        return overspeedPosition;
+    public void setOverspeedTime(Date overspeedTime) {
+        this.overspeedTime = overspeedTime;
     }
 
     private long overspeedGeofenceId;

@@ -54,21 +54,6 @@ public class MotionEventHandler extends BaseEventHandler {
         return Collections.singletonMap(event, position);
     }
 
-    public Map<Event, Position> updateMotionState(DeviceState deviceState) {
-        Map<Event, Position> result = null;
-        if (deviceState.getMotionState() != null && deviceState.getMotionPosition() != null) {
-            boolean newMotion = !deviceState.getMotionState();
-            Position motionPosition = deviceState.getMotionPosition();
-            long currentTime = System.currentTimeMillis();
-            long motionTime = motionPosition.getFixTime().getTime()
-                    + (newMotion ? tripsConfig.getMinimalTripDuration() : tripsConfig.getMinimalParkingDuration());
-            if (motionTime <= currentTime) {
-                result = newEvent(deviceState, newMotion);
-            }
-        }
-        return result;
-    }
-
     public Map<Event, Position> updateMotionState(DeviceState deviceState, Position position) {
         return updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION));
     }

@@ -42,7 +42,6 @@ public class OverspeedEventHandler extends BaseEventHandler {
     private final ConnectionManager connectionManager;
     private final CacheManager cacheManager;
 
-    private final boolean notRepeat;
     private final long minimalDuration;
     private final boolean preferLowest;
 
@@ -50,66 +49,46 @@ public class OverspeedEventHandler extends BaseEventHandler {
     public OverspeedEventHandler(Config config, ConnectionManager connectionManager, CacheManager cacheManager) {
         this.connectionManager = connectionManager;
         this.cacheManager = cacheManager;
-        notRepeat = config.getBoolean(Keys.EVENT_OVERSPEED_NOT_REPEAT);
         minimalDuration = config.getLong(Keys.EVENT_OVERSPEED_MINIMAL_DURATION) * 1000;
         preferLowest = config.getBoolean(Keys.EVENT_OVERSPEED_PREFER_LOWEST);
     }
 
-    private Map<Event, Position> newEvent(DeviceState deviceState, double speedLimit) {
-        Position position = deviceState.getOverspeedPosition();
-        Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position);
-        event.set(ATTRIBUTE_SPEED, deviceState.getOverspeedPosition().getSpeed());
-        event.set(Position.KEY_SPEED_LIMIT, speedLimit);
-        event.setGeofenceId(deviceState.getOverspeedGeofenceId());
-        deviceState.setOverspeedState(notRepeat);
-        deviceState.setOverspeedPosition(null);
-        deviceState.setOverspeedGeofenceId(0);
-        return Collections.singletonMap(event, position);
-    }
-
-    public Map<Event, Position> updateOverspeedState(DeviceState deviceState, double speedLimit) {
-        Map<Event, Position> result = null;
-        if (deviceState.getOverspeedState() != null && !deviceState.getOverspeedState()
-                && deviceState.getOverspeedPosition() != null && speedLimit != 0) {
-            long currentTime = System.currentTimeMillis();
-            Position overspeedPosition = deviceState.getOverspeedPosition();
-            long overspeedTime = overspeedPosition.getFixTime().getTime();
-            if (overspeedTime + minimalDuration <= currentTime) {
-                result = newEvent(deviceState, speedLimit);
-            }
-        }
-        return result;
-    }
-
     public Map<Event, Position> updateOverspeedState(
             DeviceState deviceState, Position position, double speedLimit, long geofenceId) {
-        Map<Event, Position> result = null;
 
-        Boolean oldOverspeed = deviceState.getOverspeedState();
+        boolean oldState = deviceState.getOverspeedState();
+        if (oldState) {
+            boolean newState = position.getSpeed() > speedLimit;
+            if (newState) {
+                if (deviceState.getOverspeedTime() != null) {
+                    long oldTime = deviceState.getOverspeedTime().getTime();
+                    long newTime = position.getFixTime().getTime();
+                    if (newTime - oldTime > minimalDuration) {
 
-        long currentTime = position.getFixTime().getTime();
-        boolean newOverspeed = position.getSpeed() > speedLimit;
-        if (newOverspeed && !oldOverspeed) {
-            if (deviceState.getOverspeedPosition() == null) {
-                deviceState.setOverspeedPosition(position);
-                deviceState.setOverspeedGeofenceId(geofenceId);
+                        Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position);
+                        event.set(ATTRIBUTE_SPEED, position.getSpeed());
+                        event.set(Position.KEY_SPEED_LIMIT, speedLimit);
+                        event.setGeofenceId(deviceState.getOverspeedGeofenceId());
+
+                        deviceState.setOverspeedTime(null);
+                        deviceState.setOverspeedGeofenceId(0);
+
+                        return Collections.singletonMap(event, position);
+
+                    }
+                }
+            } else {
+                deviceState.setOverspeedState(false);
+                deviceState.setOverspeedTime(null);
+                deviceState.setOverspeedGeofenceId(0);
             }
-        } else if (oldOverspeed && !newOverspeed) {
-            deviceState.setOverspeedState(false);
-            deviceState.setOverspeedPosition(null);
-            deviceState.setOverspeedGeofenceId(0);
-        } else {
-            deviceState.setOverspeedPosition(null);
-            deviceState.setOverspeedGeofenceId(0);
+        } else if (position != null && position.getSpeed() > speedLimit) {
+            deviceState.setOverspeedState(true);
+            deviceState.setOverspeedTime(position.getFixTime());
+            deviceState.setOverspeedGeofenceId(geofenceId);
         }
-        Position overspeedPosition = deviceState.getOverspeedPosition();
-        if (overspeedPosition != null) {
-            long overspeedTime = overspeedPosition.getFixTime().getTime();
-            if (newOverspeed && overspeedTime + minimalDuration <= currentTime) {
-                result = newEvent(deviceState, speedLimit);
-            }
-        }
-        return result;
+
+        return null;
     }
 
     @Override
@@ -156,16 +135,8 @@ public class OverspeedEventHandler extends BaseEventHandler {
             return null;
         }
 
-        Map<Event, Position> result = null;
         DeviceState deviceState = connectionManager.getDeviceState(deviceId);
-
-        if (deviceState.getOverspeedState() == null) {
-            deviceState.setOverspeedState(position.getSpeed() > speedLimit);
-            deviceState.setOverspeedGeofenceId(position.getSpeed() > speedLimit ? overspeedGeofenceId : 0);
-        } else {
-            result = updateOverspeedState(deviceState, position, speedLimit, overspeedGeofenceId);
-        }
-
+        Map<Event, Position> result = updateOverspeedState(deviceState, position, speedLimit, overspeedGeofenceId);
         connectionManager.setDeviceState(deviceId, deviceState);
         return result;
     }

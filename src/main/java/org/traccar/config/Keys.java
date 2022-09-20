@@ -327,13 +327,6 @@ public final class Keys {
             0.0);
 
     /**
-     * If true, the event is generated once at the beginning of overspeeding period.
-     */
-    public static final ConfigKey<Boolean> EVENT_OVERSPEED_NOT_REPEAT = new BooleanConfigKey(
-            "event.overspeed.notRepeat",
-            List.of(KeyType.CONFIG));
-
-    /**
      * Minimal over speed duration to trigger the event. Value in seconds.
      */
     public static final ConfigKey<Long> EVENT_OVERSPEED_MINIMAL_DURATION = new LongConfigKey(
@@ -597,13 +590,6 @@ public final class Keys {
             "status.timeout",
             List.of(KeyType.CONFIG),
             600L);
-
-    /**
-     * Force additional state check when device status changes to 'offline' or 'unknown'. Default false.
-     */
-    public static final ConfigKey<Boolean> STATUS_UPDATE_DEVICE_STATE = new BooleanConfigKey(
-            "status.updateDeviceState",
-            List.of(KeyType.CONFIG));
 
     /**
      * List of protocol names to ignore offline status. Can be useful to not trigger status change when devices are

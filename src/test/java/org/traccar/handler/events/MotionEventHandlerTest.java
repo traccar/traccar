@@ -70,27 +70,6 @@ public class MotionEventHandlerTest extends BaseTest {
     }
 
     @Test
-    public void testMotionWithStatus() throws Exception {
-        MotionEventHandler motionEventHandler = new MotionEventHandler(
-                null, null, new TripsConfig(500, 300 * 1000, 300 * 1000, 0, false, false, 0.01));
-
-        Position position = new Position();
-        position.setTime(new Date(System.currentTimeMillis() - 360000));
-        position.set(Position.KEY_MOTION, true);
-        DeviceState deviceState = new DeviceState();
-        deviceState.setMotionState(false);
-        deviceState.setMotionPosition(position);
-
-        Map<Event, Position> events = motionEventHandler.updateMotionState(deviceState);
-
-        assertNotNull(events);
-        Event event = events.keySet().iterator().next();
-        assertEquals(Event.TYPE_DEVICE_MOVING, event.getType());
-        assertTrue(deviceState.getMotionState());
-        assertNull(deviceState.getMotionPosition());
-    }
-
-    @Test
     public void testStopWithPositionIgnition() throws Exception {
         MotionEventHandler motionEventHandler = new MotionEventHandler(
                 null, null, new TripsConfig(500, 300 * 1000, 300 * 1000, 0, true, false, 0.01));
