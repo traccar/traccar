@@ -16,30 +16,38 @@
  */
 package org.traccar.session;
 
-import org.traccar.model.Position;
-
 import java.util.Date;
 
 public class DeviceState {
 
-    private Boolean motionState;
+    private boolean motionState;
 
     public void setMotionState(boolean motionState) {
         this.motionState = motionState;
     }
 
-    public Boolean getMotionState() {
+    public boolean getMotionState() {
         return motionState;
     }
 
-    private Position motionPosition;
+    private Date motionTime;
 
-    public void setMotionPosition(Position motionPosition) {
-        this.motionPosition = motionPosition;
+    public Date getMotionTime() {
+        return motionTime;
     }
 
-    public Position getMotionPosition() {
-        return motionPosition;
+    public void setMotionTime(Date motionTime) {
+        this.motionTime = motionTime;
+    }
+
+    private double motionDistance;
+
+    public double getMotionDistance() {
+        return motionDistance;
+    }
+
+    public void setMotionDistance(double motionDistance) {
+        this.motionDistance = motionDistance;
     }
 
     private boolean overspeedState;

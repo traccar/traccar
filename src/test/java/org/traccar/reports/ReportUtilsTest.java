@@ -106,7 +106,7 @@ public class ReportUtilsTest extends BaseTest {
                 mock(Config.class), storage, mock(PermissionsService.class),
                 tripsConfig, mock(VelocityEngine.class), null);
 
-        Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(mock(Device.class), data, false, TripReportItem.class);
+        var trips = reportUtils.detectTripsAndStops(mock(Device.class), data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -120,7 +120,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -161,7 +161,7 @@ public class ReportUtilsTest extends BaseTest {
                 mock(Config.class), storage, mock(PermissionsService.class),
                 tripsConfig, mock(VelocityEngine.class), null);
 
-        Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, TripReportItem.class);
+        var trips = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -189,7 +189,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -232,7 +232,7 @@ public class ReportUtilsTest extends BaseTest {
                 mock(Config.class), storage, mock(PermissionsService.class),
                 tripsConfig, mock(VelocityEngine.class), null);
 
-        Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, TripReportItem.class);
+        var trips = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -246,7 +246,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(7000, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -283,7 +283,7 @@ public class ReportUtilsTest extends BaseTest {
                 mock(Config.class), storage, mock(PermissionsService.class),
                 tripsConfig, mock(VelocityEngine.class), null);
 
-        Collection<StopReportItem> result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -312,7 +312,7 @@ public class ReportUtilsTest extends BaseTest {
                 mock(Config.class), storage, mock(PermissionsService.class),
                 tripsConfig, mock(VelocityEngine.class), null);
 
-        Collection<StopReportItem> result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -341,7 +341,7 @@ public class ReportUtilsTest extends BaseTest {
                 mock(Config.class), storage, mock(PermissionsService.class),
                 tripsConfig, mock(VelocityEngine.class), null);
 
-        Collection<StopReportItem> result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -370,7 +370,7 @@ public class ReportUtilsTest extends BaseTest {
                 mock(Config.class), storage, mock(PermissionsService.class),
                 tripsConfig, mock(VelocityEngine.class), null);
 
-        Collection<StopReportItem> result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -395,7 +395,7 @@ public class ReportUtilsTest extends BaseTest {
                 mock(Config.class), storage, mock(PermissionsService.class),
                 tripsConfig, mock(VelocityEngine.class), null);
 
-        Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, TripReportItem.class);
+        var trips = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -409,7 +409,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(7, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(600, itemTrip.getDistance(), 0.01);
 
-        Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());

@@ -45,54 +45,52 @@ public class MotionEventHandler extends BaseEventHandler {
         this.tripsConfig = tripsConfig;
     }
 
-    private Map<Event, Position> newEvent(DeviceState deviceState, boolean newMotion) {
-        String eventType = newMotion ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
-        Position position = deviceState.getMotionPosition();
-        Event event = new Event(eventType, position);
-        deviceState.setMotionState(newMotion);
-        deviceState.setMotionPosition(null);
-        return Collections.singletonMap(event, position);
-    }
+    public Map<Event, Position> updateMotionState(DeviceState deviceState, Position position, boolean newState) {
 
-    public Map<Event, Position> updateMotionState(DeviceState deviceState, Position position) {
-        return updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION));
-    }
+        boolean oldState = deviceState.getMotionState();
+        if (oldState == newState) {
+            if (deviceState.getMotionTime() != null) {
+                long oldTime = deviceState.getMotionTime().getTime();
+                long newTime = position.getFixTime().getTime();
 
-    public Map<Event, Position> updateMotionState(DeviceState deviceState, Position position, boolean newMotion) {
-        Map<Event, Position> result = null;
-        Boolean oldMotion = deviceState.getMotionState();
+                double distance = position.getDouble(Position.KEY_TOTAL_DISTANCE) - deviceState.getMotionDistance();
+                Boolean ignition = null;
+                if (tripsConfig.getUseIgnition() && position.hasAttribute(Position.KEY_IGNITION)) {
+                    ignition = position.getBoolean(Position.KEY_IGNITION);
+                }
 
-        long currentTime = position.getFixTime().getTime();
-        if (newMotion != oldMotion) {
-            if (deviceState.getMotionPosition() == null) {
-                deviceState.setMotionPosition(position);
+                boolean generateEvent = false;
+                if (newState) {
+                    if (newTime - oldTime >= tripsConfig.getMinimalTripDuration()
+                            || distance >= tripsConfig.getMinimalTripDistance()) {
+                        generateEvent = true;
+                    }
+                } else {
+                    if (newTime - oldTime >= tripsConfig.getMinimalParkingDuration()
+                            || ignition != null && !ignition) {
+                        generateEvent = true;
+                    }
+                }
+
+                if (generateEvent) {
+
+                    String eventType = newState ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
+                    Event event = new Event(eventType, position);
+
+                    deviceState.setMotionTime(null);
+                    deviceState.setMotionDistance(0);
+
+                    return Collections.singletonMap(event, position);
+
+                }
             }
         } else {
-            deviceState.setMotionPosition(null);
+            deviceState.setMotionState(newState);
+            deviceState.setMotionTime(position.getFixTime());
+            deviceState.setMotionDistance(position.getDouble(Position.KEY_TOTAL_DISTANCE));
         }
 
-        Position motionPosition = deviceState.getMotionPosition();
-        if (motionPosition != null) {
-            long motionTime = motionPosition.getFixTime().getTime();
-            double distance = PositionUtil.calculateDistance(motionPosition, position, false);
-            Boolean ignition = null;
-            if (tripsConfig.getUseIgnition()
-                    && position.hasAttribute(Position.KEY_IGNITION)) {
-                ignition = position.getBoolean(Position.KEY_IGNITION);
-            }
-            if (newMotion) {
-                if (motionTime + tripsConfig.getMinimalTripDuration() <= currentTime
-                        || distance >= tripsConfig.getMinimalTripDistance()) {
-                    result = newEvent(deviceState, newMotion);
-                }
-            } else {
-                if (motionTime + tripsConfig.getMinimalParkingDuration() <= currentTime
-                        || ignition != null && !ignition) {
-                    result = newEvent(deviceState, newMotion);
-                }
-            }
-        }
-        return result;
+        return null;
     }
 
     @Override
@@ -108,14 +106,8 @@ public class MotionEventHandler extends BaseEventHandler {
             return null;
         }
 
-        Map<Event, Position> result = null;
         DeviceState deviceState = connectionManager.getDeviceState(deviceId);
-
-        if (deviceState.getMotionState() == null) {
-            deviceState.setMotionState(position.getBoolean(Position.KEY_MOTION));
-        } else {
-            result = updateMotionState(deviceState, position);
-        }
+        var result = updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION));
         connectionManager.setDeviceState(deviceId, deviceState);
         return result;
     }

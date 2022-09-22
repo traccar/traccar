@@ -136,7 +136,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         }
 
         DeviceState deviceState = connectionManager.getDeviceState(deviceId);
-        Map<Event, Position> result = updateOverspeedState(deviceState, position, speedLimit, overspeedGeofenceId);
+        var result = updateOverspeedState(deviceState, position, speedLimit, overspeedGeofenceId);
         connectionManager.setDeviceState(deviceId, deviceState);
         return result;
     }
