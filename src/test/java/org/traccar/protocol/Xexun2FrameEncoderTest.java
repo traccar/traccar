@@ -15,6 +15,7 @@ public class Xexun2FrameEncoderTest extends ProtocolTest {
         ByteBuf result = Unpooled.buffer();
         encoder.encode(null, binary("FAAF123456FAAF123456FBBF123456FAAF"), result);
         verifyFrame(binary("FAAF123456FBBF01123456FBBF02123456FAAF"), result);
+
     }
 
 }
