@@ -62,6 +62,7 @@ import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
+import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
@@ -81,7 +82,6 @@ import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.ext.ContextResolver;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -110,14 +110,13 @@ public class MainModule extends AbstractModule {
             objectMapper.registerModule(new SanitizerModule());
         }
         objectMapper.registerModule(new JSR353Module());
-        objectMapper.setConfig(objectMapper
-                .getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return objectMapper;
     }
 
     @Provides
-    public static Client provideClient(ObjectMapper objectMapper) {
-        return ClientBuilder.newClient().register((ContextResolver<ObjectMapper>) clazz -> objectMapper);
+    public static Client provideClient(ObjectMapperContextResolver objectMapperContextResolver) {
+        return ClientBuilder.newClient().register(objectMapperContextResolver);
     }
 
     @Singleton
