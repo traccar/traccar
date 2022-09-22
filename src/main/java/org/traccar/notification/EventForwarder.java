@@ -68,18 +68,17 @@ public class EventForwarder {
         }
 
         LOGGER.debug("Event forwarding initiated");
-        requestBuilder.async().post(
-                Entity.json(preparePayload(event, position)), new InvocationCallback<Object>() {
-                    @Override
-                    public void completed(Object o) {
-                        LOGGER.debug("Event forwarding succeeded");
-                    }
+        requestBuilder.async().post(Entity.json(preparePayload(event, position)), new InvocationCallback<>() {
+            @Override
+            public void completed(Object o) {
+                LOGGER.debug("Event forwarding succeeded");
+            }
 
-                    @Override
-                    public void failed(Throwable throwable) {
-                        LOGGER.warn("Event forwarding failed", throwable);
-                    }
-                });
+            @Override
+            public void failed(Throwable throwable) {
+                LOGGER.warn("Event forwarding failed", throwable);
+            }
+        });
     }
 
     protected Map<String, Object> preparePayload(Event event, Position position) {
