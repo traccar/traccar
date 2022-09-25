@@ -1,6 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
- * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.session;
+package org.traccar.session.state;
+
+import org.traccar.model.Device;
+import org.traccar.model.Event;
 
 import java.util.Date;
 
-public class DeviceState {
+public class MotionState {
+
+    public static MotionState fromDevice(Device device) {
+        MotionState state = new MotionState();
+        state.motionState = device.getMotionState();
+        state.motionTime = device.getMotionTime();
+        state.motionDistance = device.getMotionDistance();
+        return state;
+    }
+
+    public void toDevice(Device device) {
+        device.setMotionState(motionState);
+        device.setMotionTime(motionTime);
+        device.setMotionDistance(motionDistance);
+    }
+
+    private boolean changed;
+
+    public boolean isChanged() {
+        return changed;
+    }
 
     private boolean motionState;
 
-    public void setMotionState(boolean motionState) {
-        this.motionState = motionState;
-    }
-
     public boolean getMotionState() {
         return motionState;
+    }
+
+    public void setMotionState(boolean motionState) {
+        this.motionState = motionState;
+        changed = true;
     }
 
     private Date motionTime;
@@ -38,6 +61,7 @@ public class DeviceState {
 
     public void setMotionTime(Date motionTime) {
         this.motionTime = motionTime;
+        changed = true;
     }
 
     private double motionDistance;
@@ -48,36 +72,17 @@ public class DeviceState {
 
     public void setMotionDistance(double motionDistance) {
         this.motionDistance = motionDistance;
+        changed = true;
     }
 
-    private boolean overspeedState;
+    private Event event;
 
-    public void setOverspeedState(boolean overspeedState) {
-        this.overspeedState = overspeedState;
+    public Event getEvent() {
+        return event;
     }
 
-    public boolean getOverspeedState() {
-        return overspeedState;
-    }
-
-    private Date overspeedTime;
-
-    public Date getOverspeedTime() {
-        return overspeedTime;
-    }
-
-    public void setOverspeedTime(Date overspeedTime) {
-        this.overspeedTime = overspeedTime;
-    }
-
-    private long overspeedGeofenceId;
-
-    public void setOverspeedGeofenceId(long overspeedGeofenceId) {
-        this.overspeedGeofenceId = overspeedGeofenceId;
-    }
-
-    public long getOverspeedGeofenceId() {
-        return overspeedGeofenceId;
+    public void setEvent(Event event) {
+        this.event = event;
     }
 
 }

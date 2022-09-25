@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
@@ -160,6 +161,84 @@ public class Device extends GroupedModel implements Disableable {
     @Override
     public void setExpirationTime(Date expirationTime) {
         this.expirationTime = expirationTime;
+    }
+
+    private boolean motionState;
+
+    @QueryIgnore
+    @JsonIgnore
+    public boolean getMotionState() {
+        return motionState;
+    }
+
+    @JsonIgnore
+    public void setMotionState(boolean motionState) {
+        this.motionState = motionState;
+    }
+
+    private Date motionTime;
+
+    @QueryIgnore
+    @JsonIgnore
+    public Date getMotionTime() {
+        return motionTime;
+    }
+
+    @JsonIgnore
+    public void setMotionTime(Date motionTime) {
+        this.motionTime = motionTime;
+    }
+
+    private double motionDistance;
+
+    @QueryIgnore
+    @JsonIgnore
+    public double getMotionDistance() {
+        return motionDistance;
+    }
+
+    @JsonIgnore
+    public void setMotionDistance(double motionDistance) {
+        this.motionDistance = motionDistance;
+    }
+
+    private boolean overspeedState;
+
+    @QueryIgnore
+    @JsonIgnore
+    public boolean getOverspeedState() {
+        return overspeedState;
+    }
+
+    @JsonIgnore
+    public void setOverspeedState(boolean overspeedState) {
+        this.overspeedState = overspeedState;
+    }
+
+    private Date overspeedTime;
+
+    @QueryIgnore
+    @JsonIgnore
+    public Date getOverspeedTime() {
+        return overspeedTime;
+    }
+
+    @JsonIgnore
+    public void setOverspeedTime(Date overspeedTime) {
+        this.overspeedTime = overspeedTime;
+    }
+
+    private long overspeedGeofenceId;
+
+    @QueryIgnore
+    @JsonIgnore
+    public long getOverspeedGeofenceId() {
+        return overspeedGeofenceId;
+    }
+
+    @JsonIgnore
+    public void setOverspeedGeofenceId(long overspeedGeofenceId) {
+        this.overspeedGeofenceId = overspeedGeofenceId;
     }
 
 }

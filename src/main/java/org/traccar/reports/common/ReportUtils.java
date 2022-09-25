@@ -30,7 +30,6 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.geocoder.Geocoder;
-import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
@@ -43,7 +42,8 @@ import org.traccar.model.User;
 import org.traccar.reports.model.BaseReportItem;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.TripReportItem;
-import org.traccar.session.DeviceState;
+import org.traccar.session.state.MotionProcessor;
+import org.traccar.session.state.MotionState;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -350,17 +350,16 @@ public class ReportUtils {
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (!positions.isEmpty()) {
             boolean trips = reportClass.equals(TripReportItem.class);
-            MotionEventHandler motionHandler = new MotionEventHandler(null, null, tripsConfig);
 
-            DeviceState deviceState = new DeviceState();
-            deviceState.setMotionState(isMoving(positions, 0, tripsConfig));
+            MotionState motionState = new MotionState();
+            motionState.setMotionState(isMoving(positions, 0, tripsConfig));
 
-            boolean detected = trips == deviceState.getMotionState();
+            boolean detected = trips == motionState.getMotionState();
             int startEventIndex = detected ? 0 : -1;
             int startNoEventIndex = -1;
             for (int i = 0; i < positions.size(); i++) {
                 boolean motion = isMoving(positions, i, tripsConfig);
-                if (deviceState.getMotionState() != motion) {
+                if (motionState.getMotionState() != motion) {
                     if (motion == trips) {
                         startEventIndex = detected ? startEventIndex : i;
                         startNoEventIndex = -1;
@@ -369,7 +368,8 @@ public class ReportUtils {
                     }
                 }
 
-                if (motionHandler.updateMotionState(deviceState, positions.get(i), motion) != null) {
+                MotionProcessor.updateState(motionState, positions.get(i), motion, tripsConfig);
+                if (motionState.getEvent() != null) {
                     if (motion == trips) {
                         detected = true;
                         startNoEventIndex = -1;

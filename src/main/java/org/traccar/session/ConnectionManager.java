@@ -66,8 +66,6 @@ public class ConnectionManager implements BroadcastInterface {
     private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
     private final Map<Endpoint, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
 
-    private final Map<Long, DeviceState> deviceStates = new ConcurrentHashMap<>();
-
     private final Config config;
     private final CacheManager cacheManager;
     private final Storage storage;
@@ -273,14 +271,6 @@ public class ConnectionManager implements BroadcastInterface {
         }
 
         updateDevice(true, device);
-    }
-
-    public DeviceState getDeviceState(long deviceId) {
-        return deviceStates.computeIfAbsent(deviceId, x -> new DeviceState());
-    }
-
-    public void setDeviceState(long deviceId, DeviceState deviceState) {
-        deviceStates.put(deviceId, deviceState);
     }
 
     public synchronized void sendKeepalive() {

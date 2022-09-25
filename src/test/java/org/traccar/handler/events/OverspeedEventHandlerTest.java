@@ -2,11 +2,10 @@ package org.traccar.handler.events;
 
 import org.junit.Test;
 import org.traccar.BaseTest;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.session.DeviceState;
+import org.traccar.session.state.OverspeedProcessor;
+import org.traccar.session.state.OverspeedState;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -28,43 +27,36 @@ public class OverspeedEventHandlerTest  extends BaseTest {
         return position;
     }
 
-    private void verifyState(DeviceState deviceState, boolean state, long geofenceId) {
-        assertEquals(state, deviceState.getOverspeedState());
-        assertEquals(geofenceId, deviceState.getOverspeedGeofenceId());
+    private void verifyState(OverspeedState overspeedState, boolean state, long geofenceId) {
+        assertEquals(state, overspeedState.getOverspeedState());
+        assertEquals(geofenceId, overspeedState.getOverspeedGeofenceId());
     }
 
     private void testOverspeedWithPosition(long geofenceId) throws ParseException {
-        Config config = new Config();
-        config.setString(Keys.EVENT_OVERSPEED_MINIMAL_DURATION, String.valueOf(15));
-        config.setString(Keys.EVENT_OVERSPEED_PREFER_LOWEST, String.valueOf(false));
-        OverspeedEventHandler overspeedEventHandler = new OverspeedEventHandler(config, null, null);
+        OverspeedState state = new OverspeedState();
 
-        DeviceState deviceState = new DeviceState();
+        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:00", 50), 40, 15000, geofenceId);
+        assertNull(state.getEvent());
+        verifyState(state, true, geofenceId);
 
-        Position position = position("2017-01-01 00:00:00", 50);
-        assertNull(overspeedEventHandler.updateOverspeedState(deviceState, position, 40, geofenceId));
-        verifyState(deviceState, true, geofenceId);
+        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:10", 55), 40, 15000, geofenceId);
+        assertNull(state.getEvent());
 
-        position = position("2017-01-01 00:00:10", 55);
-        assertNull(overspeedEventHandler.updateOverspeedState(deviceState, position, 40, geofenceId));
+        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:20", 55), 40, 15000, geofenceId);
+        assertNotNull(state.getEvent());
+        assertEquals(Event.TYPE_DEVICE_OVERSPEED, state.getEvent().getType());
+        assertEquals(55, state.getEvent().getDouble("speed"), 0.1);
+        assertEquals(40, state.getEvent().getDouble("speedLimit"), 0.1);
+        assertEquals(geofenceId, state.getEvent().getGeofenceId());
+        verifyState(state, true, 0);
 
-        position = position("2017-01-01 00:00:20", 55);
-        var events = overspeedEventHandler.updateOverspeedState(deviceState, position, 40, geofenceId);
-        assertNotNull(events);
-        Event event = events.keySet().iterator().next();
-        assertEquals(Event.TYPE_DEVICE_OVERSPEED, event.getType());
-        assertEquals(55, event.getDouble("speed"), 0.1);
-        assertEquals(40, event.getDouble("speedLimit"), 0.1);
-        assertEquals(geofenceId, event.getGeofenceId());
-        verifyState(deviceState, true, 0);
+        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:30", 55), 40, 15000, geofenceId);
+        assertNull(state.getEvent());
+        verifyState(state, true, 0);
 
-        position = position("2017-01-01 00:00:30", 55);
-        assertNull(overspeedEventHandler.updateOverspeedState(deviceState, position, 40, geofenceId));
-        verifyState(deviceState, true, 0);
-
-        position = position("2017-01-01 00:00:30", 30);
-        assertNull(overspeedEventHandler.updateOverspeedState(deviceState, position, 40, geofenceId));
-        verifyState(deviceState, false, 0);
+        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:30", 30), 40, 15000, geofenceId);
+        assertNull(state.getEvent());
+        verifyState(state, false, 0);
     }
 
     @Test

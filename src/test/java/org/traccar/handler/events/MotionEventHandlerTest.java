@@ -5,7 +5,8 @@ import org.traccar.BaseTest;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.common.TripsConfig;
-import org.traccar.session.DeviceState;
+import org.traccar.session.state.MotionProcessor;
+import org.traccar.session.state.MotionState;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -28,57 +29,52 @@ public class MotionEventHandlerTest extends BaseTest {
         return position;
     }
 
-    private void verifyState(DeviceState deviceState, boolean state, long distance) {
-        assertEquals(state, deviceState.getMotionState());
-        assertEquals(distance, deviceState.getMotionDistance(), 0.1);
+    private void verifyState(MotionState motionState, boolean state, long distance) {
+        assertEquals(state, motionState.getMotionState());
+        assertEquals(distance, motionState.getMotionDistance(), 0.1);
     }
 
     @Test
     public void testMotionWithPosition() throws ParseException {
-        MotionEventHandler motionEventHandler = new MotionEventHandler(
-                null, null, new TripsConfig(500, 300000, 300000, 0, false, false, 0.01));
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, false, false, 0.01);
 
-        DeviceState deviceState = new DeviceState();
+        MotionState state = new MotionState();
 
-        Position position = position("2017-01-01 00:00:00", false, 0, null);
-        assertNull(motionEventHandler.updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION)));
-        verifyState(deviceState, false, 0);
+        MotionProcessor.updateState(state, position("2017-01-01 00:00:00", false, 0, null), false, tripsConfig);
+        assertNull(state.getEvent());
+        verifyState(state, false, 0);
 
-        position = position("2017-01-01 00:02:00", true, 100, null);
-        assertNull(motionEventHandler.updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION)));
-        verifyState(deviceState, true, 100);
+        MotionProcessor.updateState(state, position("2017-01-01 00:02:00", true, 100, null), true, tripsConfig);
+        assertNull(state.getEvent());
+        verifyState(state, true, 100);
 
-        position = position("2017-01-01 00:02:00", true, 700, null);
-        var events = motionEventHandler.updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION));
-        assertEquals(Event.TYPE_DEVICE_MOVING, events.keySet().iterator().next().getType());
-        verifyState(deviceState, true, 0);
+        MotionProcessor.updateState(state, position("2017-01-01 00:02:00", true, 700, null), true, tripsConfig);
+        assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvent().getType());
+        verifyState(state, true, 0);
 
-        position = position("2017-01-01 00:03:00", false, 700, null);
-        assertNull(motionEventHandler.updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION)));
-        verifyState(deviceState, false, 700);
+        MotionProcessor.updateState(state, position("2017-01-01 00:03:00", false, 700, null), false, tripsConfig);
+        assertNull(state.getEvent());
+        verifyState(state, false, 700);
 
-        position = position("2017-01-01 00:10:00", false, 700, null);
-        events = motionEventHandler.updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION));
-        assertEquals(Event.TYPE_DEVICE_STOPPED, events.keySet().iterator().next().getType());
-        verifyState(deviceState, false, 0);
+        MotionProcessor.updateState(state, position("2017-01-01 00:10:00", false, 700, null), false, tripsConfig);
+        assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvent().getType());
+        verifyState(state, false, 0);
     }
 
     @Test
     public void testStopWithPositionIgnition() throws ParseException {
-        MotionEventHandler motionEventHandler = new MotionEventHandler(
-                null, null, new TripsConfig(500, 300000, 300000, 0, true, false, 0.01));
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, true, false, 0.01);
 
-        DeviceState deviceState = new DeviceState();
-        deviceState.setMotionState(true);
+        MotionState state = new MotionState();
+        state.setMotionState(true);
 
-        Position position = position("2017-01-01 00:00:00", false, 100, true);
-        assertNull(motionEventHandler.updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION)));
-        verifyState(deviceState, false, 100);
+        MotionProcessor.updateState(state, position("2017-01-01 00:00:00", false, 100, true), false, tripsConfig);
+        assertNull(state.getEvent());
+        verifyState(state, false, 100);
 
-        position = position("2017-01-01 00:02:00", false, 100, false);
-        var events = motionEventHandler.updateMotionState(deviceState, position, position.getBoolean(Position.KEY_MOTION));
-        assertEquals(Event.TYPE_DEVICE_STOPPED, events.keySet().iterator().next().getType());
-        verifyState(deviceState, false, 0);
+        MotionProcessor.updateState(state, position("2017-01-01 00:02:00", false, 100, false), false, tripsConfig);
+        assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvent().getType());
+        verifyState(state, false, 0);
     }
 
 }
