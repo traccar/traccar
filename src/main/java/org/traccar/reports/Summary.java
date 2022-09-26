@@ -61,7 +61,7 @@ public final class Summary {
             }
             boolean ignoreOdometer = Context.getDeviceManager()
                     .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
-            result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
+            result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer, positions));
             result.setAverageSpeed(speedSum / positions.size());
             result.setSpentFuel(ReportUtils.calculateFuel(firstPosition, previousPosition));
 

@@ -91,11 +91,11 @@ public final class ReportUtils {
         return result;
     }
 
-    public static double calculateDistance(Position firstPosition, Position lastPosition) {
-        return calculateDistance(firstPosition, lastPosition, true);
+    public static double calculateDistance(Position firstPosition, Position lastPosition, Collection<Position> positions) {
+        return calculateDistance(firstPosition, lastPosition, true, positions);
     }
 
-    public static double calculateDistance(Position firstPosition, Position lastPosition, boolean useOdometer) {
+    private static double calculateDistance(Position firstPosition, Position lastPosition, boolean useOdometer) {
         double distance = 0.0;
         double firstOdometer = firstPosition.getDouble(Position.KEY_ODOMETER);
         double lastOdometer = lastPosition.getDouble(Position.KEY_ODOMETER);
@@ -107,7 +107,52 @@ public final class ReportUtils {
             distance = lastPosition.getDouble(Position.KEY_TOTAL_DISTANCE)
                     - firstPosition.getDouble(Position.KEY_TOTAL_DISTANCE);
         }
+
         return distance;
+    }
+
+    private static boolean isValid(Position start, Position end, double distance){
+
+        if(distance < 0){
+            return false;
+        }
+
+        long t = end.getFixTime().getTime()-start.getFixTime().getTime();
+        if(0 == t){
+            return (0 == distance);
+        }
+
+        double kms = distance/1000.0;
+        double hours = t/3600000.0;
+        double averageSpeed = kms/hours;
+        return (averageSpeed < 200);
+    }
+
+    public static double calculateDistance(Position firstPosition, Position lastPosition, boolean useOdometer, Collection<Position> positions) {
+
+        double distance = calculateDistance(firstPosition, lastPosition, useOdometer);
+        if(null == positions || isValid(firstPosition, lastPosition, distance)){
+            return distance;
+        }
+
+        //invalid distance - need to calculate a fixed one checking position by position
+        Double fixedDistance = 0.0;
+        Position previous = null;
+        for (Position p : positions) {
+            if(p.getFixTime().before(firstPosition.getFixTime()) ||
+               p.getFixTime().after(lastPosition.getFixTime())){
+                continue;
+            }
+
+            if(previous != null){
+                double positionDistance = calculateDistance(previous, p, useOdometer);
+                if(isValid(previous, p, positionDistance)){
+                    fixedDistance += positionDistance;
+                }
+            }
+            previous = p;
+        }
+        return fixedDistance;
     }
 
     public static double calculateFuel(Position firstPosition, Position lastPosition) {
@@ -219,7 +264,7 @@ public final class ReportUtils {
         }
         trip.setEndAddress(endAddress);
 
-        trip.setDistance(calculateDistance(startTrip, endTrip, !ignoreOdometer));
+        trip.setDistance(calculateDistance(startTrip, endTrip, !ignoreOdometer, positions));
         trip.setDuration(tripDuration);
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));
         trip.setMaxSpeed(speedMax);

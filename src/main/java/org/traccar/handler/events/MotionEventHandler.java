@@ -86,7 +86,7 @@ public class MotionEventHandler extends BaseEventHandler {
         Position motionPosition = deviceState.getMotionPosition();
         if (motionPosition != null) {
             long motionTime = motionPosition.getFixTime().getTime();
-            double distance = ReportUtils.calculateDistance(motionPosition, position, false);
+            double distance = ReportUtils.calculateDistance(motionPosition, position, false, null);
             Boolean ignition = null;
             if (tripsConfig.getUseIgnition()
                     && position.getAttributes().containsKey(Position.KEY_IGNITION)) {
