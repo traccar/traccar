@@ -49,10 +49,10 @@ public class ReportUtilsTest extends BaseTest {
         startPosition.set(Position.KEY_TOTAL_DISTANCE, 500.0);
         Position endPosition = new Position();
         endPosition.set(Position.KEY_TOTAL_DISTANCE, 700.0);
-        assertEquals(ReportUtils.calculateDistance(startPosition, endPosition), 200.0, 10);
+        assertEquals(ReportUtils.calculateDistance(startPosition, endPosition, null), 200.0, 10);
         startPosition.set(Position.KEY_ODOMETER, 50000);
         endPosition.set(Position.KEY_ODOMETER, 51000);
-        assertEquals(ReportUtils.calculateDistance(startPosition, endPosition), 1000.0, 10);
+        assertEquals(ReportUtils.calculateDistance(startPosition, endPosition, null), 1000.0, 10);
     }
 
     @Test

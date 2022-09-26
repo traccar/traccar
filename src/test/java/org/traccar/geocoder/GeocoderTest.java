@@ -31,14 +31,6 @@ public class GeocoderTest {
 
     @Ignore
     @Test
-    public void testGisgraphy() {
-        Geocoder geocoder = new GisgraphyGeocoder(null, 0, new AddressFormat());
-        String address = geocoder.getAddress(48.8530000, 2.3400000, null);
-        assertEquals("Rue du Jardinet, Paris, Île-de-France, FR", address);
-    }
-
-    @Ignore
-    @Test
     public void testOpenCage() {
         Geocoder geocoder = new OpenCageGeocoder(
                 "http://api.opencagedata.com/geocode/v1", "SECRET", 0, new AddressFormat());
@@ -72,25 +64,9 @@ public class GeocoderTest {
 
     @Ignore
     @Test
-    public void testHere() {
-        Geocoder geocoder = new HereGeocoder(null, "", "", null, 0, new AddressFormat());
-        String address = geocoder.getAddress(48.8575, 2.2944, null);
-        assertEquals("6 Avenue Gustave Eiffel, Paris, Île-de-France, FRA", address);
-    }
-
-    @Ignore
-    @Test
     public void testMapmyIndia() {
         Geocoder geocoder = new MapmyIndiaGeocoder("", "", 0, new AddressFormat("%f"));
         String address = geocoder.getAddress(28.6129602407977, 77.2294557094574, null);
         assertEquals("New Delhi, Delhi. 1 m from India Gate pin-110001 (India)", address);
-    }
-
-    @Ignore
-    @Test
-    public void testPositionStack() {
-        Geocoder geocoder = new PositionStackGeocoder("", 0, new AddressFormat("%f"));
-        String address = geocoder.getAddress(28.6129602407977, 77.2294557094574, null);
-        assertEquals("India Gate, New Delhi, India", address);
     }
 }
