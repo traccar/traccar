@@ -287,5 +287,6 @@
     <entry key='thuraya.port'>5242</entry>
     <entry key='ndtpv6.port'>5243</entry>
     <entry key='g1rus.port'>5244</entry>
+    <entry key='rftrack.port'>5245</entry>
 
 </properties>
