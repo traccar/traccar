@@ -160,6 +160,9 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
         for (int i = 0; i < count; i++) {
             int value;
+            if (!PID_LENGTH_MAP.containsKey(pids[i])) {
+                throw new RuntimeException(String.format("Unknown PID 0x%02x", pids[i]));
+            }
             switch (PID_LENGTH_MAP.get(pids[i])) {
                 case 1:
                     value = buf.readUnsignedByte();
