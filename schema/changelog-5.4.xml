@@ -17,6 +17,39 @@
       <column name="overspeedgeofenceid" type="INT" defaultValueNumeric="0" />
     </addColumn>
 
+    <createTable tableName="tc_commands_queue">
+      <column autoIncrement="true" name="id" type="INT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="description" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="textchannel" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+            baseTableName="tc_commands_queue"
+            baseColumnNames="deviceid"
+            constraintName="fk_commands_queue_deviceid"
+            onDelete="CASCADE"
+            referencedColumnNames="id"
+            referencedTableName="tc_devices" />
+
+    <createIndex tableName="tc_commands_queue" indexName="idx_commands_queue_deviceid">
+      <column name="deviceid" />
+    </createIndex>
+
   </changeSet>
 
 </databaseChangeLog>
