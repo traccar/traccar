@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.traccar.storage.StorageName;
 
 @StorageName("tc_commands")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Command extends Message implements Cloneable {
+public class Command extends BaseCommand {
 
     public static final String TYPE_CUSTOM = "custom";
     public static final String TYPE_IDENTIFICATION = "deviceIdentification";
@@ -84,21 +84,6 @@ public class Command extends Message implements Cloneable {
     public static final String KEY_SERVER = "server";
     public static final String KEY_PORT = "port";
 
-    @Override
-    public Command clone() throws CloneNotSupportedException {
-        return (Command) super.clone();
-    }
-
-    private boolean textChannel;
-
-    public boolean getTextChannel() {
-        return textChannel;
-    }
-
-    public void setTextChannel(boolean textChannel) {
-        this.textChannel = textChannel;
-    }
-
     @QueryIgnore
     @Override
     public long getDeviceId() {
@@ -109,16 +94,6 @@ public class Command extends Message implements Cloneable {
     @Override
     public void setDeviceId(long deviceId) {
         super.setDeviceId(deviceId);
-    }
-
-    private String description;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
 }
