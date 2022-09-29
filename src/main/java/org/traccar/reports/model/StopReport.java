@@ -103,4 +103,10 @@ public class StopReport extends BaseReport  {
     public void addEngineHours(long engineHours) {
         this.engineHours += engineHours;
     }
+
+    private long idleTime;
+
+    public void setIdleTime(long idleTime) { this.idleTime = idleTime; }
+
+    public long getIdleTime() { return this.idleTime; }
 }
