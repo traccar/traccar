@@ -83,13 +83,8 @@ public class CommandsManager {
             }
         } else {
             DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
-            if (deviceSession != null) {
-                if (deviceSession.supportsLiveCommands()) {
-                    deviceSession.sendCommand(command);
-                } else {
-                    getDeviceQueue(deviceId).add(command);
-                    return false;
-                }
+            if (deviceSession != null && deviceSession.supportsLiveCommands()) {
+                deviceSession.sendCommand(command);
             } else {
                 getDeviceQueue(deviceId).add(command);
                 return false;
