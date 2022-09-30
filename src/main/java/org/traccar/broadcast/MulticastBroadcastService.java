@@ -103,6 +103,13 @@ public class MulticastBroadcastService implements BroadcastService {
     }
 
     @Override
+    public void updateCommand(boolean local, long deviceId) {
+        BroadcastMessage message = new BroadcastMessage();
+        message.setCommandDeviceId(deviceId);
+        sendMessage(message);
+    }
+
+    @Override
     public void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
         BroadcastMessage message = new BroadcastMessage();
         message.setChanges(Map.of(Permission.getKey(clazz), id));
@@ -136,6 +143,8 @@ public class MulticastBroadcastService implements BroadcastService {
             listeners.forEach(listener -> listener.updatePosition(false, message.getPosition()));
         } else if (message.getUserId() != null && message.getEvent() != null) {
             listeners.forEach(listener -> listener.updateEvent(false, message.getUserId(), message.getEvent()));
+        } else if (message.getCommandDeviceId() != null) {
+            listeners.forEach(listener -> listener.updateCommand(false, message.getCommandDeviceId()));
         } else if (message.getChanges() != null) {
             var iterator = message.getChanges().entrySet().iterator();
             if (iterator.hasNext()) {

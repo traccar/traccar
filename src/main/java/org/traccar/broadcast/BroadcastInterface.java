@@ -31,6 +31,9 @@ public interface BroadcastInterface {
     default void updateEvent(boolean local, long userId, Event event) {
     }
 
+    default void updateCommand(boolean local, long deviceId) {
+    }
+
     default void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
     }
 

@@ -18,6 +18,8 @@ package org.traccar.database;
 
 import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
+import org.traccar.broadcast.BroadcastInterface;
+import org.traccar.broadcast.BroadcastService;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -40,21 +42,24 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Singleton
-public class CommandsManager {
+public class CommandsManager implements BroadcastInterface {
 
     private final Storage storage;
     private final ServerManager serverManager;
     private final SmsManager smsManager;
     private final ConnectionManager connectionManager;
+    private final BroadcastService broadcastService;
 
     @Inject
     public CommandsManager(
             Storage storage, ServerManager serverManager, @Nullable SmsManager smsManager,
-            ConnectionManager connectionManager) {
+            ConnectionManager connectionManager, BroadcastService broadcastService) {
         this.storage = storage;
         this.serverManager = serverManager;
         this.smsManager = smsManager;
         this.connectionManager = connectionManager;
+        this.broadcastService = broadcastService;
+        broadcastService.registerListener(this);
     }
 
     public boolean sendCommand(Command command) throws Exception {
@@ -81,6 +86,7 @@ public class CommandsManager {
                 deviceSession.sendCommand(command);
             } else {
                 storage.addObject(QueuedCommand.fromCommand(command), new Request(new Columns.Exclude("id")));
+                broadcastService.updateCommand(true, deviceId);
                 return false;
             }
         }
@@ -105,6 +111,18 @@ public class CommandsManager {
             return commands.stream().map(QueuedCommand::toCommand).collect(Collectors.toList());
         } catch (StorageException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void updateCommand(boolean local, long deviceId) {
+        if (!local) {
+            DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
+            if (deviceSession != null && deviceSession.supportsLiveCommands()) {
+                for (Command command : readQueuedCommands(deviceId)) {
+                    deviceSession.sendCommand(command);
+                }
+            }
         }
     }
 

@@ -63,6 +63,16 @@ public class BroadcastMessage {
         this.event = event;
     }
 
+    private Long commandDeviceId;
+
+    public Long getCommandDeviceId() {
+        return commandDeviceId;
+    }
+
+    public void setCommandDeviceId(Long commandDeviceId) {
+        this.commandDeviceId = commandDeviceId;
+    }
+
     private Map<String, Long> changes;
 
     public Map<String, Long> getChanges() {
