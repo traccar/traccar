@@ -18,8 +18,6 @@ package org.traccar.database;
 
 import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -55,22 +53,22 @@ public class CommandsManager {
     private final SmsManager smsManager;
     private final ConnectionManager connectionManager;
 
-    private final boolean queueing;
-
     @Inject
     public CommandsManager(
             Storage storage, ServerManager serverManager, @Nullable SmsManager smsManager,
-            ConnectionManager connectionManager, Config config) {
+            ConnectionManager connectionManager) {
         this.storage = storage;
         this.serverManager = serverManager;
         this.smsManager = smsManager;
         this.connectionManager = connectionManager;
-        queueing = config.getBoolean(Keys.COMMANDS_QUEUEING);
     }
 
     public boolean sendCommand(Command command) throws Exception {
         long deviceId = command.getDeviceId();
         if (command.getTextChannel()) {
+            if (smsManager == null) {
+                throw new RuntimeException("SMS not configured");
+            }
             Device device = storage.getObject(Device.class, new Request(
                     new Columns.Include("positionId", "phone"), new Condition.Equals("id", "id", deviceId)));
             Position position = storage.getObject(Position.class, new Request(
@@ -92,8 +90,6 @@ public class CommandsManager {
                     getDeviceQueue(deviceId).add(command);
                     return false;
                 }
-            } else if (!queueing) {
-                throw new RuntimeException("Device is not online");
             } else {
                 getDeviceQueue(deviceId).add(command);
                 return false;

@@ -780,14 +780,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Enable commands queuing when devices are offline. Commands are buffered in memory only, so restarting service
-     * will clear the buffer.
-     */
-    public static final ConfigKey<Boolean> COMMANDS_QUEUEING = new BooleanConfigKey(
-            "commands.queueing",
-            List.of(KeyType.CONFIG));
-
-    /**
      * Root folder for all template files.
      */
     public static final ConfigKey<String> TEMPLATES_ROOT = new StringConfigKey(
