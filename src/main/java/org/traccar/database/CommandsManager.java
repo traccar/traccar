@@ -21,32 +21,26 @@ import org.traccar.ServerManager;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.model.QueuedCommand;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
 import org.traccar.sms.SmsManager;
 import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Limit;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 @Singleton
 public class CommandsManager {
-
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
-
-    private final Map<Long, Queue<Command>> deviceQueues = new ConcurrentHashMap<>();
 
     private final Storage storage;
     private final ServerManager serverManager;
@@ -86,31 +80,11 @@ public class CommandsManager {
             if (deviceSession != null && deviceSession.supportsLiveCommands()) {
                 deviceSession.sendCommand(command);
             } else {
-                getDeviceQueue(deviceId).add(command);
+                storage.addObject(QueuedCommand.fromCommand(command), new Request(new Columns.Exclude("id")));
                 return false;
             }
         }
         return true;
-    }
-
-    private Queue<Command> getDeviceQueue(long deviceId) {
-        Queue<Command> deviceQueue;
-        try {
-            lock.readLock().lock();
-            deviceQueue = deviceQueues.get(deviceId);
-        } finally {
-            lock.readLock().unlock();
-        }
-        if (deviceQueue != null) {
-            return deviceQueue;
-        } else {
-            try {
-                lock.writeLock().lock();
-                return deviceQueues.computeIfAbsent(deviceId, key -> new ConcurrentLinkedQueue<>());
-            } finally {
-                lock.writeLock().unlock();
-            }
-        }
     }
 
     public Collection<Command> readQueuedCommands(long deviceId) {
@@ -118,22 +92,20 @@ public class CommandsManager {
     }
 
     public Collection<Command> readQueuedCommands(long deviceId, int count) {
-        Queue<Command> deviceQueue;
         try {
-            lock.readLock().lock();
-            deviceQueue = deviceQueues.get(deviceId);
-        } finally {
-            lock.readLock().unlock();
-        }
-        Collection<Command> result = new ArrayList<>();
-        if (deviceQueue != null) {
-            Command command = deviceQueue.poll();
-            while (command != null && result.size() < count) {
-                result.add(command);
-                command = deviceQueue.poll();
+            var commands = storage.getObjects(QueuedCommand.class, new Request(
+                    new Columns.All(),
+                    new Condition.Equals("deviceId", "deviceId", deviceId),
+                    new Order(false, "id"),
+                    new Limit(count)));
+            for (var command : commands) {
+                storage.removeObject(QueuedCommand.class, new Request(
+                        new Condition.Equals("id", "id", command.getId())));
             }
+            return commands.stream().map(QueuedCommand::toCommand).collect(Collectors.toList());
+        } catch (StorageException e) {
+            throw new RuntimeException(e);
         }
-        return result;
     }
 
 }
