@@ -1,7 +1,7 @@
 plugins {
     id "java"
     id "checkstyle"
-    id "com.google.protobuf" version "0.8.18"
+    id "com.google.protobuf" version "0.8.19"
     id "org.kordamp.gradle.project-enforcer" version "0.9.0"
 }
 
@@ -14,7 +14,7 @@ ext {
     jettyVersion = "10.0.7" // jetty 11 javax to jakarta
     jerseyVersion = "2.36" // jersey 3 javax to jakarta
     jacksonVersion = "2.13.3" // same version as jersey-media-json-jackson dependency
-    protobufVersion = "3.19.3"
+    protobufVersion = "3.21.7"
 }
 
 sourceCompatibility = "11"
