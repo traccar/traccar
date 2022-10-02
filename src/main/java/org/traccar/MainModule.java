@@ -99,10 +99,11 @@ public class MainModule extends AbstractModule {
     protected void configure() {
         bindConstant().annotatedWith(Names.named("configFile")).to(configFile);
         bind(Config.class).asEagerSingleton();
-        bind(Storage.class).to(DatabaseStorage.class);
+        bind(Storage.class).to(DatabaseStorage.class).in(Scopes.SINGLETON);
         bind(Timer.class).to(HashedWheelTimer.class).in(Scopes.SINGLETON);
     }
 
+    @Singleton
     @Provides
     public static ObjectMapper provideObjectMapper(Config config) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -114,6 +115,7 @@ public class MainModule extends AbstractModule {
         return objectMapper;
     }
 
+    @Singleton
     @Provides
     public static Client provideClient(ObjectMapperContextResolver objectMapperContextResolver) {
         return ClientBuilder.newClient().register(objectMapperContextResolver);
@@ -130,6 +132,7 @@ public class MainModule extends AbstractModule {
         return null;
     }
 
+    @Singleton
     @Provides
     public static MailManager provideMailManager(Config config, StatisticsManager statisticsManager) {
         if (config.getBoolean(Keys.MAIL_DEBUG)) {
@@ -265,6 +268,7 @@ public class MainModule extends AbstractModule {
         return null;
     }
 
+    @Singleton
     @Provides
     public static GeolocationHandler provideGeolocationHandler(
             Config config, @Nullable GeolocationProvider geolocationProvider, CacheManager cacheManager,
@@ -275,6 +279,7 @@ public class MainModule extends AbstractModule {
         return null;
     }
 
+    @Singleton
     @Provides
     public static GeocoderHandler provideGeocoderHandler(
             Config config, @Nullable Geocoder geocoder, CacheManager cacheManager) {
@@ -284,6 +289,7 @@ public class MainModule extends AbstractModule {
         return null;
     }
 
+    @Singleton
     @Provides
     public static SpeedLimitHandler provideSpeedLimitHandler(@Nullable SpeedLimitProvider speedLimitProvider) {
         if (speedLimitProvider != null) {
@@ -302,6 +308,7 @@ public class MainModule extends AbstractModule {
         return new NullBroadcastService();
     }
 
+    @Singleton
     @Provides
     public static EventForwarder provideEventForwarder(Config config, Client client, CacheManager cacheManager) {
         if (config.hasKey(Keys.EVENT_FORWARD_URL)) {

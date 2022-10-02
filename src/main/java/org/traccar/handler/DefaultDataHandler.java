@@ -25,7 +25,9 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 @ChannelHandler.Sharable
 public class DefaultDataHandler extends BaseDataHandler {
 

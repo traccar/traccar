@@ -40,7 +40,9 @@ import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 @ChannelHandler.Sharable
 public class ComputedAttributesHandler extends BaseDataHandler {
 

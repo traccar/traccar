@@ -36,11 +36,13 @@ import org.traccar.storage.query.Request;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+@Singleton
 public class NotificationManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);

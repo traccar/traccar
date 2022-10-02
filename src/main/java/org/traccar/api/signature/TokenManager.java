@@ -21,11 +21,13 @@ import org.apache.commons.codec.binary.Base64;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+@Singleton
 public class TokenManager {
 
     private static final int DEFAULT_EXPIRATION_DAYS = 7;

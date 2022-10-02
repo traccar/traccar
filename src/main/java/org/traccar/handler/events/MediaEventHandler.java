@@ -20,10 +20,12 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Singleton
 @ChannelHandler.Sharable
 public class MediaEventHandler extends BaseEventHandler {
 

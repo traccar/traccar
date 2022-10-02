@@ -23,9 +23,11 @@ import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.Collections;
 import java.util.Map;
 
+@Singleton
 @ChannelHandler.Sharable
 public class DriverEventHandler extends BaseEventHandler {
 

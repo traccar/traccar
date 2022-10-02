@@ -22,7 +22,9 @@ import org.traccar.model.Position;
 import org.traccar.reports.common.TripsConfig;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 @ChannelHandler.Sharable
 public class MotionHandler extends BaseDataHandler {
 

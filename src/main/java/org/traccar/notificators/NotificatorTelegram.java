@@ -25,9 +25,11 @@ import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 
+@Singleton
 public class NotificatorTelegram implements Notificator {
 
     private final NotificationFormatter notificationFormatter;

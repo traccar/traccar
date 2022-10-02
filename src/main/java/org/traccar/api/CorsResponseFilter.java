@@ -20,11 +20,13 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.container.ContainerResponseFilter;
 import java.io.IOException;
 
+@Singleton
 public class CorsResponseFilter implements ContainerResponseFilter {
 
     private final String allowed;

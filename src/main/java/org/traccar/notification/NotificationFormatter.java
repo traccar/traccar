@@ -28,7 +28,9 @@ import org.traccar.model.User;
 import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class NotificationFormatter {
 
     private final CacheManager cacheManager;

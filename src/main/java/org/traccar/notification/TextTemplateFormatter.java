@@ -30,6 +30,7 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -37,6 +38,7 @@ import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.Locale;
 
+@Singleton
 public class TextTemplateFormatter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TextTemplateFormatter.class);

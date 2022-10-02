@@ -21,6 +21,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;
@@ -33,6 +34,7 @@ import java.security.spec.ECGenParameterSpec;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+@Singleton
 public class CryptoManager {
 
     private final Storage storage;

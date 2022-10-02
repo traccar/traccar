@@ -22,6 +22,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -34,6 +35,7 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@Singleton
 public class MediaManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MediaManager.class);

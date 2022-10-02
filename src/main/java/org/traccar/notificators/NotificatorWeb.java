@@ -16,7 +16,6 @@
  */
 package org.traccar.notificators;
 
-import org.traccar.broadcast.BroadcastService;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -24,19 +23,18 @@ import org.traccar.notification.NotificationFormatter;
 import org.traccar.session.ConnectionManager;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public final class NotificatorWeb implements Notificator {
 
     private final ConnectionManager connectionManager;
-    private final BroadcastService broadcastService;
     private final NotificationFormatter notificationFormatter;
 
     @Inject
     public NotificatorWeb(
-            ConnectionManager connectionManager, BroadcastService broadcastService,
-            NotificationFormatter notificationFormatter) {
+            ConnectionManager connectionManager, NotificationFormatter notificationFormatter) {
         this.connectionManager = connectionManager;
-        this.broadcastService = broadcastService;
         this.notificationFormatter = notificationFormatter;
     }
 

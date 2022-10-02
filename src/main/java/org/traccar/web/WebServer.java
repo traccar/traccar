@@ -52,7 +52,6 @@ import org.traccar.api.security.SecurityRequestFilter;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
-import javax.inject.Inject;
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
@@ -76,7 +75,6 @@ public class WebServer implements LifecycleObject {
     private final Config config;
     private final Server server;
 
-    @Inject
     public WebServer(Injector injector, Config config) {
         this.injector = injector;
         this.config = config;

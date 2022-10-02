@@ -20,7 +20,9 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 public class TripsConfig {
 
     @Inject

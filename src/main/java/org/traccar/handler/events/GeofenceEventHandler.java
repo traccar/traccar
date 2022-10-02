@@ -33,11 +33,13 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Singleton
 @ChannelHandler.Sharable
 public class GeofenceEventHandler extends BaseEventHandler {
 

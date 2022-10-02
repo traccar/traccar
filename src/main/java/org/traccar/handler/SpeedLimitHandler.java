@@ -24,7 +24,9 @@ import org.traccar.model.Position;
 import org.traccar.speedlimit.SpeedLimitProvider;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 
+@Singleton
 @ChannelHandler.Sharable
 public class SpeedLimitHandler extends ChannelInboundHandlerAdapter {
 

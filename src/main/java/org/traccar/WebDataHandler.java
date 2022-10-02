@@ -33,6 +33,7 @@ import org.traccar.model.Group;
 import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -52,6 +53,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Singleton
 @ChannelHandler.Sharable
 public class WebDataHandler extends BaseDataHandler {
 

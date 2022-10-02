@@ -28,9 +28,11 @@ import org.traccar.storage.query.Request;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
+@Singleton
 public class LoginService {
 
     private final Storage storage;
