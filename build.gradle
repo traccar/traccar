@@ -10,10 +10,10 @@ repositories {
 }
 
 ext {
-    guiceVersion = "5.0.1"
-    jettyVersion = "10.0.7" // jetty 11 javax to jakarta
-    jerseyVersion = "2.36" // jersey 3 javax to jakarta
-    jacksonVersion = "2.13.3" // same version as jersey-media-json-jackson dependency
+    guiceVersion = "5.1.0"
+    jettyVersion = "10.0.12" // jetty 11 javax to jakarta
+    jerseyVersion = "2.37" // jersey 3 javax to jakarta
+    jacksonVersion = "2.13.4" // same version as jersey-media-json-jackson dependency
     protobufVersion = "3.21.7"
 }
 
@@ -41,13 +41,13 @@ enforce {
 
 dependencies {
     implementation "commons-codec:commons-codec:1.15"
-    implementation "com.h2database:h2:2.0.206"
-    implementation "mysql:mysql-connector-java:8.0.27"
-    implementation "org.postgresql:postgresql:42.3.1"
-    implementation "com.microsoft.sqlserver:mssql-jdbc:9.4.1.jre11"
+    implementation "com.h2database:h2:2.1.214"
+    implementation "mysql:mysql-connector-java:8.0.30"
+    implementation "org.postgresql:postgresql:42.5.0"
+    implementation "com.microsoft.sqlserver:mssql-jdbc:11.2.1.jre11"
     implementation "com.zaxxer:HikariCP:5.0.1"
-    implementation "io.netty:netty-all:4.1.66.Final"
-    implementation "org.slf4j:slf4j-jdk14:2.0.0-alpha6"
+    implementation "io.netty:netty-all:4.1.82.Final"
+    implementation "org.slf4j:slf4j-jdk14:2.0.3"
     implementation "com.google.inject:guice:$guiceVersion"
     implementation "com.google.inject.extensions:guice-servlet:$guiceVersion"
     implementation "org.owasp.encoder:encoder:1.2.3"
@@ -65,29 +65,29 @@ dependencies {
     implementation "org.glassfish.hk2:guice-bridge:2.6.1" // same version as jersey-hk2
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr353:$jacksonVersion"
-    implementation "org.liquibase:liquibase-core:4.7.0"
+    implementation "org.liquibase:liquibase-core:4.16.1"
     implementation "com.sun.mail:javax.mail:1.6.2"
     implementation "org.jxls:jxls:2.4.7" // needs upgrade (wait for jexl 4)
     implementation "org.jxls:jxls-poi:1.0.16" // needs upgrade (wait for jexl 4)
-    implementation "org.apache.velocity:velocity:1.7"
-    implementation "org.apache.velocity:velocity-tools:2.0"
+    implementation "org.apache.velocity:velocity:1.7" // needs upgrade
+    implementation "org.apache.velocity:velocity-tools:2.0" // needs upgrade
     implementation "org.apache.commons:commons-collections4:4.4"
-    implementation "org.mnode.ical4j:ical4j:3.1.2"
+    implementation "org.mnode.ical4j:ical4j:3.2.5"
     implementation "org.locationtech.spatial4j:spatial4j:0.8"
-    implementation "org.locationtech.jts:jts-core:1.18.2"
-    implementation "net.java.dev.jna:jna-platform:5.10.0"
+    implementation "org.locationtech.jts:jts-core:1.19.0"
+    implementation "net.java.dev.jna:jna-platform:5.12.1"
     implementation "com.github.jnr:jnr-posix:3.1.15"
     implementation "com.google.protobuf:protobuf-java:$protobufVersion"
     implementation "javax.xml.bind:jaxb-api:2.3.1"
-    implementation "com.sun.xml.bind:jaxb-core:3.0.2"
-    implementation "com.sun.xml.bind:jaxb-impl:3.0.2"
+    implementation "com.sun.xml.bind:jaxb-core:3.0.2" // needs upgrade
+    implementation "com.sun.xml.bind:jaxb-impl:3.0.2" // needs upgrade
     implementation "javax.activation:activation:1.1.1"
-    implementation "com.amazonaws:aws-java-sdk-sns:1.12.141"
+    implementation "com.amazonaws:aws-java-sdk-sns:1.12.314"
     implementation ("com.google.firebase:firebase-admin:9.0.0") {
         exclude group: 'com.google.cloud', module: 'google-cloud-firestore'
     }
     testImplementation "junit:junit:4.13.2"
-    testImplementation "org.mockito:mockito-core:3.+"
+    testImplementation "org.mockito:mockito-core:4.+"
 }
 
 task copyDependencies(type: Copy) {
