@@ -2,7 +2,7 @@ plugins {
     id "java"
     id "checkstyle"
     id "com.google.protobuf" version "0.8.19"
-    id "org.kordamp.gradle.project-enforcer" version "0.9.0"
+    id "org.kordamp.gradle.project-enforcer" version "0.10.0"
 }
 
 repositories {
@@ -22,7 +22,7 @@ compileJava.options.encoding = "UTF-8"
 jar.destinationDirectory = file("$projectDir/target")
 
 checkstyle {
-    toolVersion = "9.2.1"
+    toolVersion = "10.3.4"
     configFile = "gradle/checkstyle.xml" as File
     checkstyleTest.enabled = false
 }
