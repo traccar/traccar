@@ -21,6 +21,8 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.MulticastMessage;
@@ -76,6 +78,11 @@ public class NotificatorFirebase implements Notificator {
                             .build())
                     .setAndroidConfig(AndroidConfig.builder()
                             .setNotification(AndroidNotification.builder()
+                                    .setSound("default")
+                                    .build())
+                            .build())
+                    .setApnsConfig(ApnsConfig.builder()
+                            .setAps(Aps.builder()
                                     .setSound("default")
                                     .build())
                             .build())
