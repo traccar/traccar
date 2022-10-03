@@ -28,6 +28,7 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
 import java.util.Date;
@@ -378,6 +379,9 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             }
             deviceSession = getDeviceSession(channel, remoteAddress, id);
             sentence = sentence.substring(index);
+        } else if (remoteAddress instanceof InetSocketAddress) {
+            String host = ((InetSocketAddress) remoteAddress).getHostString();
+            deviceSession = getDeviceSession(channel, remoteAddress, host);
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
         }
