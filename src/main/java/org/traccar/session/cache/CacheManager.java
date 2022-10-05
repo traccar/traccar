@@ -48,6 +48,7 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -102,7 +103,11 @@ public class CacheManager implements BroadcastInterface {
         try {
             lock.readLock().lock();
             return deviceLinks.get(deviceId).get(clazz).stream()
-                    .map(id -> deviceCache.get(new CacheKey(clazz, id)).<T>getValue())
+                    .map(id -> {
+                        var cacheValue = deviceCache.get(new CacheKey(clazz, id));
+                        return cacheValue != null ? cacheValue.<T>getValue() : null;
+                    })
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } finally {
             lock.readLock().unlock();
