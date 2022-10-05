@@ -23,6 +23,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.model.CellTower;
+import org.traccar.model.Command;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
@@ -108,7 +109,11 @@ public class RfTrackProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setNetwork(network);
         }
 
-        sendResponse(channel, HttpResponseStatus.OK, Unpooled.copiedBuffer("{}", StandardCharsets.UTF_8));
+        String response = "{}";
+        for (Command command : getCommandsManager().readQueuedCommands(position.getDeviceId(), 1)) {
+            response = command.getString(Command.KEY_DATA);
+        }
+        sendResponse(channel, HttpResponseStatus.OK, Unpooled.copiedBuffer(response, StandardCharsets.UTF_8));
         return position;
     }
 
