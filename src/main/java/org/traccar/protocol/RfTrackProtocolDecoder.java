@@ -26,6 +26,7 @@ import org.traccar.model.CellTower;
 import org.traccar.model.Command;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
 
 import javax.json.Json;
@@ -125,6 +126,14 @@ public class RfTrackProtocolDecoder extends BaseHttpProtocolDecoder {
                         break;
                     case "cob":
                         position.set("pressureChanges", value);
+                        break;
+                    case "wifi":
+                        JsonArray wifiInfo = Json.createReader(new StringReader(value)).readArray();
+                        for (int i = 0; i < wifiInfo.size(); i++) {
+                            JsonObject wifi = wifiInfo.getJsonObject(i);
+                            network.addWifiAccessPoint(WifiAccessPoint.from(
+                                    wifi.getString("m").replace('-', ':'), wifi.getInt("l")));
+                        }
                         break;
                     case "u_ids":
                         position.set("unpairedIds", value);
