@@ -13,7 +13,7 @@
     <entry key='media.path'>./target/media</entry>
 
     <entry key='logger.console'>true</entry>
-    <entry key='logger.queries'>true</entry>
+    <entry key='logger.queries'>false</entry>
 
     <entry key='mail.debug'>true</entry>
 
