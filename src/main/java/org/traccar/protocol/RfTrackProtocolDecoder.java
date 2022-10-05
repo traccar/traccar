@@ -73,7 +73,29 @@ public class RfTrackProtocolDecoder extends BaseHttpProtocolDecoder {
                         position.setDeviceTime(new Date(Long.parseLong(value)));
                         break;
                     case "bat":
-                        position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(value) & 0xff);
+                        int battery = Integer.parseInt(value);
+                        position.set(Position.KEY_BATTERY_LEVEL, battery & 0xff);
+                        position.set("plugStatus", (battery >> 8) & 0x0f);
+                        position.set(Position.KEY_CHARGE, ((battery >> 12) & 0x0f) == 1);
+                        break;
+                    case "id":
+                        position.set("braceletId", value);
+                        break;
+                    case "rc":
+                        int braceletCode = Integer.parseInt(value);
+                        position.set("braceletCode", braceletCode & 0xffff);
+                        position.set("braceletStatus", braceletCode >> 16);
+                        break;
+                    case "idt":
+                        long braceletTime = Long.parseLong(value);
+                        position.set("lastHeartbeat", (braceletTime >> 45) * 10);
+                        position.set("lastPaired", ((braceletTime >> 30) & 0xffff) * 10);
+                        position.set("lastUnpaired", ((braceletTime >> 15) & 0xffff) * 10);
+                        break;
+                    case "mt":
+                        int vibrationTime = Integer.parseInt(value);
+                        position.set("vibrationDevice", (vibrationTime & 0x7fff) * 10);
+                        position.set("vibrationBracelet", (vibrationTime >> 15) * 10);
                         break;
                     case "gps":
                         JsonObject location = Json.createReader(new StringReader(value)).readObject();
@@ -94,6 +116,18 @@ public class RfTrackProtocolDecoder extends BaseHttpProtocolDecoder {
                             network.addCellTower(CellTower.from(
                                     mcc, mnc, cell.getInt("l"), cell.getInt("c"), cell.getInt("b")));
                         }
+                        break;
+                    case "dbm":
+                        position.set(Position.KEY_RSSI, Integer.parseInt(value));
+                        break;
+                    case "bar":
+                        position.set("pressure", Double.parseDouble(value));
+                        break;
+                    case "cob":
+                        position.set("pressureChanges", value);
+                        break;
+                    case "u_ids":
+                        position.set("unpairedIds", value);
                         break;
                     default:
                         break;
