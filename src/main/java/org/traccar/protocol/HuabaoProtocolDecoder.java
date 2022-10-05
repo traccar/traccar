@@ -160,6 +160,17 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return dateBuilder.getDate();
     }
 
+    private String decodeId(ByteBuf id) {
+        String serial = ByteBufUtil.hexDump(id);
+        if (serial.matches("[0-9]+")) {
+            return serial;
+        } else {
+            long imei = id.readUnsignedShort();
+            imei = (imei << 32) + id.readUnsignedInt();
+            return String.valueOf(imei);
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -193,7 +204,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             index = buf.readUnsignedShort();
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(id));
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, decodeId(id));
         if (deviceSession == null) {
             return null;
         }
@@ -208,7 +219,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf response = Unpooled.buffer();
                 response.writeShort(index);
                 response.writeByte(RESULT_SUCCESS);
-                response.writeBytes(ByteBufUtil.hexDump(id).getBytes(StandardCharsets.US_ASCII));
+                response.writeBytes(decodeId(id).getBytes(StandardCharsets.US_ASCII));
                 channel.writeAndFlush(new NetworkMessage(
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
