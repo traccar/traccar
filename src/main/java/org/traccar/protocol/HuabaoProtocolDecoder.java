@@ -165,8 +165,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (serial.matches("[0-9]+")) {
             return serial;
         } else {
-            long imei = id.readUnsignedShort();
-            imei = (imei << 32) + id.readUnsignedInt();
+            long imei = id.getUnsignedShort(0);
+            imei = (imei << 32) + id.getUnsignedInt(2);
             return String.valueOf(imei);
         }
     }
