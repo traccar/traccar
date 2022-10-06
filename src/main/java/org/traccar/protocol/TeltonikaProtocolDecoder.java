@@ -347,10 +347,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (position.hasAttribute(mncKey) && position.hasAttribute(lacKey) && position.hasAttribute(cidKey)) {
             CellTower cellTower = CellTower.from(
                     getConfig().getInteger(Keys.GEOLOCATION_MCC),
-                    (Integer) position.getAttributes().remove(mncKey),
-                    (Integer) position.getAttributes().remove(lacKey),
-                    (Integer) position.getAttributes().remove(cidKey));
-            cellTower.setSignalStrength((Integer) position.getAttributes().remove(rssiKey));
+                    ((Number) position.getAttributes().remove(mncKey)).intValue(),
+                    ((Number) position.getAttributes().remove(lacKey)).intValue(),
+                    ((Number) position.getAttributes().remove(cidKey)).longValue());
+            cellTower.setSignalStrength(((Number) position.getAttributes().remove(rssiKey)).intValue());
             network.addCellTower(cellTower);
         }
     }
