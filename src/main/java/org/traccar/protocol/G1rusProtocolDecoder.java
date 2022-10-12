@@ -15,6 +15,7 @@
  */
 package org.traccar.protocol;
 
+import com.google.common.primitives.Longs;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -34,10 +35,10 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    public static final int HEAD_TAIL = 0xF8;
+
     public static final int MSG_HEARTBEAT = 0;
     public static final int MSG_REGULAR = 1;
-    public static final int MSG_SMS_FORWARD = 2;
-    public static final int MSG_SERIAL = 3;
     public static final int MSG_MIXED = 4;
 
     private String readString(ByteBuf buf) {
@@ -124,9 +125,17 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
+        if (buf.readUnsignedByte() != HEAD_TAIL) {
+            return null;
+        }
+
+        buf.skipBytes(1); /* skip version */
+
         int type = buf.readUnsignedByte();
-        String imei = String.valueOf(buf.readLong());
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        byte[] imei = new byte[8];
+        buf.readBytes(imei, 0, 7);
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(Longs.fromByteArray(imei)));
         if (deviceSession == null) {
             return null;
         }
