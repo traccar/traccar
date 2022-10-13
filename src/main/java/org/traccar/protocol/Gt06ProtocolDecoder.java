@@ -118,6 +118,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         S5,
         SPACE10X,
         STANDARD,
+        OBD6,
     }
 
     private Variant variant;
@@ -346,7 +347,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return true;
     }
 
-    private void decodeStatus(Position position, ByteBuf buf, boolean batteryLevel) {
+    private void decodeStatus(Position position, ByteBuf buf) {
 
         int status = buf.readUnsignedByte();
 
@@ -381,13 +382,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             default:
                 break;
         }
-
-        if (batteryLevel) {
-            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 100 / 6);
-        } else {
-            position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
-        }
-        position.set(Position.KEY_RSSI, buf.readUnsignedByte());
     }
 
     private String decodeAlarm(short value) {
@@ -793,8 +787,22 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (hasStatus(type)) {
-                decodeStatus(position, buf, true);
-                position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                decodeStatus(position, buf);
+                if (variant == Variant.OBD6) {
+                    int signal = buf.readUnsignedShort();
+                    int satellites = BitUtil.between(signal, 10, 15) + BitUtil.between(signal, 5, 10);
+                    position.set(Position.KEY_SATELLITES, satellites);
+                    position.set(Position.KEY_RSSI, BitUtil.to(signal, 5));
+                    position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                    buf.readUnsignedByte(); // language
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    buf.readUnsignedByte(); // working mode
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
+                } else {
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 100 / 6);
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                }
             }
 
             if (type == MSG_GPS_LBS_1) {
@@ -823,10 +831,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
                 } else if (variant == Variant.VXT01) {
-                    decodeStatus(position, buf, false);
+                    decodeStatus(position, buf);
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     buf.readUnsignedByte(); // alarm extension
                 } else if (variant == Variant.S5) {
-                    decodeStatus(position, buf, false);
+                    decodeStatus(position, buf);
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
                     position.set("oil", buf.readUnsignedShort());
                     int temperature = buf.readUnsignedByte();
@@ -1355,6 +1367,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.S5;
         } else if (header == 0x7878 && type == MSG_LBS_STATUS && length >= 0x17) {
             variant = Variant.SPACE10X;
+        } else if (header == 0x7878 && type == MSG_STATUS && length == 0x13) {
+            variant = Variant.OBD6;
         } else {
             variant = Variant.STANDARD;
         }
