@@ -124,8 +124,12 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
+        buf.readUnsignedByte(); // header
+        buf.readUnsignedByte(); // version
+
         int type = buf.readUnsignedByte();
         String imei = String.valueOf(buf.readLong());
+        buf.readerIndex(buf.readerIndex() - 1);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;
@@ -144,14 +148,14 @@ public class G1rusProtocolDecoder extends BaseProtocolDecoder {
                 if (BitUtil.to(subtype, 6) == MSG_REGULAR) {
                     positions.add(decodeRegular(deviceSession, buf, subtype));
                 } else {
-                    buf.skipBytes(length);
+                    buf.skipBytes(length - 1);
                 }
             }
             return positions.isEmpty() ? null : positions;
 
         }
 
-        buf.skipBytes(2);
+        buf.readUnsignedShort(); // checksum
         buf.readUnsignedByte(); // tail
 
         return null;
