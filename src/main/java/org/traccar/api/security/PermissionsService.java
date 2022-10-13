@@ -62,7 +62,7 @@ public class PermissionsService {
                 user = new ServiceAccountUser();
             } else {
                 user = storage.getObject(
-                        User.class, new Request(new Columns.All(), new Condition.Equals("id", "id", userId)));
+                        User.class, new Request(new Columns.All(), new Condition.Equals("id", userId)));
             }
         }
         return user;
@@ -187,7 +187,7 @@ public class PermissionsService {
             var object = storage.getObject(clazz, new Request(
                     new Columns.Include("id"),
                     new Condition.And(
-                            new Condition.Equals("id", "id", objectId),
+                            new Condition.Equals("id", objectId),
                             new Condition.Permission(
                                     User.class, userId, clazz.equals(User.class) ? ManagedUser.class : clazz))));
             if (object == null) {

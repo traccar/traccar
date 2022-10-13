@@ -56,7 +56,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     public Response getSingle(@PathParam("id") long id) throws StorageException {
         permissionsService.checkPermission(baseClass, getUserId(), id);
         T entity = storage.getObject(baseClass, new Request(
-                new Columns.All(), new Condition.Equals("id", "id", id)));
+                new Columns.All(), new Condition.Equals("id", id)));
         if (entity != null) {
             return Response.ok(entity).build();
         } else {
@@ -86,7 +86,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         if (entity instanceof User) {
             User before = storage.getObject(User.class, new Request(
-                    new Columns.All(), new Condition.Equals("id", "id", entity.getId())));
+                    new Columns.All(), new Condition.Equals("id", entity.getId())));
             permissionsService.checkUserUpdate(getUserId(), before, (User) entity);
         } else if (entity instanceof Group) {
             Group group = (Group) entity;
@@ -97,12 +97,13 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         storage.updateObject(entity, new Request(
                 new Columns.Exclude("id"),
-                new Condition.Equals("id", "id")));
+                new Condition.Equals("id", entity.getId())));
         if (entity instanceof User) {
             User user = (User) entity;
             if (user.getHashedPassword() != null) {
                 storage.updateObject(entity, new Request(
-                        new Columns.Include("hashedPassword", "salt"), new Condition.Equals("id", "id")));
+                        new Columns.Include("hashedPassword", "salt"),
+                        new Condition.Equals("id", entity.getId())));
             }
         }
         cacheManager.updateOrInvalidate(true, entity);
@@ -117,7 +118,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         permissionsService.checkEdit(getUserId(), baseClass, false);
         permissionsService.checkPermission(baseClass, getUserId(), id);
 
-        storage.removeObject(baseClass, new Request(new Condition.Equals("id", "id", id)));
+        storage.removeObject(baseClass, new Request(new Condition.Equals("id", id)));
         cacheManager.invalidate(baseClass, id);
 
         LogAction.remove(getUserId(), baseClass, id);

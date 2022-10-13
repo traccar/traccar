@@ -82,7 +82,8 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
             try {
                 storage.updateObject(device, new Request(
-                        new Columns.Include("geofenceIds"), new Condition.Equals("id", "id")));
+                        new Columns.Include("geofenceIds"),
+                        new Condition.Equals("id", device.getId())));
             } catch (StorageException e) {
                 throw new RuntimeException("Update device geofences error", e);
             }

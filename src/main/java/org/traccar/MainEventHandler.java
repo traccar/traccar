@@ -90,7 +90,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
                     updatedDevice.setPositionId(position.getId());
                     storage.updateObject(updatedDevice, new Request(
                             new Columns.Include("positionId"),
-                            new Condition.Equals("id", "id")));
+                            new Condition.Equals("id", updatedDevice.getId())));
 
                     cacheManager.updatePosition(position);
                     connectionManager.updatePosition(true, position);

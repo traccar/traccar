@@ -95,7 +95,7 @@ public class ReportUtils {
         return storage.getObject(clazz, new Request(
                 new Columns.All(),
                 new Condition.And(
-                        new Condition.Equals("id", "id", objectId),
+                        new Condition.Equals("id", objectId),
                         new Condition.Permission(User.class, userId, clazz))));
     }
 
@@ -166,7 +166,7 @@ public class ReportUtils {
         if (driverUniqueId != null) {
             Driver driver = storage.getObject(Driver.class, new Request(
                     new Columns.All(),
-                    new Condition.Equals("uniqueId", "uniqueId", driverUniqueId)));
+                    new Condition.Equals("uniqueId", driverUniqueId)));
             if (driver != null) {
                 return driver.getName();
             }

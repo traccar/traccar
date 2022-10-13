@@ -37,10 +37,12 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @SuppressWarnings("UnusedReturnValue")
 public final class QueryBuilder {
@@ -283,36 +285,32 @@ public final class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder setObject(Object object) throws SQLException {
+    public QueryBuilder setObject(Object object, List<String> columns) throws SQLException {
 
-        Method[] methods = object.getClass().getMethods();
-
-        for (Method method : methods) {
-            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0
-                    && !method.getName().equals("getClass")) {
-                String name = method.getName().substring(3);
-                try {
-                    if (method.getReturnType().equals(boolean.class)) {
-                        setBoolean(name, (Boolean) method.invoke(object));
-                    } else if (method.getReturnType().equals(int.class)) {
-                        setInteger(name, (Integer) method.invoke(object));
-                    } else if (method.getReturnType().equals(long.class)) {
-                        setLong(name, (Long) method.invoke(object), name.endsWith("Id"));
-                    } else if (method.getReturnType().equals(double.class)) {
-                        setDouble(name, (Double) method.invoke(object));
-                    } else if (method.getReturnType().equals(String.class)) {
-                        setString(name, (String) method.invoke(object));
-                    } else if (method.getReturnType().equals(Date.class)) {
-                        setDate(name, (Date) method.invoke(object));
-                    } else if (method.getReturnType().equals(byte[].class)) {
-                        setBlob(name, (byte[]) method.invoke(object));
-                    } else {
-                        setString(name, objectMapper.writeValueAsString(method.invoke(object)));
-                    }
-                } catch (IllegalAccessException | InvocationTargetException | JsonProcessingException error) {
-                    LOGGER.warn("Get property error", error);
+        try {
+            for (String column : columns) {
+                Method method = object.getClass().getMethod(
+                        "get" + Character.toUpperCase(column.charAt(0)) + column.substring(1));
+                if (method.getReturnType().equals(boolean.class)) {
+                    setBoolean(column, (Boolean) method.invoke(object));
+                } else if (method.getReturnType().equals(int.class)) {
+                    setInteger(column, (Integer) method.invoke(object));
+                } else if (method.getReturnType().equals(long.class)) {
+                    setLong(column, (Long) method.invoke(object), column.endsWith("Id"));
+                } else if (method.getReturnType().equals(double.class)) {
+                    setDouble(column, (Double) method.invoke(object));
+                } else if (method.getReturnType().equals(String.class)) {
+                    setString(column, (String) method.invoke(object));
+                } else if (method.getReturnType().equals(Date.class)) {
+                    setDate(column, (Date) method.invoke(object));
+                } else if (method.getReturnType().equals(byte[].class)) {
+                    setBlob(column, (byte[]) method.invoke(object));
+                } else {
+                    setString(column, objectMapper.writeValueAsString(method.invoke(object)));
                 }
             }
+        } catch (ReflectiveOperationException | JsonProcessingException e) {
+            LOGGER.warn("Set object error", e);
         }
 
         return this;

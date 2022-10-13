@@ -122,7 +122,7 @@ public class SessionResource extends BaseResource {
     public User get(@PathParam("id") long userId) throws StorageException {
         permissionsService.checkAdmin(getUserId());
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("id", "id", userId)));
+                new Columns.All(), new Condition.Equals("id", userId)));
         request.getSession().setAttribute(USER_ID_KEY, user.getId());
         LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
         return user;

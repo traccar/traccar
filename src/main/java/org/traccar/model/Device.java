@@ -52,22 +52,22 @@ public class Device extends GroupedModel implements Disableable {
 
     private String status;
 
+    @QueryIgnore
     public String getStatus() {
         return status != null ? status : STATUS_OFFLINE;
     }
 
-    @QueryIgnore
     public void setStatus(String status) {
         this.status = status != null ? status.trim() : null;
     }
 
     private Date lastUpdate;
 
+    @QueryIgnore
     public Date getLastUpdate() {
         return this.lastUpdate;
     }
 
-    @QueryIgnore
     public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
@@ -79,18 +79,17 @@ public class Device extends GroupedModel implements Disableable {
         return positionId;
     }
 
-    @QueryIgnore
     public void setPositionId(long positionId) {
         this.positionId = positionId;
     }
 
     private List<Long> geofenceIds;
 
+    @QueryIgnore
     public List<Long> getGeofenceIds() {
         return geofenceIds;
     }
 
-    @QueryIgnore
     public void setGeofenceIds(List<? extends Number> geofenceIds) {
         if (geofenceIds != null) {
             this.geofenceIds = geofenceIds.stream().map(Number::longValue).collect(Collectors.toList());

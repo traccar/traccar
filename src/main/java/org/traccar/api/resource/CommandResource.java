@@ -110,7 +110,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
             permissionsService.checkPermission(Command.class, getUserId(), entity.getId());
             long deviceId = entity.getDeviceId();
             entity = storage.getObject(baseClass, new Request(
-                    new Columns.All(), new Condition.Equals("id", "id", entity.getId())));
+                    new Columns.All(), new Condition.Equals("id", entity.getId())));
             entity.setDeviceId(deviceId);
         } else {
             permissionsService.checkRestriction(getUserId(), UserRestrictions::getLimitCommands);

@@ -64,7 +64,7 @@ public class EventsReportProvider {
         return storage.getObjects(Event.class, new Request(
                 new Columns.All(),
                 new Condition.And(
-                        new Condition.Equals("deviceId", "deviceId", deviceId),
+                        new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("eventTime", "from", from, "to", to)),
                 new Order("eventTime")));
     }
@@ -134,7 +134,7 @@ public class EventsReportProvider {
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
             if (device.getGroupId() > 0) {
                 Group group = storage.getObject(Group.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", "id", device.getGroupId())));
+                        new Columns.All(), new Condition.Equals("id", device.getGroupId())));
                 if (group != null) {
                     deviceEvents.setGroupName(group.getName());
                 }

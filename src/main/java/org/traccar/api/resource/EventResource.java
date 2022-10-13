@@ -41,7 +41,7 @@ public class EventResource extends BaseResource {
     @GET
     public Event get(@PathParam("id") long id) throws StorageException {
         Event event = storage.getObject(Event.class, new Request(
-                new Columns.All(), new Condition.Equals("id", "id", id)));
+                new Columns.All(), new Condition.Equals("id", id)));
         if (event == null) {
             throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
         }

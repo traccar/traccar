@@ -76,7 +76,7 @@ public class ServerResource extends BaseResource {
         permissionsService.checkAdmin(getUserId());
         storage.updateObject(entity, new Request(
                 new Columns.Exclude("id"),
-                new Condition.Equals("id", "id")));
+                new Condition.Equals("id", entity.getId())));
         cacheManager.updateOrInvalidate(true, entity);
         LogAction.edit(getUserId(), entity);
         return Response.ok(entity).build();

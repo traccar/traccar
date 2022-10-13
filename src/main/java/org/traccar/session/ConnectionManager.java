@@ -215,7 +215,7 @@ public class ConnectionManager implements BroadcastInterface {
         if (device == null) {
             try {
                 device = storage.getObject(Device.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", "id", deviceId)));
+                        new Columns.All(), new Condition.Equals("id", deviceId)));
             } catch (StorageException e) {
                 LOGGER.warn("Failed to get device", e);
             }
@@ -265,7 +265,7 @@ public class ConnectionManager implements BroadcastInterface {
         try {
             storage.updateObject(device, new Request(
                     new Columns.Include("status", "lastUpdate"),
-                    new Condition.Equals("id", "id")));
+                    new Condition.Equals("id", deviceId)));
         } catch (StorageException e) {
             LOGGER.warn("Update device status error", e);
         }

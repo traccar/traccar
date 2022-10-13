@@ -67,7 +67,7 @@ public class PositionResource extends BaseResource {
             var positions = new ArrayList<Position>();
             for (long positionId : positionIds) {
                 Position position = storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", "id", positionId)));
+                        new Columns.All(), new Condition.Equals("id", positionId)));
                 permissionsService.checkPermission(Device.class, getUserId(), position.getDeviceId());
                 positions.add(position);
             }

@@ -84,7 +84,7 @@ public class MediaFilter implements Filter {
             String[] parts = path != null ? path.split("/") : null;
             if (parts != null && parts.length >= 2) {
                 Device device = storage.getObject(Device.class, new Request(
-                        new Columns.All(), new Condition.Equals("uniqueId", "uniqueId", parts[1])));
+                        new Columns.All(), new Condition.Equals("uniqueId", parts[1])));
                 if (device != null) {
                     permissionsServiceProvider.get().checkPermission(Device.class, userId, device.getId());
                     chain.doFilter(request, response);

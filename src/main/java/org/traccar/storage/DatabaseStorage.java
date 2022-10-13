@@ -57,7 +57,7 @@ public class DatabaseStorage extends Storage {
         if (request.getColumns() instanceof Columns.All) {
             query.append('*');
         } else {
-            query.append(formatColumns(request.getColumns(), clazz, "get", c -> c));
+            query.append(formatColumns(request.getColumns().getColumns(clazz, "set"), c -> c));
         }
         query.append(" FROM ").append(getStorageName(clazz));
         query.append(formatCondition(request.getCondition()));
@@ -76,16 +76,17 @@ public class DatabaseStorage extends Storage {
 
     @Override
     public <T> long addObject(T entity, Request request) throws StorageException {
+        List<String> columns = request.getColumns().getColumns(entity.getClass(), "get");
         StringBuilder query = new StringBuilder("INSERT INTO ");
         query.append(getStorageName(entity.getClass()));
         query.append("(");
-        query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> c));
+        query.append(formatColumns(columns, c -> c));
         query.append(") VALUES (");
-        query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> ':' + c));
+        query.append(formatColumns(columns, c -> ':' + c));
         query.append(")");
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true);
-            builder.setObject(entity);
+            builder.setObject(entity, columns);
             return builder.executeUpdate();
         } catch (SQLException e) {
             throw new StorageException(e);
@@ -94,14 +95,15 @@ public class DatabaseStorage extends Storage {
 
     @Override
     public <T> void updateObject(T entity, Request request) throws StorageException {
+        List<String> columns = request.getColumns().getColumns(entity.getClass(), "get");
         StringBuilder query = new StringBuilder("UPDATE ");
         query.append(getStorageName(entity.getClass()));
         query.append(" SET ");
-        query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> c + " = :" + c));
+        query.append(formatColumns(columns, c -> c + " = :" + c));
         query.append(formatCondition(request.getCondition()));
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
-            builder.setObject(entity);
+            builder.setObject(entity, columns);
             for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
                 builder.setValue(variable.getKey(), variable.getValue());
             }
@@ -135,12 +137,10 @@ public class DatabaseStorage extends Storage {
         query.append(Permission.getStorageName(ownerClass, propertyClass));
         var conditions = new LinkedList<Condition>();
         if (ownerId > 0) {
-            conditions.add(new Condition.Equals(
-                    Permission.getKey(ownerClass), Permission.getKey(ownerClass), ownerId));
+            conditions.add(new Condition.Equals(Permission.getKey(ownerClass), ownerId));
         }
         if (propertyId > 0) {
-            conditions.add(new Condition.Equals(
-                    Permission.getKey(propertyClass), Permission.getKey(propertyClass), propertyId));
+            conditions.add(new Condition.Equals(Permission.getKey(propertyClass), propertyId));
         }
         Condition combinedCondition = Condition.merge(conditions);
         query.append(formatCondition(combinedCondition));
@@ -230,9 +230,8 @@ public class DatabaseStorage extends Storage {
         return results;
     }
 
-    private String formatColumns(
-            Columns columns, Class<?> clazz, String type, Function<String, String> mapper) {
-        return columns.getColumns(clazz, type).stream().map(mapper).collect(Collectors.joining(", "));
+    private String formatColumns(List<String> columns, Function<String, String> mapper) {
+        return columns.stream().map(mapper).collect(Collectors.joining(", "));
     }
 
     private String formatCondition(Condition genericCondition) throws StorageException {

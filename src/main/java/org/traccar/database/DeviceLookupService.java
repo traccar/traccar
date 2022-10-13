@@ -108,7 +108,7 @@ public class DeviceLookupService {
             for (String uniqueId : uniqueIds) {
                 if (!isThrottled(uniqueId)) {
                     device = storage.getObject(Device.class, new Request(
-                            new Columns.All(), new Condition.Equals("uniqueId", "uniqueId", uniqueId)));
+                            new Columns.All(), new Condition.Equals("uniqueId", uniqueId)));
                     if (device != null) {
                         lookupSucceeded(uniqueId);
                         break;

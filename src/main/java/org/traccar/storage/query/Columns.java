@@ -17,6 +17,7 @@ package org.traccar.storage.query;
 
 import org.traccar.storage.QueryIgnore;
 
+import java.beans.Introspector;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -36,7 +37,7 @@ public abstract class Columns {
             if (method.getName().startsWith(type) && method.getParameterTypes().length == parameterCount
                     && !method.isAnnotationPresent(QueryIgnore.class)
                     && !method.getName().equals("getClass")) {
-                columns.add(method.getName().substring(3).toLowerCase());
+                columns.add(Introspector.decapitalize(method.getName().substring(3)));
             }
         }
         return columns;

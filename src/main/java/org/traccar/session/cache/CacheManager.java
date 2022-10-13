@@ -201,7 +201,7 @@ public class CacheManager implements BroadcastInterface {
     public void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
         try {
             var object = storage.getObject(clazz, new Request(
-                    new Columns.All(), new Condition.Equals("id", "id", id)));
+                    new Columns.All(), new Condition.Equals("id", id)));
             if (object != null) {
                 updateOrInvalidate(local, object);
             } else {
@@ -286,7 +286,7 @@ public class CacheManager implements BroadcastInterface {
         Map<Class<? extends BaseModel>, Set<Long>> links = new HashMap<>();
 
         Device device = storage.getObject(Device.class, new Request(
-                new Columns.All(), new Condition.Equals("id", "id", deviceId)));
+                new Columns.All(), new Condition.Equals("id", deviceId)));
         if (device != null) {
             addObject(deviceId, device);
 
@@ -294,7 +294,7 @@ public class CacheManager implements BroadcastInterface {
             long groupId = device.getGroupId();
             while (groupDepth < GROUP_DEPTH_LIMIT && groupId > 0) {
                 Group group = storage.getObject(Group.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", "id", groupId)));
+                        new Columns.All(), new Condition.Equals("id", groupId)));
                 links.computeIfAbsent(Group.class, k -> new LinkedHashSet<>()).add(group.getId());
                 addObject(deviceId, group);
                 groupId = group.getGroupId();
@@ -311,7 +311,7 @@ public class CacheManager implements BroadcastInterface {
                         var scheduled = (ScheduledModel) object;
                         if (scheduled.getCalendarId() > 0) {
                             var calendar = storage.getObject(Calendar.class, new Request(
-                                    new Columns.All(), new Condition.Equals("id", "id", scheduled.getCalendarId())));
+                                    new Columns.All(), new Condition.Equals("id", scheduled.getCalendarId())));
                             links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>())
                                     .add(calendar.getId());
                             addObject(deviceId, calendar);
@@ -336,7 +336,7 @@ public class CacheManager implements BroadcastInterface {
                     addObject(deviceId, notification);
                     if (notification.getCalendarId() > 0) {
                         var calendar = storage.getObject(Calendar.class, new Request(
-                                new Columns.All(), new Condition.Equals("id", "id", notification.getCalendarId())));
+                                new Columns.All(), new Condition.Equals("id", notification.getCalendarId())));
                         links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>())
                                 .add(calendar.getId());
                         addObject(deviceId, calendar);
@@ -348,7 +348,7 @@ public class CacheManager implements BroadcastInterface {
 
             if (device.getPositionId() > 0) {
                 devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", "id", device.getPositionId()))));
+                        new Columns.All(), new Condition.Equals("id", device.getPositionId()))));
             }
         }
     }

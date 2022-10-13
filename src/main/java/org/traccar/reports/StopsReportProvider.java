@@ -87,7 +87,7 @@ public class StopsReportProvider {
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
             if (device.getGroupId() > 0) {
                 Group group = storage.getObject(Group.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", "id", device.getGroupId())));
+                        new Columns.All(), new Condition.Equals("id", device.getGroupId())));
                 if (group != null) {
                     deviceStops.setGroupName(group.getName());
                 }

@@ -59,7 +59,7 @@ public class PasswordResource extends BaseResource {
             throws StorageException, MessagingException, GeneralSecurityException, IOException {
 
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("email", "email", email)));
+                new Columns.All(), new Condition.Equals("email", email)));
         if (user != null) {
             var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
             velocityContext.put("token", tokenManager.generateToken(user.getId()));
@@ -78,11 +78,12 @@ public class PasswordResource extends BaseResource {
 
         long userId = tokenManager.verifyToken(token);
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("id", "id", userId)));
+                new Columns.All(), new Condition.Equals("id", userId)));
         if (user != null) {
             user.setPassword(password);
             storage.updateObject(user, new Request(
-                    new Columns.Include("hashedPassword", "salt"), new Condition.Equals("id", "id")));
+                    new Columns.Include("hashedPassword", "salt"),
+                    new Condition.Equals("id", userId)));
             return Response.ok().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
