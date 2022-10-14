@@ -50,7 +50,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_SERVICES = 0x03;
     public static final int MSG_RESPONSE = 0x7F;
 
-    private String decodeAlarm(int code) {
+    private String decodeAlarm(long code) {
         if (BitUtil.check(code, 0)) {
             return Position.ALARM_LOW_BATTERY;
         }
@@ -181,7 +181,11 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setDeviceId(deviceSession.getDeviceId());
                         break;
                     case 0x02:
-                        position.set(Position.KEY_ALARM, decodeAlarm(buf.readIntLE()));
+                        long alarm = buf.readUnsignedIntLE();
+                        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
+                        if (BitUtil.check(alarm, 31)) {
+                            position.set("bark", true);
+                        }
                         break;
                     case 0x14:
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
