@@ -31,7 +31,6 @@ import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Limit;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
@@ -102,8 +101,7 @@ public class CommandsManager implements BroadcastInterface {
             var commands = storage.getObjects(QueuedCommand.class, new Request(
                     new Columns.All(),
                     new Condition.Equals("deviceId", deviceId),
-                    new Order(false, "id"),
-                    new Limit(count)));
+                    new Order("id", false, count)));
             for (var command : commands) {
                 storage.removeObject(QueuedCommand.class, new Request(
                         new Condition.Equals("id", command.getId())));

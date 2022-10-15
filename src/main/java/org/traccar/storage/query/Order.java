@@ -19,14 +19,16 @@ public class Order {
 
     private final String column;
     private final boolean descending;
+    private final int limit;
 
     public Order(String column) {
-        this(false, column);
+        this(column, false, 0);
     }
 
-    public Order(boolean descending, String column) {
+    public Order(String column, boolean descending, int limit) {
         this.column = column;
-        this.descending = descending;
+        this.descending = false;
+        this.limit = limit;
     }
 
     public String getColumn() {
@@ -35,6 +37,10 @@ public class Order {
 
     public boolean getDescending() {
         return descending;
+    }
+
+    public int getLimit() {
+        return limit;
     }
 
 }

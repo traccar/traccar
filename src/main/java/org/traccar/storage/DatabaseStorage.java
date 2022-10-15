@@ -24,7 +24,6 @@ import org.traccar.model.GroupedModel;
 import org.traccar.model.Permission;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Limit;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
@@ -43,12 +42,19 @@ public class DatabaseStorage extends Storage {
     private final Config config;
     private final DataSource dataSource;
     private final ObjectMapper objectMapper;
+    private final String databaseType;
 
     @Inject
     public DatabaseStorage(Config config, DataSource dataSource, ObjectMapper objectMapper) {
         this.config = config;
         this.dataSource = dataSource;
         this.objectMapper = objectMapper;
+
+        try {
+            databaseType = dataSource.getConnection().getMetaData().getDatabaseProductName();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -62,7 +68,6 @@ public class DatabaseStorage extends Storage {
         query.append(" FROM ").append(getStorageName(clazz));
         query.append(formatCondition(request.getCondition()));
         query.append(formatOrder(request.getOrder()));
-        query.append(formatLimit(request.getLimit()));
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
             for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
@@ -302,15 +307,16 @@ public class DatabaseStorage extends Storage {
             if (order.getDescending()) {
                 result.append(" DESC");
             }
-        }
-        return result.toString();
-    }
-
-    private String formatLimit(Limit limit) {
-        StringBuilder result = new StringBuilder();
-        if (limit != null) {
-            result.append(" LIMIT ");
-            result.append(limit.getValue());
+            if (order.getLimit() > 0) {
+                if (databaseType.equals("Microsoft SQL Server")) {
+                    result.append(" OFFSET 0 ROWS FETCH FIRST ");
+                    result.append(order.getLimit());
+                    result.append(" ROWS ONLY");
+                } else {
+                    result.append(" LIMIT ");
+                    result.append(order.getLimit());
+                }
+            }
         }
         return result.toString();
     }
