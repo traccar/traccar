@@ -43,6 +43,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
@@ -203,12 +204,16 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_POWER_RESTORED;
             case 41:
                 return Position.ALARM_POWER_CUT;
+            case 42:
+                return Position.ALARM_SOS;
             case 46:
                 return Position.ALARM_ACCELERATION;
             case 47:
                 return Position.ALARM_BRAKING;
             case 50:
                 return Position.ALARM_JAMMING;
+            case 132:
+                return Position.ALARM_DOOR;
             default:
                 return null;
         }
@@ -468,7 +473,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         String type = values[index++];
 
-        if (!type.equals("STT") && !type.equals("ALT") && !type.equals("BLE")) {
+        if (!type.equals("STT") && !type.equals("ALT") && !type.equals("BLE") && !type.equals("RES")) {
             return null;
         }
 
@@ -480,6 +485,14 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
         position.set(Position.KEY_TYPE, type);
+
+        if (type.equals("RES")) {
+            getLastLocation(position, null);
+            position.set(
+                    Position.KEY_RESULT,
+                    Arrays.stream(values, index, values.length).collect(Collectors.joining(";")));
+            return position;
+        }
 
         int mask;
         if (type.equals("BLE")) {
@@ -581,7 +594,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
             if (type.equals("ALT")) {
                 if (BitUtil.check(mask, 19)) {
-                    position.set("alertId", values[index++]);
+                    int alertId = Integer.parseInt(values[index++]);
+                    position.set(Position.KEY_ALARM, decodeAlert(alertId));
                 }
                 if (BitUtil.check(mask, 20)) {
                     position.set("alertModifier", values[index++]);

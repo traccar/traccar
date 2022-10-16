@@ -83,6 +83,10 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new SuntechProtocolDecoder(null));
 
+        verifyAttribute(decoder, buffer(
+                "RES;4309999001;04;02;TEST"),
+                Position.KEY_RESULT, "04;02;TEST");
+
         verifyPosition(decoder, buffer(
                 "BLE;1140000053;114;1.0.1;20211001;17:27:09;+28.433465;-82.565891;1;-43;-46;-41;ACB89523EF68;247;0;0"));
 
