@@ -856,7 +856,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
-            String[] values = buf.toString(StandardCharsets.US_ASCII).split(";");
+            String[] values = buf.toString(StandardCharsets.US_ASCII).split(";", -1);
             prefix = values[0];
 
             if (prefix.equals("CRR")) {
