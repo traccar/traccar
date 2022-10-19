@@ -96,4 +96,14 @@ public class Command extends BaseCommand {
         super.setDeviceId(deviceId);
     }
 
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
 }

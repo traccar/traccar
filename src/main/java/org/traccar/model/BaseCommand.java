@@ -17,16 +17,6 @@ package org.traccar.model;
 
 public class BaseCommand extends Message {
 
-    private String description;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     private boolean textChannel;
 
     public boolean getTextChannel() {
