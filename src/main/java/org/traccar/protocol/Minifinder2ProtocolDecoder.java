@@ -198,7 +198,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
                         position.setCourse(buf.readUnsignedShortLE());
                         position.setAltitude(buf.readShortLE());
-                        position.setValid(buf.readUnsignedShortLE() > 0);
+                        int hdop = buf.readUnsignedShortLE();
+                        position.setValid(hdop > 0);
+                        position.set(Position.KEY_HDOP, hdop * 0.1);
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                         break;
