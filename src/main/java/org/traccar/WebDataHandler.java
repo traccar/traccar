@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,14 @@ import org.slf4j.LoggerFactory;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.IdentityManager;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.model.Group;
+import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -52,6 +53,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Singleton
 @ChannelHandler.Sharable
 public class WebDataHandler extends BaseDataHandler {
 
@@ -60,9 +62,10 @@ public class WebDataHandler extends BaseDataHandler {
     private static final String KEY_POSITION = "position";
     private static final String KEY_DEVICE = "device";
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
     private final ObjectMapper objectMapper;
     private final Client client;
+    private final Timer timer;
 
     private final String url;
     private final String header;
@@ -78,11 +81,12 @@ public class WebDataHandler extends BaseDataHandler {
 
     @Inject
     public WebDataHandler(
-            Config config, IdentityManager identityManager, ObjectMapper objectMapper, Client client) {
+            Config config, CacheManager cacheManager, ObjectMapper objectMapper, Client client, Timer timer) {
 
-        this.identityManager = identityManager;
+        this.cacheManager = cacheManager;
         this.objectMapper = objectMapper;
         this.client = client;
+        this.timer = timer;
         this.url = config.getString(Keys.FORWARD_URL);
         this.header = config.getString(Keys.FORWARD_HEADER);
         this.json = config.getBoolean(Keys.FORWARD_JSON);
@@ -123,7 +127,7 @@ public class WebDataHandler extends BaseDataHandler {
     }
 
     private String calculateStatus(Position position) {
-        if (position.getAttributes().containsKey(Position.KEY_ALARM)) {
+        if (position.hasAttribute(Position.KEY_ALARM)) {
             return "0xF841"; // STATUS_PANIC_ON
         } else if (position.getSpeed() < 1.0) {
             return "0xF020"; // STATUS_LOCATION
@@ -134,7 +138,7 @@ public class WebDataHandler extends BaseDataHandler {
 
     public String formatRequest(Position position) throws UnsupportedEncodingException, JsonProcessingException {
 
-        Device device = identityManager.getById(position.getDeviceId());
+        Device device = cacheManager.getObject(Device.class, position.getDeviceId());
 
         String request = url
                 .replace("{name}", URLEncoder.encode(device.getName(), StandardCharsets.UTF_8.name()))
@@ -171,7 +175,7 @@ public class WebDataHandler extends BaseDataHandler {
         if (request.contains("{group}")) {
             String deviceGroupName = "";
             if (device.getGroupId() != 0) {
-                Group group = Context.getGroupsManager().getById(device.getGroupId());
+                Group group = cacheManager.getObject(Group.class, device.getGroupId());
                 if (group != null) {
                     deviceGroupName = group.getName();
                 }
@@ -248,8 +252,7 @@ public class WebDataHandler extends BaseDataHandler {
         }
 
         private void schedule() {
-            Main.getInjector().getInstance(Timer.class).newTimeout(
-                this, retryDelay * (long) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
+            timer.newTimeout(this, retryDelay * (long) Math.pow(2, retries++), TimeUnit.MILLISECONDS);
         }
 
         @Override
@@ -287,8 +290,10 @@ public class WebDataHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
 
-        AsyncRequestAndCallback request = new AsyncRequestAndCallback(position);
-        request.send();
+        if (url != null) {
+            AsyncRequestAndCallback request = new AsyncRequestAndCallback(position);
+            request.send();
+        }
 
         return position;
     }
@@ -296,7 +301,7 @@ public class WebDataHandler extends BaseDataHandler {
     private Map<String, Object> prepareJsonPayload(Position position) {
 
         Map<String, Object> data = new HashMap<>();
-        Device device = identityManager.getById(position.getDeviceId());
+        Device device = cacheManager.getObject(Device.class, position.getDeviceId());
 
         data.put(KEY_POSITION, position);
 

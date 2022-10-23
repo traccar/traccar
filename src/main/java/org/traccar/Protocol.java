@@ -25,7 +25,7 @@ public interface Protocol {
 
     String getName();
 
-    Collection<TrackerServer> getServerList();
+    Collection<TrackerConnector> getConnectorList();
 
     Collection<String> getSupportedDataCommands();
 

@@ -19,20 +19,24 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class AstraProtocol extends BaseProtocol {
 
-    public AstraProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public AstraProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 2, -3, 0));
                 pipeline.addLast(new AstraProtocolDecoder(AstraProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new AstraProtocolDecoder(AstraProtocol.this));
             }
         });

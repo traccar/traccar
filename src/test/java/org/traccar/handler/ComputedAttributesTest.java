@@ -1,11 +1,11 @@
 package org.traccar.handler;
 
-import java.util.Date;
-
 import org.junit.Test;
 import org.traccar.config.Config;
 import org.traccar.model.Attribute;
 import org.traccar.model.Position;
+
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,7 +14,7 @@ public class ComputedAttributesTest {
     @Test
     public void testComputedAttributes() {
 
-        ComputedAttributesHandler handler = new ComputedAttributesHandler(new Config(), null, null);
+        ComputedAttributesHandler handler = new ComputedAttributesHandler(new Config(), null);
 
         Date date = new Date();
         Position position = new Position();

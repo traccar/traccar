@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-5.0">
+
+  <changeSet author="author" id="changelog-5.0">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <columnExists tableName="tc_servers" columnName="disablereports" />
+      </not>
+    </preConditions>
+
+    <addColumn tableName="tc_servers">
+      <column name="disablereports" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+    <addColumn tableName="tc_users">
+      <column name="disablereports" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+    <renameColumn tableName="tc_orders" oldColumnName="toAddress" newColumnName="toaddresstmp" columnDataType="VARCHAR(512)" />
+    <renameColumn tableName="tc_orders" oldColumnName="fromAddress" newColumnName="fromaddresstmp" columnDataType="VARCHAR(512)" />
+
+    <renameColumn tableName="tc_orders" oldColumnName="toaddresstmp" newColumnName="toaddress" columnDataType="VARCHAR(512)" />
+    <renameColumn tableName="tc_orders" oldColumnName="fromaddresstmp" newColumnName="fromaddress" columnDataType="VARCHAR(512)" />
+
+  </changeSet>
+
+</databaseChangeLog>

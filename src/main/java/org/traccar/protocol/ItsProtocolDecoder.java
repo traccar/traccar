@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
@@ -28,6 +28,10 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class ItsProtocolDecoder extends BaseProtocolDecoder {
@@ -75,7 +79,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // power
             .number("(d+.?d*),")                 // battery
             .number("([01]),")                   // emergency
-            .expression("[CO]?,")                // tamper
+            .expression("[COYN]?,")              // tamper
             .expression("(.*),")                 // cells
             .number("([012]{4}),")               // inputs
             .number("([01]{2}),")                // outputs
@@ -96,6 +100,12 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .number("d+,")                       // index
             .number("(d+.?d*),")                 // adc1
             .number("(d+.?d*),")                 // adc2
+            .or()
+            .number("(d+.d+),")                  // adc1
+            .number("(d+),")                     // odometer
+            .number("(d{6}),")                   // index
+            .expression("([^,]+),")              // response format
+            .expression("([^,]+),")              // response
             .groupEnd("?")
             .groupEnd("?")
             .or()
@@ -137,8 +147,17 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
 
-        if (channel != null && sentence.startsWith("$,01,")) {
-            channel.writeAndFlush(new NetworkMessage("$,1,*", remoteAddress));
+        if (channel != null) {
+            if (sentence.startsWith("$,01,")) {
+                channel.writeAndFlush(new NetworkMessage("$,1,*", remoteAddress));
+            } else if (sentence.startsWith("$,LGN,")) {
+                DateFormat dateFormat = new SimpleDateFormat("ddMMyyyyHHmmss");
+                dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+                String time = dateFormat.format(new Date());
+                channel.writeAndFlush(new NetworkMessage("$LGN" + time + "*", remoteAddress));
+            } else if (sentence.startsWith("$,HBT,")) {
+                channel.writeAndFlush(new NetworkMessage("$HBT*", remoteAddress));
+            }
         }
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -186,7 +205,8 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             position.setValid(parser.nextInt() == 1);
         }
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+        position.setTime(parser.nextDateTime(
+                Parser.DateTimeFormat.DMY_HMS, getTimeZone(deviceSession.getDeviceId()).getID()));
         if (parser.hasNext()) {
             position.setValid(parser.next().matches("[1A]"));
         }
@@ -255,6 +275,14 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(2)) {
             position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
             position.set(Position.PREFIX_ADC + 2, parser.nextDouble());
+        }
+
+        if (parser.hasNext(5)) {
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_INDEX, parser.nextInt());
+            position.set("responseFormat", parser.next());
+            position.set("response", parser.next());
         }
 
         if (parser.hasNext(2)) {

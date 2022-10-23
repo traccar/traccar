@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
@@ -32,7 +32,11 @@ import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -51,12 +55,25 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
         JsonObject root = Json.createReader(
                 new StringReader(request.content().toString(StandardCharsets.US_ASCII))).readObject();
 
+        Object result;
+        if (root.containsKey("device")) {
+            result = decodeEdge(channel, remoteAddress, root);
+        } else {
+            result = decodeTraditional(channel, remoteAddress, root);
+        }
+
+        sendResponse(channel, result != null ? HttpResponseStatus.OK : HttpResponseStatus.BAD_REQUEST);
+        return result;
+    }
+
+    private Collection<Position> decodeTraditional(
+            Channel channel, SocketAddress remoteAddress, JsonObject root) throws ParseException {
+
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, root.getString("IMEI"));
         if (deviceSession == null) {
-            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
         }
 
@@ -126,8 +143,77 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
             positions.add(position);
         }
 
-        sendResponse(channel, HttpResponseStatus.OK);
         return positions;
+    }
+
+    private Position decodeEdge(
+            Channel channel, SocketAddress remoteAddress, JsonObject root) {
+
+        JsonObject device = root.getJsonObject("device");
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, device.getString("imei"));
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        Date time = new Date(OffsetDateTime.parse(root.getString("date")).toInstant().toEpochMilli());
+
+        if (root.containsKey("lat") && root.containsKey("lng")) {
+            position.setValid(true);
+            position.setTime(time);
+            position.setLatitude(root.getJsonNumber("lat").doubleValue());
+            position.setLongitude(root.getJsonNumber("lng").doubleValue());
+            position.setAccuracy(root.getJsonNumber("posAcc").doubleValue());
+        } else {
+            getLastLocation(position, time);
+        }
+
+        position.set(Position.KEY_INDEX, root.getInt("sqn"));
+        position.set(Position.KEY_EVENT, root.getInt("reason"));
+
+        if (root.containsKey("analogues")) {
+            JsonArray analogues = root.getJsonArray("analogues");
+            for (int i = 0; i < analogues.size(); i++) {
+                JsonObject adc = analogues.getJsonObject(i);
+                position.set(Position.PREFIX_ADC + adc.getInt("id"), adc.getInt("val"));
+            }
+        }
+
+        if (root.containsKey("inputs")) {
+            int input = root.getInt("inputs");
+            position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
+            position.set(Position.KEY_INPUT, input);
+        }
+        if (root.containsKey("outputs")) {
+            position.set(Position.KEY_OUTPUT, root.getInt("outputs"));
+        }
+        if (root.containsKey("status")) {
+            position.set(Position.KEY_STATUS, root.getInt("status"));
+        }
+
+        if (root.containsKey("counters")) {
+            JsonArray counters = root.getJsonArray("counters");
+            for (int i = 0; i < counters.size(); i++) {
+                JsonObject counter = counters.getJsonObject(i);
+                switch (counter.getInt("id")) {
+                    case 0:
+                        position.set(Position.KEY_BATTERY, counter.getInt("val") * 0.001);
+                        break;
+                    case 1:
+                        position.set(Position.KEY_BATTERY_LEVEL, counter.getInt("val") * 0.01);
+                        break;
+                    default:
+                        position.set("counter" + counter.getInt("id"), counter.getInt("val"));
+                        break;
+                }
+
+            }
+        }
+
+        return position;
     }
 
 }

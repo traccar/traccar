@@ -21,18 +21,38 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Position;
 
+import javax.inject.Inject;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter {
 
+    private Config config;
+
+    public Config getConfig() {
+        return config;
+    }
+
+    @Inject
+    public void setConfig(Config config) {
+        this.config = config;
+        init();
+    }
+
+    /**
+     * Method called when config is initialized.
+     */
+    protected void init() {
+    }
+
     private void saveOriginal(Object decodedMessage, Object originalMessage) {
-        if (Context.getConfig().getBoolean(Keys.DATABASE_SAVE_ORIGINAL) && decodedMessage instanceof Position) {
+        if (getConfig().getBoolean(Keys.DATABASE_SAVE_ORIGINAL) && decodedMessage instanceof Position) {
             Position position = (Position) decodedMessage;
             if (originalMessage instanceof ByteBuf) {
                 ByteBuf buf = (ByteBuf) originalMessage;

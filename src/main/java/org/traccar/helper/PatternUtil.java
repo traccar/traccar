@@ -63,7 +63,7 @@ public final class PatternUtil {
 
         for (int i = 0; i < pattern.length(); i++) {
             try {
-                Matcher matcher = Pattern.compile("(" + pattern.substring(0, i) + ").*").matcher(input);
+                Matcher matcher = Pattern.compile("(" + pattern.substring(0, i) + ")[\\s\\S]*").matcher(input);
                 if (matcher.matches()) {
                     result.patternMatch = pattern.substring(0, i);
                     result.patternTail = pattern.substring(i);

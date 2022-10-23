@@ -2,16 +2,25 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class MictrackProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecodeStandard() throws Exception {
 
-        MictrackProtocolDecoder decoder = new MictrackProtocolDecoder(null);
+        var decoder = inject(new MictrackProtocolDecoder(null));
 
-        verifyNull(decoder, text(
-                "mode=Success!"));
+        verifyAttributes(decoder, text(
+                "MT;5;867035041396795;Y1;220111085741+test,8c:53:c3:db:e7:26,-58,jiuide-842,80:26:89:f0:5e:4f,-74,jiu2ide 403,94:e4:4b:0a:31:08,-75,jiu3ide,7a:91:e9:50:26:0b,-85,CNet-9rNe,78:91:e9:40:26:0b,-87+0+4092+1"));
+
+        verifyAttribute(decoder, text(
+                "867035041390699 netlock=Success!"),
+                Position.KEY_RESULT, "netlock=Success");
+
+        verifyAttribute(decoder, text(
+                "mode=Success!"),
+                Position.KEY_RESULT, "mode=Success");
 
         verifyPosition(decoder, text(
                 "MT;6;866425031361423;R0;10+190109091803+22.63827+114.02922+2.14+69+2+3744+113"),
@@ -39,7 +48,10 @@ public class MictrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeLowAltitude() throws Exception {
 
-        MictrackProtocolDecoder decoder = new MictrackProtocolDecoder(null);
+        var decoder = inject(new MictrackProtocolDecoder(null));
+
+        verifyPositions(decoder, text(
+                "861836051888035$162835.00,A,4139.6460,N,07009.7239,W,,41.53,-25.8,220621"));
 
         verifyPositions(decoder, text(
                 "861108032038761$062232.00,A,2238.2832,N,11401.7381,E,0.01,309.62,95.0,131117"));

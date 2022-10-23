@@ -16,6 +16,7 @@
 package org.traccar.geocoder;
 
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 
 public class GeocodeFarmGeocoder extends JsonGeocoder {
 
@@ -30,8 +31,9 @@ public class GeocodeFarmGeocoder extends JsonGeocoder {
         }
         return url;
     }
-    public GeocodeFarmGeocoder(String key, String language, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(key, language), cacheSize, addressFormat);
+    public GeocodeFarmGeocoder(
+            Client client, String key, String language, int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(key, language), cacheSize, addressFormat);
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Network {
@@ -116,6 +117,29 @@ public class Network {
             wifiAccessPoints = new ArrayList<>();
         }
         wifiAccessPoints.add(wifiAccessPoint);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Network network = (Network) o;
+        return Objects.equals(homeMobileCountryCode, network.homeMobileCountryCode)
+                && Objects.equals(homeMobileNetworkCode, network.homeMobileNetworkCode)
+                && Objects.equals(radioType, network.radioType)
+                && Objects.equals(carrier, network.carrier)
+                && Objects.equals(cellTowers, network.cellTowers)
+                && Objects.equals(wifiAccessPoints, network.wifiAccessPoints);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                homeMobileCountryCode, homeMobileNetworkCode, radioType, carrier, cellTowers, wifiAccessPoints);
     }
 
 }

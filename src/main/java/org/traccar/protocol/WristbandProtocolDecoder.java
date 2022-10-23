@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
@@ -51,14 +51,10 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             String sentence = String.format("YX%s|%s|0|{F%02d#%s}\r\n", imei, version, type, data);
             ByteBuf response = Unpooled.buffer();
-            if (type != 91) {
-                response.writeBytes(new byte[]{0x00, 0x01, 0x02});
-                response.writeShort(sentence.length());
-            }
+            response.writeBytes(new byte[]{0x00, 0x01, 0x02});
+            response.writeShort(sentence.length());
             response.writeCharSequence(sentence, StandardCharsets.US_ASCII);
-            if (type != 91) {
-                response.writeBytes(new byte[]{(byte) 0xFF, (byte) 0xFE, (byte) 0xFC});
-            }
+            response.writeBytes(new byte[]{(byte) 0xFF, (byte) 0xFE, (byte) 0xFC});
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
     }

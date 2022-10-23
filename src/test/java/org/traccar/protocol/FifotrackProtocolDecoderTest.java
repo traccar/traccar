@@ -9,7 +9,20 @@ public class FifotrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        FifotrackProtocolDecoder decoder = new FifotrackProtocolDecoder(null);
+        var decoder = inject(new FifotrackProtocolDecoder(null));
+
+        verifyPosition(decoder, buffer(
+                "$$95,866104023192332,1,A03,,210414055249,460|0|25FC|104C,4.18,100,000F,0,A,2,9,22.643175,114.018150*75"));
+
+        verifyAttributes(decoder, buffer(
+                "$$136,866104023192332,1,A03,,210414055249,460|0|25FC|104C,4.18,100,000F,1,94D9B377EB53:-60|EC6C9FA4CAD8:-55|CA50E9206252:-61|54E061260A89:-51*3E"));
+
+        verifyPosition(decoder, buffer(
+                "$$274,863003046499158,18D0,A01,,211026081639,A,13.934116,100.000463,0,263,16,366959,345180,80000040,02,0,520|0|FA8|1A9B5B9,9DE|141|2D,%  ^YENSABAICHAI$SONGKRAN$MR.^^?;6007643190300472637=150519870412=?+             14            1            0000155  00103                     ?,*69"));
+
+        verifyAttribute(decoder, buffer(
+                "$$25,863003046473534,1,B03,OK*4D"),
+                Position.KEY_RESULT, "OK");
 
         verifyPosition(decoder, buffer(
                 "$$118,863003046473534,258,A01,,201007231735,V,3.067783,101.672858,0,176,96,189890,0,A0,03,0,502|19|5C1|93349F,196|4E0|6C,1,*13"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -97,6 +97,10 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             long date = buf.readUnsignedIntLE();
 
             long days = BitUtil.from(date, 6 + 6 + 5);
+            if (days < 7 * 780) {
+                days += 7 * 1024;
+            }
+
             long hours = BitUtil.between(date, 6 + 6, 6 + 6 + 5);
             long minutes = BitUtil.between(date, 6, 6 + 6);
             long seconds = BitUtil.to(date, 6);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.traccar.web;
 
+import com.google.inject.Injector;
+import com.google.inject.servlet.GuiceFilter;
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
@@ -26,44 +28,56 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
+import org.eclipse.jetty.server.session.DatabaseAdaptor;
+import org.eclipse.jetty.server.session.DefaultSessionCache;
+import org.eclipse.jetty.server.session.JDBCSessionDataStoreFactory;
+import org.eclipse.jetty.server.session.SessionCache;
+import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.api.DateParameterConverterProvider;
-import org.traccar.config.Config;
-import org.traccar.api.AsyncSocketServlet;
+import org.traccar.LifecycleObject;
 import org.traccar.api.CorsResponseFilter;
-import org.traccar.api.MediaFilter;
-import org.traccar.api.ObjectMapperProvider;
+import org.traccar.api.DateParameterConverterProvider;
 import org.traccar.api.ResourceErrorHandler;
-import org.traccar.api.SecurityRequestFilter;
 import org.traccar.api.resource.ServerResource;
+import org.traccar.api.security.SecurityRequestFilter;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.ObjectMapperContextResolver;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletException;
 import javax.servlet.SessionCookieConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 
-public class WebServer {
+public class WebServer implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
 
-    private Server server;
+    private final Injector injector;
+    private final Config config;
+    private final Server server;
 
-    private void initServer(Config config) {
-
+    public WebServer(Injector injector, Config config) {
+        this.injector = injector;
+        this.config = config;
         String address = config.getString(Keys.WEB_ADDRESS);
         int port = config.getInteger(Keys.WEB_PORT);
         if (address == null) {
@@ -71,39 +85,42 @@ public class WebServer {
         } else {
             server = new Server(new InetSocketAddress(address, port));
         }
-    }
-
-    public WebServer(Config config) {
-
-        initServer(config);
 
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        JettyWebSocketServletContainerInitializer.configure(servletHandler, null);
+        servletHandler.addFilter(GuiceFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
 
-        initApi(config, servletHandler);
-        initSessionConfig(config, servletHandler);
+        initApi(servletHandler);
+        initSessionConfig(servletHandler);
 
         if (config.getBoolean(Keys.WEB_CONSOLE)) {
-            servletHandler.addServlet(new ServletHolder(new ConsoleServlet()), "/console/*");
+            servletHandler.addServlet(new ServletHolder(new ConsoleServlet(config)), "/console/*");
         }
 
-        initWebApp(config, servletHandler);
+        initWebApp(servletHandler);
 
         servletHandler.setErrorHandler(new ErrorHandler() {
             @Override
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
-                writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
-                        + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
+                Path index = Paths.get(config.getString(Keys.WEB_PATH), "index.html");
+                if (code == HttpStatus.NOT_FOUND_404
+                        && !request.getPathInfo().startsWith("/api/") && Files.exists(index)) {
+                    writer.write(Files.readString(index));
+                } else {
+                    writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
+                            + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
+                }
             }
         });
 
         HandlerList handlers = new HandlerList();
-        initClientProxy(config, handlers);
+        initClientProxy(handlers);
         handlers.addHandler(servletHandler);
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
 
-        if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
+        if (config.hasKey(Keys.WEB_REQUEST_LOG_PATH)) {
             RequestLogWriter logWriter = new RequestLogWriter(config.getString(Keys.WEB_REQUEST_LOG_PATH));
             logWriter.setAppend(true);
             logWriter.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
@@ -112,7 +129,7 @@ public class WebServer {
         }
     }
 
-    private void initClientProxy(Config config, HandlerList handlers) {
+    private void initClientProxy(HandlerList handlers) {
         int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix("osmand"));
         if (port != 0) {
             ServletContextHandler servletHandler = new ServletContextHandler() {
@@ -125,16 +142,17 @@ public class WebServer {
                     }
                 }
             };
-            ServletHolder servletHolder = new ServletHolder(new AsyncProxyServlet.Transparent());
+            ServletHolder servletHolder = new ServletHolder(AsyncProxyServlet.Transparent.class);
             servletHolder.setInitParameter("proxyTo", "http://localhost:" + port);
             servletHandler.addServlet(servletHolder, "/");
             handlers.addHandler(servletHandler);
         }
     }
 
-    private void initWebApp(Config config, ServletContextHandler servletHandler) {
+    private void initWebApp(ServletContextHandler servletHandler) {
         ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
         servletHolder.setInitParameter("resourceBase", new File(config.getString(Keys.WEB_PATH)).getAbsolutePath());
+        servletHolder.setInitParameter("dirAllowed", "false");
         if (config.getBoolean(Keys.WEB_DEBUG)) {
             servletHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
         } else {
@@ -147,9 +165,7 @@ public class WebServer {
         servletHandler.addServlet(servletHolder, "/*");
     }
 
-    private void initApi(Config config, ServletContextHandler servletHandler) {
-        servletHandler.addServlet(new ServletHolder(new AsyncSocketServlet()), "/api/socket");
-
+    private void initApi(ServletContextHandler servletHandler) {
         String mediaPath = config.getString(Keys.MEDIA_PATH);
         if (mediaPath != null) {
             ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
@@ -157,18 +173,35 @@ public class WebServer {
             servletHolder.setInitParameter("dirAllowed", "false");
             servletHolder.setInitParameter("pathInfoOnly", "true");
             servletHandler.addServlet(servletHolder, "/api/media/*");
-            servletHandler.addFilter(MediaFilter.class, "/api/media/*", EnumSet.allOf(DispatcherType.class));
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.registerClasses(
-                JacksonFeature.class, ObjectMapperProvider.class, ResourceErrorHandler.class,
-                SecurityRequestFilter.class, CorsResponseFilter.class, DateParameterConverterProvider.class);
+                JacksonFeature.class,
+                ObjectMapperContextResolver.class,
+                DateParameterConverterProvider.class,
+                SecurityRequestFilter.class,
+                CorsResponseFilter.class,
+                ResourceErrorHandler.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
+        if (resourceConfig.getClasses().stream().filter(ServerResource.class::equals).findAny().isEmpty()) {
+            LOGGER.warn("Failed to load API resources");
+        }
         servletHandler.addServlet(new ServletHolder(new ServletContainer(resourceConfig)), "/api/*");
     }
 
-    private void initSessionConfig(Config config, ServletContextHandler servletHandler) {
+    private void initSessionConfig(ServletContextHandler servletHandler) {
+        if (config.getBoolean(Keys.WEB_PERSIST_SESSION)) {
+            DatabaseAdaptor databaseAdaptor = new DatabaseAdaptor();
+            databaseAdaptor.setDatasource(injector.getInstance(DataSource.class));
+            JDBCSessionDataStoreFactory jdbcSessionDataStoreFactory = new JDBCSessionDataStoreFactory();
+            jdbcSessionDataStoreFactory.setDatabaseAdaptor(databaseAdaptor);
+            SessionHandler sessionHandler = servletHandler.getSessionHandler();
+            SessionCache sessionCache = new DefaultSessionCache(sessionHandler);
+            sessionCache.setSessionDataStore(jdbcSessionDataStoreFactory.getSessionDataStore(sessionHandler));
+            sessionHandler.setSessionCache(sessionCache);
+        }
+
         int sessionTimeout = config.getInteger(Keys.WEB_SESSION_TIMEOUT);
         if (sessionTimeout > 0) {
             servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
@@ -194,20 +227,14 @@ public class WebServer {
         }
     }
 
-    public void start() {
-        try {
-            server.start();
-        } catch (Exception error) {
-            LOGGER.warn("Web server start failed", error);
-        }
+    @Override
+    public void start() throws Exception {
+        server.start();
     }
 
-    public void stop() {
-        try {
-            server.stop();
-        } catch (Exception error) {
-            LOGGER.warn("Web server stop failed", error);
-        }
+    @Override
+    public void stop() throws Exception {
+        server.stop();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WifiAccessPoint {
@@ -61,6 +63,25 @@ public class WifiAccessPoint {
 
     public void setChannel(Integer channel) {
         this.channel = channel;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        WifiAccessPoint that = (WifiAccessPoint) o;
+        return Objects.equals(macAddress, that.macAddress)
+                && Objects.equals(signalStrength, that.signalStrength)
+                && Objects.equals(channel, that.channel);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(macAddress, signalStrength, channel);
     }
 
 }

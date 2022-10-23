@@ -21,11 +21,15 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
+
+import javax.inject.Inject;
 
 public class Tk103Protocol extends BaseProtocol {
 
-    public Tk103Protocol() {
+    @Inject
+    public Tk103Protocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_GET_DEVICE_STATUS,
@@ -45,9 +49,9 @@ public class Tk103Protocol extends BaseProtocol {
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_OUTPUT_CONTROL);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Tk103FrameDecoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
@@ -55,9 +59,9 @@ public class Tk103Protocol extends BaseProtocol {
                 pipeline.addLast(new Tk103ProtocolDecoder(Tk103Protocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new Tk103ProtocolEncoder(Tk103Protocol.this));

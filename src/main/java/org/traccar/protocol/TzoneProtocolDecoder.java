@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,14 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
+import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -29,11 +33,30 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
     public TzoneProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, int index) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String ack = String.format("@ACK,%d#", index);
+        String time = String.format("@UTC time:%s", dateFormat.format(new Date()));
+
+        ByteBuf response = Unpooled.copiedBuffer(ack + time, StandardCharsets.US_ASCII);
+
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
     }
 
     private String decodeAlarm(Short value) {
@@ -256,9 +279,28 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         int blockLength = buf.readUnsignedShort();
         int blockEnd = buf.readerIndex() + blockLength;
 
-        if (blockLength > 0 && (hardware == 0x10A || hardware == 0x10B || hardware == 0x406)) {
-            position.setNetwork(new Network(
-                    CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
+        if (blockLength > 0) {
+            if (hardware == 0x10A || hardware == 0x10B || hardware == 0x406) {
+
+                position.setNetwork(new Network(
+                        CellTower.fromLacCid(getConfig(), buf.readUnsignedShort(), buf.readUnsignedShort())));
+
+            } else if (hardware == 0x407) {
+
+                Network network = new Network();
+                int count = buf.readUnsignedByte();
+                for (int i = 0; i < count; i++) {
+                    buf.readUnsignedByte(); // signal information
+
+                    int mcc = BcdUtil.readInteger(buf, 4);
+                    int mnc = BcdUtil.readInteger(buf, 4) % 1000;
+
+                    network.addCellTower(CellTower.from(
+                            mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedInt()));
+                }
+                position.setNetwork(network);
+
+            }
         }
 
         buf.readerIndex(blockEnd);
@@ -268,25 +310,41 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         blockLength = buf.readUnsignedShort();
         blockEnd = buf.readerIndex() + blockLength;
 
-        if (blockLength >= 13) {
+        if (hardware == 0x407 || blockLength >= 13) {
             position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
             position.set("terminalInfo", buf.readUnsignedByte());
 
-            int status = buf.readUnsignedByte();
-            position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 0));
-            position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 1));
-            status = buf.readUnsignedByte();
-            position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 4));
-            if (BitUtil.check(status, 0)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            if (hardware != 0x407) {
+                int status = buf.readUnsignedByte();
+                position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 0));
+                position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 1));
+                status = buf.readUnsignedByte();
+                position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 4));
+                if (BitUtil.check(status, 0)) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                }
             }
 
             position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             position.set("gsmStatus", buf.readUnsignedByte());
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShort());
-            position.set(Position.KEY_POWER, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
-            position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+
+            if (hardware != 0x407) {
+                position.set(Position.KEY_POWER, buf.readUnsignedShort());
+                position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort());
+                position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
+            } else {
+                int temperature = buf.readUnsignedShort();
+                if (!BitUtil.check(temperature, 15)) {
+                    double value = BitUtil.to(temperature, 14) * 0.1;
+                    position.set(Position.PREFIX_TEMP + 1, BitUtil.check(temperature, 14) ? -value : value);
+                }
+                int humidity = buf.readUnsignedShort();
+                if (!BitUtil.check(humidity, 15)) {
+                    position.set("humidity", BitUtil.to(humidity, 15) * 0.1);
+                }
+                position.set("lightSensor", buf.readUnsignedByte() == 0);
+            }
         }
 
         if (blockLength >= 15) {
@@ -310,6 +368,10 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
             decodeTags(position, buf);
 
+        }
+
+        if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+            sendResponse(channel, remoteAddress, buf.getUnsignedShort(buf.writerIndex() - 6));
         }
 
         return position;

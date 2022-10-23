@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import io.netty.channel.ChannelPromise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.NetworkMessage;
+import org.traccar.helper.NetworkUtil;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -63,7 +64,7 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
     public void log(ChannelHandlerContext ctx, boolean downstream, SocketAddress remoteAddress, ByteBuf buf) {
         StringBuilder message = new StringBuilder();
 
-        message.append("[").append(ctx.channel().id().asShortText()).append(": ");
+        message.append("[").append(NetworkUtil.session(ctx.channel())).append(": ");
         message.append(protocol);
         if (downstream) {
             message.append(" > ");
@@ -76,9 +77,8 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
         } else {
             message.append("unknown");
         }
-        message.append("]");
+        message.append("] ");
 
-        message.append(" HEX: ");
         message.append(ByteBufUtil.hexDump(buf));
 
         LOGGER.info(message.toString());

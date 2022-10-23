@@ -48,13 +48,14 @@ public class Parser {
     }
 
     public boolean hasNext(int number) {
-        String value = matcher.group(position);
-        if (value != null && !value.isEmpty()) {
-            return true;
-        } else {
-            position += number;
-            return false;
+        for (int i = position; i < position + number; i++) {
+            String value = matcher.group(i);
+            if (value != null && !value.isEmpty()) {
+                return true;
+            }
         }
+        position += number;
+        return false;
     }
 
     public String next() {
@@ -155,6 +156,7 @@ public class Parser {
 
     public enum CoordinateFormat {
         DEG_DEG,
+        DEG_DEG_HEM,
         DEG_HEM,
         DEG_MIN_MIN,
         DEG_MIN_HEM,
@@ -172,6 +174,10 @@ public class Parser {
         switch (format) {
             case DEG_DEG:
                 coordinate = Double.parseDouble(next() + '.' + next());
+                break;
+            case DEG_DEG_HEM:
+                coordinate = Double.parseDouble(next() + '.' + next());
+                hemisphere = next();
                 break;
             case DEG_HEM:
                 coordinate = nextDouble(0);

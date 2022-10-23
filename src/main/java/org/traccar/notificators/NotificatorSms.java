@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,34 +16,38 @@
  */
 package org.traccar.notificators;
 
-import org.traccar.Context;
-import org.traccar.Main;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
+import org.traccar.sms.SmsManager;
 
-public final class NotificatorSms extends Notificator {
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
-    @Override
-    public void sendAsync(long userId, Event event, Position position) {
-        final User user = Context.getPermissionsManager().getUser(userId);
-        if (user.getPhone() != null) {
-            Main.getInjector().getInstance(StatisticsManager.class).registerSms();
-            Context.getSmsManager().sendMessageAsync(user.getPhone(),
-                    NotificationFormatter.formatShortMessage(userId, event, position), false);
-        }
+@Singleton
+public class NotificatorSms implements Notificator {
+
+    private final SmsManager smsManager;
+    private final NotificationFormatter notificationFormatter;
+    private final StatisticsManager statisticsManager;
+
+    @Inject
+    public NotificatorSms(
+            SmsManager smsManager, NotificationFormatter notificationFormatter, StatisticsManager statisticsManager) {
+        this.smsManager = smsManager;
+        this.notificationFormatter = notificationFormatter;
+        this.statisticsManager = statisticsManager;
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) throws MessageException, InterruptedException {
-        final User user = Context.getPermissionsManager().getUser(userId);
+    public void send(User user, Event event, Position position) throws MessageException, InterruptedException {
         if (user.getPhone() != null) {
-            Main.getInjector().getInstance(StatisticsManager.class).registerSms();
-            Context.getSmsManager().sendMessageSync(user.getPhone(),
-                    NotificationFormatter.formatShortMessage(userId, event, position), false);
+            var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
+            statisticsManager.registerSms();
+            smsManager.sendMessage(user.getPhone(), shortMessage.getBody(), false);
         }
     }
 

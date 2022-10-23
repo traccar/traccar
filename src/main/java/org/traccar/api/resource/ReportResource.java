@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,41 +16,47 @@
  */
 package org.traccar.api.resource;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.api.BaseResource;
+import org.traccar.mail.MailManager;
+import org.traccar.helper.LogAction;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
+import org.traccar.model.User;
+import org.traccar.model.UserRestrictions;
+import org.traccar.reports.EventsReportProvider;
+import org.traccar.reports.RouteReportProvider;
+import org.traccar.reports.StopsReportProvider;
+import org.traccar.reports.SummaryReportProvider;
+import org.traccar.reports.TripsReportProvider;
+import org.traccar.reports.model.StopReportItem;
+import org.traccar.reports.model.SummaryReportItem;
+import org.traccar.reports.model.TripReportItem;
+import org.traccar.storage.StorageException;
 
 import javax.activation.DataHandler;
+import javax.inject.Inject;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.util.ByteArrayDataSource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.api.BaseResource;
-import org.traccar.helper.LogAction;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
-import org.traccar.reports.Events;
-import org.traccar.reports.Summary;
-import org.traccar.reports.Trips;
-import org.traccar.reports.model.StopReport;
-import org.traccar.reports.model.SummaryReport;
-import org.traccar.reports.model.TripReport;
-import org.traccar.reports.Route;
-import org.traccar.reports.Stops;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 @Path("reports")
 @Produces(MediaType.APPLICATION_JSON)
@@ -59,155 +65,267 @@ public class ReportResource extends BaseResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportResource.class);
 
-    private static final String XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-    private static final String CONTENT_DISPOSITION_VALUE_XLSX = "attachment; filename=report.xlsx";
+    private static final String EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    @Inject
+    private EventsReportProvider eventsReportProvider;
+
+    @Inject
+    private RouteReportProvider routeReportProvider;
+
+    @Inject
+    private StopsReportProvider stopsReportProvider;
+
+    @Inject
+    private SummaryReportProvider summaryReportProvider;
+
+    @Inject
+    private TripsReportProvider tripsReportProvider;
+
+    @Inject
+    private MailManager mailManager;
 
     private interface ReportExecutor {
-        void execute(ByteArrayOutputStream stream) throws SQLException, IOException;
+        void execute(OutputStream stream) throws StorageException, IOException;
     }
 
     private Response executeReport(
-            long userId, boolean mail, ReportExecutor executor) throws SQLException, IOException {
-        final ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            long userId, boolean mail, ReportExecutor executor) {
         if (mail) {
             new Thread(() -> {
                 try {
+                    var stream = new ByteArrayOutputStream();
                     executor.execute(stream);
 
                     MimeBodyPart attachment = new MimeBodyPart();
-
                     attachment.setFileName("report.xlsx");
                     attachment.setDataHandler(new DataHandler(new ByteArrayDataSource(
                             stream.toByteArray(), "application/octet-stream")));
 
-                    Context.getMailManager().sendMessage(
-                            userId, "Report", "The report is in the attachment.", attachment);
-                } catch (SQLException | IOException | MessagingException e) {
+                    User user = permissionsService.getUser(userId);
+                    mailManager.sendMessage(user, "Report", "The report is in the attachment.", attachment);
+                } catch (StorageException | IOException | MessagingException e) {
                     LOGGER.warn("Report failed", e);
                 }
             }).start();
             return Response.noContent().build();
         } else {
-            executor.execute(stream);
-            return Response.ok(stream.toByteArray())
-                    .header(HttpHeaders.CONTENT_DISPOSITION, CONTENT_DISPOSITION_VALUE_XLSX).build();
+            StreamingOutput stream = output -> {
+                try {
+                    executor.execute(output);
+                } catch (StorageException e) {
+                    throw new WebApplicationException(e);
+                }
+            };
+            return Response.ok(stream)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=report.xlsx").build();
         }
     }
 
     @Path("route")
     @GET
     public Collection<Position> getRoute(
-            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to) throws SQLException {
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "route", from, to, deviceIds, groupIds);
-        return Route.getObjects(getUserId(), deviceIds, groupIds, from, to);
+        return routeReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
     }
 
     @Path("route")
     @GET
-    @Produces(XLSX)
+    @Produces(EXCEL)
     public Response getRouteExcel(
-            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("mail") boolean mail)
-            throws SQLException, IOException {
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @QueryParam("mail") boolean mail) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "route", from, to, deviceIds, groupIds);
-            Route.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
+            routeReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
         });
+    }
+
+    @Path("route/{type:xlsx|mail}")
+    @GET
+    @Produces(EXCEL)
+    public Response getRouteExcel(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") final List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @PathParam("type") String type) throws StorageException {
+        return getRouteExcel(deviceIds, groupIds, from, to, type.equals("mail"));
     }
 
     @Path("events")
     @GET
     public Collection<Event> getEvents(
-            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("type") final List<String> types,
-            @QueryParam("from") Date from, @QueryParam("to") Date to) throws SQLException {
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("type") List<String> types,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.logReport(getUserId(), "events", from, to, deviceIds, groupIds);
-        return Events.getObjects(getUserId(), deviceIds, groupIds, types, from, to);
+        return eventsReportProvider.getObjects(getUserId(), deviceIds, groupIds, types, from, to);
     }
 
     @Path("events")
     @GET
-    @Produces(XLSX)
+    @Produces(EXCEL)
     public Response getEventsExcel(
-            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("type") final List<String> types,
-            @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("mail") boolean mail)
-            throws SQLException, IOException {
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("type") List<String> types,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @QueryParam("mail") boolean mail) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "events", from, to, deviceIds, groupIds);
-            Events.getExcel(stream, getUserId(), deviceIds, groupIds, types, from, to);
+            eventsReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, types, from, to);
         });
     }
 
-    @Path("summary")
+    @Path("events/{type:xlsx|mail}")
     @GET
-    public Collection<SummaryReport> getSummary(
-            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("daily") boolean daily)
-            throws SQLException {
-        LogAction.logReport(getUserId(), "summary", from, to, deviceIds, groupIds);
-        return Summary.getObjects(getUserId(), deviceIds, groupIds, from, to, daily);
+    @Produces(EXCEL)
+    public Response getEventsExcel(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("type") List<String> types,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @PathParam("type") String type) throws StorageException {
+        return getEventsExcel(deviceIds, groupIds, types, from, to, type.equals("mail"));
     }
 
     @Path("summary")
     @GET
-    @Produces(XLSX)
+    public Collection<SummaryReportItem> getSummary(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @QueryParam("daily") boolean daily) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        LogAction.logReport(getUserId(), "summary", from, to, deviceIds, groupIds);
+        return summaryReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to, daily);
+    }
+
+    @Path("summary")
+    @GET
+    @Produces(EXCEL)
     public Response getSummaryExcel(
-            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("daily") boolean daily,
-            @QueryParam("mail") boolean mail)
-            throws SQLException, IOException {
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @QueryParam("daily") boolean daily,
+            @QueryParam("mail") boolean mail) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "summary", from, to, deviceIds, groupIds);
-            Summary.getExcel(stream, getUserId(), deviceIds, groupIds, from, to, daily);
+            summaryReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to, daily);
         });
     }
 
-    @Path("trips")
+    @Path("summary/{type:xlsx|mail}")
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Collection<TripReport> getTrips(
-            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to) throws SQLException {
-        LogAction.logReport(getUserId(), "trips", from, to, deviceIds, groupIds);
-        return Trips.getObjects(getUserId(), deviceIds, groupIds, from, to);
+    @Produces(EXCEL)
+    public Response getSummaryExcel(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @QueryParam("daily") boolean daily,
+            @PathParam("type") String type) throws StorageException {
+        return getSummaryExcel(deviceIds, groupIds, from, to, daily, type.equals("mail"));
     }
 
     @Path("trips")
     @GET
-    @Produces(XLSX)
+    public Collection<TripReportItem> getTrips(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        LogAction.logReport(getUserId(), "trips", from, to, deviceIds, groupIds);
+        return tripsReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
+    }
+
+    @Path("trips")
+    @GET
+    @Produces(EXCEL)
     public Response getTripsExcel(
-            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("mail") boolean mail)
-            throws SQLException, IOException {
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @QueryParam("mail") boolean mail) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "trips", from, to, deviceIds, groupIds);
-            Trips.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
+            tripsReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
         });
     }
 
-    @Path("stops")
+    @Path("trips/{type:xlsx|mail}")
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public Collection<StopReport> getStops(
-            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to) throws SQLException {
-        LogAction.logReport(getUserId(), "stops", from, to, deviceIds, groupIds);
-        return Stops.getObjects(getUserId(), deviceIds, groupIds, from, to);
+    @Produces(EXCEL)
+    public Response getTripsExcel(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @PathParam("type") String type) throws StorageException {
+        return getTripsExcel(deviceIds, groupIds, from, to, type.equals("mail"));
     }
 
     @Path("stops")
     @GET
-    @Produces(XLSX)
+    public Collection<StopReportItem> getStops(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        LogAction.logReport(getUserId(), "stops", from, to, deviceIds, groupIds);
+        return stopsReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
+    }
+
+    @Path("stops")
+    @GET
+    @Produces(EXCEL)
     public Response getStopsExcel(
-            @QueryParam("deviceId") final List<Long> deviceIds, @QueryParam("groupId") final List<Long> groupIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to, @QueryParam("mail") boolean mail)
-            throws SQLException, IOException {
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @QueryParam("mail") boolean mail) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.logReport(getUserId(), "stops", from, to, deviceIds, groupIds);
-            Stops.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
+            stopsReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
         });
+    }
+
+    @Path("stops/{type:xlsx|mail}")
+    @GET
+    @Produces(EXCEL)
+    public Response getStopsExcel(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @PathParam("type") String type) throws StorageException {
+        return getStopsExcel(deviceIds, groupIds, from, to, type.equals("mail"));
     }
 
 }

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-4.15">
+
+  <changeSet author="author" id="changelog-4.15">
+
+    <createTable tableName="tc_orders">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="uniqueid" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="description" type="VARCHAR(512)" />
+      <column name="fromAddress" type="VARCHAR(512)" />
+      <column name="toAddress" type="VARCHAR(512)" />
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_order">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="orderid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_user_order" baseColumnNames="userid" constraintName="fk_user_order_userid" referencedTableName="tc_users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="tc_user_order" baseColumnNames="orderid" constraintName="fk_user_order_orderid" referencedTableName="tc_orders" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="tc_group_order">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="orderid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_group_order" baseColumnNames="groupid" constraintName="fk_group_order_groupid" referencedTableName="tc_groups" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="tc_group_order" baseColumnNames="orderid" constraintName="fk_group_order_orderid" referencedTableName="tc_orders" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="tc_device_order">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="orderid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_device_order" baseColumnNames="deviceid" constraintName="fk_device_order_deviceid" referencedTableName="tc_devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="tc_device_order" baseColumnNames="orderid" constraintName="fk_device_order_orderid" referencedTableName="tc_orders" referencedColumnNames="id" onDelete="CASCADE" />
+
+  </changeSet>
+
+</databaseChangeLog>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,15 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
+
+import javax.inject.Inject;
 
 public class MiniFinderProtocol extends BaseProtocol {
 
-    public MiniFinderProtocol() {
+    @Inject
+    public MiniFinderProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_VOICE_MONITORING,
@@ -38,10 +42,10 @@ public class MiniFinderProtocol extends BaseProtocol {
                 Command.TYPE_MODE_DEEP_SLEEP,
                 Command.TYPE_SOS_NUMBER,
                 Command.TYPE_SET_INDICATOR);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ';'));
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ";\0", ";"));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new MiniFinderProtocolEncoder(MiniFinderProtocol.this));

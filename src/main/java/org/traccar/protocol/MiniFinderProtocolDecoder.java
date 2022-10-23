@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
@@ -143,7 +143,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-        if (deviceSession == null || !sentence.matches("![3A-D],.*")) {
+        if (deviceSession == null || !sentence.matches("![35A-D],.*")) {
             return null;
         }
 
@@ -158,6 +158,19 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             position.set(Position.KEY_RESULT, sentence.substring(3));
+
+            return position;
+
+        } else if (type.equals("5")) {
+
+            String[] values = sentence.split(",");
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RSSI, Integer.parseInt(values[1]));
+            if (values.length >= 4) {
+                position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[3]));
+            }
 
             return position;
 

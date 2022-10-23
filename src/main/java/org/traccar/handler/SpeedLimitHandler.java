@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.traccar.model.Position;
 import org.traccar.speedlimit.SpeedLimitProvider;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 @ChannelHandler.Sharable
 public class SpeedLimitHandler extends ChannelInboundHandlerAdapter {
 
@@ -30,6 +34,7 @@ public class SpeedLimitHandler extends ChannelInboundHandlerAdapter {
 
     private final SpeedLimitProvider speedLimitProvider;
 
+    @Inject
     public SpeedLimitHandler(SpeedLimitProvider speedLimitProvider) {
         this.speedLimitProvider = speedLimitProvider;
     }

@@ -18,13 +18,17 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class NvsProtocol extends BaseProtocol {
 
-    public NvsProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public NvsProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new NvsFrameDecoder());
                 pipeline.addLast(new NvsProtocolDecoder(NvsProtocol.this));
             }

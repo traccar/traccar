@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,69 +16,100 @@
  */
 package org.traccar.api.resource;
 
-import java.sql.SQLException;
-import java.util.LinkedHashMap;
+import org.traccar.api.BaseResource;
+import org.traccar.helper.LogAction;
+import org.traccar.model.Permission;
+import org.traccar.model.UserRestrictions;
+import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.StorageException;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.traccar.Context;
-import org.traccar.api.BaseResource;
-import org.traccar.helper.LogAction;
-import org.traccar.model.Device;
-import org.traccar.model.Permission;
-import org.traccar.model.User;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 
 @Path("permissions")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PermissionsResource  extends BaseResource {
 
-    private void checkPermission(Permission permission, boolean link) {
-        if (!link && permission.getOwnerClass().equals(User.class)
-                && permission.getPropertyClass().equals(Device.class)) {
-            if (getUserId() != permission.getOwnerId()) {
-                Context.getPermissionsManager().checkUser(getUserId(), permission.getOwnerId());
-            } else {
-                Context.getPermissionsManager().checkAdmin(getUserId());
-            }
-        } else {
-            Context.getPermissionsManager().checkPermission(
-                    permission.getOwnerClass(), getUserId(), permission.getOwnerId());
+    @Inject
+    private CacheManager cacheManager;
+
+    private void checkPermission(Permission permission) throws StorageException {
+        if (permissionsService.notAdmin(getUserId())) {
+            permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
+            permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
         }
-        Context.getPermissionsManager().checkPermission(
-                permission.getPropertyClass(), getUserId(), permission.getPropertyId());
+    }
+
+    private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) {
+        Set<String> keys = null;
+        for (LinkedHashMap<String, Long> entity: entities) {
+            if (keys != null & !entity.keySet().equals(keys)) {
+                throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
+            }
+            keys = entity.keySet();
+        }
+    }
+
+    @Path("bulk")
+    @POST
+    public Response add(List<LinkedHashMap<String, Long>> entities) throws StorageException, ClassNotFoundException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
+        checkPermissionTypes(entities);
+        for (LinkedHashMap<String, Long> entity: entities) {
+            Permission permission = new Permission(entity);
+            checkPermission(permission);
+            storage.addPermission(permission);
+            cacheManager.invalidatePermission(
+                    true,
+                    permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId());
+            LogAction.link(getUserId(),
+                    permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId());
+        }
+        return Response.noContent().build();
     }
 
     @POST
-    public Response add(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        Permission permission = new Permission(entity);
-        checkPermission(permission, true);
-        Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
-                permission.getPropertyClass(), permission.getPropertyId(), true);
-        LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
-                permission.getPropertyClass(), permission.getPropertyId());
-        Context.getPermissionsManager().refreshPermissions(permission);
+    public Response add(LinkedHashMap<String, Long> entity) throws StorageException, ClassNotFoundException {
+        return add(Collections.singletonList(entity));
+    }
+
+    @DELETE
+    @Path("bulk")
+    public Response remove(List<LinkedHashMap<String, Long>> entities) throws StorageException, ClassNotFoundException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
+        checkPermissionTypes(entities);
+        for (LinkedHashMap<String, Long> entity: entities) {
+            Permission permission = new Permission(entity);
+            checkPermission(permission);
+            storage.removePermission(permission);
+            cacheManager.invalidatePermission(
+                    true,
+                    permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId());
+            LogAction.unlink(getUserId(),
+                    permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId());
+        }
         return Response.noContent().build();
     }
 
     @DELETE
-    public Response remove(LinkedHashMap<String, Long> entity) throws SQLException, ClassNotFoundException {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        Permission permission = new Permission(entity);
-        checkPermission(permission, false);
-        Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
-                permission.getPropertyClass(), permission.getPropertyId(), false);
-        LogAction.unlink(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
-                permission.getPropertyClass(), permission.getPropertyId());
-        Context.getPermissionsManager().refreshPermissions(permission);
-        return Response.noContent().build();
+    public Response remove(LinkedHashMap<String, Long> entity) throws StorageException, ClassNotFoundException {
+        return remove(Collections.singletonList(entity));
     }
 
 }

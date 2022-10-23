@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -313,7 +313,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                 if (messageIndex != null) {
                     String response;
                     if (messageIndex.startsWith("#IP")) {
-                        response = "\u0020\u0020\u0006\u0000>SAK;ID=" + uniqueId + ";" + messageIndex + "<";
+                        response = ">SAK;ID=" + uniqueId + ";" + messageIndex + "<";
                     } else {
                         response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
                         response += String.format("%02X", Checksum.xor(response)) + "<";

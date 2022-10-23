@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,13 @@
  */
 package org.traccar.protocol;
 
+import com.google.inject.Injector;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
 
+import javax.inject.Inject;
 import java.net.SocketAddress;
 
 public class ArnaviProtocolDecoder extends BaseProtocolDecoder {
@@ -31,6 +33,12 @@ public class ArnaviProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
         textProtocolDecoder = new ArnaviTextProtocolDecoder(protocol);
         binaryProtocolDecoder = new ArnaviBinaryProtocolDecoder(protocol);
+    }
+
+    @Inject
+    public void setInjector(Injector injector) {
+        injector.injectMembers(textProtocolDecoder);
+        injector.injectMembers(binaryProtocolDecoder);
     }
 
     @Override
