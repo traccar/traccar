@@ -54,11 +54,11 @@ public class NotificatorManager {
             "firebase", NotificatorFirebase.class,
             "traccar", NotificatorTraccar.class,
             "telegram", NotificatorTelegram.class,
-            "pushover", NotificatorPushover.class);
+            "pushover", NotificatorPushover.class,
+            "mqtt", NotificatorMqtt.class);
 
     private final Injector injector;
 
-<<<<<<< HEAD
     private final Set<String> types = new HashSet<>();
 
     @Inject
@@ -67,44 +67,6 @@ public class NotificatorManager {
         String types = config.getString(Keys.NOTIFICATOR_TYPES);
         if (types != null) {
             this.types.addAll(Arrays.asList(types.split(",")));
-=======
-    public NotificatorManager() {
-        final String[] types = Context.getConfig().getString("notificator.types", "").split(",");
-        for (String type : types) {
-            String defaultNotificator = "";
-            switch (type) {
-                case "web":
-                    defaultNotificator = NotificatorWeb.class.getCanonicalName();
-                    break;
-                case "mail":
-                    defaultNotificator = NotificatorMail.class.getCanonicalName();
-                    break;
-                case "sms":
-                    defaultNotificator = NotificatorSms.class.getCanonicalName();
-                    break;
-                case "firebase":
-                    defaultNotificator = NotificatorFirebase.class.getCanonicalName();
-                    break;
-                case "telegram":
-                    defaultNotificator = NotificatorTelegram.class.getCanonicalName();
-                    break;
-                case "pushover":
-                    defaultNotificator = NotificatorPushover.class.getCanonicalName();
-                    break;
-                case "mqtt":
-                    defaultNotificator = NotificatorMqtt.class.getCanonicalName();
-                    break;
-                default:
-                    break;
-            }
-            final String className = Context.getConfig()
-                    .getString("notificator." + type + ".class", defaultNotificator);
-            try {
-                notificators.put(type, (Notificator) Class.forName(className).newInstance());
-            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                LOGGER.warn("Unable to load notificator class for " + type + " " + className + " " + e.getMessage());
-            }
->>>>>>> Added MQTT dependency and notificator class
         }
     }
 
