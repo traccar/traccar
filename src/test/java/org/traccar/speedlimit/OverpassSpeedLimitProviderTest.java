@@ -3,19 +3,20 @@ package org.traccar.speedlimit;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class OverpassSpeedLimitProviderTest {
 
+    private final Client client = ClientBuilder.newClient();
+
     @Ignore
     @Test
-    public void test() throws Exception {
-        testLocationProvider();
-    }
-
-    public void testLocationProvider() throws Exception {
-        SpeedLimitProvider provider = new OverpassSpeedLimitProvider("http://8.8.8.8/api/interpreter");
+    public void testOverpass() throws Exception {
+        SpeedLimitProvider provider = new OverpassSpeedLimitProvider(client, "http://8.8.8.8/api/interpreter");
 
         provider.getSpeedLimit(34.74767, -82.48098, new SpeedLimitProvider.SpeedLimitProviderCallback() {
             @Override

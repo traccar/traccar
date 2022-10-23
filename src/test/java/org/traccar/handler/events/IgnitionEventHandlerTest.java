@@ -1,21 +1,22 @@
 package org.traccar.handler.events;
 
-import static org.junit.Assert.assertNull;
+import org.junit.Test;
+import org.traccar.BaseTest;
+import org.traccar.model.Event;
+import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import java.util.Map;
 
-import org.junit.Test;
-import org.traccar.BaseTest;
-import org.traccar.TestIdentityManager;
-import org.traccar.model.Event;
-import org.traccar.model.Position;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.mock;
 
 public class IgnitionEventHandlerTest extends BaseTest {
     
     @Test
     public void testIgnitionEventHandler() {
         
-        IgnitionEventHandler ignitionEventHandler = new IgnitionEventHandler(new TestIdentityManager());
+        IgnitionEventHandler ignitionEventHandler = new IgnitionEventHandler(mock(CacheManager.class));
         
         Position position = new Position();
         position.set(Position.KEY_IGNITION, true);

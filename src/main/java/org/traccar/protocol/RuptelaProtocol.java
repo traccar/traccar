@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,19 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
+
+import javax.inject.Inject;
 
 public class RuptelaProtocol extends BaseProtocol {
 
-    public RuptelaProtocol() {
+    @Inject
+    public RuptelaProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_REQUEST_PHOTO,
                 Command.TYPE_CONFIGURATION,
                 Command.TYPE_GET_VERSION,
@@ -33,9 +39,9 @@ public class RuptelaProtocol extends BaseProtocol {
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_SET_CONNECTION,
                 Command.TYPE_SET_ODOMETER);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 0, 2, 2, 0));
                 pipeline.addLast(new RuptelaProtocolEncoder(RuptelaProtocol.this));
                 pipeline.addLast(new RuptelaProtocolDecoder(RuptelaProtocol.this));

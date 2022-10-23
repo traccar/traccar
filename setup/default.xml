@@ -11,10 +11,16 @@
     -->
 
     <entry key='web.port'>8082</entry>
-    <entry key='web.path'>./web</entry>
+    <entry key='web.path'>./modern</entry>
+    <entry key='web.sanitize'>false</entry>
+    <entry key='web.persistSession'>false</entry>
 
-    <entry key='geocoder.enable'>false</entry>
-    <entry key='geocoder.type'>google</entry>
+    <entry key='geocoder.enable'>true</entry>
+    <entry key='geocoder.type'>nominatim</entry>
+    <entry key='geocoder.url'>https://us1.locationiq.com/v1/reverse.php</entry>
+    <entry key='geocoder.key'>pk.689d849289c8c63708068b2ff1f63b2d</entry>
+    <entry key='geocoder.onRequest'>true</entry>
+    <entry key='geocoder.ignorePositions'>true</entry>
 
     <entry key='logger.level'>info</entry>
     <entry key='logger.file'>./logs/tracker-server.log</entry>
@@ -24,8 +30,6 @@
     <entry key='filter.future'>86400</entry>
 
     <entry key='event.ignoreDuplicateAlerts'>true</entry>
-    <entry key='processing.computedAttributes.enable'>true</entry>
-    <entry key='processing.engineHours.enable'>true</entry>
 
     <entry key='media.path'>./media</entry>
 
@@ -36,33 +40,7 @@
     <entry key='commands.queueing'>true</entry>
 
     <entry key='database.ignoreUnknown'>true</entry>
-    <entry key='database.generateQueries'>true</entry>
     <entry key='database.changelog'>./schema/changelog-master.xml</entry>
- 
-    <entry key='database.loginUser'>
-        SELECT * FROM tc_users
-        WHERE email = :email OR login = :email
-    </entry>
-
-    <entry key='database.selectPositions'>
-        SELECT * FROM tc_positions WHERE deviceId = :deviceId AND fixTime BETWEEN :from AND :to ORDER BY fixTime
-    </entry>
-
-    <entry key='database.selectLatestPositions'>
-        SELECT tc_positions.* FROM tc_positions INNER JOIN tc_devices ON tc_positions.id = tc_devices.positionid;
-    </entry>
-
-    <entry key='database.updateLatestPosition'>
-        UPDATE tc_devices SET positionId = :id WHERE id = :deviceId
-    </entry>
-
-    <entry key='database.selectEvents'>
-        SELECT * FROM tc_events WHERE deviceId = :deviceId AND serverTime BETWEEN :from AND :to ORDER BY serverTime
-    </entry>
-
-    <entry key='database.selectStatistics'>
-        SELECT * FROM tc_statistics WHERE captureTime BETWEEN :from AND :to ORDER BY captureTime
-    </entry>
 
     <entry key='gps103.port'>5001</entry>
     <entry key='tk103.port'>5002</entry>
@@ -239,7 +217,7 @@
     <entry key='autotrack.port'>5172</entry>
     <entry key='tek.port'>5173</entry>
     <entry key='wristband.port'>5174</entry>
-    <entry key='applet.port'>5175</entry>
+    <entry key='lacak.port'>5175</entry>
     <entry key='milesmate.port'>5176</entry>
     <entry key='anytrek.port'>5177</entry>
     <entry key='smartsole.port'>5178</entry>
@@ -285,5 +263,30 @@
     <entry key='iotm.port'>5218</entry>
     <entry key='dolphin.port'>5219</entry>
     <entry key='ennfu.port'>5220</entry>
+    <entry key='navtelecom.port'>5221</entry>
+    <entry key='startek.port'>5222</entry>
+    <entry key='gs100.port'>5223</entry>
+    <entry key='mavlink2.port'>5224</entry>
+    <entry key='uux.port'>5225</entry>
+    <entry key='r12w.port'>5226</entry>
+    <entry key='flexiblereport.port'>5227</entry>
+    <entry key='thinkpower.port'>5228</entry>
+    <entry key='stb.port'>5229</entry>
+    <entry key='b2316.port'>5230</entry>
+    <entry key='hoopo.port'>5231</entry>
+    <entry key='dualcam.port'>5232</entry>
+    <entry key='xexun2.port'>5233</entry>
+    <entry key='techtocruz.port'>5234</entry>
+    <entry key='flexapi.port'>5235</entry>
+    <entry key='dsf22.port'>5236</entry>
+    <entry key='jido.port'>5237</entry>
+    <entry key='armoli.port'>5238</entry>
+    <entry key='teratrack.port'>5239</entry>
+    <entry key='envotech.port'>5240</entry>
+    <entry key='bstpl.port'>5241</entry>
+    <entry key='thuraya.port'>5242</entry>
+    <entry key='ndtpv6.port'>5243</entry>
+    <entry key='g1rus.port'>5244</entry>
+    <entry key='rftrack.port'>5245</entry>
 
 </properties>

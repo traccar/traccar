@@ -20,8 +20,7 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
@@ -35,11 +34,15 @@ public class SkypatrolProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SkypatrolProtocolDecoder.class);
 
-    private final long defaultMask;
+    private long defaultMask;
 
     public SkypatrolProtocolDecoder(Protocol protocol) {
         super(protocol);
-        defaultMask = Context.getConfig().getInteger(Keys.PROTOCOL_MASK.withPrefix(getProtocolName()));
+    }
+
+    @Override
+    protected void init() {
+        defaultMask = getConfig().getInteger(Keys.PROTOCOL_MASK.withPrefix(getProtocolName()));
     }
 
     private static double convertCoordinate(long coordinate) {

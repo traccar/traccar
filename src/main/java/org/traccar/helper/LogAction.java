@@ -47,7 +47,7 @@ public final class LogAction {
 
     private static final String PATTERN_OBJECT = "user: %d, action: %s, object: %s, id: %d";
     private static final String PATTERN_LINK = "user: %d, action: %s, owner: %s, id: %d, property: %s, id: %d";
-    private static final String PATTERN_LOGIN = "user: %d, action: %s";
+    private static final String PATTERN_LOGIN = "user: %d, action: %s, from: %s";
     private static final String PATTERN_LOGIN_FAILED = "login failed from: %s";
     private static final String PATTERN_DEVICE_ACCUMULATORS = "user: %d, action: %s, deviceId: %d";
     private static final String PATTERN_REPORT = "user: %d, report: %s, from: %s, to: %s, devices: %s, groups: %s";
@@ -72,12 +72,12 @@ public final class LogAction {
         logLinkAction(ACTION_UNLINK, userId, owner, ownerId, property, propertyId);
     }
 
-    public static void login(long userId) {
-        logLoginAction(ACTION_LOGIN, userId);
+    public static void login(long userId, String remoteAddress) {
+        logLoginAction(ACTION_LOGIN, userId, remoteAddress);
     }
 
-    public static void logout(long userId) {
-        logLoginAction(ACTION_LOGOUT, userId);
+    public static void logout(long userId, String remoteAddress) {
+        logLoginAction(ACTION_LOGOUT, userId, remoteAddress);
     }
 
     public static void failedLogin(String remoteAddress) {
@@ -105,8 +105,11 @@ public final class LogAction {
                 Introspector.decapitalize(property.getSimpleName()), propertyId));
     }
 
-    private static void logLoginAction(String action, long userId) {
-        LOGGER.info(String.format(PATTERN_LOGIN, userId, action));
+    private static void logLoginAction(String action, long userId, String remoteAddress) {
+        if (remoteAddress == null || remoteAddress.isEmpty()) {
+            remoteAddress = "unknown";
+        }
+        LOGGER.info(String.format(PATTERN_LOGIN, userId, action, remoteAddress));
     }
 
     public static void logReport(

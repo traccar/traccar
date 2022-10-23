@@ -18,8 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -40,7 +39,11 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
 
     public XirgoProtocolDecoder(Protocol protocol) {
         super(protocol);
-        form = Context.getConfig().getString(Keys.PROTOCOL_FORM.withPrefix(getProtocolName()));
+    }
+
+    @Override
+    protected void init() {
+        form = getConfig().getString(Keys.PROTOCOL_FORM.withPrefix(getProtocolName()));
     }
 
     public void setForm(String form) {

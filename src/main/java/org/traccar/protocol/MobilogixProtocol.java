@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,18 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class MobilogixProtocol extends BaseProtocol {
 
-    public MobilogixProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public MobilogixProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "]\r\n", "]"));
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ']'));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new MobilogixProtocolDecoder(MobilogixProtocol.this));

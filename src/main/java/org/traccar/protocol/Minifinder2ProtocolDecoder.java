@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -46,9 +46,11 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_DATA = 0x01;
+    public static final int MSG_CONFIGURATION = 0x02;
+    public static final int MSG_SERVICES = 0x03;
     public static final int MSG_RESPONSE = 0x7F;
 
-    private String decodeAlarm(int code) {
+    private String decodeAlarm(long code) {
         if (BitUtil.check(code, 0)) {
             return Position.ALARM_LOW_BATTERY;
         }
@@ -70,6 +72,66 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, int index, int type, ByteBuf buf) {
+
+        if (channel != null) {
+
+            ByteBuf body = Unpooled.buffer();
+            if (type == MSG_SERVICES) {
+                while (buf.isReadable()) {
+                    int endIndex = buf.readUnsignedByte() + buf.readerIndex();
+                    int key = buf.readUnsignedByte();
+                    switch (key) {
+                        case 0x11:
+                        case 0x21:
+                        case 0x22:
+                            body.writeByte(9 + 1); // length
+                            body.writeByte(key);
+                            body.writeIntLE(0); // latitude
+                            body.writeIntLE(0); // longitude
+                            body.writeByte(0); // address
+                            break;
+                        case 0x12:
+                            body.writeByte(5); // length
+                            body.writeByte(key);
+                            body.writeIntLE((int) (System.currentTimeMillis() / 1000));
+                            break;
+                        default:
+                            break;
+                    }
+                    buf.readerIndex(endIndex);
+                }
+            } else {
+                body.writeByte(1); // key length
+                body.writeByte(0); // success
+            }
+
+            ByteBuf content = Unpooled.buffer();
+            content.writeByte(type == MSG_SERVICES ? type : MSG_RESPONSE);
+            content.writeBytes(body);
+            body.release();
+
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(0xAB); // header
+            response.writeByte(0x00); // properties
+            response.writeShortLE(content.readableBytes());
+            response.writeShortLE(Checksum.crc16(Checksum.CRC16_XMODEM, content.nioBuffer()));
+            response.writeShortLE(index);
+            response.writeBytes(content);
+            content.release();
+
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+    }
+
+    private String readTagId(ByteBuf buf) {
+        StringBuilder tagId = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            tagId.insert(0, ByteBufUtil.hexDump(buf.readSlice(1)));
+        }
+        return tagId.toString();
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -83,23 +145,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShortLE();
         int type = buf.readUnsignedByte();
 
-        if (BitUtil.check(flags, 4) && channel != null) {
-
-            ByteBuf content = Unpooled.buffer();
-            content.writeByte(MSG_RESPONSE);
-            content.writeByte(1); // key length
-            content.writeByte(0); // success
-
-            ByteBuf response = Unpooled.buffer();
-            response.writeByte(0xAB); // header
-            response.writeByte(0x00); // properties
-            response.writeShortLE(content.readableBytes());
-            response.writeShortLE(Checksum.crc16(Checksum.CRC16_XMODEM, content.nioBuffer()));
-            response.writeShortLE(index);
-            response.writeBytes(content);
-            content.release();
-
-            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        if (BitUtil.check(flags, 4)) {
+            sendResponse(channel, remoteAddress, index, type, buf);
         }
 
         if (type == MSG_DATA) {
@@ -134,7 +181,11 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setDeviceId(deviceSession.getDeviceId());
                         break;
                     case 0x02:
-                        position.set(Position.KEY_ALARM, decodeAlarm(buf.readIntLE()));
+                        long alarm = buf.readUnsignedIntLE();
+                        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
+                        if (BitUtil.check(alarm, 31)) {
+                            position.set("bark", true);
+                        }
                         break;
                     case 0x14:
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
@@ -147,7 +198,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
                         position.setCourse(buf.readUnsignedShortLE());
                         position.setAltitude(buf.readShortLE());
-                        position.setValid(buf.readUnsignedShortLE() > 0);
+                        int hdop = buf.readUnsignedShortLE();
+                        position.setValid(hdop > 0);
+                        position.set(Position.KEY_HDOP, hdop * 0.1);
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                         break;
@@ -175,9 +228,10 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         }
                         break;
                     case 0x23:
-                        position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
+                        position.set("tagId", readTagId(buf));
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
+                        position.setValid(true);
                         hasLocation = true;
                         break;
                     case 0x24:
@@ -188,12 +242,13 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x28:
                         int beaconFlags = buf.readUnsignedByte();
-                        position.set("tagId", ByteBufUtil.hexDump(buf.readSlice(6)));
-                        position.set("tagRssi", buf.readUnsignedByte());
-                        buf.readUnsignedByte(); // 1m rssi
+                        position.set("tagId", readTagId(buf));
+                        position.set("tagRssi", (int) buf.readByte());
+                        position.set("tag1mRssi", (int) buf.readByte());
                         if (BitUtil.check(beaconFlags, 7)) {
                             position.setLatitude(buf.readIntLE() * 0.0000001);
                             position.setLongitude(buf.readIntLE() * 0.0000001);
+                            position.setValid(true);
                             hasLocation = true;
                         }
                         if (BitUtil.check(beaconFlags, 6)) {
@@ -201,9 +256,26 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                                     endIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString());
                         }
                         break;
+                    case 0x2A:
+                        buf.readUnsignedByte(); // flags
+                        buf.skipBytes(6); // mac
+                        buf.readUnsignedByte(); // rssi
+                        position.setLatitude(buf.readIntLE() * 0.0000001);
+                        position.setLongitude(buf.readIntLE() * 0.0000001);
+                        position.setValid(true);
+                        hasLocation = true;
+                        break;
                     case 0x30:
                         buf.readUnsignedInt(); // timestamp
                         position.set(Position.KEY_STEPS, buf.readUnsignedInt());
+                        break;
+                    case 0x31:
+                        int i = 1;
+                        while (buf.readerIndex() < endIndex) {
+                            position.set("activity" + i + "Time", buf.readUnsignedInt());
+                            position.set("activity" + i, buf.readUnsignedInt());
+                            i += 1;
+                        }
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp

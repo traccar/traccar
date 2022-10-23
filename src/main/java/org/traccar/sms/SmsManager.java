@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +20,7 @@ import org.traccar.notification.MessageException;
 
 public interface SmsManager {
 
-    void sendMessageSync(
+    void sendMessage(
             String destAddress, String message, boolean command) throws InterruptedException, MessageException;
-
-    void sendMessageAsync(
-            String destAddress, String message, boolean command);
 
 }

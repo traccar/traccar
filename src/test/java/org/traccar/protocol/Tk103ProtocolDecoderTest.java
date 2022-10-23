@@ -9,7 +9,16 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        Tk103ProtocolDecoder decoder = new Tk103ProtocolDecoder(null);
+        var decoder = inject(new Tk103ProtocolDecoder(null));
+
+        verifyAttributes(decoder, text(
+                "(027046434858BZ00,{460,0,20949,58711}\n{460,0,20494,54003}\n{460,0,20951,19569}\n,01000000)"));
+
+        verifyAttributes(decoder, text(
+                "(027045009305BP05355227045009305,{413,2,30073,16724}\n{413,2,30073,16730}\n{413,2,30073,49860}\n,01000000)"));
+
+        verifyPosition(decoder, text(
+                "(868822040452227,DW3B,150421,A,4154.51607N,45.78950E,0.050,103142,0.000,595.200,7,0)"));
 
         verifyPosition(decoder, text(
                 "(086375304593BR00210119A2220.0160N11335.4073E0000014000309.84001000293L0000015FP23BS27F)"));

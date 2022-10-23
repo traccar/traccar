@@ -8,7 +8,7 @@ public class OmnicommFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        OmnicommFrameDecoder decoder = new OmnicommFrameDecoder();
+        var decoder = inject(new OmnicommFrameDecoder());
 
         verifyFrame(
                 binary("c08600004566"),

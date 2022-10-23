@@ -19,8 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
@@ -57,9 +56,12 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd()
             .expression("([^,]+)?,")             // rfid
             .groupBegin()
-            .text("L,,,")
+            .text("L,")
+            .groupBegin()
+            .text(",,")
             .number("(x+),,")                    // lac
             .number("(x+),,,")                   // cid
+            .groupEnd("?")
             .or()
             .text("F,")
             .groupBegin()
@@ -140,8 +142,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             return Position.ALARM_FUEL_LEAK;
         }
         switch (value) {
-            case "tracker":
-                return null;
             case "help me":
                 return Position.ALARM_SOS;
             case "low battery":
@@ -152,10 +152,6 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_MOVEMENT;
             case "speed":
                 return Position.ALARM_OVERSPEED;
-            case "acc on":
-                return Position.ALARM_POWER_ON;
-            case "acc off":
-                return Position.ALARM_POWER_OFF;
             case "door alarm":
                 return Position.ALARM_DOOR;
             case "ac alarm":
@@ -163,13 +159,14 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             case "accident alarm":
                 return Position.ALARM_ACCIDENT;
             case "sensor alarm":
-                return Position.ALARM_SHOCK;
+                return Position.ALARM_VIBRATION;
             case "bonnet alarm":
                 return Position.ALARM_BONNET;
             case "footbrake alarm":
                 return Position.ALARM_FOOT_BRAKE;
             case "DTC":
                 return Position.ALARM_FAULT;
+            case "tracker":
             default:
                 return null;
         }
@@ -208,7 +205,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(alarm.substring(2)));
         } else if (alarm.startsWith("oil ")) {
             position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(alarm.substring(4)));
-        } else if (!position.getAttributes().containsKey(Position.KEY_ALARM) && !alarm.equals("tracker")) {
+        } else if (!position.hasAttribute(Position.KEY_ALARM) && !alarm.equals("tracker")) {
             position.set(Position.KEY_EVENT, alarm);
         }
 
@@ -224,12 +221,11 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext(2)) {
+            position.setNetwork(new Network(CellTower.fromLacCid(
+                    getConfig(), parser.nextHexInt(0), parser.nextHexInt(0))));
+        }
 
-            getLastLocation(position, null);
-
-            position.setNetwork(new Network(CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
-
-        } else {
+        if (parser.hasNext(20)) {
 
             String utcHours = parser.next();
             String utcMinutes = parser.next();
@@ -266,6 +262,10 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             position.set("fuel1", parser.nextDouble());
             position.set("fuel2", parser.nextDouble());
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
+
+        } else {
+
+            getLastLocation(position, null);
 
         }
 
@@ -366,7 +366,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             try {
-                position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
+                position.set(Position.KEY_IMAGE, writeMediaFile(imei, photo, "jpg"));
             } finally {
                 photoPackets = 0;
                 photo.release();

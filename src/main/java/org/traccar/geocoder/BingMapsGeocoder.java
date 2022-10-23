@@ -18,11 +18,12 @@ package org.traccar.geocoder;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 
 public class BingMapsGeocoder extends JsonGeocoder {
 
-    public BingMapsGeocoder(String url, String key, int cacheSize, AddressFormat addressFormat) {
-        super(url + "/Locations/%f,%f?key=" + key + "&include=ciso2", cacheSize, addressFormat);
+    public BingMapsGeocoder(Client client, String url, String key, int cacheSize, AddressFormat addressFormat) {
+        super(client, url + "/Locations/%f,%f?key=" + key + "&include=ciso2", cacheSize, addressFormat);
     }
 
     @Override

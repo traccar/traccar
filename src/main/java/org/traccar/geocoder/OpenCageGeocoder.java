@@ -18,19 +18,24 @@ package org.traccar.geocoder;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 
 public class OpenCageGeocoder extends JsonGeocoder {
 
-    private static String formatUrl(String url, String key) {
+    private static String formatUrl(String url, String key, String language) {
         if (url == null) {
             url = "https://api.opencagedata.com/geocode/v1";
         }
         url += "/json?q=%f,%f&no_annotations=1&key=" + key;
+        if (language != null) {
+            url += "&language=" + language;
+        }
         return url;
     }
 
-    public OpenCageGeocoder(String url, String key, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(url, key), cacheSize, addressFormat);
+    public OpenCageGeocoder(
+            Client client, String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(url, key, language), cacheSize, addressFormat);
     }
 
     @Override

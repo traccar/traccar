@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ public final class BitUtil {
     }
 
     public static boolean check(long number, int index) {
-        return (number & (1 << index)) != 0;
+        return (number & (1L << index)) != 0;
     }
 
     public static int between(int number, int from, int to) {

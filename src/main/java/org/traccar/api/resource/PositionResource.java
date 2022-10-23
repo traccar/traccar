@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,20 +15,32 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
 import org.traccar.api.BaseResource;
+import org.traccar.helper.model.PositionUtil;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.model.UserRestrictions;
+import org.traccar.reports.CsvExportProvider;
+import org.traccar.reports.GpxExportProvider;
+import org.traccar.reports.KmlExportProvider;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import java.sql.SQLException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -37,29 +49,95 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class PositionResource extends BaseResource {
 
+    @Inject
+    private KmlExportProvider kmlExportProvider;
+
+    @Inject
+    private CsvExportProvider csvExportProvider;
+
+    @Inject
+    private GpxExportProvider gpxExportProvider;
+
     @GET
     public Collection<Position> getJson(
             @QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to)
-            throws SQLException {
+            throws StorageException {
         if (!positionIds.isEmpty()) {
-            ArrayList<Position> positions = new ArrayList<>();
-            for (Long positionId : positionIds) {
-                Position position = Context.getDataManager().getObject(Position.class, positionId);
-                Context.getPermissionsManager().checkDevice(getUserId(), position.getDeviceId());
+            var positions = new ArrayList<Position>();
+            for (long positionId : positionIds) {
+                Position position = storage.getObject(Position.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", positionId)));
+                permissionsService.checkPermission(Device.class, getUserId(), position.getDeviceId());
                 positions.add(position);
             }
             return positions;
-        } else if (deviceId == 0) {
-            return Context.getDeviceManager().getInitialState(getUserId());
-        } else {
-            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
+        } else if (deviceId > 0) {
+            permissionsService.checkPermission(Device.class, getUserId(), deviceId);
             if (from != null && to != null) {
-                return Context.getDataManager().getPositions(deviceId, from, to);
+                permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+                return PositionUtil.getPositions(storage, deviceId, from, to);
             } else {
-                return Collections.singleton(Context.getDeviceManager().getLastPosition(deviceId));
+                return storage.getObjects(Position.class, new Request(
+                        new Columns.All(), new Condition.LatestPositions(deviceId)));
             }
+        } else {
+            return PositionUtil.getLatestPositions(storage, getUserId());
         }
+    }
+
+    @Path("kml")
+    @GET
+    @Produces("application/vnd.google-earth.kml+xml")
+    public Response getKml(
+            @QueryParam("deviceId") long deviceId,
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        StreamingOutput stream = output -> {
+            try {
+                kmlExportProvider.generate(output, deviceId, from, to);
+            } catch (StorageException e) {
+                throw new WebApplicationException(e);
+            }
+        };
+        return Response.ok(stream)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions.kml").build();
+    }
+
+    @Path("csv")
+    @GET
+    @Produces("text/csv")
+    public Response getCsv(
+            @QueryParam("deviceId") long deviceId,
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        StreamingOutput stream = output -> {
+            try {
+                csvExportProvider.generate(output, deviceId, from, to);
+            } catch (StorageException e) {
+                throw new WebApplicationException(e);
+            }
+        };
+        return Response.ok(stream)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions.csv").build();
+    }
+
+    @Path("gpx")
+    @GET
+    @Produces("application/gpx+xml")
+    public Response getGpx(
+            @QueryParam("deviceId") long deviceId,
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        StreamingOutput stream = output -> {
+            try {
+                gpxExportProvider.generate(output, deviceId, from, to);
+            } catch (StorageException e) {
+                throw new WebApplicationException(e);
+            }
+        };
+        return Response.ok(stream)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=positions.gpx").build();
     }
 
 }

@@ -19,13 +19,17 @@ import io.netty.handler.codec.FixedLengthFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class M2mProtocol extends BaseProtocol {
 
-    public M2mProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public M2mProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new FixedLengthFrameDecoder(23));
                 pipeline.addLast(new M2mProtocolDecoder(M2mProtocol.this));
             }

@@ -39,7 +39,6 @@ warn () {
 
 VERSION=$1
 PLATFORM=${2:-all}
-export EXTJS_PATH=$(cd ../..; pwd)/ext-6.2.0
 PREREQ=true
 
 check_requirement () {
@@ -54,28 +53,25 @@ check_requirement () {
 
 info "Checking build requirements for platform: "$PLATFORM
 check_requirement "Traccar server archive" "ls ../target/tracker-server.jar" "Missing traccar archive"
-check_requirement "Traccar web interface" "ls ../traccar-web/tools/minify.sh" "Missing traccar-web sources"
 check_requirement "Zip" "which zip" "Missing zip binary"
 check_requirement "Unzip" "which unzip" "Missing unzip binary"
-check_requirement "Ext JS" "ls $EXTJS_PATH" "ExtJS not found in $EXTJS_PATH (https://www.sencha.com/legal/GPL/)"
-check_requirement "Sencha Cmd" "which sencha" "Missing Sencha Cmd package (https://www.sencha.com/products/extjs/cmd-download/)"
 if [ $PLATFORM != "other" ]; then
   check_requirement "Jlink" "which jlink" "Missing jlink binary"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "windows-64" ]; then
   check_requirement "Inno Extractor" "which innoextract" "Missing innoextract binary"
   check_requirement "Inno Setup" "ls i*setup-*.exe" "Missing Inno Setup (http://www.jrsoftware.org/isdl.php)"
-  check_requirement "Windows 64 Java" "ls java-*.windows.ojdkbuild.x86_64.zip" "Missing Windows 64 Java (https://github.com/ojdkbuild/ojdkbuild)"
+  check_requirement "Windows 64 Java" "ls OpenJDK*64_windows*.zip" "Missing Windows 64 JDK (https://adoptium.net/)"
   check_requirement "Wine" "which wine" "Missing wine binary"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" -o $PLATFORM = "linux-arm" ]; then
   check_requirement "Makeself" "which makeself" "Missing makeself binary"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" ]; then
-  check_requirement "Linux 64 Java" "ls jdk-*-linux-x64.zip" "Missing Linux 64 Java (https://github.com/ojdkbuild/contrib_jdk11u-ci/releases)"
+  check_requirement "Linux 64 Java" "ls OpenJDK*64_linux*.tar.gz" "Missing Linux 64 JDK (https://adoptium.net/)"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-arm" ]; then
-  check_requirement "Linux ARM Java" "ls jdk-*-linux-armhf.zip" "Missing Linux ARM Java (https://github.com/ojdkbuild/contrib_jdk11u-aarch32-ci/releases)"
+  check_requirement "Linux ARM Java" "ls OpenJDK*arm_linux*.tar.gz" "Missing Linux ARM JDK (https://adoptium.net/)"
 fi
 if [ $PREREQ = false ]; then
   info "Missing build requirements, aborting..."
@@ -85,17 +81,14 @@ else
 fi
 
 prepare () {
-  info "Generating app.min.js"
-  ../traccar-web/tools/minify.sh >/dev/null
-  ok "Created app.min.js"
-
-  mkdir -p out/{conf,data,lib,logs,web,schema,templates}
+  mkdir -p out/{conf,data,lib,logs,legacy,modern,schema,templates}
 
   cp ../target/tracker-server.jar out
   cp ../target/lib/* out/lib
   cp ../schema/* out/schema
   cp -r ../templates/* out/templates
-  cp -r ../traccar-web/web/* out/web
+  cp -r ../traccar-web/web/* out/legacy
+  cp -r ../traccar-web/modern/build/* out/modern
   cp default.xml out/conf
   cp traccar.xml out/conf
 
@@ -107,8 +100,6 @@ prepare () {
 
 cleanup () {
   info "Cleanup"
-  rm ../traccar-web/web/app.min.js
-
   rm -r out
   if [ $PLATFORM = "all" -o $PLATFORM = "windows-64" ]; then
 	rm -r tmp
@@ -128,9 +119,9 @@ package_other () {
 
 package_windows () {
   info "Building Windows 64 installer"
-  unzip -q -o java-*.windows.ojdkbuild.x86_64.zip
-  jlink --module-path java-*.windows.ojdkbuild.x86_64/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec --output out/jre
-  rm -rf java-*.windows.ojdkbuild.x86_64
+  unzip -q OpenJDK*64_windows*.zip
+  jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec --output out/jre
+  rm -rf jdk-*
   wine app/ISCC.exe traccar.iss >/dev/null
   rm -rf out/jre
   zip -q -j traccar-windows-64-$VERSION.zip Output/traccar-setup.exe README.txt
@@ -142,13 +133,13 @@ package_linux () {
   cp setup.sh out
   cp traccar.service out
 
-  unzip -q -o jdk-*-linux-$1.zip
-  jlink --module-path jdk-*-linux-$1/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec --output out/jre
-  rm -rf jdk-*-linux-$1
+  tar -xf OpenJDK*$1_linux*.tar.gz
+  jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec --output out/jre
+  rm -rf jdk-*
   makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
   rm -rf out/jre
 
-  zip -q -j traccar-linux-$2-$VERSION.zip traccar.run README.txt
+  zip -q -j traccar-linux-$1-$VERSION.zip traccar.run README.txt
 
   rm traccar.run
   rm out/setup.sh
@@ -157,13 +148,13 @@ package_linux () {
 
 package_linux_64 () {
   info "Building Linux 64 installer"
-  package_linux x64 64
+  package_linux 64
   ok "Created Linux 64 installer"
 }
 
 package_linux_arm () {
   info "Building Linux ARM installer"
-  package_linux armhf arm
+  package_linux arm
   ok "Created Linux ARM installer"
 }
 

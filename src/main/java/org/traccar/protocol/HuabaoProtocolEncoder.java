@@ -18,10 +18,11 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.Context;
-import org.traccar.helper.DataConverter;
-import org.traccar.model.Command;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
+import org.traccar.helper.DataConverter;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.model.Command;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -35,8 +36,8 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        boolean alternative = Context.getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
+        boolean alternative = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()), command.getDeviceId());
 
         ByteBuf id = Unpooled.wrappedBuffer(
                 DataConverter.parseHex(getUniqueId(command.getDeviceId())));

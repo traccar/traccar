@@ -20,7 +20,8 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.helper.BufferUtil;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
@@ -57,12 +58,6 @@ public class NiotProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private double readCoordinate(ByteBuf buf) {
-        long value = buf.readUnsignedInt();
-        double result = BitUtil.to(value, 31) / 1800000.0;
-        return BitUtil.check(value, 31) ? -result : result;
-    }
-
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -96,8 +91,8 @@ public class NiotProtocolDecoder extends BaseProtocolDecoder {
                     .setSecond(BcdUtil.readInteger(buf, 2));
             position.setTime(dateBuilder.getDate());
 
-            position.setLatitude(readCoordinate(buf));
-            position.setLongitude(readCoordinate(buf));
+            position.setLatitude(BufferUtil.readSignedMagnitudeInt(buf) / 1800000.0);
+            position.setLongitude(BufferUtil.readSignedMagnitudeInt(buf) / 1800000.0);
             BcdUtil.readInteger(buf, 4); // reserved
             position.setCourse(BcdUtil.readInteger(buf, 4));
 

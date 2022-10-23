@@ -1,1 +1,2 @@
+#set($subject = "Test message")
 Test message

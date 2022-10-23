@@ -17,11 +17,12 @@ package org.traccar.geocoder;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 
 public class MapmyIndiaGeocoder extends JsonGeocoder {
 
-    public MapmyIndiaGeocoder(String url, String key, int cacheSize, AddressFormat addressFormat) {
-        super(url + "/" + key + "/rev_geocode?lat=%f&lng=%f", cacheSize, addressFormat);
+    public MapmyIndiaGeocoder(Client client, String url, String key, int cacheSize, AddressFormat addressFormat) {
+        super(client, url + "/" + key + "/rev_geocode?lat=%f&lng=%f", cacheSize, addressFormat);
     }
 
     @Override

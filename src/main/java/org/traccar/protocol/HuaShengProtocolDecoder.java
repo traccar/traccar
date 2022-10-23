@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -261,6 +261,13 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0x0011:
                     position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 0.05);
+                    break;
+                case 0x0014:
+                    position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte() / 255.0);
+                    position.set("timingAdvance", buf.readUnsignedByte() * 0.5);
+                    position.set("airTemp", buf.readUnsignedByte() - 40);
+                    position.set("airFlow", buf.readUnsignedShort() * 0.01);
+                    position.set(Position.KEY_THROTTLE, buf.readUnsignedByte() / 255.0);
                     break;
                 case 0x0020:
                     String[] cells = buf.readCharSequence(

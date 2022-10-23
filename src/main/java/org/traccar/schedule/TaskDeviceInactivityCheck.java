@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,26 @@
  */
 package org.traccar.schedule;
 
-import org.traccar.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.database.NotificationManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Request;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class TaskDeviceInactivityCheck implements Runnable {
+public class TaskDeviceInactivityCheck implements ScheduleTask {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TaskDeviceInactivityCheck.class);
 
     public static final String ATTRIBUTE_DEVICE_INACTIVITY_START = "deviceInactivityStart";
     public static final String ATTRIBUTE_DEVICE_INACTIVITY_PERIOD = "deviceInactivityPeriod";
@@ -33,6 +42,16 @@ public class TaskDeviceInactivityCheck implements Runnable {
 
     private static final long CHECK_PERIOD_MINUTES = 15;
 
+    private final Storage storage;
+    private final NotificationManager notificationManager;
+
+    @Inject
+    public TaskDeviceInactivityCheck(Storage storage, NotificationManager notificationManager) {
+        this.storage = storage;
+        this.notificationManager = notificationManager;
+    }
+
+    @Override
     public void schedule(ScheduledExecutorService executor) {
         executor.scheduleAtFixedRate(this, CHECK_PERIOD_MINUTES, CHECK_PERIOD_MINUTES, TimeUnit.MINUTES);
     }
@@ -43,15 +62,20 @@ public class TaskDeviceInactivityCheck implements Runnable {
         long checkPeriod = TimeUnit.MINUTES.toMillis(CHECK_PERIOD_MINUTES);
 
         Map<Event, Position> events = new HashMap<>();
-        for (Device device : Context.getDeviceManager().getAllDevices()) {
-            if (device.getLastUpdate() != null && checkDevice(device, currentTime, checkPeriod)) {
-                Event event = new Event(Event.TYPE_DEVICE_INACTIVE, device.getId());
-                event.set(ATTRIBUTE_LAST_UPDATE, device.getLastUpdate().getTime());
-                events.put(event, null);
+
+        try {
+            for (Device device : storage.getObjects(Device.class, new Request(new Columns.All()))) {
+                if (device.getLastUpdate() != null && checkDevice(device, currentTime, checkPeriod)) {
+                    Event event = new Event(Event.TYPE_DEVICE_INACTIVE, device.getId());
+                    event.set(ATTRIBUTE_LAST_UPDATE, device.getLastUpdate().getTime());
+                    events.put(event, null);
+                }
             }
+        } catch (StorageException e) {
+            LOGGER.warn("Get devices error", e);
         }
 
-        Context.getNotificationManager().updateEvents(events);
+        notificationManager.updateEvents(events);
     }
 
     private boolean checkDevice(Device device, long currentTime, long checkPeriod) {

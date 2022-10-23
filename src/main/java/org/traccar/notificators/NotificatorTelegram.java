@@ -1,5 +1,6 @@
 /*
- * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 Rafael Miquelino (rafaelmiquelino@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +17,30 @@
 package org.traccar.notificators;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
 
-public class NotificatorTelegram extends Notificator {
+@Singleton
+public class NotificatorTelegram implements Notificator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorTelegram.class);
+    private final NotificationFormatter notificationFormatter;
+    private final Client client;
 
-    private final String url;
+    private final String urlSendText;
+    private final String urlSendLocation;
     private final String chatId;
+    private final boolean sendLocation;
 
-    public static class Message {
+    public static class TextMessage {
         @JsonProperty("chat_id")
         private String chatId;
         @JsonProperty("text")
@@ -43,36 +49,56 @@ public class NotificatorTelegram extends Notificator {
         private String parseMode = "html";
     }
 
-    public NotificatorTelegram() {
-        url = String.format(
-                "https://api.telegram.org/bot%s/sendMessage",
-                Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
-        chatId = Context.getConfig().getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
+    public static class LocationMessage {
+        @JsonProperty("chat_id")
+        private String chatId;
+        @JsonProperty("latitude")
+        private double latitude;
+        @JsonProperty("longitude")
+        private double longitude;
+        @JsonProperty("horizontal_accuracy")
+        private double accuracy;
+        @JsonProperty("bearing")
+        private int bearing;
+    }
+
+    @Inject
+    public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter, Client client) {
+        this.notificationFormatter = notificationFormatter;
+        this.client = client;
+        urlSendText = String.format(
+                "https://api.telegram.org/bot%s/sendMessage", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+        urlSendLocation = String.format(
+                "https://api.telegram.org/bot%s/sendLocation", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
+        chatId = config.getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
+        sendLocation = config.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
+    }
+
+    private LocationMessage createLocationMessage(String messageChatId, Position position) {
+        LocationMessage locationMessage = new LocationMessage();
+        locationMessage.chatId = messageChatId;
+        locationMessage.latitude = position.getLatitude();
+        locationMessage.longitude = position.getLongitude();
+        locationMessage.bearing = (int) Math.ceil(position.getCourse());
+        locationMessage.accuracy = position.getAccuracy();
+        return locationMessage;
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) {
+    public void send(User user, Event event, Position position) {
+        var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 
-        Message message = new Message();
-        message.chatId = chatId;
-        message.text = NotificationFormatter.formatShortMessage(userId, event, position);
-
-        Context.getClient().target(url).request()
-                .async().post(Entity.json(message), new InvocationCallback<Object>() {
-            @Override
-            public void completed(Object o) {
-            }
-
-            @Override
-            public void failed(Throwable throwable) {
-                LOGGER.warn("Telegram API error", throwable);
-            }
-        });
-    }
-
-    @Override
-    public void sendAsync(long userId, Event event, Position position) {
-        sendSync(userId, event, position);
+        TextMessage message = new TextMessage();
+        message.chatId = user.getString("telegramChatId");
+        if (message.chatId == null) {
+            message.chatId = chatId;
+        }
+        message.text = shortMessage.getBody();
+        client.target(urlSendText).request().post(Entity.json(message)).close();
+        if (sendLocation && position != null) {
+            client.target(urlSendLocation).request().post(
+                    Entity.json(createLocationMessage(message.chatId, position))).close();
+        }
     }
 
 }

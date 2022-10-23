@@ -16,10 +16,11 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.Context;
-import org.traccar.StringProtocolEncoder;
-import org.traccar.model.Command;
 import org.traccar.Protocol;
+import org.traccar.StringProtocolEncoder;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.model.Command;
 
 public class Tk103ProtocolEncoder extends StringProtocolEncoder {
 
@@ -42,12 +43,12 @@ public class Tk103ProtocolEncoder extends StringProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        boolean alternative = forceAlternative || Context.getIdentityManager().lookupAttributeBoolean(
-                command.getDeviceId(), getProtocolName() + ".alternative", false, false, true);
+        boolean alternative = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()), command.getDeviceId());
 
         initDevicePassword(command, "123456");
 
-        if (alternative) {
+        if (alternative || forceAlternative) {
             switch (command.getType()) {
                 case Command.TYPE_CUSTOM:
                     return formatAlt(command, "%s", Command.KEY_DATA);

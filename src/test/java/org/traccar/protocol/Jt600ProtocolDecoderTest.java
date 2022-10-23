@@ -1,15 +1,20 @@
 package org.traccar.protocol;
 
-import org.traccar.ProtocolTest;
-
 import org.junit.Test;
+import org.traccar.ProtocolTest;
 
 public class Jt600ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        Jt600ProtocolDecoder decoder = new Jt600ProtocolDecoder(null);
+        var decoder = inject(new Jt600ProtocolDecoder(null));
+
+        verifyPosition(decoder, buffer(
+                "(8000632862,P45,290322,132412,25.28217,S,57.54683,W,A,0,0,5,0,0000000000,0,0,9,0)"));
+
+        verifyPositions(decoder, binary(
+                "2480413009781914003406102107544354193631006213423b00000000006c070000000020e064f91ea0671d00020f0f0f0f0f0f0f0f0f0f07f100ea0f6e"));
 
         verifyPositions(decoder, binary(
                 "2478807035371711003419081920061851380856003256223b000000000000070000000020c0ff965d54de1800000f0f0f0f0f0f0f0f0f0f02d600ea0a21"));

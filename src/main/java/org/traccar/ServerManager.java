@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,95 +15,80 @@
  */
 package org.traccar;
 
+import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.ClassScanner;
 
-import java.io.File;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.BindException;
-import java.net.URI;
+import java.net.ConnectException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
-public class ServerManager {
+@Singleton
+public class ServerManager implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
 
-    private final List<TrackerServer> serverList = new LinkedList<>();
+    private final List<TrackerConnector> connectorList = new LinkedList<>();
     private final Map<String, BaseProtocol> protocolList = new ConcurrentHashMap<>();
 
-    private void loadPackage(String packageName) throws IOException, URISyntaxException, ReflectiveOperationException {
-
-        List<String> names = new LinkedList<>();
-        String packagePath = packageName.replace('.', '/');
-        URL packageUrl = getClass().getClassLoader().getResource(packagePath);
-
-        if (packageUrl.getProtocol().equals("jar")) {
-            String jarFileName = URLDecoder.decode(packageUrl.getFile(), StandardCharsets.UTF_8.name());
-            try (JarFile jf = new JarFile(jarFileName.substring(5, jarFileName.indexOf("!")))) {
-                Enumeration<JarEntry> jarEntries = jf.entries();
-                while (jarEntries.hasMoreElements()) {
-                    String entryName = jarEntries.nextElement().getName();
-                    if (entryName.startsWith(packagePath) && entryName.length() > packagePath.length() + 5) {
-                        names.add(entryName.substring(packagePath.length() + 1, entryName.lastIndexOf('.')));
-                    }
-                }
-            }
-        } else {
-            File folder = new File(new URI(packageUrl.toString()));
-            File[] files = folder.listFiles();
-            if (files != null) {
-                for (File actual: files) {
-                    String entryName = actual.getName();
-                    names.add(entryName.substring(0, entryName.lastIndexOf('.')));
+    @Inject
+    public ServerManager(
+            Injector injector, Config config) throws IOException, URISyntaxException, ReflectiveOperationException {
+        Set<String> enabledProtocols = null;
+        if (config.hasKey(Keys.PROTOCOLS_ENABLE)) {
+            enabledProtocols = new HashSet<>(Arrays.asList(config.getString(Keys.PROTOCOLS_ENABLE).split("[, ]")));
+        }
+        for (Class<?> protocolClass : ClassScanner.findSubclasses(BaseProtocol.class, "org.traccar.protocol")) {
+            String protocolName = BaseProtocol.nameFromClass(protocolClass);
+            if (enabledProtocols == null || enabledProtocols.contains(protocolName)) {
+                if (config.hasKey(Keys.PROTOCOL_PORT.withPrefix(protocolName))) {
+                    BaseProtocol protocol = (BaseProtocol) injector.getInstance(protocolClass);
+                    connectorList.addAll(protocol.getConnectorList());
+                    protocolList.put(protocol.getName(), protocol);
                 }
             }
         }
-
-        for (String name : names) {
-            Class<?> protocolClass = Class.forName(packageName + '.' + name);
-            if (BaseProtocol.class.isAssignableFrom(protocolClass) && Context.getConfig().hasKey(
-                    Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(protocolClass)))) {
-                BaseProtocol protocol = (BaseProtocol) protocolClass.getDeclaredConstructor().newInstance();
-                serverList.addAll(protocol.getServerList());
-                protocolList.put(protocol.getName(), protocol);
-            }
-        }
-    }
-
-    public ServerManager() throws IOException, URISyntaxException, ReflectiveOperationException {
-        loadPackage("org.traccar.protocol");
     }
 
     public BaseProtocol getProtocol(String name) {
         return protocolList.get(name);
     }
 
+    @Override
     public void start() throws Exception {
-        for (TrackerServer server: serverList) {
+        for (TrackerConnector connector: connectorList) {
             try {
-                server.start();
+                connector.start();
             } catch (BindException e) {
-                LOGGER.warn("Port {} is disabled due to conflict", server.getPort());
+                LOGGER.warn("Port disabled due to conflict", e);
+            } catch (ConnectException e) {
+                LOGGER.warn("Connection failed", e);
             }
         }
     }
 
-    public void stop() {
-        for (TrackerServer server: serverList) {
-            server.stop();
+    @Override
+    public void stop() throws Exception {
+        try {
+            for (TrackerConnector connector : connectorList) {
+                connector.stop();
+            }
+        } finally {
+            GlobalTimer.release();
         }
-        GlobalTimer.release();
     }
 
 }

@@ -15,6 +15,8 @@
  */
 package org.traccar.geocoder;
 
+import org.traccar.database.StatisticsManager;
+
 public interface Geocoder {
 
     interface ReverseGeocoderCallback {
@@ -26,5 +28,7 @@ public interface Geocoder {
     }
 
     String getAddress(double latitude, double longitude, ReverseGeocoderCallback callback);
+
+    void setStatisticsManager(StatisticsManager statisticsManager);
 
 }

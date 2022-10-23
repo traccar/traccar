@@ -16,6 +16,9 @@
  */
 package org.traccar.model;
 
+import org.traccar.storage.StorageName;
+
+@StorageName("tc_attributes")
 public class Attribute extends BaseModel {
 
     private String description;
