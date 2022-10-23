@@ -25,18 +25,24 @@ import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
+
+import javax.inject.Inject;
+import javax.inject.Singleton;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public final class NotificatorMqtt extends Notificator {
+@Singleton
+public final class NotificatorMqtt implements Notificator {
 
-    // Get Logger
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorMqtt.class);
+    private final NotificationFormatter notificationFormatter;
+    private final Config config;
 
     // Initialize connection variables
     private String mqttHost;
@@ -47,52 +53,56 @@ public final class NotificatorMqtt extends Notificator {
     private String cleanSession;
     private String retain;
 
-    public NotificatorMqtt() {
+    @Inject
+    public NotificatorMqtt(Config config, NotificationFormatter notificationFormatter) {
+
+        this.notificationFormatter = notificationFormatter;
+        this.config = config;
 
         // Read connection configuration values
-        mqttHost = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.uri")))
-                ? Context.getConfig().getString("notificator.mqtt.uri")
+        mqttHost = (StringUtils.isNotBlank(config.getString("notificator.mqtt.uri")))
+                ? config.getString("notificator.mqtt.uri")
                 : "tcp://127.0.0.1:1883";
-        mqttUser = Context.getConfig().getString("notificator.mqtt.username");
-        mqttPass = Context.getConfig().getString("notificator.mqtt.password");
-        clientId = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.clientid")))
-                ? Context.getConfig().getString("notificator.mqtt.clientid")
+        mqttUser = config.getString("notificator.mqtt.username");
+        mqttPass = config.getString("notificator.mqtt.password");
+        clientId = (StringUtils.isNotBlank(config.getString("notificator.mqtt.clientid")))
+                ? config.getString("notificator.mqtt.clientid")
                 : MqttClient.generateClientId();
-        qos = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.qos")))
-                ? Context.getConfig().getString("notificator.mqtt.qos")
+        qos = (StringUtils.isNotBlank(config.getString("notificator.mqtt.qos")))
+                ? config.getString("notificator.mqtt.qos")
                 : "0";
-        cleanSession = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.cleansession")))
-                ? Context.getConfig().getString("notificator.mqtt.cleansession")
+        cleanSession = (StringUtils.isNotBlank(config.getString("notificator.mqtt.cleansession")))
+                ? config.getString("notificator.mqtt.cleansession")
                 : "true";
-        retain = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.retain")))
-                ? Context.getConfig().getString("notificator.mqtt.retain")
+        retain = (StringUtils.isNotBlank(config.getString("notificator.mqtt.retain")))
+                ? config.getString("notificator.mqtt.retain")
                 : "false";
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) {
+    public void send(User user, Event event, Position position) {
 
         try {
 
             // Create placeholders and substitutors map
             Map<String, String> values = new HashMap<String, String>();
-            values.put("U", String.valueOf(userId));
+            //values.put("U", String.valueOf(userId)); //FixMe
             values.put("E", event.getType());
             values.put("D", String.valueOf(event.getDeviceId()));
             values.put("G", String.valueOf(event.getGeofenceId()));
             values.put("P", String.valueOf(event.getPositionId()));
-            values.put("M", NotificationFormatter.formatMessage(userId, event, position, "short").getBody());
+            values.put("M", notificationFormatter.formatMessage(user, event, position, "short").getBody());
             StrSubstitutor sub = new StrSubstitutor(values, "%", "%");
 
             // Read configured topic to publish to, if any, or set default
-            String topic = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.topic")))
-                    ? Context.getConfig().getString("notificator.mqtt.topic")
+            String topic = (StringUtils.isNotBlank(config.getString("notificator.mqtt.topic")))
+                    ? config.getString("notificator.mqtt.topic")
                     : "/Traccar/Notification/" + event.getType();
 
             // Read configured payload to publish, if any, or set default
-            String payload = (StringUtils.isNotBlank(Context.getConfig().getString("notificator.mqtt.payload")))
-                    ? Context.getConfig().getString("notificator.mqtt.payload")
-                    : NotificationFormatter.formatMessage(userId, event, position, "short").getBody();
+            String payload = (StringUtils.isNotBlank(config.getString("notificator.mqtt.payload")))
+                    ? config.getString("notificator.mqtt.payload")
+                    : notificationFormatter.formatMessage(user, event, position, "short").getBody();
 
             // Replace placeholders with real values
             topic = sub.replace(topic);
@@ -125,11 +135,7 @@ public final class NotificatorMqtt extends Notificator {
         } catch (MqttException e) {
             LOGGER.warn("MqttException", e);
         }
-    }
 
-    @Override
-    public void sendAsync(long userId, Event event, Position position) {
-        sendSync(userId, event, position);
     }
 
 }
