@@ -52,7 +52,7 @@ public class MaintenanceEventHandler extends BaseEventHandler {
                 double oldValue = lastPosition.getDouble(maintenance.getType());
                 double newValue = position.getDouble(maintenance.getType());
                 if (oldValue != 0.0 && newValue != 0.0 && newValue >= maintenance.getStart()) {
-                    if (oldValue < maintenance.getStart()            
+                    if (oldValue < maintenance.getStart()
                         || (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
                         < (long) ((newValue - maintenance.getStart()) / maintenance.getPeriod())) {
                         Event event = new Event(Event.TYPE_MAINTENANCE, position);
