@@ -51,13 +51,15 @@ public class MaintenanceEventHandler extends BaseEventHandler {
             if (maintenance.getPeriod() != 0) {
                 double oldValue = lastPosition.getDouble(maintenance.getType());
                 double newValue = position.getDouble(maintenance.getType());
-                if (oldValue != 0.0 && newValue != 0.0
-                        && (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
+                if (oldValue != 0.0 && newValue != 0.0 && newValue >= maintenance.getStart()) {
+                    if (oldValue < maintenance.getStart()            
+                        || (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
                         < (long) ((newValue - maintenance.getStart()) / maintenance.getPeriod())) {
-                    Event event = new Event(Event.TYPE_MAINTENANCE, position);
-                    event.setMaintenanceId(maintenance.getId());
-                    event.set(maintenance.getType(), newValue);
-                    events.put(event, position);
+                        Event event = new Event(Event.TYPE_MAINTENANCE, position);
+                        event.setMaintenanceId(maintenance.getId());
+                        event.set(maintenance.getType(), newValue);
+                        events.put(event, position);
+                    }
                 }
             }
         }
