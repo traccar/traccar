@@ -225,7 +225,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
-        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT || type == MSG_PHOTO || type == MSG_HEARTBEAT_2) {
+        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT || type == MSG_HEARTBEAT_2 || type == MSG_PHOTO) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
