@@ -408,6 +408,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private double decodeCustomDouble(ByteBuf buf) {
+        int b1 = buf.readByte();
+        int b2 = buf.readUnsignedByte();
+        int sign = b1 != 0 ? b1 / Math.abs(b1) : 1;
+        return sign * (Math.abs(b1) + b2 / 255.0);
+    }
+
     private Position decodeLocation(DeviceSession deviceSession, ByteBuf buf) {
 
         Position position = new Position(getProtocolName());
@@ -529,12 +536,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     while (buf.readerIndex() < endIndex) {
                         int sensorIndex = buf.readUnsignedByte();
                         buf.skipBytes(6); // mac
-                        position.set(
-                                Position.PREFIX_TEMP + sensorIndex,
-                                buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
-                        position.set(
-                                "humidity" + sensorIndex,
-                                buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
+                        position.set(Position.PREFIX_TEMP + sensorIndex, decodeCustomDouble(buf));
+                        position.set("humidity" + sensorIndex, decodeCustomDouble(buf));
                     }
                     break;
                 case 0xEB:
