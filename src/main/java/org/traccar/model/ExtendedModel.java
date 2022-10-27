@@ -16,6 +16,7 @@
 package org.traccar.model;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -33,6 +34,12 @@ public class ExtendedModel extends BaseModel {
 
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = Objects.requireNonNullElseGet(attributes, LinkedHashMap::new);
+    }
+
+    public void set(String key, List<Map<String, String>> value) {
+        if (value != null && !value.isEmpty()) {
+            attributes.put(key, value);
+        }
     }
 
     public void set(String key, Boolean value) {

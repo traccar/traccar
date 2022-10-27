@@ -41,6 +41,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
@@ -66,6 +68,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TIME_SYNC_RESPONSE = 0x8109;
     public static final int MSG_PHOTO = 0x8888;
     public static final int MSG_TRANSPARENT = 0x0900;
+    public static final int MSG_CAN_BUS_DATA = 0x0705;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -294,6 +297,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_TRANSPARENT) {
 
             return decodeTransparent(deviceSession, buf);
+
+        } else if (type == MSG_CAN_BUS_DATA) {
+
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
+            return decodeCanBusData(deviceSession, buf);
 
         }
 
@@ -815,4 +824,58 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
+    private List<Position> decodeCanBusData(DeviceSession deviceSession, ByteBuf buf) {
+
+        String key = "canBusData";
+
+        TimeZone deviceTZ = deviceSession.get(DeviceSession.KEY_TIMEZONE);
+        DateBuilder dateBuilder = new DateBuilder(deviceTZ)
+                .setCurrentDate()
+                .setHour(BcdUtil.readInteger(buf, 2))
+                .setMinute(BcdUtil.readInteger(buf, 2))
+                .setSecond(BcdUtil.readInteger(buf, 2))
+                .setMillis(BcdUtil.readInteger(buf, 4) / 10);
+        Date receptionTime = dateBuilder.getDate();  // reception time of can data
+
+        // sample frame: {"collectWay":"original","canData":"20130003ffe1fe00","channel":"CAN1","canId":"18ecff0f","frame":"extended"}
+        int singleFrameJsonLength = 120;  // the sample frame above is 109 chars long
+        int maxFramesPerPosition = 4000 / singleFrameJsonLength;  // database limit for attributes is 4000
+        int ignoreLastNBytes = 2 + 4 + 8;  // end marker, can id length, can data length
+
+        List<Position> positions = new LinkedList<>();
+        List<Map<String, String>> data = new LinkedList<>();
+
+        buf.skipBytes(2); // count, can just check data.size()
+
+        while (buf.readableBytes() >= ignoreLastNBytes) {
+
+            Integer canId = buf.readInt();
+
+            data.add(Map.of(
+                "channel", BitUtil.check(canId, 31) ? "CAN2" : "CAN1",
+                "frame", BitUtil.check(canId, 30) ? "extended" : "standard",
+                "collectWay", BitUtil.check(canId, 29) ? "average" : "original",
+                "canId", Integer.toHexString(canId & 0x1fffffff),  // make it 29 bit
+                "canData", ByteBufUtil.hexDump(buf.readSlice(8))
+            ));
+
+            if (data.size() + 1 < maxFramesPerPosition && buf.readableBytes() >= ignoreLastNBytes) {
+                continue;
+            }
+
+            // last position or position full
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, null);
+            position.setTime(receptionTime);
+
+            position.set(key, data);
+            positions.add(position);
+            data = new LinkedList<>();
+
+        }
+
+        return positions;
+    }
 }
