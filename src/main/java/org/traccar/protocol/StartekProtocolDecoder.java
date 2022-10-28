@@ -83,9 +83,9 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .number("(d+)?|")                    // rpm
             .number("(d+)?|")                    // engine load
-            .number("d*|")                       // maf flow
-            .number("d*|")                       // intake pressure
-            .number("d*|")                       // intake temperature
+            .number("(d+)?|")                    // maf flow
+            .number("(d+)?|")                    // intake pressure
+            .number("(d+)?|")                    // intake temperature
             .number("(d+)?|")                    // throttle
             .number("(d+)?|")                    // coolant temperature
             .number("(d+)?|")                    // instant fuel
@@ -224,6 +224,11 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(6)) {
             position.set(Position.KEY_RPM, parser.nextInt());
             position.set(Position.KEY_ENGINE_LOAD, parser.nextInt());
+            position.set("airFlow", parser.nextInt());
+            position.set("airPressure", parser.nextInt());
+            if (parser.hasNext()) {
+                position.set("airTemp", parser.nextInt() - 40);
+            }
             position.set(Position.KEY_THROTTLE, parser.nextInt());
             if (parser.hasNext()) {
                 position.set(Position.KEY_COOLANT_TEMP, parser.nextInt() - 40);
