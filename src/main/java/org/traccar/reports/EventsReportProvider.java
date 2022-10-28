@@ -24,6 +24,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.Maintenance;
+import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.Storage;
@@ -102,6 +103,7 @@ public class EventsReportProvider {
         ArrayList<String> sheetNames = new ArrayList<>();
         HashMap<Long, String> geofenceNames = new HashMap<>();
         HashMap<Long, String> maintenanceNames = new HashMap<>();
+        HashMap<Long, Position> positions = new HashMap<>();
         for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
             Collection<Event> events = getEvents(device.getId(), from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
@@ -129,6 +131,14 @@ public class EventsReportProvider {
                     iterator.remove();
                 }
             }
+            for (Event event : events) {
+                long positionId = event.getPositionId();
+                if (positionId > 0) {
+                    Position position = storage.getObject(Position.class, new Request(
+                            new Columns.All(), new Condition.Equals("id", positionId)));
+                    positions.put(positionId, position);
+                }
+            }
             DeviceReportSection deviceEvents = new DeviceReportSection();
             deviceEvents.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
@@ -150,6 +160,7 @@ public class EventsReportProvider {
             context.putVar("sheetNames", sheetNames);
             context.putVar("geofenceNames", geofenceNames);
             context.putVar("maintenanceNames", maintenanceNames);
+            context.putVar("positions", positions);
             context.putVar("from", from);
             context.putVar("to", to);
             reportUtils.processTemplateWithSheets(inputStream, outputStream, context);
