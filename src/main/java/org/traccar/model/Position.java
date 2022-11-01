@@ -145,6 +145,24 @@ public class Position extends Message {
     public static final String ALARM_TAMPERING = "tampering";
     public static final String ALARM_REMOVING = "removing";
 
+    public static final String KEY_CAN0 = "can0";
+    public static final String KEY_CAN1 = "can1";
+    public static final String KEY_CAN2 = "can2";
+    public static final String KEY_CAN3 = "can3";
+    public static final String KEY_CAN4 = "can4";
+    public static final String KEY_CAN5 = "can5";
+    public static final String KEY_CAN6 = "can6";
+    public static final String KEY_CAN7 = "can7";
+    public static final String KEY_CAN8 = "can8";
+    public static final String KEY_CAN9 = "can9";
+    public static final String KEY_CAN10 = "can10";
+    public static final String KEY_CAN11 = "can11";
+    public static final String KEY_CAN12 = "can12";
+    public static final String KEY_CAN13 = "can13";
+    public static final String KEY_CAN14 = "can14";
+    public static final String KEY_CAN15 = "can15";
+
+
     public Position() {
     }
 

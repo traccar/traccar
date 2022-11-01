@@ -276,6 +276,22 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                     break;
             }
         });
+        register(900, null, (p, b) -> p.set(Position.KEY_CAN0, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(901, null, (p, b) -> p.set(Position.KEY_CAN1, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(902, null, (p, b) -> p.set(Position.KEY_CAN2, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(903, null, (p, b) -> p.set(Position.KEY_CAN3, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(904, null, (p, b) -> p.set(Position.KEY_CAN4, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(905, null, (p, b) -> p.set(Position.KEY_CAN5, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(906, null, (p, b) -> p.set(Position.KEY_CAN6, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(907, null, (p, b) -> p.set(Position.KEY_CAN7, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(908, null, (p, b) -> p.set(Position.KEY_CAN8, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(909, null, (p, b) -> p.set(Position.KEY_CAN9, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(910, null, (p, b) -> p.set(Position.KEY_CAN10, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(911, null, (p, b) -> p.set(Position.KEY_CAN11, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(912, null, (p, b) -> p.set(Position.KEY_CAN12, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(913, null, (p, b) -> p.set(Position.KEY_CAN13, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(914, null, (p, b) -> p.set(Position.KEY_CAN14, ByteBufUtil.hexDump(b.readSlice(8))));
+        register(915, null, (p, b) -> p.set(Position.KEY_CAN15, ByteBufUtil.hexDump(b.readSlice(8))));
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
