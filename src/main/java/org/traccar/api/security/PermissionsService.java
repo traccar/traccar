@@ -104,7 +104,7 @@ public class PermissionsService {
             } else if (clazz.equals(Device.class)) {
                 denied = getServer().getDeviceReadonly() || getUser(userId).getDeviceReadonly()
                         || addition && getUser(userId).getDeviceLimit() == 0;
-                if (addition && getUser(userId).getDeviceLimit() > 0) {
+                if (!denied && addition && getUser(userId).getDeviceLimit() > 0) {
                     int deviceCount = storage.getObjects(Device.class, new Request(
                             new Columns.Include("id"),
                             new Condition.Permission(User.class, userId, Device.class))).size();
