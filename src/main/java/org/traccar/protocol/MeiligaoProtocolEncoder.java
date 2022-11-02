@@ -24,8 +24,10 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
+import org.traccar.model.Device;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 import java.util.TimeZone;
 
 public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
@@ -57,15 +59,36 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
         return buf;
     }
 
+    private ByteBuf encodeOutputCommand(long deviceId, int index, int value) {
+
+        int outputCount;
+        int outputType;
+
+        String model = getCacheManager().getObject(Device.class, deviceId).getModel();
+
+        if (model != null && Set.of("TK510", "GT08", "TK208", "TK228", "MT05").contains(model)) {
+            outputCount = 5;
+            outputType = MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL_1;
+        } else {
+            outputCount = 1;
+            boolean alternative = AttributeUtil.lookup(
+                    getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()), deviceId);
+            outputType = alternative
+                    ? MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL_1
+                    : MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL_2;
+        }
+
+        ByteBuf content = Unpooled.buffer();
+
+        for (int i = 1; i <= outputCount; i++) {
+            content.writeByte(i == index ? value : 2);
+        }
+
+        return encodeContent(deviceId, outputType, content);
+    }
+
     @Override
     protected Object encodeCommand(Command command) {
-
-        boolean alternative = AttributeUtil.lookup(
-                getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()), command.getDeviceId());
-
-        int outputControlMessageType = alternative
-                ? MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL_1
-                : MeiligaoProtocolDecoder.MSG_OUTPUT_CONTROL_2;
 
         ByteBuf content = Unpooled.buffer();
 
@@ -75,12 +98,14 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
             case Command.TYPE_POSITION_PERIODIC:
                 content.writeShort(command.getInteger(Command.KEY_FREQUENCY) / 10);
                 return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_TRACK_BY_INTERVAL, content);
+            case Command.TYPE_OUTPUT_CONTROL:
+                int index = Integer.parseInt(command.getString(Command.KEY_INDEX)) - 1;
+                int value = Integer.parseInt(command.getString(Command.KEY_DATA));
+                return encodeOutputCommand(command.getDeviceId(), index, value);
             case Command.TYPE_ENGINE_STOP:
-                content.writeByte(0x01);
-                return encodeContent(command.getDeviceId(), outputControlMessageType, content);
+                return encodeOutputCommand(command.getDeviceId(), 1, 1);
             case Command.TYPE_ENGINE_RESUME:
-                content.writeByte(0x00);
-                return encodeContent(command.getDeviceId(), outputControlMessageType, content);
+                return encodeOutputCommand(command.getDeviceId(), 1, 0);
             case Command.TYPE_ALARM_GEOFENCE:
                 content.writeShort(command.getInteger(Command.KEY_RADIUS));
                 return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_MOVEMENT_ALARM, content);
