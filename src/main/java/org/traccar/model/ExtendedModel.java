@@ -91,7 +91,7 @@ public class ExtendedModel extends BaseModel {
 
     public String getString(String key) {
         if (attributes.containsKey(key)) {
-            return (String) attributes.get(key);
+            return attributes.get(key).toString();
         } else {
             return null;
         }
@@ -99,7 +99,12 @@ public class ExtendedModel extends BaseModel {
 
     public double getDouble(String key) {
         if (attributes.containsKey(key)) {
-            return ((Number) attributes.get(key)).doubleValue();
+            Object value = attributes.get(key);
+            if (value instanceof Number) {
+                return ((Number) attributes.get(key)).doubleValue();
+            } else {
+                return Double.parseDouble(value.toString());
+            }
         } else {
             return 0.0;
         }
@@ -107,7 +112,12 @@ public class ExtendedModel extends BaseModel {
 
     public boolean getBoolean(String key) {
         if (attributes.containsKey(key)) {
-            return (Boolean) attributes.get(key);
+            Object value = attributes.get(key);
+            if (value instanceof Boolean) {
+                return (Boolean) attributes.get(key);
+            } else {
+                return Boolean.parseBoolean(value.toString());
+            }
         } else {
             return false;
         }
@@ -115,7 +125,12 @@ public class ExtendedModel extends BaseModel {
 
     public int getInteger(String key) {
         if (attributes.containsKey(key)) {
-            return ((Number) attributes.get(key)).intValue();
+            Object value = attributes.get(key);
+            if (value instanceof Number) {
+                return ((Number) attributes.get(key)).intValue();
+            } else {
+                return Integer.parseInt(value.toString());
+            }
         } else {
             return 0;
         }
@@ -123,7 +138,12 @@ public class ExtendedModel extends BaseModel {
 
     public long getLong(String key) {
         if (attributes.containsKey(key)) {
-            return ((Number) attributes.get(key)).longValue();
+            Object value = attributes.get(key);
+            if (value instanceof Number) {
+                return ((Number) attributes.get(key)).longValue();
+            } else {
+                return Long.parseLong(value.toString());
+            }
         } else {
             return 0;
         }

@@ -80,14 +80,14 @@ public class RuptelaProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent(RuptelaProtocolDecoder.MSG_FIRMWARE_UPDATE, content);
             case Command.TYPE_OUTPUT_CONTROL:
                 content.writeInt(command.getInteger(Command.KEY_INDEX));
-                content.writeInt(Integer.parseInt(command.getString(Command.KEY_DATA)));
+                content.writeInt(command.getInteger(Command.KEY_DATA));
                 return encodeContent(RuptelaProtocolDecoder.MSG_SET_IO, content);
             case Command.TYPE_SET_CONNECTION:
                 String c = command.getString(Command.KEY_SERVER) + "," + command.getInteger(Command.KEY_PORT) + ",TCP";
                 content.writeBytes(c.getBytes(StandardCharsets.US_ASCII));
                 return encodeContent(RuptelaProtocolDecoder.MSG_SET_CONNECTION, content);
             case Command.TYPE_SET_ODOMETER:
-                content.writeInt(Integer.parseInt(command.getString(Command.KEY_DATA)));
+                content.writeInt(command.getInteger(Command.KEY_DATA));
                 return encodeContent(RuptelaProtocolDecoder.MSG_SET_ODOMETER, content);
             default:
                 return null;

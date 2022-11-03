@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -99,8 +99,8 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
                 content.writeShort(command.getInteger(Command.KEY_FREQUENCY) / 10);
                 return encodeContent(command.getDeviceId(), MeiligaoProtocolDecoder.MSG_TRACK_BY_INTERVAL, content);
             case Command.TYPE_OUTPUT_CONTROL:
-                int index = Integer.parseInt(command.getString(Command.KEY_INDEX)) - 1;
-                int value = Integer.parseInt(command.getString(Command.KEY_DATA));
+                int index = command.getInteger(Command.KEY_INDEX) - 1;
+                int value = command.getInteger(Command.KEY_DATA);
                 return encodeOutputCommand(command.getDeviceId(), index, value);
             case Command.TYPE_ENGINE_STOP:
                 return encodeOutputCommand(command.getDeviceId(), 1, 1);

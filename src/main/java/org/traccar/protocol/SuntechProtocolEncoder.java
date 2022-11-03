@@ -59,23 +59,23 @@ public class SuntechProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(command, "CMD;%s;03;01\r", Command.KEY_UNIQUE_ID);
             case Command.TYPE_OUTPUT_CONTROL:
                 if (command.getAttributes().get(Command.KEY_DATA).equals("1")) {
-                    switch (command.getString(Command.KEY_INDEX)) {
-                        case "1":
+                    switch (command.getInteger(Command.KEY_INDEX)) {
+                        case 1:
                             return formatCommand(command, "CMD;%s;04;01\r", Command.KEY_UNIQUE_ID);
-                        case "2":
+                        case 2:
                             return formatCommand(command, "CMD;%s;04;03\r", Command.KEY_UNIQUE_ID);
-                        case "3":
+                        case 3:
                             return formatCommand(command, "CMD;%s;04;09\r", Command.KEY_UNIQUE_ID);
                         default:
                             return null;
                     }
                 } else {
-                    switch (command.getString(Command.KEY_INDEX)) {
-                        case "1":
+                    switch (command.getInteger(Command.KEY_INDEX)) {
+                        case 1:
                             return formatCommand(command, "CMD;%s;04;02\r", Command.KEY_UNIQUE_ID);
-                        case "2":
+                        case 2:
                             return formatCommand(command, "CMD;%s;04;04\r", Command.KEY_UNIQUE_ID);
-                        case "3":
+                        case 3:
                             return formatCommand(command, "CMD;%s;04;10\r", Command.KEY_UNIQUE_ID);
                         default:
                             return null;
