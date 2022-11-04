@@ -363,17 +363,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             positions.add(position);
         }
 
-        if (channel != null) {
+        if (channel == null) {
             StringBuilder command = new StringBuilder("@@");
             command.append(flag).append(27 + positions.size() / 10).append(",");
             command.append(imei).append(",CCC,").append(positions.size()).append("*");
-            int checksum = 0;
-            for (int i = 0; i < command.length(); i += 1) {
-                checksum += command.charAt(i);
-            }
-            command.append(String.format("%02x", checksum & 0xff).toUpperCase());
+            command.append(Checksum.sum(command.toString()));
             command.append("\r\n");
-            channel.writeAndFlush(new NetworkMessage(command.toString(), remoteAddress)); // delete processed data
+            channel.writeAndFlush(new NetworkMessage(command.toString(), remoteAddress));
         }
 
         return positions;
