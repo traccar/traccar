@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -538,13 +538,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private void requestPhotoPacket(Channel channel, SocketAddress socketAddress, String imei, String file, int index) {
+    private void requestPhotoPacket(Channel channel, SocketAddress remoteAddress, String imei, String file, int index) {
         if (channel != null) {
             String content = "D00," + file + "," + index;
             int length = 1 + imei.length() + 1 + content.length() + 5;
             String response = String.format("@@O%02d,%s,%s*", length, imei, content);
             response += Checksum.sum(response) + "\r\n";
-            channel.writeAndFlush(new NetworkMessage(response, socketAddress));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
     }
 
@@ -560,6 +560,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         String type = buf.toString(index + 1, 3, StandardCharsets.US_ASCII);
 
         switch (type) {
+            case "AAC":
+                if (channel != null) {
+                    String response = String.format("@@z27,%s,AAC,1*", imei);
+                    response += Checksum.sum(response) + "\r\n";
+                    channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+                }
+                return null;
             case "D00":
                 if (photo == null) {
                     photo = Unpooled.buffer();
