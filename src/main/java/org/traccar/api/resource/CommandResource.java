@@ -84,10 +84,10 @@ public class CommandResource extends ExtendedObjectResource<Command> {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
         BaseProtocol protocol = getDeviceProtocol(deviceId);
 
-        var commands = storage.getObjects(Command.class, new Request(
+        var commands = storage.getObjects(baseClass, new Request(
                 new Columns.All(),
                 Condition.merge(List.of(
-                        new Condition.Permission(User.class, getUserId(), Command.class),
+                        new Condition.Permission(User.class, getUserId(), baseClass),
                         new Condition.Permission(Device.class, deviceId, baseClass)
                 ))));
 
@@ -107,7 +107,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     public Response send(Command entity) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         if (entity.getId() > 0) {
-            permissionsService.checkPermission(Command.class, getUserId(), entity.getId());
+            permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
             long deviceId = entity.getDeviceId();
             entity = storage.getObject(baseClass, new Request(
                     new Columns.All(), new Condition.Equals("id", entity.getId())));
