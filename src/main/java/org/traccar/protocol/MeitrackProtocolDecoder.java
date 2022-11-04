@@ -363,7 +363,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             positions.add(position);
         }
 
-        if (channel == null) {
+        if (channel != null) {
             StringBuilder command = new StringBuilder("@@");
             command.append(flag).append(27 + positions.size() / 10).append(",");
             command.append(imei).append(",CCC,").append(positions.size()).append("*");
