@@ -15,6 +15,8 @@
  */
 package org.traccar.session.cache;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
@@ -42,6 +44,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -57,6 +60,7 @@ import java.util.stream.Collectors;
 @Singleton
 public class CacheManager implements BroadcastInterface {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CacheManager.class);
     private static final int GROUP_DEPTH_LIMIT = 3;
     private static final Collection<Class<? extends BaseModel>> CLASSES = Arrays.asList(
             Attribute.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
@@ -102,13 +106,19 @@ public class CacheManager implements BroadcastInterface {
     public <T extends BaseModel> List<T> getDeviceObjects(long deviceId, Class<T> clazz) {
         try {
             lock.readLock().lock();
-            return deviceLinks.get(deviceId).get(clazz).stream()
-                    .map(id -> {
-                        var cacheValue = deviceCache.get(new CacheKey(clazz, id));
-                        return cacheValue != null ? cacheValue.<T>getValue() : null;
-                    })
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+            var links = deviceLinks.get(deviceId);
+            if (links != null) {
+                return links.getOrDefault(clazz, new LinkedHashSet<>()).stream()
+                        .map(id -> {
+                            var cacheValue = deviceCache.get(new CacheKey(clazz, id));
+                            return cacheValue != null ? cacheValue.<T>getValue() : null;
+                        })
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+            } else {
+                LOGGER.warn("Device {} cache missing", deviceId);
+                return Collections.emptyList();
+            }
         } finally {
             lock.readLock().unlock();
         }
