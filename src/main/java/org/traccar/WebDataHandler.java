@@ -126,6 +126,7 @@ public class WebDataHandler extends BaseDataHandler {
         return s.toString();
     }
 
+    // OpenGTS status code
     private String calculateStatus(Position position) {
         if (position.hasAttribute(Position.KEY_ALARM)) {
             return "0xF841"; // STATUS_PANIC_ON
