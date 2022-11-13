@@ -129,7 +129,11 @@ public class NotificationManager {
             if (event.getMaintenanceId() != 0) {
                 eventData.setMaintenance(cacheManager.getObject(Maintenance.class, event.getMaintenanceId()));
             }
-            eventForwarder.forward(eventData);
+            eventForwarder.forward(eventData, (success, throwable) -> {
+                if (!success) {
+                    LOGGER.warn("Event forwarding failed", throwable);
+                }
+            });
         }
     }
 

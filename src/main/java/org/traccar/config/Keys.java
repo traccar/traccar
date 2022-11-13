@@ -721,14 +721,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Boolean value to enable URL parameters in json mode. For example, {uniqueId} for device identifier,
-     * {latitude} and {longitude} for coordinates.
-     */
-    public static final ConfigKey<Boolean> FORWARD_URL_VARIABLES = new BooleanConfigKey(
-            "forward.urlVariables",
-            List.of(KeyType.CONFIG));
-
-    /**
      * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions. If initial
      * delivery fails, because of an unreachable server or an HTTP response different from '2xx', the software waits
      * for 'forward.retry.delay' milliseconds to retry delivery. On subsequent failures, this delay is duplicated.
@@ -745,7 +737,8 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FORWARD_RETRY_DELAY = new IntegerConfigKey(
             "forward.retry.delay",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            100);
 
     /**
      * Position forwarding retry maximum retries.
@@ -753,7 +746,8 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FORWARD_RETRY_COUNT = new IntegerConfigKey(
             "forward.retry.count",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            10);
 
     /**
      * Position forwarding retry pending positions limit.
@@ -761,7 +755,8 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FORWARD_RETRY_LIMIT = new IntegerConfigKey(
             "forward.retry.limit",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            100);
 
     /**
      * Events forwarding URL.

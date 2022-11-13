@@ -37,6 +37,9 @@ import org.traccar.database.LdapProvider;
 import org.traccar.database.StatisticsManager;
 import org.traccar.forward.EventForwarder;
 import org.traccar.forward.EventForwarderJson;
+import org.traccar.forward.PositionForwarder;
+import org.traccar.forward.PositionForwarderJson;
+import org.traccar.forward.PositionForwarderUrl;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
@@ -314,6 +317,19 @@ public class MainModule extends AbstractModule {
     public static EventForwarder provideEventForwarder(Config config, Client client) {
         if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
             return new EventForwarderJson(config, client);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static PositionForwarder providePositionForwarder(Config config, Client client, ObjectMapper objectMapper) {
+        if (config.hasKey(Keys.FORWARD_URL)) {
+            if (config.getBoolean(Keys.FORWARD_JSON)) {
+                return new PositionForwarderJson(config, client, objectMapper);
+            } else {
+                return new PositionForwarderUrl(config, client, objectMapper);
+            }
         }
         return null;
     }

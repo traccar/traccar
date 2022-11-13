@@ -15,33 +15,29 @@
  */
 package org.traccar.forward;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
-import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
+import javax.ws.rs.core.Response;
 
 public class EventForwarderJson implements EventForwarder {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventForwarderJson.class);
 
     private final String url;
     private final String header;
 
     private final Client client;
 
-    @Inject
     public EventForwarderJson(Config config, Client client) {
         this.client = client;
         url = config.getString(Keys.EVENT_FORWARD_URL);
         header = config.getString(Keys.EVENT_FORWARD_HEADERS);
     }
 
-    public void forward(EventData eventData) {
+    @Override
+    public void forward(EventData eventData, ResultHandler resultHandler) {
         var requestBuilder = client.target(url).request();
 
         if (header != null && !header.isEmpty()) {
@@ -51,14 +47,20 @@ public class EventForwarderJson implements EventForwarder {
             }
         }
 
-        requestBuilder.async().post(Entity.json(eventData), new InvocationCallback<>() {
+        requestBuilder.async().post(Entity.json(eventData), new InvocationCallback<Response>() {
             @Override
-            public void completed(Object o) {
+            public void completed(Response response) {
+                if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+                    resultHandler.onResult(true, null);
+                } else {
+                    int code = response.getStatusInfo().getStatusCode();
+                    resultHandler.onResult(false, new RuntimeException("HTTP code " + code));
+                }
             }
 
             @Override
             public void failed(Throwable throwable) {
-                LOGGER.warn("Event forwarding failed", throwable);
+                resultHandler.onResult(false, throwable);
             }
         });
     }

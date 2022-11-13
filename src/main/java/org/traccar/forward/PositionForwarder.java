@@ -15,6 +15,6 @@
  */
 package org.traccar.forward;
 
-public interface EventForwarder {
-    void forward(EventData eventData, ResultHandler resultHandler);
+public interface PositionForwarder {
+    void forward(PositionData positionData, ResultHandler resultHandler);
 }
