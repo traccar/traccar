@@ -34,6 +34,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
+import java.util.Objects;
 
 @RequestScoped
 public class PermissionsService {
@@ -158,6 +159,7 @@ public class PermissionsService {
         }
         User user = getUser(userId);
         if (user != null && user.getExpirationTime() != null
+                && !Objects.equals(before.getExpirationTime(), after.getExpirationTime())
                 && (after.getExpirationTime() == null
                 || user.getExpirationTime().compareTo(after.getExpirationTime()) < 0)) {
             checkAdmin(userId);
