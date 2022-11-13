@@ -20,12 +20,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.forward.EventData;
+import org.traccar.forward.EventForwarder;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.model.Calendar;
 import org.traccar.model.Event;
+import org.traccar.model.Geofence;
+import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
-import org.traccar.notification.EventForwarder;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.session.cache.CacheManager;
@@ -112,8 +115,21 @@ public class NotificationManager {
             });
         }
 
+        forwardEvent(event, position);
+    }
+
+    private void forwardEvent(Event event, Position position) {
         if (eventForwarder != null) {
-            eventForwarder.forwardEvent(event, position);
+            EventData eventData = new EventData();
+            eventData.setEvent(event);
+            eventData.setPosition(position);
+            if (event.getGeofenceId() != 0) {
+                eventData.setGeofence(cacheManager.getObject(Geofence.class, event.getGeofenceId()));
+            }
+            if (event.getMaintenanceId() != 0) {
+                eventData.setMaintenance(cacheManager.getObject(Maintenance.class, event.getMaintenanceId()));
+            }
+            eventForwarder.forward(eventData);
         }
     }
 
