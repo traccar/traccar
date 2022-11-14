@@ -30,6 +30,8 @@ public class EventForwarderKafka implements EventForwarder {
     private final Producer<String, String> producer;
     private final ObjectMapper objectMapper;
 
+    private final String topic;
+
     public EventForwarderKafka(Config config, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         Properties properties = new Properties();
@@ -38,6 +40,7 @@ public class EventForwarderKafka implements EventForwarder {
         properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         producer = new KafkaProducer<>(properties);
+        topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
     }
 
     @SuppressWarnings("deprecation")
@@ -51,7 +54,7 @@ public class EventForwarderKafka implements EventForwarder {
         try {
             String key = Long.toString(eventData.getDevice().getId());
             String value = objectMapper.writeValueAsString(eventData);
-            producer.send(new ProducerRecord<>("events", key, value));
+            producer.send(new ProducerRecord<>(topic, key, value));
             resultHandler.onResult(true, null);
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);

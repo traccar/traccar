@@ -30,14 +30,17 @@ public class PositionForwarderKafka implements PositionForwarder {
     private final Producer<String, String> producer;
     private final ObjectMapper objectMapper;
 
+    private final String topic;
+
     public PositionForwarderKafka(Config config, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         Properties properties = new Properties();
-        properties.put("bootstrap.servers", config.getString(Keys.EVENT_FORWARD_URL));
+        properties.put("bootstrap.servers", config.getString(Keys.FORWARD_URL));
         properties.put("acks", "all");
         properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         producer = new KafkaProducer<>(properties);
+        topic = config.getString(Keys.FORWARD_TOPIC);
     }
 
     @Override
@@ -45,7 +48,7 @@ public class PositionForwarderKafka implements PositionForwarder {
         try {
             String key = Long.toString(positionData.getDevice().getId());
             String value = objectMapper.writeValueAsString(positionData);
-            producer.send(new ProducerRecord<>("positions", key, value));
+            producer.send(new ProducerRecord<>(topic, key, value));
             resultHandler.onResult(true, null);
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);

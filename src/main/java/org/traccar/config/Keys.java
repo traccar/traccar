@@ -707,6 +707,14 @@ public final class Keys {
             "url");
 
     /**
+     * Position forwarding Kafka topic.
+     */
+    public static final ConfigKey<String> FORWARD_TOPIC = new StringConfigKey(
+            "forward.topic",
+            List.of(KeyType.CONFIG),
+            "positions");
+
+    /**
      * URL to forward positions. Data is passed through URL parameters. For example, {uniqueId} for device identifier,
      * {latitude} and {longitude} for coordinates.
      */
@@ -766,6 +774,14 @@ public final class Keys {
             "event.forward.type",
             List.of(KeyType.CONFIG),
             "json");
+
+    /**
+     * Events forwarding Kafka topic.
+     */
+    public static final ConfigKey<String> EVENT_FORWARD_TOPIC = new StringConfigKey(
+            "event.forward.topic",
+            List.of(KeyType.CONFIG),
+            "events");
 
     /**
      * Events forwarding URL.
