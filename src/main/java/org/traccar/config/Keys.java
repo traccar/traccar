@@ -699,6 +699,14 @@ public final class Keys {
             "max-age=3600,public");
 
     /**
+     * Position forwarding format. Available options are "url", "json" and "kafka". Default is "url".
+     */
+    public static final ConfigKey<String> FORWARD_TYPE = new StringConfigKey(
+            "forward.type",
+            List.of(KeyType.CONFIG),
+            "url");
+
+    /**
      * URL to forward positions. Data is passed through URL parameters. For example, {uniqueId} for device identifier,
      * {latitude} and {longitude} for coordinates.
      */
@@ -711,13 +719,6 @@ public final class Keys {
      */
     public static final ConfigKey<String> FORWARD_HEADER = new StringConfigKey(
             "forward.header",
-            List.of(KeyType.CONFIG));
-
-    /**
-     * Boolean value to enable forwarding in JSON format.
-     */
-    public static final ConfigKey<Boolean> FORWARD_JSON = new BooleanConfigKey(
-            "forward.json",
             List.of(KeyType.CONFIG));
 
     /**
@@ -757,6 +758,14 @@ public final class Keys {
             "forward.retry.limit",
             List.of(KeyType.CONFIG),
             100);
+
+    /**
+     * Events forwarding format. Available options are "json" and "kafka". Default is "json".
+     */
+    public static final ConfigKey<String> EVENT_FORWARD_TYPE = new StringConfigKey(
+            "event.forward.type",
+            List.of(KeyType.CONFIG),
+            "json");
 
     /**
      * Events forwarding URL.

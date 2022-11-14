@@ -83,6 +83,7 @@ dependencies {
     implementation "com.sun.xml.bind:jaxb-impl:3.0.2" // needs upgrade
     implementation "javax.activation:activation:1.1.1"
     implementation "com.amazonaws:aws-java-sdk-sns:1.12.314"
+    implementation "org.apache.kafka:kafka-clients:3.3.1"
     implementation ("com.google.firebase:firebase-admin:9.0.0") {
         exclude group: 'com.google.cloud', module: 'google-cloud-firestore'
     }
