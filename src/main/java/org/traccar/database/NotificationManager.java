@@ -24,6 +24,7 @@ import org.traccar.forward.EventData;
 import org.traccar.forward.EventForwarder;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.model.Calendar;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
@@ -123,6 +124,7 @@ public class NotificationManager {
             EventData eventData = new EventData();
             eventData.setEvent(event);
             eventData.setPosition(position);
+            eventData.setDevice(cacheManager.getObject(Device.class, event.getDeviceId()));
             if (event.getGeofenceId() != 0) {
                 eventData.setGeofence(cacheManager.getObject(Geofence.class, event.getGeofenceId()));
             }
