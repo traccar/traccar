@@ -84,10 +84,12 @@ public class BaseObjectManager<T extends BaseModel> {
         if (dataManager != null) {
             try {
                 writeLock();
+                LOGGER.warn("refreshItems {}", baseClass);
                 Collection<T> databaseItems = dataManager.getObjects(baseClass);
                 if (items == null) {
                     items = new ConcurrentHashMap<>(databaseItems.size());
                 }
+                LOGGER.warn("got {} from {}", databaseItems.size(), baseClass);
                 Set<Long> databaseItemIds = new HashSet<>();
                 for (T item : databaseItems) {
                     databaseItemIds.add(item.getId());
