@@ -187,7 +187,9 @@ public class DataManager {
                 }
                 return result.toString();
             case ACTION_SELECT_ALL:
-                return "SELECT * FROM " + getObjectsTableName(clazz);
+                String query = "SELECT * FROM " + getObjectsTableName(clazz);
+                LOGGER.warn(query);
+                return query;
             case ACTION_SELECT:
                 return "SELECT * FROM " + getObjectsTableName(clazz) + " WHERE id = :id";
             case ACTION_DELETE:
