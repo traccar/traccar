@@ -100,7 +100,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         this.form = form;
     }
 
-    private static void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer(12);
             response.writeShort(0xfe02);
@@ -526,20 +526,24 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     private List<Position> decodeText(Channel channel, SocketAddress remoteAddress, String sentence) {
 
-        int startIndex = -1;
-        for (int i = 0; i < 4; i++) {
-            startIndex = sentence.indexOf(',', startIndex + 1);
+        int positionIndex = -1;
+        for (int i = 0; i < 5; i++) {
+            positionIndex = sentence.indexOf(',', positionIndex + 1);
         }
-        int endIndex = sentence.indexOf(',', startIndex + 1);
 
-        String imei = sentence.substring(startIndex + 1, endIndex);
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        String[] headers = sentence.substring(0, positionIndex).split(",");
+        long id = Long.parseLong(headers[2]);
+        int index = Integer.parseInt(headers[3]);
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, headers[4]);
         if (deviceSession == null) {
             return null;
         }
 
+        sendResponse(channel, remoteAddress, id, index);
+
         List<Position> positions = new LinkedList<>();
-        String[] lines = sentence.substring(endIndex + 1).split("\r\n");
+        String[] lines = sentence.substring(positionIndex + 1).split("\r\n");
 
         for (String line : lines) {
             Position position = decodeTextLine(deviceSession, line);
