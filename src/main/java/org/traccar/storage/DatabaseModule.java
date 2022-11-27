@@ -24,7 +24,7 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -80,7 +80,7 @@ public class DatabaseModule extends AbstractModule {
 
         if (config.hasKey(Keys.DATABASE_CHANGELOG)) {
 
-            ResourceAccessor resourceAccessor = new FileSystemResourceAccessor(new File("."));
+            ResourceAccessor resourceAccessor = new DirectoryResourceAccessor(new File("."));
 
             Database database = DatabaseFactory.getInstance().openDatabase(
                     config.getString(Keys.DATABASE_URL),
