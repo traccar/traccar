@@ -452,7 +452,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * By default server syncs with the database if it encounters and unknown device. This flag allows to disable that
+     * Throttle unknown device database queries when it sends repeated requests.
+     */
+    public static final ConfigKey<Boolean> DATABASE_THROTTLE_UNKNOWN = new BooleanConfigKey(
+            "database.throttleUnknown",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * By default, server syncs with the database if it encounters and unknown device. This flag allows to disable that
      * behavior to improve performance in some cases.
      */
     public static final ConfigKey<Boolean> DATABASE_IGNORE_UNKNOWN = new BooleanConfigKey(
