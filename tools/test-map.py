@@ -2,7 +2,7 @@
 
 import urllib
 import urllib2
-import httplib
+import http.client as httplib
 import time
 import random
 import json
@@ -14,7 +14,7 @@ devices = 500
 
 def login():
     request = urllib2.Request(baseUrl + '/api/session')
-    response = urllib2.urlopen(request, urllib.urlencode(user))
+    response = urllib2.urlopen(request, urllib.parse.urlencode(user))
     return response.headers.get('Set-Cookie')
 
 def add_device(cookie, unique_id):
@@ -29,7 +29,7 @@ def add_device(cookie, unique_id):
 
 def send_message(conn, device_id):
     params = (('id', device_id), ('lat', random.uniform(59, 61)), ('lon', random.uniform(29, 31)))
-    conn.request('GET', '?' + urllib.urlencode(params))
+    conn.request('GET', '?' + urllib.parse.urlencode(params))
     conn.getresponse().read()
 
 cookie = login()

@@ -140,7 +140,7 @@ def load_ports():
 
 def login():
     request = urllib2.Request(baseUrl + '/api/session')
-    response = urllib2.urlopen(request, urllib.urlencode(user))
+    response = urllib2.urlopen(request, urllib.parse.urlencode(user))
     if debug:
         print '\nlogin: %s\n' % repr(json.load(response))
     return response.headers.get('Set-Cookie')
@@ -176,7 +176,7 @@ def send_message(port, message):
 
 def get_protocols(cookie, device_id):
     params = { 'deviceId' : device_id, 'from' : '2000-01-01T00:00:00.000Z', 'to' : '2050-01-01T00:00:00.000Z' }
-    request = urllib2.Request(baseUrl + '/api/positions?' + urllib.urlencode(params))
+    request = urllib2.Request(baseUrl + '/api/positions?' + urllib.parse.urlencode(params))
     request.add_header('Cookie', cookie)
     request.add_header('Content-Type', 'application/json')
     request.add_header('Accept', 'application/json')
