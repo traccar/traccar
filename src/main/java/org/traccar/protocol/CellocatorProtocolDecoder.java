@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, buf.readUnsignedByte() & 0x0f);
 
         buf.readUnsignedByte(); // operator / configuration flags
-        buf.readUnsignedByte(); // reason data
+        position.set(Position.KEY_EVENT, buf.readUnsignedByte());
         position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
 
         position.set("mode", buf.readUnsignedByte());
