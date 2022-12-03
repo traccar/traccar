@@ -84,7 +84,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                         response.writeShort(file.length());
                         response.writeCharSequence(file, StandardCharsets.US_ASCII);
                     } else {
-                        response.writeShort(MSG_COMPLETE);
+                        response.writeShort(MSG_INIT);
                     }
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 }
