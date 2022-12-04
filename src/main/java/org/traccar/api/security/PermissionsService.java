@@ -120,24 +120,34 @@ public class PermissionsService {
         }
     }
 
-    public void checkEdit(long userId, Object object, boolean addition) throws StorageException, SecurityException {
+    public void checkEdit(long userId, BaseModel object, boolean addition) throws StorageException, SecurityException {
         if (!getUser(userId).getAdministrator()) {
             checkEdit(userId, object.getClass(), addition);
-            boolean denied = false;
             if (object instanceof GroupedModel) {
-                long groupId = ((GroupedModel) object).getGroupId();
-                if (groupId > 0) {
-                    checkPermission(Group.class, userId, groupId);
+                GroupedModel after = ((GroupedModel) object);
+                if (after.getGroupId() > 0) {
+                    GroupedModel before = null;
+                    if (!addition) {
+                        before = storage.getObject(after.getClass(), new Request(
+                                new Columns.Include("groupId"), new Condition.Equals("id", object.getId())));
+                    }
+                    if (before == null || before.getGroupId() != after.getGroupId()) {
+                        checkPermission(Group.class, userId, after.getGroupId());
+                    }
                 }
             }
             if (object instanceof ScheduledModel) {
-                long calendarId = ((ScheduledModel) object).getCalendarId();
-                if (calendarId > 0) {
-                    denied = storage.getPermissions(User.class, userId, Calendar.class, calendarId).isEmpty();
+                ScheduledModel after = ((ScheduledModel) object);
+                if (after.getCalendarId() > 0) {
+                    ScheduledModel before = null;
+                    if (!addition) {
+                        before = storage.getObject(after.getClass(), new Request(
+                                new Columns.Include("calendarId"), new Condition.Equals("id", object.getId())));
+                    }
+                    if (before == null || before.getCalendarId() != after.getCalendarId()) {
+                        checkPermission(Calendar.class, userId, after.getCalendarId());
+                    }
                 }
-            }
-            if (denied) {
-                throw new SecurityException("Write access denied");
             }
         }
     }
