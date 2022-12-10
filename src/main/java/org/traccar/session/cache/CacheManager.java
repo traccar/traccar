@@ -227,6 +227,15 @@ public class CacheManager implements BroadcastInterface {
             broadcastService.invalidateObject(true, object.getClass(), object.getId());
         }
 
+        if (object instanceof Server) {
+            invalidateServer();
+            return;
+        }
+        if (object instanceof User) {
+            invalidateUsers();
+            return;
+        }
+
         boolean invalidate = false;
         var before = getObject(object.getClass(), object.getId());
         if (before == null) {
