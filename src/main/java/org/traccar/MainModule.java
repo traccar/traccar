@@ -42,25 +42,7 @@ import org.traccar.forward.PositionForwarder;
 import org.traccar.forward.PositionForwarderJson;
 import org.traccar.forward.PositionForwarderKafka;
 import org.traccar.forward.PositionForwarderUrl;
-import org.traccar.geocoder.AddressFormat;
-import org.traccar.geocoder.BanGeocoder;
-import org.traccar.geocoder.BingMapsGeocoder;
-import org.traccar.geocoder.FactualGeocoder;
-import org.traccar.geocoder.GeoapifyGeocoder;
-import org.traccar.geocoder.GeocodeFarmGeocoder;
-import org.traccar.geocoder.GeocodeXyzGeocoder;
-import org.traccar.geocoder.Geocoder;
-import org.traccar.geocoder.GisgraphyGeocoder;
-import org.traccar.geocoder.GoogleGeocoder;
-import org.traccar.geocoder.HereGeocoder;
-import org.traccar.geocoder.MapQuestGeocoder;
-import org.traccar.geocoder.MapTilerGeocoder;
-import org.traccar.geocoder.MapboxGeocoder;
-import org.traccar.geocoder.MapmyIndiaGeocoder;
-import org.traccar.geocoder.NominatimGeocoder;
-import org.traccar.geocoder.OpenCageGeocoder;
-import org.traccar.geocoder.PositionStackGeocoder;
-import org.traccar.geocoder.TomTomGeocoder;
+import org.traccar.geocoder.*;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
@@ -182,6 +164,9 @@ public class MainModule extends AbstractModule {
             switch (type) {
                 case "nominatim":
                     geocoder = new NominatimGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    break;
+                case "locationiq":
+                    geocoder = new LocationIqGeocoder(client, url, key, language, cacheSize, addressFormat);
                     break;
                 case "gisgraphy":
                     geocoder = new GisgraphyGeocoder(client, url, cacheSize, addressFormat);

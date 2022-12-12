@@ -16,8 +16,7 @@
     <entry key='web.persistSession'>false</entry>
 
     <entry key='geocoder.enable'>true</entry>
-    <entry key='geocoder.type'>nominatim</entry>
-    <entry key='geocoder.url'>https://us1.locationiq.com/v1/reverse.php</entry>
+    <entry key='geocoder.type'>locationiq</entry>
     <entry key='geocoder.key'>pk.689d849289c8c63708068b2ff1f63b2d</entry>
     <entry key='geocoder.onRequest'>true</entry>
     <entry key='geocoder.ignorePositions'>true</entry>
