@@ -51,11 +51,12 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
         factory.setIdleTimeout(Duration.ofMillis(config.getLong(Keys.WEB_TIMEOUT)));
         factory.setCreator((req, resp) -> {
             if (req.getSession() != null) {
-                long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
-                return new AsyncSocket(objectMapper, connectionManager, storage, userId);
-            } else {
-                return null;
+                Long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
+                if (userId != null) {
+                    return new AsyncSocket(objectMapper, connectionManager, storage, userId);
+                }
             }
+            return null;
         });
     }
 
