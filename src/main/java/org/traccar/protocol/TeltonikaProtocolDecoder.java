@@ -647,9 +647,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private Object decodeTcp(Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws Exception {
+    private Object decodeTcp(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
-        if (buf.getUnsignedShort(0) > 0) {
+        if (buf.readableBytes() == 1 && buf.readUnsignedByte() == 0xff) {
+            return null;
+        } else if (buf.getUnsignedShort(0) > 0) {
             parseIdentification(channel, remoteAddress, buf);
         } else {
             buf.skipBytes(4);
@@ -659,7 +661,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private Object decodeUdp(Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws Exception {
+    private Object decodeUdp(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         buf.readUnsignedShort(); // length
         buf.readUnsignedShort(); // packet id
