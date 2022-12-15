@@ -57,6 +57,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TERMINAL_CONTROL = 0x8105;
     public static final int MSG_TERMINAL_AUTH = 0x0102;
     public static final int MSG_LOCATION_REPORT = 0x0200;
+    public static final int MSG_LOCATION_BATCH_2 = 0x0210;
     public static final int MSG_ACCELERATION = 0x2070;
     public static final int MSG_LOCATION_REPORT_2 = 0x5501;
     public static final int MSG_LOCATION_REPORT_BLIND = 0x5502;
@@ -243,11 +244,11 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
             return decodeLocation2(deviceSession, buf, type);
 
-        } else if (type == MSG_LOCATION_BATCH) {
+        } else if (type == MSG_LOCATION_BATCH || type == MSG_LOCATION_BATCH_2) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
-            return decodeLocationBatch(deviceSession, buf);
+            return decodeLocationBatch(deviceSession, buf, type);
 
         } else if (type == MSG_TIME_SYNC_REQUEST) {
 
@@ -681,21 +682,24 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private List<Position> decodeLocationBatch(DeviceSession deviceSession, ByteBuf buf) {
+    private List<Position> decodeLocationBatch(DeviceSession deviceSession, ByteBuf buf, int type) {
 
         List<Position> positions = new LinkedList<>();
 
-        int count = buf.readUnsignedShort();
-        int locationType = buf.readUnsignedByte();
+        int locationType = 0;
+        if (type == MSG_LOCATION_BATCH) {
+            buf.readUnsignedShort(); // count
+            locationType = buf.readUnsignedByte();
+        }
 
-        for (int i = 0; i < count; i++) {
-            int endIndex = buf.readUnsignedShort() + buf.readerIndex();
-            Position position = decodeLocation(deviceSession, buf);
+        while (buf.readableBytes() > 2) {
+            int length = type == MSG_LOCATION_BATCH_2 ? buf.readUnsignedByte() : buf.readUnsignedShort();
+            ByteBuf fragment = buf.readSlice(length);
+            Position position = decodeLocation(deviceSession, fragment);
             if (locationType > 0) {
                 position.set(Position.KEY_ARCHIVE, true);
             }
             positions.add(position);
-            buf.readerIndex(endIndex);
         }
 
         return positions;
