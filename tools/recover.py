@@ -48,5 +48,5 @@ for session in protocols:
     s.connect(("localhost", int(port)))
     for message in messages[session]:
         s.send(binascii.unhexlify(message))
-        time.sleep(0.5)
+        time.sleep(0.1)
     s.close()

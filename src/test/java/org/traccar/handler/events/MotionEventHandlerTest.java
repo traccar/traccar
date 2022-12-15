@@ -1,6 +1,5 @@
 package org.traccar.handler.events;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.traccar.BaseTest;
 import org.traccar.model.Event;
@@ -62,7 +61,6 @@ public class MotionEventHandlerTest extends BaseTest {
         verifyState(state, false, 0);
     }
 
-    @Ignore
     @Test
     public void testMotionFluctuation() throws ParseException {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, false, false, 0.01);
@@ -87,11 +85,11 @@ public class MotionEventHandlerTest extends BaseTest {
 
         MotionProcessor.updateState(state, position("2017-01-01 00:04:00", true, 1000, null), true, tripsConfig);
         assertNull(state.getEvent());
-        verifyState(state, true, 1000);
+        verifyState(state, true, 0);
 
         MotionProcessor.updateState(state, position("2017-01-01 00:06:00", true, 2000, null), true, tripsConfig);
         assertNull(state.getEvent());
-        verifyState(state, true, 2000);
+        verifyState(state, true, 0);
     }
 
     @Test
@@ -99,6 +97,7 @@ public class MotionEventHandlerTest extends BaseTest {
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, true, false, 0.01);
 
         MotionState state = new MotionState();
+        state.setMotionStreak(true);
         state.setMotionState(true);
 
         MotionProcessor.updateState(state, position("2017-01-01 00:00:00", false, 100, true), false, tripsConfig);

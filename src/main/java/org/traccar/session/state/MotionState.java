@@ -24,6 +24,7 @@ public class MotionState {
 
     public static MotionState fromDevice(Device device) {
         MotionState state = new MotionState();
+        state.motionStreak = device.getMotionStreak();
         state.motionState = device.getMotionState();
         state.motionTime = device.getMotionTime();
         state.motionDistance = device.getMotionDistance();
@@ -31,6 +32,7 @@ public class MotionState {
     }
 
     public void toDevice(Device device) {
+        device.setMotionStreak(motionStreak);
         device.setMotionState(motionState);
         device.setMotionTime(motionTime);
         device.setMotionDistance(motionDistance);
@@ -40,6 +42,17 @@ public class MotionState {
 
     public boolean isChanged() {
         return changed;
+    }
+
+    private boolean motionStreak;
+
+    public boolean getMotionStreak() {
+        return motionStreak;
+    }
+
+    public void setMotionStreak(boolean motionStreak) {
+        this.motionStreak = motionStreak;
+        changed = true;
     }
 
     private boolean motionState;

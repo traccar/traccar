@@ -59,6 +59,7 @@ public final class MotionProcessor {
                     String eventType = newState ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
                     Event event = new Event(eventType, position);
 
+                    state.setMotionStreak(newState);
                     state.setMotionTime(null);
                     state.setMotionDistance(0);
                     state.setEvent(event);
@@ -67,8 +68,13 @@ public final class MotionProcessor {
             }
         } else {
             state.setMotionState(newState);
-            state.setMotionTime(position.getFixTime());
-            state.setMotionDistance(position.getDouble(Position.KEY_TOTAL_DISTANCE));
+            if (state.getMotionStreak() == newState) {
+                state.setMotionTime(null);
+                state.setMotionDistance(0);
+            } else {
+                state.setMotionTime(position.getFixTime());
+                state.setMotionDistance(position.getDouble(Position.KEY_TOTAL_DISTANCE));
+            }
         }
     }
 

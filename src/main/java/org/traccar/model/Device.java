@@ -162,6 +162,19 @@ public class Device extends GroupedModel implements Disableable {
         this.expirationTime = expirationTime;
     }
 
+    private boolean motionStreak;
+
+    @QueryIgnore
+    @JsonIgnore
+    public boolean getMotionStreak() {
+        return motionStreak;
+    }
+
+    @JsonIgnore
+    public void setMotionStreak(boolean motionStreak) {
+        this.motionStreak = motionStreak;
+    }
+
     private boolean motionState;
 
     @QueryIgnore

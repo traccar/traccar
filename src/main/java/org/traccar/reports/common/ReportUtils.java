@@ -354,7 +354,9 @@ public class ReportUtils {
             boolean trips = reportClass.equals(TripReportItem.class);
 
             MotionState motionState = new MotionState();
-            motionState.setMotionState(isMoving(positions, 0, tripsConfig));
+            boolean initialValue = isMoving(positions, 0, tripsConfig);
+            motionState.setMotionStreak(initialValue);
+            motionState.setMotionState(initialValue);
 
             boolean detected = trips == motionState.getMotionState();
             int startEventIndex = detected ? 0 : -1;
