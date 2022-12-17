@@ -151,15 +151,11 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
 
                 position.setCourse(BitUtil.from(flags, 5) * 45);
 
-                position.setLatitude(buf.readUnsignedMedium() * 90.0 / (1 << 23));
-                if (position.getLatitude() > 90) {
-                    position.setLatitude(position.getLatitude() - 180);
-                }
+                double latitude = buf.readUnsignedMedium() * 90.0 / (1 << 23);
+                position.setLatitude(latitude > 90 ? latitude - 180 : latitude);
 
-                position.setLongitude(buf.readUnsignedMedium() * 180.0 / (1 << 23));
-                if (position.getLongitude() > 180) {
-                    position.setLongitude(position.getLongitude() - 360);
-                }
+                double longitude = buf.readUnsignedMedium() * 180.0 / (1 << 23);
+                position.setLongitude(longitude > 180 ? longitude - 360 : longitude);
 
                 int speed = buf.readUnsignedByte();
                 position.setSpeed(UnitsConverter.knotsFromKph(speed));

@@ -227,9 +227,10 @@ public class Position extends Message {
     }
 
     public void setLatitude(double latitude) {
-        if (latitude >= -90 && latitude <= 90) {
-            this.latitude = latitude;
+        if (latitude < -90 || latitude > 90) {
+            throw new IllegalArgumentException("Latitude out of range");
         }
+        this.latitude = latitude;
     }
 
     private double longitude;
@@ -239,9 +240,10 @@ public class Position extends Message {
     }
 
     public void setLongitude(double longitude) {
-        if (longitude >= -180 && longitude <= 180) {
-            this.longitude = longitude;
+        if (longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException("Longitude out of range");
         }
+        this.longitude = longitude;
     }
 
     private double altitude; // value in meters
