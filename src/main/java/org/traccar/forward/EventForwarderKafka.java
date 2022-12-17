@@ -43,12 +43,6 @@ public class EventForwarderKafka implements EventForwarder {
         topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    protected void finalize() {
-        producer.close();
-    }
-
     @Override
     public void forward(EventData eventData, ResultHandler resultHandler) {
         try {
