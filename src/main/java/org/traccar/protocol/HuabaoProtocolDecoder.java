@@ -455,6 +455,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x02:
                     position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShort() * 0.1);
                     break;
+                case 0x2b:
+                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt());
+                    break;
                 case 0x30:
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     break;
@@ -588,6 +591,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
+                case 0xF3:
+                    position.set(Position.KEY_ARMED, buf.readUnsignedByte() > 0);
+                    break;
                 case 0xFE:
                     if (length == 1) {
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
@@ -626,6 +632,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 default:
+                    System.out.println("subtype " + String.format("%x", subtype));
                     break;
             }
             buf.readerIndex(endIndex);
