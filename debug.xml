@@ -10,6 +10,8 @@
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
 
+    <entry key='geocoder.type'>test</entry>
+
     <entry key='media.path'>./target/media</entry>
 
     <entry key='logger.console'>true</entry>
