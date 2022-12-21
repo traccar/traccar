@@ -4,23 +4,22 @@
 
 <properties>
 
-    <entry key='config.default'>./conf/default.xml</entry>
+    <entry key="config.default">./conf/default.xml</entry>
 
-    <!--
+    <entry key='database.driver'>com.mysql.cj.jdbc.Driver</entry>
+    <entry key='database.url'>jdbc:mysql://localhost/traccar?serverTimezone=UTC&useSSL=false&allowMultiQueries=true&autoReconnect=true&useUnicode=yes&characterEncoding=UTF-8&sessionVariables=sql_mode=''</entry>
+    <entry key='database.user'>root</entry>
+    <entry key='database.password'>root</entry>
 
-    This is the main configuration file. All your configuration parameters should be placed in this file.
+    <entry key='logger.enable'>true</entry>
+    <entry key='logger.level'>info</entry>
 
-    Default configuration parameters are located in the "default.xml" file. You should not modify it to avoid issues
-    with upgrading to a new version. Parameters in the main config file override values in the default file. Do not
-    remove "config.default" parameter from this file unless you know what you are doing.
+    <entry key='filter.enable'>true</entry>
+    <entry key='filter.zero'>true</entry>
+    <entry key='filter.invalid'>true</entry>
+    <entry key='filter.future'>600</entry>
 
-    For list of available parameters see following page: https://www.traccar.org/configuration-file/
-
-    -->
-
-    <entry key='database.driver'>org.h2.Driver</entry>
-    <entry key='database.url'>jdbc:h2:./data/database</entry>
-    <entry key='database.user'>sa</entry>
-    <entry key='database.password'></entry>
+    <entry key='time.override'>serverTime</entry>
+    <entry key='time.protocols'>watch</entry>
 
 </properties>
