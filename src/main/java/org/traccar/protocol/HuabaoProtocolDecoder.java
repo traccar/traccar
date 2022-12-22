@@ -632,7 +632,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 default:
-                    System.out.println("subtype " + String.format("%x", subtype));
                     break;
             }
             buf.readerIndex(endIndex);
