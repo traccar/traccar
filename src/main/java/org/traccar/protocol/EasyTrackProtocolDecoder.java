@@ -106,7 +106,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
-            LOGGER.warn("ignoring {}", sentence);
+            LOGGER.warn("Easytrack ignoring {}", sentence);
             return null;
         }
 
