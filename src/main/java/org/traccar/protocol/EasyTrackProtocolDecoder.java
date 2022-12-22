@@ -98,7 +98,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-        LOGGER.warn("Easytrack", sentence);
+        LOGGER.warn("Easytrack {}", sentence);
         String type = sentence.substring(20, 22);
 
         if ((type.equals("TX") || type.equals("MQ")) && channel != null) {
