@@ -592,7 +592,66 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
                 case 0xF3:
-                    position.set(Position.KEY_ARMED, buf.readUnsignedByte() > 0);
+                    while (buf.readerIndex() < endIndex) {
+                        int extendedType = buf.readUnsignedShort();
+                        int extendedLength = buf.readUnsignedByte();
+                        switch (extendedType) {
+                            case 0x0002:
+                                position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() * 0.1);
+                                break;
+                            case 0x0003:
+                                position.set(Position.KEY_RPM, buf.readUnsignedShort());
+                                break;
+                            case 0x0004:
+                                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+                                break;
+                            case 0x0005:
+                                position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 100);
+                                break;
+                            case 0x0007:
+                                position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() * 0.1);
+                                break;
+                            case 0x0008:
+                                position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedShort() * 0.1);
+                                break;
+                            case 0x0009:
+                                position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShort() - 40);
+                                break;
+                            case 0x000B:
+                                position.set("intakePressure", buf.readUnsignedShort());
+                                break;
+                            case 0x000C:
+                                position.set("intakeTemp", buf.readUnsignedShort() - 40);
+                                break;
+                            case 0x000D:
+                                position.set("intakeFlow", buf.readUnsignedShort());
+                                break;
+                            case 0x000E:
+                                position.set(Position.KEY_THROTTLE, buf.readUnsignedShort() * 100 / 255);
+                                break;
+                            case 0x0050:
+                                position.set(Position.KEY_VIN, buf.readSlice(17).toString(StandardCharsets.US_ASCII));
+                                break;
+                            case 0x0100:
+                                position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort() * 0.1);
+                                break;
+                            case 0x0102:
+                                position.set("tripFuel", buf.readUnsignedShort() * 0.1);
+                                break;
+                            case 0x0112:
+                                position.set("hardAccelerationCount", buf.readUnsignedShort());
+                                break;
+                            case 0x0113:
+                                position.set("hardDecelerationCount", buf.readUnsignedShort());
+                                break;
+                            case 0x0114:
+                                position.set("hardCorneringCount", buf.readUnsignedShort());
+                                break;
+                            default:
+                                buf.skipBytes(extendedLength);
+                                break;
+                        }
+                    }
                     break;
                 case 0xFE:
                     if (length == 1) {
