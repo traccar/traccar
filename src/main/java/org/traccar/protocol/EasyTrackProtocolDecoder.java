@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -31,6 +32,8 @@ import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
 public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(EasyTrackProtocolDecoder.class);
 
     public EasyTrackProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -103,6 +106,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
+            LOGGER.warn("ignoring {}", sentence);
             return null;
         }
 
