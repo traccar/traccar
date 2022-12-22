@@ -99,6 +99,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
         String type = sentence.substring(20, 22);
+        LOGGER.warn("Easytrack", sentence);
 
         if ((type.equals("TX") || type.equals("MQ")) && channel != null) {
             channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
