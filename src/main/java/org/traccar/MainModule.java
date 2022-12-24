@@ -38,6 +38,7 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.forward.EventForwarder;
 import org.traccar.forward.EventForwarderJson;
 import org.traccar.forward.EventForwarderKafka;
+import org.traccar.forward.EventForwarderMqtt;
 import org.traccar.forward.PositionForwarder;
 import org.traccar.forward.PositionForwarderJson;
 import org.traccar.forward.PositionForwarderKafka;
@@ -326,10 +327,14 @@ public class MainModule extends AbstractModule {
     @Provides
     public static EventForwarder provideEventForwarder(Config config, Client client, ObjectMapper objectMapper) {
         if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
-            if (config.getString(Keys.EVENT_FORWARD_TYPE).equals("kafka")) {
-                return new EventForwarderKafka(config, objectMapper);
-            } else {
-                return new EventForwarderJson(config, client);
+            String forwardType = config.getString(Keys.EVENT_FORWARD_TYPE);
+            switch (forwardType) {
+                case "kafka":
+                    return new EventForwarderKafka(config, objectMapper);
+                case "mqtt":
+                    return new EventForwarderMqtt(config, objectMapper);
+                default:
+                    return new EventForwarderJson(config, client);
             }
         }
         return null;
