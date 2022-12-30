@@ -16,14 +16,14 @@
 package org.traccar.handler.events;
 
 import io.netty.channel.ChannelHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.traccar.config.Config;
+import org.traccar.database.CommandsManager;
 import org.traccar.helper.model.GeofenceUtil;
 import org.traccar.helper.model.PositionUtil;
-import org.traccar.model.Calendar;
-import org.traccar.model.Device;
-import org.traccar.model.Event;
-import org.traccar.model.Geofence;
-import org.traccar.model.Position;
+import org.traccar.model.*;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
@@ -34,6 +34,7 @@ import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,10 +44,13 @@ import java.util.Map;
 @ChannelHandler.Sharable
 public class GeofenceEventHandler extends BaseEventHandler {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Geofence.class);
     private final Config config;
     private final CacheManager cacheManager;
     private final ConnectionManager connectionManager;
     private final Storage storage;
+
+    private CommandsManager commandsManager;
 
     @Inject
     public GeofenceEventHandler(
@@ -97,8 +101,24 @@ public class GeofenceEventHandler extends BaseEventHandler {
             Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position);
-                event.setGeofenceId(geofenceId);
-                events.put(event, position);
+
+                if(cacheManager.getObject(Geofence.class, geofenceId).getStopOut()) {
+                    Command command = new Command();
+                    command.setDeviceId(position.getDeviceId());
+                    command.setType(Command.TYPE_ENGINE_STOP);
+
+                    try {
+                        if (!commandsManager.sendCommand(command)) {
+                            LOGGER.info("FoxGPS - BLOQUEIO SAIU DA CERCA:" + Response.accepted(command).build());
+                        }
+                    } catch (Exception e) {
+                        LOGGER.warn("FoxGPS - BLOQUEIO SAIU DA CERCA:" + e.getMessage());
+                    }
+
+                    event.setGeofenceId(geofenceId);
+                    events.put(event, position);
+                }
+
             }
         }
         for (long geofenceId : newGeofences) {
@@ -106,8 +126,28 @@ public class GeofenceEventHandler extends BaseEventHandler {
             Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position);
+
+                if(cacheManager.getObject(Geofence.class, geofenceId).getStopIn()) {
+                    Command command = new Command();
+                    command.setDeviceId(position.getDeviceId());
+                    command.setType(Command.TYPE_ENGINE_STOP);
+
+                    try {
+                        if (!commandsManager.sendCommand(command)) {
+                            LOGGER.info("FoxGPS - BLOQUEIO ENTROU DA CERCA:" + Response.accepted(command).build());
+                        }
+                    } catch (Exception e) {
+                        LOGGER.warn("FoxGPS - BLOQUEIO ENTROU DA CERCA:" + e.getMessage());
+                    }
+
+                    event.setGeofenceId(geofenceId);
+                    events.put(event, position);
+                }
+
                 event.setGeofenceId(geofenceId);
                 events.put(event, position);
+
+
             }
         }
         return events;
