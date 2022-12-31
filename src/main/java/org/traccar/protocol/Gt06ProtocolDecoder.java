@@ -100,7 +100,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_WIFI_3 = 0xA2;             // GK310
     public static final int MSG_FENCE_SINGLE = 0xA3;       // GK310
     public static final int MSG_FENCE_MULTI = 0xA4;        // GK310
-    public static final int MSG_LBS_ALARM = 0xA5;          // GK310
+    public static final int MSG_LBS_ALARM = 0xA5;          // GK310 & JM-LL301
     public static final int MSG_LBS_ADDRESS = 0xA7;        // GK310
     public static final int MSG_OBD = 0x8C;                // FM08ABC
     public static final int MSG_DTC = 0x65;                // FM08ABC
@@ -209,6 +209,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_STATUS_2:
             case MSG_GPS_LBS_STATUS_3:
             case MSG_GPS_LBS_STATUS_4:
+            case MSG_LBS_ALARM:
                 return true;
             default:
                 return false;
@@ -334,9 +335,26 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int mcc = buf.readUnsignedShort();
-        int mnc = BitUtil.check(mcc, 15) || type == MSG_GPS_LBS_6 ? buf.readUnsignedShort() : buf.readUnsignedByte();
-        int lac = buf.readUnsignedShort();
-        long cid = type == MSG_GPS_LBS_6 ? buf.readUnsignedInt() : buf.readUnsignedMedium();
+        int mnc;
+        if (BitUtil.check(mcc, 15) || type == MSG_GPS_LBS_6) {
+            mnc = buf.readUnsignedShort();
+        } else {
+            mnc = buf.readUnsignedByte();
+        }
+        int lac;
+        if (type == MSG_LBS_ALARM) {
+            lac = buf.readInt();
+        } else {
+            lac = buf.readUnsignedShort();
+        }
+        long cid;
+        if (type == MSG_LBS_ALARM) {
+            cid = buf.readLong();
+        } else if (type == MSG_GPS_LBS_6) {
+            cid = buf.readUnsignedInt();
+        } else {
+            cid = buf.readUnsignedMedium();
+        }
 
         position.setNetwork(new Network(CellTower.from(BitUtil.to(mcc, 15), mnc, lac, cid)));
 
@@ -401,6 +419,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_OVERSPEED;
             case 0x0E:
             case 0x0F:
+            case 0x19:
                 return Position.ALARM_LOW_BATTERY;
             case 0x11:
                 return Position.ALARM_POWER_OFF;
@@ -410,6 +429,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_TAMPERING;
             case 0x14:
                 return Position.ALARM_DOOR;
+            case 0x18:
+                return Position.ALARM_REMOVING;
             case 0x23:
                 return Position.ALARM_FALL_DOWN;
             case 0x29:
@@ -783,7 +804,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (hasLbs(type)) {
-                decodeLbs(position, buf, type, hasStatus(type));
+                decodeLbs(position, buf, type, hasStatus(type) && type != MSG_LBS_ALARM);
             }
 
             if (hasStatus(type)) {
