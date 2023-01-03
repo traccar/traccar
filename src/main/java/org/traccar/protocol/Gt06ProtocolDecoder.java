@@ -803,7 +803,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 getLastLocation(position, null);
             }
 
-            if (hasLbs(type)) {
+            if (hasLbs(type) && buf.readableBytes() > 6) {
                 decodeLbs(position, buf, type, hasStatus(type) && type != MSG_LBS_ALARM);
             }
 
