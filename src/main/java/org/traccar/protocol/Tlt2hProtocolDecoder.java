@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.CellTower;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
@@ -55,6 +56,12 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
             .text("#")
             .number("(?:(dd)|x*)")               // cell or voltage
+            .groupBegin()
+            .number("#(d+),")                    // mcc
+            .number("(d+),")                     // mnc
+            .number("(x+),")                     // lac
+            .number("(x+)")                      // cell id
+            .groupEnd("?")
             .text("$GPRMC,")
             .number("(dd)(dd)(dd).d+,")          // time (hhmmss.sss)
             .expression("([AVL]),")              // validity
@@ -71,6 +78,12 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_WIFI = new PatternBuilder()
             .text("#")
             .number("(?:(dd)|x+)")               // cell or voltage
+            .groupBegin()
+            .number("#(d+),")                    // mcc
+            .number("(d+),")                     // mnc
+            .number("(x+),")                     // lac
+            .number("(x+)")                      // cell id
+            .groupEnd("?")
             .text("$WIFI,")
             .number("(dd)(dd)(dd).d+,")          // time (hhmmss.sss)
             .expression("[AVL],")                // validity
@@ -168,17 +181,35 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY, parser.nextInt() * 0.1);
                     }
 
+                    if (parser.hasNext(4)) {
+                        Network network = new Network();
+                        network.addCellTower(CellTower.from(
+                                parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt()));
+                        position.setNetwork(network);
+                    }
+
                     DateBuilder dateBuilder = new DateBuilder()
                             .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
-                    position.setValid(parser.next().equals("A"));
-                    position.setLatitude(parser.nextCoordinate());
-                    position.setLongitude(parser.nextCoordinate());
-                    position.setSpeed(parser.nextDouble(0));
-                    position.setCourse(parser.nextDouble(0));
+                    boolean isPositionValid = parser.next().equals("A");
+                    position.setValid(isPositionValid);
+
+                    if(isPositionValid) {
+                        position.setLatitude(parser.nextCoordinate());
+                        position.setLongitude(parser.nextCoordinate());
+                        position.setSpeed(parser.nextDouble(0));
+                        position.setCourse(parser.nextDouble(0));
+                    } else {
+                        parser.skip(8);
+                    }
 
                     dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-                    position.setTime(dateBuilder.getDate());
+                    
+                    if(isPositionValid) {
+                        position.setTime(dateBuilder.getDate());
+                    } else {
+                        getLastLocation(position, dateBuilder.getDate());
+                    }
 
                 } else {
                     continue;
@@ -191,11 +222,16 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
                     position.set(Position.KEY_BATTERY, parser.nextInt() * 0.1);
 
+                    Network network = new Network();
+                    if (parser.hasNext(4)) {
+                        network.addCellTower(CellTower.from(
+                                parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt()));
+                    }
+
                     DateBuilder dateBuilder = new DateBuilder()
                             .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
                     String[] values = parser.next().split(",");
-                    Network network = new Network();
                     for (int i = 0; i < values.length / 2; i++) {
                         String mac = values[i * 2 + 1].replaceAll("(..)", "$1:").substring(0, 17);
                         network.addWifiAccessPoint(WifiAccessPoint.from(mac, Integer.parseInt(values[i * 2])));
