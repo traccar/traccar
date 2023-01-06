@@ -194,7 +194,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                     boolean isPositionValid = parser.next().equals("A");
                     position.setValid(isPositionValid);
 
-                    if(isPositionValid) {
+                    if (isPositionValid) {
                         position.setLatitude(parser.nextCoordinate());
                         position.setLongitude(parser.nextCoordinate());
                         position.setSpeed(parser.nextDouble(0));
@@ -204,8 +204,8 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                     }
 
                     dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-                    
-                    if(isPositionValid) {
+
+                    if (isPositionValid) {
                         position.setTime(dateBuilder.getDate());
                     } else {
                         getLastLocation(position, dateBuilder.getDate());
