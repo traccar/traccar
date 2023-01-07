@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,25 +191,14 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                     DateBuilder dateBuilder = new DateBuilder()
                             .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
-                    boolean isPositionValid = parser.next().equals("A");
-                    position.setValid(isPositionValid);
-
-                    if (isPositionValid) {
-                        position.setLatitude(parser.nextCoordinate());
-                        position.setLongitude(parser.nextCoordinate());
-                        position.setSpeed(parser.nextDouble(0));
-                        position.setCourse(parser.nextDouble(0));
-                    } else {
-                        parser.skip(8);
-                    }
+                    position.setValid(parser.next().equals("A"));
+                    position.setLatitude(parser.nextCoordinate());
+                    position.setLongitude(parser.nextCoordinate());
+                    position.setSpeed(parser.nextDouble(0));
+                    position.setCourse(parser.nextDouble(0));
 
                     dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-
-                    if (isPositionValid) {
-                        position.setTime(dateBuilder.getDate());
-                    } else {
-                        getLastLocation(position, dateBuilder.getDate());
-                    }
+                    position.setTime(dateBuilder.getDate());
 
                 } else {
                     continue;
