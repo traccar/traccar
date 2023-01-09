@@ -8,80 +8,12 @@ import org.traccar.model.Position;
 public class SuntechProtocolDecoderTest extends ProtocolTest {
 
     @Test
-    public void testDecodeTemperature() throws Exception {
-
-        var decoder = inject(new SuntechProtocolDecoder(null));
-
-        decoder.setHbm(true);
-        decoder.setIncludeAdc(true);
-
-        verifyAttribute(decoder, buffer(
-                "ST600STT;008594432;20;492;20200212;18:58:30;060bb0e1;334;20;36bb;45;+19.337897;-099.064489;000.398;000.00;12;1;5049883;13.61;100100;2;1198;013762;4.2;1;4.68"),
-                Position.PREFIX_ADC + 1, 4.68);
-
-        decoder.setIncludeTemp(true);
-
-        verifyAttribute(decoder, buffer(
-                "ST600STT;008350848;35;523;20191102;13:49:46;0bf14fdb;334;20;2f19;57;+20.466737;-100.825455;000.006;000.00;11;1;10274175;11.36;00000000;1;0300;018353;4.2;1;0.00;;;;00000000000000;0;28EE56B911160234:+13.7;:;:"),
-                Position.PREFIX_TEMP + 2, 13.7);
-
-        verifyPosition(decoder, buffer(
-                "ST300STT;205173382;07;564;20160322;23:23:18;232e19;+19.288278;-099.128750;000.122;000.00;9;1;478391;11.53;000100;1;9498;079324;4.3;1;0.00;0.00;0.00;00000000000000;0;2898E16006000058:-20.8;2861626006000039:+2.5;:"));
-
-        verifyPosition(decoder, buffer(
-                "ST300EVT;205173382;07;564;20160322;23:23:18;232e19;+19.288278;-099.128750;000.122;000.00;9;1;478391;11.53;000100;2;1;9498;079324;4.3;1;0.00;0.00;0.00;00000000000000;0;2898E16006000058:-20.8;2861626006000039:+2.5;:"));
-
-        verifyPosition(decoder, buffer(
-                "ST600STT;008349958;35;523;20181112;00:49:30;0bf10d4e;334;20;2f19;22;+20.552718;-100.824478;050.021;095.41;12;1;1303603;14.30;10000000;4;8911;001987;4.1;0;0.00;;;;00000000000000;0;2826C8A70800000C:+26.6;:;:"));
-
-    }
-
-    @Test
-    public void testDecodeRpm() throws Exception {
-
-        var decoder = inject(new SuntechProtocolDecoder(null));
-
-        decoder.setHbm(true);
-        decoder.setIncludeRpm(true);
-
-        verifyAttribute(decoder, buffer(
-                "ST300STT;907131077;04;706;20190227;23:59:34;cc719;-12.963490;-038.499587;000.067;000.00;7;1;57095;12.50;000000;1;0337;000207;0.0;1;0;012E717F010000;1"),
-                Position.KEY_RPM, 0);
-
-    }
-
-    @Test
-    public void testDecodeHours() throws Exception {
-
-        var decoder = inject(new SuntechProtocolDecoder(null));
-
-        decoder.setHbm(true);
-
-        verifyAttribute(decoder, buffer(
-                "ST300ALT;007239104;40;313;20190112;01:07:16;c99139;+04.703287;-074.148897;000.000;189.72;21;1;425512;12.61;100000;33;003188;4.1;1"),
-                Position.KEY_HOURS, 3188 * 60000L);
-
-    }
-
-    @Test
-    public void testDecodeDriver() throws Exception {
-
-        var decoder = inject(new SuntechProtocolDecoder(null));
-
-        verifyAttribute(decoder, buffer(
-                "ST300HTE;511050566;45;308;20200909;13:38:38;0;12.50;001354;0.0;1;0;1;1;0;-27.636632;-052.277933;-27.636675;-052.277947;000.000;002.296;0;00000000000000"),
-                Position.KEY_DRIVER_UNIQUE_ID, "00000000000000");
-
-        verifyAttribute(decoder, buffer(
-                "ST300HTE;100850001;04;248;20110101;00:13:52;167559;12.28;004005;0.0;1;0;3;3;0;-22.881018;-047.070831;-22.881018;-047.070831;000.000;000.000;0;0;3;0;0;0;01E04D44160000"),
-                Position.KEY_DRIVER_UNIQUE_ID, "01E04D44160000");
-
-    }
-
-    @Test
     public void testDecode() throws Exception {
 
         var decoder = inject(new SuntechProtocolDecoder(null));
+
+        verifyPosition(decoder, buffer(
+                "ALT;0840037569;FFFFFF;84;1.0.6;0;20221228;11:33:05;00004490;724;11;05D3;33;-22.845935;-46.322000;0.00;0.00;18;0;00000001;00000000;99;;;;08E3800F;4.1;12.37;0;0;0;0;4;;;;"));
 
         verifyAttribute(decoder, buffer(
                 "ALT;0950030205;3FFFFF;95;1.0.11;0;20221017;21:41:30;02F2F402;334;20;0F1D;45;+25.791061;-100.170745;0.00;0.00;18;1;00000101;00000000;42;2;"),
@@ -286,6 +218,77 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, binary(
                 "4352523b303931303030303036333b313b313b303135303b16011c150f0ad82f6c0000000000ae037085fbff7700fd00faff6300f30000006800fb000d007100fa00f32f6c00000000005e044a80fcff6f000301e1ff5d00e900e1ff6400e600f4ff5b00ec000a306c00000000002104248306006c000501fcff5b00e00001006e000101eeff4e00e10022306c00000000005c041a7e00006a00010100005d00f800b5ff7cffdf0050009300fc003b44350d"),
                 Position.KEY_G_SENSOR, "");
+
+    }
+
+    @Test
+    public void testDecodeTemperature() throws Exception {
+
+        var decoder = inject(new SuntechProtocolDecoder(null));
+
+        decoder.setHbm(true);
+        decoder.setIncludeAdc(true);
+
+        verifyAttribute(decoder, buffer(
+                        "ST600STT;008594432;20;492;20200212;18:58:30;060bb0e1;334;20;36bb;45;+19.337897;-099.064489;000.398;000.00;12;1;5049883;13.61;100100;2;1198;013762;4.2;1;4.68"),
+                Position.PREFIX_ADC + 1, 4.68);
+
+        decoder.setIncludeTemp(true);
+
+        verifyAttribute(decoder, buffer(
+                        "ST600STT;008350848;35;523;20191102;13:49:46;0bf14fdb;334;20;2f19;57;+20.466737;-100.825455;000.006;000.00;11;1;10274175;11.36;00000000;1;0300;018353;4.2;1;0.00;;;;00000000000000;0;28EE56B911160234:+13.7;:;:"),
+                Position.PREFIX_TEMP + 2, 13.7);
+
+        verifyPosition(decoder, buffer(
+                "ST300STT;205173382;07;564;20160322;23:23:18;232e19;+19.288278;-099.128750;000.122;000.00;9;1;478391;11.53;000100;1;9498;079324;4.3;1;0.00;0.00;0.00;00000000000000;0;2898E16006000058:-20.8;2861626006000039:+2.5;:"));
+
+        verifyPosition(decoder, buffer(
+                "ST300EVT;205173382;07;564;20160322;23:23:18;232e19;+19.288278;-099.128750;000.122;000.00;9;1;478391;11.53;000100;2;1;9498;079324;4.3;1;0.00;0.00;0.00;00000000000000;0;2898E16006000058:-20.8;2861626006000039:+2.5;:"));
+
+        verifyPosition(decoder, buffer(
+                "ST600STT;008349958;35;523;20181112;00:49:30;0bf10d4e;334;20;2f19;22;+20.552718;-100.824478;050.021;095.41;12;1;1303603;14.30;10000000;4;8911;001987;4.1;0;0.00;;;;00000000000000;0;2826C8A70800000C:+26.6;:;:"));
+
+    }
+
+    @Test
+    public void testDecodeRpm() throws Exception {
+
+        var decoder = inject(new SuntechProtocolDecoder(null));
+
+        decoder.setHbm(true);
+        decoder.setIncludeRpm(true);
+
+        verifyAttribute(decoder, buffer(
+                        "ST300STT;907131077;04;706;20190227;23:59:34;cc719;-12.963490;-038.499587;000.067;000.00;7;1;57095;12.50;000000;1;0337;000207;0.0;1;0;012E717F010000;1"),
+                Position.KEY_RPM, 0);
+
+    }
+
+    @Test
+    public void testDecodeHours() throws Exception {
+
+        var decoder = inject(new SuntechProtocolDecoder(null));
+
+        decoder.setHbm(true);
+
+        verifyAttribute(decoder, buffer(
+                        "ST300ALT;007239104;40;313;20190112;01:07:16;c99139;+04.703287;-074.148897;000.000;189.72;21;1;425512;12.61;100000;33;003188;4.1;1"),
+                Position.KEY_HOURS, 3188 * 60000L);
+
+    }
+
+    @Test
+    public void testDecodeDriver() throws Exception {
+
+        var decoder = inject(new SuntechProtocolDecoder(null));
+
+        verifyAttribute(decoder, buffer(
+                        "ST300HTE;511050566;45;308;20200909;13:38:38;0;12.50;001354;0.0;1;0;1;1;0;-27.636632;-052.277933;-27.636675;-052.277947;000.000;002.296;0;00000000000000"),
+                Position.KEY_DRIVER_UNIQUE_ID, "00000000000000");
+
+        verifyAttribute(decoder, buffer(
+                        "ST300HTE;100850001;04;248;20110101;00:13:52;167559;12.28;004005;0.0;1;0;3;3;0;-22.881018;-047.070831;-22.881018;-047.070831;000.000;000.000;0;0;3;0;0;0;01E04D44160000"),
+                Position.KEY_DRIVER_UNIQUE_ID, "01E04D44160000");
 
     }
 
