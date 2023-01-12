@@ -11,6 +11,15 @@ public class EskyProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new EskyProtocolDecoder(null));
 
+        verifyNull(decoder, text(
+                "ET;7;864431049985585;R3;230111233458+1,137052172,12320,505,87+5+4205+4"));
+
+        verifyNull(decoder, text(
+                "ET;7;864431049985585;R0;0+230111233558+0.00000+0.00000+0.00+0+2+4206+5"));
+
+        verifyNull(decoder, text(
+                "ET;7;864431049985585;RC;ES821_BULLANT_B1.08V3.4_20200304+1+60+12+82800+0+40+1+0,0.00000,0.00000,0|0,0.00000,0.00000,0|0,0.00000,0.00000,0|0,0.00000,0.00000,0|0,0.00000,0.00000,0+3"));
+
         verifyAttribute(decoder, text(
                 "ET;0;860337031066546;R;9+200717114059+41.32053+19.80761+0.30+0+0x2+8+40381744+0+1409+11"),
                 Position.KEY_BATTERY, 14.09);
