@@ -27,7 +27,7 @@ public class Order {
 
     public Order(String column, boolean descending, int limit) {
         this.column = column;
-        this.descending = false;
+        this.descending = descending;
         this.limit = limit;
     }
 
