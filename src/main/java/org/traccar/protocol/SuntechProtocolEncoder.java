@@ -99,7 +99,7 @@ public class SuntechProtocolEncoder extends StringProtocolEncoder {
             case Command.TYPE_REBOOT_DEVICE:
                 return formatCommand(command, prefix + "CMD;%s;02;Reboot\r", Command.KEY_UNIQUE_ID);
             case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, prefix + "CMD;%s;02;\r", Command.KEY_UNIQUE_ID);
+                return formatCommand(command, prefix + "CMD;%s;02;StatusReq\r", Command.KEY_UNIQUE_ID);
             case Command.TYPE_OUTPUT_CONTROL:
                 if (command.getAttributes().get(Command.KEY_DATA).equals("1")) {
                     return formatCommand(command, prefix + "CMD;%s;02;Enable%s\r",
