@@ -620,14 +620,6 @@
       <column name="zoom" valueNumeric="0" />
     </insert>
 
-    <insert tableName="tc_users">
-      <column name="name" value="admin" />
-      <column name="email" value="admin" />
-      <column name="hashedpassword" value="D33DCA55ABD4CC5BC76F2BC0B4E603FE2C6F61F4C1EF2D47" />
-      <column name="salt" value="000000000000000000000000000000000000000000000000" />
-      <column name="administrator" valueBoolean="true" />
-    </insert>
-    
   </changeSet>
   
   <changeSet author="author" id="changelog-4.0-clean-common">

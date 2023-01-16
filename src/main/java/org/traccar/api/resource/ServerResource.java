@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.helper.model.UserUtil;
 import org.traccar.mail.MailManager;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.Log;
@@ -65,6 +66,13 @@ public class ServerResource extends BaseResource {
         server.setEmailEnabled(mailManager.getEmailEnabled());
         server.setGeocoderEnabled(geocoder != null);
         User user = permissionsService.getUser(getUserId());
+        if (user != null) {
+            if (user.getAdministrator()) {
+                server.setStorageSpace(Log.getStorageSpace());
+            }
+        } else {
+            server.setNewServer(UserUtil.isEmpty(storage));
+        }
         if (user != null && user.getAdministrator()) {
             server.setStorageSpace(Log.getStorageSpace());
         }

@@ -17,12 +17,23 @@ package org.traccar.helper.model;
 
 import org.traccar.model.Server;
 import org.traccar.model.User;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Request;
 
 import java.util.TimeZone;
 
 public final class UserUtil {
 
     private UserUtil() {
+    }
+
+    public static boolean isEmpty(Storage storage) throws StorageException {
+        return storage.getObjects(User.class, new Request(
+                new Columns.Include("id"),
+                new Order("id", false, 1))).isEmpty();
     }
 
     public static String getDistanceUnit(Server server, User user) {

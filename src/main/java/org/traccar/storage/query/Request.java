@@ -33,11 +33,11 @@ public class Request {
         this(columns, condition, null);
     }
 
-    public Request(Columns columns, Condition condition, Order order) {
-        this(columns, condition, order, null);
+    public Request(Columns columns, Order order) {
+        this(columns, null, order);
     }
 
-    public Request(Columns columns, Condition condition, Order order, Limit limit) {
+    public Request(Columns columns, Condition condition, Order order) {
         this.columns = columns;
         this.condition = condition;
         this.order = order;
