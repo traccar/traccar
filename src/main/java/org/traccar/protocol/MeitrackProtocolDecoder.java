@@ -536,7 +536,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x2F:
                     case 0x30:
                     case 0x31:
-                        position.set(Position.PREFIX_TEMP + buf.readUnsignedByte(), buf.readShortLE() * 0.01);
+                        buf.readUnsignedByte(); // label
+                        position.set(Position.PREFIX_TEMP + (id - 0x2A), buf.readShortLE() * 0.01);
                         break;
                     case 0xFE31:
                         buf.readUnsignedByte(); // alarm protocol
