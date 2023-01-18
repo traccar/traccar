@@ -99,7 +99,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_LBS_2 = 0xA1;              // GK310
     public static final int MSG_WIFI_3 = 0xA2;             // GK310
     public static final int MSG_FENCE_SINGLE = 0xA3;       // GK310
-    public static final int MSG_FENCE_MULTI = 0xA4;        // GK310
+    public static final int MSG_FENCE_MULTI = 0xA4;        // GK310 & JM-LL301
     public static final int MSG_LBS_ALARM = 0xA5;          // GK310 & JM-LL301
     public static final int MSG_LBS_ADDRESS = 0xA7;        // GK310
     public static final int MSG_OBD = 0x8C;                // FM08ABC
@@ -209,6 +209,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_STATUS_2:
             case MSG_GPS_LBS_STATUS_3:
             case MSG_GPS_LBS_STATUS_4:
+            case MSG_FENCE_MULTI:
             case MSG_LBS_ALARM:
                 return true;
             default:
@@ -804,7 +805,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (hasLbs(type) && buf.readableBytes() > 6) {
-                decodeLbs(position, buf, type, hasStatus(type) && type != MSG_LBS_ALARM);
+                decodeLbs(position, buf, type, hasStatus(type) && type != MSG_LBS_ALARM && type != MSG_LBS_STATUS);
             }
 
             if (hasStatus(type)) {
