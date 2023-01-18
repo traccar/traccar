@@ -9,7 +9,7 @@ public class Tk103FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Tk103FrameDecoder();
+        var decoder = inject(new Tk103FrameDecoder());
 
         verifyFrame(
                 binary("283836343735353535353535353535352C445733422C3133313131372C412C353536322E30323837304E2C30313334382E3038313934452C312E3539372C3232333730372C3239312E36352C2D302E31302C3429"),

@@ -8,7 +8,7 @@ public class GpsGateProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GpsGateProtocolDecoder(null);
+        var decoder = inject(new GpsGateProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$FRCMD,0097,_SendMessage,,7618.51990,S,4002.26182,E,350.0,1.08,0.0,250816,183522.000,0*7F"));

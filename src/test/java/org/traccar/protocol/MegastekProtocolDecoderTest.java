@@ -1,15 +1,15 @@
 package org.traccar.protocol;
 
 import org.junit.Test;
-import org.traccar.model.Position;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class MegastekProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new MegastekProtocolDecoder(null);
+        var decoder = inject(new MegastekProtocolDecoder(null));
         
         verifyPosition(decoder, text(
                 "$MGV002,860719020193193,,S,070521,160748,V,2255.09165,N,11404.01322,E,00,00,00,,,,,,,,,,,,,,,,,,,10,015,Restart;!"));

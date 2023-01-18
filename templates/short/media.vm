@@ -1,0 +1,2 @@
+#set($subject = "$device.name: media file received")
+$device.name $event.getString("media") received: $event.getString("file") at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

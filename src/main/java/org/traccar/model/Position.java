@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,11 @@ package org.traccar.model;
 
 import java.util.Date;
 
-import org.traccar.database.QueryIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.traccar.storage.QueryIgnore;
+import org.traccar.storage.StorageName;
 
+@StorageName("tc_positions")
 public class Position extends Message {
 
     public static final String KEY_ORIGINAL = "raw";
@@ -147,7 +150,6 @@ public class Position extends Message {
 
     public Position(String protocol) {
         this.protocol = protocol;
-        this.serverTime = new Date();
     }
 
     private String protocol;
@@ -190,6 +192,7 @@ public class Position extends Message {
         this.fixTime = fixTime;
     }
 
+    @QueryIgnore
     public void setTime(Date time) {
         setDeviceTime(time);
         setFixTime(time);
@@ -202,6 +205,7 @@ public class Position extends Message {
         return outdated;
     }
 
+    @QueryIgnore
     public void setOutdated(boolean outdated) {
         this.outdated = outdated;
     }
@@ -223,6 +227,9 @@ public class Position extends Message {
     }
 
     public void setLatitude(double latitude) {
+        if (latitude < -90 || latitude > 90) {
+            throw new IllegalArgumentException("Latitude out of range");
+        }
         this.latitude = latitude;
     }
 
@@ -233,6 +240,9 @@ public class Position extends Message {
     }
 
     public void setLongitude(double longitude) {
+        if (longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException("Longitude out of range");
+        }
         this.longitude = longitude;
     }
 
@@ -296,10 +306,18 @@ public class Position extends Message {
         this.network = network;
     }
 
-    @Override
+    @JsonIgnore
     @QueryIgnore
+    @Override
     public String getType() {
         return super.getType();
+    }
+
+    @JsonIgnore
+    @QueryIgnore
+    @Override
+    public void setType(String type) {
+        super.setType(type);
     }
 
 }

@@ -9,7 +9,7 @@ public class NavtelecomFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new NavtelecomFrameDecoder();
+        var decoder = inject(new NavtelecomFrameDecoder());
 
         verifyFrame(
                 binary("404e5443010000000000000013004e452a3e533a383636373935303331343130363839"),
@@ -19,13 +19,16 @@ public class NavtelecomFrameDecoderTest extends ProtocolTest {
                 binary("404e544301000000000000002a005e6c2a3e464c4558b01e1efffffe300a08080ffffe08000000580028002bc0000000000000b4000000000000"),
                 decoder.decode(null, null, binary("404e544301000000000000002a005e6c2a3e464c4558b01e1efffffe300a08080ffffe08000000580028002bc0000000000000b4000000000000")));
 
+        verifyNull(
+                decoder.decode(null, null, binary("7f")));
+
     }
 
     @Ignore
     @Test
     public void testDecodeFull() throws Exception {
 
-        var decoder = new NavtelecomFrameDecoder();
+        var decoder = inject(new NavtelecomFrameDecoder());
 
         verifyFrame(
                 binary("404e5443010000000000000013004e452a3e533a383636373935303331343130363839"),

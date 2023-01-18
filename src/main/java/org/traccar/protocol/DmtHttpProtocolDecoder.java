@@ -19,7 +19,7 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
@@ -174,21 +174,25 @@ public class DmtHttpProtocolDecoder extends BaseHttpProtocolDecoder {
         position.set(Position.KEY_INDEX, root.getInt("sqn"));
         position.set(Position.KEY_EVENT, root.getInt("reason"));
 
-        JsonArray analogues = root.getJsonArray("analogues");
-        for (int i = 0; i < analogues.size(); i++) {
-            JsonObject adc = analogues.getJsonObject(i);
-            position.set(Position.PREFIX_ADC + adc.getInt("id"), adc.getInt("val"));
+        if (root.containsKey("analogues")) {
+            JsonArray analogues = root.getJsonArray("analogues");
+            for (int i = 0; i < analogues.size(); i++) {
+                JsonObject adc = analogues.getJsonObject(i);
+                position.set(Position.PREFIX_ADC + adc.getInt("id"), adc.getInt("val"));
+            }
         }
 
-        int input = root.getInt("inputs");
-        int output = root.getInt("outputs");
-        int status = root.getInt("status");
-
-        position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
-
-        position.set(Position.KEY_INPUT, input);
-        position.set(Position.KEY_OUTPUT, output);
-        position.set(Position.KEY_STATUS, status);
+        if (root.containsKey("inputs")) {
+            int input = root.getInt("inputs");
+            position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
+            position.set(Position.KEY_INPUT, input);
+        }
+        if (root.containsKey("outputs")) {
+            position.set(Position.KEY_OUTPUT, root.getInt("outputs"));
+        }
+        if (root.containsKey("status")) {
+            position.set(Position.KEY_STATUS, root.getInt("status"));
+        }
 
         if (root.containsKey("counters")) {
             JsonArray counters = root.getJsonArray("counters");

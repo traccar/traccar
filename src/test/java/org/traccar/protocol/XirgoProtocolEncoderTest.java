@@ -11,7 +11,7 @@ public class XirgoProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new XirgoProtocolEncoder(null);
+        var encoder = inject(new XirgoProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

@@ -8,7 +8,7 @@ public class EnnfuProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new EnnfuProtocolDecoder(null);
+        var decoder = inject(new EnnfuProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "Ennfu:354679095321652,041504.00,A,3154.86654,N,11849.08737,E,0.053,,080121,20,3.72,21.4,V0.01"));

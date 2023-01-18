@@ -20,8 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -54,7 +53,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private static final int MIN_DATA_LENGTH = 40;
 
     private boolean longDate;
-    private final boolean decimalFuel;
+    private boolean decimalFuel;
     private boolean custom;
     private String form;
 
@@ -64,17 +63,20 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     public AtrackProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
 
-        longDate = Context.getConfig().getBoolean(Keys.PROTOCOL_LONG_DATE.withPrefix(getProtocolName()));
-        decimalFuel = Context.getConfig().getBoolean(Keys.PROTOCOL_DECIMAL_FUEL.withPrefix(getProtocolName()));
+    @Override
+    protected void init() {
+        longDate = getConfig().getBoolean(Keys.PROTOCOL_LONG_DATE.withPrefix(getProtocolName()));
+        decimalFuel = getConfig().getBoolean(Keys.PROTOCOL_DECIMAL_FUEL.withPrefix(getProtocolName()));
 
-        custom = Context.getConfig().getBoolean(Keys.PROTOCOL_CUSTOM.withPrefix(getProtocolName()));
-        form = Context.getConfig().getString(Keys.PROTOCOL_FORM.withPrefix(getProtocolName()));
+        custom = getConfig().getBoolean(Keys.PROTOCOL_CUSTOM.withPrefix(getProtocolName()));
+        form = getConfig().getString(Keys.PROTOCOL_FORM.withPrefix(getProtocolName()));
         if (form != null) {
             custom = true;
         }
 
-        String alarmMapString = Context.getConfig().getString(Keys.PROTOCOL_ALARM_MAP.withPrefix(getProtocolName()));
+        String alarmMapString = getConfig().getString(Keys.PROTOCOL_ALARM_MAP.withPrefix(getProtocolName()));
         if (alarmMapString != null) {
             for (String pair : alarmMapString.split(",")) {
                 if (!pair.isEmpty()) {
@@ -98,7 +100,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         this.form = form;
     }
 
-    private static void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer(12);
             response.writeShort(0xfe02);
@@ -524,20 +526,24 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     private List<Position> decodeText(Channel channel, SocketAddress remoteAddress, String sentence) {
 
-        int startIndex = -1;
-        for (int i = 0; i < 4; i++) {
-            startIndex = sentence.indexOf(',', startIndex + 1);
+        int positionIndex = -1;
+        for (int i = 0; i < 5; i++) {
+            positionIndex = sentence.indexOf(',', positionIndex + 1);
         }
-        int endIndex = sentence.indexOf(',', startIndex + 1);
 
-        String imei = sentence.substring(startIndex + 1, endIndex);
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        String[] headers = sentence.substring(0, positionIndex).split(",");
+        long id = Long.parseLong(headers[2]);
+        int index = Integer.parseInt(headers[3]);
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, headers[4]);
         if (deviceSession == null) {
             return null;
         }
 
+        sendResponse(channel, remoteAddress, id, index);
+
         List<Position> positions = new LinkedList<>();
-        String[] lines = sentence.substring(endIndex + 1).split("\r\n");
+        String[] lines = sentence.substring(positionIndex + 1).split("\r\n");
 
         for (String line : lines) {
             Position position = decodeTextLine(deviceSession, line);
@@ -626,7 +632,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, new Date(time * 1000));
 
-            position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(String.valueOf(id), photo, "jpg"));
+            position.set(Position.KEY_IMAGE, writeMediaFile(String.valueOf(id), photo, "jpg"));
             photo.release();
             photo = null;
 

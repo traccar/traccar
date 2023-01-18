@@ -9,7 +9,7 @@ public class CityeasyProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new CityeasyProtocolEncoder(null);
+        var encoder = inject(new CityeasyProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,18 @@
 package org.traccar.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.database.ConnectionManager;
+import org.traccar.helper.model.PositionUtil;
+import org.traccar.session.ConnectionManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -39,9 +42,15 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private static final String KEY_POSITIONS = "positions";
     private static final String KEY_EVENTS = "events";
 
+    private final ObjectMapper objectMapper;
+    private final ConnectionManager connectionManager;
+    private final Storage storage;
     private final long userId;
 
-    public AsyncSocket(long userId) {
+    public AsyncSocket(ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage, long userId) {
+        this.objectMapper = objectMapper;
+        this.connectionManager = connectionManager;
+        this.storage = storage;
         this.userId = userId;
     }
 
@@ -49,18 +58,21 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     public void onWebSocketConnect(Session session) {
         super.onWebSocketConnect(session);
 
-        Map<String, Collection<?>> data = new HashMap<>();
-        data.put(KEY_POSITIONS, Context.getDeviceManager().getInitialState(userId));
-        sendData(data);
-
-        Context.getConnectionManager().addListener(userId, this);
+        try {
+            Map<String, Collection<?>> data = new HashMap<>();
+            data.put(KEY_POSITIONS, PositionUtil.getLatestPositions(storage, userId));
+            sendData(data);
+            connectionManager.addListener(userId, this);
+        } catch (StorageException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public void onWebSocketClose(int statusCode, String reason) {
         super.onWebSocketClose(statusCode, reason);
 
-        Context.getConnectionManager().removeListener(userId, this);
+        connectionManager.removeListener(userId, this);
     }
 
     @Override
@@ -92,7 +104,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private void sendData(Map<String, Collection<?>> data) {
         if (isConnected()) {
             try {
-                getRemote().sendString(Context.getObjectMapper().writeValueAsString(data), null);
+                getRemote().sendString(objectMapper.writeValueAsString(data), null);
             } catch (JsonProcessingException e) {
                 LOGGER.warn("Socket JSON formatting error", e);
             }

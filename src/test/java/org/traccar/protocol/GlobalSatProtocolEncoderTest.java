@@ -9,9 +9,9 @@ import static org.junit.Assert.assertEquals;
 public class GlobalSatProtocolEncoderTest extends ProtocolTest {
 
     @Test
-    public void testEncodeAlarmDismiss() {
+    public void testEncodeAlarmDismiss() throws Exception {
 
-        var encoder = new GlobalSatProtocolEncoder(null);
+        var encoder = inject(new GlobalSatProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -22,9 +22,9 @@ public class GlobalSatProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeOutputControl() {
+    public void testEncodeOutputControl() throws Exception {
 
-        var encoder = new GlobalSatProtocolEncoder(null);
+        var encoder = inject(new GlobalSatProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

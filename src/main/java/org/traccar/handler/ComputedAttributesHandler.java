@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,28 +34,29 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.AttributesManager;
-import org.traccar.database.IdentityManager;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 @ChannelHandler.Sharable
 public class ComputedAttributesHandler extends BaseDataHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputedAttributesHandler.class);
 
-    private final IdentityManager identityManager;
-    private final AttributesManager attributesManager;
+    private final CacheManager cacheManager;
 
     private final JexlEngine engine;
 
     private final boolean includeDeviceAttributes;
 
-    public ComputedAttributesHandler(
-            Config config, IdentityManager identityManager, AttributesManager attributesManager) {
-        this.identityManager = identityManager;
-        this.attributesManager = attributesManager;
+    @Inject
+    public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
         engine = new JexlEngine();
         engine.setStrict(true);
         engine.setFunctions(Collections.singletonMap("math", Math.class));
@@ -65,7 +66,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
     private MapContext prepareContext(Position position) {
         MapContext result = new MapContext();
         if (includeDeviceAttributes) {
-            Device device = identityManager.getById(position.getDeviceId());
+            Device device = cacheManager.getObject(Device.class, position.getDeviceId());
             if (device != null) {
                 for (Object key : device.getAttributes().keySet()) {
                     result.set((String) key, device.getAttributes().get(key));
@@ -104,8 +105,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-        Collection<Attribute> attributes = attributesManager.getItems(
-                attributesManager.getAllDeviceItems(position.getDeviceId()));
+        Collection<Attribute> attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class);
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
                 Object result = null;

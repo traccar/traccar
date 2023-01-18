@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
@@ -27,6 +28,7 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.nio.channels.DatagramChannel;
 import java.util.Date;
@@ -124,15 +126,41 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([01])")                // ignition
             .compile();
 
+    private static final Pattern PATTERN_PUBX = new PatternBuilder()
+            .text("$PUBX,")
+            .number("(d+),")                     // index
+            .number("(dd)(dd)(dd).d+,")          // time (hhmmss)
+            .number("(dd)(dd.d+),([NS]),")       // latitude
+            .number("(ddd)(dd.d+),([EW]),")      // longitude
+            .number("(-?d+.d+),")                // altitude
+            .expression("(..),")                 // status
+            .number("(d+.d+),")                  // horizontal accuracy
+            .number("d+.d+,")                    // vertical accuracy
+            .number("(d+.d+),")                  // speed
+            .number("(d+.d+),")                  // course
+            .number("-?d+.d+,")                  // vertical velocity
+            .expression("[^,]*,")                // corrections age
+            .number("(d+.d+),")                  // hdop
+            .number("(d+.d+),")                  // vdop
+            .number("d+.d+,")                    // tdop
+            .number("(d+),")                     // satellites
+            .number("(d+),")                     // device id
+            .number("d+")
+            .text("*")
+            .number("xx")                        // checksum
+            .compile();
+
     private Position position = null;
 
     private Position decodeGprmc(
             DeviceSession deviceSession, String sentence, SocketAddress remoteAddress, Channel channel) {
 
-        if (deviceSession != null && channel != null && !(channel instanceof DatagramChannel)
-                && Context.getIdentityManager().lookupAttributeBoolean(
-                        deviceSession.getDeviceId(), getProtocolName() + ".ack", false, false, true)) {
-            channel.writeAndFlush(new NetworkMessage("OK1\r\n", remoteAddress));
+        if (deviceSession != null && channel != null && !(channel instanceof DatagramChannel)) {
+            boolean ack = AttributeUtil.lookup(
+                    getCacheManager(), Keys.PROTOCOL_ACK.withPrefix(getProtocolName()), deviceSession.getDeviceId());
+            if (ack) {
+                channel.writeAndFlush(new NetworkMessage("OK1\r\n", remoteAddress));
+            }
         }
 
         Parser parser = new Parser(PATTERN_GPRMC, sentence);
@@ -300,11 +328,44 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodePubx(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_PUBX, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+
+        position.set(Position.KEY_INDEX, parser.nextInt());
+
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS));
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+        position.setAltitude(parser.nextDouble());
+        position.setValid(!parser.next().equals("NF"));
+        position.setAccuracy(parser.nextDouble());
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+
+        position.set(Position.KEY_HDOP, parser.nextDouble());
+        position.set(Position.KEY_VDOP, parser.nextDouble());
+        position.set(Position.KEY_SATELLITES, parser.nextInt());
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession != null) {
+            position.setDeviceId(deviceSession.getDeviceId());
+            return position;
+        }
+
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = (String) msg;
+        String sentence = ((String) msg).trim();
 
         DeviceSession deviceSession;
 
@@ -320,6 +381,10 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             sentence = sentence.substring(index);
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null && remoteAddress instanceof InetSocketAddress) {
+                String host = ((InetSocketAddress) remoteAddress).getHostString();
+                deviceSession = getDeviceSession(channel, remoteAddress, host);
+            }
         }
 
         if (sentence.startsWith("$PGID")) {
@@ -354,6 +419,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return decodeGpiop(deviceSession, sentence);
         } else if (sentence.startsWith("QZE")) {
             return decodeQze(channel, remoteAddress, sentence);
+        } else if (sentence.startsWith("$PUBX")) {
+            return decodePubx(channel, remoteAddress, sentence);
         }
 
         return null;

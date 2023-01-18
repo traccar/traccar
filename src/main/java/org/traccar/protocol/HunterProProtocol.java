@@ -21,13 +21,17 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class HunterProProtocol extends BaseProtocol {
 
-    public HunterProProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public HunterProProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "\r"));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());

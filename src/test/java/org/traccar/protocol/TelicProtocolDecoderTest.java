@@ -8,7 +8,7 @@ public class TelicProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TelicProtocolDecoder(null);
+        var decoder = inject(new TelicProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "0026355565071347499|206|01|001002008"));

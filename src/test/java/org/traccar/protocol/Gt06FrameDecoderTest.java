@@ -8,7 +8,7 @@ public class Gt06FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Gt06FrameDecoder();
+        var decoder = inject(new Gt06FrameDecoder());
 
         verifyFrame(
                 binary("787803691604130318491475905BD30E25001E10BBF7635D14759006E626560501CC0028660F213228660F1F2828660EA81E286610731428660F20140D0A"),

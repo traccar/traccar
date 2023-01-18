@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2021 Subodh Ranadive (subodhranadive3103@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@ import com.amazonaws.services.sns.model.PublishRequest;
 import com.amazonaws.services.sns.model.PublishResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.util.HashMap;
@@ -38,23 +38,16 @@ public class SnsSmsClient implements SmsManager {
 
     private final AmazonSNSAsync snsClient;
 
-    public SnsSmsClient() {
-        if (Context.getConfig().hasKey(Keys.SMS_AWS_REGION)
-                && Context.getConfig().hasKey(Keys.SMS_AWS_ACCESS)
-                && Context.getConfig().hasKey(Keys.SMS_AWS_SECRET)) {
-            BasicAWSCredentials awsCredentials =
-                    new BasicAWSCredentials(Context.getConfig().getString(Keys.SMS_AWS_ACCESS),
-                    Context.getConfig().getString(Keys.SMS_AWS_SECRET));
-            snsClient = AmazonSNSAsyncClientBuilder.standard()
-                    .withRegion(Context.getConfig().getString(Keys.SMS_AWS_REGION))
-                    .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
-        } else {
-            throw new RuntimeException("SNS Not Configured Properly. Please provide valid config.");
-        }
+    public SnsSmsClient(Config config) {
+        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(
+                config.getString(Keys.SMS_AWS_ACCESS), config.getString(Keys.SMS_AWS_SECRET));
+        snsClient = AmazonSNSAsyncClientBuilder.standard()
+                .withRegion(config.getString(Keys.SMS_AWS_REGION))
+                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
     }
 
     @Override
-    public void sendMessageSync(String destAddress, String message, boolean command) {
+    public void sendMessage(String destAddress, String message, boolean command) {
         Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
         smsAttributes.put("AWS.SNS.SMS.SenderID",
                 new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
@@ -64,19 +57,15 @@ public class SnsSmsClient implements SmsManager {
         PublishRequest publishRequest = new PublishRequest().withMessage(message)
                 .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes);
 
-        snsClient.publishAsync(publishRequest, new AsyncHandler<PublishRequest, PublishResult>() {
+        snsClient.publishAsync(publishRequest, new AsyncHandler<>() {
             @Override
             public void onError(Exception exception) {
                 LOGGER.error("SMS send failed", exception);
             }
+
             @Override
             public void onSuccess(PublishRequest request, PublishResult result) {
             }
         });
-    }
-
-    @Override
-    public void sendMessageAsync(String destAddress, String message, boolean command) {
-        sendMessageSync(destAddress, message, command);
     }
 }

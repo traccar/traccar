@@ -9,7 +9,7 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TaipProtocolDecoder(null);
+        var decoder = inject(new TaipProtocolDecoder(null));
 
         verifyAttribute(decoder, text(
                 ">RUS00,111220124402-3138067-06417623000012200FF,000000000000000000000000000,0000000111,15640422,00000,+25.5,00000,51;ID=CST3G0443;#IP1:089F;*34<"),

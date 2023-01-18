@@ -9,7 +9,7 @@ public class RstProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new RstProtocolDecoder(null);
+        var decoder = inject(new RstProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "RST;A;RST-MINIv2;V7.04;008051261;124;29;04-04-2021 17:27:26;04-04-2021 17:27:26;-1.280811;-47.931755;7353;79;1;14;7315;26;10;0;1855;0;0;0;0;5;5;-1.280821;-47.931747;04-04-2021 17:52:23;6;-1.280863;-47.931770;04-04-2021 18:12:19;5;-1.280844;-47.931763;04-04-2021 17:28:02;5;-1.280900;-47.931770;04-04-2021 19:04:27;4;-1.280843;-47.931747;04-04-2021 18:21:45;04-04-2021 19:29:59;04-04-2021 19:29:59;-1.280770;-47.931595;1;15;0;0;0;0;FIM;"));

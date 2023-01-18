@@ -8,7 +8,7 @@ public class ExtremTracProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new ExtremTracProtocolDecoder(null);
+        var decoder = inject(new ExtremTracProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$GPRMC,862106020628733,050859.000,A,1404.8573,N,08710.9967,W,0.00,0,080117,0,,00C8,00218,99,,,,,,0.00"));

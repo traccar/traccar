@@ -9,7 +9,7 @@ public class MeiligaoProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new MeiligaoProtocolEncoder(null);
+        var encoder = inject(new MeiligaoProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -35,6 +35,10 @@ public class MeiligaoProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_RADIUS, 1000);
 
         verifyCommand(encoder, command, binary("4040001312345678901234410603e87bb00d0a"));
+
+        command.setType(Command.TYPE_ENGINE_STOP);
+
+        verifyCommand(encoder, command, binary("4040001212345678901234411501fd460d0a"));
 
     }
 

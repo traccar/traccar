@@ -9,13 +9,17 @@ public class TopinProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TopinProtocolDecoder(null);
+        var decoder = inject(new TopinProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "787801080D0A"));
 
         verifyNull(decoder, binary(
                 "78780d0103593390754169634d0d0a"));
+
+        verifyAttribute(decoder, binary(
+                "7878006921120412565802010601071e4a9764071e4a9864010d0a"),
+                Position.KEY_ALARM, Position.ALARM_VIBRATION);
 
         verifyAttribute(decoder, binary(
                 "787801940D0A"),

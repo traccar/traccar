@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,146 +16,161 @@
 package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
 import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
 import com.google.inject.Provides;
-import com.google.inject.Singleton;
+import com.google.inject.Scopes;
+import com.google.inject.name.Names;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.log.NullLogChute;
+import org.eclipse.jetty.util.URIUtil;
+import org.traccar.broadcast.BroadcastService;
+import org.traccar.broadcast.MulticastBroadcastService;
+import org.traccar.broadcast.NullBroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.AttributesManager;
-import org.traccar.database.CalendarManager;
-import org.traccar.database.ConnectionManager;
-import org.traccar.database.DataManager;
-import org.traccar.database.DeviceManager;
-import org.traccar.database.GeofenceManager;
-import org.traccar.database.IdentityManager;
-import org.traccar.database.MaintenancesManager;
+import org.traccar.database.LdapProvider;
 import org.traccar.database.StatisticsManager;
+import org.traccar.forward.EventForwarder;
+import org.traccar.forward.EventForwarderJson;
+import org.traccar.forward.EventForwarderKafka;
+import org.traccar.forward.EventForwarderMqtt;
+import org.traccar.forward.PositionForwarder;
+import org.traccar.forward.PositionForwarderJson;
+import org.traccar.forward.PositionForwarderKafka;
+import org.traccar.forward.PositionForwarderUrl;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
 import org.traccar.geocoder.FactualGeocoder;
+import org.traccar.geocoder.GeoapifyGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
 import org.traccar.geocoder.GeocodeXyzGeocoder;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.geocoder.GisgraphyGeocoder;
 import org.traccar.geocoder.GoogleGeocoder;
 import org.traccar.geocoder.HereGeocoder;
+import org.traccar.geocoder.LocationIqGeocoder;
 import org.traccar.geocoder.MapQuestGeocoder;
 import org.traccar.geocoder.MapTilerGeocoder;
+import org.traccar.geocoder.MapboxGeocoder;
 import org.traccar.geocoder.MapmyIndiaGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.PositionStackGeocoder;
+import org.traccar.geocoder.TestGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
-import org.traccar.geocoder.MapboxGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
-import org.traccar.handler.ComputedAttributesHandler;
-import org.traccar.handler.CopyAttributesHandler;
-import org.traccar.handler.DefaultDataHandler;
-import org.traccar.handler.DistanceHandler;
-import org.traccar.handler.EngineHoursHandler;
-import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
-import org.traccar.handler.HemisphereHandler;
-import org.traccar.handler.MotionHandler;
-import org.traccar.handler.RemoteAddressHandler;
 import org.traccar.handler.SpeedLimitHandler;
-import org.traccar.handler.TimeHandler;
-import org.traccar.handler.events.AlertEventHandler;
-import org.traccar.handler.events.BehaviorEventHandler;
-import org.traccar.handler.events.CommandResultEventHandler;
-import org.traccar.handler.events.DriverEventHandler;
-import org.traccar.handler.events.FuelDropEventHandler;
-import org.traccar.handler.events.GeofenceEventHandler;
-import org.traccar.handler.events.IgnitionEventHandler;
-import org.traccar.handler.events.MaintenanceEventHandler;
-import org.traccar.handler.events.MotionEventHandler;
-import org.traccar.handler.events.OverspeedEventHandler;
-import org.traccar.reports.model.TripsConfig;
-
-import javax.annotation.Nullable;
-import javax.ws.rs.client.Client;
-import io.netty.util.Timer;
+import org.traccar.helper.ObjectMapperContextResolver;
+import org.traccar.helper.SanitizerModule;
+import org.traccar.mail.LogMailManager;
+import org.traccar.mail.MailManager;
+import org.traccar.mail.SmtpMailManager;
+import org.traccar.session.cache.CacheManager;
+import org.traccar.sms.HttpSmsClient;
+import org.traccar.sms.SmsManager;
+import org.traccar.sms.SnsSmsClient;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
+import org.traccar.storage.DatabaseStorage;
+import org.traccar.storage.Storage;
+import org.traccar.web.WebServer;
+
+import javax.annotation.Nullable;
+import javax.inject.Singleton;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.Properties;
 
 public class MainModule extends AbstractModule {
 
-    @Provides
-    public static ObjectMapper provideObjectMapper() {
-        return Context.getObjectMapper();
+    private final String configFile;
+
+    public MainModule(String configFile) {
+        this.configFile = configFile;
     }
 
-    @Provides
-    public static Config provideConfig() {
-        return Context.getConfig();
-    }
-
-    @Provides
-    public static DataManager provideDataManager() {
-        return Context.getDataManager();
-    }
-
-    @Provides
-    public static IdentityManager provideIdentityManager() {
-        return Context.getIdentityManager();
-    }
-
-    @Provides
-    public static ConnectionManager provideConnectionManager() {
-        return Context.getConnectionManager();
-    }
-
-    @Provides
-    public static Client provideClient() {
-        return Context.getClient();
-    }
-
-    @Provides
-    public static TripsConfig provideTripsConfig() {
-        return Context.getTripsConfig();
-    }
-
-    @Provides
-    public static DeviceManager provideDeviceManager() {
-        return Context.getDeviceManager();
-    }
-
-    @Provides
-    public static GeofenceManager provideGeofenceManager() {
-        return Context.getGeofenceManager();
-    }
-
-    @Provides
-    public static CalendarManager provideCalendarManager() {
-        return Context.getCalendarManager();
-    }
-
-    @Provides
-    public static AttributesManager provideAttributesManager() {
-        return Context.getAttributesManager();
-    }
-
-    @Provides
-    public static MaintenancesManager provideMaintenancesManager() {
-        return Context.getMaintenancesManager();
+    @Override
+    protected void configure() {
+        bindConstant().annotatedWith(Names.named("configFile")).to(configFile);
+        bind(Config.class).asEagerSingleton();
+        bind(Storage.class).to(DatabaseStorage.class).in(Scopes.SINGLETON);
+        bind(Timer.class).to(HashedWheelTimer.class).in(Scopes.SINGLETON);
     }
 
     @Singleton
     @Provides
-    public static StatisticsManager provideStatisticsManager(
-            Config config, DataManager dataManager, Client client, ObjectMapper objectMapper) {
-        return new StatisticsManager(config, dataManager, client, objectMapper);
+    public static ObjectMapper provideObjectMapper(Config config) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        if (config.getBoolean(Keys.WEB_SANITIZE)) {
+            objectMapper.registerModule(new SanitizerModule());
+        }
+        objectMapper.registerModule(new JSR353Module());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        return objectMapper;
     }
 
     @Singleton
     @Provides
-    public static Geocoder provideGeocoder(Config config) {
+    public static Client provideClient(ObjectMapperContextResolver objectMapperContextResolver) {
+        return ClientBuilder.newClient().register(objectMapperContextResolver);
+    }
+
+    @Singleton
+    @Provides
+    public static SmsManager provideSmsManager(Config config, Client client) {
+        if (config.hasKey(Keys.SMS_HTTP_URL)) {
+            return new HttpSmsClient(config, client);
+        } else if (config.hasKey(Keys.SMS_AWS_REGION)) {
+            return new SnsSmsClient(config);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static MailManager provideMailManager(Config config, StatisticsManager statisticsManager) {
+        if (config.getBoolean(Keys.MAIL_DEBUG)) {
+            return new LogMailManager();
+        } else {
+            return new SmtpMailManager(config, statisticsManager);
+        }
+    }
+
+    @Singleton
+    @Provides
+    public static LdapProvider provideLdapProvider(Config config) {
+        if (config.hasKey(Keys.LDAP_URL)) {
+            return new LdapProvider(config);
+        }
+        return null;
+    }
+
+    @Provides
+    public static WebServer provideWebServer(Injector injector, Config config) {
+        if (config.hasKey(Keys.WEB_PORT)) {
+            return new WebServer(injector, config);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static Geocoder provideGeocoder(Config config, Client client, StatisticsManager statisticsManager) {
         if (config.getBoolean(Keys.GEOCODER_ENABLE)) {
             String type = config.getString(Keys.GEOCODER_TYPE, "google");
             String url = config.getString(Keys.GEOCODER_URL);
@@ -166,60 +181,88 @@ public class MainModule extends AbstractModule {
             AddressFormat addressFormat = formatString != null ? new AddressFormat(formatString) : new AddressFormat();
 
             int cacheSize = config.getInteger(Keys.GEOCODER_CACHE_SIZE);
+            Geocoder geocoder;
             switch (type) {
+                case "test":
+                    geocoder = new TestGeocoder();
+                    break;
                 case "nominatim":
-                    return new NominatimGeocoder(url, key, language, cacheSize, addressFormat);
+                    geocoder = new NominatimGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    break;
+                case "locationiq":
+                    geocoder = new LocationIqGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    break;
                 case "gisgraphy":
-                    return new GisgraphyGeocoder(url, cacheSize, addressFormat);
+                    geocoder = new GisgraphyGeocoder(client, url, cacheSize, addressFormat);
+                    break;
                 case "mapquest":
-                    return new MapQuestGeocoder(url, key, cacheSize, addressFormat);
+                    geocoder = new MapQuestGeocoder(client, url, key, cacheSize, addressFormat);
+                    break;
                 case "opencage":
-                    return new OpenCageGeocoder(url, key, cacheSize, addressFormat);
+                    geocoder = new OpenCageGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    break;
                 case "bingmaps":
-                    return new BingMapsGeocoder(url, key, cacheSize, addressFormat);
+                    geocoder = new BingMapsGeocoder(client, url, key, cacheSize, addressFormat);
+                    break;
                 case "factual":
-                    return new FactualGeocoder(url, key, cacheSize, addressFormat);
+                    geocoder = new FactualGeocoder(client, url, key, cacheSize, addressFormat);
+                    break;
                 case "geocodefarm":
-                    return new GeocodeFarmGeocoder(key, language, cacheSize, addressFormat);
+                    geocoder = new GeocodeFarmGeocoder(client, key, language, cacheSize, addressFormat);
+                    break;
                 case "geocodexyz":
-                    return new GeocodeXyzGeocoder(key, cacheSize, addressFormat);
+                    geocoder = new GeocodeXyzGeocoder(client, key, cacheSize, addressFormat);
+                    break;
                 case "ban":
-                    return new BanGeocoder(cacheSize, addressFormat);
+                    geocoder = new BanGeocoder(client, cacheSize, addressFormat);
+                    break;
                 case "here":
-                    return new HereGeocoder(url, id, key, language, cacheSize, addressFormat);
+                    geocoder = new HereGeocoder(client, url, id, key, language, cacheSize, addressFormat);
+                    break;
                 case "mapmyindia":
-                    return new MapmyIndiaGeocoder(url, key, cacheSize, addressFormat);
+                    geocoder = new MapmyIndiaGeocoder(client, url, key, cacheSize, addressFormat);
+                    break;
                 case "tomtom":
-                    return new TomTomGeocoder(url, key, cacheSize, addressFormat);
+                    geocoder = new TomTomGeocoder(client, url, key, cacheSize, addressFormat);
+                    break;
                 case "positionstack":
-                    return new PositionStackGeocoder(key, cacheSize, addressFormat);
+                    geocoder = new PositionStackGeocoder(client, key, cacheSize, addressFormat);
+                    break;
                 case "mapbox":
-                    return new MapboxGeocoder(key, cacheSize, addressFormat);
+                    geocoder = new MapboxGeocoder(client, key, cacheSize, addressFormat);
+                    break;
                 case "maptiler":
-                    return new MapTilerGeocoder(key, cacheSize, addressFormat);
+                    geocoder = new MapTilerGeocoder(client, key, cacheSize, addressFormat);
+                    break;
+                case "geoapify":
+                    geocoder = new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
+                    break;
                 default:
-                    return new GoogleGeocoder(key, language, cacheSize, addressFormat);
+                    geocoder = new GoogleGeocoder(client, key, language, cacheSize, addressFormat);
+                    break;
             }
+            geocoder.setStatisticsManager(statisticsManager);
+            return geocoder;
         }
         return null;
     }
 
     @Singleton
     @Provides
-    public static GeolocationProvider provideGeolocationProvider(Config config) {
+    public static GeolocationProvider provideGeolocationProvider(Config config, Client client) {
         if (config.getBoolean(Keys.GEOLOCATION_ENABLE)) {
             String type = config.getString(Keys.GEOLOCATION_TYPE, "mozilla");
             String url = config.getString(Keys.GEOLOCATION_URL);
             String key = config.getString(Keys.GEOLOCATION_KEY);
             switch (type) {
                 case "google":
-                    return new GoogleGeolocationProvider(key);
+                    return new GoogleGeolocationProvider(client, key);
                 case "opencellid":
-                    return new OpenCellIdGeolocationProvider(url, key);
+                    return new OpenCellIdGeolocationProvider(client, url, key);
                 case "unwired":
-                    return new UnwiredGeolocationProvider(url, key);
+                    return new UnwiredGeolocationProvider(client, url, key);
                 default:
-                    return new MozillaGeolocationProvider(key);
+                    return new MozillaGeolocationProvider(client, key);
             }
         }
         return null;
@@ -227,58 +270,15 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static SpeedLimitProvider provideSpeedLimitProvider(Config config) {
+    public static SpeedLimitProvider provideSpeedLimitProvider(Config config, Client client) {
         if (config.getBoolean(Keys.SPEED_LIMIT_ENABLE)) {
             String type = config.getString(Keys.SPEED_LIMIT_TYPE, "overpass");
             String url = config.getString(Keys.SPEED_LIMIT_URL);
             switch (type) {
                 case "overpass":
                 default:
-                    return new OverpassSpeedLimitProvider(url);
+                    return new OverpassSpeedLimitProvider(client, url);
             }
-        }
-        return null;
-    }
-
-    @Singleton
-    @Provides
-    public static DistanceHandler provideDistanceHandler(Config config, IdentityManager identityManager) {
-        return new DistanceHandler(config, identityManager);
-    }
-
-    @Singleton
-    @Provides
-    public static FilterHandler provideFilterHandler(Config config) {
-        if (config.getBoolean(Keys.FILTER_ENABLE)) {
-            return new FilterHandler(config);
-        }
-        return null;
-    }
-
-    @Singleton
-    @Provides
-    public static HemisphereHandler provideHemisphereHandler(Config config) {
-        if (config.hasKey(Keys.LOCATION_LATITUDE_HEMISPHERE) || config.hasKey(Keys.LOCATION_LONGITUDE_HEMISPHERE)) {
-            return new HemisphereHandler(config);
-        }
-        return null;
-    }
-
-    @Singleton
-    @Provides
-    public static RemoteAddressHandler provideRemoteAddressHandler(Config config) {
-        if (config.getBoolean(Keys.PROCESSING_REMOTE_ADDRESS_ENABLE)) {
-            return new RemoteAddressHandler();
-        }
-        return null;
-    }
-
-    @Singleton
-    @Provides
-    public static WebDataHandler provideWebDataHandler(
-            Config config, IdentityManager identityManager, ObjectMapper objectMapper, Client client) {
-        if (config.hasKey(Keys.FORWARD_URL)) {
-            return new WebDataHandler(config, identityManager, objectMapper, client);
         }
         return null;
     }
@@ -286,9 +286,10 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static GeolocationHandler provideGeolocationHandler(
-            Config config, @Nullable GeolocationProvider geolocationProvider, StatisticsManager statisticsManager) {
+            Config config, @Nullable GeolocationProvider geolocationProvider, CacheManager cacheManager,
+            StatisticsManager statisticsManager) {
         if (geolocationProvider != null) {
-            return new GeolocationHandler(config, geolocationProvider, statisticsManager);
+            return new GeolocationHandler(config, geolocationProvider, cacheManager, statisticsManager);
         }
         return null;
     }
@@ -296,9 +297,9 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static GeocoderHandler provideGeocoderHandler(
-            Config config, @Nullable Geocoder geocoder, IdentityManager identityManager) {
+            Config config, @Nullable Geocoder geocoder, CacheManager cacheManager) {
         if (geocoder != null) {
-            return new GeocoderHandler(config, geocoder, identityManager);
+            return new GeocoderHandler(config, geocoder, cacheManager);
         }
         return null;
     }
@@ -314,130 +315,70 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static MotionHandler provideMotionHandler(TripsConfig tripsConfig) {
-        return new MotionHandler(tripsConfig.getSpeedThreshold());
+    public static BroadcastService provideBroadcastService(
+            Config config, ObjectMapper objectMapper) throws IOException {
+        if (config.hasKey(Keys.BROADCAST_ADDRESS)) {
+            return new MulticastBroadcastService(config, objectMapper);
+        }
+        return new NullBroadcastService();
     }
 
     @Singleton
     @Provides
-    public static EngineHoursHandler provideEngineHoursHandler(Config config, IdentityManager identityManager) {
-        if (config.getBoolean(Keys.PROCESSING_ENGINE_HOURS_ENABLE)) {
-            return new EngineHoursHandler(identityManager);
+    public static EventForwarder provideEventForwarder(Config config, Client client, ObjectMapper objectMapper) {
+        if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
+            String forwardType = config.getString(Keys.EVENT_FORWARD_TYPE);
+            switch (forwardType) {
+                case "kafka":
+                    return new EventForwarderKafka(config, objectMapper);
+                case "mqtt":
+                    return new EventForwarderMqtt(config, objectMapper);
+                default:
+                    return new EventForwarderJson(config, client);
+            }
         }
         return null;
     }
 
     @Singleton
     @Provides
-    public static CopyAttributesHandler provideCopyAttributesHandler(Config config, IdentityManager identityManager) {
-        if (config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE)) {
-            return new CopyAttributesHandler(identityManager);
+    public static PositionForwarder providePositionForwarder(Config config, Client client, ObjectMapper objectMapper) {
+        if (config.hasKey(Keys.FORWARD_URL)) {
+            switch (config.getString(Keys.FORWARD_TYPE)) {
+                case "json":
+                    return new PositionForwarderJson(config, client, objectMapper);
+                case "kafka":
+                    return new PositionForwarderKafka(config, objectMapper);
+                default:
+                    return new PositionForwarderUrl(config, client, objectMapper);
+            }
         }
         return null;
     }
 
     @Singleton
     @Provides
-    public static ComputedAttributesHandler provideComputedAttributesHandler(
-            Config config, IdentityManager identityManager, AttributesManager attributesManager) {
-        if (config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_ENABLE)) {
-            return new ComputedAttributesHandler(config, identityManager, attributesManager);
+    public static VelocityEngine provideVelocityEngine(Config config) {
+        Properties properties = new Properties();
+        properties.setProperty("file.resource.loader.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
+        properties.setProperty("runtime.log.logsystem.class", NullLogChute.class.getName());
+
+        if (config.hasKey(Keys.WEB_URL)) {
+            properties.setProperty("web.url", config.getString(Keys.WEB_URL).replaceAll("/$", ""));
+        } else {
+            String address;
+            try {
+                address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
+            } catch (UnknownHostException e) {
+                address = "localhost";
+            }
+            String url = URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
+            properties.setProperty("web.url", url);
         }
-        return null;
-    }
 
-    @Singleton
-    @Provides
-    public static TimeHandler provideTimeHandler(Config config) {
-        if (config.hasKey(Keys.TIME_OVERRIDE)) {
-            return new TimeHandler(config);
-        }
-        return null;
-    }
-
-    @Singleton
-    @Provides
-    public static DefaultDataHandler provideDefaultDataHandler(@Nullable DataManager dataManager) {
-        if (dataManager != null) {
-            return new DefaultDataHandler(dataManager);
-        }
-        return null;
-    }
-
-    @Singleton
-    @Provides
-    public static CommandResultEventHandler provideCommandResultEventHandler() {
-        return new CommandResultEventHandler();
-    }
-
-    @Singleton
-    @Provides
-    public static OverspeedEventHandler provideOverspeedEventHandler(
-            Config config, DeviceManager deviceManager, GeofenceManager geofenceManager) {
-        return new OverspeedEventHandler(config, deviceManager, geofenceManager);
-    }
-
-    @Singleton
-    @Provides
-    public static BehaviorEventHandler provideBehaviorEventHandler(Config config, IdentityManager identityManager) {
-        return new BehaviorEventHandler(config, identityManager);
-    }
-
-    @Singleton
-    @Provides
-    public static FuelDropEventHandler provideFuelDropEventHandler(IdentityManager identityManager) {
-        return new FuelDropEventHandler(identityManager);
-    }
-
-    @Singleton
-    @Provides
-    public static MotionEventHandler provideMotionEventHandler(
-            IdentityManager identityManager, DeviceManager deviceManager, TripsConfig tripsConfig) {
-        return new MotionEventHandler(identityManager, deviceManager, tripsConfig);
-    }
-
-    @Singleton
-    @Provides
-    public static GeofenceEventHandler provideGeofenceEventHandler(
-            IdentityManager identityManager, GeofenceManager geofenceManager, CalendarManager calendarManager,
-            ConnectionManager connectionManager) {
-        return new GeofenceEventHandler(identityManager, geofenceManager, calendarManager, connectionManager);
-    }
-
-    @Singleton
-    @Provides
-    public static AlertEventHandler provideAlertEventHandler(Config config, IdentityManager identityManager) {
-        return new AlertEventHandler(config, identityManager);
-    }
-
-    @Singleton
-    @Provides
-    public static IgnitionEventHandler provideIgnitionEventHandler(IdentityManager identityManager) {
-        return new IgnitionEventHandler(identityManager);
-    }
-
-    @Singleton
-    @Provides
-    public static MaintenanceEventHandler provideMaintenanceEventHandler(
-            IdentityManager identityManager, MaintenancesManager maintenancesManager) {
-        return new MaintenanceEventHandler(identityManager, maintenancesManager);
-    }
-
-    @Singleton
-    @Provides
-    public static DriverEventHandler provideDriverEventHandler(IdentityManager identityManager) {
-        return new DriverEventHandler(identityManager);
-    }
-
-    @Singleton
-    @Provides
-    public static Timer provideTimer() {
-        return GlobalTimer.getTimer();
-    }
-
-    @Override
-    protected void configure() {
-        binder().requireExplicitBindings();
+        VelocityEngine velocityEngine = new VelocityEngine();
+        velocityEngine.init(properties);
+        return velocityEngine;
     }
 
 }

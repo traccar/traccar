@@ -8,7 +8,7 @@ public class TmgProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TmgProtocolDecoder(null);
+        var decoder = inject(new TmgProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$loc,869309013800417,08032014,094459,1,2826.1956,N,07659.7690,E,0.0,2.5,4441,31,6,95,1,LLLL,NNTN,HH,0.15,0.26,HR38AU1389,0,SW0.1a"));

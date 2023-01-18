@@ -8,7 +8,7 @@ public class L100ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new L100ProtocolDecoder(null);
+        var decoder = inject(new L100ProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "ATL,NP,868004029750174,$GPRMC,062943,A,2533.6719,N,09154.3203,E,0,179,311218,,,*39,#01111011000000,0,0,0,934.82,27.13,4.0,25,405,755,15af,974b,0,0,0,ATL"));

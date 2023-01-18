@@ -4,14 +4,17 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -87,6 +90,10 @@ public class ProtocolTest extends BaseTest {
 
     protected DefaultFullHttpRequest request(HttpMethod method, String url, HttpHeaders headers) {
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, Unpooled.buffer(), headers, new DefaultHttpHeaders());
+    }
+
+    protected DefaultFullHttpResponse response(ByteBuf data) {
+        return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, data);
     }
 
     protected void verifyNotNull(BaseProtocolDecoder decoder, Object object) throws Exception {
@@ -304,12 +311,20 @@ public class ProtocolTest extends BaseTest {
             assertTrue(attributes.get(Position.KEY_RESULT) instanceof String);
         }
 
-        if (position.getNetwork() != null && position.getNetwork().getCellTowers() != null) {
-            for (CellTower cellTower : position.getNetwork().getCellTowers()) {
-                checkInteger(cellTower.getMobileCountryCode(), 0, 999);
-                checkInteger(cellTower.getMobileNetworkCode(), 0, 999);
-                checkInteger(cellTower.getLocationAreaCode(), 1, 65535);
-                checkInteger(cellTower.getCellId(), 0, 268435455);
+        if (position.getNetwork() != null) {
+            if (position.getNetwork().getCellTowers() != null) {
+                for (CellTower cellTower : position.getNetwork().getCellTowers()) {
+                    checkInteger(cellTower.getMobileCountryCode(), 0, 999);
+                    checkInteger(cellTower.getMobileNetworkCode(), 0, 999);
+                    checkInteger(cellTower.getLocationAreaCode(), 1, 65535);
+                    checkInteger(cellTower.getCellId(), 0, 268435455);
+                }
+            }
+
+            if (position.getNetwork().getWifiAccessPoints() != null) {
+                for (WifiAccessPoint wifiAccessPoint : position.getNetwork().getWifiAccessPoints()) {
+                    assertTrue(wifiAccessPoint.getMacAddress().matches("((\\p{XDigit}{2}):){5}(\\p{XDigit}{2})"));
+                }
             }
         }
 

@@ -9,7 +9,15 @@ public class StartekProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new StartekProtocolDecoder(null);
+        var decoder = inject(new StartekProtocolDecoder(null));
+
+        verifyAttribute(decoder, text(
+                "&&x164,869926040743375,000,0,,220705205955,A,33.326001,44.445318,10,1.2,0,57,8,925,418|40|038C|000083CD,31,00000015,00,00,0016|016A|0000|0000,1,,,686|33||44|99|14|124|11|8D"),
+                Position.KEY_FUEL_CONSUMPTION, 1.1);
+
+        verifyAttribute(decoder, text(
+                "&&R187,860294046453690,000,0,,220105160656,A,22.994986,72.499711,15,0.9,2,222,55,121135784,404|98|147B|0000376A,24,0000001F,02,00,052E|01A3|0000|0000,1,010000|020000,,853|6|10|105|73|41|125|34|52"),
+                Position.KEY_FUEL_LEVEL, null);
 
         verifyPosition(decoder, text(
                 "&&o142,860262050066062,000,27,,211111070826,V,28.653435,-106.077455,0,0.0,0,151,1412,918,0|0|4708|01402D19,6,0000001A,02,00,04C0|016C|0000|0000,1,,,BB"));

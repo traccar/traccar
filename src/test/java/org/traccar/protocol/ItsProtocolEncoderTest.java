@@ -11,7 +11,7 @@ public class ItsProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new ItsProtocolEncoder(null);
+        var encoder = inject(new ItsProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

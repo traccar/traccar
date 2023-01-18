@@ -8,7 +8,7 @@ public class TmgFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TmgFrameDecoder();
+        var decoder = inject(new TmgFrameDecoder());
 
         verifyNull(
                 decoder.decode(null, null, binary("2424242424")));

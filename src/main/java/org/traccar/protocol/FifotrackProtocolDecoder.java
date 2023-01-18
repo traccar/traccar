@@ -19,8 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -35,6 +34,10 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
@@ -79,7 +82,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .text("$$")
             .number("d+,")                       // length
             .number("(d+),")                     // imei
-            .number("x+,")                       // index
+            .number("(x+),")                     // index
             .text("A03,")                        // type
             .number("(d+)?,")                    // alarm
             .number("(dd)(dd)(dd)")              // date (yymmdd)
@@ -138,14 +141,18 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .number("xx")
             .compile();
 
-    private void requestPhoto(Channel channel, SocketAddress socketAddress, String imei, String file) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, String imei, String content) {
         if (channel != null) {
-            String content = "1,D06," + file + "," + photo.writerIndex() + "," + Math.min(1024, photo.writableBytes());
             int length = 1 + imei.length() + 1 + content.length();
             String response = String.format("##%02d,%s,%s*", length, imei, content);
             response += Checksum.sum(response) + "\r\n";
-            channel.writeAndFlush(new NetworkMessage(response, socketAddress));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
+    }
+
+    private void requestPhoto(Channel channel, SocketAddress remoteAddress, String imei, String file) {
+        String content = "1,D06," + file + "," + photo.writerIndex() + "," + Math.min(1024, photo.writableBytes());
+        sendResponse(channel, remoteAddress, imei, content);
     }
 
     private String decodeAlarm(Integer alarm) {
@@ -201,10 +208,13 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String imei = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;
         }
+
+        String index = parser.next();
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -243,6 +253,11 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.setNetwork(network);
+
+        DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String response = index + ",A03," + dateFormat.format(new Date());
+        sendResponse(channel, remoteAddress, imei, response);
 
         return position;
     }
@@ -381,7 +396,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(getDeviceSession(channel, remoteAddress, imei).getDeviceId());
                     getLastLocation(position, null);
-                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(imei, photo, "jpg"));
+                    position.set(Position.KEY_IMAGE, writeMediaFile(imei, photo, "jpg"));
                     photo.release();
                     photo = null;
                     return position;

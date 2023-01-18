@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.Parser;
@@ -55,17 +56,21 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
 
     public StarLinkProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
 
-        setFormat(Context.getConfig().getString(
+    @Override
+    protected void init() {
+        setFormat(getConfig().getString(
                 getProtocolName() + ".format", "#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,"
                 + "#IN1#,#IN2#,#IN3#,#IN4#,#OUT1#,#OUT2#,#OUT3#,#OUT4#,#LAC#,#CID#,#VIN#,#VBAT#,#DEST#,#IGN#,#ENG#"));
 
-        setDateFormat(Context.getConfig().getString(getProtocolName() + ".dateFormat", "yyMMddHHmmss"));
+        setDateFormat(getConfig().getString(getProtocolName() + ".dateFormat", "yyMMddHHmmss"));
     }
 
     public String[] getFormat(long deviceId) {
-        return Context.getIdentityManager().lookupAttributeString(
-                deviceId, getProtocolName() + ".format", format, false, false).split(",");
+        String value = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_FORMAT.withPrefix(getProtocolName()), deviceId);
+        return (value != null ? value : format).split(",");
     }
 
     public void setFormat(String format) {
@@ -73,8 +78,9 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public DateFormat getDateFormat(long deviceId) {
-        DateFormat dateFormat = new SimpleDateFormat(Context.getIdentityManager().lookupAttributeString(
-                deviceId, getProtocolName() + ".dateFormat", this.dateFormat, false, false));
+        String value = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_DATE_FORMAT.withPrefix(getProtocolName()), deviceId);
+        DateFormat dateFormat = new SimpleDateFormat(value != null ? value : this.dateFormat);
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat;
     }
@@ -313,7 +319,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (lac != null && cid != null) {
-            position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
+            position.setNetwork(new Network(CellTower.fromLacCid(getConfig(), lac, cid)));
         }
 
         if (event == 20) {

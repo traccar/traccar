@@ -8,7 +8,7 @@ public class Xt013ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Xt013ProtocolDecoder(null);
+        var decoder = inject(new Xt013ProtocolDecoder(null));
         
         verifyPosition(decoder, text(
                 "TK,862950021650364,150131090859,+53.267863,+5.767363,0,38,12,0,F,204,08,C94,336C,24,,4.09,1,,,,,,,,"),

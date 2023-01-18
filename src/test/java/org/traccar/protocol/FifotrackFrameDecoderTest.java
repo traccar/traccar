@@ -8,7 +8,7 @@ public class FifotrackFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new FifotrackFrameDecoder();
+        var decoder = inject(new FifotrackFrameDecoder());
 
         verifyFrame(
                 binary("24243132362c3836393436373034393239303738372c324138432c4130312c2c3139303431333135333235342c412c2d31352e3132373836382c33392e3236323530362c302c3136322c3431352c38303937323234332c302c303030302c30302c302c3634337c337c353141467c424632462c3141337c3446367c3833327c302c312c2a3534"),

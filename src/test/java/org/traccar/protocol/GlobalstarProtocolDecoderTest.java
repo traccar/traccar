@@ -9,7 +9,7 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GlobalstarProtocolDecoder(null);
+        var decoder = inject(new GlobalstarProtocolDecoder(null));
 
         verifyNull(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n",
@@ -29,7 +29,7 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
                 "<esn>0-2682225</esn>",
                 "<unixTime>1585105370</unixTime>",
                 "<gps>N</gps>",
-                "<payload length=\"9\" source=\"pc\" encoding=\"hex\">0x8EFE2D97DDEA420018</payload>",
+                "<payload length=\"9\" source=\"pc\" encoding=\"hex\">0x00C583EACD37210A00</payload>",
                 "</stuMessage>",
                 "</stuMessages>")));
 

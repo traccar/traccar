@@ -8,7 +8,7 @@ public class DwayProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new DwayProtocolDecoder(null);
+        var decoder = inject(new DwayProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "AA55,36,10024,1,171025,161055,36.0294,-79.7881,201, 2.5,111,1000,0000,00000,3578,0,0,0,D"));

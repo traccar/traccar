@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -90,11 +90,13 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 14)) {
-            position.setNetwork(new Network(CellTower.from(
-                    buf.readUnsignedShortLE(), buf.readUnsignedByte(),
-                    buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
-                    buf.readUnsignedByte())));
-            buf.readUnsignedByte();
+            int mcc = buf.readUnsignedShortLE();
+            int mnc = buf.readUnsignedByte();
+            int lac = buf.readUnsignedShortLE();
+            int cid = buf.readUnsignedShortLE();
+            buf.readUnsignedByte(); // time advance
+            int rssi = -buf.readUnsignedByte();
+            position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
         }
     }
 

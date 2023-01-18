@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,15 +16,45 @@
  */
 package org.traccar.notificators;
 
-import org.traccar.Context;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
+import org.traccar.notification.NotificationFormatter;
+import org.traccar.session.ConnectionManager;
 
-public final class NotificatorWeb extends Notificator {
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
+public final class NotificatorWeb implements Notificator {
+
+    private final ConnectionManager connectionManager;
+    private final NotificationFormatter notificationFormatter;
+
+    @Inject
+    public NotificatorWeb(
+            ConnectionManager connectionManager, NotificationFormatter notificationFormatter) {
+        this.connectionManager = connectionManager;
+        this.notificationFormatter = notificationFormatter;
+    }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) {
-        Context.getConnectionManager().updateEvent(userId, event);
+    public void send(User user, Event event, Position position) {
+
+        Event copy = new Event();
+        copy.setId(event.getId());
+        copy.setDeviceId(event.getDeviceId());
+        copy.setType(event.getType());
+        copy.setEventTime(event.getEventTime());
+        copy.setPositionId(event.getPositionId());
+        copy.setGeofenceId(event.getGeofenceId());
+        copy.setMaintenanceId(event.getMaintenanceId());
+        copy.getAttributes().putAll(event.getAttributes());
+
+        var message = notificationFormatter.formatMessage(user, event, position, "short");
+        copy.set("message", message.getBody());
+
+        connectionManager.updateEvent(true, user.getId(), copy);
     }
 
 }

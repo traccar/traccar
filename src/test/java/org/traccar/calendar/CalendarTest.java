@@ -1,16 +1,15 @@
 package org.traccar.calendar;
 
+import net.fortuna.ical4j.data.ParserException;
+import org.junit.Test;
+import org.traccar.model.Calendar;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
-import org.junit.Test;
-import org.traccar.model.Calendar;
-
-import net.fortuna.ical4j.data.ParserException;
 
 import static org.junit.Assert.assertTrue;
 

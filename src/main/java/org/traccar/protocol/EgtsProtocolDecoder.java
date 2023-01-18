@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -291,7 +291,7 @@ public class EgtsProtocolDecoder extends BaseProtocolDecoder {
 
             if (serviceType == SERVICE_TELEDATA && position.getValid()) {
                 if (useObjectIdAsDeviceId && objectId != 0L) {
-                    deviceSession = getDeviceSession(channel, remoteAddress, true, String.valueOf(objectId));
+                    deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(objectId));
                     if (deviceSession != null) {
                         position.setDeviceId(deviceSession.getDeviceId());
                     }

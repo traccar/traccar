@@ -1,15 +1,14 @@
 package org.traccar.protocol;
 
-import org.traccar.ProtocolTest;
-
 import org.junit.Test;
+import org.traccar.ProtocolTest;
 
 public class NavisProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecodeNtcb() throws Exception {
 
-        var decoder = new NavisProtocolDecoder(null);
+        var decoder = inject(new NavisProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "404E5443010000007B000000130044342A3E533A383631373835303035323035303739"));
@@ -41,7 +40,7 @@ public class NavisProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeFlex10() throws Exception {
 
-        var decoder = new NavisProtocolDecoder(null);
+        var decoder = inject(new NavisProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "404e544301000000c9b5f602130046c52a3e533a383639363936303439373232383235"));
@@ -60,7 +59,7 @@ public class NavisProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeFlex20() throws Exception {
 
-        var decoder = new NavisProtocolDecoder(null);
+        var decoder = inject(new NavisProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "404e544301000000a9eef602130043fb2a3e533a383639363936303439373337333835"));

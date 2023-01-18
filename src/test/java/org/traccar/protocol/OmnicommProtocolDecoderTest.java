@@ -8,7 +8,7 @@ public class OmnicommProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new OmnicommProtocolDecoder(null);
+        var decoder = inject(new OmnicommProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "c080080061a61915340100001dec"));

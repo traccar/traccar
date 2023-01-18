@@ -6,19 +6,20 @@ import org.traccar.BaseTest;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 public class GeolocationProviderTest extends BaseTest {
 
+    private final Client client = ClientBuilder.newClient();
+
     @Ignore
     @Test
-    public void test() throws Exception {
-        testLocationProvider();
-    }
-
-    public void testLocationProvider() throws Exception {
-        MozillaGeolocationProvider provider = new MozillaGeolocationProvider(null);
+    public void testMozilla() throws Exception {
+        MozillaGeolocationProvider provider = new MozillaGeolocationProvider(client, null);
 
         Network network = new Network(CellTower.from(208, 1, 2, 1234567));
 

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import sys
 import os
@@ -8,6 +8,7 @@ import urllib2
 import json
 import socket
 import time
+import threading
 
 messages = {
     'gps103' : 'imei:123456789012345,help me,1201011201,,F,120100.000,A,6000.0000,N,13000.0000,E,0.00,;',
@@ -88,7 +89,36 @@ messages = {
     'siwi' : '$SIWI,1234,1320,A,0,,1,1,0,0,876578,43,10,A,19.0123456,72.65347,45,0,055929,071107,22,5,1,0,3700,1210,0,2500,1230,321,0,1.1,4.0,1!\r\n',
     'starlink' : '$SLU123456,06,622,170329035057,01,170329035057,+3158.0018,+03446.6968,004.9,007,000099,1,1,0,0,0,0,0,0,,,14.176,03.826,,1,1,1,4*B0\r\n',
     'alematics' : '$T,50,592,123456789012345,20170515062915,20170515062915,25.035005,121.561555,0,31,89,3.7,5,1,0,0.000,12.752,1629,38,12752,4203,6\r\n',
-    'vtfms' : '(123456789012345,00I76,00,000,,,,,A,133755,210617,10.57354,077.24912,SW,000,00598,00000,K,0017368,1,12.7,,,0.000,,,0,0,0,0,1,1,0,,)074'
+    'vtfms' : '(123456789012345,00I76,00,000,,,,,A,133755,210617,10.57354,077.24912,SW,000,00598,00000,K,0017368,1,12.7,,,0.000,,,0,0,0,0,1,1,0,,)074',
+    'esky': 'ET;0;123456789012345;R;6+190317162511+41.32536+19.83144+0.14+0+0x0+0+18460312+0+1233+192',
+    'genx': '123456789012345,08/31/2017 17:24:13,45.47275,-73.65491,5,19,117,1.14,147,ON,1462,0,6,N,0,0.000,-95.0,-1.0,0,0.0000,0.0000,0.000,0,0.00,0.00,0.00,NA,U,UUU,0,-95.0,U\r\n',
+    'dway': 'AA55,115,1234,1,171024,195059,28.0153,-82.4761,3, 1.0,319,1000,0000,00000,4244,0,0,0,D\r\n',
+    'oko': '{123456789012345,090745,A,4944.302,N,02353.366,E,0.0,225,251120,7,0.27,F9,11.3,1}',
+    'ivt401': '(TLN,123456789012345,250118,063827,+18.598098,+73.806518,0,79,0,1,1,5,1200,0,0.0,11.50,4.00,36,0,0,1.00,0,0,12702,202,0);',
+    't57': '*T57#F1#1234567890#301117#000843#2234.1303#N#08826.1714#E#+0.242,+0.109,-0.789#0.000#6.20000#A2#4.2#',
+    'm2c': '[#M2C,2020,P1.B1.H1.F1.R1,101,123456789012345,2,L,1,100,170704,074933,28.647556,77.192940,900,194,0.0,0,0,0,255,11942,0,0,0,0,0,0,0,0,30068,5051,0,0,1*8159\r\n]',
+    'cautela': '20,123456789012,14,02,18,16.816667,96.166667,1325,S,*2E\r\n',
+    'pt60': '@B#@|01|001|123456789012345|9425010450971470|1|45|20181127122717|32.701093|35.570938|1|@R#@',
+    'telemax': '%061234560128\r\nY000007C6999999067374074649003C00A7018074666F60D66818051304321900000000C5\r\n',
+    'svias': '[7061,3041,57,1234567890,710,40618,141342,-93155840,-371754060,0,20469,0,16,1,0,0,11323,100,9,,32,4695]',
+    'eseal': '##S,eSeal,123456,256,3.0.6,Normal,34,2017-08-31,08:14:40,15,A,25.708828N 100.372870W,10,0,Close,0.71,0:0:3:0,3.8,-73,E##\r\n',
+    'avema': '1234567890,20190522093835,121.645898,25.062268,0,0,0,0,3,0.0,1,0.02,11.48,0,0,19,4,466-5,65534,56589841,0.01\r\n',
+    'milesmate': 'ApiString={A:123456789012345,B:09.8,C:00.0,D:083506,E:2838.5529N,F:07717.8049E,G:000.00,H:170918,I:G,J:00004100,K:0000000A,L:1234,M:126.86}\r\n',
+    'smartsole': '#GTXRP=123456789012345,8,180514200051,34.041981,-118.255806,60,1,1,7,1.80,180514200051,4.16,11$',
+    'its': '$,EPB,SEM,123456789012345,NM,14072020112020,A,28.359959,N,076.927566,E,260.93,0.1,0.0,G,NA00000000,N.A0000000,*',
+    'xrb28': '*SCOR,OM,123456789012345,D0,0,012102.00,A,0608.00062,S,10659.70331,E,12,0.69,151118,30.3,M,A#\r\n',
+    'c2stek': 'PA$123456789012345$D#220222#135059#0#+37.98995#+23.85141#0.00#69.2#0.0#0000#000#8#00#sz-w1001#B2600$AP',
+    'mictrack': 'MT;6;123456789012345;R0;10+190109091803+22.63827+114.02922+2.14+69+2+3744+113',
+    'plugin': '$$STATUS123456,20190528143943,28.254086,-25.860665,0,0,0,-1,2,78,11395,0,0,0#',
+    'racedynamics': '$GPRMC,12,260819,100708,123456789012345,\r\n$GPRMC,15,04,H,#,100632,A,1255.5106,N,07738.2954,E,001,260819,0887,06,1,00011,%,0000000000000000,000,000,0,0,1,0713,0,416,0,255,000,0,000,3258,000,000,00,0000,000,00000,0,F3VF01\r\n',
+    's168': 'S168#123456789012345#0f12#0077#LOCA:G;CELL:1,1cc,2,2795,1435,64;GDATA:A,12,160412154800,22.564025,113.242329,5.5,152,900;ALERT:0000;STATUS:89,98;WAY:0$',
+    'dingtek': '800001011e0692001a00000000016e008027c40000112345678901234581',
+    'portman': '$PTMLA,123456789012345,A,200612153351,N2543.0681W10009.2974,0,190,NA,C9830000,NA,108,8,2.66,16,GNA\r\n',
+    'futureway': '410000003F2000020,IMEI:123456789012345,battery level:6,network type:7,CSQ:236F42410000009BA00004GPS:V,200902093333,0.000000N,0.000000E,0.000,0.000\r\nWIFI:3,1|90-67-1C-F7-21-6C|52&2|80-89-17-C6-79-A0|54&3|40-F4-20-EF-DD-2A|58\r\nLBS:460,0,46475066,69\r\n6A42',
+    'net': '@L03612345678901234512271020161807037078881037233751000000010F850036980A4000!',
+    'mobilogix': '[2020-10-25 20:45:09,T9,1,V1.2.3,123456789012,59,10.50,701,-25.236860,-45.708530,0,314]',
+    'swiftech': '@@123456789012345,,0,102040,1023.9670,N,07606.8160,E,2.26,151220,A,0127,1,1,03962,00000,#',
+    'ennfu': 'Ennfu:123456789012345,041504.00,A,3154.86654,N,11849.08737,E,0.053,,080121,20,3.72,21.4,V0.01$',
 }
 
 baseUrl = 'http://localhost:8082'
@@ -110,7 +140,7 @@ def load_ports():
 
 def login():
     request = urllib2.Request(baseUrl + '/api/session')
-    response = urllib2.urlopen(request, urllib.urlencode(user))
+    response = urllib2.urlopen(request, urllib.parse.urlencode(user))
     if debug:
         print '\nlogin: %s\n' % repr(json.load(response))
     return response.headers.get('Set-Cookie')
@@ -141,11 +171,12 @@ def send_message(port, message):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', port))
     s.send(message)
+    time.sleep(0.5)
     s.close()
 
 def get_protocols(cookie, device_id):
     params = { 'deviceId' : device_id, 'from' : '2000-01-01T00:00:00.000Z', 'to' : '2050-01-01T00:00:00.000Z' }
-    request = urllib2.Request(baseUrl + '/api/positions?' + urllib.urlencode(params))
+    request = urllib2.Request(baseUrl + '/api/positions?' + urllib.parse.urlencode(params))
     request.add_header('Cookie', cookie)
     request.add_header('Content-Type', 'application/json')
     request.add_header('Accept', 'application/json')
@@ -155,40 +186,35 @@ def get_protocols(cookie, device_id):
         protocols.append(position['protocol'])
     return protocols
 
-ports = load_ports()
+if __name__ == "__main__":
+    ports = load_ports()
 
-cookie = login()
-remove_devices(cookie)
+    cookie = login()
+    remove_devices(cookie)
 
-devices = {
-    '123456789012345' : add_device(cookie, '123456789012345'),
-    '123456789012' : add_device(cookie, '123456789012'),
-    '1234567890' : add_device(cookie, '1234567890'),
-    '123456' : add_device(cookie, '123456'),
-    '1234' : add_device(cookie, '1234')
-}
+    devices = {
+        '123456789012345' : add_device(cookie, '123456789012345'),
+        '123456789012' : add_device(cookie, '123456789012'),
+        '1234567890' : add_device(cookie, '1234567890'),
+        '123456' : add_device(cookie, '123456'),
+        '1234' : add_device(cookie, '1234')
+    }
 
+    all = set(ports.keys())
+    protocols = set(messages.keys())
 
-all = set(ports.keys())
-protocols = set(messages.keys())
+    print 'Total: %d' % len(all)
+    print 'Missing: %d' % len(all - protocols)
+    print 'Covered: %d' % len(protocols)
 
-print 'Total: %d' % len(all)
-print 'Missing: %d' % len(all - protocols)
-print 'Covered: %d' % len(protocols)
+    for protocol in messages:
+        send_message(ports[protocol], messages[protocol])
 
-#if all - protocols:
-#    print '\nMissing: %s\n' % repr(list((all - protocols)))
+    for device in devices:
+        protocols -= set(get_protocols(cookie, devices[device]))
 
-for protocol in messages:
-    send_message(ports[protocol], messages[protocol])
+    print 'Success: %d' % (len(messages) - len(protocols))
+    print 'Failed: %d' % len(protocols)
 
-time.sleep(10)
-
-for device in devices:
-    protocols -= set(get_protocols(cookie, devices[device]))
-
-print 'Success: %d' % (len(messages) - len(protocols))
-print 'Failed: %d' % len(protocols)
-
-if protocols:
-    print '\nFailed: %s' % repr(list(protocols))
+    if protocols:
+        print '\nFailed: %s' % repr(list(protocols))

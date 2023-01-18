@@ -8,7 +8,7 @@ public class SupermateProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new SupermateProtocolDecoder(null);
+        var decoder = inject(new SupermateProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "2:359672050130411:1:*,00000000,XT,A,10031b,140b28,80ad4c72,81ba2d2c,06ab,238c,020204010000,12,0,0000,0003e6"));

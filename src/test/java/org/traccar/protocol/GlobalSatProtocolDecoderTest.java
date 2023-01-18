@@ -8,7 +8,7 @@ public class GlobalSatProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GlobalSatProtocolDecoder(null);
+        var decoder = inject(new GlobalSatProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "GSh,131826789036289,3,M,ea04*3d"));

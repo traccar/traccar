@@ -8,7 +8,7 @@ public class V680ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new V680ProtocolDecoder(null);
+        var decoder = inject(new V680ProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "#867967020910610#01234567890#1#0000#AUT#1#0500000000120000#114.036291,E,22.665795,N,111.00,000.00#111116#193333##"),

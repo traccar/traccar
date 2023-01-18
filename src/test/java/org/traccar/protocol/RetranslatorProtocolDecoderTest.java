@@ -8,7 +8,7 @@ public class RetranslatorProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new RetranslatorProtocolDecoder(null);
+        var decoder = inject(new RetranslatorProtocolDecoder(null));
 
         verifyPosition(decoder, binary(
                 "74000000333533393736303133343435343835004B0BFB70000000030BBB000000270102706F73696E666F00A027AFDF5D9848403AC7253383DD4B400000000000805A40003601460B0BBB0000001200047077725F657874002B8716D9CE973B400BBB00000011010361766C5F696E707574730000000001"));

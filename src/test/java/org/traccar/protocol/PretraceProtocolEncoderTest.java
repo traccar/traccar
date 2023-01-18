@@ -11,7 +11,7 @@ public class PretraceProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionPeriodic() throws Exception {
 
-        var encoder = new PretraceProtocolEncoder(null);
+        var encoder = inject(new PretraceProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -25,7 +25,7 @@ public class PretraceProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeCustom() throws Exception {
 
-        var encoder = new PretraceProtocolEncoder(null);
+        var encoder = inject(new PretraceProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

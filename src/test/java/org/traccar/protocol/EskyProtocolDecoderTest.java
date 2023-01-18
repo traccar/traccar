@@ -9,7 +9,7 @@ public class EskyProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new EskyProtocolDecoder(null);
+        var decoder = inject(new EskyProtocolDecoder(null));
 
         verifyAttribute(decoder, text(
                 "ET;0;860337031066546;R;9+200717114059+41.32053+19.80761+0.30+0+0x2+8+40381744+0+1409+11"),

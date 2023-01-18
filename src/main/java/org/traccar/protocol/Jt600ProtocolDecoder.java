@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
@@ -141,7 +141,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         int version = BitUtil.from(buf.readUnsignedByte(), 4);
         buf.readUnsignedShort(); // length
 
-        while (buf.readableBytes() > 1) {
+        boolean responseRequired = false;
+
+        while (buf.readableBytes() >= 17) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -160,6 +162,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ALARM, BitUtil.check(status, 2) ? Position.ALARM_GEOFENCE_EXIT : null);
                 position.set(Position.KEY_ALARM, BitUtil.check(status, 3) ? Position.ALARM_POWER_CUT : null);
                 position.set(Position.KEY_ALARM, BitUtil.check(status, 4) ? Position.ALARM_VIBRATION : null);
+                if (BitUtil.check(status, 5)) {
+                    responseRequired = true;
+                }
                 position.set(Position.KEY_BLOCKED, BitUtil.check(status, 7));
                 position.set(Position.KEY_ALARM, BitUtil.check(status, 8 + 3) ? Position.ALARM_LOW_BATTERY : null);
                 position.set(Position.KEY_ALARM, BitUtil.check(status, 8 + 6) ? Position.ALARM_FAULT : null);
@@ -172,7 +177,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY_LEVEL, battery);
                 }
 
-                CellTower cellTower = CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort());
+                CellTower cellTower = CellTower.fromCidLac(
+                        getConfig(), buf.readUnsignedShort(), buf.readUnsignedShort());
                 cellTower.setSignalStrength((int) buf.readUnsignedByte());
                 position.setNetwork(new Network(cellTower));
 
@@ -196,7 +202,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 int rssi = buf.readUnsignedByte();
 
                 if (cid != 0 && lac != 0) {
-                    CellTower cellTower = CellTower.fromCidLac(cid, lac);
+                    CellTower cellTower = CellTower.fromCidLac(getConfig(), cid, lac);
                     cellTower.setSignalStrength(rssi);
                     position.setNetwork(new Network(cellTower));
                 } else {
@@ -232,7 +238,15 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        buf.readUnsignedByte(); // index
+        int index = buf.readUnsignedByte();
+
+        if (channel != null && responseRequired) {
+            if (protocolVersion < 0x19) {
+                channel.writeAndFlush(new NetworkMessage("(P35)", remoteAddress));
+            } else {
+                channel.writeAndFlush(new NetworkMessage("(P69,0," + index + ")", remoteAddress));
+            }
+        }
 
         return positions;
     }
@@ -343,7 +357,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
         position.set(Position.KEY_STATUS, parser.nextBinInt(0));
 
-        CellTower cellTower = CellTower.fromCidLac(parser.nextInt(0), parser.nextInt(0));
+        CellTower cellTower = CellTower.fromCidLac(getConfig(), parser.nextInt(0), parser.nextInt(0));
         cellTower.setSignalStrength(parser.nextInt(0));
         position.setNetwork(new Network(cellTower));
 
@@ -356,6 +370,64 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             } else if (type.equals("U06")) {
                 channel.writeAndFlush(new NetworkMessage("(S20)", remoteAddress));
             }
+        }
+
+        return position;
+    }
+
+    private static final Pattern PATTERN_P45 = new PatternBuilder()
+            .text("(")
+            .number("(d+),")                     // id
+            .text("P45,")                        // type
+            .number("(dd)(dd)(dd),")             // date (ddmmyy)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(d+.d+),([NS]),")           // latitude
+            .number("(d+.d+),([EW]),")           // longitude
+            .expression("([AV]),")               // validity
+            .number("(d+),")                     // speed
+            .number("(d+),")                     // course
+            .number("d+,")                       // event source
+            .number("d+,")                       // unlock verification
+            .number("(d+),")                     // rfid
+            .number("d+,")                       // password verification
+            .number("d+,")                       // incorrect password count
+            .number("(d+),")                     // index
+            .any()
+            .compile();
+
+    private Position decodeP45(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_P45, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
+        position.setValid(parser.next().equals("A"));
+
+        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
+        position.setCourse(parser.nextDouble());
+
+        String rfid = parser.next();
+        if (!rfid.equals("0000000000")) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, rfid);
+        }
+
+        int index = parser.nextInt();
+
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage("(P69,0," + index + ")", remoteAddress));
         }
 
         return position;
@@ -374,6 +446,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             String sentence = buf.toString(StandardCharsets.US_ASCII);
             if (sentence.contains("W01")) {
                 return decodeW01(sentence, channel, remoteAddress);
+            } else if (sentence.contains("P45")) {
+                return decodeP45(sentence, channel, remoteAddress);
             } else {
                 return decodeU01(sentence, channel, remoteAddress);
             }

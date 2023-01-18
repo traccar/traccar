@@ -8,7 +8,7 @@ public class MxtProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new MxtProtocolDecoder(null);
+        var decoder = inject(new MxtProtocolDecoder(null));
 
         verifyPosition(decoder, binary(
                 "01a631a7627b00087dc41c40850006aab70affecdf23fd32200080000600000000000000000000001b2ff03b1bb9c4c60214f40100050000006c2d0000f427600051051101de0704"));

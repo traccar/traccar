@@ -9,7 +9,7 @@ public class OutsafeProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new OutsafeProtocolDecoder(null);
+        var decoder = inject(new OutsafeProtocolDecoder(null));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"device\":\"865303040103725\",\"owner\":\"\",\"data\":{\"cmd\":\"\",\"ms1\":-1,\"ms2\":-1,\"ms3\":0,\"ms4\":0,\"observation\":\"\",\"content\":null},\"time\":1589277568,\"origin\":\"mqgatte\",\"latitude\":19.346855,\"longitude\":-99.29587,\"altitude\":2757,\"heading\":0,\"rssi\":0}")));

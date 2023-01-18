@@ -15,20 +15,23 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class TechtoCruzProtocol extends BaseProtocol {
 
-    public TechtoCruzProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public TechtoCruzProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LineBasedFrameDecoder(1024));
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new TechtoCruzFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new TechtoCruzProtocolDecoder(TechtoCruzProtocol.this));

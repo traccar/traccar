@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.helper.BufferUtil;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
@@ -64,8 +65,8 @@ public class ThinkPowerProtocolDecoder extends BaseProtocolDecoder {
         switch (type) {
             case 0x01:
                 position.setValid(true);
-                position.setLatitude(buf.readInt() * 0.0000001);
-                position.setLongitude(buf.readInt() * 0.0000001);
+                position.setLatitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.0000001);
+                position.setLongitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.0000001);
                 position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
                 position.setCourse(buf.readUnsignedShort() * 0.01);
                 break;

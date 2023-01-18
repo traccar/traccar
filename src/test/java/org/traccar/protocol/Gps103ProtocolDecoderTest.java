@@ -9,7 +9,11 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Gps103ProtocolDecoder(null);
+        var decoder = inject(new Gps103ProtocolDecoder(null));
+
+        verifyAttribute(decoder, text(
+                "imei:865456055519122,sensor alarm,2208011920,,L,;"),
+                Position.KEY_ALARM, Position.ALARM_VIBRATION);
 
         verifyPosition(decoder, text(
                 "imei:864035050002451,tracker,201223064947,,F,064947,A,1935.70640,N,09859.94436,W,0.025,;"));
@@ -155,7 +159,7 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
                 "359586015829802"));
 
         // No GPS signal
-        verifyNull(decoder, text(
+        verifyNotNull(decoder, text(
                 "imei:359586015829802,tracker,000000000,13554900601,L,;"));
 
         verifyPosition(decoder, text(

@@ -8,7 +8,7 @@ public class ArknavX8ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new ArknavX8ProtocolDecoder(null);
+        var decoder = inject(new ArknavX8ProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "351856045213782,241111"));

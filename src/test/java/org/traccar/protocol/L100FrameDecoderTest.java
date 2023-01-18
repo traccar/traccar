@@ -8,7 +8,7 @@ public class L100FrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new L100FrameDecoder();
+        var decoder = inject(new L100FrameDecoder());
 
         verifyFrame(
                 binary("41544c2c4c2c3836383334353033383137313936332c4e2c3230313231382c3039333031362c412c3032352e3036373134342c4e2c3035352e3134343833332c452c3030302e302c4750532c333933392c3432342c30332c30303430352c303038383334"),

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,11 +20,11 @@ public class BaseModel {
 
     private long id;
 
-    public final long getId() {
+    public long getId() {
         return id;
     }
 
-    public final void setId(long id) {
+    public void setId(long id) {
         this.id = id;
     }
 

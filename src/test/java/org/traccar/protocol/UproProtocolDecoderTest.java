@@ -9,7 +9,7 @@ public class UproProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new UproProtocolDecoder(null);
+        var decoder = inject(new UproProtocolDecoder(null));
 
         verifyPosition(decoder, buffer(
                 "*HQ201999999,BA&A1656512233362911356523660000230618&B0100060010&C00000<6<&F0000&R2405&V0109&W0000003E&K00100&T65&I54600027A00FCB6227A00FCA5727A00E955327A00E8B5327A00F9748&Y54600027A000000FCB6227A000000FCA5727A000000E955327A000000E8B5327A000000F9748&b00A7E81007607#"));
@@ -53,7 +53,7 @@ public class UproProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "*MG201693502000034964,AB&A0800253335360507036975710000091116&P0730000032d2a94d&B0000000000&N13&Z12&U_P\0\0\0\u0004\0\0\0\0\0\0\0\0\0\0"),
-                position("2016-11-09 08:00:25.000", true, -33.58934, -70.61626));
+                position("2016-11-09 08:00:25.000", false, -33.58934, -70.61626));
 
         verifyNull(decoder, buffer(
                 "*MG20113800138000,AH"));
@@ -69,7 +69,7 @@ public class UproProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, buffer(
                 "*AI200905300036,AH&A0317264913209801844913060000251115&B0500000000&C0;4?72:9&F0000"),
-                position("2015-11-25 03:17:26.000", false, 49.22016, 18.74855));
+                position("2015-11-25 03:17:26.000", true, 49.22016, 18.74855));
 
         verifyPosition(decoder, buffer(
                 "*AI2000905300036,AS&A1647304913209801844913060000251115&B0400000000&C0;4?72:9&F0000"));

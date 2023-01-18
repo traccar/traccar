@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -140,8 +140,12 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{8})")                    // status
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
+            .groupBegin()
             .number("(dd)")                      // battery
             .number("(dd)")                      // external power
+            .or()
+            .number("(ddd)")                     // battery
+            .groupEnd()
             .number("(dddd)")                    // adc 1
             .groupBegin()
             .groupBegin()
@@ -166,6 +170,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{7})")                    // odometer
             .number("(dd)(dd.dddd)([NS])")       // latitude
             .number("(ddd)(dd.dddd)([EW])")      // longitude
+            .number("dddd").optional()           // temperature
             .number("dddd")                      // serial number
             .number("xx")                        // checksum
             .any()
@@ -320,7 +325,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         int lac = parser.nextHexInt(0);
         int cid = parser.nextHexInt(0);
         if (lac != 0 && cid != 0) {
-            position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
+            position.setNetwork(new Network(CellTower.fromLacCid(getConfig(), lac, cid)));
         }
 
         position.set(Position.PREFIX_TEMP + 1, parser.next());
@@ -346,7 +351,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 2, parser.next());
 
         position.setNetwork(new Network(
-                CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
+                CellTower.fromLacCid(getConfig(), parser.nextHexInt(0), parser.nextHexInt(0))));
 
         position.setValid(parser.next().equals("A"));
         position.set(Position.KEY_SATELLITES, parser.nextInt());
@@ -379,8 +384,13 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         position.setTime(parser.nextDateTime());
 
-        position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
-        position.set(Position.KEY_POWER, parser.nextDouble());
+        if (parser.hasNext(2)) {
+            position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
+            position.set(Position.KEY_POWER, parser.nextDouble());
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.01);
+        }
 
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
@@ -403,7 +413,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             int mcc = parser.nextInt();
             cellTower = CellTower.from(mcc, mnc, lac, cid);
         } else {
-            cellTower = CellTower.fromLacCid(lac, cid);
+            cellTower = CellTower.fromLacCid(getConfig(), lac, cid);
         }
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         cellTower.setSignalStrength(parser.nextInt());

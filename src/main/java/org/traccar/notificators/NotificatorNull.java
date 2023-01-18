@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,18 +20,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 
-public final class NotificatorNull extends Notificator {
+public class NotificatorNull implements Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorNull.class);
 
     @Override
-    public void sendAsync(long userId, Event event, Position position) {
-        LOGGER.warn("You are using null notificatior, please check your configuration, notification not sent");
-    }
-
-    @Override
-    public void sendSync(long userId, Event event, Position position) {
+    public void send(User user, Event event, Position position) {
         LOGGER.warn("You are using null notificatior, please check your configuration, notification not sent");
     }
 

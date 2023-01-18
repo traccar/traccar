@@ -17,8 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -32,11 +31,15 @@ import java.util.regex.Pattern;
 
 public class EsealProtocolDecoder extends BaseProtocolDecoder {
 
-    private final String config;
+    private String config;
 
     public EsealProtocolDecoder(Protocol protocol) {
         super(protocol);
-        config = Context.getConfig().getString(Keys.PROTOCOL_CONFIG.withPrefix(getProtocolName()));
+    }
+
+    @Override
+    protected void init() {
+        config = getConfig().getString(Keys.PROTOCOL_CONFIG.withPrefix(getProtocolName()));
     }
 
     private static final Pattern PATTERN = new PatternBuilder()

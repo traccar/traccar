@@ -8,7 +8,7 @@ public class ArnaviFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeValidPackets() throws Exception {
 
-        var decoder = new ArnaviFrameDecoder();
+        var decoder = inject(new ArnaviFrameDecoder());
 
         verifyFrame(
                 binary("2441562c563344492c38353136342c3231342c2d312c31392c30303030344634462c30303030303935452c30433030303030322c3836333037313031333034313631382c38393939373031353630333832353236363232462c2a3039"),

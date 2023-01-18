@@ -8,7 +8,7 @@ public class WristbandProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new WristbandProtocolDecoder(null);
+        var decoder = inject(new WristbandProtocolDecoder(null));
 
         verifyNotNull(decoder, binary(
                 "000102004459583836383730343034343735303035357c56312e307c317c7b4630342331382c30372c332c3539303139322c33303a31382c30372c332c3539303139322c33307d0d0afffefc"));

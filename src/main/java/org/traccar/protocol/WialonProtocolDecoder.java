@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
@@ -39,7 +39,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_ANY = new PatternBuilder()
-            .expression("([^#]*)?")              // imei
+            .expression("([^#]+)?")              // imei
             .text("#")                           // start byte
             .expression("([^#]+)")               // type
             .text("#")                           // separator
@@ -47,13 +47,13 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("(dd)(dd)(dd);")             // date (ddmmyy)
-            .number("(dd)(dd)(dd);")             // time (hhmmss)
+            .number("(?:NA|(dd)(dd)(dd));")      // date (ddmmyy)
+            .number("(?:NA|(dd)(dd)(dd));")      // time (hhmmss)
             .number("(?:NA|(dd)(dd.d+));")       // latitude
             .expression("(?:NA|([NS]));")
             .number("(?:NA|(ddd)(dd.d+));")      // longitude
             .expression("(?:NA|([EW]));")
-            .number("(d+.?d*)?;")                // speed
+            .number("(?:NA|(d+.?d*))?;")         // speed
             .number("(?:NA|(d+.?d*))?;")         // course
             .number("(?:NA|(-?d+.?d*));")        // altitude
             .number("(?:NA|(d+))")               // satellites
@@ -95,7 +95,11 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+        if (parser.hasNext(6)) {
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+        } else {
+            position.setTime(new Date());
+        }
 
         if (parser.hasNext(9)) {
             position.setLatitude(parser.nextCoordinate());

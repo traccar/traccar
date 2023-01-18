@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2020 Roeland Boeters (roeland@geodelta.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
@@ -114,14 +114,18 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void decodeWifi(Network network, String data) {
+    private void decodeWifi(Network network, String data, boolean hasSsid) {
         String[] values = data.split(",");
-        for (int i = 0; i < values.length / 2; i++) {
-            network.addWifiAccessPoint(WifiAccessPoint.from(values[i * 2], Integer.parseInt(values[i * 2 + 1])));
+        int step = hasSsid ? 3 : 2;
+        int offset = hasSsid ? 1 : 0;
+        for (int i = 0; i < values.length / step; i++) {
+            network.addWifiAccessPoint(WifiAccessPoint.from(
+                    values[i * step + offset], Integer.parseInt(values[i * step + offset + 1])));
         }
     }
 
-    private void decodeNetwork(Position position, String data, boolean hasWifi, boolean hasCell) throws ParseException {
+    private void decodeNetwork(
+            Position position, String data, boolean hasWifi, boolean hasSsid, boolean hasCell) throws ParseException {
         int index = 0;
         String[] values = data.split("\\+");
 
@@ -130,7 +134,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         Network network = new Network();
 
         if (hasWifi) {
-            decodeWifi(network, values[index++]);
+            decodeWifi(network, values[index++], hasSsid);
         }
 
         if (hasCell) {
@@ -231,18 +235,21 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
                 decodeLocation(position, fragments[4]);
                 break;
             case "R1":
-                decodeNetwork(position, fragments[4], true, false);
+                decodeNetwork(position, fragments[4], true, false, false);
                 break;
             case "R2":
             case "R3":
-                decodeNetwork(position, fragments[4], false, true);
+                decodeNetwork(position, fragments[4], false, false, true);
                 break;
             case "R12":
             case "R13":
-                decodeNetwork(position, fragments[4], true, true);
+                decodeNetwork(position, fragments[4], true, false, true);
                 break;
             case "RH":
                 decodeStatus(position, fragments[4]);
+                break;
+            case "Y1":
+                decodeNetwork(position, fragments[4], true, true, false);
                 break;
             default:
                 return null;

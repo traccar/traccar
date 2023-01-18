@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,88 +16,91 @@
  */
 package org.traccar.notificators;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.MulticastMessage;
+import com.google.firebase.messaging.Notification;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
-import org.traccar.notification.NotificationMessage;
+import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 
-public class NotificatorFirebase extends Notificator {
+@Singleton
+public class NotificatorFirebase implements Notificator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorFirebase.class);
+    private final NotificationFormatter notificationFormatter;
 
-    private final String url;
-    private final String key;
+    @Inject
+    public NotificatorFirebase(Config config, NotificationFormatter notificationFormatter) throws IOException {
 
-    public static class Notification {
-        @JsonProperty("title")
-        private String title;
-        @JsonProperty("body")
-        private String body;
-        @JsonProperty("sound")
-        private String sound;
-    }
+        this.notificationFormatter = notificationFormatter;
 
-    public static class Message {
-        @JsonProperty("registration_ids")
-        private String[] tokens;
-        @JsonProperty("notification")
-        private Notification notification;
-    }
+        InputStream serviceAccount = new ByteArrayInputStream(
+                config.getString(Keys.NOTIFICATOR_FIREBASE_SERVICE_ACCOUNT).getBytes());
 
-    public NotificatorFirebase() {
-        this(
-                "https://fcm.googleapis.com/fcm/send",
-                Context.getConfig().getString(Keys.NOTIFICATOR_FIREBASE_KEY));
-    }
+        FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .build();
 
-    protected NotificatorFirebase(String url, String key) {
-        this.url = url;
-        this.key = key;
+        FirebaseApp.initializeApp(options);
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) {
-        final User user = Context.getPermissionsManager().getUser(userId);
-        if (user.getAttributes().containsKey("notificationTokens")) {
+    public void send(User user, Event event, Position position) throws MessageException {
+        if (user.hasAttribute("notificationTokens")) {
 
-            NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
+            var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 
-            Notification notification = new Notification();
-            notification.title = shortMessage.getSubject();
-            notification.body = shortMessage.getBody();
-            notification.sound = "default";
+            List<String> registrationTokens = Arrays.asList(user.getString("notificationTokens").split("[, ]"));
 
-            Message message = new Message();
-            message.tokens = user.getString("notificationTokens").split("[, ]");
-            message.notification = notification;
+            MulticastMessage message = MulticastMessage.builder()
+                    .setNotification(Notification.builder()
+                            .setTitle(shortMessage.getSubject())
+                            .setBody(shortMessage.getBody())
+                            .build())
+                    .setAndroidConfig(AndroidConfig.builder()
+                            .setNotification(AndroidNotification.builder()
+                                    .setSound("default")
+                                    .build())
+                            .build())
+                    .setApnsConfig(ApnsConfig.builder()
+                            .setAps(Aps.builder()
+                                    .setSound("default")
+                                    .build())
+                            .build())
+                    .addAllTokens(registrationTokens)
+                    .putData("eventId", String.valueOf(event.getId()))
+                    .build();
 
-            Context.getClient().target(url).request()
-                    .header("Authorization", "key=" + key)
-                    .async().post(Entity.json(message), new InvocationCallback<Object>() {
-                @Override
-                public void completed(Object o) {
+            try {
+                var result = FirebaseMessaging.getInstance().sendMulticast(message);
+                for (var response : result.getResponses()) {
+                    if (!response.isSuccessful()) {
+                        throw new MessageException(response.getException());
+                    }
                 }
-
-                @Override
-                public void failed(Throwable throwable) {
-                    LOGGER.warn("Firebase notification error", throwable);
-                }
-            });
+            } catch (FirebaseMessagingException e) {
+                throw new MessageException(e);
+            }
         }
-    }
-
-    @Override
-    public void sendAsync(long userId, Event event, Position position) {
-        sendSync(userId, event, position);
     }
 
 }

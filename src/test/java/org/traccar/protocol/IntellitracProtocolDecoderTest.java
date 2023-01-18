@@ -8,7 +8,7 @@ public class IntellitracProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new IntellitracProtocolDecoder(null);
+        var decoder = inject(new IntellitracProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "359316075744331,20201008181424,12.014662,57.826301,0,76,24,10,997,3,0,0.000,4.208,20201008181424,0"));

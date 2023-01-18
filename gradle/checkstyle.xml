@@ -79,7 +79,9 @@
         <!--<module name="MethodLength">
             <property name="max" value="200"/>
         </module>-->
-        <module name="ParameterNumber"/>
+        <module name="ParameterNumber">
+            <property name="tokens" value="METHOD_DEF"/>
+        </module>
 
         <!-- Checks for whitespace                               -->
         <!-- See http://checkstyle.sf.net/config_whitespace.html -->
@@ -122,7 +124,9 @@
         <module name="FinalClass"/>
         <module name="HideUtilityClassConstructor"/>
         <module name="InterfaceIsType"/>
-        <module name="VisibilityModifier"/>
+        <module name="VisibilityModifier">
+            <property name="protectedAllowed" value="true"/>
+        </module>
 
         <!-- Miscellaneous other checks.                   -->
         <!-- See http://checkstyle.sf.net/config_misc.html -->

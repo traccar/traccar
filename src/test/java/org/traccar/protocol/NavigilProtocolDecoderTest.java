@@ -8,7 +8,7 @@ public class NavigilProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new NavigilProtocolDecoder(null);
+        var decoder = inject(new NavigilProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "01004300040020000000f60203080200e7cd0f510c0000003b00000000000000"));

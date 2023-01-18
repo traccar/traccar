@@ -9,9 +9,9 @@ import static org.junit.Assert.assertEquals;
 public class Xrb28ProtocolEncoderTest extends ProtocolTest {
 
     @Test
-    public void testEncodePositionPeriodic() {
+    public void testEncodePositionPeriodic() throws Exception {
 
-        var encoder = new Xrb28ProtocolEncoder(null);
+        var encoder = inject(new Xrb28ProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -23,9 +23,9 @@ public class Xrb28ProtocolEncoderTest extends ProtocolTest {
     }
 
     @Test
-    public void testEncodeCustom() {
+    public void testEncodeCustom() throws Exception {
 
-        var encoder = new Xrb28ProtocolEncoder(null);
+        var encoder = inject(new Xrb28ProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

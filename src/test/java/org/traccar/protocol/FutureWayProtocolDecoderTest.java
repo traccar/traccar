@@ -8,7 +8,7 @@ public class FutureWayProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new FutureWayProtocolDecoder(null);
+        var decoder = inject(new FutureWayProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "410000003F2000020,IMEI:354828100126461,battery level:6,network type:7,CSQ:236F42"));

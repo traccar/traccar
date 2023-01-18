@@ -9,9 +9,9 @@ import static org.junit.Assert.assertEquals;
 public class StartekProtocolEncoderTest extends ProtocolTest {
 
     @Test
-    public void testEncodeEngineStop() {
+    public void testEncodeEngineStop() throws Exception {
 
-        var encoder = new StartekProtocolEncoder(null);
+        var encoder = inject(new StartekProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

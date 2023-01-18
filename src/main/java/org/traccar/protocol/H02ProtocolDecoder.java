@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -176,17 +175,19 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // coding scheme
             .groupEnd()
             .groupBegin()
-            .number("-(d+)-(d+.d+),")            // latitude
+            .number("-(d+)-(d+.d+),([NS]),")     // latitude
             .or()
-            .number("(d+)(dd.d+),")              // latitude
+            .number("(d+)(dd.d+),([NS]),")       // latitude
+            .or()
+            .number("(d+)(dd)(d{4}),([NS]),")    // latitude
             .groupEnd()
-            .expression("([NS]),")
             .groupBegin()
-            .number("-(d+)-(d+.d+),")            // longitude
+            .number("-(d+)-(d+.d+),([EW]),")     // longitude
             .or()
-            .number("(d+)(dd.d+),")              // longitude
+            .number("(d+)(dd.d+),([EW]),")       // longitude
+            .or()
+            .number("(d+)(dd)(d{4}),([EW]),")    // longitude
             .groupEnd()
-            .expression("([EW]),")
             .number(" *(d+.?d*),")               // speed
             .number("(d+.?d*)?,")                // course
             .number("(?:d+,)?")                  // battery
@@ -332,7 +333,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext() && parser.next().equals("V1")) {
             sendResponse(channel, remoteAddress, id, "V1");
-        } else if (Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+        } else if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
             sendResponse(channel, remoteAddress, id, "R12");
         }
 
@@ -349,18 +350,24 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(true);
         }
 
-        if (parser.hasNext(2)) {
-            position.setLatitude(-parser.nextCoordinate());
-        }
-        if (parser.hasNext(2)) {
+        if (parser.hasNext(3)) {
             position.setLatitude(parser.nextCoordinate());
         }
-
-        if (parser.hasNext(2)) {
-            position.setLongitude(-parser.nextCoordinate());
+        if (parser.hasNext(3)) {
+            position.setLatitude(parser.nextCoordinate());
         }
-        if (parser.hasNext(2)) {
+        if (parser.hasNext(4)) {
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
+        }
+
+        if (parser.hasNext(3)) {
             position.setLongitude(parser.nextCoordinate());
+        }
+        if (parser.hasNext(3)) {
+            position.setLongitude(parser.nextCoordinate());
+        }
+        if (parser.hasNext(4)) {
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
         }
 
         position.setSpeed(parser.nextDouble(0));
@@ -384,7 +391,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setAltitude(parser.nextInt(0));
 
-            position.setNetwork(new Network(CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
+            position.setNetwork(new Network(CellTower.fromLacCid(
+                    getConfig(), parser.nextHexInt(0), parser.nextHexInt(0))));
         }
 
         if (parser.hasNext()) {

@@ -9,7 +9,7 @@ public class AvemaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new AvemaProtocolDecoder(null);
+        var decoder = inject(new AvemaProtocolDecoder(null));
 
         verifyAttribute(decoder, text(
                 "1000000000,20190527072358,121.646024,25.062135,0,0,0,0,10,0.0,1,0.02,12.32,0,0,15,2,466-5,10275,0,0.01,65EB812A000104E0,8000001234,NormanChang"),

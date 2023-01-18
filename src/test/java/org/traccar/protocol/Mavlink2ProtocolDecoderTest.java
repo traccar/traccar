@@ -8,7 +8,7 @@ public class Mavlink2ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Mavlink2ProtocolDecoder(null);
+        var decoder = inject(new Mavlink2ProtocolDecoder(null));
 
         verifyAttributes(decoder, binary(
                 "fd1c0000ce01012100004da91f004005d323b89aa30ea6ed070099fb0100f7fffdff0000942c4a88"));

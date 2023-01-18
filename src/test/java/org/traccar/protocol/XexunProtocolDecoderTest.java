@@ -6,9 +6,9 @@ import org.traccar.ProtocolTest;
 public class XexunProtocolDecoderTest extends ProtocolTest {
 
     @Test
-    public void testDecode() throws Exception {
+    public void testDecodeSimple() throws Exception {
 
-        var decoder = new XexunProtocolDecoder(null, false);
+        var decoder = inject(new XexunProtocolDecoder(null, false));
 
         verifyAttributes(decoder, text(
                 "GPRMC,.000,A,0.000000,S,0.0000,W,0.00,0.00,,00,0000.0,A*55,L,,imei:353579010727036,"));
@@ -53,7 +53,12 @@ public class XexunProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "GPRMC,043435.000,A,811.299200,S,11339.9500,E,0.93,29.52,160313,00,0000.0,A*65,F,,imei:359585014597923,"));
 
-        decoder = new XexunProtocolDecoder(null, true);
+    }
+
+    @Test
+    public void testDecodeFull() throws Exception {
+
+        var decoder = inject(new XexunProtocolDecoder(null, true));
 
         verifyPosition(decoder, text(
                 "171007160505,,GPRMC,160505.000,A,5323.4680,N,00252.4202,W,000.0,129.7,071017,,,A*7A,F,ACCStart, imei:864504031916915,10,41.1,F:4.28V,1,135,19824,234,15,0062,B7D5"));

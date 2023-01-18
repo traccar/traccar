@@ -8,7 +8,7 @@ public class EnforaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new EnforaProtocolDecoder(null);
+        var decoder = inject(new EnforaProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "000A08002020202020303131303730303030353730323637"));

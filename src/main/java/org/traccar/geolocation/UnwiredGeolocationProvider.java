@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +19,23 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.traccar.Context;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.WifiAccessPoint;
 
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.InvocationCallback;
 import java.util.Collection;
 
 public class UnwiredGeolocationProvider implements GeolocationProvider {
 
-    private String url;
-    private String key;
+    private final Client client;
+    private final String url;
+    private final String key;
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
     private abstract static class NetworkMixIn {
         @JsonProperty("mcc")
@@ -73,7 +74,8 @@ public class UnwiredGeolocationProvider implements GeolocationProvider {
         abstract Integer getSignalStrength();
     }
 
-    public UnwiredGeolocationProvider(String url, String key) {
+    public UnwiredGeolocationProvider(Client client, String url, String key) {
+        this.client = client;
         this.url = url;
         this.key = key;
 
@@ -88,7 +90,7 @@ public class UnwiredGeolocationProvider implements GeolocationProvider {
         ObjectNode json = objectMapper.valueToTree(network);
         json.put("token", key);
 
-        Context.getClient().target(url).request().async().post(Entity.json(json), new InvocationCallback<JsonObject>() {
+        client.target(url).request().async().post(Entity.json(json), new InvocationCallback<JsonObject>() {
             @Override
             public void completed(JsonObject json) {
                 if (json.getString("status").equals("error")) {

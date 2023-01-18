@@ -19,19 +19,23 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
+
+import javax.inject.Inject;
 
 public class Jt600Protocol extends BaseProtocol {
 
-    public Jt600Protocol() {
+    @Inject
+    public Jt600Protocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_SET_TIMEZONE,
                 Command.TYPE_REBOOT_DEVICE);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Jt600FrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new Jt600ProtocolEncoder(Jt600Protocol.this));

@@ -8,7 +8,7 @@ public class Pt60ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Pt60ProtocolDecoder(null);
+        var decoder = inject(new Pt60ProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "@B#@|01|006|864891030184954|9425010450971470|20181213093127|2|1|"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -50,7 +50,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_SERVICES = 0x03;
     public static final int MSG_RESPONSE = 0x7F;
 
-    private String decodeAlarm(int code) {
+    private String decodeAlarm(long code) {
         if (BitUtil.check(code, 0)) {
             return Position.ALARM_LOW_BATTERY;
         }
@@ -181,7 +181,11 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setDeviceId(deviceSession.getDeviceId());
                         break;
                     case 0x02:
-                        position.set(Position.KEY_ALARM, decodeAlarm(buf.readIntLE()));
+                        long alarm = buf.readUnsignedIntLE();
+                        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
+                        if (BitUtil.check(alarm, 31)) {
+                            position.set("bark", true);
+                        }
                         break;
                     case 0x14:
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
@@ -194,7 +198,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
                         position.setCourse(buf.readUnsignedShortLE());
                         position.setAltitude(buf.readShortLE());
-                        position.setValid(buf.readUnsignedShortLE() > 0);
+                        int hdop = buf.readUnsignedShortLE();
+                        position.setValid(hdop > 0);
+                        position.set(Position.KEY_HDOP, hdop * 0.1);
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                         break;
@@ -260,8 +266,16 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         hasLocation = true;
                         break;
                     case 0x30:
-                        buf.readUnsignedInt(); // timestamp
-                        position.set(Position.KEY_STEPS, buf.readUnsignedInt());
+                        buf.readUnsignedIntLE(); // timestamp
+                        position.set(Position.KEY_STEPS, buf.readUnsignedIntLE());
+                        break;
+                    case 0x31:
+                        int i = 1;
+                        while (buf.readerIndex() < endIndex) {
+                            position.set("activity" + i + "Time", buf.readUnsignedIntLE());
+                            position.set("activity" + i, buf.readUnsignedIntLE());
+                            i += 1;
+                        }
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp

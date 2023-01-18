@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Traccar",
-    "version": "4.14",
+    "version": "5.5",
     "description": "Traccar GPS tracking server API documentation. To use the API you need to have a server instance. For testing purposes you can use one of free [demo servers](https://www.traccar.org/demo-server/). For production use you can install your own server or get a [subscription service](https://www.traccar.org/product/tracking-server/).",
     "contact": {
       "name": "Traccar Support",
@@ -26,6 +26,10 @@
     {
       "url": "https://demo3.traccar.org/api",
       "description": "Demo Server 3"
+    },
+    {
+      "url": "https://demo4.traccar.org/api",
+      "description": "Demo Server 4"
     },
     {
       "url": "https://server.traccar.org/api",
@@ -2714,9 +2718,6 @@
           "poiLayer": {
             "type": "string"
           },
-          "token": {
-            "type": "string"
-          },
           "attributes": {
             "type": "object",
             "properties": {}
@@ -2890,6 +2891,10 @@
           "geofenceId": {
             "type": "integer",
             "description": "Geofence Id, can be second parameter only"
+          },
+          "notificationId": {
+            "type": "integer",
+            "description": "Notification Id, can be second parameter only"
           },
           "calendarId": {
             "type": "integer",

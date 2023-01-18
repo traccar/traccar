@@ -19,14 +19,18 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 import java.nio.ByteOrder;
+import javax.inject.Inject;
+
 public class ProgressProtocol extends BaseProtocol {
 
-    public ProgressProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public ProgressProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 2, 2, 4, 0, true));
                 pipeline.addLast(new ProgressProtocolDecoder(ProgressProtocol.this));
             }

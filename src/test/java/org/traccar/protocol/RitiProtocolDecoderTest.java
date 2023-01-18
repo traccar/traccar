@@ -8,7 +8,7 @@ public class RitiProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new RitiProtocolDecoder(null);
+        var decoder = inject(new RitiProtocolDecoder(null));
 
         verifyPosition(decoder, binary(
                 "3b28a2a2056315316d4000008100000000000000005f710000244750524d432c3138303535332e3030302c412c353532342e383437312c4e2c30313133342e313837382c452c302e30302c2c3032313231332c2c2c412a37340d0a00000000000000000000000000000000040404"));

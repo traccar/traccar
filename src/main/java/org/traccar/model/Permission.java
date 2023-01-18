@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,42 +16,121 @@
  */
 package org.traccar.model;
 
-import java.util.Iterator;
+import java.beans.Introspector;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
-import org.traccar.database.DataManager;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.traccar.helper.ClassScanner;
+import org.traccar.storage.QueryIgnore;
 
 public class Permission {
 
-    private final Class<?> ownerClass;
-    private final long ownerId;
-    private final Class<?> propertyClass;
-    private final long propertyId;
+    private static final Map<String, Class<? extends BaseModel>> CLASSES = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-    public Permission(LinkedHashMap<String, Long> permissionMap) throws ClassNotFoundException {
-        Iterator<Map.Entry<String, Long>> iterator = permissionMap.entrySet().iterator();
-        String owner = iterator.next().getKey();
-        ownerClass = DataManager.getClassByName(owner);
-        String property = iterator.next().getKey();
-        propertyClass = DataManager.getClassByName(property);
-        ownerId = permissionMap.get(owner);
-        propertyId = permissionMap.get(property);
+    static {
+        try {
+            for (Class<?> clazz : ClassScanner.findSubclasses(BaseModel.class)) {
+                CLASSES.put(clazz.getSimpleName(), (Class<? extends BaseModel>) clazz);
+            }
+        } catch (IOException | ReflectiveOperationException | URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public Class<?> getOwnerClass() {
+    private final LinkedHashMap<String, Long> data;
+
+    private final Class<? extends BaseModel> ownerClass;
+    private final long ownerId;
+    private final Class<? extends BaseModel> propertyClass;
+    private final long propertyId;
+
+    public Permission(LinkedHashMap<String, Long> data) {
+        this.data = data;
+        var iterator = data.entrySet().iterator();
+        var owner = iterator.next();
+        ownerClass = getKeyClass(owner.getKey());
+        ownerId = owner.getValue();
+        var property = iterator.next();
+        propertyClass = getKeyClass(property.getKey());
+        propertyId = property.getValue();
+    }
+
+    public Permission(
+            Class<? extends BaseModel> ownerClass, long ownerId,
+            Class<? extends BaseModel> propertyClass, long propertyId) {
+        this.ownerClass = ownerClass;
+        this.ownerId = ownerId;
+        this.propertyClass = propertyClass;
+        this.propertyId = propertyId;
+        data = new LinkedHashMap<>();
+        data.put(getKey(ownerClass), ownerId);
+        data.put(getKey(propertyClass), propertyId);
+    }
+
+    public static Class<? extends BaseModel> getKeyClass(String key) {
+        return CLASSES.get(key.substring(0, key.length() - 2));
+    }
+
+    public static String getKey(Class<?> clazz) {
+        return Introspector.decapitalize(clazz.getSimpleName()) + "Id";
+    }
+
+    public static String getStorageName(Class<?> ownerClass, Class<?> propertyClass) {
+        String ownerName = ownerClass.getSimpleName();
+        String propertyName = propertyClass.getSimpleName();
+        String managedPrefix = "Managed";
+        if (propertyName.startsWith(managedPrefix)) {
+            propertyName = propertyName.substring(managedPrefix.length());
+        }
+        return "tc_" + Introspector.decapitalize(ownerName) + "_" + Introspector.decapitalize(propertyName);
+    }
+
+    @QueryIgnore
+    @JsonIgnore
+    public String getStorageName() {
+        return getStorageName(ownerClass, propertyClass);
+    }
+
+    @QueryIgnore
+    @JsonAnyGetter
+    public Map<String, Long> get() {
+        return data;
+    }
+
+    @QueryIgnore
+    @JsonAnySetter
+    public void set(String key, Long value) {
+        data.put(key, value);
+    }
+
+    @QueryIgnore
+    @JsonIgnore
+    public Class<? extends BaseModel> getOwnerClass() {
         return ownerClass;
     }
 
+    @QueryIgnore
+    @JsonIgnore
     public long getOwnerId() {
         return ownerId;
     }
 
-    public Class<?> getPropertyClass() {
+    @QueryIgnore
+    @JsonIgnore
+    public Class<? extends BaseModel> getPropertyClass() {
         return propertyClass;
     }
 
+    @QueryIgnore
+    @JsonIgnore
     public long getPropertyId() {
         return propertyId;
     }
+
 }

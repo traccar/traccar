@@ -8,7 +8,7 @@ public class EgtsFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new EgtsFrameDecoder();
+        var decoder = inject(new EgtsFrameDecoder());
 
         verifyFrame(
                 binary("0100020B0025003A5701C91A003A5701CD6E68490202101700CBB4740F7617FD924364104F116A0000000000010300001EC2"),

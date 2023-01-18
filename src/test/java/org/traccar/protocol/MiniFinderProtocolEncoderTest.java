@@ -11,7 +11,7 @@ public class MiniFinderProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new MiniFinderProtocolEncoder(null);
+        var encoder = inject(new MiniFinderProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

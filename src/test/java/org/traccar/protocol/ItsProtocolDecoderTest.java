@@ -9,7 +9,7 @@ public class ItsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new ItsProtocolDecoder(null);
+        var decoder = inject(new ItsProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "$,LGN,MARK,000000000,358980100077446,V0.0.1,AIS140,19.804487,N,75.225876,E,*"));

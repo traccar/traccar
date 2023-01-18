@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
@@ -17,16 +17,24 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.traccar.BaseProtocol;
+import org.traccar.ServerManager;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.database.CommandsManager;
 import org.traccar.model.Command;
+import org.traccar.model.Device;
+import org.traccar.model.Position;
 import org.traccar.model.Typed;
+import org.traccar.model.User;
+import org.traccar.model.UserRestrictions;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
+import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -35,40 +43,80 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("commands")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class CommandResource extends ExtendedObjectResource<Command> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandResource.class);
+
+    @Inject
+    private CommandsManager commandsManager;
+
+    @Inject
+    private ServerManager serverManager;
+
     public CommandResource() {
         super(Command.class);
     }
 
+    private BaseProtocol getDeviceProtocol(long deviceId) throws StorageException {
+        Position position = storage.getObject(Position.class, new Request(
+                new Columns.All(), new Condition.LatestPositions(deviceId)));
+        if (position != null) {
+            return serverManager.getProtocol(position.getProtocol());
+        } else {
+            return null;
+        }
+    }
+
     @GET
     @Path("send")
-    public Collection<Command> get(@QueryParam("deviceId") long deviceId) {
-        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        CommandsManager commandsManager = Context.getCommandsManager();
-        Set<Long> result = new HashSet<>(commandsManager.getUserItems(getUserId()));
-        result.retainAll(commandsManager.getSupportedCommands(deviceId));
-        return commandsManager.getItems(result);
+    public Collection<Command> get(@QueryParam("deviceId") long deviceId) throws StorageException {
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        BaseProtocol protocol = getDeviceProtocol(deviceId);
+
+        var commands = storage.getObjects(baseClass, new Request(
+                new Columns.All(),
+                Condition.merge(List.of(
+                        new Condition.Permission(User.class, getUserId(), baseClass),
+                        new Condition.Permission(Device.class, deviceId, baseClass)
+                ))));
+
+        return commands.stream().filter(command -> {
+            String type = command.getType();
+            if (protocol != null) {
+                return command.getTextChannel() && protocol.getSupportedTextCommands().contains(type)
+                        || !command.getTextChannel() && protocol.getSupportedDataCommands().contains(type);
+            } else {
+                return type.equals(Command.TYPE_CUSTOM);
+            }
+        }).collect(Collectors.toList());
     }
 
     @POST
     @Path("send")
     public Response send(Command entity) throws Exception {
-        Context.getPermissionsManager().checkReadonly(getUserId());
-        long deviceId = entity.getDeviceId();
-        long id = entity.getId();
-        Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-        if (id != 0) {
-            Context.getPermissionsManager().checkPermission(Command.class, getUserId(), id);
-            Context.getPermissionsManager().checkUserDeviceCommand(getUserId(), deviceId, id);
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
+        if (entity.getId() > 0) {
+            permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
+            long deviceId = entity.getDeviceId();
+            entity = storage.getObject(baseClass, new Request(
+                    new Columns.All(), new Condition.Equals("id", entity.getId())));
+            entity.setDeviceId(deviceId);
         } else {
-            Context.getPermissionsManager().checkLimitCommands(getUserId());
+            permissionsService.checkRestriction(getUserId(), UserRestrictions::getLimitCommands);
         }
-        if (!Context.getCommandsManager().sendCommand(entity)) {
+        permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
+        if (!commandsManager.sendCommand(entity)) {
             return Response.accepted(entity).build();
         }
         return Response.ok(entity).build();
@@ -78,15 +126,33 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     @Path("types")
     public Collection<Typed> get(
             @QueryParam("deviceId") long deviceId,
-            @QueryParam("protocol") String protocol,
-            @QueryParam("textChannel") boolean textChannel) {
+            @QueryParam("textChannel") boolean textChannel) throws StorageException {
         if (deviceId != 0) {
-            Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-            return Context.getCommandsManager().getCommandTypes(deviceId, textChannel);
-        } else if (protocol != null) {
-            return Context.getCommandsManager().getCommandTypes(protocol, textChannel);
+            permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+            BaseProtocol protocol = getDeviceProtocol(deviceId);
+            if (protocol != null) {
+                if (textChannel) {
+                    return protocol.getSupportedTextCommands().stream().map(Typed::new).collect(Collectors.toList());
+                } else {
+                    return protocol.getSupportedDataCommands().stream().map(Typed::new).collect(Collectors.toList());
+                }
+            } else {
+                return Collections.singletonList(new Typed(Command.TYPE_CUSTOM));
+            }
         } else {
-            return Context.getCommandsManager().getAllCommandTypes();
+            List<Typed> result = new ArrayList<>();
+            Field[] fields = Command.class.getDeclaredFields();
+            for (Field field : fields) {
+                if (Modifier.isStatic(field.getModifiers()) && field.getName().startsWith("TYPE_")) {
+                    try {
+                        result.add(new Typed(field.get(null).toString()));
+                    } catch (IllegalArgumentException | IllegalAccessException error) {
+                        LOGGER.warn("Get command types error", error);
+                    }
+                }
+            }
+            return result;
         }
     }
+
 }

@@ -8,7 +8,7 @@ public class StarcomProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new StarcomProtocolDecoder(null);
+        var decoder = inject(new StarcomProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "|unit=416307,unittype=5,address=186.167.243.28,kind=14,software_version=14.02.18,hardware_type=17,gps_type=6,longitude=-67.85891,latitude=10.21988,datetime_actual=2019/05/07 21:59:38,network=TCPIP.1|\r\n"));

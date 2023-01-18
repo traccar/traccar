@@ -8,7 +8,7 @@ public class FlexibleReportProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new FlexibleReportProtocolDecoder(null);
+        var decoder = inject(new FlexibleReportProtocolDecoder(null));
 
         verifyPosition(decoder, binary(
                 "7d010015875000013001001028fd98991830002e7fffffff0c28fd989903f6540a07f250ed00000f02f2140f5ea20000000000000202d4000a1f8b0100000708ffff"));

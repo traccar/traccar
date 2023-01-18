@@ -17,10 +17,13 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -30,11 +33,30 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
     public TzoneProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, int index) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+        String ack = String.format("@ACK,%d#", index);
+        String time = String.format("@UTC time:%s", dateFormat.format(new Date()));
+
+        ByteBuf response = Unpooled.copiedBuffer(ack + time, StandardCharsets.US_ASCII);
+
+        if (channel != null) {
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
     }
 
     private String decodeAlarm(Short value) {
@@ -261,7 +283,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
             if (hardware == 0x10A || hardware == 0x10B || hardware == 0x406) {
 
                 position.setNetwork(new Network(
-                        CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
+                        CellTower.fromLacCid(getConfig(), buf.readUnsignedShort(), buf.readUnsignedShort())));
 
             } else if (hardware == 0x407) {
 
@@ -346,6 +368,10 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
             decodeTags(position, buf);
 
+        }
+
+        if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+            sendResponse(channel, remoteAddress, buf.getUnsignedShort(buf.writerIndex() - 6));
         }
 
         return position;

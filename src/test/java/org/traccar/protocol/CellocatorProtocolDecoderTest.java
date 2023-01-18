@@ -2,13 +2,18 @@ package org.traccar.protocol;
 
 import org.junit.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class CellocatorProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new CellocatorProtocolDecoder(null);
+        var decoder = inject(new CellocatorProtocolDecoder(null));
+
+        verifyAttribute(decoder, binary(
+                "4d4347500098ab31000856b12b2c041016002c0023b3000021f3f5ffb04c8f0100000000000078dd0004020f716445f75f3b0701126e0200b303000036002538151b0ce607ab"),
+                Position.KEY_IGNITION, true);
 
         verifyPosition(decoder, binary(
                 "4D43475000856308000004B2DE1F04009E00200100000000696CF7AB002F1A00000000000000325C000402069BFDE70857E22502F41C000036000000DF0B0932100B09DC0719"));

@@ -9,7 +9,7 @@ public class TeltonikaProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new TeltonikaProtocolEncoder(null);
+        var encoder = inject(new TeltonikaProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

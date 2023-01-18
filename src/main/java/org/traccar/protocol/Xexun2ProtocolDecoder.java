@@ -20,10 +20,11 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -41,13 +42,14 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    public static final int FLAG = 0xfaaf;
+    public static final int MSG_COMMAND = 0x07;
     public static final int MSG_POSITION = 0x14;
 
     private void sendResponse(Channel channel, int type, int index, ByteBuf imei) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
-            response.writeByte(0xfa);
-            response.writeByte(0xaf);
+            response.writeShort(FLAG);
 
             response.writeShort(type);
             response.writeShort(index);
@@ -56,8 +58,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(0xfffe); // checksum
             response.writeByte(1); // response
 
-            response.writeByte(0xfa);
-            response.writeByte(0xaf);
+            response.writeShort(FLAG);
 
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
@@ -66,6 +67,9 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
     private String decodeAlarm(long value) {
         if (BitUtil.check(value, 0)) {
             return Position.ALARM_SOS;
+        }
+        if (BitUtil.check(value, 1)) {
+            return Position.ALARM_REMOVING;
         }
         if (BitUtil.check(value, 15)) {
             return Position.ALARM_FALL_DOWN;
@@ -96,10 +100,16 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        sendResponse(channel, type, index, imei);
+        int payloadSize = buf.readUnsignedShort() & 0x03ff;
+        int checksum = buf.readUnsignedShort();
 
-        buf.readUnsignedShort(); // attributes
-        buf.readUnsignedShort(); // checksum
+        if (checksum != Checksum.ip(buf.nioBuffer(buf.readerIndex(), payloadSize))) {
+            return null;
+        }
+
+        if (type != MSG_COMMAND) {
+            sendResponse(channel, type, index, imei);
+        }
 
         if (type == MSG_POSITION) {
             List<Integer> lengths = new ArrayList<>();
@@ -173,7 +183,25 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                         position.setLongitude(convertCoordinate(buf.readDouble()));
                         position.setLatitude(convertCoordinate(buf.readDouble()));
-
+                    }
+                    if (BitUtil.check(positionMask, 7)) {
+                        int dataLength = buf.readUnsignedShort();
+                        if (dataLength > 0) {
+                            int dataType = buf.readUnsignedByte();
+                            int dataEndIndex = buf.readerIndex() + buf.readUnsignedShort();
+                            if (dataType == 'G') {
+                                position.setFixTime(position.getDeviceTime());
+                                position.setLongitude(convertCoordinate(buf.readDouble()));
+                                position.setLatitude(convertCoordinate(buf.readDouble()));
+                                position.setValid(buf.readUnsignedByte() > 0);
+                                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                                buf.readUnsignedByte(); // satellite signal-to-noise ratio
+                                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
+                                position.setCourse(buf.readUnsignedShort() * 0.1);
+                                position.setAltitude(buf.readFloat());
+                            }
+                            buf.readerIndex(dataEndIndex);
+                        }
                     }
                 }
                 if (BitUtil.check(mask, 3)) {

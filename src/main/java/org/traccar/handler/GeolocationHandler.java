@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 @ChannelHandler.Sharable
 public class GeolocationHandler extends ChannelInboundHandlerAdapter {
@@ -32,14 +33,19 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(GeolocationHandler.class);
 
     private final GeolocationProvider geolocationProvider;
+    private final CacheManager cacheManager;
     private final StatisticsManager statisticsManager;
     private final boolean processInvalidPositions;
+    private final boolean reuse;
 
     public GeolocationHandler(
-            Config config, GeolocationProvider geolocationProvider, StatisticsManager statisticsManager) {
+            Config config, GeolocationProvider geolocationProvider, CacheManager cacheManager,
+            StatisticsManager statisticsManager) {
         this.geolocationProvider = geolocationProvider;
+        this.cacheManager = cacheManager;
         this.statisticsManager = statisticsManager;
-        this.processInvalidPositions = config.getBoolean(Keys.GEOLOCATION_PROCESS_INVALID_POSITIONS);
+        processInvalidPositions = config.getBoolean(Keys.GEOLOCATION_PROCESS_INVALID_POSITIONS);
+        reuse = config.getBoolean(Keys.GEOLOCATION_REUSE);
     }
 
     @Override
@@ -48,6 +54,17 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
             final Position position = (Position) message;
             if ((position.getOutdated() || processInvalidPositions && !position.getValid())
                     && position.getNetwork() != null) {
+                if (reuse) {
+                    Position lastPosition = cacheManager.getPosition(position.getDeviceId());
+                    if (lastPosition != null && position.getNetwork().equals(lastPosition.getNetwork())) {
+                        updatePosition(
+                                position, lastPosition.getLatitude(), lastPosition.getLongitude(),
+                                lastPosition.getAccuracy());
+                        ctx.fireChannelRead(position);
+                        return;
+                    }
+                }
+
                 if (statisticsManager != null) {
                     statisticsManager.registerGeolocationRequest();
                 }
@@ -56,15 +73,7 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
                         new GeolocationProvider.LocationProviderCallback() {
                     @Override
                     public void onSuccess(double latitude, double longitude, double accuracy) {
-                        position.set(Position.KEY_APPROXIMATE, true);
-                        position.setValid(true);
-                        position.setFixTime(position.getDeviceTime());
-                        position.setLatitude(latitude);
-                        position.setLongitude(longitude);
-                        position.setAccuracy(accuracy);
-                        position.setAltitude(0);
-                        position.setSpeed(0);
-                        position.setCourse(0);
+                        updatePosition(position, latitude, longitude, accuracy);
                         ctx.fireChannelRead(position);
                     }
 
@@ -80,6 +89,18 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
         } else {
             ctx.fireChannelRead(message);
         }
+    }
+
+    private void updatePosition(Position position, double latitude, double longitude, double accuracy) {
+        position.set(Position.KEY_APPROXIMATE, true);
+        position.setValid(true);
+        position.setFixTime(position.getDeviceTime());
+        position.setLatitude(latitude);
+        position.setLongitude(longitude);
+        position.setAccuracy(accuracy);
+        position.setAltitude(0);
+        position.setSpeed(0);
+        position.setCourse(0);
     }
 
 }

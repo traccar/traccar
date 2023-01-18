@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 package org.traccar.protocol;
 
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -46,11 +45,15 @@ import java.util.regex.Pattern;
 
 public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
-    private final boolean ignoreFixTime;
+    private boolean ignoreFixTime;
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
-        ignoreFixTime = Context.getConfig().getBoolean(Keys.PROTOCOL_IGNORE_FIX_TIME.withPrefix(getProtocolName()));
+    }
+
+    @Override
+    protected void init() {
+        ignoreFixTime = getConfig().getBoolean(Keys.PROTOCOL_IGNORE_FIX_TIME.withPrefix(getProtocolName()));
     }
 
     private static final Pattern PATTERN_ACK = new PatternBuilder()
@@ -139,7 +142,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)?,")                    // lac
             .number("(x+)?,")                    // cid
             .groupEnd()
-            .number("(?:d+|(d+.d))?,")           // odometer
+            .number("(?:d+|(d+.d))?,")           // rssi / odometer
             .compile();
 
     private static final Pattern PATTERN_OBD = new PatternBuilder()
@@ -184,7 +187,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("(?:([0-9A-Z]{17}),)?")  // vin
             .expression("[^,]*,")                // device name
             .number("(d+)?,")                    // power
-            .number("d{1,2},").optional()        // report type
+            .number("(d{1,2}),").optional()      // report type
             .number("d{1,2},").optional()        // count
             .number("d*,").optional()            // reserved
             .number("(d+),").optional()          // battery
@@ -208,11 +211,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:d+.?d*|Inf|NaN)?,")      // fuel consumption
             .number("(d+)?,")                    // fuel level
             .or()
-            .number("(d{1,7}.d)?,").optional()   // odometer
-            .number("(d{1,3})?,")                // battery
-            .or()
             .number("(-?d),")                    // rssi
             .number("(d{1,3}),")                 // battery
+            .or()
+            .number("(d{1,7}.d)?,").optional()   // odometer
+            .number("(d{1,3})?,")                // battery
             .groupEnd()
             .any()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
@@ -349,6 +352,22 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
+    private static final Pattern PATTERN_DAR = new PatternBuilder()
+            .text("+RESP:GTDAR,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("(d),")                      // warning type
+            .number("(d{1,2}),,,")               // fatigue degree
+            .expression(PATTERN_LOCATION.pattern())
+            .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private static final Pattern PATTERN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
@@ -357,15 +376,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("d*,")
             .number("(x{1,2}),")                 // report type
             .number("d{1,2},")                   // count
+            .number("d*,").optional()            // reserved
             .expression(PATTERN_LOCATION.pattern())
             .groupBegin()
-            .number("(d{1,7}.d)?,").optional()   // odometer
+            .number("(?:(d{1,7}.d)|0)?,").optional() // odometer
             .number("(d{1,3})?,")                // battery
             .or()
             .number("(d{1,7}.d)?,")              // odometer
             .groupEnd()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)")  // time (hhmmss)
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .text(",")
             .number("(xxxx)")                    // count number
             .text("$").optional()
@@ -377,6 +397,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[0-9A-Z]{2}xxxx)?,").optional() // protocol version
             .number("(d{15}|x{14}),")            // imei
             .any()
+            .text(",")
             .number("(d{1,2})?,")                // hdop
             .number("(d{1,3}.d)?,")              // speed
             .number("(d{1,3})?,")                // course
@@ -835,6 +856,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         String vin = parser.next();
         Integer power = parser.nextInt();
+        Integer reportType = parser.nextInt();
         Integer battery = parser.nextInt();
 
         Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
@@ -877,11 +899,17 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RPM, parser.nextInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
 
+        if (parser.hasNext(2)) {
+            if (reportType != null) {
+                position.set(Position.KEY_MOTION, BitUtil.check(reportType, 0));
+                position.set(Position.KEY_CHARGE, BitUtil.check(reportType, 1));
+            }
+            position.set(Position.KEY_RSSI, parser.nextInt());
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        }
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         }
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
-        position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         decodeDeviceTime(position, parser);
@@ -1114,6 +1142,29 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Object decodeDar(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_DAR, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        int warningType = parser.nextInt();
+        int fatigueDegree = parser.nextInt();
+        if (warningType == 1) {
+            position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+            position.set("fatigueDegree", fatigueDegree);
+        } else {
+            position.set("warningType", warningType);
+        }
+
+        decodeLocation(position, parser);
+
+        decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
@@ -1305,6 +1356,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "PFA":
                     result = decodePna(channel, remoteAddress, sentence);
                     break;
+                case "DAR":
+                    result = decodeDar(channel, remoteAddress, sentence);
+                    break;
                 default:
                     result = decodeOther(channel, remoteAddress, sentence, type);
                     break;
@@ -1325,7 +1379,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (channel != null && Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+        if (channel != null && getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
             String checksum;
             if (sentence.endsWith("$")) {
                 checksum = sentence.substring(sentence.length() - 1 - 4, sentence.length() - 1);

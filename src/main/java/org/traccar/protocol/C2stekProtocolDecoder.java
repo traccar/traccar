@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
@@ -49,10 +49,12 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+)#")                // altitude
             .number("(d+)#")                     // battery
             .number("d+#")                       // geo area alarm
-            .number("(x+)#")                     // alarm
-            .number("([01])")                    // armed
+            .number("(x+)")                      // alarm
+            .groupBegin()
+            .number("#([01])?")                  // armed
             .number("([01])")                    // door
             .number("([01])#")                   // ignition
+            .groupEnd("?")
             .any()
             .text("$AP")
             .compile();
@@ -111,9 +113,13 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
         position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt()));
 
-        position.set(Position.KEY_ARMED, parser.nextInt() > 0);
-        position.set(Position.KEY_DOOR, parser.nextInt() > 0);
-        position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ARMED, parser.nextInt() > 0);
+        }
+        if (parser.hasNext(2)) {
+            position.set(Position.KEY_DOOR, parser.nextInt() > 0);
+            position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+        }
 
         return position;
     }

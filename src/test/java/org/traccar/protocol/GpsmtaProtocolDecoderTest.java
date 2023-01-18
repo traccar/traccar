@@ -8,7 +8,7 @@ public class GpsmtaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GpsmtaProtocolDecoder(null);
+        var decoder = inject(new GpsmtaProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "3085a94ef459 1446536867 49.81621 24.054207 1 0 22 0 10 12 24 0 0"));

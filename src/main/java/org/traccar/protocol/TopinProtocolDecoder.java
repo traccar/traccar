@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
@@ -93,6 +93,19 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
         return negative ? -result : result;
     }
 
+    private String decodeAlarm(int alarms) {
+        if (BitUtil.check(alarms, 0)) {
+            return Position.ALARM_VIBRATION;
+        }
+        if (BitUtil.check(alarms, 1)) {
+            return Position.ALARM_OVERSPEED;
+        }
+        if (BitUtil.check(alarms, 4)) {
+            return Position.ALARM_LOW_POWER;
+        }
+        return null;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -158,17 +171,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             if (buf.readableBytes() >= 5) {
                 position.setAltitude(buf.readShort());
-
-                int alarms = buf.readUnsignedByte();
-                if (BitUtil.check(alarms, 0)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
-                }
-                if (BitUtil.check(alarms, 1)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                }
-                if (BitUtil.check(alarms, 4)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
-                }
+                position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
             }
 
             ByteBuf content = Unpooled.buffer();
@@ -190,10 +193,12 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
+            ByteBuf content = buf.retainedSlice(buf.readerIndex(), buf.readableBytes() - 2);
+
             position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
             position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
             buf.readUnsignedByte(); // timezone
-            int interval = buf.readUnsignedByte();
+            buf.readUnsignedByte(); // interval
             if (buf.readableBytes() >= 1 + 2) {
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             }
@@ -207,8 +212,6 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_HEART_RATE, buf.readUnsignedByte());
             }
 
-            ByteBuf content = Unpooled.buffer();
-            content.writeByte(interval);
             sendResponse(channel, length, type, content);
 
             return position;
@@ -244,6 +247,10 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             for (int i = 0; i < cellCount; i++) {
                 network.addCellTower(CellTower.from(
                         mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort(), buf.readUnsignedByte()));
+            }
+
+            if (buf.readableBytes() > 2) {
+                position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
             }
 
             position.setNetwork(network);

@@ -8,7 +8,10 @@ public class RuptelaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new RuptelaProtocolDecoder(null);
+        var decoder = inject(new RuptelaProtocolDecoder(null));
+
+        verifyNull(decoder, binary(
+                "002e000316d53d58d6020f4573303430302e30332e36382e30340000c2b3090d0e950000827b000003e80000003c003c1681"));
 
         verifyPositions(decoder, binary(
                 "00800003167d765c155d01000160cd0a310000faae43f7176ee45702332b0c12000006070d05007300cfff260082008600870088000f00d7021100d801c900061d0000c500001e0e988300008900008b000002d0000c9bca720c889a0b047e00000000000000007f0000000000000000800000000000000000810000000000000000a341"));

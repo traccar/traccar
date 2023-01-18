@@ -22,11 +22,12 @@ package org.traccar.geocoder;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 
 public class BanGeocoder extends JsonGeocoder {
 
-    public BanGeocoder(int cacheSize, AddressFormat addressFormat) {
-        super("https://api-adresse.data.gouv.fr/reverse/?lat=%f&lon=%f", cacheSize, addressFormat);
+    public BanGeocoder(Client client, int cacheSize, AddressFormat addressFormat) {
+        super(client, "https://api-adresse.data.gouv.fr/reverse/?lat=%f&lon=%f", cacheSize, addressFormat);
     }
 
     @Override

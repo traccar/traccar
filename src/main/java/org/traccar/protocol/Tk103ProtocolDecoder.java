@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -36,11 +35,15 @@ import java.util.regex.Pattern;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
-    private final boolean decodeLow;
+    private boolean decodeLow;
 
     public Tk103ProtocolDecoder(Protocol protocol) {
         super(protocol);
-        decodeLow = Context.getConfig().getBoolean(Keys.PROTOCOL_DECODE_LOW.withPrefix(getProtocolName()));
+    }
+
+    @Override
+    protected void init() {
+        decodeLow = getConfig().getBoolean(Keys.PROTOCOL_DECODE_LOW.withPrefix(getProtocolName()));
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
@@ -94,6 +97,16 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // power voltage
             .number("d+")                        // installed
             .any()
+            .compile();
+
+    private static final Pattern PATTERN_CELL = new PatternBuilder()
+            .text("(")
+            .number("(d{12})")                   // device id
+            .expression(".{4}")                  // type
+            .number("(?:d{15})?,")               // imei
+            .expression("(.+),")                 // cell
+            .number("(d{8})")                    // odometer
+            .text(")")
             .compile();
 
     private static final Pattern PATTERN_NETWORK = new PatternBuilder()
@@ -294,6 +307,39 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeCell(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_CELL, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        Network network = new Network();
+
+        String[] cells = parser.next().split("\n");
+        for (String cell : cells) {
+            String[] values = cell.substring(1, cell.length() - 1).split(",");
+            network.addCellTower(CellTower.from(
+                    Integer.parseInt(values[0]), Integer.parseInt(values[1]),
+                    Integer.parseInt(values[2]), Integer.parseInt(values[3])));
+        }
+
+        position.setNetwork(network);
+
+        position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
+
+        return position;
+    }
+
     private Position decodeNetwork(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_NETWORK, sentence);
         if (!parser.matches()) {
@@ -419,7 +465,9 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (sentence.contains("ZC20")) {
+        if (sentence.indexOf('{') > 0 && sentence.indexOf('}') > 0) {
+            return decodeCell(channel, remoteAddress, sentence);
+        } else if (sentence.contains("ZC20")) {
             return decodeBattery(channel, remoteAddress, sentence);
         } else if (sentence.contains("BZ00")) {
             return decodeNetwork(channel, remoteAddress, sentence);

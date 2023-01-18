@@ -8,7 +8,7 @@ public class CarTrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new CarTrackProtocolDecoder(null);
+        var decoder = inject(new CarTrackProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "$$020040????????&A0000"));

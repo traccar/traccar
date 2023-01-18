@@ -8,7 +8,7 @@ public class MilesmateProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new MilesmateProtocolDecoder(null);
+        var decoder = inject(new MilesmateProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "ApiString={A:861359037373030,B:09.8,C:00.0,D:083506,E:2838.5529N,F:07717.8049E,G:000.00,H:170918,I:G,J:00004100,K:0000000A,L:1234,M:126.86}"));

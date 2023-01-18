@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.notification;
 
 import org.traccar.config.Config;
+import org.traccar.config.ConfigKey;
 import org.traccar.model.ExtendedModel;
 
 public class PropertiesProvider {
@@ -32,36 +33,29 @@ public class PropertiesProvider {
         this.extendedModel = extendedModel;
     }
 
-    public String getString(String key) {
+    public String getString(ConfigKey<String> key) {
         if (config != null) {
             return config.getString(key);
         } else {
-            return extendedModel.getString(key);
+            String result = extendedModel.getString(key.getKey());
+            return result != null ? result : key.getDefaultValue();
         }
     }
 
-    public String getString(String key, String defaultValue) {
-        String value = getString(key);
-        if (value == null) {
-            value = defaultValue;
-        }
-        return value;
-    }
-
-    public int getInteger(String key, int defaultValue) {
+    public int getInteger(ConfigKey<Integer> key) {
         if (config != null) {
-            return config.getInteger(key, defaultValue);
+            return config.getInteger(key);
         } else {
-            Object result = extendedModel.getAttributes().get(key);
+            Object result = extendedModel.getAttributes().get(key.getKey());
             if (result != null) {
                 return result instanceof String ? Integer.parseInt((String) result) : (Integer) result;
             } else {
-                return defaultValue;
+                return key.getDefaultValue();
             }
         }
     }
 
-    public Boolean getBoolean(String key) {
+    public Boolean getBoolean(ConfigKey<Boolean> key) {
         if (config != null) {
             if (config.hasKey(key)) {
                 return config.getBoolean(key);
@@ -69,7 +63,7 @@ public class PropertiesProvider {
                 return null;
             }
         } else {
-            Object result = extendedModel.getAttributes().get(key);
+            Object result = extendedModel.getAttributes().get(key.getKey());
             if (result != null) {
                 return result instanceof String ? Boolean.valueOf((String) result) : (Boolean) result;
             } else {

@@ -8,7 +8,7 @@ public class TekProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TekProtocolDecoder(null);
+        var decoder = inject(new TekProtocolDecoder(null));
 
         verifyPosition(decoder, binary(
                 "0501E304E00E76086107502100455111492C33332C3137303935342E302C353235352E393933344E2C30303833322E34333935572C322E312C3133342E382C322C302E30302C302E302C302E302C3234303931352C30362C3C45"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,12 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.BufferUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
@@ -41,7 +39,7 @@ import java.util.regex.Pattern;
 
 public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WatchProtocolDecoder.class);
+    private ByteBuf audio;
 
     public WatchProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -89,6 +87,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             return Position.ALARM_GEOFENCE_EXIT;
         } else if (BitUtil.check(status, 2)) {
             return Position.ALARM_GEOFENCE_ENTER;
+        } else if (BitUtil.check(status, 14)) {
+            return Position.ALARM_POWER_CUT;
         } else if (BitUtil.check(status, 16)) {
             return Position.ALARM_SOS;
         } else if (BitUtil.check(status, 17)) {
@@ -142,14 +142,21 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         Network network = new Network();
 
         int cellCount = Integer.parseInt(values[index++]);
-        index += 1; // timing advance
-        int mcc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
-        int mnc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
+        if (cellCount > 0) {
+            index += 1; // timing advance
+            int mcc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
+            int mnc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
 
-        for (int i = 0; i < cellCount; i++) {
-            network.addCellTower(CellTower.from(mcc, mnc,
-                    Integer.parseInt(values[index++]), Integer.parseInt(values[index++]),
-                    Integer.parseInt(values[index++])));
+            for (int i = 0; i < cellCount; i++) {
+                int lac = Integer.parseInt(values[index++]);
+                int cid = Integer.parseInt(values[index++]);
+                String rssi = values[index++];
+                if (!rssi.isEmpty()) {
+                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(rssi)));
+                } else {
+                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+                }
+            }
         }
 
         if (index < values.length && !values[index].isEmpty()) {
@@ -157,8 +164,11 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             for (int i = 0; i < wifiCount; i++) {
                 index += 1; // wifi name
-                network.addWifiAccessPoint(WifiAccessPoint.from(
-                        values[index++], Integer.parseInt(values[index++])));
+                String macAddress = values[index++];
+                String rssi = values[index++];
+                if (!macAddress.isEmpty() && !macAddress.equals("0") && !rssi.isEmpty()) {
+                    network.addWifiAccessPoint(WifiAccessPoint.from(macAddress, Integer.parseInt(rssi)));
+                }
             }
         }
 
@@ -253,6 +263,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             Position position = decodePosition(deviceSession, buf.toString(StandardCharsets.US_ASCII));
 
             if (type.startsWith("AL")) {
+                if (position != null) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                }
                 sendResponse(channel, id, index, "AL");
             }
 
@@ -305,17 +318,41 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             int timeIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
             buf.readerIndex(timeIndex + 12 + 2);
-            position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(id, buf, "jpg"));
+            position.set(Position.KEY_IMAGE, writeMediaFile(id, buf, "jpg"));
 
             return position;
+
+        } else if (type.equals("JXTK")) {
+
+            int dataIndex = BufferUtil.indexOf(buf, buf.readerIndex(), buf.writerIndex(), (byte) ',', 4) + 1;
+            String[] values = buf.readCharSequence(
+                    dataIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString().split(",");
+
+            int current = Integer.parseInt(values[2]);
+            int total = Integer.parseInt(values[3]);
+
+            if (audio == null) {
+                audio = Unpooled.buffer();
+            }
+            audio.writeBytes(buf);
+
+            sendResponse(channel, id, index, "JXTKR,1");
+
+            if (current < total) {
+                return null;
+            } else {
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                getLastLocation(position, null);
+                position.set(Position.KEY_AUDIO, writeMediaFile(id, audio, "amr"));
+                audio.release();
+                audio = null;
+                return position;
+            }
 
         } else if (type.equals("TK")) {
 
             if (buf.readableBytes() == 1) {
-                byte result = buf.readByte();
-                if (result != '1') {
-                    LOGGER.warn(type + "," + result);
-                }
                 return null;
             }
 
@@ -324,7 +361,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Position.KEY_AUDIO, Context.getMediaManager().writeFile(id, buf, "amr"));
+            position.set(Position.KEY_AUDIO, writeMediaFile(id, buf, "amr"));
 
             return position;
 

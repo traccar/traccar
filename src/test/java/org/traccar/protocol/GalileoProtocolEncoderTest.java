@@ -9,7 +9,7 @@ public class GalileoProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new GalileoProtocolEncoder(null);
+        var encoder = inject(new GalileoProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

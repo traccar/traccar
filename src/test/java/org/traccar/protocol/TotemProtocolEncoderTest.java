@@ -11,14 +11,28 @@ public class TotemProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new TotemProtocolEncoder(null);
+        var encoder = inject(new TotemProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(2);
-        command.setType(Command.TYPE_ENGINE_STOP);
+        command.setType(Command.TYPE_REBOOT_DEVICE);
         command.set(Command.KEY_DEVICE_PASSWORD, "000000");
 
-        assertEquals("*000000,025,C,1#", encoder.encodeCommand(command));
+        assertEquals("$$0020CF000000,0061D", encoder.encodeCommand(command));
+
+    }
+    
+    @Test
+    public void testSmsEncode() throws Exception {
+
+        var encoder = inject(new TotemProtocolSmsEncoder(null));
+
+        Command command = new Command();
+        command.setDeviceId(2);
+        command.setType(Command.TYPE_REBOOT_DEVICE);
+        command.set(Command.KEY_DEVICE_PASSWORD, "000000");
+
+        assertEquals("*000000,006#", encoder.encodeCommand(command));
 
     }
 

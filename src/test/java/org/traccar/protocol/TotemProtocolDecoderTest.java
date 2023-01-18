@@ -8,7 +8,10 @@ public class TotemProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TotemProtocolDecoder(null);
+        var decoder = inject(new TotemProtocolDecoder(null));
+
+        verifyPosition(decoder, text(
+                "$$0111AA353081090067318|0804400022070722520240400005B364ED5003107300001.700000002245.3919N10231.6952W000001860E"));
 
         verifyPosition(decoder, text(
                 "$$0112E5864606045334223|201112223514,-68.923106,-22.455926,$Cloud,1738,621,730,12100,0,0,255,0,40,40,0,0,255,|13"));

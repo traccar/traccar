@@ -10,7 +10,7 @@ public class NvsFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new NvsFrameDecoder();
+        var decoder = inject(new NvsFrameDecoder());
 
         assertEquals(
                 binary("0012333537303430303630303137383234312e38"),

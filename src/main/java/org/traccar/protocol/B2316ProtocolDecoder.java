@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -116,8 +116,9 @@ public class B2316ProtocolDecoder extends BaseProtocolDecoder {
                 String[] points = item.getString("wi").split(";");
                 for (String point : points) {
                     String[] values = point.split(",");
+                    String mac = values[0].replaceAll("(..)", "$1:");
                     network.addWifiAccessPoint(WifiAccessPoint.from(
-                            values[0].replaceAll("(..)", "$1:"), Integer.parseInt(values[1])));
+                            mac.substring(0, mac.length() - 1), Integer.parseInt(values[1])));
                 }
             }
 

@@ -8,7 +8,7 @@ public class OsmAndProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new OsmAndProtocolDecoder(null);
+        var decoder = inject(new OsmAndProtocolDecoder(null));
 
         verifyNotNull(decoder, request(
                 "/?id=123456&timestamp=1377177267&cell=257,02,16,2224&cell=257,02,16,2223,-90&wifi=00-14-22-01-23-45,-80&wifi=00-1C-B3-09-85-15,-70"));

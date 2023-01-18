@@ -8,7 +8,7 @@ public class DmtProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new DmtProtocolDecoder(null);
+        var decoder = inject(new DmtProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "0255003300001b00003335333232393032373533393235310038393931353030303030303030313330343539340000000403041910780603"));
