@@ -270,17 +270,17 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             int status = buf.readUnsignedShort();
             position.setValid(BitUtil.check(status, 0));
-            if (BitUtil.check(status, 1)) { // designed for car
+            if (BitUtil.check(status, 1)) {
                 position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
             }
-            if (BitUtil.check(status, 3)) { // accelerometer supported
+            if (BitUtil.check(status, 3)) {
                 position.set(Position.KEY_ARMED, BitUtil.check(status, 4));
                 position.set(Position.KEY_MOTION, BitUtil.check(status, 9));
             }
-            if (BitUtil.check(status, 5)) { // relay control supported
+            if (BitUtil.check(status, 5)) {
                 position.set(Position.KEY_BLOCKED, BitUtil.check(status, 6));
             }
-            if (BitUtil.check(status, 7)) { // external charging supported
+            if (BitUtil.check(status, 7)) {
                 position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
             }
             position.set(Position.KEY_GPS, BitUtil.check(status, 10));
