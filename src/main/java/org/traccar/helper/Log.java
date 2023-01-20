@@ -56,10 +56,14 @@ public final class Log {
         private Writer writer;
         private final boolean rotate;
 
-        RollingFileHandler(String name, boolean rotate) {
+        private final String logFileSuffix;
+
+        RollingFileHandler(String name, boolean rotate, String rotateInterval) {
             this.name = name;
             this.rotate = rotate;
+            this.logFileSuffix = rotateInterval.equalsIgnoreCase("HOUR") ? "yyyyMMddHH" : "yyyyMMdd";
         }
+
 
         @Override
         public synchronized void publish(LogRecord record) {
@@ -67,7 +71,7 @@ public final class Log {
                 try {
                     String suffix = "";
                     if (rotate) {
-                        suffix = new SimpleDateFormat("yyyyMMdd").format(new Date(record.getMillis()));
+                        suffix = new SimpleDateFormat(this.logFileSuffix).format(new Date(record.getMillis()));
                         if (writer != null && !suffix.equals(this.suffix)) {
                             writer.close();
                             writer = null;
@@ -169,7 +173,7 @@ public final class Log {
 
     public static void setupDefaultLogger() {
         String path = null;
-        URL url =  ClassLoader.getSystemClassLoader().getResource(".");
+        URL url = ClassLoader.getSystemClassLoader().getResource(".");
         if (url != null) {
             File jarPath = new File(url.getPath());
             File logsPath = new File(jarPath, "logs");
@@ -178,7 +182,7 @@ public final class Log {
             }
             path = new File(logsPath, "tracker-server.log").getPath();
         }
-        setupLogger(path == null, path, Level.WARNING.getName(), false, true);
+        setupLogger(path == null, path, Level.WARNING.getName(), false, true, "DAY");
     }
 
     public static void setupLogger(Config config) {
@@ -187,11 +191,13 @@ public final class Log {
                 config.getString(Keys.LOGGER_FILE),
                 config.getString(Keys.LOGGER_LEVEL),
                 config.getBoolean(Keys.LOGGER_FULL_STACK_TRACES),
-                config.getBoolean(Keys.LOGGER_ROTATE));
+                config.getBoolean(Keys.LOGGER_ROTATE),
+                config.getString(Keys.LOGGER_ROTATE_INTERVAL));
     }
 
     private static void setupLogger(
-            boolean console, String file, String levelString, boolean fullStackTraces, boolean rotate) {
+            boolean console, String file, String levelString,
+            boolean fullStackTraces, boolean rotate, String rotateInterval) {
 
         Logger rootLogger = Logger.getLogger("");
         for (Handler handler : rootLogger.getHandlers()) {
@@ -202,7 +208,7 @@ public final class Log {
         if (console) {
             handler = new ConsoleHandler();
         } else {
-            handler = new RollingFileHandler(file, rotate);
+            handler = new RollingFileHandler(file, rotate, rotateInterval);
         }
 
         handler.setFormatter(new LogFormatter(fullStackTraces));
