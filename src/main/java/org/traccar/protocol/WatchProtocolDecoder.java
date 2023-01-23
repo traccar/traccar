@@ -263,7 +263,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             Position position = decodePosition(deviceSession, buf.toString(StandardCharsets.US_ASCII));
 
             if (type.startsWith("AL")) {
-                if (position != null) {
+                if (position != null && !position.hasAttribute(Position.KEY_ALARM)) {
                     position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
                 }
                 sendResponse(channel, id, index, "AL");
@@ -279,6 +279,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 || type.equalsIgnoreCase("HEART")
                 || type.equalsIgnoreCase("BLOOD")
                 || type.equalsIgnoreCase("BPHRT")
+                || type.equalsIgnoreCase("TEMP")
                 || type.equalsIgnoreCase("btemp2")) {
 
             if (buf.isReadable()) {
@@ -291,7 +292,9 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
                 int valueIndex = 0;
 
-                if (type.equalsIgnoreCase("btemp2")) {
+                if (type.equalsIgnoreCase("TEMP")) {
+                    position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(values[valueIndex]));
+                } else if (type.equalsIgnoreCase("btemp2")) {
                     if (Integer.parseInt(values[valueIndex++]) > 0) {
                         position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(values[valueIndex]));
                     }
