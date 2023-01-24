@@ -272,10 +272,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeIridiumPosition(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
-        buf.readUnsignedShortLE(); // length
+        buf.readUnsignedShort(); // length
 
         buf.skipBytes(3); // identification header
-        buf.readUnsignedIntLE(); // index
+        buf.readUnsignedInt(); // index
 
         DeviceSession deviceSession = getDeviceSession(
                 channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII));
@@ -288,12 +288,19 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // session status
         buf.skipBytes(4); // reserved
-        buf.readUnsignedIntLE(); // date and time
+        position.setTime(new Date(buf.readUnsignedInt() * 1000));
 
-        buf.skipBytes(23); // coordinates block
+        buf.skipBytes(3); // coordinates header
+        int flags = buf.readUnsignedByte();
+        double latitude = buf.readUnsignedByte() + buf.readUnsignedShort() / 60000.0;
+        double longitude = buf.readUnsignedByte() + buf.readUnsignedShort() / 60000.0;
+        position.setLatitude(BitUtil.check(flags, 1) ? -latitude : latitude);
+        position.setLongitude(BitUtil.check(flags, 0) ? -longitude : longitude);
+        buf.readUnsignedInt(); // accuracy
 
-        buf.skipBytes(3); // data tag header
-        decodeMinimalDataSet(position, buf);
+        buf.readUnsignedByte(); // data tag header
+        // ByteBuf data = buf.readSlice(buf.readUnsignedShort());
+        // decodeMinimalDataSet(position, data);
 
         return position;
     }

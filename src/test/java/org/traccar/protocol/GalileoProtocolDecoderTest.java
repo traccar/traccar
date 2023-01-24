@@ -10,7 +10,7 @@ public class GalileoProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new GalileoProtocolDecoder(null));
 
-        verifyNotNull(decoder, binary(
+        verifyPosition(decoder, binary(
                 "01004e01001c0747ea59333030323334303639363034353930000012000063c85e6903000b0321a8f846aba50000000202001e205f5ec863300c4643fdfdbbe6c8fb330000000034e7013505d400000000"));
 
         verifyNotNull(decoder, binary(
