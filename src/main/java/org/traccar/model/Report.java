@@ -20,7 +20,7 @@ import org.traccar.storage.StorageName;
 import java.util.Date;
 
 @StorageName("tc_reports")
-public class Report extends ExtendedModel {
+public class Report extends ScheduledModel {
 
     private String type;
 
