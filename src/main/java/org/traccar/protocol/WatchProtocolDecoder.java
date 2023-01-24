@@ -139,41 +139,45 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         String[] values = parser.next().split(",");
         int index = 0;
 
-        Network network = new Network();
+        if (values.length < 4 || !values[index + 3].startsWith("F")) {
 
-        int cellCount = Integer.parseInt(values[index++]);
-        if (cellCount > 0) {
-            index += 1; // timing advance
-            int mcc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
-            int mnc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
+            Network network = new Network();
 
-            for (int i = 0; i < cellCount; i++) {
-                int lac = Integer.parseInt(values[index++]);
-                int cid = Integer.parseInt(values[index++]);
-                String rssi = values[index++];
-                if (!rssi.isEmpty()) {
-                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(rssi)));
-                } else {
-                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+            int cellCount = Integer.parseInt(values[index++]);
+            if (cellCount > 0) {
+                index += 1; // timing advance
+                int mcc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
+                int mnc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
+
+                for (int i = 0; i < cellCount; i++) {
+                    int lac = Integer.parseInt(values[index++]);
+                    int cid = Integer.parseInt(values[index++]);
+                    String rssi = values[index++];
+                    if (!rssi.isEmpty()) {
+                        network.addCellTower(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(rssi)));
+                    } else {
+                        network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
+                    }
                 }
             }
-        }
 
-        if (index < values.length && !values[index].isEmpty()) {
-            int wifiCount = Integer.parseInt(values[index++]);
+            if (index < values.length && !values[index].isEmpty()) {
+                int wifiCount = Integer.parseInt(values[index++]);
 
-            for (int i = 0; i < wifiCount; i++) {
-                index += 1; // wifi name
-                String macAddress = values[index++];
-                String rssi = values[index++];
-                if (!macAddress.isEmpty() && !macAddress.equals("0") && !rssi.isEmpty()) {
-                    network.addWifiAccessPoint(WifiAccessPoint.from(macAddress, Integer.parseInt(rssi)));
+                for (int i = 0; i < wifiCount; i++) {
+                    index += 1; // wifi name
+                    String macAddress = values[index++];
+                    String rssi = values[index++];
+                    if (!macAddress.isEmpty() && !macAddress.equals("0") && !rssi.isEmpty()) {
+                        network.addWifiAccessPoint(WifiAccessPoint.from(macAddress, Integer.parseInt(rssi)));
+                    }
                 }
             }
-        }
 
-        if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
-            position.setNetwork(network);
+            if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+                position.setNetwork(network);
+            }
+
         }
 
         return position;
