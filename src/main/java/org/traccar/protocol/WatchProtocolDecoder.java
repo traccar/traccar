@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.StringUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -139,7 +140,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         String[] values = parser.next().split(",");
         int index = 0;
 
-        if (values.length < 4 || !values[index + 3].startsWith("F")) {
+        if (values.length < 4 || !StringUtil.containsHex(values[index + 3])) {
 
             Network network = new Network();
 
@@ -150,8 +151,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 int mnc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
 
                 for (int i = 0; i < cellCount; i++) {
-                    int lac = Integer.parseInt(values[index++]);
-                    int cid = Integer.parseInt(values[index++]);
+                    int lac = Integer.parseInt(values[index], StringUtil.containsHex(values[index++]) ? 16 : 10);
+                    int cid = Integer.parseInt(values[index], StringUtil.containsHex(values[index++]) ? 16 : 10);
                     String rssi = values[index++];
                     if (!rssi.isEmpty()) {
                         network.addCellTower(CellTower.from(mcc, mnc, lac, cid, Integer.parseInt(rssi)));

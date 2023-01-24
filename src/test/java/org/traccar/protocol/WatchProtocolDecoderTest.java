@@ -18,6 +18,9 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new WatchProtocolDecoder(null));
 
         verifyPosition(decoder, buffer(
+                "[SG*9059011020*0067*AL,240123,181628,V,54.427538,N,6.409275,W,0.00,0,0,0,19,90,0,0,00000000,1,1,234,10,55C0,3B882A2,132,,10]"));
+
+        verifyPosition(decoder, buffer(
                 "[SG*9059011020*006b*UD2,240123,162011,A,54.427621,N,6.409190,W,0.00,0,0,8,19,88,0,0,00000000,1,1,FFFF,FFFF,FFFE,3B882A2,132,,00]"));
 
         verifyAttribute(decoder, buffer(
