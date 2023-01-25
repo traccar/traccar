@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -116,17 +116,45 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 }
                 if (result != null) {
                     try {
-                        switch (attribute.getType()) {
-                            case "number":
-                                Number numberValue = (Number) result;
-                                position.getAttributes().put(attribute.getAttribute(), numberValue);
+                        switch (attribute.getAttribute()) {
+                            case "valid":
+                                position.setValid((Boolean) result);
                                 break;
-                            case "boolean":
-                                Boolean booleanValue = (Boolean) result;
-                                position.getAttributes().put(attribute.getAttribute(), booleanValue);
+                            case "latitude":
+                                position.setLatitude(((Number) result).doubleValue());
+                                break;
+                            case "longitude":
+                                position.setLongitude(((Number) result).doubleValue());
+                                break;
+                            case "altitude":
+                                position.setAltitude(((Number) result).doubleValue());
+                                break;
+                            case "speed":
+                                position.setSpeed(((Number) result).doubleValue());
+                                break;
+                            case "course":
+                                position.setCourse(((Number) result).doubleValue());
+                                break;
+                            case "address":
+                                position.setAddress((String) result);
+                                break;
+                            case "accuracy":
+                                position.setAccuracy(((Number) result).doubleValue());
                                 break;
                             default:
-                                position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                switch (attribute.getType()) {
+                                    case "number":
+                                        Number numberValue = (Number) result;
+                                        position.getAttributes().put(attribute.getAttribute(), numberValue);
+                                        break;
+                                    case "boolean":
+                                        Boolean booleanValue = (Boolean) result;
+                                        position.getAttributes().put(attribute.getAttribute(), booleanValue);
+                                        break;
+                                    default:
+                                        position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                }
+                                break;
                         }
                     } catch (ClassCastException error) {
                         LOGGER.warn("Attribute cast error", error);
