@@ -17,7 +17,6 @@ package org.traccar.reports.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.api.security.PermissionsService;
 import org.traccar.mail.MailManager;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
