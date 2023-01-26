@@ -24,7 +24,6 @@
     <entry key='logger.level'>info</entry>
     <entry key='logger.file'>./logs/tracker-server.log</entry>
     <entry key='logger.rotate'>true</entry>
-    <entry key='logger.rotate.interval'>day</entry>
 
     <entry key='filter.enable'>true</entry>
     <entry key='filter.future'>86400</entry>

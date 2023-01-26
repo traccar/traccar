@@ -1584,7 +1584,6 @@ public final class Keys {
             List.of(KeyType.CONFIG),
             "day");
 
-
     /**
      * A list of position attributes to log.
      */

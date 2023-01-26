@@ -55,15 +55,13 @@ public final class Log {
         private String suffix;
         private Writer writer;
         private final boolean rotate;
-
-        private final String logFileSuffix;
+        private final String template;
 
         RollingFileHandler(String name, boolean rotate, String rotateInterval) {
             this.name = name;
             this.rotate = rotate;
-            this.logFileSuffix = rotateInterval.equalsIgnoreCase("HOUR") ? "yyyyMMddHH" : "yyyyMMdd";
+            this.template = rotateInterval.equalsIgnoreCase("HOUR") ? "yyyyMMddHH" : "yyyyMMdd";
         }
-
 
         @Override
         public synchronized void publish(LogRecord record) {
@@ -71,7 +69,7 @@ public final class Log {
                 try {
                     String suffix = "";
                     if (rotate) {
-                        suffix = new SimpleDateFormat(this.logFileSuffix).format(new Date(record.getMillis()));
+                        suffix = new SimpleDateFormat(template).format(new Date(record.getMillis()));
                         if (writer != null && !suffix.equals(this.suffix)) {
                             writer.close();
                             writer = null;
