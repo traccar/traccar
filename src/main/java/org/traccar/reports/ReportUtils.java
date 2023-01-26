@@ -158,8 +158,8 @@ public final class ReportUtils {
     public static double calculateFuel(Position firstPosition, Position lastPosition) {
         if (firstPosition.getAttributes().get(Position.KEY_FUEL_USED) != null
                 && lastPosition.getAttributes().get(Position.KEY_FUEL_USED) != null) {
-            BigDecimal value = new BigDecimal(firstPosition.getDouble(Position.KEY_FUEL_USED)
-                    - lastPosition.getDouble(Position.KEY_FUEL_USED));
+            BigDecimal value = new BigDecimal(lastPosition.getDouble(Position.KEY_FUEL_USED)
+                    - firstPosition.getDouble(Position.KEY_FUEL_USED));
             return value.setScale(1, RoundingMode.HALF_EVEN).doubleValue();
         }
         if (firstPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null
