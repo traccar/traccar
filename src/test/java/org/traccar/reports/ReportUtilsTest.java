@@ -63,6 +63,9 @@ public class ReportUtilsTest extends BaseTest {
         startPosition.set(Position.KEY_FUEL_LEVEL, 0.7);
         endPosition.set(Position.KEY_FUEL_LEVEL, 0.5);
         assertEquals(ReportUtils.calculateFuel(startPosition, endPosition), 0.2, 0.01);
+        startPosition.set(Position.KEY_FUEL_USED, 10);
+        endPosition.set(Position.KEY_FUEL_USED, 14.5);
+        assertEquals(ReportUtils.calculateFuel(startPosition, endPosition), 4.5, 0.01);
     }
 
     @Test
