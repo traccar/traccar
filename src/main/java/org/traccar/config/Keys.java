@@ -1575,6 +1575,16 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Log file rotation interval, the default rotation interval is once a day.
+     * This option is ignored if 'logger.rotate' = false
+     * Available options: day, hour
+     */
+    public static final ConfigKey<String> LOGGER_ROTATE_INTERVAL = new StringConfigKey(
+            "logger.rotate.interval",
+            List.of(KeyType.CONFIG),
+            "day");
+
+    /**
      * A list of position attributes to log.
      */
     public static final ConfigKey<String> LOGGER_ATTRIBUTES = new StringConfigKey(
