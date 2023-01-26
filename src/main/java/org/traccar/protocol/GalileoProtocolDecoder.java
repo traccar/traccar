@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,11 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BitBuffer;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -47,6 +49,17 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private ByteBuf photo;
+    private boolean compressed;
+
+    public void setCompressed(boolean compressed) {
+        this.compressed = compressed;
+    }
+
+    public boolean getCompressed(long deviceId) {
+        Boolean value = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_EXTENDED.withPrefix(getProtocolName()), deviceId);
+        return value != null ? value : compressed;
+    }
 
     private static final Map<Integer, Integer> TAG_LENGTH_MAP = new HashMap<>();
 
@@ -299,8 +312,34 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedInt(); // accuracy
 
         buf.readUnsignedByte(); // data tag header
-        // ByteBuf data = buf.readSlice(buf.readUnsignedShort());
-        // decodeMinimalDataSet(position, data);
+        ByteBuf data = buf.readSlice(buf.readUnsignedShort());
+        if (getCompressed(deviceSession.getDeviceId())) {
+
+            decodeMinimalDataSet(position, data);
+
+            int[] tags = new int[BitUtil.to(data.readUnsignedByte(), 8)];
+            for (int i = 0; i < tags.length; i++) {
+                tags[i] = data.readUnsignedByte();
+            }
+
+            for (int tag : tags) {
+                decodeTag(position, data, tag);
+            }
+
+        } else {
+
+            while (data.isReadable()) {
+                int tag = data.readUnsignedByte();
+                if (tag == 0x30) {
+                    position.setValid((data.readUnsignedByte() & 0xf0) == 0x00);
+                    position.setLatitude(data.readIntLE() / 1000000.0);
+                    position.setLongitude(data.readIntLE() / 1000000.0);
+                } else {
+                    decodeTag(position, data, tag);
+                }
+            }
+
+        }
 
         return position;
     }
