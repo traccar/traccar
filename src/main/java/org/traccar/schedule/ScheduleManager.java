@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,12 @@ public class ScheduleManager implements LifecycleObject {
     @Override
     public void start() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        List.of(TaskDeviceInactivityCheck.class, TaskWebSocketKeepalive.class, TaskHealthCheck.class)
-                .forEach(task -> injector.getInstance(task).schedule(executor));
+        var tasks = List.of(
+                TaskReports.class,
+                TaskDeviceInactivityCheck.class,
+                TaskWebSocketKeepalive.class,
+                TaskHealthCheck.class);
+        tasks.forEach(task -> injector.getInstance(task).schedule(executor));
     }
 
     @Override
