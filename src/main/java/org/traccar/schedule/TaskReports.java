@@ -15,6 +15,7 @@
  */
 package org.traccar.schedule;
 
+import net.fortuna.ical4j.model.component.VEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.model.BaseModel;
@@ -86,8 +87,15 @@ public class TaskReports implements ScheduleTask {
             for (Report report : storage.getObjects(Report.class, new Request(new Columns.All()))) {
                 Calendar calendar = storage.getObject(Calendar.class, new Request(
                         new Columns.All(), new Condition.Equals("id", report.getCalendarId())));
-                if (calendar.checkMoment(currentCheck) && !calendar.checkMoment(lastCheck)) {
-                    executeReport(report);
+
+                var lastEvents = calendar.findEvents(lastCheck);
+                var currentEvents = calendar.findEvents(currentCheck);
+
+                if (!lastEvents.isEmpty() && currentEvents.isEmpty()) {
+                    VEvent event = lastEvents.iterator().next();
+                    Date from = event.getStartDate().getDate();
+                    Date to = event.getEndDate().getDate();
+                    executeReport(report, from, to);
                 }
             }
         } catch (StorageException e) {
@@ -95,7 +103,8 @@ public class TaskReports implements ScheduleTask {
         }
     }
 
-    private void executeReport(Report report) throws StorageException {
+    private void executeReport(Report report, Date from, Date to) throws StorageException {
+
         var deviceIds = storage.getObjects(Device.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(Device.class, Report.class, report.getId())))
@@ -107,42 +116,28 @@ public class TaskReports implements ScheduleTask {
         var users = storage.getObjects(User.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(User.class, Report.class, report.getId())));
+
         for (User user : users) {
             switch (report.getType()) {
                 case "events":
-                    reportMailer.sendAsync(user.getId(), stream -> {
-                        eventsReportProvider.getExcel(
-                                stream, user.getId(), deviceIds, groupIds,
-                                List.of(), report.getFrom(), report.getTo());
-                    });
+                    reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
+                            stream, user.getId(), deviceIds, groupIds, List.of(), from, to));
                     break;
                 case "route":
-                    reportMailer.sendAsync(user.getId(), stream -> {
-                        routeReportProvider.getExcel(
-                                stream, user.getId(), deviceIds, groupIds,
-                                report.getFrom(), report.getTo());
-                    });
+                    reportMailer.sendAsync(user.getId(), stream -> routeReportProvider.getExcel(
+                            stream, user.getId(), deviceIds, groupIds, from, to));
                     break;
                 case "summary":
-                    reportMailer.sendAsync(user.getId(), stream -> {
-                        summaryReportProvider.getExcel(
-                                stream, user.getId(), deviceIds, groupIds,
-                                report.getFrom(), report.getTo(), false);
-                    });
+                    reportMailer.sendAsync(user.getId(), stream -> summaryReportProvider.getExcel(
+                            stream, user.getId(), deviceIds, groupIds, from, to, false));
                     break;
                 case "trips":
-                    reportMailer.sendAsync(user.getId(), stream -> {
-                        tripsReportProvider.getExcel(
-                                stream, user.getId(), deviceIds, groupIds,
-                                report.getFrom(), report.getTo());
-                    });
+                    reportMailer.sendAsync(user.getId(), stream -> tripsReportProvider.getExcel(
+                            stream, user.getId(), deviceIds, groupIds, from, to));
                     break;
                 case "stops":
-                    reportMailer.sendAsync(user.getId(), stream -> {
-                        stopsReportProvider.getExcel(
-                                stream, user.getId(), deviceIds, groupIds,
-                                report.getFrom(), report.getTo());
-                    });
+                    reportMailer.sendAsync(user.getId(), stream -> stopsReportProvider.getExcel(
+                            stream, user.getId(), deviceIds, groupIds, from, to));
                     break;
                 default:
                     LOGGER.warn("Unsupported report type {}", report.getType());

@@ -17,8 +17,6 @@ package org.traccar.model;
 
 import org.traccar.storage.StorageName;
 
-import java.util.Date;
-
 @StorageName("tc_reports")
 public class Report extends ScheduledModel {
 
@@ -40,26 +38,6 @@ public class Report extends ScheduledModel {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    private Date from;
-
-    public Date getFrom() {
-        return from;
-    }
-
-    public void setFrom(Date from) {
-        this.from = from;
-    }
-
-    private Date to;
-
-    public Date getTo() {
-        return to;
-    }
-
-    public void setTo(Date to) {
-        this.to = to;
     }
 
 }

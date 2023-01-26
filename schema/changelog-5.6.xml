@@ -25,12 +25,6 @@
       <column name="calendarid" type="INT">
         <constraints nullable="false" />
       </column>
-      <column name="from" type="TIMESTAMP">
-        <constraints nullable="false" />
-      </column>
-      <column name="to" type="TIMESTAMP">
-        <constraints nullable="false" />
-      </column>
       <column name="attributes" type="VARCHAR(4000)">
         <constraints nullable="false" />
       </column>
