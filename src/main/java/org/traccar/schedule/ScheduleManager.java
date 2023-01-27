@@ -39,7 +39,6 @@ public class ScheduleManager implements LifecycleObject {
     public void start() {
         executor = Executors.newSingleThreadScheduledExecutor();
         var tasks = List.of(
-                TaskReports.class,
                 TaskDeviceInactivityCheck.class,
                 TaskWebSocketKeepalive.class,
                 TaskHealthCheck.class);

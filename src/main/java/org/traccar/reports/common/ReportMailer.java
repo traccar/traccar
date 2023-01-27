@@ -17,13 +17,10 @@ package org.traccar.reports.common;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.api.security.PermissionsService;
 import org.traccar.mail.MailManager;
 import org.traccar.model.User;
-import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
 
 import javax.activation.DataHandler;
 import javax.inject.Inject;
@@ -37,12 +34,12 @@ public class ReportMailer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportMailer.class);
 
-    private final Storage storage;
+    private final PermissionsService permissionsService;
     private final MailManager mailManager;
 
     @Inject
-    public ReportMailer(Storage storage, MailManager mailManager) {
-        this.storage = storage;
+    public ReportMailer(PermissionsService permissionsService, MailManager mailManager) {
+        this.permissionsService = permissionsService;
         this.mailManager = mailManager;
     }
 
@@ -57,8 +54,7 @@ public class ReportMailer {
                 attachment.setDataHandler(new DataHandler(new ByteArrayDataSource(
                         stream.toByteArray(), "application/octet-stream")));
 
-                User user = storage.getObject(
-                        User.class, new Request(new Columns.All(), new Condition.Equals("id", userId)));
+                User user = permissionsService.getUser(userId);
                 mailManager.sendMessage(user, "Report", "The report is in the attachment.", attachment);
             } catch (StorageException | IOException | MessagingException e) {
                 LOGGER.warn("Email report failed", e);
