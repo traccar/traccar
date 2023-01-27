@@ -15,6 +15,9 @@
  */
 package org.traccar.schedule;
 
+import com.google.inject.Injector;
+import com.google.inject.servlet.RequestScoper;
+import com.google.inject.servlet.ServletScopes;
 import net.fortuna.ical4j.model.component.VEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +40,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -50,27 +54,12 @@ public class TaskReports implements ScheduleTask {
     private static final long CHECK_PERIOD_MINUTES = 1;
 
     private final Storage storage;
-    private final ReportMailer reportMailer;
+    private final Injector injector;
 
     @Inject
-    private EventsReportProvider eventsReportProvider;
-
-    @Inject
-    private RouteReportProvider routeReportProvider;
-
-    @Inject
-    private StopsReportProvider stopsReportProvider;
-
-    @Inject
-    private SummaryReportProvider summaryReportProvider;
-
-    @Inject
-    private TripsReportProvider tripsReportProvider;
-
-    @Inject
-    public TaskReports(Storage storage, ReportMailer reportMailer) {
+    public TaskReports(Storage storage, Injector injector) {
         this.storage = storage;
-        this.reportMailer = reportMailer;
+        this.injector = injector;
     }
 
     @Override
@@ -95,7 +84,10 @@ public class TaskReports implements ScheduleTask {
                     VEvent event = lastEvents.iterator().next();
                     Date from = event.getStartDate().getDate();
                     Date to = event.getEndDate().getDate();
-                    executeReport(report, from, to);
+                    RequestScoper scope = ServletScopes.scopeRequest(Collections.emptyMap());
+                    try (RequestScoper.CloseableScope ignored = scope.open()) {
+                        executeReport(report, from, to);
+                    }
                 }
             }
         } catch (StorageException e) {
@@ -117,25 +109,32 @@ public class TaskReports implements ScheduleTask {
                 new Columns.Include("id"),
                 new Condition.Permission(User.class, Report.class, report.getId())));
 
+        ReportMailer reportMailer = injector.getInstance(ReportMailer.class);
+
         for (User user : users) {
             switch (report.getType()) {
                 case "events":
+                    var eventsReportProvider = injector.getInstance(EventsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, List.of(), from, to));
                     break;
                 case "route":
+                    var routeReportProvider = injector.getInstance(RouteReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> routeReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to));
                     break;
                 case "summary":
+                    var summaryReportProvider = injector.getInstance(SummaryReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> summaryReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to, false));
                     break;
                 case "trips":
+                    var tripsReportProvider = injector.getInstance(TripsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> tripsReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to));
                     break;
                 case "stops":
+                    var stopsReportProvider = injector.getInstance(StopsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> stopsReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to));
                     break;
