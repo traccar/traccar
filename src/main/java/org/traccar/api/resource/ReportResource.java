@@ -16,12 +16,11 @@
  */
 package org.traccar.api.resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.api.BaseResource;
+import org.traccar.api.SimpleObjectResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.Report;
 import org.traccar.model.UserRestrictions;
 import org.traccar.reports.EventsReportProvider;
 import org.traccar.reports.RouteReportProvider;
@@ -54,9 +53,7 @@ import java.util.List;
 @Path("reports")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ReportResource extends BaseResource {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReportResource.class);
+public class ReportResource extends SimpleObjectResource<Report> {
 
     private static final String EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
@@ -77,6 +74,10 @@ public class ReportResource extends BaseResource {
 
     @Inject
     private ReportMailer reportMailer;
+
+    public ReportResource() {
+        super(Report.class);
+    }
 
     private Response executeReport(long userId, boolean mail, ReportExecutor executor) {
         if (mail) {
