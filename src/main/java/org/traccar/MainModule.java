@@ -26,7 +26,6 @@ import com.google.inject.name.Names;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.log.NullLogChute;
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.broadcast.MulticastBroadcastService;
@@ -361,7 +360,6 @@ public class MainModule extends AbstractModule {
     public static VelocityEngine provideVelocityEngine(Config config) {
         Properties properties = new Properties();
         properties.setProperty("file.resource.loader.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
-        properties.setProperty("runtime.log.logsystem.class", NullLogChute.class.getName());
 
         if (config.hasKey(Keys.WEB_URL)) {
             properties.setProperty("web.url", config.getString(Keys.WEB_URL).replaceAll("/$", ""));

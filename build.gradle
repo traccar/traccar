@@ -69,8 +69,8 @@ dependencies {
     implementation "com.sun.mail:jakarta.mail:1.6.7"
     implementation "org.jxls:jxls:2.4.7" // needs upgrade (wait for jexl 4)
     implementation "org.jxls:jxls-poi:1.0.16" // needs upgrade (wait for jexl 4)
-    implementation "org.apache.velocity:velocity:1.7" // needs upgrade
-    implementation "org.apache.velocity:velocity-tools:2.0" // needs upgrade
+    implementation 'org.apache.velocity:velocity-engine-core:2.3'
+    implementation 'org.apache.velocity.tools:velocity-tools-generic:3.1'
     implementation "org.apache.commons:commons-collections4:4.4"
     implementation "org.mnode.ical4j:ical4j:3.2.7"
     implementation "org.locationtech.spatial4j:spatial4j:0.8"
