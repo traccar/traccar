@@ -26,9 +26,10 @@ import java.util.Map;
 import java.util.Set;
 
 import io.netty.channel.ChannelHandler;
-import org.apache.commons.jexl2.JexlEngine;
-import org.apache.commons.jexl2.JexlException;
-import org.apache.commons.jexl2.MapContext;
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlException;
+import org.apache.commons.jexl3.MapContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
@@ -57,9 +58,10 @@ public class ComputedAttributesHandler extends BaseDataHandler {
     @Inject
     public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
-        engine = new JexlEngine();
-        engine.setStrict(true);
-        engine.setFunctions(Collections.singletonMap("math", Math.class));
+        engine = new JexlBuilder()
+                .strict(true)
+                .namespaces(Collections.singletonMap("math", Math.class))
+                .create();
         includeDeviceAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES);
     }
 
@@ -68,13 +70,13 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         if (includeDeviceAttributes) {
             Device device = cacheManager.getObject(Device.class, position.getDeviceId());
             if (device != null) {
-                for (Object key : device.getAttributes().keySet()) {
-                    result.set((String) key, device.getAttributes().get(key));
+                for (String key : device.getAttributes().keySet()) {
+                    result.set(key, device.getAttributes().get(key));
                 }
             }
         }
         Set<Method> methods = new HashSet<>(Arrays.asList(position.getClass().getMethods()));
-        methods.removeAll(Arrays.asList(Object.class.getMethods()));
+        Arrays.asList(Object.class.getMethods()).forEach(methods::remove);
         for (Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 String name = Character.toLowerCase(method.getName().charAt(3)) + method.getName().substring(4);
@@ -83,8 +85,8 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                     if (!method.getReturnType().equals(Map.class)) {
                         result.set(name, method.invoke(position));
                     } else {
-                        for (Object key : ((Map) method.invoke(position)).keySet()) {
-                            result.set((String) key, ((Map) method.invoke(position)).get(key));
+                        for (Object key : ((Map<?, ?>) method.invoke(position)).keySet()) {
+                            result.set((String) key, ((Map<?, ?>) method.invoke(position)).get(key));
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {

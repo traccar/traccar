@@ -15,6 +15,7 @@ ext {
     jerseyVersion = "2.37" // jersey 3 javax to jakarta
     jacksonVersion = "2.13.4" // same version as jersey-media-json-jackson dependency
     protobufVersion = "3.21.9"
+    jxlsVersion = "2.12.0"
 }
 
 sourceCompatibility = "11"
@@ -67,8 +68,8 @@ dependencies {
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr353:$jacksonVersion"
     implementation "org.liquibase:liquibase-core:4.17.2"
     implementation "com.sun.mail:jakarta.mail:1.6.7"
-    implementation "org.jxls:jxls:2.4.7" // needs upgrade (wait for jexl 4)
-    implementation "org.jxls:jxls-poi:1.0.16" // needs upgrade (wait for jexl 4)
+    implementation "org.jxls:jxls:$jxlsVersion"
+    implementation "org.jxls:jxls-poi:$jxlsVersion"
     implementation 'org.apache.velocity:velocity-engine-core:2.3'
     implementation 'org.apache.velocity.tools:velocity-tools-generic:3.1'
     implementation "org.apache.commons:commons-collections4:4.4"
