@@ -78,9 +78,6 @@ dependencies {
     implementation "net.java.dev.jna:jna-platform:5.12.1"
     implementation "com.github.jnr:jnr-posix:3.1.16"
     implementation "com.google.protobuf:protobuf-java:$protobufVersion"
-    implementation "javax.xml.bind:jaxb-api:2.3.1"
-    implementation "com.sun.xml.bind:jaxb-core:3.0.2" // needs upgrade
-    implementation "com.sun.xml.bind:jaxb-impl:3.0.2" // needs upgrade
     implementation "javax.activation:activation:1.1.1"
     implementation "com.amazonaws:aws-java-sdk-sns:1.12.349"
     implementation "org.apache.kafka:kafka-clients:3.3.1"
