@@ -359,7 +359,7 @@ public class MainModule extends AbstractModule {
     @Provides
     public static VelocityEngine provideVelocityEngine(Config config) {
         Properties properties = new Properties();
-        properties.setProperty("file.resource.loader.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
+        properties.setProperty("resource.loader.file.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
 
         if (config.hasKey(Keys.WEB_URL)) {
             properties.setProperty("web.url", config.getString(Keys.WEB_URL).replaceAll("/$", ""));
