@@ -16,6 +16,7 @@
 package org.traccar.reports.model;
 
 import org.traccar.model.Event;
+import org.traccar.model.Position;
 
 import java.util.List;
 
@@ -49,6 +50,16 @@ public class CombinedReportItem {
 
     public void setEvents(List<Event> events) {
         this.events = events;
+    }
+
+    private List<Position> positions;
+
+    public List<Position> getPositions() {
+        return positions;
+    }
+
+    public void setPositions(List<Position> positions) {
+        this.positions = positions;
     }
 
 }

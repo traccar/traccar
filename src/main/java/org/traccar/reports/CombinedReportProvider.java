@@ -53,16 +53,24 @@ public class CombinedReportProvider {
         for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
             CombinedReportItem item = new CombinedReportItem();
             item.setDeviceId(device.getId());
-            item.setRoute(PositionUtil.getPositions(storage, device.getId(), from, to)
-                    .stream()
-                    .map(p -> new double[] { p.getLongitude(), p.getLatitude() })
+            var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
+            item.setRoute(positions.stream()
+                    .map(p -> new double[] {p.getLongitude(), p.getLatitude()})
                     .collect(Collectors.toList()));
-            item.setEvents(storage.getObjects(Event.class, new Request(
+            var events = storage.getObjects(Event.class, new Request(
                     new Columns.All(),
                     new Condition.And(
                             new Condition.Equals("deviceId", device.getId()),
                             new Condition.Between("eventTime", "from", from, "to", to)),
-                    new Order("eventTime"))));
+                    new Order("eventTime")));
+            item.setEvents(events);
+            var eventPositions = events.stream()
+                    .map(Event::getPositionId)
+                    .filter(positionId -> positionId > 0)
+                    .collect(Collectors.toSet());
+            item.setPositions(positions.stream()
+                    .filter(p -> eventPositions.contains(p.getId()))
+                    .collect(Collectors.toList()));
             result.add(item);
         }
         return result;
