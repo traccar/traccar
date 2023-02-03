@@ -63,10 +63,11 @@ public class CombinedReportProvider {
                             new Condition.Equals("deviceId", device.getId()),
                             new Condition.Between("eventTime", "from", from, "to", to)),
                     new Order("eventTime")));
-            item.setEvents(events);
+            item.setEvents(events.stream()
+                    .filter(p -> p.getPositionId() > 0)
+                    .collect(Collectors.toList()));
             var eventPositions = events.stream()
                     .map(Event::getPositionId)
-                    .filter(positionId -> positionId > 0)
                     .collect(Collectors.toSet());
             item.setPositions(positions.stream()
                     .filter(p -> eventPositions.contains(p.getId()))
