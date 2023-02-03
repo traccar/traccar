@@ -31,9 +31,12 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CombinedReportProvider {
+
+    private static final Set<String> EXCLUDE_TYPES = Set.of(Event.TYPE_DEVICE_MOVING);
 
     private final ReportUtils reportUtils;
     private final Storage storage;
@@ -64,7 +67,7 @@ public class CombinedReportProvider {
                             new Condition.Between("eventTime", "from", from, "to", to)),
                     new Order("eventTime")));
             item.setEvents(events.stream()
-                    .filter(p -> p.getPositionId() > 0)
+                    .filter(e -> e.getPositionId() > 0 && !EXCLUDE_TYPES.contains(e.getType()))
                     .collect(Collectors.toList()));
             var eventPositions = events.stream()
                     .map(Event::getPositionId)
