@@ -314,7 +314,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (buf.readableBytes() >= 12) {
-                position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() / 256.0);
+                position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 256.0);
                 position.set("humidity", buf.readUnsignedShort() * 0.1);
                 position.set("illuminance", buf.readUnsignedInt() / 256.0);
                 position.set("co2", buf.readUnsignedInt());
