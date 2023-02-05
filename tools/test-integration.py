@@ -4,7 +4,7 @@ import sys
 import os
 import xml.etree.ElementTree
 import urllib
-import urllib2
+import urllib.request as urllib2
 import json
 import socket
 import time
@@ -18,10 +18,9 @@ messages = {
     't55' : '$PGID,123456789012345*0F\r\n$GPRMC,120500.000,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,,*33\r\n',
     'xexun' : '111111120009,+436763737552,GPRMC,120600.000,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,,,A*68,F,, imei:123456789012345,04,481.2,F:4.15V,0,139,2689,232,03,2725,0576\n',
     'totem' : '$$B3123456789012345|AA$GPRMC,120700.000,A,6000.0000,N,13000.0000,E,0.00,,010112,,,A*74|01.8|01.0|01.5|000000000000|20120403234603|14251914|00000000|0012D888|0000|0.0000|3674|940B\r\n',
-    'meiligao' : '$$\x00\x60\x12\x34\x56\xFF\xFF\xFF\xFF\x99\x55120900.000,A,6000.0000,N,13000.0000,E,0.00,,010112,,*1C|11.5|194|0000|0000,0000\x69\x62\x0D\x0A',
     'suntech' : 'SA200STT;123456;042;20120101;12:11:00;16d41;-15.618767;-056.083214;000.011;000.00;11;1;41557;12.21;000000;1;3205\r',
     'h02' : '*HQ,123456789012345,V1,121300,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,ffffffff,000000,000000,000000,000000#',
-    'jt600' : '$\x00\x00\x12\x34\x56\x11\x00\x1B\x01\x01\x12\x12\x14\x00\x60\x00\x00\x00\x13\x00\x00\x00\x0F\x00\x00\x07\x50\x00\x00\x00\x2B\x91\x04\x4D\x1F\xA1',
+    'jt600' : '(1234567890,P45,290322,132412,25.28217,S,57.54683,W,A,0,0,5,0,0000000000,0,0,9,0)',
     'v680' : '#123456789012345#1000#0#1000#AUT#1#66830FFB#13000.0000,E,6000.0000,N,001.41,259#010112#121600##',
     'pt502' : '$POS,123456,121700.000,A,6000.0000,N,13000.0000,E,0.0,0.0,010112,,,A/00000,00000/0/23895000//\r\n',
     'tr20' : '%%123456789012345,A,120101121800,N6000.0000E13000.0000,0,000,0,01034802,150,[Message]\r\n',
@@ -119,6 +118,9 @@ messages = {
     'mobilogix': '[2020-10-25 20:45:09,T9,1,V1.2.3,123456789012,59,10.50,701,-25.236860,-45.708530,0,314]',
     'swiftech': '@@123456789012345,,0,102040,1023.9670,N,07606.8160,E,2.26,151220,A,0127,1,1,03962,00000,#',
     'ennfu': 'Ennfu:123456789012345,041504.00,A,3154.86654,N,11849.08737,E,0.053,,080121,20,3.72,21.4,V0.01$',
+    'startek': '&&o125,123456789012345,000,0,,210702235150,A,27.263505,153.037061,11,1.2,0,0,31,5125,505|1|7032|8C89802,20,0000002D,00,00,01E2|019DF0\r\n',
+    'hoopo': '{ "deviceId": "123456789012345", "assetName": "123456789012345", "assetType": "test", "eventData": { "latitude": 31.97498, "longitude": 34.80802, "locationName": "", "accuracyLevel": "High", "eventType": "Arrival", "batteryLevel": 100, "receiveTime": "2021-09-20T18:52:32Z" }, "eventTime": "2021-09-20T08:52:02Z", "serverReportTime": "0001-01-01T00:00:00Z" }',
+    'techtocruz': '$$A120,123456789012345,211005105836,A,FLEX,KCB 947C,000.0,0,-1.38047,S,36.93951,E,1648.4,243.140,21,28,12.1,3.7,0,1,0,0,0,*F6',
 }
 
 baseUrl = 'http://localhost:8082'
@@ -135,14 +137,14 @@ def load_ports():
         if key.endswith('.port'):
             ports[key[:-5]] = int(entry.text)
     if debug:
-        print '\nports: %s\n' % repr(ports)
+        print('\nports: {ports!r}\n')
     return ports
 
 def login():
     request = urllib2.Request(baseUrl + '/api/session')
-    response = urllib2.urlopen(request, urllib.parse.urlencode(user))
+    response = urllib2.urlopen(request, urllib.parse.urlencode(user).encode())
     if debug:
-        print '\nlogin: %s\n' % repr(json.load(response))
+        print(f'\nlogin: {json.load(response)!r}\n')
     return response.headers.get('Set-Cookie')
 
 def remove_devices(cookie):
@@ -151,7 +153,7 @@ def remove_devices(cookie):
     response = urllib2.urlopen(request)
     data = json.load(response)
     if debug:
-        print '\ndevices: %s\n' % repr(data)
+        print(f'\ndevices: {data!r}\n')
     for device in data:
         request = urllib2.Request(baseUrl + '/api/devices/' + str(device['id']))
         request.add_header('Cookie', cookie)
@@ -163,14 +165,14 @@ def add_device(cookie, unique_id):
     request.add_header('Cookie', cookie)
     request.add_header('Content-Type', 'application/json')
     device = { 'name' : unique_id, 'uniqueId' : unique_id }
-    response = urllib2.urlopen(request, json.dumps(device))
+    response = urllib2.urlopen(request, json.dumps(device).encode())
     data = json.load(response)
     return data['id']
 
 def send_message(port, message):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', port))
-    s.send(message)
+    s.send(message.encode('ascii'))
     time.sleep(0.5)
     s.close()
 
@@ -203,9 +205,9 @@ if __name__ == "__main__":
     all = set(ports.keys())
     protocols = set(messages.keys())
 
-    print 'Total: %d' % len(all)
-    print 'Missing: %d' % len(all - protocols)
-    print 'Covered: %d' % len(protocols)
+    print(f'Total: {len(all)}')
+    print(f'Missing: {len(all - protocols)}')
+    print(f'Covered: {len(protocols)}')
 
     for protocol in messages:
         send_message(ports[protocol], messages[protocol])
@@ -213,8 +215,8 @@ if __name__ == "__main__":
     for device in devices:
         protocols -= set(get_protocols(cookie, devices[device]))
 
-    print 'Success: %d' % (len(messages) - len(protocols))
-    print 'Failed: %d' % len(protocols)
+    print(f'Success: {len(messages) - len(protocols)}')
+    print(f'Failed:{len(protocols)}')
 
     if protocols:
-        print '\nFailed: %s' % repr(list(protocols))
+        print(f'\nFailed: {list(protocols)!r}')
