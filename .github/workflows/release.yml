@@ -11,7 +11,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-18.04
 
     steps:
       - uses: actions/checkout@v3
@@ -41,9 +41,8 @@ jobs:
       - run: ./traccar-web/tools/package.sh
       - run: |
           sudo dpkg --add-architecture i386
-          sudo dpkg -l | awk '/ii  lib.*deb.sury.org/ {gsub(/:.*/, s, $2); print $2}' | xargs apt show -a | awk '/Package:/ {p=$2} /APT-Sources: .*focal\/main/ {print p"/focal"}' | sudo xargs eatmydata apt install --allow-downgrades
-          sudo DEBIAN_FRONTEND=noninteractive eatmydata apt install -y --no-install-recommends wine-stable wine32
-          sudo apt-get install innoextract makeself s3cmd
+          sudo apt-get update
+          sudo apt-get install innoextract makeself wine32 s3cmd
       - name: Build installers
         working-directory: ./setup
         run: |
