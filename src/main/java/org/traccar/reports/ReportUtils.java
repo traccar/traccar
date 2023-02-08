@@ -129,13 +129,6 @@ public final class ReportUtils {
     }
 
     public static double calculateDistance(Position firstPosition, Position lastPosition, boolean useOdometer, Collection<Position> positions) {
-
-        double distance = calculateDistance(firstPosition, lastPosition, useOdometer);
-        if(null == positions || isValid(firstPosition, lastPosition, distance)){
-            return distance;
-        }
-
-        //invalid distance - need to calculate a fixed one checking position by position
         Double fixedDistance = 0.0;
         Position previous = null;
         for (Position p : positions) {
@@ -156,6 +149,12 @@ public final class ReportUtils {
     }
 
     public static double calculateFuel(Position firstPosition, Position lastPosition) {
+        if (firstPosition.getAttributes().get("io107") != null
+                && lastPosition.getAttributes().get(Position.KEY_FUEL_USED) != null) {
+            BigDecimal value = new BigDecimal(lastPosition.getDouble(Position.KEY_FUEL_USED)
+                    - firstPosition.getDouble(Position.KEY_FUEL_USED));
+            return value.setScale(1, RoundingMode.HALF_EVEN).doubleValue();
+        }
         if (firstPosition.getAttributes().get(Position.KEY_FUEL_USED) != null
                 && lastPosition.getAttributes().get(Position.KEY_FUEL_USED) != null) {
             BigDecimal value = new BigDecimal(lastPosition.getDouble(Position.KEY_FUEL_USED)
