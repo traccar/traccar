@@ -29,6 +29,7 @@ import org.traccar.Context;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
 import org.traccar.handler.events.MotionEventHandler;
+import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.DeviceState;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
@@ -102,6 +103,10 @@ public final class ReportUtils {
 
         if (useOdometer && (firstOdometer != 0.0 || lastOdometer != 0.0)) {
             distance = lastOdometer - firstOdometer;
+        } else if (firstPosition.getProtocol() == "osmand") {
+            distance = DistanceCalculator.distance(
+                    firstPosition.getLatitude(), firstPosition.getLongitude(),
+                    lastPosition.getLatitude(), lastPosition.getLongitude());
         } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                 && lastPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
             distance = lastPosition.getDouble(Position.KEY_TOTAL_DISTANCE)
