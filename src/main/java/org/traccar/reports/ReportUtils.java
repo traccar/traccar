@@ -129,6 +129,14 @@ public final class ReportUtils {
     }
 
     public static double calculateDistance(Position firstPosition, Position lastPosition, boolean useOdometer, Collection<Position> positions) {
+
+        double distance = calculateDistance(firstPosition, lastPosition, useOdometer);
+        if(null == positions || isValid(firstPosition, lastPosition, distance)){
+            if (firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER))
+                return distance;
+        }
+
+        //invalid distance - need to calculate a fixed one checking position by position
         Double fixedDistance = 0.0;
         Position previous = null;
         for (Position p : positions) {
