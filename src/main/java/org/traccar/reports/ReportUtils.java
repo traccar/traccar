@@ -131,7 +131,7 @@ public final class ReportUtils {
     public static double calculateDistance(Position firstPosition, Position lastPosition, boolean useOdometer, Collection<Position> positions) {
 
         double distance = calculateDistance(firstPosition, lastPosition, useOdometer);
-        if(null == positions) {
+        if (null == positions) {
             return distance;
         }
         if (isValid(firstPosition, lastPosition, distance) &&
