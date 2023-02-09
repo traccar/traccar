@@ -132,7 +132,8 @@ public final class ReportUtils {
 
         double distance = calculateDistance(firstPosition, lastPosition, useOdometer);
         if(null == positions || isValid(firstPosition, lastPosition, distance)){
-            return distance;
+            if (firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER))
+                return distance;
         }
 
         //invalid distance - need to calculate a fixed one checking position by position
