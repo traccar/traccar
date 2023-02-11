@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BitUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -43,9 +44,6 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    public static final int MSG_COMPACT = 0x0100;
-    public static final int MSG_FULL = 0x00FE;
-
     private static final String[] DIRECTIONS = new String[] {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
 
     @Override
@@ -58,6 +56,8 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
         if (protocol == 0x01) {
             return decode01(channel, remoteAddress, buf);
+        } else if (protocol == 0x04) {
+            return decode04(channel, remoteAddress, buf);
         } else if (protocol == 0x80) {
             return decode80(channel, remoteAddress, buf);
         }
@@ -71,7 +71,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShortLE();
         int type = buf.readUnsignedShortLE();
 
-        if (type == MSG_COMPACT || type == MSG_FULL) {
+        if (type == 0x0100 || type == 0x00FE) {
 
             buf.readUnsignedShort(); // length
             buf.readUnsignedShort(); // mask
@@ -79,21 +79,21 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
             long id = buf.readUnsignedIntLE();
             buf.readUnsignedInt(); // time
 
-            Position position = new Position(getProtocolName());
-            position.set(Position.KEY_INDEX, index);
-            position.setValid(true);
-
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
             if (deviceSession == null) {
                 return null;
             }
+
+            Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
+            position.set(Position.KEY_INDEX, index);
 
             // need to send ack?
 
             buf.readUnsignedShortLE(); // report trigger
             buf.readUnsignedShortLE(); // state flag
 
+            position.setValid(true);
             position.setLatitude(buf.readUnsignedIntLE() * 0.0000001);
             position.setLongitude(buf.readUnsignedIntLE() * 0.0000001);
 
@@ -123,6 +123,88 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
+    private Position decode04(Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws ParseException {
+
+        buf.readUnsignedShortLE(); // length
+        buf.readUnsignedShortLE(); // checksum
+        int index = buf.readUnsignedShortLE();
+
+        String id = String.format("%08d%07d", buf.readUnsignedIntLE(), buf.readUnsignedIntLE());
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        position.set(Position.KEY_INDEX, index);
+
+        position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
+
+        while (buf.isReadable()) {
+            int type = buf.readUnsignedByte();
+            switch (type) {
+                case 0:
+                    position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
+                    buf.readUnsignedIntLE(); // event data
+
+                    int status = buf.readUnsignedShortLE();
+                    position.set(Position.KEY_IGNITION, BitUtil.check(status, 5));
+                    position.set(Position.KEY_STATUS, status);
+
+                    position.setValid(true);
+                    position.setLatitude(buf.readInt() * 0.00001);
+                    position.setLongitude(buf.readInt() * 0.00001);
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
+                    position.setCourse(buf.readUnsignedShortLE());
+
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    position.set(Position.KEY_GPS, buf.readUnsignedByte());
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShortLE());
+                    position.set("maxAcceleration", buf.readUnsignedShortLE() * 0.001);
+                    position.set("maxDeceleration", buf.readUnsignedShortLE() * 0.001);
+                    buf.readUnsignedShortLE(); // bearing to landmark
+                    buf.readUnsignedIntLE(); // distance to landmark
+
+                    position.setFixTime(new Date(buf.readUnsignedIntLE() * 1000));
+
+                    buf.readUnsignedByte(); // reserved
+                    break;
+                case 1:
+                    buf.skipBytes(buf.readUnsignedShortLE()); // landmark
+                    break;
+                case 4:
+                    buf.skipBytes(53); // trip
+                    break;
+                case 20:
+                    buf.skipBytes(32); // extended
+                    break;
+                case 22:
+                    buf.readUnsignedByte(); // zone flag
+                    buf.skipBytes(buf.readUnsignedShortLE()); // zone name
+                    break;
+                case 30:
+                    buf.skipBytes(79); // system status
+                    break;
+                case 40:
+                    buf.skipBytes(40); // analog
+                    break;
+                case 50:
+                    buf.skipBytes(buf.readUnsignedShortLE()); // console
+                    break;
+                case 255:
+                    buf.skipBytes(4); // acknowledgement
+                    break;
+                default:
+                    throw new IllegalArgumentException(String.format("Unknown type %d", type));
+            }
+        }
+
+        return position.getValid() ? position : null;
+
+    }
+
     private Position decode80(Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws ParseException {
 
         buf.readUnsignedByte(); // version id
@@ -135,15 +217,14 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         long id = buf.readUnsignedInt();
         buf.readUnsignedInt(); // time
 
-        Position position = new Position(getProtocolName());
-        position.set(Position.KEY_INDEX, index);
-        position.setValid(true);
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+        position.set(Position.KEY_INDEX, index);
 
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(
@@ -159,6 +240,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setLatitude(Double.parseDouble(matcher.group(1)));
         position.setLongitude(Double.parseDouble(matcher.group(2)));
+        position.setValid(true);
 
         pattern = Pattern.compile("([NSWE]{1,2}) with speed (\\d+) km/h");
         matcher = pattern.matcher(sentence);
