@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ public class TramigoFrameDecoder extends BaseFrameDecoder {
         if (buf.getUnsignedByte(buf.readerIndex()) == 0x80) {
             length = buf.getUnsignedShortLE(buf.readerIndex() + 6);
         } else {
-            length = buf.getUnsignedShort(buf.readerIndex() + 6);
+            length = buf.getUnsignedShortLE(buf.readerIndex() + 1);
         }
 
         if (length <= buf.readableBytes()) {
