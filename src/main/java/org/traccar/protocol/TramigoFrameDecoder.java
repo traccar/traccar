@@ -29,11 +29,15 @@ public class TramigoFrameDecoder extends BaseFrameDecoder {
             return null;
         }
 
+        int protocol = buf.getUnsignedByte(buf.readerIndex());
+
         int length;
-        if (buf.getUnsignedByte(buf.readerIndex()) == 0x80) {
+        if (protocol == 0x80) {
             length = buf.getUnsignedShortLE(buf.readerIndex() + 6);
-        } else {
+        } else if (protocol == 0x02 || protocol == 0x04) {
             length = buf.getUnsignedShortLE(buf.readerIndex() + 1);
+        } else {
+            length = buf.getUnsignedShort(buf.readerIndex() + 6);
         }
 
         if (length <= buf.readableBytes()) {
