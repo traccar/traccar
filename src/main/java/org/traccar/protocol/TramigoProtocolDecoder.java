@@ -153,8 +153,8 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_STATUS, status);
 
                     position.setValid(true);
-                    position.setLatitude(buf.readInt() * 0.00001);
-                    position.setLongitude(buf.readInt() * 0.00001);
+                    position.setLatitude(buf.readIntLE() * 0.00001);
+                    position.setLongitude(buf.readIntLE() * 0.00001);
                     position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
                     position.setCourse(buf.readUnsignedShortLE());
 
@@ -172,7 +172,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // reserved
                     break;
                 case 1:
-                    buf.skipBytes(buf.readUnsignedShortLE()); // landmark
+                    buf.skipBytes(buf.readUnsignedShortLE() - 3); // landmark
                     break;
                 case 4:
                     buf.skipBytes(53); // trip
@@ -191,7 +191,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
                     buf.skipBytes(40); // analog
                     break;
                 case 50:
-                    buf.skipBytes(buf.readUnsignedShortLE()); // console
+                    buf.skipBytes(buf.readUnsignedShortLE() - 3); // console
                     break;
                 case 255:
                     buf.skipBytes(4); // acknowledgement
