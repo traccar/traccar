@@ -176,7 +176,21 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private static final Pattern PATTERN_OBD = new PatternBuilder()
+    private static final Pattern PATTERN_E2 = new PatternBuilder()
+            .text("$$")                          // header
+            .number("dddd")                      // length
+            .number("xx")                        // type
+            .number("(d+)|")                     // imei
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(-?d+.d+),")                // longitude
+            .number("(-?d+.d+),")                // latitude
+            .expression("(.+)")                  // rfid
+            .number("|xx")                       // checksum
+            .any()
+            .compile();
+
+    private static final Pattern PATTERN_E5 = new PatternBuilder()
             .text("$$")                          // header
             .number("dddd")                      // length
             .number("xx")                        // type
@@ -396,6 +410,15 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
 
         int type = Integer.parseInt(sentence.substring(6, 8), 16);
 
+        switch (type) {
+            case 0xE2:
+                return decodeE2(channel, remoteAddress, sentence);
+            case 0xE5:
+                return decodeE5(channel, remoteAddress, sentence);
+            default:
+                break;
+        }
+
         Parser parser = new Parser(PATTERN4, sentence);
         if (!parser.matches()) {
             return null;
@@ -473,9 +496,34 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Position decodeE2(Channel channel, SocketAddress remoteAddress, String sentence) {
 
-        Parser parser = new Parser(PATTERN_OBD, sentence);
+        Parser parser = new Parser(PATTERN_E2, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setValid(true);
+        position.setTime(parser.nextDateTime());
+        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble());
+
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+
+        return position;
+    }
+
+    private Position decodeE5(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_E5, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -517,9 +565,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         String sentence = (String) msg;
 
         Position position;
-        if (sentence.contains("$Cloud")) {
-            position = decodeObd(channel, remoteAddress, sentence);
-        } else if (sentence.charAt(2) == '0') {
+        if (sentence.charAt(2) == '0') {
             position = decode4(channel, remoteAddress, sentence);
         } else if (sentence.contains("$GPRMC")) {
             position = decode12(channel, remoteAddress, sentence, PATTERN1);
