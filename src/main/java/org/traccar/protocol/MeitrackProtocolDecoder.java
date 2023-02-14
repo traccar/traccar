@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -510,6 +510,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x0D:
                         position.set("runtime", buf.readUnsignedIntLE());
                         break;
+                    case 0x25:
+                        position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
+                        break;
                     case 0xA0:
                         position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE() * 0.001);
                         break;
@@ -624,6 +627,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 photo = Unpooled.buffer();
                 requestPhotoPacket(channel, remoteAddress, imei, "camera_picture.jpg", 0);
                 return null;
+            case "D82":
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(getDeviceSession(channel, remoteAddress, imei).getDeviceId());
+                getLastLocation(position, null);
+                String result = buf.toString(index + 1, buf.writerIndex() - index - 4, StandardCharsets.US_ASCII);
+                position.set(Position.KEY_RESULT, result);
+                return position;
             case "CCC":
                 return decodeBinaryC(channel, remoteAddress, buf);
             case "CCE":
