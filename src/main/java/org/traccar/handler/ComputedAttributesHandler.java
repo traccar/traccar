@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,9 +26,10 @@ import java.util.Map;
 import java.util.Set;
 
 import io.netty.channel.ChannelHandler;
-import org.apache.commons.jexl2.JexlEngine;
-import org.apache.commons.jexl2.JexlException;
-import org.apache.commons.jexl2.MapContext;
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlException;
+import org.apache.commons.jexl3.MapContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
@@ -57,9 +58,10 @@ public class ComputedAttributesHandler extends BaseDataHandler {
     @Inject
     public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
-        engine = new JexlEngine();
-        engine.setStrict(true);
-        engine.setFunctions(Collections.singletonMap("math", Math.class));
+        engine = new JexlBuilder()
+                .strict(true)
+                .namespaces(Collections.singletonMap("math", Math.class))
+                .create();
         includeDeviceAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES);
     }
 
@@ -68,13 +70,13 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         if (includeDeviceAttributes) {
             Device device = cacheManager.getObject(Device.class, position.getDeviceId());
             if (device != null) {
-                for (Object key : device.getAttributes().keySet()) {
-                    result.set((String) key, device.getAttributes().get(key));
+                for (String key : device.getAttributes().keySet()) {
+                    result.set(key, device.getAttributes().get(key));
                 }
             }
         }
         Set<Method> methods = new HashSet<>(Arrays.asList(position.getClass().getMethods()));
-        methods.removeAll(Arrays.asList(Object.class.getMethods()));
+        Arrays.asList(Object.class.getMethods()).forEach(methods::remove);
         for (Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 String name = Character.toLowerCase(method.getName().charAt(3)) + method.getName().substring(4);
@@ -83,8 +85,8 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                     if (!method.getReturnType().equals(Map.class)) {
                         result.set(name, method.invoke(position));
                     } else {
-                        for (Object key : ((Map) method.invoke(position)).keySet()) {
-                            result.set((String) key, ((Map) method.invoke(position)).get(key));
+                        for (Object key : ((Map<?, ?>) method.invoke(position)).keySet()) {
+                            result.set((String) key, ((Map<?, ?>) method.invoke(position)).get(key));
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
@@ -116,17 +118,45 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 }
                 if (result != null) {
                     try {
-                        switch (attribute.getType()) {
-                            case "number":
-                                Number numberValue = (Number) result;
-                                position.getAttributes().put(attribute.getAttribute(), numberValue);
+                        switch (attribute.getAttribute()) {
+                            case "valid":
+                                position.setValid((Boolean) result);
                                 break;
-                            case "boolean":
-                                Boolean booleanValue = (Boolean) result;
-                                position.getAttributes().put(attribute.getAttribute(), booleanValue);
+                            case "latitude":
+                                position.setLatitude(((Number) result).doubleValue());
+                                break;
+                            case "longitude":
+                                position.setLongitude(((Number) result).doubleValue());
+                                break;
+                            case "altitude":
+                                position.setAltitude(((Number) result).doubleValue());
+                                break;
+                            case "speed":
+                                position.setSpeed(((Number) result).doubleValue());
+                                break;
+                            case "course":
+                                position.setCourse(((Number) result).doubleValue());
+                                break;
+                            case "address":
+                                position.setAddress((String) result);
+                                break;
+                            case "accuracy":
+                                position.setAccuracy(((Number) result).doubleValue());
                                 break;
                             default:
-                                position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                switch (attribute.getType()) {
+                                    case "number":
+                                        Number numberValue = (Number) result;
+                                        position.getAttributes().put(attribute.getAttribute(), numberValue);
+                                        break;
+                                    case "boolean":
+                                        Boolean booleanValue = (Boolean) result;
+                                        position.getAttributes().put(attribute.getAttribute(), booleanValue);
+                                        break;
+                                    default:
+                                        position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                }
+                                break;
                         }
                     } catch (ClassCastException error) {
                         LOGGER.warn("Attribute cast error", error);

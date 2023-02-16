@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import re
 import os
@@ -22,6 +22,7 @@ def get_config_keys():
     desc_re = re.compile(r"(/\*\*\n|\s+\*/|\s+\*)")
     key_match_re = re.compile(r"\(\n(.+)\);", re.DOTALL)
     key_split_re = re.compile(r",\s+", re.DOTALL)
+    types_match_re = re.compile(r"List\.of\(([^)]+)\)", re.DOTALL)
     keys = []
 
     with open(_KEYS_FILE, "r") as f:
@@ -34,16 +35,18 @@ def get_config_keys():
                 if key_match:
                     terms = [x.strip() for x in key_split_re.split(key_match.group(1))]
                     key = terms[0].replace('"', "")
+                    key = "[protocol]" + key if key.startswith('.') else key
                     description = [
                         x.strip().replace("\n", "")
                         for x in desc_re.sub("\n", i[0]).strip().split("\n\n")
                     ]
-                    if len(terms) == 3:
-                        description.append(f"Default: {terms[2]}")
+                    types_match = types_match_re.search(i[1])
+                    types = map(lambda x: x[8:].lower(), types_match[1].split(", "))
                     keys.append(
                         {
                             "key": key,
                             "description": description,
+                            "types": types,
                         }
                     )
             except IndexError:
@@ -60,7 +63,7 @@ def get_html():
             f"""        <div class="card mt-3">
           <div class="card-body">
               <h5 class="card-title">
-                {x["key"]} <span class="badge badge-dark">config</span>
+                {x["key"]}
               </h5>
               <p class="card-text">
                 {"<br /> ".join(x["description"])}
@@ -77,7 +80,7 @@ def get_pug():
         [
             f"""  div(class='card mt-3')
     div(class='card-body')
-      h5(class='card-title') {x["key"]} #[span(class='badge badge-dark') config]
+      h5(class='card-title') {x["key"]} {" ".join(map("#[span(class='badge badge-dark') {:}]".format, x["types"]))}
       p(class='card-text') {"#[br] ".join(x["description"])}"""
             for x in get_config_keys()
         ]

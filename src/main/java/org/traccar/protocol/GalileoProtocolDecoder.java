@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,11 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.BitBuffer;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -46,6 +49,17 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private ByteBuf photo;
+    private boolean compressed;
+
+    public void setCompressed(boolean compressed) {
+        this.compressed = compressed;
+    }
+
+    public boolean getCompressed(long deviceId) {
+        Boolean value = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_EXTENDED.withPrefix(getProtocolName()), deviceId);
+        return value != null ? value : compressed;
+    }
 
     private static final Map<Integer, Integer> TAG_LENGTH_MAP = new HashMap<>();
 
@@ -66,7 +80,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         };
         int[] l3 = {
             0x63, 0x64, 0x6f, 0x5d, 0x65, 0x66, 0x67, 0x68,
-            0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e
+            0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0xfa
         };
         int[] l4 = {
             0x20, 0x33, 0x44, 0x90, 0xc0, 0xc2, 0xc3, 0xd3,
@@ -88,6 +102,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         }
         TAG_LENGTH_MAP.put(0x5b, 7); // variable length
         TAG_LENGTH_MAP.put(0x5c, 68);
+        TAG_LENGTH_MAP.put(0xfd, 8);
+        TAG_LENGTH_MAP.put(0xfe, 8);
     }
 
     private static int getTagLength(int tag) {
@@ -239,6 +255,8 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             }
         } else if (header == 0x07) {
             return decodePhoto(channel, remoteAddress, buf);
+        } else if (header == 0x08) {
+            return decodeCompressedPositions(channel, remoteAddress, buf);
         }
 
         return null;
@@ -259,7 +277,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         position.setValid(bits.readUnsigned(1) == 0);
         position.setLongitude(360 * bits.readUnsigned(22) / 4194304.0 - 180);
-        position.setLatitude(360 * bits.readUnsigned(21) / 2097152.0 - 90);
+        position.setLatitude(180 * bits.readUnsigned(21) / 2097152.0 - 90);
         if (bits.readUnsigned(1) > 0) {
             position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
         }
@@ -267,10 +285,10 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeIridiumPosition(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
-        buf.readUnsignedShortLE(); // length
+        buf.readUnsignedShort(); // length
 
         buf.skipBytes(3); // identification header
-        buf.readUnsignedIntLE(); // index
+        buf.readUnsignedInt(); // index
 
         DeviceSession deviceSession = getDeviceSession(
                 channel, remoteAddress, buf.readSlice(15).toString(StandardCharsets.US_ASCII));
@@ -283,12 +301,45 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // session status
         buf.skipBytes(4); // reserved
-        buf.readUnsignedIntLE(); // date and time
+        position.setTime(new Date(buf.readUnsignedInt() * 1000));
 
-        buf.skipBytes(23); // coordinates block
+        buf.skipBytes(3); // coordinates header
+        int flags = buf.readUnsignedByte();
+        double latitude = buf.readUnsignedByte() + buf.readUnsignedShort() / 60000.0;
+        double longitude = buf.readUnsignedByte() + buf.readUnsignedShort() / 60000.0;
+        position.setLatitude(BitUtil.check(flags, 1) ? -latitude : latitude);
+        position.setLongitude(BitUtil.check(flags, 0) ? -longitude : longitude);
+        buf.readUnsignedInt(); // accuracy
 
-        buf.skipBytes(3); // data tag header
-        decodeMinimalDataSet(position, buf);
+        buf.readUnsignedByte(); // data tag header
+        ByteBuf data = buf.readSlice(buf.readUnsignedShort());
+        if (getCompressed(deviceSession.getDeviceId())) {
+
+            decodeMinimalDataSet(position, data);
+
+            int[] tags = new int[BitUtil.to(data.readUnsignedByte(), 8)];
+            for (int i = 0; i < tags.length; i++) {
+                tags[i] = data.readUnsignedByte();
+            }
+
+            for (int tag : tags) {
+                decodeTag(position, data, tag);
+            }
+
+        } else {
+
+            while (data.isReadable()) {
+                int tag = data.readUnsignedByte();
+                if (tag == 0x30) {
+                    position.setValid((data.readUnsignedByte() & 0xf0) == 0x00);
+                    position.setLatitude(data.readIntLE() / 1000000.0);
+                    position.setLongitude(data.readIntLE() / 1000000.0);
+                } else {
+                    decodeTag(position, data, tag);
+                }
+            }
+
+        }
 
         return position;
     }
@@ -390,6 +441,45 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, 0x07, buf.readUnsignedShortLE());
 
         return position;
+    }
+
+    private List<Position> decodeCompressedPositions(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        buf.readUnsignedShortLE(); // length
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        List<Position> positions = new LinkedList<>();
+        while (buf.readableBytes() > 2) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            decodeMinimalDataSet(position, buf);
+
+            int[] tags = new int[BitUtil.to(buf.readUnsignedByte(), 8)];
+            for (int i = 0; i < tags.length; i++) {
+                tags[i] = buf.readUnsignedByte();
+            }
+
+            for (int tag : tags) {
+                decodeTag(position, buf, tag);
+            }
+
+            positions.add(position);
+
+        }
+
+        sendResponse(channel, 0x02, buf.readUnsignedShortLE());
+
+        for (Position p : positions) {
+            p.setDeviceId(deviceSession.getDeviceId());
+        }
+
+        return positions.isEmpty() ? null : positions;
     }
 
 }

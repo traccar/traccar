@@ -571,6 +571,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 case 0x00CE:
                                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                                     break;
+                                case 0x00D8:
+                                    Network network = new Network();
+                                    network.addCellTower(CellTower.from(
+                                            buf.readUnsignedShort(), buf.readUnsignedByte(),
+                                            buf.readUnsignedShort(), buf.readUnsignedInt()));
+                                    position.setNetwork(network);
+                                    break;
                                 case 0xE1:
                                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                                     break;

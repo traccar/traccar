@@ -273,6 +273,17 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             if (BitUtil.check(status, 1)) {
                 position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
             }
+            if (BitUtil.check(status, 3)) {
+                position.set(Position.KEY_ARMED, BitUtil.check(status, 4));
+                position.set(Position.KEY_MOTION, BitUtil.check(status, 9));
+            }
+            if (BitUtil.check(status, 5)) {
+                position.set(Position.KEY_BLOCKED, BitUtil.check(status, 6));
+            }
+            if (BitUtil.check(status, 7)) {
+                position.set(Position.KEY_CHARGE, BitUtil.check(status, 8));
+            }
+            position.set(Position.KEY_GPS, BitUtil.check(status, 10));
             position.set(Position.KEY_STATUS, status);
 
         }
@@ -303,7 +314,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (buf.readableBytes() >= 12) {
-                position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() / 256.0);
+                position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 256.0);
                 position.set("humidity", buf.readUnsignedShort() * 0.1);
                 position.set("illuminance", buf.readUnsignedInt() / 256.0);
                 position.set("co2", buf.readUnsignedInt());

@@ -41,7 +41,7 @@ public class ComputedAttributesTest {
         attribute.setExpression("(bitFlag & 4) != 0");
         assertEquals(true, handler.computeAttribute(attribute, position));
 
-        attribute.setExpression("if (event == 42) \"lowBattery\"");
+        attribute.setExpression("event == 42 ? \"lowBattery\" : null");
         assertEquals("lowBattery", handler.computeAttribute(attribute, position));
 
         attribute.setExpression("speed > 5 && valid");

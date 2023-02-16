@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,13 +60,13 @@ public class FuelEventHandler extends BaseEventHandler {
                 if (change > 0) {
                     double threshold = AttributeUtil.lookup(
                             cacheManager, Keys.EVENT_FUEL_INCREASE_THRESHOLD, position.getDeviceId());
-                    if (change >= threshold) {
+                    if (threshold > 0 && change >= threshold) {
                         return Map.of(new Event(Event.TYPE_DEVICE_FUEL_INCREASE, position), position);
                     }
                 } else if (change < 0) {
                     double threshold = AttributeUtil.lookup(
                             cacheManager, Keys.EVENT_FUEL_DROP_THRESHOLD, position.getDeviceId());
-                    if (Math.abs(change) >= threshold) {
+                    if (threshold > 0 && Math.abs(change) >= threshold) {
                         return Map.of(new Event(Event.TYPE_DEVICE_FUEL_DROP, position), position);
                     }
                 }

@@ -105,7 +105,6 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     @POST
     @Path("send")
     public Response send(Command entity) throws Exception {
-        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         if (entity.getId() > 0) {
             permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
             long deviceId = entity.getDeviceId();

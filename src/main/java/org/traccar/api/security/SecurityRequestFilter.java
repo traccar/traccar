@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,13 +42,6 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityRequestFilter.class);
 
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
-    public static final String BASIC_REALM = "Basic realm=\"api\"";
-    public static final String BEARER_PREFIX = "Bearer ";
-    public static final String X_REQUESTED_WITH = "X-Requested-With";
-    public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
-
     public static String[] decodeBasicAuth(String auth) {
         auth = auth.replaceFirst("[B|b]asic ", "");
         byte[] decodedBytes = DataConverter.parseBase64(auth);
@@ -81,13 +74,13 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
         try {
 
-            String authHeader = requestContext.getHeaderString(AUTHORIZATION_HEADER);
+            String authHeader = requestContext.getHeaderString("Authorization");
             if (authHeader != null) {
 
                 try {
                     User user;
-                    if (authHeader.startsWith(BEARER_PREFIX)) {
-                        user = loginService.login(authHeader.substring(BEARER_PREFIX.length()));
+                    if (authHeader.startsWith("Bearer ")) {
+                        user = loginService.login(authHeader.substring(7));
                     } else {
                         String[] auth = decodeBasicAuth(authHeader);
                         user = loginService.login(auth[0], auth[1]);
@@ -120,8 +113,9 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
             Method method = resourceInfo.getResourceMethod();
             if (!method.isAnnotationPresent(PermitAll.class)) {
                 Response.ResponseBuilder responseBuilder = Response.status(Response.Status.UNAUTHORIZED);
-                if (!XML_HTTP_REQUEST.equals(request.getHeader(X_REQUESTED_WITH))) {
-                    responseBuilder.header(WWW_AUTHENTICATE, BASIC_REALM);
+                String accept = request.getHeader("Accept");
+                if (accept != null && accept.contains("text/html")) {
+                    responseBuilder.header("WWW-Authenticate", "Basic realm=\"api\"");
                 }
                 throw new WebApplicationException(responseBuilder.build());
             }

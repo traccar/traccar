@@ -510,7 +510,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * LDAP server URL.
+     * LDAP server URL. For more info check <a href="https://www.traccar.org/ldap/">LDAP config</a>.
      */
     public static final ConfigKey<String> LDAP_URL = new StringConfigKey(
             "ldap.url",
@@ -1573,6 +1573,16 @@ public final class Keys {
     public static final ConfigKey<Boolean> LOGGER_ROTATE = new BooleanConfigKey(
             "logger.rotate",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Log file rotation interval, the default rotation interval is once a day.
+     * This option is ignored if 'logger.rotate' = false
+     * Available options: day, hour
+     */
+    public static final ConfigKey<String> LOGGER_ROTATE_INTERVAL = new StringConfigKey(
+            "logger.rotate.interval",
+            List.of(KeyType.CONFIG),
+            "day");
 
     /**
      * A list of position attributes to log.

@@ -19,6 +19,7 @@ import org.traccar.api.BaseObjectResource;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.model.UserUtil;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
@@ -96,6 +97,10 @@ public class UserResource extends BaseObjectResource<User> {
                     entity.setExpirationTime(new Date(System.currentTimeMillis() + expirationDays * 86400000L));
                 }
             }
+        }
+
+        if (UserUtil.isEmpty(storage)) {
+            entity.setAdministrator(true);
         }
 
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));

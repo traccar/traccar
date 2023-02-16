@@ -249,4 +249,16 @@ public class Server extends ExtendedModel implements UserRestrictions {
         this.storageSpace = storageSpace;
     }
 
+    private boolean newServer;
+
+    @QueryIgnore
+    public boolean getNewServer() {
+        return newServer;
+    }
+
+    @QueryIgnore
+    public void setNewServer(boolean newServer) {
+        this.newServer = newServer;
+    }
+
 }

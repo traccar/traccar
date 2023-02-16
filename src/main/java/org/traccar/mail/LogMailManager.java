@@ -38,7 +38,9 @@ public class LogMailManager implements MailManager {
 
     @Override
     public void sendMessage(User user, String subject, String body, MimeBodyPart attachment) throws MessagingException {
-        LOGGER.info("\nTo: " + user.getEmail() + "\nSubject: " + subject + "\nBody:\n" + body);
+        LOGGER.info(
+                "Email sent\nTo: {}\nSubject: {}\nAttachment: {}\nBody:\n{}",
+                user.getEmail(), subject, attachment != null ? attachment.getFileName() : null, body);
     }
 
 }

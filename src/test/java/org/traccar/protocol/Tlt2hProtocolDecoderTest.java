@@ -81,6 +81,13 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
                 "#357671031289215#V600#0000#AUTOLOW#1\r\n",
                 "#00735e1c$GPRMC,115647.000,A,5553.6524,N,02632.3128,E,0.00,0.0,130614,0.0,W,A*28"));
 
+        verifyPositions(decoder, false, text(
+                "#860186058100000#MT700#0000#AUTO#1\r\n",
+                "#39#262,03,8CE6,A672$WIFI,154928.00,A,-74,3CA62F52615B,-82,A0E4CB83852D,,,050123*28\r\n##\r\n"));
+
+        verifyPositions(decoder, false, text(
+                "#860186058100000#MT700#0000#AUTO#1\r\n",
+                "#39#262,03,8CE6,A672$GPRMC,115419.00,V,,,,,,,050123,,,A*7D\r\n##\r\n"));
     }
 
 }

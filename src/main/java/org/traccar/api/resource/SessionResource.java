@@ -110,7 +110,10 @@ public class SessionResource extends BaseResource {
 
         } else {
 
-            return permissionsService.getUser(userId);
+            User user = permissionsService.getUser(userId);
+            if (user != null) {
+                return user;
+            }
 
         }
 

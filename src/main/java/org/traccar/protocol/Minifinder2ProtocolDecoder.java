@@ -272,8 +272,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x31:
                         int i = 1;
                         while (buf.readerIndex() < endIndex) {
-                            position.set("activity" + i + "Time", buf.readUnsignedInt());
-                            position.set("activity" + i, buf.readUnsignedInt());
+                            position.set("activity" + i + "Time", buf.readUnsignedIntLE());
+                            position.set("activity" + i, buf.readUnsignedIntLE());
                             i += 1;
                         }
                         break;

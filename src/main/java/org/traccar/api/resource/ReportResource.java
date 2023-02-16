@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,30 +16,27 @@
  */
 package org.traccar.api.resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.api.BaseResource;
-import org.traccar.mail.MailManager;
+import org.traccar.api.SimpleObjectResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.model.User;
+import org.traccar.model.Report;
 import org.traccar.model.UserRestrictions;
+import org.traccar.reports.CombinedReportProvider;
 import org.traccar.reports.EventsReportProvider;
 import org.traccar.reports.RouteReportProvider;
 import org.traccar.reports.StopsReportProvider;
 import org.traccar.reports.SummaryReportProvider;
 import org.traccar.reports.TripsReportProvider;
+import org.traccar.reports.common.ReportExecutor;
+import org.traccar.reports.common.ReportMailer;
+import org.traccar.reports.model.CombinedReportItem;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.SummaryReportItem;
 import org.traccar.reports.model.TripReportItem;
 import org.traccar.storage.StorageException;
 
-import javax.activation.DataHandler;
 import javax.inject.Inject;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.util.ByteArrayDataSource;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -51,9 +48,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -61,11 +55,12 @@ import java.util.List;
 @Path("reports")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class ReportResource extends BaseResource {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReportResource.class);
+public class ReportResource extends SimpleObjectResource<Report> {
 
     private static final String EXCEL = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+    @Inject
+    private CombinedReportProvider combinedReportProvider;
 
     @Inject
     private EventsReportProvider eventsReportProvider;
@@ -83,31 +78,15 @@ public class ReportResource extends BaseResource {
     private TripsReportProvider tripsReportProvider;
 
     @Inject
-    private MailManager mailManager;
+    private ReportMailer reportMailer;
 
-    private interface ReportExecutor {
-        void execute(OutputStream stream) throws StorageException, IOException;
+    public ReportResource() {
+        super(Report.class);
     }
 
-    private Response executeReport(
-            long userId, boolean mail, ReportExecutor executor) {
+    private Response executeReport(long userId, boolean mail, ReportExecutor executor) {
         if (mail) {
-            new Thread(() -> {
-                try {
-                    var stream = new ByteArrayOutputStream();
-                    executor.execute(stream);
-
-                    MimeBodyPart attachment = new MimeBodyPart();
-                    attachment.setFileName("report.xlsx");
-                    attachment.setDataHandler(new DataHandler(new ByteArrayDataSource(
-                            stream.toByteArray(), "application/octet-stream")));
-
-                    User user = permissionsService.getUser(userId);
-                    mailManager.sendMessage(user, "Report", "The report is in the attachment.", attachment);
-                } catch (StorageException | IOException | MessagingException e) {
-                    LOGGER.warn("Report failed", e);
-                }
-            }).start();
+            reportMailer.sendAsync(userId, executor);
             return Response.noContent().build();
         } else {
             StreamingOutput stream = output -> {
@@ -120,6 +99,18 @@ public class ReportResource extends BaseResource {
             return Response.ok(stream)
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=report.xlsx").build();
         }
+    }
+
+    @Path("combined")
+    @GET
+    public Collection<CombinedReportItem> getCombined(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        LogAction.logReport(getUserId(), "combined", from, to, deviceIds, groupIds);
+        return combinedReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
     }
 
     @Path("route")

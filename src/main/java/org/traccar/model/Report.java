@@ -13,34 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.storage.query;
+package org.traccar.model;
 
-public class Order {
+import org.traccar.storage.StorageName;
 
-    private final String column;
-    private final boolean descending;
-    private final int limit;
+@StorageName("tc_reports")
+public class Report extends ScheduledModel {
 
-    public Order(String column) {
-        this(column, false, 0);
+    private String type;
+
+    public String getType() {
+        return type;
     }
 
-    public Order(String column, boolean descending, int limit) {
-        this.column = column;
-        this.descending = descending;
-        this.limit = limit;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public String getColumn() {
-        return column;
+    private String description;
+
+    public String getDescription() {
+        return description;
     }
 
-    public boolean getDescending() {
-        return descending;
-    }
-
-    public int getLimit() {
-        return limit;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
 }
