@@ -86,8 +86,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    static boolean isLongFormat(ByteBuf buf, int flagIndex) {
-        return buf.getUnsignedByte(flagIndex) >> 4 >= 7;
+    static boolean isLongFormat(ByteBuf buf) {
+        return buf.getUnsignedByte(buf.readerIndex() + 8) == 0;
     }
 
     static void decodeBinaryLocation(ByteBuf buf, Position position) {
@@ -123,9 +123,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         List<Position> positions = new LinkedList<>();
 
-        buf.readByte(); // header
+        boolean longFormat = isLongFormat(buf);
 
-        boolean longFormat = isLongFormat(buf, buf.readerIndex());
+        buf.readByte(); // header
 
         String id = String.valueOf(Long.parseLong(ByteBufUtil.hexDump(buf.readSlice(5))));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
