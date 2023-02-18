@@ -221,7 +221,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (parser.hasNext(6)) {
+        if (parser.hasNextAny(6)) {
             position.set(Position.KEY_RPM, parser.nextInt());
             position.set(Position.KEY_ENGINE_LOAD, parser.nextInt());
             position.set("airFlow", parser.nextInt());

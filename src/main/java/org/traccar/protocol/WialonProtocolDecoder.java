@@ -101,7 +101,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date());
         }
 
-        if (parser.hasNext(9)) {
+        if (parser.hasNextAny(9)) {
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
