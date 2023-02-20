@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
 import org.traccar.model.ManagedUser;
+import org.traccar.model.Notification;
 import org.traccar.model.ScheduledModel;
 import org.traccar.model.Server;
 import org.traccar.model.User;
@@ -129,7 +130,7 @@ public class PermissionsService {
                     GroupedModel before = null;
                     if (!addition) {
                         before = storage.getObject(after.getClass(), new Request(
-                                new Columns.Include("groupId"), new Condition.Equals("id", object.getId())));
+                                new Columns.Include("groupId"), new Condition.Equals("id", after.getId())));
                     }
                     if (before == null || before.getGroupId() != after.getGroupId()) {
                         checkPermission(Group.class, userId, after.getGroupId());
@@ -142,10 +143,23 @@ public class PermissionsService {
                     ScheduledModel before = null;
                     if (!addition) {
                         before = storage.getObject(after.getClass(), new Request(
-                                new Columns.Include("calendarId"), new Condition.Equals("id", object.getId())));
+                                new Columns.Include("calendarId"), new Condition.Equals("id", after.getId())));
                     }
                     if (before == null || before.getCalendarId() != after.getCalendarId()) {
                         checkPermission(Calendar.class, userId, after.getCalendarId());
+                    }
+                }
+            }
+            if (object instanceof Notification) {
+                Notification after = ((Notification) object);
+                if (after.getCommandId() > 0) {
+                    Notification before = null;
+                    if (!addition) {
+                        before = storage.getObject(after.getClass(), new Request(
+                                new Columns.Include("commandId"), new Condition.Equals("id", after.getId())));
+                    }
+                    if (before == null || before.getCommandId() != after.getCommandId()) {
+                        checkPermission(Command.class, userId, after.getCommandId());
                     }
                 }
             }
