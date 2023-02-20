@@ -32,7 +32,7 @@
 
     <entry key='media.path'>./media</entry>
 
-    <entry key='notificator.types'>web,mail</entry>
+    <entry key='notificator.types'>web,mail,command</entry>
 
     <entry key='server.statistics'>https://www.traccar.org/analytics/</entry>
 
