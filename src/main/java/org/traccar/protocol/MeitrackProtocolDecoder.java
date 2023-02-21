@@ -420,6 +420,12 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x15:
                         position.set(Position.KEY_INPUT, buf.readUnsignedByte());
                         break;
+                    case 0x47:
+                        int lockState = buf.readUnsignedByte();
+                        if (lockState > 0) {
+                            position.set(Position.KEY_LOCK, lockState == 2);
+                        }
+                        break;
                     case 0x97:
                         position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
                         break;
