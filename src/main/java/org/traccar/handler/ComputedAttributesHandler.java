@@ -26,8 +26,12 @@ import java.util.Map;
 import java.util.Set;
 
 import io.netty.channel.ChannelHandler;
-import org.apache.commons.jexl3.*;
+import org.apache.commons.jexl3.JexlFeatures;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlBuilder;
 import org.apache.commons.jexl3.introspection.JexlSandbox;
+import org.apache.commons.jexl3.JexlException;
+import org.apache.commons.jexl3.MapContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
