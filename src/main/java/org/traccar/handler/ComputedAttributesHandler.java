@@ -26,10 +26,8 @@ import java.util.Map;
 import java.util.Set;
 
 import io.netty.channel.ChannelHandler;
-import org.apache.commons.jexl3.JexlBuilder;
-import org.apache.commons.jexl3.JexlEngine;
-import org.apache.commons.jexl3.JexlException;
-import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.jexl3.*;
+import org.apache.commons.jexl3.introspection.JexlSandbox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
@@ -55,14 +53,51 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     private final boolean includeDeviceAttributes;
 
+
     @Inject
     public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
+        boolean enableJEXLAnnotation = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_ANNOTATION);
+        boolean enableJEXLArrayReferences = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_ARRAY_REFERENCES);
+        boolean enableJEXLLambdas = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LAMBDA);
+        boolean enableJEXLLexical = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LEXICAL);
+        boolean enableJEXLLexicalShade = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LEXICAL_SHADE);
+        boolean enableJEXLLocalVariables = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES);
+        boolean enableJEXLLoops = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOOPS);
+        boolean enableJEXLMethodCalls = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_METHOD_CALLS);
+        boolean enableJEXLNewInstanceCreation = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_NEW_INSTANCE_CREATION);
+        boolean enableJEXLPragma = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_PRAGMA);
+        boolean enableJEXLScriptConstructs = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_SCRIPT_CONSTRUCTS);
+        boolean enableJEXLSideEffect = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_SIDE_EFFECT);
+        boolean enableJEXLSideEffectGlobal = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_SIDE_EFFECT_GLOBAL);
+        boolean enableJEXLStructuredLiteral = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_STRUCTURED_LITERAL);
+        JexlSandbox sandbox = new JexlSandbox(false);
+        sandbox.allow("com.safe.Functions");
+        boolean enableJEXLRegister = true;
+        JexlFeatures features = new JexlFeatures()
+                .annotation(enableJEXLAnnotation)
+                .arrayReferenceExpr(enableJEXLArrayReferences)
+                .lambda(enableJEXLLambdas)
+                .lexical(enableJEXLLexical)
+                .lexicalShade(enableJEXLLexicalShade)
+                .localVar(enableJEXLLocalVariables)
+                .loops(enableJEXLLoops)
+                .methodCall(enableJEXLMethodCalls)
+                .newInstance(enableJEXLNewInstanceCreation)
+                .pragma(enableJEXLPragma)
+                .register(enableJEXLRegister)
+                .script(enableJEXLScriptConstructs)
+                .sideEffect(enableJEXLSideEffect)
+                .sideEffectGlobal(enableJEXLSideEffectGlobal)
+                .structuredLiteral(enableJEXLStructuredLiteral);
         engine = new JexlBuilder()
                 .strict(true)
                 .namespaces(Collections.singletonMap("math", Math.class))
+                .sandbox(sandbox)
+                .features(features)
                 .create();
         includeDeviceAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES);
+
     }
 
     private MapContext prepareContext(Position position) {

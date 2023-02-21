@@ -1299,6 +1299,101 @@ public final class Keys {
     public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES = new BooleanConfigKey(
             "processing.computedAttributes.deviceAttributes",
             List.of(KeyType.CONFIG));
+    /**
+     * Enable annotation constructs processing.
+     * When disabled, parsing a script/expression using syntactic annotation constructs (@annotation) will throw a parsing exception.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_ANNOTATION = new BooleanConfigKey(
+            "processing.computedAttributes.parser.annotation",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable array references processing.
+     *  When disabled, parsing a script/expression using 'obj[ ref ]' where ref is not a string or integer literal will throw a parsing exception;
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_ARRAY_REFERENCES = new BooleanConfigKey(
+            "processing.computedAttributes.parser.arrayReferences",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable lambda declaration.
+     * When disabled, parsing a script/expression using syntactic lambda constructs (->,function) will throw a parsing exception.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LAMBDA = new BooleanConfigKey(
+            "processing.computedAttributes.parser.lambda",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable whether redefining local variables is an error.
+     * When disabled, parsing a script/expression using a local variable or parameter syntax will throw a parsing exception.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LEXICAL = new BooleanConfigKey(
+            "processing.computedAttributes.parser.lexical",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable whether local variables shade global variables outside their scope.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LEXICAL_SHADE = new BooleanConfigKey(
+            "processing.computedAttributes.parser.lexicalShade",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable local variables declaration.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES = new BooleanConfigKey(
+            "processing.computedAttributes.parser.localVariables",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable loops processing.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LOOPS = new BooleanConfigKey(
+            "processing.computedAttributes.parser.loops",
+            List.of(KeyType.CONFIG));
+    /**
+     * Set whether object method calls are enabled.
+     * When disabled, parsing a script/expression using 'obj.method()' will throw a parsing exception;
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_METHOD_CALLS = new BooleanConfigKey(
+            "processing.computedAttributes.parser.method_calls",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable new instances creation.
+     * When disabled, parsing a script/expression using 'new(...)' will throw a parsing exception; using a class as functor will fail.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_NEW_INSTANCE_CREATION = new BooleanConfigKey(
+            "processing.computedAttributes.parser.newInstanceCreation",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable pragma expressions processing.
+     * When disabled, parsing a script/expression using syntactic pragma constructs (#pragma) will throw a parsing exception.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_PRAGMA = new BooleanConfigKey(
+            "processing.computedAttributes.parser.pragma",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable scripts constructs processing.
+     * When disabled, parsing a script using syntactic script constructs (statements, ...) will throw a parsing exception.
+     * Dangerous, as can be used to escalate privileges on the Traccar server.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_SCRIPT_CONSTRUCTS = new BooleanConfigKey(
+            "processing.computedAttributes.parser.scriptConstructs",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable side effect expressions processing.
+     * When disabled, parsing a script/expression using syntactical constructs modifying variables or members will throw a parsing exception.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_SIDE_EFFECT = new BooleanConfigKey(
+            "processing.computedAttributes.parser.sideEffect",
+            List.of(KeyType.CONFIG));
+    /**
+     * Set whether side effect expressions on global variables (aka non-local) are enabled.
+     * When disabled, parsing a script/expression using syntactical constructs modifying variables including all potentially ant-ish variables will throw a parsing exception.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_SIDE_EFFECT_GLOBAL = new BooleanConfigKey(
+            "processing.computedAttributes.parser.sideEffectGlobal",
+            List.of(KeyType.CONFIG));
+    /**
+     * Enable array/map/set literal expressions processing.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_STRUCTURED_LITERAL = new BooleanConfigKey(
+            "processing.computedAttributes.parser.structuredLiteral",
+            List.of(KeyType.CONFIG));
 
     /**
      * Boolean flag to enable or disable reverse geocoder.
