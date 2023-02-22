@@ -39,31 +39,31 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_ANY = new PatternBuilder()
-            .expression("([^#]+)?") // imei
-            .text("#") // start byte
-            .expression("([^#]+)") // type
-            .text("#") // separator
-            .expression("(.*)") // message
+            .expression("([^#]+)?")              // imei
+            .text("#")                           // start byte
+            .expression("([^#]+)")               // type
+            .text("#")                           // separator
+            .expression("(.*)")                  // message
             .compile();
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("(?:NA|(dd)(dd)(dd));") // date (ddmmyy)
-            .number("(?:NA|(dd)(dd)(dd));") // time (hhmmss)
-            .number("(?:NA|(dd)(dd.d+));") // latitude
+            .number("(?:NA|(dd)(dd)(dd));")      // date (ddmmyy)
+            .number("(?:NA|(dd)(dd)(dd));")      // time (hhmmss)
+            .number("(?:NA|(dd)(dd.d+));")       // latitude
             .expression("(?:NA|([NS]));")
-            .number("(?:NA|(ddd)(dd.d+));") // longitude
+            .number("(?:NA|(ddd)(dd.d+));")      // longitude
             .expression("(?:NA|([EW]));")
-            .number("(?:NA|(d+.?d*))?;") // speed
-            .number("(?:NA|(d+.?d*))?;") // course
-            .number("(?:NA|(-?d+.?d*));") // altitude
-            .number("(?:NA|(d+))") // satellites
+            .number("(?:NA|(d+.?d*))?;")         // speed
+            .number("(?:NA|(d+.?d*))?;")         // course
+            .number("(?:NA|(-?d+.?d*));")        // altitude
+            .number("(?:NA|(d+))")               // satellites
             .groupBegin().text(";")
-            .number("(?:NA|(d+.?d*));") // hdop
-            .number("(?:NA|(d+));") // inputs
-            .number("(?:NA|(d+));") // outputs
-            .expression("(?:NA|([^;]*));") // adc
-            .expression("(?:NA|([^;]*));") // ibutton
-            .expression("(?:NA|(.*))") // params
+            .number("(?:NA|(d+.?d*));")          // hdop
+            .number("(?:NA|(d+));")              // inputs
+            .number("(?:NA|(d+));")              // outputs
+            .expression("(?:NA|([^;]*));")       // adc
+            .expression("(?:NA|([^;]*));")       // ibutton
+            .expression("(?:NA|(.*))")           // params
             .groupEnd("?")
             .compile();
 
