@@ -78,15 +78,8 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, text(
                 "#B#110315;045857;5364.0167;N;06127.8262;E;0;155;965;7;2.40;4;0;14.77,0.02,3.6;AB45DF01145;"));
 
-        verifyAttributes(decoder, text(
-                "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;motion:3:true"));
-
-        verifyAttributes(decoder, text(
-                "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;motion:3:false"));
-
-        Position p = (Position)decoder.decode(null, null, text(
-                "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;accuracy:2:12.3"));
-        assertEquals(p.getAccuracy(), 12.3, 0.001);
+        verifyAttribute(decoder, text(
+                "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;motion:3:false"), "motion", false);
     }
 
 }

@@ -145,7 +145,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                     // This covers both integer (x:1:y) and double (x:2:y) types in the Wialon protocol
 
                     // If not, value type is a string unless it is equal to some specific cases
-                    // (true, yes, etc), in which case we convert into a boolean
+                    // (true, false), in which case we convert into a boolean
 
                     try {
                         double doubleValue = Double.parseDouble(value);
@@ -158,13 +158,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                             position.set(key, doubleValue);
                         }
                     } catch (NumberFormatException e) {
-                        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("t")
-                            || value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("y")
-                            || value.equalsIgnoreCase("on")) {
+                        if (value.equalsIgnoreCase("true")) {
                             position.set(key, true);
-                        } else if (value.equalsIgnoreCase("false") || value.equalsIgnoreCase("f")
-                            || value.equalsIgnoreCase("no") || value.equalsIgnoreCase("n")
-                            || value.equalsIgnoreCase("off")) {
+                        } else if (value.equalsIgnoreCase("false")) {
                             position.set(key, false);
                         } else {
                             position.set(key, value);
