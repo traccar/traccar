@@ -57,19 +57,15 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     private final boolean includeDeviceAttributes;
 
-
     @Inject
     public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
-        boolean enableJEXLLocalVariables = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES);
-        boolean enableJEXLLoops = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOOPS);
-        boolean enableJEXLNewInstanceCreation = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_NEW_INSTANCE_CREATION);
         JexlSandbox sandbox = new JexlSandbox(false);
         sandbox.allow("com.safe.Functions");
         JexlFeatures features = new JexlFeatures()
-                .localVar(enableJEXLLocalVariables)
-                .loops(enableJEXLLoops)
-                .newInstance(enableJEXLNewInstanceCreation)
+                .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
+                .loops(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOOPS))
+                .newInstance(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_NEW_INSTANCE_CREATION))
                 .structuredLiteral(true);
         engine = new JexlBuilder()
                 .strict(true)
@@ -78,7 +74,6 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 .features(features)
                 .create();
         includeDeviceAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES);
-
     }
 
     private MapContext prepareContext(Position position) {
