@@ -55,6 +55,8 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     private final JexlEngine engine;
 
+    private final JexlFeatures features;
+
     private final boolean includeDeviceAttributes;
 
     @Inject
@@ -62,7 +64,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         this.cacheManager = cacheManager;
         JexlSandbox sandbox = new JexlSandbox(false);
         sandbox.allow("com.safe.Functions");
-        JexlFeatures features = new JexlFeatures()
+        features = new JexlFeatures()
                 .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
                 .loops(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOOPS))
                 .newInstance(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_NEW_INSTANCE_CREATION))
@@ -71,7 +73,6 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 .strict(true)
                 .namespaces(Collections.singletonMap("math", Math.class))
                 .sandbox(sandbox)
-                .features(features)
                 .create();
         includeDeviceAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES);
     }
@@ -113,7 +114,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
      */
     @Deprecated
     public Object computeAttribute(Attribute attribute, Position position) throws JexlException {
-        return engine.createExpression(attribute.getExpression()).evaluate(prepareContext(position));
+        return engine.createScript(features, engine.createInfo(), attribute.getExpression()).execute(prepareContext(position));
     }
 
     @Override
