@@ -148,7 +148,16 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                     // (true, yes, etc), in which case we convert into a boolean
 
                     try {
-                        position.set(key, Double.parseDouble(value));
+                        double double_value = Double.parseDouble(value);
+
+                        // Since accuracy is not part of the general parameter list,
+                        // we need to handle it separately by calling setAccuracy directly
+                        if (key.equals("accuracy")) {
+                            position.setAccuracy(double_value);
+                        }
+                        else {
+                            position.set(key, double_value);
+                        }
                     } catch (NumberFormatException e) {
                         if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("t")
                             || value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("y")
