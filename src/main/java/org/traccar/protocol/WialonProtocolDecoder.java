@@ -140,9 +140,13 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                     String value = paramParser.group(2);
 
                     // Key is already in correct type (string)
-                    // If we can parse the value as a double, then we use that as the value's type
-                    // If not, value type is a string unless it is equal to some specific cases (true, yes, etc), in which case we convert into a boolean
-                    
+
+                    // If we can parse the value as a double, then we use that as the value's type.
+                    // This covers both integer (x:1:y) and double (x:2:y) types in the Wialon protocol
+
+                    // If not, value type is a string unless it is equal to some specific cases
+                    // (true, yes, etc), in which case we convert into a boolean
+
                     try {
                         position.set(key, Double.parseDouble(value));
                     } catch (NumberFormatException e) {

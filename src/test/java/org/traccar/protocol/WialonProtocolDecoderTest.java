@@ -19,6 +19,12 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, text(
                 "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;101_521347:1:521246,101_158:1:510,101_521055:1:510,101_521055_2.9:1:509,101_521056:1:3;626B"));
 
+        verifyAttributes(decoder, text(
+                "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;motion:3:true"));
+
+        verifyAttributes(decoder, text(
+                "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;motion:3:false"));
+
         verifyNull(decoder, text(
                 "#L#123456789012345;test"));
         
