@@ -135,10 +135,36 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             for (String param : values) {
                 Matcher paramParser = Pattern.compile("(.*):[1-3]:(.*)").matcher(param);
                 if (paramParser.matches()) {
+                    // Parsing gives a (string,string) key-value pair
+                    String key = paramParser.group(1).toLowerCase();
+                    String value = paramParser.group(2);
+
+                    // Key is already in correct type (string)
+
+                    // If we can parse the value as a double, then we use that as the value's type.
+                    // This covers both integer (x:1:y) and double (x:2:y) types in the Wialon protocol
+
+                    // If not, value type is a string unless it is equal to some specific cases
+                    // (true, false), in which case we convert into a boolean
+
                     try {
-                        position.set(paramParser.group(1).toLowerCase(), Double.parseDouble(paramParser.group(2)));
+                        double doubleValue = Double.parseDouble(value);
+
+                        // Since accuracy is not part of the general parameter list,
+                        // we need to handle it separately by calling setAccuracy directly
+                        if (key.equals("accuracy")) {
+                            position.setAccuracy(doubleValue);
+                        } else {
+                            position.set(key, doubleValue);
+                        }
                     } catch (NumberFormatException e) {
-                        position.set(paramParser.group(1).toLowerCase(), paramParser.group(2));
+                        if (value.equalsIgnoreCase("true")) {
+                            position.set(key, true);
+                        } else if (value.equalsIgnoreCase("false")) {
+                            position.set(key, false);
+                        } else {
+                            position.set(key, value);
+                        }
                     }
                 }
             }
