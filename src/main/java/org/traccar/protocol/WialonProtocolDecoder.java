@@ -39,31 +39,31 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_ANY = new PatternBuilder()
-            .expression("([^#]+)?")              // imei
-            .text("#")                           // start byte
-            .expression("([^#]+)")               // type
-            .text("#")                           // separator
-            .expression("(.*)")                  // message
+            .expression("([^#]+)?") // imei
+            .text("#") // start byte
+            .expression("([^#]+)") // type
+            .text("#") // separator
+            .expression("(.*)") // message
             .compile();
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("(?:NA|(dd)(dd)(dd));")      // date (ddmmyy)
-            .number("(?:NA|(dd)(dd)(dd));")      // time (hhmmss)
-            .number("(?:NA|(dd)(dd.d+));")       // latitude
+            .number("(?:NA|(dd)(dd)(dd));") // date (ddmmyy)
+            .number("(?:NA|(dd)(dd)(dd));") // time (hhmmss)
+            .number("(?:NA|(dd)(dd.d+));") // latitude
             .expression("(?:NA|([NS]));")
-            .number("(?:NA|(ddd)(dd.d+));")      // longitude
+            .number("(?:NA|(ddd)(dd.d+));") // longitude
             .expression("(?:NA|([EW]));")
-            .number("(?:NA|(d+.?d*))?;")         // speed
-            .number("(?:NA|(d+.?d*))?;")         // course
-            .number("(?:NA|(-?d+.?d*));")        // altitude
-            .number("(?:NA|(d+))")               // satellites
+            .number("(?:NA|(d+.?d*))?;") // speed
+            .number("(?:NA|(d+.?d*))?;") // course
+            .number("(?:NA|(-?d+.?d*));") // altitude
+            .number("(?:NA|(d+))") // satellites
             .groupBegin().text(";")
-            .number("(?:NA|(d+.?d*));")          // hdop
-            .number("(?:NA|(d+));")              // inputs
-            .number("(?:NA|(d+));")              // outputs
-            .expression("(?:NA|([^;]*));")       // adc
-            .expression("(?:NA|([^;]*));")       // ibutton
-            .expression("(?:NA|(.*))")           // params
+            .number("(?:NA|(d+.?d*));") // hdop
+            .number("(?:NA|(d+));") // inputs
+            .number("(?:NA|(d+));") // outputs
+            .expression("(?:NA|([^;]*));") // adc
+            .expression("(?:NA|([^;]*));") // ibutton
+            .expression("(?:NA|(.*))") // params
             .groupEnd("?")
             .compile();
 
@@ -135,10 +135,28 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             for (String param : values) {
                 Matcher paramParser = Pattern.compile("(.*):[1-3]:(.*)").matcher(param);
                 if (paramParser.matches()) {
+                    // Parsing gives a (string,string) key-value pair
+                    String key = paramParser.group(1).toLowerCase();
+                    String value = paramParser.group(2);
+
+                    // Key is already in correct type (string)
+                    // If we can parse the value as a double, then we use that as the value's type
+                    // If not, value type is a string unless it is equal to some specific cases (true, yes, etc), in which case we convert into a boolean
+                    
                     try {
-                        position.set(paramParser.group(1).toLowerCase(), Double.parseDouble(paramParser.group(2)));
+                        position.set(key, Double.parseDouble(value));
                     } catch (NumberFormatException e) {
-                        position.set(paramParser.group(1).toLowerCase(), paramParser.group(2));
+                        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("t")
+                            || value.equalsIgnoreCase("yes") || value.equalsIgnoreCase("y")
+                            || value.equalsIgnoreCase("on")) {
+                            position.set(key, true);
+                        } else if (value.equalsIgnoreCase("false") || value.equalsIgnoreCase("f")
+                            || value.equalsIgnoreCase("no") || value.equalsIgnoreCase("n")
+                            || value.equalsIgnoreCase("off")) {
+                            position.set(key, false);
+                        } else {
+                            position.set(key, value);
+                        }
                     }
                 }
             }
