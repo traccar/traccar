@@ -135,27 +135,13 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             for (String param : values) {
                 Matcher paramParser = Pattern.compile("(.*):[1-3]:(.*)").matcher(param);
                 if (paramParser.matches()) {
-                    // Parsing gives a (string,string) key-value pair
                     String key = paramParser.group(1).toLowerCase();
                     String value = paramParser.group(2);
-
-                    // Key is already in correct type (string)
-
-                    // If we can parse the value as a double, then we use that as the value's type.
-                    // This covers both integer (x:1:y) and double (x:2:y) types in the Wialon protocol
-
-                    // If not, value type is a string unless it is equal to some specific cases
-                    // (true, false), in which case we convert into a boolean
-
                     try {
-                        double doubleValue = Double.parseDouble(value);
-
-                        // Since accuracy is not part of the general parameter list,
-                        // we need to handle it separately by calling setAccuracy directly
                         if (key.equals("accuracy")) {
-                            position.setAccuracy(doubleValue);
+                            position.setAccuracy(Double.parseDouble(value));
                         } else {
-                            position.set(key, doubleValue);
+                            position.set(key, Double.parseDouble(value));
                         }
                     } catch (NumberFormatException e) {
                         if (value.equalsIgnoreCase("true")) {
