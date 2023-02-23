@@ -115,9 +115,8 @@ public class ComputedAttributesHandler extends BaseDataHandler {
      */
     @Deprecated
     public Object computeAttribute(Attribute attribute, Position position) throws JexlException {
-        return engine.createScript(features,
-                engine.createInfo(),
-                attribute.getExpression()).execute(prepareContext(position));
+        return engine.createScript(features,engine.createInfo(), attribute.getExpression())
+                .execute(prepareContext(position));
     }
 
     @Override
