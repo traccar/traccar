@@ -26,8 +26,10 @@ import java.util.Map;
 import java.util.Set;
 
 import io.netty.channel.ChannelHandler;
-import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.JexlFeatures;
 import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.introspection.JexlSandbox;
 import org.apache.commons.jexl3.JexlException;
 import org.apache.commons.jexl3.MapContext;
 import org.slf4j.Logger;
@@ -53,14 +55,25 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     private final JexlEngine engine;
 
+    private final JexlFeatures features;
+
     private final boolean includeDeviceAttributes;
 
     @Inject
     public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
+        JexlSandbox sandbox = new JexlSandbox(false);
+        sandbox.allow("com.safe.Functions");
+        sandbox.allow(Math.class.getName());
+        features = new JexlFeatures()
+                .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
+                .loops(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOOPS))
+                .newInstance(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_NEW_INSTANCE_CREATION))
+                .structuredLiteral(true);
         engine = new JexlBuilder()
                 .strict(true)
                 .namespaces(Collections.singletonMap("math", Math.class))
+                .sandbox(sandbox)
                 .create();
         includeDeviceAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES);
     }
@@ -102,7 +115,9 @@ public class ComputedAttributesHandler extends BaseDataHandler {
      */
     @Deprecated
     public Object computeAttribute(Attribute attribute, Position position) throws JexlException {
-        return engine.createExpression(attribute.getExpression()).evaluate(prepareContext(position));
+        return engine.createScript(features,
+                engine.createInfo(),
+                attribute.getExpression()).execute(prepareContext(position));
     }
 
     @Override

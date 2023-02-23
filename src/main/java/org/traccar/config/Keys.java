@@ -1301,6 +1301,28 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Enable local variables declaration.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES = new BooleanConfigKey(
+            "processing.computedAttributes.localVariables",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Enable loops processing.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LOOPS = new BooleanConfigKey(
+            "processing.computedAttributes.loops",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Enable new instances creation.
+     * When disabled, parsing a script/expression using 'new(...)' will throw a parsing exception;
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_NEW_INSTANCE_CREATION = new BooleanConfigKey(
+            "processing.computedAttributes.newInstanceCreation",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Boolean flag to enable or disable reverse geocoder.
      */
     public static final ConfigKey<Boolean> GEOCODER_ENABLE = new BooleanConfigKey(
