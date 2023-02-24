@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -146,6 +146,18 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // satellites
             .number("(d+),")                     // device id
             .number("d+")
+            .text("*")
+            .number("xx")                        // checksum
+            .compile();
+
+    private static final Pattern PATTERN_GPTXT = new PatternBuilder()
+            .text("$GPTXT,")
+            .text("NET,")
+            .number("(d+),")                     // device id
+            .expression("([^,]+),")              // network operator
+            .number("(-d+),")                    // rssi
+            .number("(d+) ")                     // mcc
+            .number("(d+)")                      // mnc
             .text("*")
             .number("xx")                        // checksum
             .compile();
@@ -328,6 +340,30 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeGptxt(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_GPTXT, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_OPERATOR, parser.next());
+        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.set("mcc", parser.nextInt());
+        position.set("mnc", parser.nextInt());
+
+        return position;
+    }
+
     private Position decodePubx(Channel channel, SocketAddress remoteAddress, String sentence) {
 
         Parser parser = new Parser(PATTERN_PUBX, sentence);
@@ -421,6 +457,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             return decodeQze(channel, remoteAddress, sentence);
         } else if (sentence.startsWith("$PUBX")) {
             return decodePubx(channel, remoteAddress, sentence);
+        } else if (sentence.startsWith("$GPTXT")) {
+            return decodeGptxt(channel, remoteAddress, sentence);
         }
 
         return null;
