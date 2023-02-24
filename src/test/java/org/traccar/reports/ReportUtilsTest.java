@@ -98,8 +98,8 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:03:00.000", 10, 1000),
                 position("2016-01-01 00:04:00.000", 10, 2000),
                 position("2016-01-01 00:05:00.000", 0, 3000),
-                position("2016-01-01 00:06:00.000", 0, 3000),
-                position("2016-01-01 00:07:00.000", 0, 3000));
+                position("2016-01-01 00:15:00.000", 0, 3000),
+                position("2016-01-01 00:25:00.000", 0, 3000));
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
@@ -136,8 +136,8 @@ public class ReportUtilsTest extends BaseTest {
         itemStop = iterator.next();
 
         assertEquals(date("2016-01-01 00:05:00.000"), itemStop.getStartTime());
-        assertEquals(date("2016-01-01 00:07:00.000"), itemStop.getEndTime());
-        assertEquals(120000, itemStop.getDuration());
+        assertEquals(date("2016-01-01 00:25:00.000"), itemStop.getEndTime());
+        assertEquals(1200000, itemStop.getDuration());
 
     }
 
@@ -151,8 +151,8 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:03:00.000", 10, 1000),
                 position("2016-01-01 00:04:00.000", 10, 2000),
                 position("2016-01-01 00:05:00.000", 0, 3000),
-                position("2016-01-01 00:06:00.000", 0, 3000),
-                position("2016-01-01 00:07:00.000", 0, 3000));
+                position("2016-01-01 00:15:00.000", 0, 3000),
+                position("2016-01-01 00:25:00.000", 0, 3000));
 
         data.get(5).set(Position.KEY_IGNITION, false);
 
@@ -205,8 +205,8 @@ public class ReportUtilsTest extends BaseTest {
         itemStop = iterator.next();
 
         assertEquals(date("2016-01-01 00:05:00.000"), itemStop.getStartTime());
-        assertEquals(date("2016-01-01 00:07:00.000"), itemStop.getEndTime());
-        assertEquals(120000, itemStop.getDuration());
+        assertEquals(date("2016-01-01 00:25:00.000"), itemStop.getEndTime());
+        assertEquals(1200000, itemStop.getDuration());
 
     }
 
@@ -224,8 +224,8 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:07:00.000", 0, 5000),
                 position("2016-01-01 00:08:00.000", 10, 6000),
                 position("2016-01-01 00:09:00.000", 0, 7000),
-                position("2016-01-01 00:10:00.000", 0, 7000),
-                position("2016-01-01 00:11:00.000", 0, 7000));
+                position("2016-01-01 00:19:00.000", 0, 7000),
+                position("2016-01-01 00:29:00.000", 0, 7000));
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
@@ -262,8 +262,8 @@ public class ReportUtilsTest extends BaseTest {
         itemStop = iterator.next();
 
         assertEquals(date("2016-01-01 00:09:00.000"), itemStop.getStartTime());
-        assertEquals(date("2016-01-01 00:11:00.000"), itemStop.getEndTime());
-        assertEquals(120000, itemStop.getDuration());
+        assertEquals(date("2016-01-01 00:29:00.000"), itemStop.getEndTime());
+        assertEquals(1200000, itemStop.getDuration());
 
     }
 
@@ -332,9 +332,9 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:00:00.000", 2, 0),
                 position("2016-01-01 00:01:00.000", 1, 0),
                 position("2016-01-01 00:02:00.000", 0, 0),
-                position("2016-01-01 00:03:00.000", 0, 0),
-                position("2016-01-01 00:04:00.000", 0, 0),
-                position("2016-01-01 00:05:00.000", 0, 0));
+                position("2016-01-01 00:12:00.000", 0, 0),
+                position("2016-01-01 00:22:00.000", 0, 0),
+                position("2016-01-01 00:32:00.000", 0, 0));
 
         TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false, 0.01);
         ReportUtils reportUtils = new ReportUtils(
@@ -349,8 +349,8 @@ public class ReportUtilsTest extends BaseTest {
         StopReportItem itemStop = result.iterator().next();
 
         assertEquals(date("2016-01-01 00:02:00.000"), itemStop.getStartTime());
-        assertEquals(date("2016-01-01 00:05:00.000"), itemStop.getEndTime());
-        assertEquals(180000, itemStop.getDuration());
+        assertEquals(date("2016-01-01 00:32:00.000"), itemStop.getEndTime());
+        assertEquals(1800000, itemStop.getDuration());
 
     }
 
