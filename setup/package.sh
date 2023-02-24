@@ -75,7 +75,7 @@ if [ $PLATFORM = "all" -o $PLATFORM = "linux-arm" ]; then
   check_requirement "Linux ARM Java" "ls OpenJDK*arm_linux*.tar.gz" "Missing Linux ARM JDK (https://adoptium.net/)"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-arm64" ]; then
-  check_requirement "Linux 64 Java" "ls OpenJDK*aarch64_linux*.tar.gz" "Missing Linux ARM 64 JDK (https://adoptium.net/)"
+  check_requirement "Linux ARM 64 Java" "ls OpenJDK*aarch64_linux*.tar.gz" "Missing Linux ARM 64 JDK (https://adoptium.net/)"
 fi
 if [ $PREREQ = false ]; then
   info "Missing build requirements, aborting..."
