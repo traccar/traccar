@@ -16,28 +16,8 @@
   },
   "servers": [
     {
-      "url": "https://legacy.foxgps.com.br/api",
-      "description": "Legacy Server"
-    },
-    {
-      "url": "https://app.foxgps.com.br/api",
+      "url": "https://api.foxgps.com.br/api",
       "description": "FOX GPS Server"
-    },
-    {
-      "url": "http://{host}:{port}/api",
-      "description": "Other Server",
-      "variables": {
-        "host": {
-          "default": "localhost"
-        },
-        "port": {
-          "enum": [
-            "8082",
-            "80"
-          ],
-          "default": "8082"
-        }
-      }
     }
   ],
   "security": [
