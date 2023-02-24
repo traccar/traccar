@@ -1,13 +1,13 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "title": "Traccar",
+    "title": "FOX GPS",
     "version": "5.6",
-    "description": "Traccar GPS tracking server API documentation. To use the API you need to have a server instance. For testing purposes you can use one of free [demo servers](https://www.traccar.org/demo-server/). For production use you can install your own server or get a [subscription service](https://www.traccar.org/product/tracking-server/).",
+    "description": "Documentação da API do servidor de rastreamento FOX GPS. Para usar a API, você precisa ter uma conta válida no servidor [criar conta](http://app.foxgps.com.br:8082/register).",
     "contact": {
-      "name": "Traccar Support",
-      "url": "https://www.traccar.org/",
-      "email": "support@traccar.org"
+      "name": "FOX GPS Support",
+      "url": "https://www.foxgps.com.br/",
+      "email": "sac@foxgps.com.br"
     },
     "license": {
       "name": "Apache 2.0",
@@ -16,24 +16,12 @@
   },
   "servers": [
     {
-      "url": "https://demo.traccar.org/api",
-      "description": "Demo Server 1"
+      "url": "https://legacy.foxgps.com.br/api",
+      "description": "Legacy Server"
     },
     {
-      "url": "https://demo2.traccar.org/api",
-      "description": "Demo Server 2"
-    },
-    {
-      "url": "https://demo3.traccar.org/api",
-      "description": "Demo Server 3"
-    },
-    {
-      "url": "https://demo4.traccar.org/api",
-      "description": "Demo Server 4"
-    },
-    {
-      "url": "https://server.traccar.org/api",
-      "description": "Subscription Server"
+      "url": "https://app.foxgps.com.br/api",
+      "description": "FOX GPS Server"
     },
     {
       "url": "http://{host}:{port}/api",
