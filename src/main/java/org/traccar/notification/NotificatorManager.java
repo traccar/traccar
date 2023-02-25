@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,15 +17,13 @@
 package org.traccar.notification;
 
 import com.google.inject.Injector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Typed;
 import org.traccar.notificators.Notificator;
+import org.traccar.notificators.NotificatorCommand;
 import org.traccar.notificators.NotificatorFirebase;
 import org.traccar.notificators.NotificatorMail;
-import org.traccar.notificators.NotificatorNull;
 import org.traccar.notificators.NotificatorPushover;
 import org.traccar.notificators.NotificatorSms;
 import org.traccar.notificators.NotificatorTelegram;
@@ -43,9 +41,8 @@ import java.util.stream.Collectors;
 @Singleton
 public class NotificatorManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorManager.class);
-
     private static final Map<String, Class<? extends Notificator>> NOTIFICATORS_ALL = Map.of(
+            "command", NotificatorCommand.class,
             "web", NotificatorWeb.class,
             "mail", NotificatorMail.class,
             "sms", NotificatorSms.class,
@@ -75,8 +72,7 @@ public class NotificatorManager {
                 return notificator;
             }
         }
-        LOGGER.warn("Failed to get notificator {}", type);
-        return new NotificatorNull();
+        throw new RuntimeException("Failed to get notificator " + type);
     }
 
     public Set<Typed> getAllNotificatorTypes() {

@@ -50,6 +50,7 @@ jobs:
           wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_x64_windows_hotspot_17.0.6_10.zip
           wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.6_10.tar.gz
           wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_arm_linux_hotspot_17.0.6_10.tar.gz
+          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_aarch64_linux_hotspot_17.0.6_10.tar.gz
           ./package.sh ${{ github.event.inputs.version }}
       - name: Upload installers
         working-directory: ./setup

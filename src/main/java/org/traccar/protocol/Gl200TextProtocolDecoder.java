@@ -956,7 +956,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, power * 0.001);
         }
 
-        if (parser.hasNext(12)) {
+        if (parser.hasNextAny(12)) {
 
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
             position.set(Position.KEY_HOURS, parseHours(parser.next()));

@@ -11,6 +11,9 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new T55ProtocolDecoder(null));
 
+        verifyAttributes(decoder, text(
+                "$GPTXT,NET,1003,A1,-53,232 01*77"));
+
         verifyPosition(decoder, text(
                 "$PUBX,00,130209.00,3650.51159,N,01346.10602,E,785.947,D3,4.1,5.2,0.163,87.43,-0.054,7.0,0.88,1.21,0.88,24,01012,0*6D"));
 

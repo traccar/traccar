@@ -1,6 +1,5 @@
 /*
- * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
- * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +15,46 @@
  */
 package org.traccar.notificators;
 
-import org.traccar.mail.MailManager;
+import org.traccar.database.CommandsManager;
+import org.traccar.model.Command;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
-import org.traccar.notification.NotificationFormatter;
+import org.traccar.storage.Storage;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.mail.MessagingException;
 
 @Singleton
-public class NotificatorMail implements Notificator {
+public class NotificatorCommand implements Notificator {
 
-    private final MailManager mailManager;
-    private final NotificationFormatter notificationFormatter;
+    private final Storage storage;
+    private final CommandsManager commandsManager;
 
     @Inject
-    public NotificatorMail(MailManager mailManager, NotificationFormatter notificationFormatter) {
-        this.mailManager = mailManager;
-        this.notificationFormatter = notificationFormatter;
+    public NotificatorCommand(Storage storage, CommandsManager commandsManager) {
+        this.storage = storage;
+        this.commandsManager = commandsManager;
     }
 
     @Override
     public void send(Notification notification, User user, Event event, Position position) throws MessageException {
+
+        if (notification == null || notification.getCommandId() <= 0) {
+            throw new MessageException("Saved command not provided");
+        }
+
         try {
-            var fullMessage = notificationFormatter.formatMessage(user, event, position, "full");
-            mailManager.sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
-        } catch (MessagingException e) {
+            Command command = storage.getObject(Command.class, new Request(
+                    new Columns.All(), new Condition.Equals("id", notification.getCommandId())));
+            command.setDeviceId(event.getDeviceId());
+            commandsManager.sendCommand(command);
+        } catch (Exception e) {
             throw new MessageException(e);
         }
     }

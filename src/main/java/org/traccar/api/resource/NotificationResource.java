@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,10 +80,10 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
 
     @POST
     @Path("test")
-    public Response testMessage() throws MessageException, InterruptedException, StorageException {
+    public Response testMessage() throws MessageException, StorageException {
         User user = permissionsService.getUser(getUserId());
         for (Typed method : notificatorManager.getAllNotificatorTypes()) {
-            notificatorManager.getNotificator(method.getType()).send(user, new Event("test", 0), null);
+            notificatorManager.getNotificator(method.getType()).send(null, user, new Event("test", 0), null);
         }
         return Response.noContent().build();
     }
@@ -91,9 +91,9 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @POST
     @Path("test/{notificator}")
     public Response testMessage(@PathParam("notificator") String notificator)
-            throws MessageException, InterruptedException, StorageException {
+            throws MessageException, StorageException {
         User user = permissionsService.getUser(getUserId());
-        notificatorManager.getNotificator(notificator).send(user, new Event("test", 0), null);
+        notificatorManager.getNotificator(notificator).send(null, user, new Event("test", 0), null);
         return Response.noContent().build();
     }
 

@@ -225,7 +225,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
                     getConfig(), parser.nextHexInt(0), parser.nextHexInt(0))));
         }
 
-        if (parser.hasNext(20)) {
+        if (parser.hasNextAny(20)) {
 
             String utcHours = parser.next();
             String utcMinutes = parser.next();

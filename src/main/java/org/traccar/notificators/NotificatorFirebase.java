@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,10 +26,10 @@ import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.MulticastMessage;
-import com.google.firebase.messaging.Notification;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
+import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
@@ -64,7 +64,7 @@ public class NotificatorFirebase implements Notificator {
     }
 
     @Override
-    public void send(User user, Event event, Position position) throws MessageException {
+    public void send(Notification notification, User user, Event event, Position position) throws MessageException {
         if (user.hasAttribute("notificationTokens")) {
 
             var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
@@ -72,7 +72,7 @@ public class NotificatorFirebase implements Notificator {
             List<String> registrationTokens = Arrays.asList(user.getString("notificationTokens").split("[, ]"));
 
             MulticastMessage message = MulticastMessage.builder()
-                    .setNotification(Notification.builder()
+                    .setNotification(com.google.firebase.messaging.Notification.builder()
                             .setTitle(shortMessage.getSubject())
                             .setBody(shortMessage.getBody())
                             .build())

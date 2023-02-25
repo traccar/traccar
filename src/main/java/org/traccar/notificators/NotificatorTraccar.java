@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class NotificatorTraccar implements Notificator {
     private final String url;
     private final String key;
 
-    public static class Notification {
+    public static class NotificationObject {
         @JsonProperty("title")
         private String title;
         @JsonProperty("body")
@@ -50,7 +50,7 @@ public class NotificatorTraccar implements Notificator {
         @JsonProperty("registration_ids")
         private String[] tokens;
         @JsonProperty("notification")
-        private Notification notification;
+        private NotificationObject notification;
     }
 
     @Inject
@@ -62,19 +62,19 @@ public class NotificatorTraccar implements Notificator {
     }
 
     @Override
-    public void send(User user, Event event, Position position) {
+    public void send(org.traccar.model.Notification notification, User user, Event event, Position position) {
         if (user.hasAttribute("notificationTokens")) {
 
             var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 
-            Notification notification = new Notification();
-            notification.title = shortMessage.getSubject();
-            notification.body = shortMessage.getBody();
-            notification.sound = "default";
+            NotificationObject item = new NotificationObject();
+            item.title = shortMessage.getSubject();
+            item.body = shortMessage.getBody();
+            item.sound = "default";
 
             Message message = new Message();
             message.tokens = user.getString("notificationTokens").split("[, ]");
-            message.notification = notification;
+            message.notification = item;
 
             client.target(url).request().header("Authorization", "key=" + key).post(Entity.json(message)).close();
         }

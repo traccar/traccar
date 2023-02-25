@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,7 +67,7 @@ public class HttpSmsClient implements SmsManager {
     }
 
     private String prepareValue(String value) throws UnsupportedEncodingException {
-        return encode ? URLEncoder.encode(value, StandardCharsets.UTF_8.name()) : value;
+        return encode ? URLEncoder.encode(value, StandardCharsets.UTF_8) : value;
     }
 
     private String preparePayload(String destAddress, String message) {

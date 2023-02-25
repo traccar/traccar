@@ -50,6 +50,17 @@ public class Parser {
     public boolean hasNext(int number) {
         for (int i = position; i < position + number; i++) {
             String value = matcher.group(i);
+            if (value == null || value.isEmpty()) {
+                position += number;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean hasNextAny(int number) {
+        for (int i = position; i < position + number; i++) {
+            String value = matcher.group(i);
             if (value != null && !value.isEmpty()) {
                 return true;
             }

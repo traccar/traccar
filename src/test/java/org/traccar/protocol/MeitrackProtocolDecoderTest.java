@@ -11,6 +11,10 @@ public class MeitrackProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new MeitrackProtocolDecoder(null));
 
+        verifyAttribute(decoder, binary(
+                "24245b3131342c3836343630363034343939333938372c4343452c0000000001005000130006012305000600070f1b004702060800000900000a00000b0000199d011a00000602d179570103b25ccc0604cf04862b0cc65b01000da4090d001c01000000010e0ccc010000b627be11000000002a41300d0a"),
+                Position.KEY_LOCK, true);
+
         verifyAttribute(decoder, buffer(
                 "$$u28,864606044993987,D82,0*D6"),
                 Position.KEY_RESULT, "D82,0");

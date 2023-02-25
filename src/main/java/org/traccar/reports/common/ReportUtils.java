@@ -386,7 +386,7 @@ public class ReportUtils {
                     }
                 }
             }
-            if (startEventIndex >= 0 && startEventIndex < positions.size() - 1) {
+            if (detected & startEventIndex >= 0 && startEventIndex < positions.size() - 1) {
                 int endIndex = startNoEventIndex >= 0 ? startNoEventIndex : positions.size() - 1;
                 result.add(calculateTripOrStop(
                         device, positions, startEventIndex, endIndex, ignoreOdometer, reportClass));
