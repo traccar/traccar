@@ -130,7 +130,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         int index = buf.readUnsignedShortLE();
 
         String id = String.format("%08d%07d", buf.readUnsignedIntLE(), buf.readUnsignedIntLE());
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
         }
