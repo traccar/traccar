@@ -553,6 +553,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedByte(); // alarm type
                         buf.skipBytes(length - 2);
                         break;
+                    case 0xFEA8:
+                        buf.readUnsignedByte(); // battery status
+                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        buf.readUnsignedByte(); // battery alert
+                        break;
                     default:
                         buf.skipBytes(length);
                         break;
