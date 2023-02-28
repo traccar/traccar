@@ -847,7 +847,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x03:
                     count = buf.readUnsignedByte();
                     for (int i = 0; i < count; i++) {
-                        int id = buf.readUnsignedShort();
+                        int id = buf.readUnsignedByte();
                         int length = buf.readUnsignedByte();
                         switch (id) {
                             case 0x1A:
