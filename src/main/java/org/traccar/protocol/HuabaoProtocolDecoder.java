@@ -169,7 +169,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         } else {
             long imei = id.getUnsignedShort(0);
             imei = (imei << 32) + id.getUnsignedInt(2);
-            return String.valueOf(imei);
+            return String.valueOf(imei) + Checksum.luhn(imei);
         }
     }
 
