@@ -20,6 +20,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -123,23 +124,45 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private Position decode04(Channel channel, SocketAddress remoteAddress, ByteBuf buf) throws ParseException {
+    private Position decode04(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
 
         buf.readUnsignedShortLE(); // length
         buf.readUnsignedShortLE(); // checksum
         int index = buf.readUnsignedShortLE();
+        long id1 = buf.readUnsignedIntLE();
+        long id2 = buf.readUnsignedIntLE();
+        long time = buf.readUnsignedIntLE();
 
-        String id = String.format("%08d%07d", buf.readUnsignedIntLE(), buf.readUnsignedIntLE());
+        String id = String.format("%08d%07d", id1, id2);
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
         if (deviceSession == null) {
             return null;
+        }
+
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(0x04); // protocol
+            response.writeShortLE(24); // length
+            response.writeShortLE(0); // checksum
+            response.writeShortLE(index);
+            response.writeIntLE((int) id1);
+            response.writeIntLE((int) id2);
+            response.writeIntLE((int) time);
+
+            response.writeByte(0xff); // acknowledgement
+            response.writeShortLE(index);
+            response.writeShortLE(0); // success
+
+            response.setShortLE(3, Checksum.crc16(Checksum.CRC16_CCITT_FALSE, response.nioBuffer()));
+
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
         position.set(Position.KEY_INDEX, index);
 
-        position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
+        position.setDeviceTime(new Date(time * 1000));
 
         while (buf.isReadable()) {
             int type = buf.readUnsignedByte();
