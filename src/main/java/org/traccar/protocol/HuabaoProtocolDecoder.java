@@ -294,6 +294,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_TRANSPARENT) {
 
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
             return decodeTransparent(deviceSession, buf);
 
         }
