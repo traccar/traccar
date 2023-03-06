@@ -1,7 +1,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class Tk103FrameDecoderTest extends ProtocolTest {

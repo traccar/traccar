@@ -1,6 +1,6 @@
 package org.traccar.handler.events;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.BaseTest;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -13,8 +13,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class MotionEventHandlerTest extends BaseTest {
 

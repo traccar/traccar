@@ -1,13 +1,13 @@
 package org.traccar.geocoder;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import java.util.Locale;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GeocoderTest {
 
@@ -17,7 +17,7 @@ public class GeocoderTest {
 
     private final Client client = ClientBuilder.newClient();
 
-    @Ignore
+    @Disabled
     @Test
     public void testGoogle() {
         Geocoder geocoder = new GoogleGeocoder(client, null, null, 0, new AddressFormat());
@@ -25,7 +25,7 @@ public class GeocoderTest {
         assertEquals("1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testNominatim() {
         Geocoder geocoder = new NominatimGeocoder(client, null, null, null, 0, new AddressFormat());
@@ -33,7 +33,7 @@ public class GeocoderTest {
         assertEquals("35 West 9th Street, NYC, New York, US", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testGisgraphy() {
         Geocoder geocoder = new GisgraphyGeocoder(client, null, 0, new AddressFormat());
@@ -41,7 +41,7 @@ public class GeocoderTest {
         assertEquals("Rue du Jardinet, Paris, Île-de-France, FR", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testOpenCage() {
         Geocoder geocoder = new OpenCageGeocoder(
@@ -50,7 +50,7 @@ public class GeocoderTest {
         assertEquals("Charleston Road, California, US", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testGeocodeFarm() {
         Geocoder geocoder = new GeocodeFarmGeocoder(client, null, null, 0, new AddressFormat());
@@ -58,7 +58,7 @@ public class GeocoderTest {
         assertEquals("Estrella Avenue, Arcadia, California, United States", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testGeocodeXyz() {
         Geocoder geocoder = new GeocodeXyzGeocoder(client, null, 0, new AddressFormat());
@@ -66,7 +66,7 @@ public class GeocoderTest {
         assertEquals("605 ESTRELLA AVE, ARCADIA, California United States of America, US", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testBan() {
         Geocoder geocoder = new BanGeocoder(client, 0, new AddressFormat("%f [%d], %c"));
@@ -74,7 +74,7 @@ public class GeocoderTest {
         assertEquals("8 Avenue Gustave Eiffel 75007 Paris [75, Paris, Île-de-France], FR", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testHere() {
         Geocoder geocoder = new HereGeocoder(client, null, "", "", null, 0, new AddressFormat());
@@ -82,7 +82,7 @@ public class GeocoderTest {
         assertEquals("6 Avenue Gustave Eiffel, Paris, Île-de-France, FRA", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testMapmyIndia() {
         Geocoder geocoder = new MapmyIndiaGeocoder(client, "", "", 0, new AddressFormat("%f"));
@@ -90,7 +90,7 @@ public class GeocoderTest {
         assertEquals("New Delhi, Delhi. 1 m from India Gate pin-110001 (India)", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testPositionStack() {
         Geocoder geocoder = new PositionStackGeocoder(client, "", 0, new AddressFormat("%f"));
@@ -98,7 +98,7 @@ public class GeocoderTest {
         assertEquals("India Gate, New Delhi, India", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testMapbox() {
         Geocoder geocoder = new MapboxGeocoder(client, "", 0, new AddressFormat("%f"));
@@ -106,7 +106,7 @@ public class GeocoderTest {
         assertEquals("120 East 13th Street, New York, New York 10003, United States", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testMapTiler() {
         Geocoder geocoder = new MapTilerGeocoder(client, "", 0, new AddressFormat());
@@ -114,7 +114,7 @@ public class GeocoderTest {
         assertEquals("East 13th Street, New York City, New York, United States", address);
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testGeoapify() {
         Geocoder geocoder = new GeoapifyGeocoder(client, "", null, 0, new AddressFormat());

@@ -1,7 +1,7 @@
 package org.traccar.calendar;
 
 import net.fortuna.ical4j.data.ParserException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.model.Calendar;
 
 import java.io.IOException;
@@ -11,7 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CalendarTest {
     

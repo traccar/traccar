@@ -1,6 +1,6 @@
 package org.traccar.handler.events;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.BaseTest;
 import org.traccar.config.Config;
 import org.traccar.model.Event;
@@ -9,8 +9,8 @@ import org.traccar.session.cache.CacheManager;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 public class AlertEventHandlerTest extends BaseTest {

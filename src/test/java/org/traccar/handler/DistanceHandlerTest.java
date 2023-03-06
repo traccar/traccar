@@ -1,11 +1,11 @@
 package org.traccar.handler;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.config.Config;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 public class DistanceHandlerTest {

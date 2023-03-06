@@ -1,13 +1,13 @@
 package org.traccar.protocol;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
 public class HuabaoProtocolEncoderTest extends ProtocolTest {
 
-    @Ignore
+    @Disabled
     @Test
     public void testEncode() throws Exception {
 

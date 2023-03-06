@@ -1,7 +1,7 @@
 package org.traccar.protocol;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class TeltonikaProtocolDecoderTest extends ProtocolTest {
@@ -158,7 +158,7 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testDecodeConnectionless() throws Exception {
 

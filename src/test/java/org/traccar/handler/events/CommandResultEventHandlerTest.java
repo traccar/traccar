@@ -1,14 +1,14 @@
 package org.traccar.handler.events;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.BaseTest;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CommandResultEventHandlerTest extends BaseTest {
 

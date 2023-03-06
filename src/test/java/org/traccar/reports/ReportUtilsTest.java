@@ -1,8 +1,8 @@
 package org.traccar.reports;
 
 import org.apache.velocity.app.VelocityEngine;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.traccar.BaseTest;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
@@ -26,10 +26,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -38,7 +38,7 @@ public class ReportUtilsTest extends BaseTest {
     
     private Storage storage;
     
-    @Before
+    @BeforeEach
     public void init() throws StorageException {
         storage = mock(Storage.class);
         when(storage.getObject(any(), any())).thenReturn(mock(Device.class));

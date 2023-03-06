@@ -1,7 +1,7 @@
 package org.traccar.protocol;
 
 import io.netty.handler.codec.http.HttpMethod;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class DmtHttpProtocolDecoderTest extends ProtocolTest {

@@ -1,6 +1,6 @@
 package org.traccar.handler.events;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.BaseTest;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
@@ -9,7 +9,7 @@ import org.traccar.session.cache.CacheManager;
 import java.util.Arrays;
 import java.util.Date;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.eq;

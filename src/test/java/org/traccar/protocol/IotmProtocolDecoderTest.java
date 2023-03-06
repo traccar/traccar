@@ -2,7 +2,7 @@ package org.traccar.protocol;
 
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class IotmProtocolDecoderTest extends ProtocolTest {
