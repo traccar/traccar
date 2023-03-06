@@ -88,7 +88,7 @@ dependencies {
     implementation "com.google.firebase:firebase-admin:9.1.1"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    testImplementation "org.mockito:mockito-core:4.+"
+    testImplementation "org.mockito:mockito-core:5.1.1"
 }
 
 test {
