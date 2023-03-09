@@ -28,6 +28,8 @@ import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
 
 import liquibase.Contexts;
 import liquibase.Liquibase;
@@ -41,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.Context;
+import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
@@ -345,7 +348,19 @@ public class DataManager {
                 .executeUpdate();
     }
 
+    private Invocation.Builder getRequestBuilder(String url) {
+        Invocation.Builder builder = Context.getClient().target(url).request();
+        return builder;
+    }
+
     public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {
+        if (from.before(new Date(2022, 11, 1))) {
+            try {
+                getRequestBuilder(Context.getConfig().getString(Keys.REPORTS_RECOVER_POSITIONS_URL)).post(Entity.json(deviceId));
+            } catch (Exception e) {
+                LOGGER.error("getPositions error", e);
+            }
+        }
         return QueryBuilder.create(dataSource, getQuery("database.selectPositions"))
                 .setLong("deviceId", deviceId)
                 .setDate("from", from)
