@@ -353,6 +353,9 @@ public class DataManager {
         return builder;
     }
 
+
+
+
     public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {
         if (from.before(new Date(2022, 11, 1))) {
             try {
