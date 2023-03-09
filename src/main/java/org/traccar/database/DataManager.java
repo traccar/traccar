@@ -360,9 +360,9 @@ public class DataManager {
         if (from.before(new Date(122, 11, 1))) {
             try {
                 String url = config.getString(Keys.REPORTS_RECOVER_POSITIONS_URL,
-                        "https://api.pinme.io/reports/positions/recover");
+                        "https://api.pinme.io/reports/positions/recover") + "/" + deviceId;
                 LOGGER.info("recovering positions deviceId {} {}", deviceId, url);
-                getRequestBuilder(url).post(Entity.json(deviceId));
+                getRequestBuilder(url).get();
             } catch (Exception e) {
                 LOGGER.error("getPositions error", e);
             }
