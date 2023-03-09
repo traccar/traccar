@@ -359,7 +359,7 @@ public class DataManager {
     public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {
         if (from.before(new Date(122, 11, 1))) {
             try {
-                String url = Context.getConfig().getString(Keys.REPORTS_RECOVER_POSITIONS_URL,
+                String url = config.getString(Keys.REPORTS_RECOVER_POSITIONS_URL,
                         "https://api.pinme.io/reports/positions/recover");
                 LOGGER.info("recovering positions deviceId {} {}", deviceId, url);
                 getRequestBuilder(url).post(Entity.json(deviceId));
