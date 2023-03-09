@@ -359,7 +359,7 @@ public class DataManager {
     public Collection<Position> getPositions(long deviceId, Date from, Date to) throws SQLException {
         if (from.before(new Date(2022, 11, 1))) {
             try {
-                getRequestBuilder(Context.getConfig().getString(Keys.REPORTS_RECOVER_POSITIONS_URL)).post(Entity.json(deviceId));
+                // getRequestBuilder(Context.getConfig().getString(Keys.REPORTS_RECOVER_POSITIONS_URL)).post(Entity.json(deviceId));
             } catch (Exception e) {
                 LOGGER.error("getPositions error", e);
             }
