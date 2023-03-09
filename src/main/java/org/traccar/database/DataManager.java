@@ -360,7 +360,7 @@ public class DataManager {
         if (from.before(new Date(122, 11, 1))) {
             try {
                 LOGGER.info("recovering positions deviceId " + deviceId);
-                // getRequestBuilder(Context.getConfig().getString(Keys.REPORTS_RECOVER_POSITIONS_URL)).post(Entity.json(deviceId));
+                getRequestBuilder(Context.getConfig().getString(Keys.REPORTS_RECOVER_POSITIONS_URL)).post(Entity.json(deviceId));
             } catch (Exception e) {
                 LOGGER.error("getPositions error", e);
             }
