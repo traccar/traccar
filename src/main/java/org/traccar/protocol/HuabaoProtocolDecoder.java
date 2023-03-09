@@ -753,6 +753,22 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_STATUS, status);
 
+        while (buf.readableBytes() > 2) {
+            int id = buf.readUnsignedByte();
+            int length = buf.readUnsignedByte();
+            switch (id) {
+                case 0x02:
+                    position.setAltitude(buf.readShort());
+                    break;
+                case 0x0C:
+                    position.set("gyro", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    break;
+                default:
+                    buf.skipBytes(length);
+                    break;
+            }
+        }
+
         return position;
     }
 
