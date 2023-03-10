@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
 import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
@@ -32,7 +30,6 @@ import java.util.UUID;
 
 public class EventForwarderMqtt implements EventForwarder {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventForwarderMqtt.class);
     private final Mqtt5AsyncClient client;
     private final ObjectMapper objectMapper;
 
@@ -63,7 +60,7 @@ public class EventForwarderMqtt implements EventForwarder {
         String host = url.getHost();
         int port = url.getPort();
         client = Mqtt5Client.builder()
-                .identifier("traccar-" + UUID.randomUUID().toString())
+                .identifier("traccar-" + UUID.randomUUID())
                 .serverHost(host)
                 .serverPort(port)
                 .simpleAuth(simpleAuth)
