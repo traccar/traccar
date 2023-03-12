@@ -84,6 +84,7 @@ import org.traccar.sms.SnsSmsClient;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
 import org.traccar.storage.DatabaseStorage;
+import org.traccar.storage.MemoryStorage;
 import org.traccar.storage.Storage;
 import org.traccar.web.WebServer;
 
@@ -108,8 +109,17 @@ public class MainModule extends AbstractModule {
     protected void configure() {
         bindConstant().annotatedWith(Names.named("configFile")).to(configFile);
         bind(Config.class).asEagerSingleton();
-        bind(Storage.class).to(DatabaseStorage.class).in(Scopes.SINGLETON);
         bind(Timer.class).to(HashedWheelTimer.class).in(Scopes.SINGLETON);
+    }
+
+    @Singleton
+    @Provides
+    public static Storage provideStorage(Injector injector, Config config) {
+        if (config.getBoolean(Keys.DATABASE_MEMORY)) {
+            return injector.getInstance(MemoryStorage.class);
+        } else {
+            return injector.getInstance(DatabaseStorage.class);
+        }
     }
 
     @Singleton

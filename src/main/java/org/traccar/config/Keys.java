@@ -386,6 +386,13 @@ public final class Keys {
             25.0);
 
     /**
+     * Enable in-memory database instead of an SQL database.
+     */
+    public static final ConfigKey<Boolean> DATABASE_MEMORY = new BooleanConfigKey(
+            "database.memory",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Path to the database driver JAR file. Traccar includes drivers for MySQL, PostgreSQL and H2 databases. If you use
      * one of those, you don't need to specify this parameter.
      */
