@@ -499,7 +499,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> DATABASE_REGISTER_UNKNOWN_REGEX = new StringConfigKey(
             "database.registerUnknown.regex",
-            List.of(KeyType.CONFIG), "\w{3,15}");
+            List.of(KeyType.CONFIG), "\\w{3,15}");
 
     /**
      * Store empty messages as positions. For example, heartbeats.
