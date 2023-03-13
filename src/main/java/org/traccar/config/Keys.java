@@ -495,6 +495,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Automatically register unknown devices with regex filter.
+     */
+    public static final ConfigKey<String> DATABASE_REGISTER_UNKNOWN_REGEX = new StringConfigKey(
+            "database.registerUnknown.regex",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Store empty messages as positions. For example, heartbeats.
      */
     public static final ConfigKey<Boolean> DATABASE_SAVE_EMPTY = new BooleanConfigKey(

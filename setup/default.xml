@@ -39,6 +39,8 @@
     <entry key='commands.queueing'>true</entry>
 
     <entry key='database.ignoreUnknown'>true</entry>
+    <entry key='database.registerUnknown.regex'>\w{3,15}</entry>
+
     <entry key='database.changelog'>./schema/changelog-master.xml</entry>
 
     <entry key='gps103.port'>5001</entry>
