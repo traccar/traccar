@@ -279,7 +279,11 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x37:
                         buf.readUnsignedIntLE(); // timestamp
-                        position.set("barkCount", BitUtil.to(buf.readUnsignedIntLE(), 31));
+                        long barking = buf.readUnsignedIntLE();
+                        if (BitUtil.check(barking, 31)) {
+                            position.set("barkStop", true);
+                        }
+                        position.set("barkCount", BitUtil.to(barking, 31));
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp
