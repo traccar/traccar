@@ -247,7 +247,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_TEMP + (id - 71), readValue(buf, length, true) * 0.1);
                 break;
             case 78:
-                long driverUniqueId = readValue(buf, length, false);
+                long driverUniqueId = buf.readLong();
                 if (driverUniqueId != 0) {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
                 }
