@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,10 @@ public interface MailManager {
 
     boolean getEmailEnabled();
 
-    void sendMessage(User user, String subject, String body) throws MessagingException;
+    void sendMessage(
+            User user, boolean system, String subject, String body) throws MessagingException;
 
-    void sendMessage(User user, String subject, String body, MimeBodyPart attachment) throws MessagingException;
+    void sendMessage(
+            User user, boolean system, String subject, String body, MimeBodyPart attachment) throws MessagingException;
 
 }

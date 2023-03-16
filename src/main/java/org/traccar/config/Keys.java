@@ -836,6 +836,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Restrict global SMTP configuration to system messages only (e.g. password reset).
+     */
+    public static final ConfigKey<Boolean> MAIL_SMTP_SYSTEM_ONLY = new BooleanConfigKey(
+            "mail.smtp.systemOnly",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Force SMTP settings from the config file and ignore user attributes.
      */
     public static final ConfigKey<Boolean> MAIL_SMTP_IGNORE_USER_CONFIG = new BooleanConfigKey(

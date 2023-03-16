@@ -93,19 +93,21 @@ public final class SmtpMailManager implements MailManager {
         return config.hasKey(Keys.MAIL_SMTP_HOST);
     }
 
+    @Override
     public void sendMessage(
-            User user, String subject, String body) throws MessagingException {
-        sendMessage(user, subject, body, null);
+            User user, boolean system, String subject, String body) throws MessagingException {
+        sendMessage(user, system, subject, body, null);
     }
 
+    @Override
     public void sendMessage(
-            User user, String subject, String body, MimeBodyPart attachment) throws MessagingException {
+            User user, boolean system, String subject, String body, MimeBodyPart attachment) throws MessagingException {
 
         Properties properties = null;
         if (!config.getBoolean(Keys.MAIL_SMTP_IGNORE_USER_CONFIG)) {
             properties = getProperties(new PropertiesProvider(user));
         }
-        if (properties == null) {
+        if (properties == null && (system || !config.getBoolean(Keys.MAIL_SMTP_SYSTEM_ONLY))) {
             properties = getProperties(new PropertiesProvider(config));
         }
         if (properties == null) {
