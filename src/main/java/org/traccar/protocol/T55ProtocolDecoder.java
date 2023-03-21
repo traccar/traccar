@@ -353,6 +353,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, null);
 
