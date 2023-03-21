@@ -61,7 +61,7 @@ public class AcknowledgementHandler extends ChannelOutboundHandlerAdapter {
         }
     }
 
-    private static class Entry {
+    private static final class Entry {
         private final Object message;
         private final ChannelPromise promise;
 
