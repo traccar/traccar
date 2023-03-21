@@ -123,7 +123,7 @@ public class SessionResource extends BaseResource {
     @Path("{id}")
     @GET
     public User get(@PathParam("id") long userId) throws StorageException {
-        permissionsService.checkAdmin(getUserId());
+        permissionsService.checkUser(getUserId(), userId);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", userId)));
         request.getSession().setAttribute(USER_ID_KEY, user.getId());
