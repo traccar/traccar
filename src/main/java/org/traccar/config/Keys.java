@@ -293,6 +293,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Send device responses immediately before writing it in the database.
+     */
+    public static final ConfigKey<Boolean> SERVER_INSTANT_ACKNOWLEDGEMENT = new BooleanConfigKey(
+            "server.instantAcknowledgement",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Address for uploading aggregated anonymous usage statistics. Uploaded information is the same you can see on the
      * statistics screen in the web app. It does not include any sensitive (e.g. locations).
      */

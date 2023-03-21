@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.handler.AcknowledgementHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DefaultDataHandler;
@@ -60,15 +61,19 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private final Injector injector;
     private final TrackerConnector connector;
     private final String protocol;
-    private int timeout;
+    private final boolean instantAcknowledgement;
+    private final int timeout;
 
     public BasePipelineFactory(TrackerConnector connector, Config config, String protocol) {
         this.injector = Main.getInjector();
         this.connector = connector;
         this.protocol = protocol;
-        timeout = config.getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
+        instantAcknowledgement = config.getBoolean(Keys.SERVER_INSTANT_ACKNOWLEDGEMENT);
+        int timeout = config.getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
-            timeout = config.getInteger(Keys.SERVER_TIMEOUT);
+            this.timeout = config.getInteger(Keys.SERVER_TIMEOUT);
+        } else {
+            this.timeout = timeout;
         }
     }
 
@@ -112,6 +117,9 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
         pipeline.addLast(new OpenChannelHandler(connector));
         pipeline.addLast(new NetworkMessageHandler());
         pipeline.addLast(new StandardLoggingHandler(protocol));
+        if (!instantAcknowledgement) {
+            pipeline.addLast(new AcknowledgementHandler());
+        }
 
         addProtocolHandlers(handler -> {
             if (handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder) {

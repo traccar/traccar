@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
+import org.traccar.handler.AcknowledgementHandler;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.NetworkUtil;
 import org.traccar.helper.model.PositionUtil;
@@ -145,6 +146,8 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             LOGGER.info(builder.toString());
 
             statisticsManager.registerMessageStored(position.getDeviceId(), position.getProtocol());
+
+            ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
         }
     }
 

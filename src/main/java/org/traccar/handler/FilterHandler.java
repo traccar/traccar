@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.BaseDataHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
@@ -39,7 +40,7 @@ import java.util.Date;
 
 @Singleton
 @ChannelHandler.Sharable
-public class FilterHandler extends BaseDataHandler {
+public class FilterHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterHandler.class);
 
@@ -177,7 +178,7 @@ public class FilterHandler extends BaseDataHandler {
         return false;
     }
 
-    private boolean filter(Position position) {
+    protected boolean filter(Position position) {
 
         StringBuilder filterType = new StringBuilder();
 
@@ -243,11 +244,17 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     @Override
-    protected Position handlePosition(Position position) {
-        if (enabled && filter(position)) {
-            return null;
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        if (msg instanceof Position) {
+            Position position = (Position) msg;
+            if (enabled && filter(position)) {
+                ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
+            } else {
+                ctx.fireChannelRead(position);
+            }
+        } else {
+            super.channelRead(ctx, msg);
         }
-        return position;
     }
 
 }

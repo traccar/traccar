@@ -11,8 +11,8 @@ import org.traccar.session.cache.CacheManager;
 
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -71,18 +71,18 @@ public class FilterHandlerTest extends BaseTest {
 
         Position position = createPosition(new Date(), true, 10);
 
-        assertNotNull(filteringHandler.handlePosition(position));
-        assertNotNull(passingHandler.handlePosition(position));
+        assertFalse(filteringHandler.filter(position));
+        assertFalse(passingHandler.filter(position));
 
         position = createPosition(new Date(Long.MAX_VALUE), true, 10);
 
-        assertNull(filteringHandler.handlePosition(position));
-        assertNotNull(passingHandler.handlePosition(position));
+        assertTrue(filteringHandler.filter(position));
+        assertFalse(passingHandler.filter(position));
 
         position = createPosition(new Date(), false, 10);
 
-        assertNull(filteringHandler.handlePosition(position));
-        assertNotNull(passingHandler.handlePosition(position));
+        assertTrue(filteringHandler.filter(position));
+        assertFalse(passingHandler.filter(position));
 
     }
 
@@ -92,7 +92,7 @@ public class FilterHandlerTest extends BaseTest {
         Position position = createPosition(new Date(), true, 0);
         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
 
-        assertNotNull(filteringHandler.handlePosition(position));
+        assertFalse(filteringHandler.filter(position));
 
     }
 

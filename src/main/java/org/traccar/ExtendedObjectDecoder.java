@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.handler.AcknowledgementHandler;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Position;
 
@@ -30,6 +31,7 @@ import javax.inject.Inject;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 
 public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter {
 
@@ -68,6 +70,7 @@ public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         NetworkMessage networkMessage = (NetworkMessage) msg;
         Object originalMessage = networkMessage.getMessage();
+        ctx.writeAndFlush(new AcknowledgementHandler.EventReceived());
         try {
             Object decodedMessage = decode(ctx.channel(), networkMessage.getRemoteAddress(), originalMessage);
             onMessageEvent(ctx.channel(), networkMessage.getRemoteAddress(), originalMessage, decodedMessage);
@@ -76,14 +79,19 @@ public abstract class ExtendedObjectDecoder extends ChannelInboundHandlerAdapter
             }
             if (decodedMessage != null) {
                 if (decodedMessage instanceof Collection) {
-                    for (Object o : (Collection) decodedMessage) {
+                    var collection = (Collection) decodedMessage;
+                    ctx.writeAndFlush(new AcknowledgementHandler.EventDecoded(collection));
+                    for (Object o : collection) {
                         saveOriginal(o, originalMessage);
                         ctx.fireChannelRead(o);
                     }
                 } else {
+                    ctx.writeAndFlush(new AcknowledgementHandler.EventDecoded(List.of(decodedMessage)));
                     saveOriginal(decodedMessage, originalMessage);
                     ctx.fireChannelRead(decodedMessage);
                 }
+            } else {
+                ctx.writeAndFlush(new AcknowledgementHandler.EventDecoded(List.of()));
             }
         } finally {
             ReferenceCountUtil.release(originalMessage);
