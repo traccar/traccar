@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,8 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_UPFAULT_RSP = 0xFF13;
     public static final int MSG_HSO_REQ = 0x0002;
     public static final int MSG_HSO_RSP = 0x0003;
+    public static final int MSG_SET_REQ = 0xAA04;
+    public static final int MSG_SET_RSP = 0xFF05;
 
     private void sendResponse(Channel channel, int type, int index, ByteBuf content) {
         if (channel != null) {
