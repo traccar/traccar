@@ -11,6 +11,10 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Tk103ProtocolDecoder(null));
 
+        verifyAttribute(decoder, text(
+                "(352602014867BS500064FF0EF10FF10FF00FF20FF30FF20FF20FF40FF20FF40FF40FF20FF30FF20F0000000000000000000000000000000000000000000000001663000000010004000000000000000002444444420000000000A00FA000000000000000200000000315E2000000)"),
+                "batteryTemp2", 26);
+
         verifyAttributes(decoder, text(
                 "(027046434858BZ00,{460,0,20949,58711}\n{460,0,20494,54003}\n{460,0,20951,19569}\n,01000000)"));
 

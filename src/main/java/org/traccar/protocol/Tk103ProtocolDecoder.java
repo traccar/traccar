@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,11 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DataConverter;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -448,6 +451,63 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeBms(Channel channel, SocketAddress remoteAddress, String sentence) {
+        String id = sentence.substring(1, 13);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        ByteBuf buf = Unpooled.wrappedBuffer(
+                DataConverter.parseHex(sentence.substring(1 + 12 + 4, sentence.length() - 1)));
+
+        buf.readUnsignedByte();
+        buf.readUnsignedByte();
+        buf.readUnsignedByte(); // header
+
+        int batteryCount = buf.readUnsignedByte();
+        for (int i = 1; i <= 24; i++) {
+            int voltage = buf.readUnsignedShortLE();
+            if (i <= batteryCount) {
+                position.set("battery" + i, voltage * 0.001);
+            }
+        }
+
+        position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 0);
+        position.set("current", buf.readUnsignedShortLE() * 0.1);
+        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
+        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+        position.set("batteryOverheat", buf.readUnsignedByte() > 0);
+        position.set("chargeProtection", buf.readUnsignedByte() > 0);
+        position.set("dischargeProtection", buf.readUnsignedByte() > 0);
+        buf.readUnsignedByte(); // drop line
+        buf.readUnsignedByte(); // balanced
+        position.set("cycles", buf.readUnsignedShortLE());
+        position.set("faultAlarm", buf.readUnsignedByte());
+
+        buf.skipBytes(6);
+
+        int temperatureCount = buf.readUnsignedByte();
+        position.set("powerTemp", buf.readUnsignedByte() - 40);
+        position.set("equilibriumTemp", buf.readUnsignedByte() - 40);
+        for (int i = 1; i <= 7; i++) {
+            int temperature = buf.readUnsignedByte() - 40;
+            if (i <= temperatureCount) {
+                position.set("batteryTemp" + i, temperature);
+            }
+        }
+
+        position.set("calibrationCapacity", buf.readUnsignedShortLE() * 0.01);
+        position.set("dischargeCapacity", buf.readUnsignedIntLE());
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -477,6 +537,8 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return decodeLbsWifi(channel, remoteAddress, sentence);
         } else if (sentence.contains("BV00")) {
             return decodeVin(channel, remoteAddress, sentence);
+        } else if (sentence.contains("BS50")) {
+            return decodeBms(channel, remoteAddress, sentence);
         }
 
         Parser parser = new Parser(PATTERN, sentence);
