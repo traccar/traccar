@@ -50,7 +50,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd):(dd):(dd),")           // time (hhmmss)
             .number("Td+,")                      // type
             .number("(d),")                      // archive
-            .expression("[^,]+,")                // protocol version
+            .expression("([^,]+),")                // protocol version
             .expression("([^,]+),")              // serial number
             .number("(xx),")                     // status
             .number("(-?d+.d+)")                // battery
@@ -62,7 +62,9 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
             .number("(d+.?d*),")                 // speed
-            .number("(d+.?d*),")                 // course
+            .number("(d+.?d*)")                  // course
+            .groupBegin()
+            .text(",")
             .number("(d+.?d*),")                 // int battery
             .number("(d+.?d*),")                 // odometer trip
             .number("(d+.?d*),")                 // odometer total
@@ -73,6 +75,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // lac
             .number("(d+.?d*),")                 // cell_id
             .number("(d+.?d*)")                  // rx_level
+            .groupEnd("?")
             .groupEnd("?")
             .any()
             .compile();
@@ -133,7 +136,9 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
                 getLastLocation(position, position.getDeviceTime());
                 return position;
             }
-            LOGGER.warn("Mobilogix ignoring:{}", sentence);
+            if (!type.equals("T1")) {
+                LOGGER.warn("Mobilogix ignoring:{}", sentence);
+            }
             return null;
         }
 
@@ -143,6 +148,8 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         if (parser.nextInt() == 0) {
             position.set(Position.KEY_ARCHIVE, true);
         }
+
+        position.set(Position.KEY_VERSION_FW, parser.next());
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
