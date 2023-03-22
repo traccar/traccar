@@ -140,11 +140,14 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
 
         position.setDeviceTime(parser.nextDateTime());
-        if (parser.nextInt() == 0) {
+        Integer archive = parser.nextInt();
+
+        if (archive == 0) {
             position.set(Position.KEY_ARCHIVE, true);
         }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String serial = parser.next();
+        LOGGER.warn("mobilogix archive: {} serial: {}", archive, serial);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, serial);
         if (deviceSession == null) {
             return null;
         }
