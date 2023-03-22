@@ -26,6 +26,8 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -60,7 +62,17 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
             .number("(d+.?d*),")                 // speed
-            .number("(d+.?d*)")                  // course
+            .number("(d+.?d*),")                 // course
+            .number("(d+.?d*),")                 // int battery
+            .number("(d+.?d*),")                 // odometer trip
+            .number("(d+.?d*),")                 // odometer total
+            .number("(d+.?d*),")                 // horimeter
+            .number("(d+.?d*),")                 // hdop
+            .number("(d+.?d*),")                 // mcc
+            .number("(d+.?d*),")                 // mnc
+            .number("(d+.?d*),")                 // lac
+            .number("(d+.?d*),")                 // cell_id
+            .number("(d+.?d*)")                  // rx_level
             .groupEnd("?")
             .any()
             .compile();
@@ -165,6 +177,13 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextDouble());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
             position.setCourse(parser.nextDouble());
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextDouble());
+            position.set(Position.KEY_ODOMETER_TRIP, parser.nextInt());
+            position.set(Position.KEY_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(parser.nextInt()));
+            position.set(Position.KEY_HDOP, parser.nextDouble());
+            position.setNetwork(new Network(CellTower.from(
+                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextLong(), parser.nextInt())));
 
         } else {
 
