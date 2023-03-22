@@ -50,7 +50,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd):(dd):(dd),")           // time (hhmmss)
             .number("Td+,")                      // type
             .number("(d),")                      // archive
-            .expression("[^,]+,")                // protocol version
+            .expression("([^,]+),")                // protocol version
             .expression("([^,]+),")              // serial number
             .number("(xx),")                     // status
             .number("(-?d+.d+)")                // battery
@@ -62,7 +62,9 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+),")                // latitude
             .number("(-?d+.d+),")                // longitude
             .number("(d+.?d*),")                 // speed
-            .number("(d+.?d*),")                 // course
+            .number("(d+.?d*)")                  // course
+            .groupBegin()
+            .text(",")
             .number("(d+.?d*),")                 // int battery
             .number("(d+.?d*),")                 // odometer trip
             .number("(d+.?d*),")                 // odometer total
@@ -73,6 +75,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // lac
             .number("(d+.?d*),")                 // cell_id
             .number("(d+.?d*)")                  // rx_level
+            .groupEnd("?")
             .groupEnd("?")
             .any()
             .compile();
@@ -133,21 +136,22 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
                 getLastLocation(position, position.getDeviceTime());
                 return position;
             }
-            LOGGER.warn("Mobilogix ignoring:{}", sentence);
+            if (!type.equals("T1")) {
+                LOGGER.warn("Mobilogix ignoring:{}", sentence);
+            }
             return null;
         }
 
         Position position = new Position(getProtocolName());
 
         position.setDeviceTime(parser.nextDateTime());
-        Integer archive = parser.nextInt();
-
-        if (archive == 0) {
+        if (parser.nextInt() == 0) {
             position.set(Position.KEY_ARCHIVE, true);
         }
-        String serial = parser.next();
-        LOGGER.warn("mobilogix archive: {} serial: {}", archive, serial);
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, serial);
+
+        position.set(Position.KEY_VERSION_FW, parser.next());
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
@@ -180,14 +184,16 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextDouble());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
             position.setCourse(parser.nextDouble());
-            position.set(Position.KEY_BATTERY_LEVEL, parser.nextDouble());
-            position.set(Position.KEY_ODOMETER_TRIP, parser.nextInt());
-            position.set(Position.KEY_ODOMETER, parser.nextInt());
-            position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(parser.nextInt()));
-            position.set(Position.KEY_HDOP, parser.nextDouble());
-            position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextLong(), parser.nextInt())));
 
+            if (parser.hasNext(10)) {
+                position.set(Position.KEY_BATTERY_LEVEL, parser.nextDouble());
+                position.set(Position.KEY_ODOMETER_TRIP, parser.nextInt());
+                position.set(Position.KEY_ODOMETER, parser.nextInt());
+                position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(parser.nextInt()));
+                position.set(Position.KEY_HDOP, parser.nextDouble());
+                position.setNetwork(new Network(CellTower.from(
+                        parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextLong(), parser.nextInt())));
+            }
         } else {
 
             getLastLocation(position, position.getDeviceTime());
