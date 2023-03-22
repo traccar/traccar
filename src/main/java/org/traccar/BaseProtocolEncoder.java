@@ -71,31 +71,30 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 
-        NetworkMessage networkMessage = (NetworkMessage) msg;
+        if (msg instanceof NetworkMessage) {
+            NetworkMessage networkMessage = (NetworkMessage) msg;
+            if (networkMessage.getMessage() instanceof Command) {
 
-        if (networkMessage.getMessage() instanceof Command) {
+                Command command = (Command) networkMessage.getMessage();
+                Object encodedCommand = encodeCommand(ctx.channel(), command);
 
-            Command command = (Command) networkMessage.getMessage();
-            Object encodedCommand = encodeCommand(ctx.channel(), command);
+                StringBuilder s = new StringBuilder();
+                s.append("[").append(NetworkUtil.session(ctx.channel())).append("] ");
+                s.append("id: ").append(getUniqueId(command.getDeviceId())).append(", ");
+                s.append("command type: ").append(command.getType()).append(" ");
+                if (encodedCommand != null) {
+                    s.append("sent");
+                } else {
+                    s.append("not sent");
+                }
+                LOGGER.info(s.toString());
 
-            StringBuilder s = new StringBuilder();
-            s.append("[").append(NetworkUtil.session(ctx.channel())).append("] ");
-            s.append("id: ").append(getUniqueId(command.getDeviceId())).append(", ");
-            s.append("command type: ").append(command.getType()).append(" ");
-            if (encodedCommand != null) {
-                s.append("sent");
-            } else {
-                s.append("not sent");
+                ctx.write(new NetworkMessage(encodedCommand, networkMessage.getRemoteAddress()), promise);
+
+                return;
             }
-            LOGGER.info(s.toString());
-
-            ctx.write(new NetworkMessage(encodedCommand, networkMessage.getRemoteAddress()), promise);
-
-        } else {
-
-            super.write(ctx, msg, promise);
-
         }
+        super.write(ctx, msg, promise);
     }
 
     protected Object encodeCommand(Channel channel, Command command) {
