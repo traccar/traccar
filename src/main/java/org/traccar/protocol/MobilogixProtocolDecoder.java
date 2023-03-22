@@ -140,14 +140,11 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
 
         position.setDeviceTime(parser.nextDateTime());
-        Integer archive = parser.nextInt();
-
-        if (archive == 0) {
+        if (parser.nextInt() == 0) {
             position.set(Position.KEY_ARCHIVE, true);
         }
-        String serial = parser.next();
-        LOGGER.warn("mobilogix archive: {} serial: {}", archive, serial);
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, serial);
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
@@ -180,14 +177,16 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextDouble());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
             position.setCourse(parser.nextDouble());
-            position.set(Position.KEY_BATTERY_LEVEL, parser.nextDouble());
-            position.set(Position.KEY_ODOMETER_TRIP, parser.nextInt());
-            position.set(Position.KEY_ODOMETER, parser.nextInt());
-            position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(parser.nextInt()));
-            position.set(Position.KEY_HDOP, parser.nextDouble());
-            position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextLong(), parser.nextInt())));
 
+            if (parser.hasNext(10)) {
+                position.set(Position.KEY_BATTERY_LEVEL, parser.nextDouble());
+                position.set(Position.KEY_ODOMETER_TRIP, parser.nextInt());
+                position.set(Position.KEY_ODOMETER, parser.nextInt());
+                position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(parser.nextInt()));
+                position.set(Position.KEY_HDOP, parser.nextDouble());
+                position.setNetwork(new Network(CellTower.from(
+                        parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextLong(), parser.nextInt())));
+            }
         } else {
 
             getLastLocation(position, position.getDeviceTime());
