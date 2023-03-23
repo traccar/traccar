@@ -16,7 +16,7 @@ public class HuabaoProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "7e55019c3b8571110003399a07032310302029538631031015370500001a0c000000265700440001233703080000001001020202000a0a04028f000af401040c06ff98ffa8007e707e"),
-                "gyro", "ff98ffa8007e");
+                "tilt", "[-104,-88,126]");
 
         verifyPosition(decoder, binary(
                 "7e0900001f4f07788ef87d000cf0230223150215010203013800000c000b029dc58c04b99b60230223171822507e"));

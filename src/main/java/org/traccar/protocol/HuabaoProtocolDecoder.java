@@ -761,7 +761,19 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.setAltitude(buf.readShort());
                     break;
                 case 0x0C:
-                    position.set("gyro", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    int x = buf.readUnsignedShort();
+                    if (x > 0x8000) {
+                        x -= 0x10000;
+                    }
+                    int y = buf.readUnsignedShort();
+                    if (y > 0x8000) {
+                        y -= 0x10000;
+                    }
+                    int z = buf.readUnsignedShort();
+                    if (z > 0x8000) {
+                        z -= 0x10000;
+                    }
+                    position.set("tilt", String.format("[%d,%d,%d]", x, y, z));
                     break;
                 default:
                     buf.skipBytes(length);
