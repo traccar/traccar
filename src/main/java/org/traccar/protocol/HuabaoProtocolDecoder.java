@@ -329,6 +329,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x03:
                     position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() * 0.1);
                     break;
+                case 0x56:
+                    buf.readUnsignedByte(); // power level
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    break;
+                case 0x61:
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                    break;
                 case 0x80:
                     position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
                     break;
