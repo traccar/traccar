@@ -400,6 +400,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         int alarm = buf.readUnsignedByte();
         position.set(Position.KEY_ALARM, header != 0x2727 ? decodeAlarm1(alarm) : decodeAlarm2(alarm));
+        position.set("alarmCode", alarm);
 
         if (header != 0x2727) {
 
@@ -470,6 +471,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             int inputStatus = buf.readUnsignedShort();
             position.set(Position.KEY_IGNITION, BitUtil.check(inputStatus, 2));
             position.set(Position.KEY_RSSI, BitUtil.between(inputStatus, 4, 11));
+            position.set(Position.KEY_INPUT, inputStatus);
 
             buf.readUnsignedShort(); // ignition on upload interval
             buf.readUnsignedInt(); // ignition off upload interval
