@@ -457,6 +457,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             int subtype = buf.readUnsignedByte();
             int length = buf.readUnsignedByte();
             int endIndex = buf.readerIndex() + length;
+            String stringValue;
             switch (subtype) {
                 case 0x01:
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
@@ -474,9 +475,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
                 case 0x33:
-                    String sentence = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
-                    if (sentence.startsWith("*M00")) {
-                        String lockStatus = sentence.substring(8, 8 + 7);
+                    stringValue = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+                    if (stringValue.startsWith("*M00")) {
+                        String lockStatus = stringValue.substring(8, 8 + 7);
                         position.set(Position.KEY_BATTERY, Integer.parseInt(lockStatus.substring(2, 5)) * 0.01);
                     }
                     break;
@@ -501,8 +502,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0x94:
                     if (length > 0) {
-                        position.set(
-                                Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                        stringValue = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+                        position.set(Position.KEY_VIN, stringValue);
                     }
                     break;
                 case 0xA7:
@@ -511,6 +512,14 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xAC:
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                    break;
+                case 0xBC:
+                    stringValue = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+                    position.set("driver", stringValue.trim());
+                    break;
+                case 0xBD:
+                    stringValue = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, stringValue);
                     break;
                 case 0xD0:
                     long userStatus = buf.readUnsignedInt();
@@ -598,8 +607,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xED:
-                    String license = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString().trim();
-                    position.set("driverLicense", license);
+                    stringValue = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+                    position.set("driverLicense", stringValue.trim());
                     break;
                 case 0xEE:
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
