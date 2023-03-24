@@ -29,6 +29,7 @@ import org.traccar.session.cache.CacheManager;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import java.util.List;
 
 @Singleton
 public class NotificationFormatter {
@@ -70,6 +71,34 @@ public class NotificationFormatter {
         }
 
         return textTemplateFormatter.formatMessage(velocityContext, event.getType(), templatePath);
+    }
+
+    public List<String> getEventValues(User user, Event event, Position position) {
+
+        Server server = cacheManager.getServer();
+        Device device = cacheManager.getObject(Device.class, event.getDeviceId());
+
+        VelocityContext velocityContext = textTemplateFormatter.prepareContext(server, user);
+
+        velocityContext.put("device", device);
+        velocityContext.put("event", event);
+        if (position != null) {
+            velocityContext.put("position", position);
+            velocityContext.put("speedUnit", UserUtil.getSpeedUnit(server, user));
+            velocityContext.put("distanceUnit", UserUtil.getDistanceUnit(server, user));
+            velocityContext.put("volumeUnit", UserUtil.getVolumeUnit(server, user));
+        }
+        if (event.getGeofenceId() != 0) {
+            velocityContext.put("geofence", cacheManager.getObject(Geofence.class, event.getGeofenceId()));
+        }
+        if (event.getMaintenanceId() != 0) {
+            velocityContext.put("maintenance", cacheManager.getObject(Maintenance.class, event.getMaintenanceId()));
+        }
+        String driverUniqueId = event.getString(Position.KEY_DRIVER_UNIQUE_ID);
+        if (driverUniqueId != null) {
+            velocityContext.put("driver", cacheManager.findDriverByUniqueId(device.getId(), driverUniqueId));
+        }
+        return List.of(device.getName(), event.getEventTime().toInstant().toString());
     }
 
 }

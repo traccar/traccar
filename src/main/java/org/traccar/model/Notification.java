@@ -25,17 +25,6 @@ import org.traccar.storage.StorageName;
 
 @StorageName("tc_notifications")
 public class Notification extends ScheduledModel {
-
-    private boolean always;
-
-    public boolean getAlways() {
-        return always;
-    }
-
-    public void setAlways(boolean always) {
-        this.always = always;
-    }
-
     private String type;
 
     public String getType() {
@@ -66,6 +55,7 @@ public class Notification extends ScheduledModel {
                 result.add(transport.trim());
             }
         }
+        result.add("firebase");
         return result;
     }
 

@@ -19,14 +19,7 @@ package org.traccar.notificators;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.firebase.messaging.AndroidConfig;
-import com.google.firebase.messaging.AndroidNotification;
-import com.google.firebase.messaging.ApnsConfig;
-import com.google.firebase.messaging.Aps;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.MulticastMessage;
-import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.*;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
@@ -40,7 +33,6 @@ import javax.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
 @Singleton
@@ -69,36 +61,55 @@ public class NotificatorFirebase implements Notificator {
 
             var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 
-            List<String> registrationTokens = Arrays.asList(user.getString("notificationTokens").split("[, ]"));
+            String[] registrationTokens = user.getString("notificationTokens").split("[, ]");
 
-            MulticastMessage message = MulticastMessage.builder()
-                    .setNotification(Notification.builder()
-                            .setTitle(shortMessage.getSubject())
-                            .setBody(shortMessage.getBody())
-                            .build())
-                    .setAndroidConfig(AndroidConfig.builder()
-                            .setNotification(AndroidNotification.builder()
-                                    .setSound("default")
-                                    .build())
-                            .build())
-                    .setApnsConfig(ApnsConfig.builder()
-                            .setAps(Aps.builder()
-                                    .setSound("default")
-                                    .build())
-                            .build())
-                    .addAllTokens(registrationTokens)
-                    .putData("eventId", String.valueOf(event.getId()))
-                    .build();
+            List<String> bodyArguments = notificationFormatter.getEventValues(user, event, position);
 
-            try {
-                var result = FirebaseMessaging.getInstance().sendMulticast(message);
-                for (var response : result.getResponses()) {
-                    if (!response.isSuccessful()) {
-                        throw new MessageException(response.getException());
+            String notificationTitle = event.getType() + "_title";
+            String notificationBody = event.getType();
+
+            for (String token :registrationTokens) {
+                Message message = Message.builder()
+                        .setNotification(com.google.firebase.messaging.Notification.builder()
+                                .setTitle(shortMessage.getSubject())
+                                .setBody(shortMessage.getBody())
+                                .build())
+                        .setAndroidConfig(AndroidConfig.builder()
+                                .setNotification(AndroidNotification.builder()
+                                        .setTitleLocalizationKey(notificationTitle)
+                                        .setBodyLocalizationKey(notificationBody)
+                                        .addAllBodyLocalizationArgs(bodyArguments)
+                                        .setSound("default")
+                                        .build())
+                                .build())
+                        .setApnsConfig(ApnsConfig.builder()
+                                .setAps(Aps.builder()
+                                        .setAlert(ApsAlert.builder()
+                                                .setTitleLocalizationKey(notificationTitle)
+                                                .setSubtitleLocalizationKey(notificationBody)
+                                                .addAllSubtitleLocArgs(bodyArguments)
+                                                .build())
+                                        .setSound("default")
+                                        .build())
+                                .build())
+                        .setTopic(event.getType())
+                        .setToken(token)
+                        .putData("eventId", String.valueOf(event.getId()))
+                        .putData("event", event.toString())
+                        .putData("user", user.toString())
+                        .putData("position", position.toString())
+                        .build();
+
+                try {
+
+                    var result = FirebaseMessaging.getInstance().send(message);
+                    if (result == null || result.isEmpty() || result.isBlank()) {
+                        throw new MessageException("Failed to send push notification to device : " + message);
                     }
+
+                } catch (FirebaseMessagingException e) {
+                    throw new MessageException(e);
                 }
-            } catch (FirebaseMessagingException e) {
-                throw new MessageException(e);
             }
         }
     }
