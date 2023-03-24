@@ -25,6 +25,17 @@ import org.traccar.storage.StorageName;
 
 @StorageName("tc_notifications")
 public class Notification extends ScheduledModel {
+
+    private final boolean always;
+
+    public Notification(boolean always) {
+        this.always = always;
+    }
+
+    public boolean getAlways() {
+        return always;
+    }
+
     private String type;
 
     public String getType() {
