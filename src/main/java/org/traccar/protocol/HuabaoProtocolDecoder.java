@@ -608,7 +608,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xED:
                     stringValue = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
-                    position.set("driverLicense", stringValue.trim());
+                    position.set(Position.KEY_CARD, stringValue.trim());
                     break;
                 case 0xEE:
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());

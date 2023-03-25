@@ -123,7 +123,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
             position.set("tripStart", decodeDate(buf).getTime());
             position.set("tripEnd", decodeDate(buf).getTime());
-            position.set("drivingTime", buf.readUnsignedShort());
+            position.set(Position.KEY_DRIVING_TIME, buf.readUnsignedShort());
 
             position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt());
             position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());

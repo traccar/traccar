@@ -119,6 +119,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         SPACE10X,
         STANDARD,
         OBD6,
+        WETRUST,
     }
 
     private Variant variant;
@@ -833,7 +834,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     String data = buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString();
                     buf.readUnsignedByte(); // alarm
                     buf.readUnsignedByte(); // swiped
-                    position.set("driverLicense", data.trim());
+                    position.set(Position.KEY_CARD, data.trim());
                 } else if (variant == Variant.BENWAY) {
                     int mask = buf.readUnsignedShort();
                     position.set(Position.KEY_IGNITION, BitUtil.check(mask, 8 + 7));
@@ -869,6 +870,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     position.set(Position.PREFIX_TEMP + 1, temperature);
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 10);
+                } else if (variant == Variant.WETRUST) {
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                    position.set(Position.KEY_CARD, buf.readCharSequence(
+                            buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString());
+                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
+                    position.set("cardStatus", buf.readUnsignedByte());
+                    position.set(Position.KEY_DRIVING_TIME, buf.readUnsignedShort());
                 }
             }
 
@@ -1391,6 +1399,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.SPACE10X;
         } else if (header == 0x7878 && type == MSG_STATUS && length == 0x13) {
             variant = Variant.OBD6;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x29) {
+            variant = Variant.WETRUST;
         } else {
             variant = Variant.STANDARD;
         }

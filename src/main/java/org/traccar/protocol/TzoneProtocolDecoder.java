@@ -234,7 +234,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (type == 1) {
 
-                position.set("driverLicense", buf.readCharSequence(
+                position.set(Position.KEY_CARD, buf.readCharSequence(
                         blockEnd - buf.readerIndex(), StandardCharsets.UTF_8).toString());
 
             }

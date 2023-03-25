@@ -308,11 +308,11 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            String rfid = parser.next();
-            if (rfid.matches("\\p{XDigit}+")) {
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(Integer.parseInt(rfid, 16)));
+            String value = parser.next();
+            if (value.matches("\\p{XDigit}+")) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(Integer.parseInt(value, 16)));
             } else {
-                position.set("driverLicense", rfid);
+                position.set(Position.KEY_CARD, value);
             }
         }
 

@@ -282,7 +282,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RSSI, parser.nextHexInt());
         position.set(Position.KEY_ODOMETER, parser.nextHexLong());
         position.set(Position.KEY_SATELLITES, parser.nextHexInt());
-        position.set("driverLicense", parser.next());
+        position.set(Position.KEY_CARD, parser.next());
         position.set(Position.KEY_ODOMETER, parser.nextLong());
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
