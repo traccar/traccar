@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import urllib
-import urllib2
+import urllib.request as urllib2
 import http.client as httplib
 import time
 import random
@@ -14,7 +14,7 @@ devices = 500
 
 def login():
     request = urllib2.Request(baseUrl + '/api/session')
-    response = urllib2.urlopen(request, urllib.parse.urlencode(user))
+    response = urllib2.urlopen(request, urllib.parse.urlencode(user).encode())
     return response.headers.get('Set-Cookie')
 
 def add_device(cookie, unique_id):
@@ -23,7 +23,7 @@ def add_device(cookie, unique_id):
     request.add_header('Content-Type', 'application/json')
     device = { 'name' : unique_id, 'uniqueId' : unique_id }
     try:
-        response = urllib2.urlopen(request, json.dumps(device))
+        response = urllib2.urlopen(request, json.dumps(device).encode())
     except urllib2.HTTPError:
         pass
 
