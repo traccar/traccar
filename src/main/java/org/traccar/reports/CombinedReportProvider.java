@@ -15,6 +15,7 @@
  */
 package org.traccar.reports;
 
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -53,7 +54,7 @@ public class CombinedReportProvider {
         reportUtils.checkPeriodLimit(from, to);
 
         ArrayList<CombinedReportItem> result = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             CombinedReportItem item = new CombinedReportItem();
             item.setDeviceId(device.getId());
             var positions = PositionUtil.getPositions(storage, device.getId(), from, to);

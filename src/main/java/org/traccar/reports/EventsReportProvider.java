@@ -19,6 +19,7 @@ package org.traccar.reports;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
@@ -76,7 +77,7 @@ public class EventsReportProvider {
         reportUtils.checkPeriodLimit(from, to);
 
         ArrayList<Event> result = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             Collection<Event> events = getEvents(device.getId(), from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Event event : events) {
@@ -104,7 +105,7 @@ public class EventsReportProvider {
         HashMap<Long, String> geofenceNames = new HashMap<>();
         HashMap<Long, String> maintenanceNames = new HashMap<>();
         HashMap<Long, Position> positions = new HashMap<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             Collection<Event> events = getEvents(device.getId(), from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {

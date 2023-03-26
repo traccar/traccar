@@ -23,8 +23,10 @@ import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.database.CommandsManager;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.Typed;
 import org.traccar.model.User;
@@ -104,7 +106,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
 
     @POST
     @Path("send")
-    public Response send(Command entity) throws Exception {
+    public Response send(Command entity, @QueryParam("groupId") long groupId) throws Exception {
         if (entity.getId() > 0) {
             permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
             long deviceId = entity.getDeviceId();
@@ -114,11 +116,19 @@ public class CommandResource extends ExtendedObjectResource<Command> {
         } else {
             permissionsService.checkRestriction(getUserId(), UserRestrictions::getLimitCommands);
         }
-        permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
-        if (!commandsManager.sendCommand(entity)) {
-            return Response.accepted(entity).build();
+        boolean result = true;
+        if (groupId > 0) {
+            permissionsService.checkPermission(Group.class, getUserId(), groupId);
+            var devices = DeviceUtil.getAccessibleDevices(storage, getUserId(), List.of(), List.of(groupId));
+            for (Device device : devices) {
+                entity.setDeviceId(device.getId());
+                result = result && commandsManager.sendCommand(entity);
+            }
+        } else {
+            permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
+            result = commandsManager.sendCommand(entity);
         }
-        return Response.ok(entity).build();
+        return result ? Response.ok(entity).build() : Response.accepted(entity).build();
     }
 
     @GET

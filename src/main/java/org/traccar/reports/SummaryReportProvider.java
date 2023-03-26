@@ -21,6 +21,7 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
@@ -146,7 +147,7 @@ public class SummaryReportProvider {
         reportUtils.checkPeriodLimit(from, to);
 
         ArrayList<SummaryReportItem> result = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             Collection<SummaryReportItem> deviceResults = calculateSummaryResults(userId, device, from, to, daily);
             for (SummaryReportItem summaryReport : deviceResults) {
                 if (summaryReport.getStartTime() != null && summaryReport.getEndTime() != null) {

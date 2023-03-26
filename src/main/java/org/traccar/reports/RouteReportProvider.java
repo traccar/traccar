@@ -19,6 +19,7 @@ package org.traccar.reports;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
@@ -60,7 +61,7 @@ public class RouteReportProvider {
         reportUtils.checkPeriodLimit(from, to);
 
         ArrayList<Position> result = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             result.addAll(PositionUtil.getPositions(storage, device.getId(), from, to));
         }
         return result;
@@ -73,7 +74,7 @@ public class RouteReportProvider {
 
         ArrayList<DeviceReportSection> devicesRoutes = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
             DeviceReportSection deviceRoutes = new DeviceReportSection();
             deviceRoutes.setDeviceName(device.getName());

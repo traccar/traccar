@@ -19,6 +19,7 @@ package org.traccar.reports;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
@@ -67,7 +68,7 @@ public class TripsReportProvider {
         reportUtils.checkPeriodLimit(from, to);
 
         ArrayList<TripReportItem> result = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             result.addAll(detectTrips(device, from, to));
         }
         return result;
@@ -80,7 +81,7 @@ public class TripsReportProvider {
 
         ArrayList<DeviceReportSection> devicesTrips = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             Collection<TripReportItem> trips = detectTrips(device, from, to);
             DeviceReportSection deviceTrips = new DeviceReportSection();
             deviceTrips.setDeviceName(device.getName());

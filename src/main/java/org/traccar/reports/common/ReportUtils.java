@@ -36,7 +36,6 @@ import org.traccar.helper.model.UserUtil;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
-import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.reports.model.BaseReportItem;
@@ -60,13 +59,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Singleton
 public class ReportUtils {
@@ -104,41 +99,6 @@ public class ReportUtils {
         if (limit > 0 && to.getTime() - from.getTime() > limit) {
             throw new IllegalArgumentException("Time period exceeds the limit");
         }
-    }
-
-    public Collection<Device> getAccessibleDevices(
-            long userId, Collection<Long> deviceIds, Collection<Long> groupIds) throws StorageException {
-
-        var devices = storage.getObjects(Device.class, new Request(
-                new Columns.All(),
-                new Condition.Permission(User.class, userId, Device.class)));
-        var deviceById = devices.stream()
-                .collect(Collectors.toUnmodifiableMap(Device::getId, x -> x));
-        var devicesByGroup = devices.stream()
-                .filter(x -> x.getGroupId() > 0)
-                .collect(Collectors.groupingBy(Device::getGroupId));
-
-        var groups = storage.getObjects(Group.class, new Request(
-                new Columns.All(),
-                new Condition.Permission(User.class, userId, Group.class)));
-        var groupsByGroup = groups.stream()
-                .filter(x -> x.getGroupId() > 0)
-                .collect(Collectors.groupingBy(Group::getGroupId));
-
-        var results = deviceIds.stream()
-                .map(deviceById::get)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        var groupQueue = new LinkedList<>(groupIds);
-        while (!groupQueue.isEmpty()) {
-            long groupId = groupQueue.pop();
-            results.addAll(devicesByGroup.getOrDefault(groupId, Collections.emptyList()));
-            groupQueue.addAll(groupsByGroup.getOrDefault(groupId, Collections.emptyList())
-                    .stream().map(Group::getId).collect(Collectors.toUnmodifiableList()));
-        }
-
-        return results;
     }
 
     public double calculateFuel(Position firstPosition, Position lastPosition) {
