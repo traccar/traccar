@@ -124,13 +124,15 @@ public class VltProtocolDecoder extends BaseHttpProtocolDecoder {
         switch (type) {
             case "NRM":
                 return decodePosition(deviceSession, sentence.substring(3 + 15));
-            default:
+            case "BTH":
                 List<Position> positions = new LinkedList<>();
                 int count = Integer.parseInt(sentence.substring(index, index += 3));
                 for (int i = 0; i < count; i++) {
                     positions.add(decodePosition(deviceSession, sentence.substring(index, index += 78)));
                 }
                 return positions;
+            default:
+                return null;
         }
     }
 
