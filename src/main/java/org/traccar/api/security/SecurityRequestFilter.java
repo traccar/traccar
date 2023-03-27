@@ -15,6 +15,7 @@
  */
 package org.traccar.api.security;
 
+import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.api.resource.SessionResource;
@@ -63,6 +64,9 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
     @Inject
     private StatisticsManager statisticsManager;
 
+    @Inject
+    private Injector injector;
+
     @Override
     public void filter(ContainerRequestContext requestContext) {
 
@@ -97,13 +101,14 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
                 Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
+                    injector.getInstance(PermissionsService.class).getUser(userId).checkDisabled();
                     statisticsManager.registerRequest(userId);
                     securityContext = new UserSecurityContext(new UserPrincipal(userId));
                 }
 
             }
 
-        } catch (SecurityException e) {
+        } catch (SecurityException | StorageException e) {
             LOGGER.warn("Authentication error", e);
         }
 
