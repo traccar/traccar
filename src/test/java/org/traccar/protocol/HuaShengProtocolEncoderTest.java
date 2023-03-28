@@ -11,7 +11,17 @@ public class HuaShengProtocolEncoderTest extends ProtocolTest {
 
         var encoder = inject(new HuaShengProtocolEncoder(null));
 
-        Command command = new Command();
+        Command command;
+
+        command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_OUTPUT_CONTROL);
+        command.set(Command.KEY_INDEX, 1);
+        command.set(Command.KEY_DATA, "1");
+
+        verifyCommand(encoder, command, binary("c00000000daa1600000000000101c0"));
+
+        command = new Command();
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_PERIODIC);
         command.set(Command.KEY_FREQUENCY, 60);

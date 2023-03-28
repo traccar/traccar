@@ -50,6 +50,8 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_HSO_RSP = 0x0003;
     public static final int MSG_SET_REQ = 0xAA04;
     public static final int MSG_SET_RSP = 0xFF05;
+    public static final int MSG_CTRL_REQ = 0xAA16;
+    public static final int MSG_CTRL_RSP = 0xFF17;
 
     private void sendResponse(Channel channel, int type, int index, ByteBuf content) {
         if (channel != null) {
