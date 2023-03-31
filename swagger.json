@@ -764,15 +764,9 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Permission"
-                }
-              }
-            }
+          "204": {
+            "description": "No Content",
+            "content": {}
           },
           "400": {
             "description": "No permission",
@@ -786,16 +780,6 @@
         "tags": [
           "Permissions"
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Permission"
-              }
-            }
-          },
-          "required": true
-        },
         "responses": {
           "204": {
             "description": "No Content",
