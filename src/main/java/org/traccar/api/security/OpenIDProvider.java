@@ -61,7 +61,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 public class OpenIDProvider {
-    private final Boolean force;
+    public final Boolean force;
     private final ClientID clientId;
     private final Secret clientSecret;
     private URI callbackUrl;
