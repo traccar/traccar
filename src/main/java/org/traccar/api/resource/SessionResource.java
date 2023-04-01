@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
 import org.traccar.api.security.LoginService;
+import org.traccar.api.security.OpenIDProvider;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.LogAction;
@@ -49,6 +50,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.net.URI;
 
 @Path("session")
 @Produces(MediaType.APPLICATION_JSON)
@@ -61,6 +63,9 @@ public class SessionResource extends BaseResource {
 
     @Inject
     private LoginService loginService;
+
+    @Inject
+    private OpenIDProvider openIdProvider;
 
     @Inject
     private TokenManager tokenManager;
@@ -160,4 +165,24 @@ public class SessionResource extends BaseResource {
         return tokenManager.generateToken(getUserId(), expiration);
     }
 
+    @PermitAll
+    @Path("openid/auth")
+    @GET
+    public Response openIdAuth() throws IOException {
+        return Response.seeOther(
+            openIdProvider.createAuthRequest()
+        ).build();
+    }
+    
+    @PermitAll
+    @Path("openid/callback")
+    @GET
+    public Response requestToken() throws IOException, StorageException {
+        // Get full request URI
+        StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+        String queryString = request.getQueryString();
+        String requestURI = requestURL.append('?').append(queryString).toString();
+
+        return openIdProvider.handleCallback(URI.create(requestURI), request);
+    }
 }
