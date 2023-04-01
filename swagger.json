@@ -1013,6 +1013,46 @@
         }
       }
     },
+    "/session/openid/auth": {
+      "get": {
+        "summary": "Fetch Session information",
+        "tags": [
+          "Session"
+        ],
+        "parameters": [
+          {
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect to OpenID Connect identity provider",
+            "content": { }
+          }
+        }
+      }
+    },
+    "/session/openid/callback": {
+      "get": {
+        "summary": "OpenID Callback",
+        "tags": [
+          "Session"
+        ],
+        "parameters": [
+          {
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect to homepage",
+            "content": { }
+          },
+          "404": {
+            "description": "Invalid callback",
+            "content": { }
+          }
+        }
+      }
+    },
     "/users": {
       "get": {
         "summary": "Fetch a list of Users",
