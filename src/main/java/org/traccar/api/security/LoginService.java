@@ -89,6 +89,19 @@ public class LoginService {
         return null;
     }
 
+    public User lookup(String email) throws StorageException {
+        User user = storage.getObject(User.class, new Request(
+                new Columns.All(),
+                new Condition.Equals("email", email)));
+
+        if (user != null) {
+            checkUserEnabled(user);
+            return user;
+        }
+        
+        return null;
+    }
+
     private void checkUserEnabled(User user) throws SecurityException {
         if (user == null) {
             throw new SecurityException("Unknown account");
