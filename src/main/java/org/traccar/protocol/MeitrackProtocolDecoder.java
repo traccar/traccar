@@ -554,15 +554,14 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         buf.skipBytes(length - 2);
                         break;
                     case 0xFEA8:
-                        if (buf.readUnsignedByte() > 0) {
-                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                        } else {
-                            buf.readUnsignedByte();
+                        for (int k = 1; k <= 3; k++) {
+                            if (buf.readUnsignedByte() > 0) {
+                                String key = k == 1 ? Position.KEY_BATTERY_LEVEL : "battery" + k + "Level";
+                                position.set(key, buf.readUnsignedByte());
+                            } else {
+                                buf.readUnsignedByte();
+                            }
                         }
-                        buf.readUnsignedByte(); // battery 2 status
-                        buf.readUnsignedByte(); // battery 2 level
-                        buf.readUnsignedByte(); // battery 3 status
-                        buf.readUnsignedByte(); // battery 3 level
                         buf.readUnsignedByte(); // battery alert
                         break;
                     default:
