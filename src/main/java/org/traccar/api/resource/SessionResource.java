@@ -169,6 +169,10 @@ public class SessionResource extends BaseResource {
     @Path("openid/auth")
     @GET
     public Response openIdAuth() throws IOException {
+        if (openIdProvider == null) {
+            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+        }
+
         return Response.seeOther(
             openIdProvider.createAuthRequest()
         ).build();
@@ -178,6 +182,10 @@ public class SessionResource extends BaseResource {
     @Path("openid/callback")
     @GET
     public Response requestToken() throws IOException, StorageException {
+        if (openIdProvider == null) {
+            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+        }
+        
         // Get full request URI
         StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
         String queryString = request.getQueryString();
