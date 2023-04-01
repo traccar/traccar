@@ -610,6 +610,62 @@ public final class Keys {
             "ldap.adminGroup",
             List.of(KeyType.CONFIG));
 
+
+    /**
+     * OIDC enable.
+     */
+    public static final ConfigKey<String> OIDC_ENABLE = new BooleanConfigKey(
+            "oidc.enable",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Force OIDC authentication.
+     */
+    public static final ConfigKey<String> OIDC_FORCE = new BooleanConfigKey(
+            "oidc.force",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * OIDC Client ID.
+     */
+    public static final ConfigKey<String> OIDC_CLIENTID = new StringConfigKey(
+            "oidc.clientId",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * OIDC Client Secret.
+     */
+    public static final ConfigKey<String> OIDC_CLIENTSECRET = new StringConfigKey(
+            "oidc.clientSecret",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * OIDC Authorization URL.
+     */
+    public static final ConfigKey<String> OIDC_AUTHURL = new StringConfigKey(
+            "oidc.authUrl",
+            List.of(KeyType.CONFIG));
+    /**
+     * OIDC Token URL.
+     */
+    public static final ConfigKey<String> OIDC_TOKENURL = new StringConfigKey(
+            "oidc.tokenUrl",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * OIDC User Info URL.
+     */
+    public static final ConfigKey<String> OIDC_USERINFOURL = new StringConfigKey(
+            "oidc.userInfoUrl",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * OIDC group to grant admin access.
+     */
+    public static final ConfigKey<String> OIDC_ADMINGROUP = new StringConfigKey(
+            "oidc.adminGroup",
+            List.of(KeyType.CONFIG));
+
     /**
      * If no data is reported by a device for the given amount of time, status changes from online to unknown. Value is
      * in seconds. Default timeout is 10 minutes.
