@@ -614,14 +614,14 @@ public final class Keys {
     /**
      * OIDC enable.
      */
-    public static final ConfigKey<String> OIDC_ENABLE = new BooleanConfigKey(
+    public static final ConfigKey<Boolean> OIDC_ENABLE = new BooleanConfigKey(
             "oidc.enable",
             List.of(KeyType.CONFIG));
 
     /**
      * Force OIDC authentication.
      */
-    public static final ConfigKey<String> OIDC_FORCE = new BooleanConfigKey(
+    public static final ConfigKey<Boolean> OIDC_FORCE = new BooleanConfigKey(
             "oidc.force",
             List.of(KeyType.CONFIG));
 

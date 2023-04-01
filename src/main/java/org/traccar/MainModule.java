@@ -87,6 +87,7 @@ import org.traccar.storage.DatabaseStorage;
 import org.traccar.storage.MemoryStorage;
 import org.traccar.storage.Storage;
 import org.traccar.web.WebServer;
+import org.traccar.api.security.OpenIDProvider;
 
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
@@ -166,6 +167,15 @@ public class MainModule extends AbstractModule {
     public static LdapProvider provideLdapProvider(Config config) {
         if (config.hasKey(Keys.LDAP_URL)) {
             return new LdapProvider(config);
+        }
+        return null;
+    }
+    
+    @Singleton
+    @Provides
+    public static OpenIDProvider provideOpenIDProvider(Config config) {
+        if (config.getBoolean(Keys.OIDC_ENABLE)) {
+            return new OpenIDProvider(config);
         }
         return null;
     }
