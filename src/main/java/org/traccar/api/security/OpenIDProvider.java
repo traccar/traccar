@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import com.google.inject.Inject;
 
@@ -43,6 +44,7 @@ import com.nimbusds.oauth2.sdk.AuthorizationGrant;
 import com.nimbusds.oauth2.sdk.TokenRequest;
 import com.nimbusds.oauth2.sdk.TokenResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import com.nimbusds.oauth2.sdk.AuthorizationErrorResponse;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.AuthorizationResponse;
 import com.nimbusds.oauth2.sdk.auth.Secret;
@@ -134,7 +136,7 @@ public class OpenIDProvider {
         }
     }
 
-    private AuthorizationCode parseCallback(URI requri) {
+    private AuthorizationCode parseCallback(URI requri) throws WebApplicationException {
         AuthorizationResponse response;
 
         try {
@@ -144,7 +146,8 @@ public class OpenIDProvider {
         }
 
         if (!response.indicatesSuccess()) {
-            return null;
+            AuthorizationErrorResponse error = response.toErrorResponse();
+            throw new WebApplicationException(Response.status(403).entity(error.getErrorObject().getDescription()).build());
         }
 
         return response.toSuccessResponse().getAuthorizationCode();
@@ -196,19 +199,19 @@ public class OpenIDProvider {
         return user;
     }
 
-    public Response handleCallback(URI requri, HttpServletRequest request) throws StorageException {
+    public Response handleCallback(URI requri, HttpServletRequest request) throws StorageException, WebApplicationException {
         // Parse callback
         AuthorizationCode authCode = this.parseCallback(requri);
 
         if (authCode == null) {
-            return Response.ok().entity("Callback parse fail").build();
+            return Response.status(403).entity( "Invalid OpenID Connect callback.").build();
         }
 
         // Get token from IDP
         OIDCTokenResponse tokens = this.getToken(authCode);
 
         if (tokens == null) {
-            return Response.ok().entity("Token request failed").build();
+            return Response.status(403).entity("Unable to authenticate with the OpenID Connect provider. Please try again.").build();
         }
 
         BearerAccessToken bearerToken = tokens.getOIDCTokens().getBearerAccessToken();
@@ -217,7 +220,7 @@ public class OpenIDProvider {
         UserInfo idpUser = this.getUserInfo(bearerToken);
 
         if (idpUser == null) {
-            return Response.ok().entity("User info request failed").build();
+            return Response.status(500).entity("Failed to access OpenID Connect user info endpoint. Please contact your administrator.").build();
         }
 
         String email = idpUser.getEmailAddress();
