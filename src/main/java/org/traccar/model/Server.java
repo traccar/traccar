@@ -17,15 +17,13 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-import org.traccar.Main;
-import org.traccar.api.security.OpenIDProvider;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
 @StorageName("tc_servers")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Server extends ExtendedModel implements UserRestrictions {
-    
+
     private boolean registration;
 
     public boolean getRegistration() {
@@ -264,15 +262,27 @@ public class Server extends ExtendedModel implements UserRestrictions {
         this.newServer = newServer;
     }
 
+    private boolean openIdEnabled;
+
     @QueryIgnore
-    public boolean getOidcEnabled() {
-        OpenIDProvider oidc = Main.getInjector().getInstance(OpenIDProvider.class);
-        return oidc != null;
+    public boolean getOpenIdEnabled() {
+        return openIdEnabled;
     }
 
     @QueryIgnore
-    public boolean getOidcForce() {
-        OpenIDProvider oidc = Main.getInjector().getInstance(OpenIDProvider.class);
-        return oidc != null && oidc.force;
+    public void setOpenIdEnabled(boolean openIdEnabled) {
+        this.openIdEnabled = openIdEnabled;
+    }
+
+    private boolean openIdForce;
+
+    @QueryIgnore
+    public boolean getOpenIdForce() {
+        return openIdForce;
+    }
+
+    @QueryIgnore
+    public void setOpenIdForce(boolean openIdForce) {
+        this.openIdForce = openIdForce;
     }
 }

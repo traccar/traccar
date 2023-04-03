@@ -89,17 +89,24 @@ public class LoginService {
         return null;
     }
 
-    public User lookup(String email) throws StorageException {
+    public User login(String email, String name, Boolean administrator) throws StorageException {
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(),
-                new Condition.Equals("email", email)));
+            new Columns.All(),
+            new Condition.Equals("email", email)));
 
         if (user != null) {
             checkUserEnabled(user);
             return user;
+        } else {
+            user = new User();
+            user.setName(name);
+            user.setEmail(email);
+            user.setFixedEmail(true);
+            user.setAdministrator(administrator);
+            user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));            
+            checkUserEnabled(user);
+            return user;
         }
-        
-        return null;
     }
 
     private void checkUserEnabled(User user) throws SecurityException {

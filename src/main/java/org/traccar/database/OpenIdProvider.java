@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 Daniel Raper (me@danr.uk)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.api.security;
+package org.traccar.database;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.api.security.LoginService;
 import org.traccar.model.User;
-import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Request;
-import org.traccar.storage.query.Columns;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.ServletHelper;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Date;
-import java.util.List;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
@@ -62,7 +58,7 @@ import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
 
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
-public class OpenIDProvider {
+public class OpenIdProvider {
     public final Boolean force;
     private final ClientID clientId;
     private final Secret clientSecret;
@@ -73,39 +69,35 @@ public class OpenIDProvider {
     private URI baseUrl;
     private final String adminGroup;
 
-    private Config config;
     private LoginService loginService;
-    private Storage storage;
 
     @Inject
-    public OpenIDProvider(Config config, LoginService loginService, Storage storage) {
-        force = config.getBoolean(Keys.OIDC_FORCE);
-        clientId = new ClientID(config.getString(Keys.OIDC_CLIENTID));
-        clientSecret = new Secret(config.getString(Keys.OIDC_CLIENTSECRET));
+    public OpenIdProvider(Config config, LoginService loginService) {
+        force = config.getBoolean(Keys.OPENID_FORCE);
+        clientId = new ClientID(config.getString(Keys.OPENID_CLIENTID));
+        clientSecret = new Secret(config.getString(Keys.OPENID_CLIENTSECRET));
 
-        this.config = config;
-        this.storage = storage;
         this.loginService = loginService;
 
         try {
             callbackUrl = new URI(config.getString(Keys.WEB_URL, "") + "/api/session/openid/callback");
-            authUrl = new URI(config.getString(Keys.OIDC_AUTHURL, ""));
-            tokenUrl = new URI(config.getString(Keys.OIDC_TOKENURL, ""));
-            userInfoUrl = new URI(config.getString(Keys.OIDC_USERINFOURL, ""));
+            authUrl = new URI(config.getString(Keys.OPENID_AUTHURL, ""));
+            tokenUrl = new URI(config.getString(Keys.OPENID_TOKENURL, ""));
+            userInfoUrl = new URI(config.getString(Keys.OPENID_USERINFOURL, ""));
             baseUrl = new URI(config.getString(Keys.WEB_URL, ""));
         } catch (URISyntaxException e) {
         }
 
-        adminGroup = config.getString(Keys.OIDC_ADMINGROUP);
+        adminGroup = config.getString(Keys.OPENID_ADMINGROUP);
     }
 
-    public URI createAuthRequest() {
+    public URI createAuthUri() {
         AuthenticationRequest request = new AuthenticationRequest.Builder(
                 new ResponseType("code"),
                 new Scope("openid", "profile", "email", "groups"),
-                this.clientId,
-                this.callbackUrl)
-                .endpointURI(this.authUrl)
+                clientId,
+                callbackUrl)
+                .endpointURI(authUrl)
                 .state(new State())
                 .nonce(new Nonce())
                 .build();
@@ -115,10 +107,10 @@ public class OpenIDProvider {
 
     private OIDCTokenResponse getToken(AuthorizationCode code) {
         // Credentials to authenticate us to the token endpoint
-        ClientAuthentication clientAuth = new ClientSecretBasic(this.clientId, this.clientSecret);
-        AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, this.callbackUrl);
+        ClientAuthentication clientAuth = new ClientSecretBasic(clientId, clientSecret);
+        AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callbackUrl);
 
-        TokenRequest request = new TokenRequest(this.tokenUrl, clientAuth, codeGrant);
+        TokenRequest request = new TokenRequest(tokenUrl, clientAuth, codeGrant);
         TokenResponse tokenResponse;
 
         try {
@@ -136,37 +128,14 @@ public class OpenIDProvider {
         }
     }
 
-    private AuthorizationCode parseCallback(URI requri) throws WebApplicationException {
-        AuthorizationResponse response;
-
-        try {
-            response = AuthorizationResponse.parse(requri);
-        } catch (ParseException e) {
-            return null;
-        }
-
-        if (!response.indicatesSuccess()) {
-            AuthorizationErrorResponse error = response.toErrorResponse();
-            throw new WebApplicationException(Response.status(403).entity(error.getErrorObject().getDescription()).build());
-        }
-
-        return response.toSuccessResponse().getAuthorizationCode();
-    }
-
-    private UserInfo getUserInfo(BearerAccessToken token) {
+    private UserInfo getUserInfo(BearerAccessToken token) throws IOException, ParseException {
         UserInfoResponse userInfoResponse;
 
-        try {
-            HTTPResponse httpResponse = new UserInfoRequest(this.userInfoUrl, token)
-                    .toHTTPRequest()
-                    .send();
+        HTTPResponse httpResponse = new UserInfoRequest(userInfoUrl, token)
+                .toHTTPRequest()
+                .send();
 
-            userInfoResponse = UserInfoResponse.parse(httpResponse);
-        } catch (IOException e) {
-            return null;
-        } catch (ParseException e) {
-            return null;
-        }
+        userInfoResponse = UserInfoResponse.parse(httpResponse);
 
         if (!userInfoResponse.indicatesSuccess()) {
             // User info request failed - usually from expiring
@@ -176,39 +145,21 @@ public class OpenIDProvider {
         return userInfoResponse.toSuccessResponse().getUserInfo();
     }
 
-    private User createUser(String name, String email, Boolean administrator) throws StorageException {
-        User user = new User();
+    public Response handleCallback(URI requestUri, HttpServletRequest request) throws StorageException, ParseException, IOException, WebApplicationException {
+        AuthorizationResponse response = AuthorizationResponse.parse(requestUri);
 
-        user.setName(name);
-        user.setEmail(email);
-        user.setFixedEmail(true);
-        user.setDeviceLimit(this.config.getInteger(Keys.USERS_DEFAULT_DEVICE_LIMIT));
-
-        int expirationDays = this.config.getInteger(Keys.USERS_DEFAULT_EXPIRATION_DAYS);
-
-        if (expirationDays > 0) {
-            user.setExpirationTime(new Date(System.currentTimeMillis() + expirationDays * 86400000L));
+        if (!response.indicatesSuccess()) {
+            AuthorizationErrorResponse error = response.toErrorResponse();
+            throw new WebApplicationException(Response.status(403).entity(error.getErrorObject().getDescription()).build());
         }
 
-        if (administrator) {
-            user.setAdministrator(true);
-        }
-
-        user.setId(this.storage.addObject(user, new Request(new Columns.Exclude("id"))));
-
-        return user;
-    }
-
-    public Response handleCallback(URI requri, HttpServletRequest request) throws StorageException, WebApplicationException {
-        // Parse callback
-        AuthorizationCode authCode = this.parseCallback(requri);
+        AuthorizationCode authCode = response.toSuccessResponse().getAuthorizationCode();
 
         if (authCode == null) {
             return Response.status(403).entity( "Invalid OpenID Connect callback.").build();
         }
 
-        // Get token from IDP
-        OIDCTokenResponse tokens = this.getToken(authCode);
+        OIDCTokenResponse tokens = getToken(authCode);
 
         if (tokens == null) {
             return Response.status(403).entity("Unable to authenticate with the OpenID Connect provider. Please try again.").build();
@@ -216,27 +167,14 @@ public class OpenIDProvider {
 
         BearerAccessToken bearerToken = tokens.getOIDCTokens().getBearerAccessToken();
 
-        // Get user info from IDP
-        UserInfo idpUser = this.getUserInfo(bearerToken);
+        UserInfo userInfo = getUserInfo(bearerToken);
 
-        if (idpUser == null) {
+        if (userInfo == null) {
             return Response.status(500).entity("Failed to access OpenID Connect user info endpoint. Please contact your administrator.").build();
         }
 
-        String email = idpUser.getEmailAddress();
-        String name = idpUser.getName();
+        User user = loginService.login(userInfo.getEmailAddress(), userInfo.getName(), userInfo.getStringListClaim("groups").contains(adminGroup));
 
-        // Check if user exists
-        User user = this.loginService.lookup(email);
-
-        // If user does not exist, create one
-        if (user == null) {
-            List<String> groups = idpUser.getStringListClaim("groups");
-            Boolean administrator = groups.contains(this.adminGroup);
-            user = this.createUser(name, email, administrator);
-        }
-
-        // Set user session and redirect to homepage
         request.getSession().setAttribute(SessionResource.USER_ID_KEY, user.getId());
         LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
         return Response.seeOther(

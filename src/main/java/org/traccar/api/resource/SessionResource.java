@@ -17,8 +17,8 @@ package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
 import org.traccar.api.security.LoginService;
-import org.traccar.api.security.OpenIDProvider;
 import org.traccar.api.signature.TokenManager;
+import org.traccar.database.OpenIdProvider;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.ServletHelper;
@@ -28,6 +28,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import com.nimbusds.oauth2.sdk.ParseException;
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
@@ -65,7 +66,7 @@ public class SessionResource extends BaseResource {
     private LoginService loginService;
 
     @Inject
-    private OpenIDProvider openIdProvider;
+    private OpenIdProvider openIdProvider;
 
     @Inject
     private TokenManager tokenManager;
@@ -169,28 +170,17 @@ public class SessionResource extends BaseResource {
     @Path("openid/auth")
     @GET
     public Response openIdAuth() throws IOException {
-        if (openIdProvider == null) {
-            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
-        }
-
-        return Response.seeOther(
-            openIdProvider.createAuthRequest()
-        ).build();
+        return Response.seeOther(openIdProvider.createAuthUri()).build();
     }
     
     @PermitAll
     @Path("openid/callback")
     @GET
-    public Response requestToken() throws IOException, StorageException {
-        if (openIdProvider == null) {
-            throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
-        }
-        
-        // Get full request URI
-        StringBuilder requestURL = new StringBuilder(request.getRequestURL().toString());
+    public Response requestToken() throws IOException, StorageException, ParseException {
+        StringBuilder requestUrl = new StringBuilder(request.getRequestURL().toString());
         String queryString = request.getQueryString();
-        String requestURI = requestURL.append('?').append(queryString).toString();
+        String requestUri = requestUrl.append('?').append(queryString).toString();
 
-        return openIdProvider.handleCallback(URI.create(requestURI), request);
+        return openIdProvider.handleCallback(URI.create(requestUri), request);
     }
 }

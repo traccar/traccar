@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.database.OpenIdProvider;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.mail.MailManager;
 import org.traccar.geocoder.Geocoder;
@@ -57,6 +58,10 @@ public class ServerResource extends BaseResource {
 
     @Inject
     @Nullable
+    private OpenIdProvider openIdProvider;
+
+    @Inject
+    @Nullable
     private Geocoder geocoder;
 
     @PermitAll
@@ -65,6 +70,8 @@ public class ServerResource extends BaseResource {
         Server server = storage.getObject(Server.class, new Request(new Columns.All()));
         server.setEmailEnabled(mailManager.getEmailEnabled());
         server.setGeocoderEnabled(geocoder != null);
+        server.setOpenIdEnabled(openIdProvider != null);
+        server.setOpenIdForce(openIdProvider != null && openIdProvider.force);
         User user = permissionsService.getUser(getUserId());
         if (user != null) {
             if (user.getAdministrator()) {
