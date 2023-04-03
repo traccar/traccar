@@ -2821,6 +2821,12 @@
           "coordinateFormat": {
             "type": "string"
           },
+          "oidcEnabled": {
+            "type": "boolean"
+          },
+          "oidcForce": {
+            "type": "boolean"
+          },
           "attributes": {
             "type": "object",
             "properties": {}
