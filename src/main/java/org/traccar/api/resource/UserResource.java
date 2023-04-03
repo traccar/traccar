@@ -17,7 +17,6 @@ package org.traccar.api.resource;
 
 import org.traccar.api.BaseObjectResource;
 import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.ManagedUser;

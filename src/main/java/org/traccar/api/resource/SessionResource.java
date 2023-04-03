@@ -174,7 +174,7 @@ public class SessionResource extends BaseResource {
     public Response openIdAuth() throws IOException {
         return Response.seeOther(openIdProvider.createAuthUri()).build();
     }
-    
+
     @PermitAll
     @Path("openid/callback")
     @GET

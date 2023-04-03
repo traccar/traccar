@@ -171,7 +171,7 @@ public class MainModule extends AbstractModule {
         }
         return null;
     }
-    
+
     @Singleton
     @Provides
     public static OpenIdProvider provideOpenIDProvider(Config config, LoginService loginService) {

@@ -71,7 +71,7 @@ public class ServerResource extends BaseResource {
         server.setEmailEnabled(mailManager.getEmailEnabled());
         server.setGeocoderEnabled(geocoder != null);
         server.setOpenIdEnabled(openIdProvider != null);
-        server.setOpenIdForce(openIdProvider != null && openIdProvider.force);
+        server.setOpenIdForce(openIdProvider != null && openIdProvider.getForce());
         User user = permissionsService.getUser(getUserId());
         if (user != null) {
             if (user.getAdministrator()) {

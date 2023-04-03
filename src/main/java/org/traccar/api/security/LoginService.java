@@ -107,7 +107,7 @@ public class LoginService {
             user.setEmail(email);
             user.setFixedEmail(true);
             user.setAdministrator(administrator);
-            user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));            
+            user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
             checkUserEnabled(user);
             return user;
         }

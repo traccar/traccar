@@ -628,7 +628,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * OpenID Connect Client Secret. 
+     * OpenID Connect Client Secret.
      * This is a secret assigned to each application you register with your identity provider.
      * Required to enable SSO.
      */
