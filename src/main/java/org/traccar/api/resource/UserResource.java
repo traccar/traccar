@@ -39,7 +39,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
-import java.util.Date;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -91,11 +90,7 @@ public class UserResource extends BaseObjectResource<User> {
                 if (!permissionsService.getServer().getRegistration()) {
                     throw new SecurityException("Registration disabled");
                 }
-                entity.setDeviceLimit(config.getInteger(Keys.USERS_DEFAULT_DEVICE_LIMIT));
-                int expirationDays = config.getInteger(Keys.USERS_DEFAULT_EXPIRATION_DAYS);
-                if (expirationDays > 0) {
-                    entity.setExpirationTime(new Date(System.currentTimeMillis() + expirationDays * 86400000L));
-                }
+                UserUtil.setUserDefaults(entity, config);
             }
         }
 

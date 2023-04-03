@@ -15,6 +15,8 @@
  */
 package org.traccar.helper.model;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
@@ -23,6 +25,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
+import java.util.Date;
 import java.util.TimeZone;
 
 public final class UserUtil {
@@ -65,4 +68,11 @@ public final class UserUtil {
         return preference != null ? preference : defaultValue;
     }
 
+    public static void setUserDefaults(User user, Config config) {
+        user.setDeviceLimit(config.getInteger(Keys.USERS_DEFAULT_DEVICE_LIMIT));
+        int expirationDays = config.getInteger(Keys.USERS_DEFAULT_EXPIRATION_DAYS);
+        if (expirationDays > 0) {
+            user.setExpirationTime(new Date(System.currentTimeMillis() + expirationDays * 86400000L));
+        }
+    }
 }
