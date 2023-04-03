@@ -665,12 +665,12 @@ public final class Keys {
 
     /**
      * OpenID Connect group to grant admin access.
-     * Defaults to admins.
+     * If this is not provided, no groups will be granted admin access.
+     * This option will only work if your OpenID provider supports the groups scope.
      */
     public static final ConfigKey<String> OPENID_ADMINGROUP = new StringConfigKey(
             "openid.adminGroup",
-            List.of(KeyType.CONFIG),
-            "admins");
+            List.of(KeyType.CONFIG));
 
     /**
      * If no data is reported by a device for the given amount of time, status changes from online to unknown. Value is
