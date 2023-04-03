@@ -94,9 +94,15 @@ public class OpenIdProvider {
     }
 
     public URI createAuthUri() {
+        Scope scope = new Scope("openid", "profile", "email");
+
+        if (adminGroup != null) {
+            scope.add("groups");
+        }
+
         AuthenticationRequest.Builder request = new AuthenticationRequest.Builder(
                 new ResponseType("code"),
-                new Scope("openid", "profile", "email", "groups"),
+                scope,
                 clientId,
                 callbackUrl);
 
@@ -156,9 +162,9 @@ public class OpenIdProvider {
 
             UserInfo userInfo = getUserInfo(bearerToken);
 
-            User user = loginService.login(
-                userInfo.getEmailAddress(), userInfo.getName(),
-                userInfo.getStringListClaim("groups").contains(adminGroup));
+            Boolean administrator = adminGroup != null && userInfo.getStringListClaim("groups").contains(adminGroup);
+
+            User user = loginService.login(userInfo.getEmailAddress(), userInfo.getName(), administrator);
 
             request.getSession().setAttribute(SessionResource.USER_ID_KEY, user.getId());
             LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
