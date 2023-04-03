@@ -43,6 +43,7 @@ public class LoginService {
 
     private final String serviceAccountToken;
     private final boolean forceLdap;
+    private final boolean forceOpenId;
 
     @Inject
     public LoginService(
@@ -53,6 +54,7 @@ public class LoginService {
         this.ldapProvider = ldapProvider;
         serviceAccountToken = config.getString(Keys.WEB_SERVICE_ACCOUNT_TOKEN);
         forceLdap = config.getBoolean(Keys.LDAP_FORCE);
+        forceOpenId = config.getBoolean(Keys.OPENID_FORCE);
     }
 
     public User login(String token) throws StorageException, GeneralSecurityException, IOException {
@@ -69,6 +71,10 @@ public class LoginService {
     }
 
     public User login(String email, String password) throws StorageException {
+        if (forceOpenId) {
+            return null;
+        }
+
         email = email.trim();
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
