@@ -176,11 +176,11 @@ public class SessionResource extends BaseResource {
     @PermitAll
     @Path("openid/callback")
     @GET
-    public Response requestToken() throws IOException, StorageException, ParseException {
+    public Response requestToken() throws IOException, StorageException, ParseException, GeneralSecurityException {
         StringBuilder requestUrl = new StringBuilder(request.getRequestURL().toString());
         String queryString = request.getQueryString();
         String requestUri = requestUrl.append('?').append(queryString).toString();
 
-        return openIdProvider.handleCallback(URI.create(requestUri), request);
+        return Response.seeOther(openIdProvider.handleCallback(URI.create(requestUri), request)).build();
     }
 }
