@@ -1027,10 +1027,6 @@
           "303": {
             "description": "Redirect to OpenID Connect identity provider",
             "content": { }
-          },
-          "404": {
-            "description": "OpenID Connect disabled",
-            "content": { }
           }
         }
       }
@@ -1048,18 +1044,6 @@
         "responses": {
           "303": {
             "description": "Successful authentication, redirect to homepage",
-            "content": { }
-          },
-          "403": {
-            "description": "Invalid callback or negative response from identity provider",
-            "content": { }
-          },
-          "404": {
-            "description": "OpenID Connect disabled",
-            "content": { }
-          },
-          "500": {
-            "description": "Other OpenID Connect error",
             "content": { }
           }
         }
@@ -2821,10 +2805,10 @@
           "coordinateFormat": {
             "type": "string"
           },
-          "oidcEnabled": {
+          "openIdEnabled": {
             "type": "boolean"
           },
-          "oidcForce": {
+          "openIdForce": {
             "type": "boolean"
           },
           "attributes": {

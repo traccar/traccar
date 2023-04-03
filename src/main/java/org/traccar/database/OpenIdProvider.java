@@ -95,44 +95,39 @@ public class OpenIdProvider {
     }
 
     public URI createAuthUri() {
-        AuthenticationRequest request = new AuthenticationRequest.Builder(
+        AuthenticationRequest.Builder request = new AuthenticationRequest.Builder(
                 new ResponseType("code"),
                 new Scope("openid", "profile", "email", "groups"),
                 clientId,
-                callbackUrl)
-                .endpointURI(authUrl)
+                callbackUrl);
+                
+        return request.endpointURI(authUrl)
                 .state(new State())
-                .nonce(new Nonce())
-                .build();
-
-        return request.toURI();
+                .build()
+                .toURI();
     }
 
     private OIDCTokenResponse getToken(AuthorizationCode code) throws IOException, ParseException, GeneralSecurityException {
         AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callbackUrl);
         TokenRequest tokenRequest = new TokenRequest(tokenUrl, clientAuth, codeGrant);
 
-        HTTPResponse tokenReq = tokenRequest.toHTTPRequest().send();
-        TokenResponse tokenResponse = OIDCTokenResponseParser.parse(tokenReq);
-        if (!tokenResponse.indicatesSuccess()) {
-            LOGGER.warn("Invalid authorization code provided to OpenID callback");
+        HTTPResponse tokenResponse = tokenRequest.toHTTPRequest().send();
+        TokenResponse token = OIDCTokenResponseParser.parse(tokenResponse);
+        if (!token.indicatesSuccess()) {
             throw new GeneralSecurityException("Unable to authenticate with the OpenID Connect provider.");
         }
 
-        return (OIDCTokenResponse) tokenResponse.toSuccessResponse();
+        return (OIDCTokenResponse) token.toSuccessResponse();
     }
 
     private UserInfo getUserInfo(BearerAccessToken token) throws IOException, ParseException, GeneralSecurityException {
-        UserInfoResponse userInfoResponse;
-
         HTTPResponse httpResponse = new UserInfoRequest(userInfoUrl, token)
                 .toHTTPRequest()
                 .send();
 
-        userInfoResponse = UserInfoResponse.parse(httpResponse);
+        UserInfoResponse userInfoResponse = UserInfoResponse.parse(httpResponse);
 
         if (!userInfoResponse.indicatesSuccess()) {
-            LOGGER.error("Failed to access OpenID user info endpoint");
             throw new GeneralSecurityException("Failed to access OpenID Connect user info endpoint. Please contact your administrator.");
         }
 
@@ -143,14 +138,12 @@ public class OpenIdProvider {
         AuthorizationResponse response = AuthorizationResponse.parse(requestUri);
 
         if (!response.indicatesSuccess()) {
-            LOGGER.warn("Callback received error response from OpenID identity provider");
             throw new GeneralSecurityException(response.toErrorResponse().getErrorObject().getDescription());
         }
 
         AuthorizationCode authCode = response.toSuccessResponse().getAuthorizationCode();
 
         if (authCode == null) {
-            LOGGER.warn("Malformed OpenID callback");
             throw new GeneralSecurityException( "Malformed OpenID callback.");
         }
 

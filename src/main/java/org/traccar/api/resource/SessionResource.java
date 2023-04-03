@@ -29,6 +29,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import com.nimbusds.oauth2.sdk.ParseException;
+import javax.annotation.Nullable;
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
@@ -66,6 +67,7 @@ public class SessionResource extends BaseResource {
     private LoginService loginService;
 
     @Inject
+    @Nullable
     private OpenIdProvider openIdProvider;
 
     @Inject
