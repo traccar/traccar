@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.api.BaseResource;
 import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
+import org.traccar.database.OpenIdProvider;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.ServletHelper;
@@ -27,6 +28,8 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import com.nimbusds.oauth2.sdk.ParseException;
+import javax.annotation.Nullable;
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
@@ -49,6 +52,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.net.URI;
 
 @Path("session")
 @Produces(MediaType.APPLICATION_JSON)
@@ -61,6 +65,10 @@ public class SessionResource extends BaseResource {
 
     @Inject
     private LoginService loginService;
+
+    @Inject
+    @Nullable
+    private OpenIdProvider openIdProvider;
 
     @Inject
     private TokenManager tokenManager;
@@ -160,4 +168,21 @@ public class SessionResource extends BaseResource {
         return tokenManager.generateToken(getUserId(), expiration);
     }
 
+    @PermitAll
+    @Path("openid/auth")
+    @GET
+    public Response openIdAuth() throws IOException {
+        return Response.seeOther(openIdProvider.createAuthUri()).build();
+    }
+
+    @PermitAll
+    @Path("openid/callback")
+    @GET
+    public Response requestToken() throws IOException, StorageException, ParseException, GeneralSecurityException {
+        StringBuilder requestUrl = new StringBuilder(request.getRequestURL().toString());
+        String queryString = request.getQueryString();
+        String requestUri = requestUrl.append('?').append(queryString).toString();
+
+        return Response.seeOther(openIdProvider.handleCallback(URI.create(requestUri), request)).build();
+    }
 }

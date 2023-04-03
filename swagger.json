@@ -1013,6 +1013,42 @@
         }
       }
     },
+    "/session/openid/auth": {
+      "get": {
+        "summary": "Fetch Session information",
+        "tags": [
+          "Session"
+        ],
+        "parameters": [
+          {
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect to OpenID Connect identity provider",
+            "content": { }
+          }
+        }
+      }
+    },
+    "/session/openid/callback": {
+      "get": {
+        "summary": "OpenID Callback",
+        "tags": [
+          "Session"
+        ],
+        "parameters": [
+          {
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Successful authentication, redirect to homepage",
+            "content": { }
+          }
+        }
+      }
+    },
     "/users": {
       "get": {
         "summary": "Fetch a list of Users",
@@ -2768,6 +2804,12 @@
           },
           "coordinateFormat": {
             "type": "string"
+          },
+          "openIdEnabled": {
+            "type": "boolean"
+          },
+          "openIdForce": {
+            "type": "boolean"
           },
           "attributes": {
             "type": "object",

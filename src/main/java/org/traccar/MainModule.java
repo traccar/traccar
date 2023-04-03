@@ -33,6 +33,7 @@ import org.traccar.broadcast.NullBroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
+import org.traccar.database.OpenIdProvider;
 import org.traccar.database.StatisticsManager;
 import org.traccar.forward.EventForwarder;
 import org.traccar.forward.EventForwarderJson;
@@ -87,6 +88,7 @@ import org.traccar.storage.DatabaseStorage;
 import org.traccar.storage.MemoryStorage;
 import org.traccar.storage.Storage;
 import org.traccar.web.WebServer;
+import org.traccar.api.security.LoginService;
 
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
@@ -166,6 +168,15 @@ public class MainModule extends AbstractModule {
     public static LdapProvider provideLdapProvider(Config config) {
         if (config.hasKey(Keys.LDAP_URL)) {
             return new LdapProvider(config);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static OpenIdProvider provideOpenIDProvider(Config config, LoginService loginService) {
+        if (config.hasKey(Keys.OPENID_CLIENTID)) {
+            return new OpenIdProvider(config, loginService);
         }
         return null;
     }

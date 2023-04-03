@@ -611,6 +611,68 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Force OpenID Connect authentication. When enabled, the Traccar login page will be skipped
+     * and users are redirected to the OpenID Connect provider.
+     */
+    public static final ConfigKey<Boolean> OPENID_FORCE = new BooleanConfigKey(
+            "openid.force",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * OpenID Connect Client ID.
+     * This is a unique ID assigned to each application you register with your identity provider.
+     * Required to enable SSO.
+     */
+    public static final ConfigKey<String> OPENID_CLIENTID = new StringConfigKey(
+            "openid.clientId",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * OpenID Connect Client Secret.
+     * This is a secret assigned to each application you register with your identity provider.
+     * Required to enable SSO.
+     */
+    public static final ConfigKey<String> OPENID_CLIENTSECRET = new StringConfigKey(
+            "openid.clientSecret",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * OpenID Connect Authorization URL.
+     * This can usually be found in the documentation of your identity provider or by using the well-known
+     * configuration endpoint, eg. https://auth.example.com//.well-known/openid-configuration
+     * Required to enable SSO.
+     */
+    public static final ConfigKey<String> OPENID_AUTHURL = new StringConfigKey(
+            "openid.authUrl",
+            List.of(KeyType.CONFIG));
+    /**
+     * OpenID Connect Token URL.
+     * This can be found in the same ways at openid.authUrl.
+     * Required to enable SSO.
+     */
+    public static final ConfigKey<String> OPENID_TOKENURL = new StringConfigKey(
+            "openid.tokenUrl",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * OpenID Connect User Info URL.
+     * This can be found in the same ways at openid.authUrl.
+     * Required to enable SSO.
+     */
+    public static final ConfigKey<String> OPENID_USERINFOURL = new StringConfigKey(
+            "openid.userInfoUrl",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * OpenID Connect group to grant admin access.
+     * Defaults to admins.
+     */
+    public static final ConfigKey<String> OPENID_ADMINGROUP = new StringConfigKey(
+            "openid.adminGroup",
+            List.of(KeyType.CONFIG),
+            "admins");
+
+    /**
      * If no data is reported by a device for the given amount of time, status changes from online to unknown. Value is
      * in seconds. Default timeout is 10 minutes.
      */
@@ -1573,7 +1635,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Public URL for the web app. Used for notification and report link.
+     * Public URL for the web app. Used for notification, report link and OpenID Connect.
      * If not provided, Traccar will attempt to get a URL from the server IP address, but it might be a local address.
      */
     public static final ConfigKey<String> WEB_URL = new StringConfigKey(

@@ -16,6 +16,7 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
@@ -261,4 +262,27 @@ public class Server extends ExtendedModel implements UserRestrictions {
         this.newServer = newServer;
     }
 
+    private boolean openIdEnabled;
+
+    @QueryIgnore
+    public boolean getOpenIdEnabled() {
+        return openIdEnabled;
+    }
+
+    @QueryIgnore
+    public void setOpenIdEnabled(boolean openIdEnabled) {
+        this.openIdEnabled = openIdEnabled;
+    }
+
+    private boolean openIdForce;
+
+    @QueryIgnore
+    public boolean getOpenIdForce() {
+        return openIdForce;
+    }
+
+    @QueryIgnore
+    public void setOpenIdForce(boolean openIdForce) {
+        this.openIdForce = openIdForce;
+    }
 }
