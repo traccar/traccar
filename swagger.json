@@ -873,6 +873,54 @@
             }
           }
         }
+      },
+      "delete": {
+        "summary": "Deletes all the Positions of a device in the time span specified",
+        "description": "",
+        "tags": [
+          "Positions"
+        ],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {}
+          }
+        }
       }
     },
     "/server": {

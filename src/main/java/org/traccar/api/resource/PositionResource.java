@@ -31,6 +31,7 @@ import org.traccar.storage.query.Request;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -43,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.LinkedList;
 
 @Path("positions")
 @Produces(MediaType.APPLICATION_JSON)
@@ -84,6 +86,21 @@ public class PositionResource extends BaseResource {
         } else {
             return PositionUtil.getLatestPositions(storage, getUserId());
         }
+    }
+
+    @DELETE
+    public Response remove(
+            @QueryParam("deviceId") long deviceId,
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
+
+        var conditions = new LinkedList<Condition>();
+        conditions.add(new Condition.Equals("deviceId", deviceId));
+        conditions.add(new Condition.Between("fixTime", "from", from, "to", to));
+        storage.removeObject(Position.class, new Request(Condition.merge(conditions)));
+
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @Path("kml")
