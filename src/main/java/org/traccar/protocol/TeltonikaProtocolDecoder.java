@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -253,7 +253,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(182, null, (p, b) -> p.set(Position.KEY_HDOP, b.readUnsignedShort() * 0.1));
         register(199, null, (p, b) -> p.set(Position.KEY_ODOMETER_TRIP, b.readUnsignedInt()));
         register(200, fmbXXX, (p, b) -> p.set("sleepMode", b.readUnsignedByte()));
-        register(205, fmbXXX, (p, b) -> p.set("cid", b.readUnsignedShort()));
+        register(205, fmbXXX, (p, b) -> p.set("cid2g", b.readUnsignedShort()));
         register(206, fmbXXX, (p, b) -> p.set("lac", b.readUnsignedShort()));
         register(236, null, (p, b) -> {
             p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
@@ -276,6 +276,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                     break;
             }
         });
+        register(636, fmbXXX, (p, b) -> p.set("cid4g", b.readUnsignedInt()));
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
@@ -366,10 +367,18 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.setNetwork(network);
             }
         } else {
-            Integer cid = (Integer) position.getAttributes().remove("cid");
+            Integer cid2g = (Integer) position.getAttributes().remove("cid2g");
+            Long cid4g = (Long) position.getAttributes().remove("cid4g");
             Integer lac = (Integer) position.getAttributes().remove("lac");
-            if (cid != null && lac != null) {
-                CellTower cellTower = CellTower.fromLacCid(getConfig(), lac, cid);
+            if (lac != null && (cid2g != null || cid4g != null)) {
+                CellTower cellTower;
+                if (cid2g != null) {
+                    cellTower = CellTower.fromLacCid(getConfig(), lac, cid2g);
+                    cellTower.setRadioType("gsm");
+                } else {
+                    cellTower = CellTower.fromLacCid(getConfig(), lac, cid4g);
+                    cellTower.setRadioType("lte");
+                }
                 long operator = position.getInteger(Position.KEY_OPERATOR);
                 if (operator >= 1000) {
                     cellTower.setOperator(operator);
