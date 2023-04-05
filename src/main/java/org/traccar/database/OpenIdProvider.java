@@ -82,56 +82,46 @@ public class OpenIdProvider {
     private LoginService loginService;
 
     @Inject
-    public OpenIdProvider(Config config, LoginService loginService) {
-        this.loginService = loginService;
+    public OpenIdProvider(
+        Config config, LoginService loginService, HttpClient httpClient, ObjectMapper objectMapper
+        ) throws InterruptedException, IOException {
+            this.loginService = loginService;
 
-        force = config.getBoolean(Keys.OPENID_FORCE);
-        clientId = new ClientID(config.getString(Keys.OPENID_CLIENTID));
-        clientAuth = new ClientSecretBasic(clientId, new Secret(config.getString(Keys.OPENID_CLIENTSECRET)));
+            force = config.getBoolean(Keys.OPENID_FORCE);
+            clientId = new ClientID(config.getString(Keys.OPENID_CLIENT_ID));
+            clientAuth = new ClientSecretBasic(clientId, new Secret(config.getString(Keys.OPENID_CLIENT_SECRET)));
 
-        try {
-            callbackUrl = new URI(config.getString(Keys.WEB_URL, "") + "/api/session/openid/callback");
-            baseUrl = new URI(config.getString(Keys.WEB_URL, ""));
+            try {
+                callbackUrl = new URI(config.getString(Keys.WEB_URL, "") + "/api/session/openid/callback");
+                baseUrl = new URI(config.getString(Keys.WEB_URL, ""));
 
-            if (
-                config.hasKey(Keys.OPENID_ISSUERURL)
-                && (
-                    !config.hasKey(Keys.OPENID_AUTHURL)
-                    || !config.hasKey(Keys.OPENID_TOKENURL)
-                    || !config.hasKey(Keys.OPENID_USERINFOURL))
-                ) {
-                    HttpClient httpClient = HttpClient.newHttpClient();
-
+                if (config.hasKey(Keys.OPENID_ISSUER_URL)) {
                     HttpRequest httpRequest = HttpRequest.newBuilder(
-                        URI.create(
-                            config.getString(Keys.OPENID_ISSUERURL) + "/.well-known/openid-configuration")
-                            )
-                        .header("accept", "application/json")
+                        URI.create(config.getString(Keys.OPENID_ISSUER_URL) + "/.well-known/openid-configuration"))
+                        .header("Accept", "application/json")
                         .build();
 
                     String httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString()).body();
 
-                    Map<String, Object> discoveryMap = new ObjectMapper().readValue(
+                    Map<String, Object> discoveryMap = objectMapper.readValue(
                         httpResponse, new TypeReference<Map<String, Object>>() { });
 
-                    authUrl = new URI(discoveryMap.get("authorization_endpoint").toString());
-                    tokenUrl = new URI(discoveryMap.get("token_endpoint").toString());
-                    userInfoUrl = new URI(discoveryMap.get("userinfo_endpoint").toString());
+                    authUrl = new URI((String) discoveryMap.get("authorization_endpoint"));
+                    tokenUrl = new URI((String) discoveryMap.get("token_endpoint"));
+                    userInfoUrl = new URI((String) discoveryMap.get("userinfo_endpoint"));
 
                     LOGGER.info("OpenID Connect auto discovery successful");
-            } else {
-                authUrl = new URI(config.getString(Keys.OPENID_AUTHURL));
-                tokenUrl = new URI(config.getString(Keys.OPENID_TOKENURL));
-                userInfoUrl = new URI(config.getString(Keys.OPENID_USERINFOURL));
-            }
+                } else {
+                    authUrl = new URI(config.getString(Keys.OPENID_AUTH_URL));
+                    tokenUrl = new URI(config.getString(Keys.OPENID_TOKEN_URL));
+                    userInfoUrl = new URI(config.getString(Keys.OPENID_USERINFO_URL));
+                }
         } catch (URISyntaxException error) {
             LOGGER.error("Invalid URIs provided in OpenID configuration");
-        } catch (InterruptedException | IOException error) {
-            LOGGER.error("OpenID Connect auto discovery failed");
         }
 
-        adminGroup = config.getString(Keys.OPENID_ADMINGROUP);
-        allowGroup = config.getString(Keys.OPENID_ALLOWGROUP);
+        adminGroup = config.getString(Keys.OPENID_ADMIN_GROUP);
+        allowGroup = config.getString(Keys.OPENID_ALLOW_GROUP);
     }
 
     public URI createAuthUri() {

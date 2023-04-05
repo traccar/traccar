@@ -623,7 +623,7 @@ public final class Keys {
      * This is a unique ID assigned to each application you register with your identity provider.
      * Required to enable SSO.
      */
-    public static final ConfigKey<String> OPENID_CLIENTID = new StringConfigKey(
+    public static final ConfigKey<String> OPENID_CLIENT_ID = new StringConfigKey(
             "openid.clientId",
             List.of(KeyType.CONFIG));
 
@@ -632,7 +632,7 @@ public final class Keys {
      * This is a secret assigned to each application you register with your identity provider.
      * Required to enable SSO.
      */
-    public static final ConfigKey<String> OPENID_CLIENTSECRET = new StringConfigKey(
+    public static final ConfigKey<String> OPENID_CLIENT_SECRET = new StringConfigKey(
             "openid.clientSecret",
             List.of(KeyType.CONFIG));
 
@@ -641,7 +641,7 @@ public final class Keys {
      * This is used to automatically configure the authorization, token and user info URLs if
      * they are not provided.
      */
-    public static final ConfigKey<String> OPENID_ISSUERURL = new StringConfigKey(
+    public static final ConfigKey<String> OPENID_ISSUER_URL = new StringConfigKey(
             "openid.issuerUrl",
             List.of(KeyType.CONFIG));
 
@@ -651,7 +651,7 @@ public final class Keys {
      * configuration endpoint, eg. https://auth.example.com//.well-known/openid-configuration
      * Required to enable SSO if openid.issuerUrl is not set.
      */
-    public static final ConfigKey<String> OPENID_AUTHURL = new StringConfigKey(
+    public static final ConfigKey<String> OPENID_AUTH_URL = new StringConfigKey(
             "openid.authUrl",
             List.of(KeyType.CONFIG));
     /**
@@ -659,7 +659,7 @@ public final class Keys {
      * This can be found in the same ways at openid.authUrl.
      * Required to enable SSO if openid.issuerUrl is not set.
      */
-    public static final ConfigKey<String> OPENID_TOKENURL = new StringConfigKey(
+    public static final ConfigKey<String> OPENID_TOKEN_URL = new StringConfigKey(
             "openid.tokenUrl",
             List.of(KeyType.CONFIG));
 
@@ -668,7 +668,7 @@ public final class Keys {
      * This can be found in the same ways at openid.authUrl.
      * Required to enable SSO if openid.issuerUrl is not set.
      */
-    public static final ConfigKey<String> OPENID_USERINFOURL = new StringConfigKey(
+    public static final ConfigKey<String> OPENID_USERINFO_URL = new StringConfigKey(
             "openid.userInfoUrl",
             List.of(KeyType.CONFIG));
 
@@ -677,7 +677,7 @@ public final class Keys {
      * If this is not provided, all OpenID users will have access to Traccar.
      * This option will only work if your OpenID provider supports the groups scope.
      */
-    public static final ConfigKey<String> OPENID_ALLOWGROUP = new StringConfigKey(
+    public static final ConfigKey<String> OPENID_ALLOW_GROUP = new StringConfigKey(
         "openid.allowGroup",
         List.of(KeyType.CONFIG));
 
@@ -686,7 +686,7 @@ public final class Keys {
      * If this is not provided, no groups will be granted admin access.
      * This option will only work if your OpenID provider supports the groups scope.
      */
-    public static final ConfigKey<String> OPENID_ADMINGROUP = new StringConfigKey(
+    public static final ConfigKey<String> OPENID_ADMIN_GROUP = new StringConfigKey(
             "openid.adminGroup",
             List.of(KeyType.CONFIG));
 

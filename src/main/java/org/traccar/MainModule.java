@@ -97,6 +97,7 @@ import javax.ws.rs.client.ClientBuilder;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.net.http.HttpClient;
 import java.util.Properties;
 
 public class MainModule extends AbstractModule {
@@ -174,11 +175,12 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static OpenIdProvider provideOpenIDProvider(Config config, LoginService loginService) {
-        if (config.hasKey(Keys.OPENID_CLIENTID)) {
-            return new OpenIdProvider(config, loginService);
-        }
-        return null;
+    public static OpenIdProvider provideOpenIDProvider(
+        Config config, LoginService loginService, ObjectMapper objectMapper) throws InterruptedException, IOException {
+            if (config.hasKey(Keys.OPENID_CLIENT_ID)) {
+                return new OpenIdProvider(config, loginService, HttpClient.newHttpClient(), objectMapper);
+            }
+            return null;
     }
 
     @Provides
