@@ -638,8 +638,7 @@ public final class Keys {
 
     /**
      * OpenID Connect Issuer (Base) URL.
-     * This is used to automatically configure the authorization, token and user info URLs if
-     * they are not provided.
+     * This is used to automatically configure the authorization, token and user info URLs if provided.
      */
     public static final ConfigKey<String> OPENID_ISSUER_URL = new StringConfigKey(
             "openid.issuerUrl",
