@@ -36,7 +36,7 @@ Provide as much details as possible, including log fragments, operating system a
 
 Before creating a feature request make sure that the feature or modification that you are requesting is not yet implemented.
 
-Search reposiroty to ensure that there is no existing issues for your request. If there is, add a new comment on that issue.
+Search repository to ensure that there is no existing issues for your request. If there is, add a new comment on that issue.
 
 Provide as much details as possible, including use case for your feature and any benefits that you can think of.
 
