@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class ServletHelperTest {
+public class WebHelperTest {
 
     @Test
     public void testRetrieveRemoteAddressProxyMultiple() {
@@ -16,7 +16,7 @@ public class ServletHelperTest {
         when(request.getRemoteAddr()).thenReturn("147.120.1.5");
         when(request.getHeader("X-FORWARDED-FOR")).thenReturn("231.23.45.65, 10.20.10.33, 10.20.20.34");
 
-        assertEquals("231.23.45.65", ServletHelper.retrieveRemoteAddress(request));
+        assertEquals("231.23.45.65", WebHelper.retrieveRemoteAddress(request));
     }
 
     @Test
@@ -25,7 +25,7 @@ public class ServletHelperTest {
         when(request.getRemoteAddr()).thenReturn("147.120.1.5");
         when(request.getHeader("X-FORWARDED-FOR")).thenReturn("231.23.45.65");
 
-        assertEquals("231.23.45.65", ServletHelper.retrieveRemoteAddress(request));
+        assertEquals("231.23.45.65", WebHelper.retrieveRemoteAddress(request));
     }
 
     @Test
@@ -33,7 +33,7 @@ public class ServletHelperTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         when(request.getRemoteAddr()).thenReturn("231.23.45.65");
 
-        assertEquals("231.23.45.65", ServletHelper.retrieveRemoteAddress(request));
+        assertEquals("231.23.45.65", WebHelper.retrieveRemoteAddress(request));
     }
 
 }

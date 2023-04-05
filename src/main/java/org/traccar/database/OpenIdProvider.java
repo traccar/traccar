@@ -22,7 +22,7 @@ import org.traccar.api.security.LoginService;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.helper.LogAction;
-import org.traccar.helper.ServletHelper;
+import org.traccar.helper.WebHelper;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -88,7 +88,7 @@ public class OpenIdProvider {
 
         callbackUrl = new URI(config.getString(Keys.WEB_URL, "") + "/api/session/openid/callback");
         baseUrl = new URI(config.getString(Keys.WEB_URL, ""));
-
+        
         if (config.hasKey(Keys.OPENID_ISSUER_URL)) {
             HttpRequest httpRequest = HttpRequest.newBuilder(
                 URI.create(config.getString(Keys.OPENID_ISSUER_URL) + "/.well-known/openid-configuration"))
@@ -192,7 +192,7 @@ public class OpenIdProvider {
             User user = loginService.login(userInfo.getEmailAddress(), userInfo.getName(), administrator);
 
             request.getSession().setAttribute(SessionResource.USER_ID_KEY, user.getId());
-            LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
+            LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
 
             return baseUrl;
     }

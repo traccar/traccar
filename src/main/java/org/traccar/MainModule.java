@@ -75,6 +75,7 @@ import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.SanitizerModule;
+import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
 import org.traccar.mail.SmtpMailManager;
@@ -390,19 +391,7 @@ public class MainModule extends AbstractModule {
     public static VelocityEngine provideVelocityEngine(Config config) {
         Properties properties = new Properties();
         properties.setProperty("resource.loader.file.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
-
-        if (config.hasKey(Keys.WEB_URL)) {
-            properties.setProperty("web.url", config.getString(Keys.WEB_URL).replaceAll("/$", ""));
-        } else {
-            String address;
-            try {
-                address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
-            } catch (UnknownHostException e) {
-                address = "localhost";
-            }
-            String url = URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
-            properties.setProperty("web.url", url);
-        }
+        properties.setProperty("web.url", WebHelper.retrieveWebUrl(config));
 
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.init(properties);

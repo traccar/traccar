@@ -15,11 +15,18 @@
  */
 package org.traccar.helper;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import javax.servlet.http.HttpServletRequest;
 
-public final class ServletHelper {
+import org.eclipse.jetty.util.URIUtil;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 
-    private ServletHelper() {
+public final class WebHelper {
+
+    private WebHelper() {
     }
 
     public static String retrieveRemoteAddress(HttpServletRequest request) {
@@ -41,5 +48,4 @@ public final class ServletHelper {
             return null;
         }
     }
-
 }

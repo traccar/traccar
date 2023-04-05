@@ -21,7 +21,7 @@ import org.traccar.api.signature.TokenManager;
 import org.traccar.database.OpenIdProvider;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.LogAction;
-import org.traccar.helper.ServletHelper;
+import org.traccar.helper.WebHelper;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -84,7 +84,7 @@ public class SessionResource extends BaseResource {
             User user = loginService.login(token);
             if (user != null) {
                 request.getSession().setAttribute(USER_ID_KEY, user.getId());
-                LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
+                LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
                 return user;
             }
         }
@@ -111,7 +111,7 @@ public class SessionResource extends BaseResource {
                 User user = loginService.login(email, password);
                 if (user != null) {
                     request.getSession().setAttribute(USER_ID_KEY, user.getId());
-                    LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
+                    LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
                     return user;
                 }
             }
@@ -135,7 +135,7 @@ public class SessionResource extends BaseResource {
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", userId)));
         request.getSession().setAttribute(USER_ID_KEY, user.getId());
-        LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
+        LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
         return user;
     }
 
@@ -146,17 +146,17 @@ public class SessionResource extends BaseResource {
         User user = loginService.login(email, password);
         if (user != null) {
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
-            LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
+            LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
             return user;
         } else {
-            LogAction.failedLogin(ServletHelper.retrieveRemoteAddress(request));
+            LogAction.failedLogin(WebHelper.retrieveRemoteAddress(request));
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
     }
 
     @DELETE
     public Response remove() {
-        LogAction.logout(getUserId(), ServletHelper.retrieveRemoteAddress(request));
+        LogAction.logout(getUserId(), WebHelper.retrieveRemoteAddress(request));
         request.getSession().removeAttribute(USER_ID_KEY);
         return Response.noContent().build();
     }
