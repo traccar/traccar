@@ -30,6 +30,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.security.GeneralSecurityException;
+import java.util.List;
 import java.util.Map;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
@@ -76,6 +77,7 @@ public class OpenIdProvider {
     private URI userInfoUrl;
     private URI baseUrl;
     private final String adminGroup;
+    private final String allowGroup;
 
     private LoginService loginService;
 
@@ -129,6 +131,7 @@ public class OpenIdProvider {
         }
 
         adminGroup = config.getString(Keys.OPENID_ADMINGROUP);
+        allowGroup = config.getString(Keys.OPENID_ALLOWGROUP);
     }
 
     public URI createAuthUri() {
@@ -200,7 +203,12 @@ public class OpenIdProvider {
 
             UserInfo userInfo = getUserInfo(bearerToken);
 
-            Boolean administrator = adminGroup != null && userInfo.getStringListClaim("groups").contains(adminGroup);
+            List<String> userGroups = userInfo.getStringListClaim("groups");
+            Boolean administrator = adminGroup != null && userGroups.contains(adminGroup);
+
+            if (!(administrator || allowGroup == null || userGroups.contains(allowGroup))) {
+                throw new GeneralSecurityException("Your OpenID Groups do not permit access to Traccar.");
+            }
 
             User user = loginService.login(userInfo.getEmailAddress(), userInfo.getName(), administrator);
 
