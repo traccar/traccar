@@ -637,10 +637,19 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * OpenID Connect Issuer (Base) URL.
+     * This is used to automatically configure the authorization, token and user info URLs if
+     * they are not provided.
+     */
+    public static final ConfigKey<String> OPENID_ISSUERURL = new StringConfigKey(
+            "openid.issuerUrl",
+            List.of(KeyType.CONFIG));
+
+    /**
      * OpenID Connect Authorization URL.
      * This can usually be found in the documentation of your identity provider or by using the well-known
      * configuration endpoint, eg. https://auth.example.com//.well-known/openid-configuration
-     * Required to enable SSO.
+     * Required to enable SSO if openid.issuerUrl is not set.
      */
     public static final ConfigKey<String> OPENID_AUTHURL = new StringConfigKey(
             "openid.authUrl",
@@ -648,7 +657,7 @@ public final class Keys {
     /**
      * OpenID Connect Token URL.
      * This can be found in the same ways at openid.authUrl.
-     * Required to enable SSO.
+     * Required to enable SSO if openid.issuerUrl is not set.
      */
     public static final ConfigKey<String> OPENID_TOKENURL = new StringConfigKey(
             "openid.tokenUrl",
@@ -657,7 +666,7 @@ public final class Keys {
     /**
      * OpenID Connect User Info URL.
      * This can be found in the same ways at openid.authUrl.
-     * Required to enable SSO.
+     * Required to enable SSO if openid.issuerUrl is not set.
      */
     public static final ConfigKey<String> OPENID_USERINFOURL = new StringConfigKey(
             "openid.userInfoUrl",
