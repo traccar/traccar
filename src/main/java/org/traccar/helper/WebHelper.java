@@ -48,4 +48,18 @@ public final class WebHelper {
             return null;
         }
     }
+
+    public static String retrieveWebUrl(Config config) {
+        if (config.hasKey(Keys.WEB_URL)) {
+            return config.getString(Keys.WEB_URL).replaceAll("/$", "");
+        } else {
+            String address;
+            try {
+                address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
+            } catch (UnknownHostException e) {
+                address = "localhost";
+            }
+            return URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
+        }
+    }
 }

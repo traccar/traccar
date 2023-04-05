@@ -26,7 +26,6 @@ import com.google.inject.name.Names;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.apache.velocity.app.VelocityEngine;
-import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.broadcast.MulticastBroadcastService;
 import org.traccar.broadcast.NullBroadcastService;
@@ -96,9 +95,7 @@ import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.URISyntaxException;
-import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.util.Properties;
 
