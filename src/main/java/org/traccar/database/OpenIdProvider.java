@@ -38,8 +38,6 @@ import javax.servlet.http.HttpServletRequest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 import com.nimbusds.oauth2.sdk.AuthorizationCode;
@@ -62,12 +60,9 @@ import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
 import com.nimbusds.openid.connect.sdk.UserInfoResponse;
 import com.nimbusds.openid.connect.sdk.UserInfoRequest;
 import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-
 import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 public class OpenIdProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenIdProvider.class);
-
     private final Boolean force;
     private final ClientID clientId;
     private final ClientAuthentication clientAuth;
@@ -84,40 +79,34 @@ public class OpenIdProvider {
     @Inject
     public OpenIdProvider(
         Config config, LoginService loginService, HttpClient httpClient, ObjectMapper objectMapper
-        ) throws InterruptedException, IOException {
-            this.loginService = loginService;
+        ) throws InterruptedException, IOException, URISyntaxException {
+        this.loginService = loginService;
 
-            force = config.getBoolean(Keys.OPENID_FORCE);
-            clientId = new ClientID(config.getString(Keys.OPENID_CLIENT_ID));
-            clientAuth = new ClientSecretBasic(clientId, new Secret(config.getString(Keys.OPENID_CLIENT_SECRET)));
+        force = config.getBoolean(Keys.OPENID_FORCE);
+        clientId = new ClientID(config.getString(Keys.OPENID_CLIENT_ID));
+        clientAuth = new ClientSecretBasic(clientId, new Secret(config.getString(Keys.OPENID_CLIENT_SECRET)));
 
-            try {
-                callbackUrl = new URI(config.getString(Keys.WEB_URL, "") + "/api/session/openid/callback");
-                baseUrl = new URI(config.getString(Keys.WEB_URL, ""));
+        callbackUrl = new URI(config.getString(Keys.WEB_URL, "") + "/api/session/openid/callback");
+        baseUrl = new URI(config.getString(Keys.WEB_URL, ""));
 
-                if (config.hasKey(Keys.OPENID_ISSUER_URL)) {
-                    HttpRequest httpRequest = HttpRequest.newBuilder(
-                        URI.create(config.getString(Keys.OPENID_ISSUER_URL) + "/.well-known/openid-configuration"))
-                        .header("Accept", "application/json")
-                        .build();
+        if (config.hasKey(Keys.OPENID_ISSUER_URL)) {
+            HttpRequest httpRequest = HttpRequest.newBuilder(
+                URI.create(config.getString(Keys.OPENID_ISSUER_URL) + "/.well-known/openid-configuration"))
+                .header("Accept", "application/json")
+                .build();
 
-                    String httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString()).body();
+            String httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString()).body();
 
-                    Map<String, Object> discoveryMap = objectMapper.readValue(
-                        httpResponse, new TypeReference<Map<String, Object>>() { });
+            Map<String, Object> discoveryMap = objectMapper.readValue(
+                httpResponse, new TypeReference<Map<String, Object>>() { });
 
-                    authUrl = new URI((String) discoveryMap.get("authorization_endpoint"));
-                    tokenUrl = new URI((String) discoveryMap.get("token_endpoint"));
-                    userInfoUrl = new URI((String) discoveryMap.get("userinfo_endpoint"));
-
-                    LOGGER.info("OpenID Connect auto discovery successful");
-                } else {
-                    authUrl = new URI(config.getString(Keys.OPENID_AUTH_URL));
-                    tokenUrl = new URI(config.getString(Keys.OPENID_TOKEN_URL));
-                    userInfoUrl = new URI(config.getString(Keys.OPENID_USERINFO_URL));
-                }
-        } catch (URISyntaxException error) {
-            LOGGER.error("Invalid URIs provided in OpenID configuration");
+            authUrl = new URI((String) discoveryMap.get("authorization_endpoint"));
+            tokenUrl = new URI((String) discoveryMap.get("token_endpoint"));
+            userInfoUrl = new URI((String) discoveryMap.get("userinfo_endpoint"));
+        } else {
+            authUrl = new URI(config.getString(Keys.OPENID_AUTH_URL));
+            tokenUrl = new URI(config.getString(Keys.OPENID_TOKEN_URL));
+            userInfoUrl = new URI(config.getString(Keys.OPENID_USERINFO_URL));
         }
 
         adminGroup = config.getString(Keys.OPENID_ADMIN_GROUP);
