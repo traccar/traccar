@@ -26,7 +26,6 @@ import com.google.inject.name.Names;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.apache.velocity.app.VelocityEngine;
-import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.broadcast.MulticastBroadcastService;
 import org.traccar.broadcast.NullBroadcastService;
@@ -75,6 +74,7 @@ import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.SanitizerModule;
+import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
 import org.traccar.mail.SmtpMailManager;
@@ -95,8 +95,8 @@ import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
 import java.util.Properties;
 
 public class MainModule extends AbstractModule {
@@ -174,9 +174,11 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static OpenIdProvider provideOpenIDProvider(Config config, LoginService loginService) {
-        if (config.hasKey(Keys.OPENID_CLIENTID)) {
-            return new OpenIdProvider(config, loginService);
+    public static OpenIdProvider provideOpenIDProvider(
+        Config config, LoginService loginService, ObjectMapper objectMapper
+        ) throws InterruptedException, IOException, URISyntaxException {
+        if (config.hasKey(Keys.OPENID_CLIENT_ID)) {
+            return new OpenIdProvider(config, loginService, HttpClient.newHttpClient(), objectMapper);
         }
         return null;
     }
@@ -386,19 +388,7 @@ public class MainModule extends AbstractModule {
     public static VelocityEngine provideVelocityEngine(Config config) {
         Properties properties = new Properties();
         properties.setProperty("resource.loader.file.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
-
-        if (config.hasKey(Keys.WEB_URL)) {
-            properties.setProperty("web.url", config.getString(Keys.WEB_URL).replaceAll("/$", ""));
-        } else {
-            String address;
-            try {
-                address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
-            } catch (UnknownHostException e) {
-                address = "localhost";
-            }
-            String url = URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
-            properties.setProperty("web.url", url);
-        }
+        properties.setProperty("web.url", WebHelper.retrieveWebUrl(config));
 
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.init(properties);
