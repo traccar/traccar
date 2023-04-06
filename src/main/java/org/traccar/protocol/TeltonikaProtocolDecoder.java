@@ -610,8 +610,12 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 int length = buf.readInt() - 4;
                 getLastLocation(position, new Date(buf.readUnsignedInt() * 1000));
                 if (isPrintable(buf, length)) {
-                    position.set(Position.KEY_RESULT,
-                            buf.readCharSequence(length, StandardCharsets.US_ASCII).toString().trim());
+                    String data = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString().trim();
+                    if (data.startsWith("GTSL")) {
+                        position.set(Position.KEY_DRIVER_UNIQUE_ID, data.split("\\|")[4]);
+                    } else {
+                        position.set(Position.KEY_RESULT, data);
+                    }
                 } else {
                     position.set(Position.KEY_RESULT,
                             ByteBufUtil.hexDump(buf.readSlice(length)));
