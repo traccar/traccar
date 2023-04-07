@@ -371,18 +371,19 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             Long cid4g = (Long) position.getAttributes().remove("cid4g");
             Integer lac = (Integer) position.getAttributes().remove("lac");
             if (lac != null && (cid2g != null || cid4g != null)) {
+                Network network = new Network();
                 CellTower cellTower;
                 if (cid2g != null) {
                     cellTower = CellTower.fromLacCid(getConfig(), lac, cid2g);
-                    cellTower.setRadioType("gsm");
                 } else {
                     cellTower = CellTower.fromLacCid(getConfig(), lac, cid4g);
-                    cellTower.setRadioType("lte");
+                    network.setRadioType("lte");
                 }
                 long operator = position.getInteger(Position.KEY_OPERATOR);
                 if (operator >= 1000) {
                     cellTower.setOperator(operator);
                 }
+                network.addCellTower(cellTower);
                 position.setNetwork(new Network(cellTower));
             }
         }
