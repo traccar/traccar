@@ -69,6 +69,7 @@ dependencies {
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr353:$jacksonVersion"
     implementation "org.liquibase:liquibase-core:4.19.0"
     implementation "com.sun.mail:jakarta.mail:1.6.7"
+    implementation "org.apache.commons:commons-jexl3:3.3"
     implementation "org.jxls:jxls:$jxlsVersion"
     implementation "org.jxls:jxls-poi:$jxlsVersion"
     implementation "org.apache.velocity:velocity-engine-core:2.3"
