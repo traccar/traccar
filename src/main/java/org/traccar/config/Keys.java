@@ -806,6 +806,13 @@ public final class Keys {
             "max-age=3600,public");
 
     /**
+     * Host for raw data forwarding.
+     */
+    public static final ConfigKey<String> SERVER_FORWARD = new StringConfigKey(
+            "server.forward",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Position forwarding format. Available options are "url", "json" and "kafka". Default is "url".
      */
     public static final ConfigKey<String> FORWARD_TYPE = new StringConfigKey(
