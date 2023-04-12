@@ -61,4 +61,12 @@ public class NetworkForwarderHandler extends ChannelInboundHandlerAdapter {
         super.channelRead(ctx, msg);
     }
 
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        if (!(ctx.channel() instanceof DatagramChannel)) {
+            networkForwarder.disconnect((InetSocketAddress) ctx.channel().remoteAddress());
+        }
+        super.channelInactive(ctx);
+    }
+
 }

@@ -63,4 +63,15 @@ public class NetworkForwarder {
         }
     }
 
+    public void disconnect(InetSocketAddress source) {
+        Socket connectionTcp = connectionsTcp.remove(source);
+        if (connectionTcp != null) {
+            try {
+                connectionTcp.close();
+            } catch (IOException e) {
+                LOGGER.warn("Connection close error", e);
+            }
+        }
+    }
+
 }
