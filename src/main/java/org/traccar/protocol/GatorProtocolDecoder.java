@@ -182,6 +182,140 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
 
+            // 2 byte - Temperature
+            // 0x00 0x1E= 30℃
+            // 0x01 0x1E= -30℃
+
+            if (type == MSG_ALARM_DATA || type  == MSG_POSITION_DATA){
+                int _temperature_sign_pos = buf.readUnsignedByte();
+                int _temperature_pos = buf.readUnsignedByte();
+
+                // 0xFF means there is no temperature sensor detected
+                if (_temperature_pos != 0xFF){
+                    if (_temperature_sign_pos == 0x00){
+
+                        position.set(Position.PREFIX_TEMP + 1, _temperature_pos);
+                    }
+                    else if (_temperature_sign_pos == 0x01){
+                        position.set(Position.PREFIX_TEMP + 1, -_temperature_pos);
+                    }
+                }
+            }
+
+            if (type == MSG_ALARM_DATA){
+                // Alarm Data - 2 Bytes
+                int _alarm_data_b1 = buf.readUnsignedByte();
+                int _alarm_data_b2 = buf.readUnsignedByte();
+
+                // 1st Byte ->
+                // D7
+                // D6 oil change alarm
+                // D5 Cross the border alarm
+                // D4 Over voltage alarm
+                // D3 Under voltage alarm
+                // D2 The people of overload alarm
+                // D1 Overtime driving alarm
+                // D0 Enter in to the border alarm
+
+                // Bitmask and Set Position Keys
+                if ((_alarm_data_b1 & 0b00100000) >= 1) position.set(Position.ALARM_GEOFENCE_EXIT, true);
+                if ((_alarm_data_b1 & 0b00000001) >= 1) position.set(Position.ALARM_GEOFENCE_ENTER, true);
+
+                // 2nd Byte ->
+                // D7 The alarm of the door was opened illegally
+                // D6 Start the vehicle illegally
+                // D5 Vibration alarm
+                // D4 Center enable the terminal to alarm
+                // D3 Power failure alarm
+                // D2 Parking alarm
+                // D1 Over speed alarm
+                // D0 Emergency alarm
+
+                // Bitmask and Set Position Keys
+                if ((_alarm_data_b2 & 0b10000000) >= 1) position.set(Position.ALARM_DOOR, true);
+                if ((_alarm_data_b2 & 0b00100000) >= 1) position.set(Position.ALARM_VIBRATION, true);
+                if ((_alarm_data_b2 & 0b00001000) >= 1) position.set(Position.ALARM_POWER_OFF, true);
+                if ((_alarm_data_b2 & 0b00000100) >= 1) position.set(Position.ALARM_PARKING, true);
+                if ((_alarm_data_b2 & 0b00000010) >= 1) position.set(Position.ALARM_OVERSPEED, true);
+                if ((_alarm_data_b2 & 0b00000001) >= 1) position.set(Position.ALARM_SOS, true);
+            }
+            else if (type == MSG_POSITION_DATA){
+                // Note: M588FS Returned 120D after Temperature => Following Part is not used
+                // May be Some Other Devices Would Use The Following Part of this Protocol
+
+//                // 1 Byte - Rotation Sensor Status
+//                // 0x00 = Stopped
+//                // 0x01 = Stirring
+//                // 0x02 = Unloading
+//                buf.readUnsignedByte();
+//
+//                // 1 Byte - Reserved Byte
+//                buf.readUnsignedByte();
+//
+//                // 1 Byte - Harsh Alarm Byte
+//                // 0x01 = Harsh Acceleration
+//                // 0x02 = Harsh Breaking
+//                // 0x04 = Harsh Cornering
+//                // 0x10 = Collision
+//                // 0x20 = Rollover
+//                int _harsh_alarm = buf.readUnsignedByte();
+//
+//                if (_harsh_alarm == 0x01){
+//                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+//                }
+//                else if (_harsh_alarm == 0x02){
+//                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+//                }
+//                else if (_harsh_alarm == 0x04){
+//                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+//                }
+//                else if (_harsh_alarm == 0x10){
+//                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+//                }
+//                else if (_harsh_alarm == 0x20){
+//                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+//                }
+//
+//                // 1 Byte - Sub Signal
+//                // 0x03 - Temperature Data 2, 3, 4, Weight Sensor Value -> 8 Byte
+//                // 0x06 - Packet Length, Temperature, Humidity
+//
+//                int _sub_signal = buf.readUnsignedByte();
+//
+//                if (_sub_signal == 0x03){
+//                    for (int _index = 0; _index < 3; _index++){
+//                        int _temperature_sign_sub = buf.readUnsignedByte();
+//
+//                        if (_temperature_sign_sub == 0x00){
+//                            position.set(Position.PREFIX_TEMP + (_index + 2), buf.readUnsignedByte());
+//                        }
+//                        else if (_temperature_sign_sub == 0x01){
+//                            position.set(Position.PREFIX_TEMP + (_index + 2), -buf.readUnsignedByte());
+//                        }
+//                    }
+//
+//                    // Read two bytes of Weight Sensor Value
+//                    position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedShort());
+//                }
+//                else if (_sub_signal == 0x06){
+//                    // 1 Byte - Packet Length
+//                    if (buf.readUnsignedByte() == 0x05) {
+//
+//                        // 3 Byte - Temperature
+//                        int _temperature_sign_sub = buf.readUnsignedByte();
+//
+//                        if (_temperature_sign_sub == 0x00) {
+//                            position.set(Position.PREFIX_TEMP + 5, buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
+//                        } else if (_temperature_sign_sub == 0x01) {
+//                            position.set(Position.PREFIX_TEMP + 5, -(buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01));
+//                        }
+//
+//                        // 2 Byte - Humidity
+//                        // No Key for Humidity
+//                    }
+//                }
+            }
+
             return position;
         }
 
