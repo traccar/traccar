@@ -98,6 +98,8 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(int value) {
         switch (value) {
+            case 1:
+                return Position.ALARM_SOS;
             case 5:
             case 6:
                 return Position.ALARM_DOOR;
@@ -186,6 +188,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
         int input = parser.nextHexInt();
         int output = parser.nextHexInt();
         position.set(Position.KEY_IGNITION, BitUtil.check(input, 1));
+        position.set(Position.KEY_DOOR, BitUtil.check(input, 2));
         position.set(Position.KEY_INPUT, input);
         position.set(Position.KEY_OUTPUT, output);
 
