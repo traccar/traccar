@@ -99,7 +99,6 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, remoteAddress, type, buf.getByte(buf.writerIndex() - 2));
 
         if (type == MSG_RFID_DATA){
-            LOGGER.info("============  RFID data ====== ");
             Position position = new Position(getProtocolName());
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, "1" + id, id);
@@ -114,7 +113,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            String RFID_Data = "";
+            StringBuilder RFID_Data = new StringBuilder();
             // read the RFID data from the buffer until the 0x0D is found
             while (buf.readableBytes() > 0) {
                 int _byte = buf.readUnsignedByte();
@@ -122,12 +121,12 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
                 // append the byte as a character to the RFID data
-                RFID_Data += (char) _byte;
+                RFID_Data.append((char) _byte);
             }
 
             LOGGER.info("RFID ID:" + RFID_Data);
 
-            position.set(Position.KEY_DRIVER_UNIQUE_ID ,RFID_Data);
+            position.set(Position.KEY_DRIVER_UNIQUE_ID , RFID_Data.toString());
 
             buf.readUnsignedByte();
 
@@ -209,29 +208,9 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 int _alarm_data_b1 = buf.readUnsignedByte();
                 int _alarm_data_b2 = buf.readUnsignedByte();
 
-                // 1st Byte ->
-                // D7
-                // D6 oil change alarm
-                // D5 Cross the border alarm
-                // D4 Over voltage alarm
-                // D3 Under voltage alarm
-                // D2 The people of overload alarm
-                // D1 Overtime driving alarm
-                // D0 Enter in to the border alarm
-
                 // Bitmask and Set Position Keys
                 if ((_alarm_data_b1 & 0b00100000) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
                 if ((_alarm_data_b1 & 0b00000001) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
-
-                // 2nd Byte ->
-                // D7 The alarm of the door was opened illegally
-                // D6 Start the vehicle illegally
-                // D5 Vibration alarm
-                // D4 Center enable the terminal to alarm
-                // D3 Power failure alarm
-                // D2 Parking alarm
-                // D1 Over speed alarm
-                // D0 Emergency alarm
 
                 // Bitmask and Set Position Keys
                 if ((_alarm_data_b2 & 0b10000000) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
@@ -321,17 +300,12 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             return position;
         }
         else if (type == MSG_TERMINAL_ANSWER){
-            LOGGER.info("============ ACK from Device ============");
-            Event event = new Event();
             Position position = new Position(getProtocolName());
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, "1" + id, id);
             if (deviceSession == null) {
                 return null;
             }
-
-            event.setDeviceId(deviceSession.getDeviceId());
-            event.setEventTime(new Date());
 
             position.setDeviceId(deviceSession.getDeviceId());
             position.setTime(new Date());
@@ -348,12 +322,6 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
             // Success (0x01) or Fail (0x00)
             int _success = buf.readUnsignedByte();
-
-            if (_success == 0x01){
-                // Convert Byte to String
-                String _main_order_str = String.format("%02X", _main_order);
-                position.set(Position.PREFIX_IO + 900, _main_order_str);
-            }
 
             // Reserved - 2 Bytes
             buf.readUnsignedShort();
