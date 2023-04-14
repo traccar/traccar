@@ -23,13 +23,15 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Main;
 import org.traccar.helper.*;
+import org.traccar.model.Command;
+import org.traccar.model.Event;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.charset.StandardCharsets;
+import java.util.Date;
 
 public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
@@ -314,6 +316,54 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 //                        // No Key for Humidity
 //                    }
 //                }
+            }
+
+            return position;
+        }
+        else if (type == MSG_TERMINAL_ANSWER){
+            LOGGER.info("Terminal Answer");
+            Event event = new Event();
+            Position position = new Position(getProtocolName());
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, "1" + id, id);
+            if (deviceSession == null) {
+                return null;
+            }
+
+            event.setDeviceId(deviceSession.getDeviceId());
+            event.setEventTime(new Date());
+            position.setDeviceId(deviceSession.getDeviceId());
+            position.setTime(new Date());
+
+            // Main Order
+            int _main_order = buf.readUnsignedByte();
+
+            // Slave Order
+//            int _slave_order = buf.readUnsignedByte();
+            buf.readUnsignedByte();
+
+            // Success (0x01) or Fail (0x00)
+            int _success = buf.readUnsignedByte();
+
+            // Reserved - 2 Bytes
+            buf.readUnsignedShort();
+
+            position.set(Position.KEY_EVENT, Event.TYPE_COMMAND_RESULT);
+            position.setValid(false);
+
+            // If Main Order -> 0x38 = Start Engine, 0x39 = Stop Engine
+            if (_success == 0x01){
+                if (_main_order == 0x38){
+                    position.set(Position.KEY_COMMAND, Command.TYPE_ENGINE_RESUME);
+                    position.set(Position.KEY_RESULT, "Engine Started");
+                }
+                else if (_main_order == 0x39){
+                    position.set(Position.KEY_COMMAND, Command.TYPE_ENGINE_STOP);
+                    position.set(Position.KEY_RESULT, "Engine Stopped");
+                }
+            }
+            else {
+                position.set(Position.KEY_RESULT, "Command Failed");
             }
 
             return position;
