@@ -33,6 +33,7 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.util.Date;
 
+
 public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
     public GatorProtocolDecoder(Protocol protocol) {
@@ -203,7 +204,6 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
             }
-
             if (type == MSG_ALARM_DATA){
                 // Alarm Data - 2 Bytes
                 int _alarm_data_b1 = buf.readUnsignedByte();
@@ -321,7 +321,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             return position;
         }
         else if (type == MSG_TERMINAL_ANSWER){
-            LOGGER.info("Terminal Answer");
+            LOGGER.info("============ ACK from Device ============");
             Event event = new Event();
             Position position = new Position(getProtocolName());
 
@@ -332,8 +332,12 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
             event.setDeviceId(deviceSession.getDeviceId());
             event.setEventTime(new Date());
+
             position.setDeviceId(deviceSession.getDeviceId());
             position.setTime(new Date());
+
+            // Get Last Position and Set it to Current Position
+            getLastLocation(position, null);
 
             // Main Order
             int _main_order = buf.readUnsignedByte();
@@ -344,6 +348,12 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
             // Success (0x01) or Fail (0x00)
             int _success = buf.readUnsignedByte();
+
+            if (_success == 0x01){
+                // Convert Byte to String
+                String _main_order_str = String.format("%02X", _main_order);
+                position.set(Position.PREFIX_IO + 900, _main_order_str);
+            }
 
             // Reserved - 2 Bytes
             buf.readUnsignedShort();
