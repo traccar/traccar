@@ -49,8 +49,7 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(0x00);
         buf.writeByte(0x06);
 
-        // Add Device ID - String to 5 Byte
-        // Convert String to Int Array
+        // Add Device ID
         int[] _ip = numToIp(Pseudo_ID);
 
         buf.writeByte(_ip[0]);
@@ -58,17 +57,7 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(_ip[2]);
         buf.writeByte(_ip[3]);
 
-//        String _decoded_id = decodeId(_ip[0], _ip[1], _ip[2], _ip[3]);
-//        LOGGER.info("Decoded ID: " + _decoded_id);
-
-//        // CRC / Calibration -> XOR All Bytes
-//        byte _crc = 0;
-//        for (int i = 0; i < buf.writerIndex(); i++) {
-//            _crc ^= buf.getByte(i);
-//        }
-//
-//        // Add CRC
-//        buf.writeByte(_crc);
+        // Add Checksum
         buf.writeByte(Checksum.xor(buf.nioBuffer(2, buf.writerIndex())));
 
         // End of Packet -> 0D
@@ -76,17 +65,6 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
         return buf;
     }
-
-//    public static String decodeId(int b1, int b2, int b3, int b4) {
-//
-//        int d1 = 30 + ((b1 >> 7) << 3) + ((b2 >> 7) << 2) + ((b3 >> 7) << 1) + (b4 >> 7);
-//        int d2 = b1 & 0x7f;
-//        int d3 = b2 & 0x7f;
-//        int d4 = b3 & 0x7f;
-//        int d5 = b4 & 0x7f;
-//
-//        return String.format("%02d%02d%02d%02d%02d", d1, d2, d3, d4, d5);
-//    }
 
     public int[] numToIp(String sim) {
         String[] temp = new String[4];
