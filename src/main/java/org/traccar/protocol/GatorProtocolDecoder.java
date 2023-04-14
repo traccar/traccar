@@ -125,7 +125,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 RFID_Data += (char) _byte;
             }
 
-            LOGGER.info("============  RFID data ========= " + RFID_Data);
+            LOGGER.info("RFID ID:" + RFID_Data);
 
             position.set(Position.KEY_DRIVER_UNIQUE_ID ,RFID_Data);
 
@@ -220,8 +220,8 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 // D0 Enter in to the border alarm
 
                 // Bitmask and Set Position Keys
-                if ((_alarm_data_b1 & 0b00100000) >= 1) position.set(Position.ALARM_GEOFENCE_EXIT, true);
-                if ((_alarm_data_b1 & 0b00000001) >= 1) position.set(Position.ALARM_GEOFENCE_ENTER, true);
+                if ((_alarm_data_b1 & 0b00100000) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+                if ((_alarm_data_b1 & 0b00000001) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
 
                 // 2nd Byte ->
                 // D7 The alarm of the door was opened illegally
@@ -234,12 +234,12 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 // D0 Emergency alarm
 
                 // Bitmask and Set Position Keys
-                if ((_alarm_data_b2 & 0b10000000) >= 1) position.set(Position.ALARM_DOOR, true);
-                if ((_alarm_data_b2 & 0b00100000) >= 1) position.set(Position.ALARM_VIBRATION, true);
-                if ((_alarm_data_b2 & 0b00001000) >= 1) position.set(Position.ALARM_POWER_OFF, true);
-                if ((_alarm_data_b2 & 0b00000100) >= 1) position.set(Position.ALARM_PARKING, true);
-                if ((_alarm_data_b2 & 0b00000010) >= 1) position.set(Position.ALARM_OVERSPEED, true);
-                if ((_alarm_data_b2 & 0b00000001) >= 1) position.set(Position.ALARM_SOS, true);
+                if ((_alarm_data_b2 & 0b10000000) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
+                if ((_alarm_data_b2 & 0b00100000) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                if ((_alarm_data_b2 & 0b00001000) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+                if ((_alarm_data_b2 & 0b00000100) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_PARKING);
+                if ((_alarm_data_b2 & 0b00000010) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                if ((_alarm_data_b2 & 0b00000001) >= 1) position.set(Position.KEY_ALARM, Position.ALARM_SOS);
             }
             else if (type == MSG_POSITION_DATA){
                 // Note: M588FS Returned 120D after Temperature => Following Part is not used
