@@ -61,14 +61,15 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 //        String _decoded_id = decodeId(_ip[0], _ip[1], _ip[2], _ip[3]);
 //        LOGGER.info("Decoded ID: " + _decoded_id);
 
-        // CRC / Calibration -> XOR All Bytes
-        byte _crc = 0;
-        for (int i = 0; i < buf.writerIndex(); i++) {
-            _crc ^= buf.getByte(i);
-        }
-
-        // Add CRC
-        buf.writeByte(_crc);
+//        // CRC / Calibration -> XOR All Bytes
+//        byte _crc = 0;
+//        for (int i = 0; i < buf.writerIndex(); i++) {
+//            _crc ^= buf.getByte(i);
+//        }
+//
+//        // Add CRC
+//        buf.writeByte(_crc);
+        buf.writeByte(Checksum.xor(buf.nioBuffer(2, buf.writerIndex())));
 
         // End of Packet -> 0D
         buf.writeByte(0x0D);
