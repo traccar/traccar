@@ -53,6 +53,7 @@ public class Minifinder2ProtocolEncoder extends BaseProtocolEncoder {
             ByteBuf content = Unpooled.buffer();
             if (command.getType().equals(Command.TYPE_FIRMWARE_UPDATE)) {
                 String url = command.getString(Command.KEY_DATA);
+                content.writeByte(Minifinder2ProtocolDecoder.MSG_SYSTEM_CONTROL);
                 content.writeByte(1 + url.length());
                 content.writeByte(0x30); // type
                 content.writeCharSequence(url, StandardCharsets.US_ASCII);
