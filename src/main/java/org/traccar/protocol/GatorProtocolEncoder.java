@@ -25,8 +25,6 @@ import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
 
-import java.nio.charset.StandardCharsets;
-
 public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
     public GatorProtocolEncoder(Protocol protocol) {
@@ -35,7 +33,7 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-    private ByteBuf engineExecute(String Pseudo_ID, byte engineState){
+    private ByteBuf engineExecute(String pseudoAddress, byte engineState) {
         ByteBuf buf = Unpooled.buffer(256);
 
         // Add Header - 24 24
@@ -50,12 +48,12 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(0x06);
 
         // Add Device ID
-        int[] _ip = numToIp(Pseudo_ID);
+        int[] ipAddress = numToIp(pseudoAddress);
 
-        buf.writeByte(_ip[0]);
-        buf.writeByte(_ip[1]);
-        buf.writeByte(_ip[2]);
-        buf.writeByte(_ip[3]);
+        buf.writeByte(ipAddress[0]);
+        buf.writeByte(ipAddress[1]);
+        buf.writeByte(ipAddress[2]);
+        buf.writeByte(ipAddress[3]);
 
         // Add Checksum
         buf.writeByte(Checksum.xor(buf.nioBuffer(2, buf.writerIndex())));
@@ -114,22 +112,26 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
                 }
         }
         int[] sIp = new int[4];
-        if ((iHigt & 0x08) != 0)
+        if ((iHigt & 0x08) != 0) {
             sIp[0] = Integer.parseInt(temp[0]) | 128;
-        else
+        } else {
             sIp[0] = Integer.parseInt(temp[0]);
-        if ((iHigt & 0x04) != 0)
+        }
+        if ((iHigt & 0x04) != 0) {
             sIp[1] = Integer.parseInt(temp[1]) | 128;
-        else
-            sIp[1] = Integer.parseInt(temp[1]);
-        if ((iHigt & 0x02) != 0)
+        } else {
+                sIp[1] = Integer.parseInt(temp[1]);
+        }
+        if ((iHigt & 0x02) != 0) {
             sIp[2] = Integer.parseInt(temp[2]) | 128;
-        else
+        } else {
             sIp[2] = Integer.parseInt(temp[2]);
-        if ((iHigt & 0x01) != 0)
+        }
+        if ((iHigt & 0x01) != 0) {
             sIp[3] = Integer.parseInt(temp[3]) | 128;
-        else
+        } else {
             sIp[3] = Integer.parseInt(temp[3]);
+        }
         return sIp;
     }
 
