@@ -48,6 +48,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DATA = 0x01;
     public static final int MSG_CONFIGURATION = 0x02;
     public static final int MSG_SERVICES = 0x03;
+    public static final int MSG_SYSTEM_CONTROL = 0x04;
+    public static final int MSG_FIRMWARE = 0x7E;
     public static final int MSG_RESPONSE = 0x7F;
 
     private String decodeAlarm(long code) {
