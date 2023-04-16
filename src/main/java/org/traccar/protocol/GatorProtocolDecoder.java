@@ -18,23 +18,26 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.Main;
+import org.traccar.helper.*;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
-import org.traccar.helper.BcdUtil;
-import org.traccar.helper.Checksum;
-import org.traccar.helper.DateBuilder;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 
 public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
     public GatorProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static final int MSG_HEARTBEAT = 0x21;
     public static final int MSG_POSITION_DATA = 0x80;
@@ -47,6 +50,8 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PICTURE_FRAME = 0x54;
     public static final int MSG_CAMERA_RESPONSE = 0x56;
     public static final int MSG_PICTURE_DATA = 0x57;
+    public static final int MSG_RFID_DATA = 0x72;
+
 
     public static String decodeId(int b1, int b2, int b3, int b4) {
 
@@ -90,7 +95,57 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
         sendResponse(channel, remoteAddress, type, buf.getByte(buf.writerIndex() - 2));
 
-        if (type == MSG_POSITION_DATA || type == MSG_ROLLCALL_RESPONSE
+        if (type == MSG_RFID_DATA){
+            LOGGER.info("============  RFID data ====== ");
+            Position position = new Position(getProtocolName());
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, "1" + id, id);
+            if (deviceSession == null) {
+                return null;
+            }
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            int _sub_signal = buf.readUnsignedByte();
+
+            if (_sub_signal != 0x02){
+                return null;
+            }
+
+            String RFID_Data = "";
+            // read the RFID data from the buffer until the 0x0D is found
+            while (buf.readableBytes() > 0) {
+                int _byte = buf.readUnsignedByte();
+                if (_byte == 0x0D) {
+                    break;
+                }
+                // append the byte as a character to the RFID data
+                RFID_Data += (char) _byte;
+            }
+
+            LOGGER.info("============  RFID data ========= " + RFID_Data);
+
+            position.set(Position.KEY_DRIVER_UNIQUE_ID ,RFID_Data);
+
+            buf.readUnsignedByte();
+
+            int flags = buf.readUnsignedByte();
+            position.setValid((flags & 0x41) != 0);
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setYear(BcdUtil.readInteger(buf, 2))
+                    .setMonth(BcdUtil.readInteger(buf, 2))
+                    .setDay(BcdUtil.readInteger(buf, 2))
+                    .setHour(BcdUtil.readInteger(buf, 2))
+                    .setMinute(BcdUtil.readInteger(buf, 2))
+                    .setSecond(BcdUtil.readInteger(buf, 2));
+            position.setTime(dateBuilder.getDate());
+
+            position.setLatitude(BcdUtil.readCoordinate(buf));
+            position.setLongitude(BcdUtil.readCoordinate(buf));
+
+            return position;
+        }
+        else if (type == MSG_POSITION_DATA || type == MSG_ROLLCALL_RESPONSE
                 || type == MSG_ALARM_DATA || type == MSG_BLIND_AREA) {
 
             Position position = new Position(getProtocolName());
