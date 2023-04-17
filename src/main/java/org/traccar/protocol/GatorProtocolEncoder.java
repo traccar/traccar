@@ -33,7 +33,12 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-    private ByteBuf engineExecute(String pseudoAddress, byte engineState) {
+    public static final int GET_POSITION = 0x30;
+    public static final int SET_ENGINE_START = 0x38;
+    public static final int SET_ENGINE_STOP = 0x39;
+
+
+    private ByteBuf engineExecute(String pseudoAddress, int engineState) {
         ByteBuf buf = Unpooled.buffer(256);
 
         // Add Header - 24 24
@@ -42,6 +47,37 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
         // Add Main Order - 0x38 for Engine Start, 0x39 for Engine Stop
         buf.writeByte(engineState);
+
+        // Add Packet Length - 00 06
+        buf.writeByte(0x00);
+        buf.writeByte(0x06);
+
+        // Add Device ID
+        int[] ipAddress = numToIp(pseudoAddress);
+
+        buf.writeByte(ipAddress[0]);
+        buf.writeByte(ipAddress[1]);
+        buf.writeByte(ipAddress[2]);
+        buf.writeByte(ipAddress[3]);
+
+        // Add Checksum
+        buf.writeByte(Checksum.xor(buf.nioBuffer(2, buf.writerIndex())));
+
+        // End of Packet -> 0D
+        buf.writeByte(0x0D);
+
+        return buf;
+    }
+
+    private ByteBuf getFromDevice(String pseudoAddress, int type) {
+        ByteBuf buf = Unpooled.buffer(256);
+
+        // Add Header - 24 24
+        buf.writeByte(0x24);
+        buf.writeByte(0x24);
+
+        // Add Type
+        buf.writeByte(type);
 
         // Add Packet Length - 00 06
         buf.writeByte(0x00);
@@ -141,10 +177,13 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         switch (command.getType()) {
             case Command.TYPE_ENGINE_RESUME:
                 LOGGER.info("Command: " + Command.TYPE_ENGINE_RESUME);
-                return engineExecute(getUniqueId(command.getDeviceId()), (byte) 0x38);
+                return engineExecute(getUniqueId(command.getDeviceId()), SET_ENGINE_START);
             case Command.TYPE_ENGINE_STOP:
                 LOGGER.info("Command: " + Command.TYPE_ENGINE_STOP);
-                return engineExecute(getUniqueId(command.getDeviceId()), (byte) 0x39);
+                return engineExecute(getUniqueId(command.getDeviceId()), SET_ENGINE_STOP);
+            case Command.TYPE_POSITION_SINGLE:
+                LOGGER.info("Command: " + Command.TYPE_POSITION_SINGLE);
+                return getFromDevice(getUniqueId(command.getDeviceId()), GET_POSITION);
             default:
                 return null;
         }
