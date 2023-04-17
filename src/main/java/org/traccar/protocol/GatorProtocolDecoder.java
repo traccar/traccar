@@ -175,7 +175,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, flags & 0x0f);
 
             position.set(Position.KEY_STATUS, buf.readUnsignedByte());
-            position.set(Position.KEY_IGNITION, buf.readUnsignedByte());
+            position.set(Position.KEY_IGNITION, buf.readUnsignedByte() == 0x01);
 
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
             position.set(Position.PREFIX_ADC + 2, buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
