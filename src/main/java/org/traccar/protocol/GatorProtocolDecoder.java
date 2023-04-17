@@ -251,7 +251,6 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort();
 
             position.set(Position.KEY_EVENT, Event.TYPE_COMMAND_RESULT);
-            position.setValid(false);
 
             if (commandExecuted == 0x01) {
                 if (mainType == 0x38) {
