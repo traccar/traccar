@@ -25,8 +25,6 @@ import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
 
-import java.nio.charset.StandardCharsets;
-
 public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
     public GatorProtocolEncoder(Protocol protocol) {
@@ -35,7 +33,12 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
-    private ByteBuf engineExecute(String Pseudo_ID, byte engineState){
+    public static final int GET_POSITION = 0x30;
+    public static final int SET_ENGINE_START = 0x38;
+    public static final int SET_ENGINE_STOP = 0x39;
+
+
+    private ByteBuf engineExecute(String pseudoAddress, int engineState) {
         ByteBuf buf = Unpooled.buffer(256);
 
         // Add Header - 24 24
@@ -49,26 +52,15 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(0x00);
         buf.writeByte(0x06);
 
-        // Add Device ID - String to 5 Byte
-        // Convert String to Int Array
-        int[] _ip = numToIp(Pseudo_ID);
+        // Add Device ID
+        int[] ipAddress = numToIp(pseudoAddress);
 
-        buf.writeByte(_ip[0]);
-        buf.writeByte(_ip[1]);
-        buf.writeByte(_ip[2]);
-        buf.writeByte(_ip[3]);
+        buf.writeByte(ipAddress[0]);
+        buf.writeByte(ipAddress[1]);
+        buf.writeByte(ipAddress[2]);
+        buf.writeByte(ipAddress[3]);
 
-//        String _decoded_id = decodeId(_ip[0], _ip[1], _ip[2], _ip[3]);
-//        LOGGER.info("Decoded ID: " + _decoded_id);
-
-//        // CRC / Calibration -> XOR All Bytes
-//        byte _crc = 0;
-//        for (int i = 0; i < buf.writerIndex(); i++) {
-//            _crc ^= buf.getByte(i);
-//        }
-//
-//        // Add CRC
-//        buf.writeByte(_crc);
+        // Add Checksum
         buf.writeByte(Checksum.xor(buf.nioBuffer(2, buf.writerIndex())));
 
         // End of Packet -> 0D
@@ -77,16 +69,36 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         return buf;
     }
 
-//    public static String decodeId(int b1, int b2, int b3, int b4) {
-//
-//        int d1 = 30 + ((b1 >> 7) << 3) + ((b2 >> 7) << 2) + ((b3 >> 7) << 1) + (b4 >> 7);
-//        int d2 = b1 & 0x7f;
-//        int d3 = b2 & 0x7f;
-//        int d4 = b3 & 0x7f;
-//        int d5 = b4 & 0x7f;
-//
-//        return String.format("%02d%02d%02d%02d%02d", d1, d2, d3, d4, d5);
-//    }
+    private ByteBuf getFromDevice(String pseudoAddress, int type) {
+        ByteBuf buf = Unpooled.buffer(256);
+
+        // Add Header - 24 24
+        buf.writeByte(0x24);
+        buf.writeByte(0x24);
+
+        // Add Type
+        buf.writeByte(type);
+
+        // Add Packet Length - 00 06
+        buf.writeByte(0x00);
+        buf.writeByte(0x06);
+
+        // Add Device ID
+        int[] ipAddress = numToIp(pseudoAddress);
+
+        buf.writeByte(ipAddress[0]);
+        buf.writeByte(ipAddress[1]);
+        buf.writeByte(ipAddress[2]);
+        buf.writeByte(ipAddress[3]);
+
+        // Add Checksum
+        buf.writeByte(Checksum.xor(buf.nioBuffer(2, buf.writerIndex())));
+
+        // End of Packet -> 0D
+        buf.writeByte(0x0D);
+
+        return buf;
+    }
 
     public int[] numToIp(String sim) {
         String[] temp = new String[4];
@@ -136,22 +148,26 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
                 }
         }
         int[] sIp = new int[4];
-        if ((iHigt & 0x08) != 0)
+        if ((iHigt & 0x08) != 0) {
             sIp[0] = Integer.parseInt(temp[0]) | 128;
-        else
+        } else {
             sIp[0] = Integer.parseInt(temp[0]);
-        if ((iHigt & 0x04) != 0)
+        }
+        if ((iHigt & 0x04) != 0) {
             sIp[1] = Integer.parseInt(temp[1]) | 128;
-        else
-            sIp[1] = Integer.parseInt(temp[1]);
-        if ((iHigt & 0x02) != 0)
+        } else {
+                sIp[1] = Integer.parseInt(temp[1]);
+        }
+        if ((iHigt & 0x02) != 0) {
             sIp[2] = Integer.parseInt(temp[2]) | 128;
-        else
+        } else {
             sIp[2] = Integer.parseInt(temp[2]);
-        if ((iHigt & 0x01) != 0)
+        }
+        if ((iHigt & 0x01) != 0) {
             sIp[3] = Integer.parseInt(temp[3]) | 128;
-        else
+        } else {
             sIp[3] = Integer.parseInt(temp[3]);
+        }
         return sIp;
     }
 
@@ -161,10 +177,13 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         switch (command.getType()) {
             case Command.TYPE_ENGINE_RESUME:
                 LOGGER.info("Command: " + Command.TYPE_ENGINE_RESUME);
-                return engineExecute(getUniqueId(command.getDeviceId()), (byte) 0x38);
+                return engineExecute(getUniqueId(command.getDeviceId()), SET_ENGINE_START);
             case Command.TYPE_ENGINE_STOP:
                 LOGGER.info("Command: " + Command.TYPE_ENGINE_STOP);
-                return engineExecute(getUniqueId(command.getDeviceId()), (byte) 0x39);
+                return engineExecute(getUniqueId(command.getDeviceId()), SET_ENGINE_STOP);
+            case Command.TYPE_POSITION_SINGLE:
+                LOGGER.info("Command: " + Command.TYPE_POSITION_SINGLE);
+                return getFromDevice(getUniqueId(command.getDeviceId()), GET_POSITION);
             default:
                 return null;
         }
