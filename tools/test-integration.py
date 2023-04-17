@@ -121,6 +121,11 @@ messages = {
     'startek': '&&o125,123456789012345,000,0,,210702235150,A,27.263505,153.037061,11,1.2,0,0,31,5125,505|1|7032|8C89802,20,0000002D,00,00,01E2|019DF0\r\n',
     'hoopo': '{ "deviceId": "123456789012345", "assetName": "123456789012345", "assetType": "test", "eventData": { "latitude": 31.97498, "longitude": 34.80802, "locationName": "", "accuracyLevel": "High", "eventType": "Arrival", "batteryLevel": 100, "receiveTime": "2021-09-20T18:52:32Z" }, "eventTime": "2021-09-20T08:52:02Z", "serverReportTime": "0001-01-01T00:00:00Z" }',
     'techtocruz': '$$A120,123456789012345,211005105836,A,FLEX,KCB 947C,000.0,0,-1.38047,S,36.93951,E,1648.4,243.140,21,28,12.1,3.7,0,1,0,0,0,*F6',
+    'flexapi': '${"topic":"v1/123456789012345/motion/info","payload":{"motion.ts":1641885877,"motion.ax":0.006344,"motion.ay":0.289384,"motion.az":-0.939156,"motion.gx":0.420000,"motion.gy":0.420000,"motion.gz":-0.280000}}xx\r\n',
+    'jido': '*123456789012345,03,130517,160435,1820.5845,N,07833.2478,E,1,58#',
+    'armoli': '[M123456789012345210122125205N38.735641E035.4727751E003340000000C00000E9E07FF:106AG505283H60E];',
+    'teratrack': '{"MDeviceID":"022043756090","DiviceType":"1","DataType":"1","DataLength":"69","DateTime":"2022-03-09 10:56:01","Latitude":"-6.846451","Longitude":"39.316324","LongitudeState":"1","LatitudeState":"0","Speed":"90","Mileage":"0","FenceAlarm":"0","AreaAlarmID":"0","LockCutOff":"0","SealTampered":"0","MessageAck":"1","LockRope":"1","LockStatus":"1","LockOpen":"0","PasswordError":"0","CardNo":"60000644","IllegalCard":"0","LowPower":"0","UnCoverBack":"0","CoverStatus":"1","LockStuck":"0","Power":"79","GSM":"16","IMEI":"123456789012345","Index":"20","Slave":[]}',
+    'envotech': '$80SLM,02,F,123456,130410155921,431750216,000040,0000,,00000000,\'13041015592110476673N10111459E001281*2A#',
 }
 
 baseUrl = 'http://localhost:8082'
