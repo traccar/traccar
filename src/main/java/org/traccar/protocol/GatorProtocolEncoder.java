@@ -17,10 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.Main;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
@@ -31,8 +28,6 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         super(protocol);
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
-
     public static final int GET_POSITION = 0x30;
     public static final int SET_ENGINE_START = 0x38;
     public static final int SET_ENGINE_STOP = 0x39;
@@ -41,29 +36,21 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
     private ByteBuf engineExecute(String pseudoAddress, int engineState) {
         ByteBuf buf = Unpooled.buffer(256);
 
-        // Add Header - 24 24
-        buf.writeByte(0x24);
-        buf.writeByte(0x24);
+        buf.writeShort(0x2424);
 
-        // Add Main Order - 0x38 for Engine Start, 0x39 for Engine Stop
         buf.writeByte(engineState);
 
-        // Add Packet Length - 00 06
-        buf.writeByte(0x00);
-        buf.writeByte(0x06);
+        buf.writeShort(0x0006); // Length
 
-        // Add Device ID
-        int[] ipAddress = numToIp(pseudoAddress);
+        int[] ipAddress = idToPseudoIPAddress(pseudoAddress);
 
         buf.writeByte(ipAddress[0]);
         buf.writeByte(ipAddress[1]);
         buf.writeByte(ipAddress[2]);
         buf.writeByte(ipAddress[3]);
 
-        // Add Checksum
         buf.writeByte(Checksum.xor(buf.nioBuffer(2, buf.writerIndex())));
 
-        // End of Packet -> 0D
         buf.writeByte(0x0D);
 
         return buf;
@@ -72,103 +59,99 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
     private ByteBuf getFromDevice(String pseudoAddress, int type) {
         ByteBuf buf = Unpooled.buffer(256);
 
-        // Add Header - 24 24
-        buf.writeByte(0x24);
-        buf.writeByte(0x24);
+        buf.writeShort(0x2424);
 
-        // Add Type
         buf.writeByte(type);
 
-        // Add Packet Length - 00 06
-        buf.writeByte(0x00);
-        buf.writeByte(0x06);
+        buf.writeShort(0x0006); // Length
 
-        // Add Device ID
-        int[] ipAddress = numToIp(pseudoAddress);
+        int[] ipAddress = idToPseudoIPAddress(pseudoAddress);
 
         buf.writeByte(ipAddress[0]);
         buf.writeByte(ipAddress[1]);
         buf.writeByte(ipAddress[2]);
         buf.writeByte(ipAddress[3]);
 
-        // Add Checksum
         buf.writeByte(Checksum.xor(buf.nioBuffer(2, buf.writerIndex())));
 
-        // End of Packet -> 0D
         buf.writeByte(0x0D);
 
         return buf;
     }
 
-    public int[] numToIp(String sim) {
-        String[] temp = new String[4];
-        int iHigt;
-        switch (sim.length()) {
+    public int[] idToPseudoIPAddress(String deviceID) {
+        String[] ipAddressString = new String[4];
+        int highOrderBits;
+
+        switch (deviceID.length()) {
             case 11:
-                temp[0] = sim.substring(3, 5);
-                temp[1] = sim.substring(5, 7);
-                temp[2] = sim.substring(7, 9);
-                temp[3] = sim.substring(9, 11);
-                iHigt = Integer.parseInt(sim.substring(1, 3)) - 30;
+                ipAddressString[0] = deviceID.substring(3, 5);
+                ipAddressString[1] = deviceID.substring(5, 7);
+                ipAddressString[2] = deviceID.substring(7, 9);
+                ipAddressString[3] = deviceID.substring(9, 11);
+                highOrderBits = Integer.parseInt(deviceID.substring(1, 3)) - 30;
                 break;
             case 10:
-                temp[0] = sim.substring(2, 4);
-                temp[1] = sim.substring(4, 6);
-                temp[2] = sim.substring(6, 8);
-                temp[3] = sim.substring(8, 10);
-                iHigt = Integer.parseInt(sim.substring(0, 2)) - 30;
+                ipAddressString[0] = deviceID.substring(2, 4);
+                ipAddressString[1] = deviceID.substring(4, 6);
+                ipAddressString[2] = deviceID.substring(6, 8);
+                ipAddressString[3] = deviceID.substring(8, 10);
+                highOrderBits = Integer.parseInt(deviceID.substring(0, 2)) - 30;
                 break;
             case 9:
-                temp[0] = sim.substring(1, 3);
-                temp[1] = sim.substring(3, 5);
-                temp[2] = sim.substring(5, 7);
-                temp[3] = sim.substring(7, 9);
-                iHigt = Integer.parseInt(sim.substring(0, 1));
+                ipAddressString[0] = deviceID.substring(1, 3);
+                ipAddressString[1] = deviceID.substring(3, 5);
+                ipAddressString[2] = deviceID.substring(5, 7);
+                ipAddressString[3] = deviceID.substring(7, 9);
+                highOrderBits = Integer.parseInt(deviceID.substring(0, 1));
                 break;
             default:
-                switch (sim.length()) {
+                switch (deviceID.length()) {
                     case 8:
-                        return numToIp("140" + sim);
+                        return idToPseudoIPAddress("140" + deviceID);
                     case 7:
-                        return numToIp("1400" + sim);
+                        return idToPseudoIPAddress("1400" + deviceID);
                     case 6:
-                        return numToIp("14000" + sim);
+                        return idToPseudoIPAddress("14000" + deviceID);
                     case 5:
-                        return numToIp("140000" + sim);
+                        return idToPseudoIPAddress("140000" + deviceID);
                     case 4:
-                        return numToIp("1400000" + sim);
+                        return idToPseudoIPAddress("1400000" + deviceID);
                     case 3:
-                        return numToIp("14000000" + sim);
+                        return idToPseudoIPAddress("14000000" + deviceID);
                     case 2:
-                        return numToIp("140000000" + sim);
+                        return idToPseudoIPAddress("140000000" + deviceID);
                     case 1:
-                        return numToIp("1400000000" + sim);
+                        return idToPseudoIPAddress("1400000000" + deviceID);
                     default:
                         return new int[4];
                 }
         }
-        int[] sIp = new int[4];
-        if ((iHigt & 0x08) != 0) {
-            sIp[0] = Integer.parseInt(temp[0]) | 128;
+
+        int[] ipAddress = new int[4];
+
+        if ((highOrderBits & 0x08) != 0) {
+            ipAddress[0] = Integer.parseInt(ipAddressString[0]) | 128;
         } else {
-            sIp[0] = Integer.parseInt(temp[0]);
+            ipAddress[0] = Integer.parseInt(ipAddressString[0]);
         }
-        if ((iHigt & 0x04) != 0) {
-            sIp[1] = Integer.parseInt(temp[1]) | 128;
+        if ((highOrderBits & 0x04) != 0) {
+            ipAddress[1] = Integer.parseInt(ipAddressString[1]) | 128;
         } else {
-                sIp[1] = Integer.parseInt(temp[1]);
+            ipAddress[1] = Integer.parseInt(ipAddressString[1]);
         }
-        if ((iHigt & 0x02) != 0) {
-            sIp[2] = Integer.parseInt(temp[2]) | 128;
+        if ((highOrderBits & 0x02) != 0) {
+            ipAddress[2] = Integer.parseInt(ipAddressString[2]) | 128;
         } else {
-            sIp[2] = Integer.parseInt(temp[2]);
+            ipAddress[2] = Integer.parseInt(ipAddressString[2]);
         }
-        if ((iHigt & 0x01) != 0) {
-            sIp[3] = Integer.parseInt(temp[3]) | 128;
+        if ((highOrderBits & 0x01) != 0) {
+            ipAddress[3] = Integer.parseInt(ipAddressString[3]) | 128;
         } else {
-            sIp[3] = Integer.parseInt(temp[3]);
+            ipAddress[3] = Integer.parseInt(ipAddressString[3]);
         }
-        return sIp;
+
+        return ipAddress;
     }
 
     @Override
@@ -176,13 +159,10 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_RESUME:
-                LOGGER.info("Command: " + Command.TYPE_ENGINE_RESUME);
                 return engineExecute(getUniqueId(command.getDeviceId()), SET_ENGINE_START);
             case Command.TYPE_ENGINE_STOP:
-                LOGGER.info("Command: " + Command.TYPE_ENGINE_STOP);
                 return engineExecute(getUniqueId(command.getDeviceId()), SET_ENGINE_STOP);
             case Command.TYPE_POSITION_SINGLE:
-                LOGGER.info("Command: " + Command.TYPE_POSITION_SINGLE);
                 return getFromDevice(getUniqueId(command.getDeviceId()), GET_POSITION);
             default:
                 return null;

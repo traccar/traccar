@@ -18,10 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Main;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.DateBuilder;
@@ -34,6 +31,7 @@ import org.traccar.Protocol;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.util.Date;
 
 
@@ -42,8 +40,6 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
     public GatorProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
     public static final int MSG_HEARTBEAT = 0x21;
     public static final int MSG_POSITION_DATA = 0x80;
@@ -110,23 +106,28 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             }
             position.setDeviceId(deviceSession.getDeviceId());
 
-            int subSignal = buf.readUnsignedByte();
+            int dataType = buf.readUnsignedByte();
 
-            if (subSignal != 0x02) {
+            // RFID Data Type - 0x02
+            if (dataType != 0x02) {
                 return null;
             }
 
             StringBuilder rfidData = new StringBuilder();
-            while (buf.readableBytes() > 0) {
-                int rfidDataByte = buf.readUnsignedByte();
-                if (rfidDataByte == 0x0D) {
-                    break;
-                }
-                rfidData.append((char) rfidDataByte);
+            int rfidDataEndIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x0D);
+
+            if (rfidDataEndIndex != -1) {
+                int length = rfidDataEndIndex - buf.readerIndex();
+                rfidData.append(buf.toString(buf.readerIndex(), length, Charset.defaultCharset()));
+
+                buf.skipBytes(length + 1);
+            } else {
+                return null;
             }
 
             position.set(Position.KEY_DRIVER_UNIQUE_ID, rfidData.toString());
 
+            // Reserved - Skip 1 Byte
             buf.readUnsignedByte();
 
             int flags = buf.readUnsignedByte();
@@ -239,26 +240,24 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            // Main Order
-            int mainOrder = buf.readUnsignedByte();
+            int mainType = buf.readUnsignedByte();
 
-            // Slave Order
+            // Sub Type - Skip 1 Byte
             buf.readUnsignedByte();
 
-            int commandSuccess = buf.readUnsignedByte();
+            int commandExecuted = buf.readUnsignedByte();
 
-            // Reserved - 2 Bytes
+            // Reserved - Skip 2 Bytes
             buf.readUnsignedShort();
 
             position.set(Position.KEY_EVENT, Event.TYPE_COMMAND_RESULT);
             position.setValid(false);
 
-            // If Main Order -> 0x38 = Start Engine, 0x39 = Stop Engine
-            if (commandSuccess == 0x01) {
-                if (mainOrder == 0x38) {
+            if (commandExecuted == 0x01) {
+                if (mainType == 0x38) {
                     position.set(Position.KEY_COMMAND, Command.TYPE_ENGINE_RESUME);
                     position.set(Position.KEY_RESULT, "Engine Started");
-                } else if (mainOrder == 0x39) {
+                } else if (mainType == 0x39) {
                     position.set(Position.KEY_COMMAND, Command.TYPE_ENGINE_STOP);
                     position.set(Position.KEY_RESULT, "Engine Stopped");
                 }

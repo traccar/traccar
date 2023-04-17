@@ -27,15 +27,4 @@
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
 
-    <entry key='notificator.types'>web,mail,command</entry>
-
-    <entry key='commands.queueing'>true</entry>
-
-    <entry key="filter.enable">true</entry>
-    <entry key="filter.zero">true</entry>
-
-    <entry key="filter.skipAttributes.enable">true</entry>
-    <entry key="filter.skipAttributes">command,event,result</entry>
-
-
 </properties>
