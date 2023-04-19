@@ -463,47 +463,90 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        ByteBuf buf = Unpooled.wrappedBuffer(
-                DataConverter.parseHex(sentence.substring(1 + 12 + 4, sentence.length() - 1)));
+        String payload = sentence.substring(1 + 12 + 4, sentence.length() - 1);
 
-        buf.readUnsignedByte();
-        buf.readUnsignedByte();
-        buf.readUnsignedByte(); // header
+        if (sentence.startsWith("BS50", 1 + 12)) {
 
-        int batteryCount = buf.readUnsignedByte();
-        for (int i = 1; i <= 24; i++) {
-            int voltage = buf.readUnsignedShortLE();
-            if (i <= batteryCount) {
-                position.set("battery" + i, voltage * 0.001);
+            ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(payload));
+
+            buf.readUnsignedByte();
+            buf.readUnsignedByte();
+            buf.readUnsignedByte(); // header
+
+            int batteryCount = buf.readUnsignedByte();
+            for (int i = 1; i <= 24; i++) {
+                int voltage = buf.readUnsignedShortLE();
+                if (i <= batteryCount) {
+                    position.set("battery" + i, voltage * 0.001);
+                }
             }
-        }
 
-        position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 0);
-        position.set("current", buf.readUnsignedShortLE() * 0.1);
-        position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
-        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-        position.set("batteryOverheat", buf.readUnsignedByte() > 0);
-        position.set("chargeProtection", buf.readUnsignedByte() > 0);
-        position.set("dischargeProtection", buf.readUnsignedByte() > 0);
-        buf.readUnsignedByte(); // drop line
-        buf.readUnsignedByte(); // balanced
-        position.set("cycles", buf.readUnsignedShortLE());
-        position.set("faultAlarm", buf.readUnsignedByte());
+            position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 0);
+            position.set("current", buf.readUnsignedShortLE() * 0.1);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
+            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+            position.set("batteryOverheat", buf.readUnsignedByte() > 0);
+            position.set("chargeProtection", buf.readUnsignedByte() > 0);
+            position.set("dischargeProtection", buf.readUnsignedByte() > 0);
+            buf.readUnsignedByte(); // drop line
+            buf.readUnsignedByte(); // balanced
+            position.set("cycles", buf.readUnsignedShortLE());
+            position.set("faultAlarm", buf.readUnsignedByte());
 
-        buf.skipBytes(6);
+            buf.skipBytes(6);
 
-        int temperatureCount = buf.readUnsignedByte();
-        position.set("powerTemp", buf.readUnsignedByte() - 40);
-        position.set("equilibriumTemp", buf.readUnsignedByte() - 40);
-        for (int i = 1; i <= 7; i++) {
-            int temperature = buf.readUnsignedByte() - 40;
-            if (i <= temperatureCount) {
-                position.set("batteryTemp" + i, temperature);
+            int temperatureCount = buf.readUnsignedByte();
+            position.set("powerTemp", buf.readUnsignedByte() - 40);
+            position.set("equilibriumTemp", buf.readUnsignedByte() - 40);
+            for (int i = 1; i <= 7; i++) {
+                int temperature = buf.readUnsignedByte() - 40;
+                if (i <= temperatureCount) {
+                    position.set("batteryTemp" + i, temperature);
+                }
             }
-        }
 
-        position.set("calibrationCapacity", buf.readUnsignedShortLE() * 0.01);
-        position.set("dischargeCapacity", buf.readUnsignedIntLE());
+            position.set("calibrationCapacity", buf.readUnsignedShortLE() * 0.01);
+            position.set("dischargeCapacity", buf.readUnsignedIntLE());
+
+        } else {
+
+            String[] values = payload.split(",");
+            for (String value : values) {
+                String[] pair = value.split(":");
+                int key = Integer.parseInt(pair[0], 16);
+                ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(pair[1]));
+                switch (key) {
+                    case 0x90:
+                        position.set("cumulativeVoltage", buf.readUnsignedShortLE() * 0.1);
+                        position.set("gatherVoltage", buf.readUnsignedShortLE() * 0.1);
+                        position.set("current", (buf.readUnsignedShortLE() - 30000) * 0.1);
+                        position.set("soc", buf.readUnsignedShortLE() * 0.1);
+                        break;
+                    case 0x91:
+                        position.set("maxCellVoltage", buf.readUnsignedShortLE() * 0.001);
+                        position.set("maxCellVoltageCount", buf.readUnsignedByte());
+                        position.set("minCellVoltage", buf.readUnsignedShortLE() * 0.001);
+                        position.set("minCellVoltageCount", buf.readUnsignedByte());
+                        break;
+                    case 0x92:
+                        position.set("maxTemp", buf.readUnsignedByte() - 40);
+                        position.set("maxTempCount", buf.readUnsignedByte());
+                        position.set("minTemp", buf.readUnsignedByte() - 40);
+                        position.set("minTempCount", buf.readUnsignedByte());
+                        break;
+                    case 0x96:
+                        buf.readUnsignedByte(); // frame
+                        while (buf.isReadable()) {
+                            position.set("cellTemp" + buf.readerIndex(), buf.readUnsignedByte() - 40);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+
+        }
 
         return position;
     }
@@ -537,7 +580,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return decodeLbsWifi(channel, remoteAddress, sentence);
         } else if (sentence.contains("BV00")) {
             return decodeVin(channel, remoteAddress, sentence);
-        } else if (sentence.contains("BS50")) {
+        } else if (sentence.contains("BS50") || sentence.contains("BS51")) {
             return decodeBms(channel, remoteAddress, sentence);
         }
 
