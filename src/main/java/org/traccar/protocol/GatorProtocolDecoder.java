@@ -116,15 +116,13 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
             String rfidData;
             int rfidDataEndIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x0D);
-
-            if (rfidDataEndIndex != -1) {
-                int length = rfidDataEndIndex - buf.readerIndex();
-                rfidData = buf.readCharSequence(length, Charset.defaultCharset()).toString();
-
-                buf.readUnsignedByte();
-            } else {
+            if (rfidDataEndIndex == -1) {
                 return null;
             }
+
+            int length = rfidDataEndIndex - buf.readerIndex();
+            rfidData = buf.readCharSequence(length, Charset.defaultCharset()).toString();
+            buf.readUnsignedByte();
 
             position.set(Position.KEY_DRIVER_UNIQUE_ID, rfidData);
 
