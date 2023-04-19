@@ -80,76 +80,19 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
     }
 
     public int[] idToPseudoIPAddress(String deviceID) {
-        String[] ipAddressString = new String[4];
-        int highOrderBits;
-
-        switch (deviceID.length()) {
-            case 11:
-                ipAddressString[0] = deviceID.substring(3, 5);
-                ipAddressString[1] = deviceID.substring(5, 7);
-                ipAddressString[2] = deviceID.substring(7, 9);
-                ipAddressString[3] = deviceID.substring(9, 11);
-                highOrderBits = Integer.parseInt(deviceID.substring(1, 3)) - 30;
-                break;
-            case 10:
-                ipAddressString[0] = deviceID.substring(2, 4);
-                ipAddressString[1] = deviceID.substring(4, 6);
-                ipAddressString[2] = deviceID.substring(6, 8);
-                ipAddressString[3] = deviceID.substring(8, 10);
-                highOrderBits = Integer.parseInt(deviceID.substring(0, 2)) - 30;
-                break;
-            case 9:
-                ipAddressString[0] = deviceID.substring(1, 3);
-                ipAddressString[1] = deviceID.substring(3, 5);
-                ipAddressString[2] = deviceID.substring(5, 7);
-                ipAddressString[3] = deviceID.substring(7, 9);
-                highOrderBits = Integer.parseInt(deviceID.substring(0, 1));
-                break;
-            default:
-                switch (deviceID.length()) {
-                    case 8:
-                        return idToPseudoIPAddress("140" + deviceID);
-                    case 7:
-                        return idToPseudoIPAddress("1400" + deviceID);
-                    case 6:
-                        return idToPseudoIPAddress("14000" + deviceID);
-                    case 5:
-                        return idToPseudoIPAddress("140000" + deviceID);
-                    case 4:
-                        return idToPseudoIPAddress("1400000" + deviceID);
-                    case 3:
-                        return idToPseudoIPAddress("14000000" + deviceID);
-                    case 2:
-                        return idToPseudoIPAddress("140000000" + deviceID);
-                    case 1:
-                        return idToPseudoIPAddress("1400000000" + deviceID);
-                    default:
-                        return new int[4];
-                }
+        if (deviceID.length() != 11) {
+            return new int[4];
         }
 
         int[] ipAddress = new int[4];
+        for (int i = 0; i < 4; i++) {
+            ipAddress[i] = Integer.parseInt(deviceID.substring(3 + i * 2, 5 + i * 2));
+        }
 
-        if ((highOrderBits & 0x08) != 0) {
-            ipAddress[0] = Integer.parseInt(ipAddressString[0]) | 128;
-        } else {
-            ipAddress[0] = Integer.parseInt(ipAddressString[0]);
-        }
-        if ((highOrderBits & 0x04) != 0) {
-            ipAddress[1] = Integer.parseInt(ipAddressString[1]) | 128;
-        } else {
-            ipAddress[1] = Integer.parseInt(ipAddressString[1]);
-        }
-        if ((highOrderBits & 0x02) != 0) {
-            ipAddress[2] = Integer.parseInt(ipAddressString[2]) | 128;
-        } else {
-            ipAddress[2] = Integer.parseInt(ipAddressString[2]);
-        }
-        if ((highOrderBits & 0x01) != 0) {
-            ipAddress[3] = Integer.parseInt(ipAddressString[3]) | 128;
-        } else {
-            ipAddress[3] = Integer.parseInt(ipAddressString[3]);
-        }
+        ipAddress[0] = ipAddress[0] % 0x7f;
+        ipAddress[1] = ipAddress[1] % 0x7f;
+        ipAddress[2] = ipAddress[2] % 0x7f;
+        ipAddress[3] = ipAddress[3] % 0x7f;
 
         return ipAddress;
     }
