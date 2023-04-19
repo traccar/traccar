@@ -28,6 +28,7 @@ import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Position;
+import org.traccar.model.QueuedCommand;
 import org.traccar.model.Typed;
 import org.traccar.model.User;
 import org.traccar.model.UserRestrictions;
@@ -121,8 +122,9 @@ public class CommandResource extends ExtendedObjectResource<Command> {
             permissionsService.checkPermission(Group.class, getUserId(), groupId);
             var devices = DeviceUtil.getAccessibleDevices(storage, getUserId(), List.of(), List.of(groupId));
             for (Device device : devices) {
-                entity.setDeviceId(device.getId());
-                result = result && commandsManager.sendCommand(entity);
+                Command command = QueuedCommand.fromCommand(entity).toCommand();
+                command.setDeviceId(device.getId());
+                result = result && commandsManager.sendCommand(command);
             }
         } else {
             permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
