@@ -23,8 +23,6 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.Command;
-import org.traccar.model.Event;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -53,6 +51,9 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_CAMERA_RESPONSE = 0x56;
     public static final int MSG_PICTURE_DATA = 0x57;
     public static final int MSG_RFID_DATA = 0x72;
+    public static final int MSG_LOCATE_IMMEDIATE = 0x30;
+    public static final int MSG_ENGINE_ENABLE = 0x38;
+    public static final int MSG_ENGINE_STOP = 0x39;
 
 
     public static String decodeId(int b1, int b2, int b3, int b4) {
@@ -113,19 +114,19 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
 
-            StringBuilder rfidData = new StringBuilder();
+            String rfidData;
             int rfidDataEndIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x0D);
 
             if (rfidDataEndIndex != -1) {
                 int length = rfidDataEndIndex - buf.readerIndex();
-                rfidData.append(buf.toString(buf.readerIndex(), length, Charset.defaultCharset()));
+                rfidData = buf.readCharSequence(length, Charset.defaultCharset()).toString();
 
-                buf.skipBytes(length + 1);
+                buf.readUnsignedByte();
             } else {
                 return null;
             }
 
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, rfidData.toString());
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, rfidData);
 
             // Reserved - Skip 1 Byte
             buf.readUnsignedByte();
@@ -250,19 +251,8 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             // Reserved - Skip 2 Bytes
             buf.readUnsignedShort();
 
-            position.set(Position.KEY_EVENT, Event.TYPE_COMMAND_RESULT);
-
-            if (commandExecuted == 0x01) {
-                if (mainType == 0x38) {
-                    position.set(Position.KEY_COMMAND, Command.TYPE_ENGINE_RESUME);
-                    position.set(Position.KEY_RESULT, "Engine Started");
-                } else if (mainType == 0x39) {
-                    position.set(Position.KEY_COMMAND, Command.TYPE_ENGINE_STOP);
-                    position.set(Position.KEY_RESULT, "Engine Stopped");
-                }
-            } else {
-                position.set(Position.KEY_RESULT, "Command Failed");
-            }
+            position.set(Position.KEY_COMMAND, mainType);
+            position.set(Position.KEY_RESULT, Integer.toString(commandExecuted));
 
             return position;
         }

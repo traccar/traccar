@@ -28,40 +28,12 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         super(protocol);
     }
 
-    public static final int GET_POSITION = 0x30;
-    public static final int SET_ENGINE_START = 0x38;
-    public static final int SET_ENGINE_STOP = 0x39;
-
-
-    private ByteBuf engineExecute(String pseudoAddress, int engineState) {
-        ByteBuf buf = Unpooled.buffer(256);
+    private ByteBuf encodeCommand(String pseudoAddress, int commandType) {
+        ByteBuf buf = Unpooled.buffer();
 
         buf.writeShort(0x2424);
 
-        buf.writeByte(engineState);
-
-        buf.writeShort(0x0006); // Length
-
-        int[] ipAddress = idToPseudoIPAddress(pseudoAddress);
-
-        buf.writeByte(ipAddress[0]);
-        buf.writeByte(ipAddress[1]);
-        buf.writeByte(ipAddress[2]);
-        buf.writeByte(ipAddress[3]);
-
-        buf.writeByte(Checksum.xor(buf.nioBuffer(2, buf.writerIndex())));
-
-        buf.writeByte(0x0D);
-
-        return buf;
-    }
-
-    private ByteBuf getFromDevice(String pseudoAddress, int type) {
-        ByteBuf buf = Unpooled.buffer(256);
-
-        buf.writeShort(0x2424);
-
-        buf.writeByte(type);
+        buf.writeByte(commandType);
 
         buf.writeShort(0x0006); // Length
 
@@ -102,11 +74,11 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_ENGINE_RESUME:
-                return engineExecute(getUniqueId(command.getDeviceId()), SET_ENGINE_START);
+                return encodeCommand(getUniqueId(command.getDeviceId()), GatorProtocolDecoder.MSG_ENGINE_ENABLE);
             case Command.TYPE_ENGINE_STOP:
-                return engineExecute(getUniqueId(command.getDeviceId()), SET_ENGINE_STOP);
+                return encodeCommand(getUniqueId(command.getDeviceId()), GatorProtocolDecoder.MSG_ENGINE_STOP);
             case Command.TYPE_POSITION_SINGLE:
-                return getFromDevice(getUniqueId(command.getDeviceId()), GET_POSITION);
+                return encodeCommand(getUniqueId(command.getDeviceId()), GatorProtocolDecoder.MSG_LOCATE_IMMEDIATE);
             default:
                 return null;
         }
