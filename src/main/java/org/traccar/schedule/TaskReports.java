@@ -18,7 +18,7 @@ package org.traccar.schedule;
 import com.google.inject.Injector;
 import com.google.inject.servlet.RequestScoper;
 import com.google.inject.servlet.ServletScopes;
-import net.fortuna.ical4j.model.component.VEvent;
+import net.fortuna.ical4j.model.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.model.BaseModel;
@@ -77,16 +77,14 @@ public class TaskReports implements ScheduleTask {
                 Calendar calendar = storage.getObject(Calendar.class, new Request(
                         new Columns.All(), new Condition.Equals("id", report.getCalendarId())));
 
-                var lastEvents = calendar.findEvents(lastCheck);
-                var currentEvents = calendar.findEvents(currentCheck);
+                var lastEvents = calendar.findPeriods(lastCheck);
+                var currentEvents = calendar.findPeriods(currentCheck);
 
                 if (!lastEvents.isEmpty() && currentEvents.isEmpty()) {
-                    VEvent event = lastEvents.iterator().next();
-                    Date from = event.getStartDate().getDate();
-                    Date to = event.getEndDate().getDate();
+                    Period period = lastEvents.iterator().next();
                     RequestScoper scope = ServletScopes.scopeRequest(Collections.emptyMap());
                     try (RequestScoper.CloseableScope ignored = scope.open()) {
-                        executeReport(report, from, to);
+                        executeReport(report, period.getStart(), period.getEnd());
                     }
                 }
             }
