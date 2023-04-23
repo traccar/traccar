@@ -16,6 +16,8 @@
 package org.traccar.model;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.storage.QueryIgnore;
@@ -307,6 +309,20 @@ public class Position extends Message {
 
     public void setNetwork(Network network) {
         this.network = network;
+    }
+
+    private List<Long> geofenceIds;
+
+    public List<Long> getGeofenceIds() {
+        return geofenceIds;
+    }
+
+    public void setGeofenceIds(List<? extends Number> geofenceIds) {
+        if (geofenceIds != null) {
+            this.geofenceIds = geofenceIds.stream().map(Number::longValue).collect(Collectors.toList());
+        } else {
+            this.geofenceIds = null;
+        }
     }
 
     @JsonIgnore
