@@ -51,7 +51,6 @@ import org.traccar.storage.query.Request;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -63,7 +62,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-@Singleton
 public class ReportUtils {
 
     private final Config config;
