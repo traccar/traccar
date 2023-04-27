@@ -146,10 +146,10 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             addHandlers(
                     pipeline,
                     CommandResultEventHandler.class,
-                    OverspeedEventHandler.class,
                     FuelDropEventHandler.class,
                     MotionEventHandler.class,
                     GeofenceEventHandler.class,
+                    OverspeedEventHandler.class,
                     AlertEventHandler.class,
                     IgnitionEventHandler.class,
                     MaintenanceEventHandler.class,
