@@ -48,6 +48,7 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
     private final boolean filterInvalid;
     private final boolean filterZero;
     private final boolean filterDuplicate;
+    private final boolean filterOutdated;
     private final long filterFuture;
     private final long filterPast;
     private final boolean filterApproximate;
@@ -69,6 +70,7 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
         filterInvalid = config.getBoolean(Keys.FILTER_INVALID);
         filterZero = config.getBoolean(Keys.FILTER_ZERO);
         filterDuplicate = config.getBoolean(Keys.FILTER_DUPLICATE);
+        filterOutdated = config.getBoolean(Keys.FILTER_OUTDATED);
         filterFuture = config.getLong(Keys.FILTER_FUTURE) * 1000;
         filterPast = config.getLong(Keys.FILTER_PAST) * 1000;
         filterAccuracy = config.getInteger(Keys.FILTER_ACCURACY);
@@ -113,6 +115,10 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
             return true;
         }
         return false;
+    }
+
+    private boolean filterOutdated(Position position) {
+        return filterOutdated && position.getOutdated();
     }
 
     private boolean filterFuture(Position position) {
@@ -188,6 +194,9 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
         }
         if (filterZero(position)) {
             filterType.append("Zero ");
+        }
+        if (filterOutdated(position)) {
+            filterType.append("Outdated ");
         }
         if (filterFuture(position)) {
             filterType.append("Future ");
