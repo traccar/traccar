@@ -124,7 +124,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
             for (Device device : devices) {
                 Command command = QueuedCommand.fromCommand(entity).toCommand();
                 command.setDeviceId(device.getId());
-                result = result && commandsManager.sendCommand(command);
+                result = commandsManager.sendCommand(command) && result;
             }
         } else {
             permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
