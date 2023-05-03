@@ -1239,6 +1239,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Filter messages that do not have GPS location. If they are not filtered, they will include the last known
+     * location.
+     */
+    public static final ConfigKey<Boolean> FILTER_OUTDATED = new BooleanConfigKey(
+            "filter.outdated",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Filter records with fix time in the future. The value is specified in seconds. Records that have fix time more
      * than the specified number of seconds later than current server time would be filtered out.
      */

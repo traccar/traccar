@@ -2725,6 +2725,12 @@
             "type": "object",
             "properties": {}
           },
+          "geofenceIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
           "attributes": {
             "type": "object",
             "properties": {}
@@ -2926,12 +2932,6 @@
           },
           "category": {
             "type": "string"
-          },
-          "geofenceIds": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
           },
           "attributes": {
             "type": "object",

@@ -33,6 +33,7 @@ import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
+import org.traccar.handler.GeofenceHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
@@ -149,6 +150,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 DistanceHandler.class,
                 RemoteAddressHandler.class,
                 FilterHandler.class,
+                GeofenceHandler.class,
                 GeocoderHandler.class,
                 SpeedLimitHandler.class,
                 MotionHandler.class,

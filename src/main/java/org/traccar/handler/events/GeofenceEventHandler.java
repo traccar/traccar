@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,14 @@ package org.traccar.handler.events;
 
 import io.netty.channel.ChannelHandler;
 import org.traccar.config.Config;
-import org.traccar.helper.model.GeofenceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Calendar;
-import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -59,36 +53,21 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        Device device = cacheManager.getObject(Device.class, position.getDeviceId());
-        if (device == null) {
-            return null;
-        }
-        if (!PositionUtil.isLatest(cacheManager, position) || !position.getValid()) {
+        if (!PositionUtil.isLatest(cacheManager, position)) {
             return null;
         }
 
-        List<Long> currentGeofences = GeofenceUtil.getCurrentGeofences(config, cacheManager, position);
         List<Long> oldGeofences = new ArrayList<>();
-        if (device.getGeofenceIds() != null) {
-            oldGeofences.addAll(device.getGeofenceIds());
+        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
+        if (lastPosition != null && lastPosition.getGeofenceIds() != null) {
+            oldGeofences.addAll(lastPosition.getGeofenceIds());
         }
-        List<Long> newGeofences = new ArrayList<>(currentGeofences);
-        newGeofences.removeAll(oldGeofences);
-        oldGeofences.removeAll(currentGeofences);
 
-
-        if (!oldGeofences.isEmpty() || !newGeofences.isEmpty()) {
-            device.setGeofenceIds(currentGeofences.isEmpty() ? null : currentGeofences);
-
-            try {
-                storage.updateObject(device, new Request(
-                        new Columns.Include("geofenceIds"),
-                        new Condition.Equals("id", device.getId())));
-            } catch (StorageException e) {
-                throw new RuntimeException("Update device geofences error", e);
-            }
-
-            connectionManager.updateDevice(true, device);
+        List<Long> newGeofences = new ArrayList<>();
+        if (position.getGeofenceIds() != null) {
+            newGeofences.addAll(position.getGeofenceIds());
+            newGeofences.removeAll(oldGeofences);
+            oldGeofences.removeAll(position.getGeofenceIds());
         }
 
         Map<Event, Position> events = new HashMap<>();

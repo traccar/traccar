@@ -15,13 +15,11 @@
  */
 package org.traccar.model;
 
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
+
+import java.util.Date;
 
 @StorageName("tc_devices")
 public class Device extends GroupedModel implements Disableable {
@@ -81,21 +79,6 @@ public class Device extends GroupedModel implements Disableable {
 
     public void setPositionId(long positionId) {
         this.positionId = positionId;
-    }
-
-    private List<Long> geofenceIds;
-
-    @QueryIgnore
-    public List<Long> getGeofenceIds() {
-        return geofenceIds;
-    }
-
-    public void setGeofenceIds(List<? extends Number> geofenceIds) {
-        if (geofenceIds != null) {
-            this.geofenceIds = geofenceIds.stream().map(Number::longValue).collect(Collectors.toList());
-        } else {
-            this.geofenceIds = null;
-        }
     }
 
     private String phone;

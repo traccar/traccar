@@ -34,6 +34,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @StorageName("tc_calendars")
 public class Calendar extends ExtendedModel {
@@ -68,14 +69,20 @@ public class Calendar extends ExtendedModel {
         return calendar;
     }
 
-    public Collection<VEvent> findEvents(Date date) {
+    private Collection<VEvent> findEvents(Date date) {
         if (calendar != null) {
-            Period period = new Period(new DateTime(date), Duration.ZERO);
-            Filter<VEvent> filter = new Filter<>(new PeriodRule<>(period));
+            var filter = new Filter<VEvent>(new PeriodRule<>(new Period(new DateTime(date), Duration.ZERO)));
             return filter.filter(calendar.getComponents(CalendarComponent.VEVENT));
         } else {
             return List.of();
         }
+    }
+
+    public Collection<Period> findPeriods(Date date) {
+        var calendarDate = new net.fortuna.ical4j.model.Date(date);
+        return findEvents(date).stream()
+                .flatMap((event) -> event.getConsumedTime(calendarDate, calendarDate).stream())
+                .collect(Collectors.toSet());
     }
 
     public boolean checkMoment(Date date) {
