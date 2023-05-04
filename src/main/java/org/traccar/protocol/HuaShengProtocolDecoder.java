@@ -236,6 +236,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() > 4) {
             int subtype = buf.readUnsignedShort();
             int length = buf.readUnsignedShort() - 4;
+            int endIndex = buf.readerIndex() + length;
             switch (subtype) {
                 case 0x0001:
                     int coolantTemperature = buf.readUnsignedByte() - 40;
@@ -253,6 +254,9 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
                     buf.readUnsignedInt(); // trip id
+                    if (buf.readerIndex() < endIndex) {
+                        position.set("adBlueLevel", buf.readUnsignedByte() * 0.4);
+                    }
                     break;
                 case 0x0005:
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
@@ -295,6 +299,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     buf.skipBytes(length);
                     break;
             }
+            buf.readerIndex(endIndex);
         }
 
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
