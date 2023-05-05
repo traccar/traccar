@@ -25,7 +25,8 @@ import org.traccar.storage.StorageName;
 
 @StorageName("tc_positions")
 public class Position extends Message {
-
+  	
+    public static final String KEY_FAULT_COUNT = "faultCount";
     public static final String KEY_ORIGINAL = "raw";
     public static final String KEY_INDEX = "index";
     public static final String KEY_HDOP = "hdop";
