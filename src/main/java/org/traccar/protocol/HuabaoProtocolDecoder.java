@@ -911,8 +911,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 break;
                         }
                     }
+                    getLastLocation(position, time);
                     decodeCoordinates(position, buf);
-                    position.setTime(time);
                     break;
                 case 0x02:
                     count = buf.readUnsignedByte();
@@ -923,6 +923,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             buf.skipBytes(16); // code
                         }
                     }
+                    getLastLocation(position, time);
                     decodeCoordinates(position, buf);
                     break;
                 case 0x03:
@@ -953,8 +954,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         }
                         buf.skipBytes(length);
                     }
+                    getLastLocation(position, time);
                     decodeCoordinates(position, buf);
-                    position.setTime(time);
                     break;
                 case 0x0B:
                     if (buf.readUnsignedByte() > 0) {
