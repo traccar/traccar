@@ -877,6 +877,22 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 0x0539:
                                 position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() * 0.01);
                                 break;
+                            case 0x052D:
+                                position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
+                                break;
+                            case 0x0530:
+                                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
+                                break;
+                            case 0x0535:
+                                position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() * 0.1);
+                                break;
+                            case 0x0536:
+                                position.set(Position.KEY_RPM, buf.readUnsignedShort());
+                                break;
+                            case 0x0547:
+                            case 0x0548:
+                                position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
+                                break;
                             default:
                                 switch (length) {
                                     case 1:
@@ -897,6 +913,17 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     decodeCoordinates(position, buf);
                     position.setTime(time);
+                    break;
+                case 0x02:
+                    count = buf.readUnsignedByte();
+                    for (int i = 0; i < count; i++) {
+                        buf.readUnsignedInt(); // system id
+                        int codeCount = buf.readUnsignedShort();
+                        for (int j = 0; j < codeCount; j++) {
+                            buf.skipBytes(16); // code
+                        }
+                    }
+                    decodeCoordinates(position, buf);
                     break;
                 case 0x03:
                     count = buf.readUnsignedByte();
