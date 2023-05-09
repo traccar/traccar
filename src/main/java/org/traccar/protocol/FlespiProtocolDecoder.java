@@ -130,6 +130,9 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             case "dout":
                 position.set(Position.KEY_OUTPUT, ((JsonNumber) value).intValue());
                 return true;
+            case "report.reason":
+                position.set(Position.KEY_EVENT, ((JsonNumber) value).intValue());
+                return true;
             case "gps.vehicle.mileage":
                 position.set(Position.KEY_ODOMETER, ((JsonNumber) value).doubleValue());
                 return true;
