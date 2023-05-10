@@ -934,6 +934,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         int id = buf.readUnsignedByte();
                         int length = buf.readUnsignedByte();
                         switch (id) {
+                            case 0x01:
+                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+                                break;
+                            case 0x02:
+                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                                break;
                             case 0x1A:
                                 position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
                                 break;
@@ -959,12 +965,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 0x31:
                             case 0x32:
                                 position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
-                                break;
-                            case 0x01:
-                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
-                                break;
-                            case 0x02:
-                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
                                 break;
                             default:
                                 break;
