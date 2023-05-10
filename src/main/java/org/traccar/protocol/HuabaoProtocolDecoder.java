@@ -951,6 +951,21 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 0x23:
                                 position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
                                 break;
+                            case 0x26:
+                            case 0x27:
+                            case 0x28:
+                                position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                                break;
+                            case 0x31:
+                            case 0x32:
+                                position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
+                                break;
+                            case 0x01:
+                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+                                break;
+                            case 0x02:
+                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                                break;
                             default:
                                 break;
                         }
