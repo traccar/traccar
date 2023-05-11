@@ -26,6 +26,7 @@ import org.traccar.storage.StorageName;
 @StorageName("tc_positions")
 public class Position extends Message {
 
+    public static final String KEY_GNSS_STATUS = "gnssStatus";
     public static final String KEY_ORIGINAL = "raw";
     public static final String KEY_INDEX = "index";
     public static final String KEY_HDOP = "hdop";
@@ -79,7 +80,7 @@ public class Position extends Message {
     public static final String KEY_ARMED = "armed";
     public static final String KEY_GEOFENCE = "geofence";
     public static final String KEY_ACCELERATION = "acceleration";
-    public static final String KEY_DEVICE_TEMP = "deviceTemp"; // celsius
+    public static final String KEY_DEVICE_TEMP = "deviceTemp"; // celsius   
     public static final String KEY_COOLANT_TEMP = "coolantTemp"; // celsius
     public static final String KEY_ENGINE_LOAD = "engineLoad";
     public static final String KEY_OPERATOR = "operator";
