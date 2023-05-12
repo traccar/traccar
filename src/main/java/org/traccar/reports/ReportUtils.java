@@ -103,7 +103,8 @@ public final class ReportUtils {
 
         if (useOdometer && (firstOdometer != 0.0 || lastOdometer != 0.0)) {
             distance = lastOdometer - firstOdometer;
-        } else if (firstPosition.getProtocol() == null || firstPosition.getProtocol().equals("osmand")) {
+        } else if (firstPosition.getAttributes().containsKey("source") ||
+                (firstPosition.getProtocol() != null && firstPosition.getProtocol().equals("osmand"))) {
             distance = DistanceCalculator.distance(
                     firstPosition.getLatitude(), firstPosition.getLongitude(),
                     lastPosition.getLatitude(), lastPosition.getLongitude());
