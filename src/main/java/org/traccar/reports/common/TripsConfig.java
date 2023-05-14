@@ -33,20 +33,18 @@ public class TripsConfig {
                 config.getLong(Keys.REPORT_TRIP_MINIMAL_PARKING_DURATION) * 1000,
                 config.getLong(Keys.REPORT_TRIP_MINIMAL_NO_DATA_DURATION) * 1000,
                 config.getBoolean(Keys.REPORT_TRIP_USE_IGNITION),
-                config.getBoolean(Keys.EVENT_MOTION_PROCESS_INVALID_POSITIONS),
-                config.getDouble(Keys.EVENT_MOTION_SPEED_THRESHOLD));
+                config.getBoolean(Keys.EVENT_MOTION_PROCESS_INVALID_POSITIONS));
     }
 
     public TripsConfig(
             double minimalTripDistance, long minimalTripDuration, long minimalParkingDuration,
-            long minimalNoDataDuration, boolean useIgnition, boolean processInvalidPositions, double speedThreshold) {
+            long minimalNoDataDuration, boolean useIgnition, boolean processInvalidPositions) {
         this.minimalTripDistance = minimalTripDistance;
         this.minimalTripDuration = minimalTripDuration;
         this.minimalParkingDuration = minimalParkingDuration;
         this.minimalNoDataDuration = minimalNoDataDuration;
         this.useIgnition = useIgnition;
         this.processInvalidPositions = processInvalidPositions;
-        this.speedThreshold = speedThreshold;
     }
 
     private final double minimalTripDistance;
@@ -83,12 +81,6 @@ public class TripsConfig {
 
     public boolean getProcessInvalidPositions() {
         return processInvalidPositions;
-    }
-
-    private final double speedThreshold;
-
-    public double getSpeedThreshold() {
-        return speedThreshold;
     }
 
 }
