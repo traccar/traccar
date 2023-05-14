@@ -50,8 +50,7 @@ public class MotionEventHandler extends BaseEventHandler {
     private final Storage storage;
 
     @Inject
-    public MotionEventHandler(
-            CacheManager cacheManager, Storage storage, TripsConfig tripsConfig) {
+    public MotionEventHandler(CacheManager cacheManager, Storage storage) {
         this.cacheManager = cacheManager;
         this.storage = storage;
     }
