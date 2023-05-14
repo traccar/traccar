@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,8 @@ package org.traccar.handler.events;
 import io.netty.channel.ChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -46,14 +48,12 @@ public class MotionEventHandler extends BaseEventHandler {
 
     private final CacheManager cacheManager;
     private final Storage storage;
-    private final TripsConfig tripsConfig;
 
     @Inject
     public MotionEventHandler(
             CacheManager cacheManager, Storage storage, TripsConfig tripsConfig) {
         this.cacheManager = cacheManager;
         this.storage = storage;
-        this.tripsConfig = tripsConfig;
     }
 
     @Override
@@ -61,14 +61,16 @@ public class MotionEventHandler extends BaseEventHandler {
 
         long deviceId = position.getDeviceId();
         Device device = cacheManager.getObject(Device.class, deviceId);
-        if (device == null) {
+        if (device == null || !PositionUtil.isLatest(cacheManager, position)) {
             return null;
         }
-        if (!PositionUtil.isLatest(cacheManager, position)
-                || !tripsConfig.getProcessInvalidPositions() && !position.getValid()) {
+        boolean processInvalid = AttributeUtil.lookup(
+                cacheManager, Keys.EVENT_MOTION_PROCESS_INVALID_POSITIONS, deviceId);
+        if (!processInvalid && !position.getValid()) {
             return null;
         }
 
+        TripsConfig tripsConfig = new TripsConfig(new AttributeUtil.CacheProvider(cacheManager, deviceId));
         MotionState state = MotionState.fromDevice(device);
         MotionProcessor.updateState(state, position, position.getBoolean(Position.KEY_MOTION), tripsConfig);
         if (state.isChanged()) {

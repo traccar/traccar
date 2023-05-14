@@ -36,7 +36,7 @@ public class MotionEventHandlerTest extends BaseTest {
 
     @Test
     public void testMotionWithPosition() throws ParseException {
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, false, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, false);
 
         MotionState state = new MotionState();
 
@@ -63,7 +63,7 @@ public class MotionEventHandlerTest extends BaseTest {
 
     @Test
     public void testMotionFluctuation() throws ParseException {
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, false, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, false);
 
         MotionState state = new MotionState();
 
@@ -94,7 +94,7 @@ public class MotionEventHandlerTest extends BaseTest {
 
     @Test
     public void testStopWithPositionIgnition() throws ParseException {
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, true, false);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, true);
 
         MotionState state = new MotionState();
         state.setMotionStreak(true);

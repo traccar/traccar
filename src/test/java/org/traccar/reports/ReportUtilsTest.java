@@ -2,15 +2,16 @@ package org.traccar.reports;
 
 import org.apache.velocity.app.VelocityEngine;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.traccar.BaseTest;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
-import org.traccar.reports.common.TripsConfig;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.TripReportItem;
 import org.traccar.storage.Storage;
@@ -24,6 +25,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,6 +64,19 @@ public class ReportUtilsTest extends BaseTest {
 
         return position;
     }
+
+    private Device mockDevice(
+            double minimalTripDistance, long minimalTripDuration, long minimalParkingDuration,
+            long minimalNoDataDuration, boolean useIgnition) {
+        Device device = mock(Device.class);
+        when(device.getAttributes()).thenReturn(Map.of(
+                Keys.REPORT_TRIP_MINIMAL_TRIP_DISTANCE.getKey(), minimalTripDistance,
+                Keys.REPORT_TRIP_MINIMAL_TRIP_DURATION.getKey(), minimalTripDuration,
+                Keys.REPORT_TRIP_MINIMAL_PARKING_DURATION.getKey(), minimalParkingDuration,
+                Keys.REPORT_TRIP_MINIMAL_NO_DATA_DURATION.getKey(), minimalNoDataDuration,
+                Keys.REPORT_TRIP_USE_IGNITION.getKey(), useIgnition));
+        return device;
+    }
     
     @Test
     public void testCalculateDistance() {
@@ -78,8 +93,7 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testCalculateSpentFuel() {
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), storage, mock(PermissionsService.class),
-                mock(TripsConfig.class), mock(VelocityEngine.class), null);
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
         Position startPosition = new Position();
         Position endPosition = new Position();
         assertEquals(reportUtils.calculateFuel(startPosition, endPosition), 0.0, 0.01);
@@ -101,12 +115,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:15:00.000", 0, 3000),
                 position("2016-01-01 00:25:00.000", 0, 3000));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false);
+        Device device = mockDevice(500, 300, 180, 900, false);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), storage, mock(PermissionsService.class),
-                tripsConfig, mock(VelocityEngine.class), null);
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var trips = reportUtils.detectTripsAndStops(mock(Device.class), data, false, TripReportItem.class);
+        var trips = reportUtils.detectTripsAndStops(device, data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -120,7 +133,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        var stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var stops = reportUtils.detectTripsAndStops(device, data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -156,12 +169,11 @@ public class ReportUtilsTest extends BaseTest {
 
         data.get(5).set(Position.KEY_IGNITION, false);
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, true, false);
+        Device device = mockDevice(500, 300, 180, 900, true);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), storage, mock(PermissionsService.class),
-                tripsConfig, mock(VelocityEngine.class), null);
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var trips = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, TripReportItem.class);
+        var trips = reportUtils.detectTripsAndStops(device, data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -175,7 +187,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        trips = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, TripReportItem.class);
+        trips = reportUtils.detectTripsAndStops(device, data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -189,7 +201,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        var stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var stops = reportUtils.detectTripsAndStops(device, data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -227,12 +239,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:19:00.000", 0, 7000),
                 position("2016-01-01 00:29:00.000", 0, 7000));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 180000, 900000, false, false);
+        Device device = mockDevice(500, 300, 180, 900, false);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), storage, mock(PermissionsService.class),
-                tripsConfig, mock(VelocityEngine.class), null);
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var trips = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, TripReportItem.class);
+        var trips = reportUtils.detectTripsAndStops(device, data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -246,7 +257,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(7000, itemTrip.getDistance(), 0.01);
 
-        var stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var stops = reportUtils.detectTripsAndStops(device, data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -278,12 +289,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 1, 0),
                 position("2016-01-01 00:05:00.000", 0, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false);
+        Device device = mockDevice(500, 300, 200, 900, false);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), storage, mock(PermissionsService.class),
-                tripsConfig, mock(VelocityEngine.class), null);
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var result = reportUtils.detectTripsAndStops(device, data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -307,12 +317,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 1, 0),
                 position("2016-01-01 00:05:00.000", 2, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false);
+        Device device = mockDevice(500, 300, 200, 900, false);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), storage, mock(PermissionsService.class),
-                tripsConfig, mock(VelocityEngine.class), null);
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var result = reportUtils.detectTripsAndStops(device, data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -336,12 +345,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:22:00.000", 0, 0),
                 position("2016-01-01 00:32:00.000", 0, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false);
+        Device device = mockDevice(500, 300, 200, 900, false);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), storage, mock(PermissionsService.class),
-                tripsConfig, mock(VelocityEngine.class), null);
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var result = reportUtils.detectTripsAndStops(device, data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -365,12 +373,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:04:00.000", 5, 0),
                 position("2016-01-01 00:05:00.000", 5, 0));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 200000, 900000, false, false);
+        Device device = mockDevice(500, 300, 200, 900, false);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), storage, mock(PermissionsService.class),
-                tripsConfig, mock(VelocityEngine.class), null);
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var result = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var result = reportUtils.detectTripsAndStops(device, data, false, StopReportItem.class);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -390,12 +397,11 @@ public class ReportUtilsTest extends BaseTest {
                 position("2016-01-01 00:24:00.000", 5, 800),
                 position("2016-01-01 00:25:00.000", 5, 900));
 
-        TripsConfig tripsConfig = new TripsConfig(500, 200000, 200000, 900000, false, false);
+        Device device = mockDevice(500, 200, 200, 900, false);
         ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), storage, mock(PermissionsService.class),
-                tripsConfig, mock(VelocityEngine.class), null);
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var trips = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, TripReportItem.class);
+        var trips = reportUtils.detectTripsAndStops(device, data, false, TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -409,7 +415,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(7, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(600, itemTrip.getDistance(), 0.01);
 
-        var stops = reportUtils.detectTripsAndStops(mock(Device.class) ,data, false, StopReportItem.class);
+        var stops = reportUtils.detectTripsAndStops(device, data, false, StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());

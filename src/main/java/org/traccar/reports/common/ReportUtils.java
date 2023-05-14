@@ -31,6 +31,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.geocoder.Geocoder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.BaseModel;
@@ -67,18 +68,16 @@ public class ReportUtils {
     private final Config config;
     private final Storage storage;
     private final PermissionsService permissionsService;
-    private final TripsConfig tripsConfig;
     private final VelocityEngine velocityEngine;
     private final Geocoder geocoder;
 
     @Inject
     public ReportUtils(
             Config config, Storage storage, PermissionsService permissionsService,
-            TripsConfig tripsConfig, VelocityEngine velocityEngine, @Nullable Geocoder geocoder) {
+            VelocityEngine velocityEngine, @Nullable Geocoder geocoder) {
         this.config = config;
         this.storage = storage;
         this.permissionsService = permissionsService;
-        this.tripsConfig = tripsConfig;
         this.velocityEngine = velocityEngine;
         this.geocoder = geocoder;
     }
@@ -306,6 +305,8 @@ public class ReportUtils {
             Class<T> reportClass) throws StorageException {
 
         Collection<T> result = new ArrayList<>();
+        TripsConfig tripsConfig = new TripsConfig(
+                new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
 
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (!positions.isEmpty()) {
