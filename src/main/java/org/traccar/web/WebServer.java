@@ -62,9 +62,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.EnumSet;
 
 public class WebServer implements LifecycleObject {
