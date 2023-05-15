@@ -103,14 +103,8 @@ public class WebServer implements LifecycleObject {
             @Override
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
-                Path index = Paths.get(config.getString(Keys.WEB_PATH), "index.html");
-                if (code == HttpStatus.NOT_FOUND_404
-                        && !request.getPathInfo().startsWith("/api/") && Files.exists(index)) {
-                    writer.write(Files.readString(index));
-                } else {
-                    writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
-                            + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
-                }
+                writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
+                        + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
             }
         });
 
@@ -150,7 +144,7 @@ public class WebServer implements LifecycleObject {
     }
 
     private void initWebApp(ServletContextHandler servletHandler) {
-        ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
+        ServletHolder servletHolder = new ServletHolder(ModernDefaultServlet.class);
         servletHolder.setInitParameter("resourceBase", new File(config.getString(Keys.WEB_PATH)).getAbsolutePath());
         servletHolder.setInitParameter("dirAllowed", "false");
         if (config.getBoolean(Keys.WEB_DEBUG)) {

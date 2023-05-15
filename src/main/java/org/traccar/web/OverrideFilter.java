@@ -27,6 +27,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
@@ -44,28 +45,36 @@ public class OverrideFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        CharResponseWrapper wrapper = new CharResponseWrapper((HttpServletResponse) response);
+        CharResponseWrapper wrappedResponse = new CharResponseWrapper((HttpServletResponse) response);
 
-        chain.doFilter(request, wrapper);
+        chain.doFilter(request, wrappedResponse);
 
-        Server server;
-        try {
-            server = permissionsServiceProvider.get().getServer();
-        } catch (StorageException e) {
-            throw new RuntimeException(e);
+        byte[] bytes = wrappedResponse.getCapture();
+        if (wrappedResponse.getContentType().contains("text/html")
+                || ((HttpServletRequest) request).getPathInfo().endsWith("manifest.json")) {
+
+            Server server;
+            try {
+                server = permissionsServiceProvider.get().getServer();
+            } catch (StorageException e) {
+                throw new RuntimeException(e);
+            }
+
+            String title = server.getString("title", "Traccar");
+            String description = server.getString("description", "Traccar GPS Tracking System");
+            String colorPrimary = server.getString("colorPrimary", "#1a237e");
+
+            String alteredContent = new String(wrappedResponse.getCapture())
+                    .replace("${title}", title)
+                    .replace("${description}", description)
+                    .replace("${colorPrimary}", colorPrimary);
+
+            response.setContentLength(alteredContent.length());
+            response.getOutputStream().write(alteredContent.getBytes());
+
+        } else {
+            response.getOutputStream().write(bytes);
         }
-
-        String title = server.getString("title", "Traccar");
-        String description = server.getString("description", "Traccar GPS Tracking System");
-        String colorPrimary = server.getString("colorPrimary", "#1a237e");
-
-        String alteredContent = wrapper.getCaptureAsString()
-                .replace("${title}", title)
-                .replace("${description}", description)
-                .replace("${colorPrimary}", colorPrimary);
-
-        response.setContentLength(alteredContent.length());
-        response.getWriter().write(alteredContent);
     }
 
 }

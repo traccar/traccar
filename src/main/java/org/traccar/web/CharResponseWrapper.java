@@ -72,11 +72,11 @@ public class CharResponseWrapper extends HttpServletResponseWrapper {
         }
     }
 
-    public String getCaptureAsString() throws IOException {
+    public byte[] getCapture() throws IOException {
         if (output != null) {
             output.close();
         }
-        return capture.toString(getCharacterEncoding());
+        return capture.toByteArray();
     }
 
 }
