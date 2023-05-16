@@ -232,6 +232,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(27, null, (p, b) -> p.set("bleTemp3", b.readShort() * 0.01));
         register(28, null, (p, b) -> p.set("bleTemp4", b.readShort() * 0.01));
         register(30, fmbXXX, (p, b) -> p.set("faultCount", b.readUnsignedByte()));
+        register(32, fmbXXX, (p, b) -> p.set(Position.KEY_COOLANT_TEMP, b.readByte()));
         register(66, null, (p, b) -> p.set(Position.KEY_POWER, b.readUnsignedShort() * 0.001));
         register(67, null, (p, b) -> p.set(Position.KEY_BATTERY, b.readUnsignedShort() * 0.001));
         register(68, fmbXXX, (p, b) -> p.set("batteryCurrent", b.readUnsignedShort() * 0.001));
@@ -247,7 +248,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         });
         register(80, fmbXXX, (p, b) -> p.set("dataMode", b.readUnsignedByte()));
         register(90, null, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedShort()));
-        register(115, fmbXXX, (p, b) -> p.set(Position.KEY_COOLANT_TEMP, b.readShort() * 0.1));
         register(179, null, (p, b) -> p.set(Position.PREFIX_OUT + 1, b.readUnsignedByte() > 0));
         register(180, null, (p, b) -> p.set(Position.PREFIX_OUT + 2, b.readUnsignedByte() > 0));
         register(181, null, (p, b) -> p.set(Position.KEY_PDOP, b.readUnsignedShort() * 0.1));
