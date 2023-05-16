@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
@@ -6,6 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -13,206 +29,166 @@ import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.Arrays;
 
 public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final byte[] STX = new byte[]{0x3a, 0x3a};
 
     public TranSyncProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
-    public Date getDatefromIntegerParameters(int year, int month, int day, int hours, int minutes, int seconds) {
-
-        String dataString = ""+year + "-" + month + "-" + day + " " + hours + ":" + minutes + ":" + seconds;
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        try {
-            return simpleDateFormat.parse(dataString);
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    protected void setDeviceAlert(Position position, int alert) {
-        switch (alert) {
+    protected void decodeAlarm(Position position, int value) {
+        switch (value) {
             case 10:
-                position.set(Position.ALARM_SOS, true);
+                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 break;
             case 11:
-                position.set(Position.ALARM_SOS, false);
+                position.set(Position.KEY_EVENT, 11);
                 break;
             case 16:
                 position.set(Position.KEY_EVENT, 16);
                 break;
             case 3:
-                position.set("distressCutOff", true);
+                position.set(Position.KEY_ALARM, 3);
                 break;
             case 22:
-                position.set("tilt", true);
+                position.set(Position.KEY_ALARM, 22);
                 break;
             case 9:
                 position.set(Position.KEY_EVENT, 9);
             case 17:
-                position.set(Position.ALARM_OVERSPEED, true);
+                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
                 break;
             case 13:
-                position.set(Position.ALARM_BRAKING, true);
+                position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
                 break;
             case 14:
-                position.set(Position.ALARM_ACCELERATION, true);
+                position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
                 break;
             case 15:
                 position.set(Position.KEY_EVENT, 15);
                 break;
             case 23:
-                position.set(Position.ALARM_ACCIDENT, true);
+                position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
                 break;
             case 12:
                 position.set(Position.KEY_EVENT, 12);
                 break;
             case 6:
-                position.set(Position.ALARM_POWER_RESTORED, true);
+                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
                 break;
             case 4:
-                position.set(Position.ALARM_LOW_BATTERY, true);
+                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
                 break;
             case 5:
                 position.set(Position.KEY_EVENT, 5);
                 break;
-
         }
+    }
+
+    private void decodePowerEngineParameters(Position position, int value){
+
+        position.set(Position.PREFIX_OUT + 1, BitUtil.check(value, 7));
+        position.set(Position.PREFIX_OUT + 2, BitUtil.check(value, 6));
+        position.set(Position.PREFIX_IN + 3, BitUtil.check(value, 5));
+        if (BitUtil.check(value, 4)) position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+        position.set(Position.KEY_IGNITION, BitUtil.check(value, 3));
+        position.set("gpsFix", BitUtil.check(value, 0));
 
     }
 
-    private void setNetwork(Position position, int lacInt, int cellIdInt, int mobileNetworkCode, int gsmSignalStrength){
-        CellTower cellTower = CellTower.fromLacCid(getConfig(), lacInt, cellIdInt);
-        cellTower.setMobileNetworkCode(mobileNetworkCode);
-        cellTower.setSignalStrength(gsmSignalStrength);
-        position.setNetwork(new Network(cellTower));
-
-    }
-
-    private String getTrackerModel(int mask){
-
-        switch (mask) {
-            case 1:
-                return  "basic";
-            case 2:
-                return "asset";
-            case 3:
-                return "bike";
-
-            case 4:
-                return "serial";
-
-            case 5:
-                return "obd";
-            case 6:
-                return "l1";
-            case 7:
-                return "ais";
-            default:
-                return "unknown";
+    private void decodeTrackerStatusParameters(Position position, int value){
+        if (BitUtil.check(value, 7)) position.set("restored", true);
+        if (BitUtil.check(value, 5)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
         }
-
     }
 
-    private Position parseData(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
-        if (ByteBufUtil.hexDump(buf, 0, 2).equalsIgnoreCase("3A3A")) {
+    @Override
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+        ByteBuf buf = (ByteBuf) msg;
+        if (Arrays.equals(ByteBufUtil.getBytes(buf, 0, 2), STX)) {
             buf.readUnsignedShort();
         }
-        int packetLength = buf.readByte();
-        int lacInt = buf.readUnsignedShort();
-        String deviceId = ByteBufUtil.hexDump(buf, buf.readerIndex(), 8).toUpperCase().trim().replaceFirst("^0+(?!$)", "");
-        buf.readBytes(8);
-        int informationSerialNumber = buf.readUnsignedShort();
-        int protocolNumber = buf.readUnsignedByte();
+        buf.readByte(); //packetLength
+
+        int locationAreaCode = buf.readUnsignedShort();
+        String deviceId = ByteBufUtil.hexDump(buf.readSlice(8));
+
+        buf.readUnsignedShort(); //informationSerialNumber
+        buf.readUnsignedByte(); //protocolNumber
+
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
         if (deviceSession == null) {
             return null;
         }
-
         Position position = new Position(getProtocolName());
-        long devicesessionId = deviceSession.getDeviceId();
-
-        position.setDeviceId(devicesessionId) ;
+        position.setDeviceId(deviceSession.getDeviceId());
         position.setValid(true);
-        int year =  buf.readUnsignedByte();
-        int month = buf.readUnsignedByte();
-        int day =   buf.readUnsignedByte();
-        int hour =  buf.readUnsignedByte();
-        int minute = buf.readUnsignedByte();
-        int second = buf.readUnsignedByte();
-        position.setTime(getDatefromIntegerParameters(year, month, day, hour, minute, second));
+        position.setTime(new DateBuilder()
+                .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                .getDate());
         position.setLatitude(buf.readUnsignedInt() / 1800000.0);
         position.setLongitude(buf.readUnsignedInt() / 1800000.0);
         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
         position.setCourse(buf.readUnsignedShort());
+
         int mobileNetworkCode = buf.readUnsignedByte();
-        int cellIdInt = buf.readUnsignedShort();
-        int zeroByte =  buf.readUnsignedByte();
-        position.set(Position.PREFIX_OUT + 1, BitUtil.check(zeroByte, 0));
-        position.set(Position.PREFIX_OUT + 2, BitUtil.check(zeroByte, 1));
-        position.set(Position.PREFIX_IN + 3, BitUtil.check(zeroByte, 2));
-        if (BitUtil.check(zeroByte, 3)) position.set(Position.ALARM_POWER_OFF, true);
-        position.set(Position.KEY_IGNITION, BitUtil.check(zeroByte, 4));
-        position.set("gpsFix", BitUtil.check(zeroByte, 7));
-        int oneByte =  buf.readUnsignedByte();
-        int deviceAlert =  buf.readUnsignedByte();
-        if (deviceAlert > 0) { setDeviceAlert(position, deviceAlert); }
-        int threeByte =  buf.readUnsignedByte();
-        if (!((threeByte & 0b10000000) == 0)) position.set("restored", true);
-        if ((threeByte & 0b00100000) != 0) {
-            position.set(Position.ALARM_GPS_ANTENNA_CUT, true);
-            position.set("gpsAlert", true);
-        }
-        position.set("model", getTrackerModel(threeByte & 0b00001111));
+        int cellTowerId = buf.readUnsignedShort();
+
+        decodePowerEngineParameters(position, buf.readUnsignedByte());
+
+        buf.readUnsignedByte(); // not in use
+
+        decodeAlarm(position, buf.readUnsignedByte());
+
+        decodeTrackerStatusParameters(position, buf.readUnsignedByte());
+
         int gsmSignalStrength = buf.readUnsignedByte();
+
         position.set(Position.KEY_BATTERY, (double) (buf.readUnsignedByte() / 10));
         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
         position.set(Position.KEY_HDOP, buf.readUnsignedByte());
         position.set(Position.PREFIX_ADC + 1, (short) buf.readUnsignedShort());
-        boolean isOptionalParameters = (buf.readableBytes() > 2);
-        setNetwork(position, lacInt, cellIdInt, mobileNetworkCode, gsmSignalStrength);
-        if (isOptionalParameters) { //  Always True
-            int odometerIndex = buf.readUnsignedByte();
+
+        CellTower cellTower = CellTower.fromLacCid(getConfig(), locationAreaCode, cellTowerId);
+        cellTower.setMobileNetworkCode(mobileNetworkCode);
+        cellTower.setSignalStrength(gsmSignalStrength);
+
+        position.setNetwork(new Network(cellTower));
+
+        if (buf.readableBytes() > 2) {
+            buf.readUnsignedByte(); // odometerIndex
             int odometerLength = buf.readUnsignedByte();
             if (odometerLength > 0) {
-                String odometerReading = ByteBufUtil.hexDump(buf, buf.readerIndex(), odometerLength).toUpperCase().trim().replaceFirst("^0+(?!$)", "");
-                int odometer = Integer.parseInt(odometerReading);
-                buf.readBytes(odometerLength);
+                int odometer = buf.readBytes(odometerLength).readInt();
                 position.set(Position.KEY_ODOMETER, odometer);
             }
             if ((buf.readableBytes() > 2)) {
-                int rfidIndex = buf.readUnsignedByte();
-                int rfidLength = buf.readUnsignedByte();
-                if(rfidLength > 0) {
-                    String rfidTagName = ByteBufUtil.hexDump(buf, buf.readerIndex(), rfidLength).toUpperCase().trim();
-                    buf.readBytes(rfidLength);
-                    position.set("tag", rfidTagName);
+                buf.readUnsignedByte(); // tagIndex
+                int tagLength = buf.readUnsignedByte();
+                if (tagLength > 0) {
+                    position.set("tag", ByteBufUtil.hexDump(buf.readSlice(tagLength)));
                 }
             }
             if ((buf.readableBytes() > 5)) {
-                int adcTwoIndex =  buf.readUnsignedByte();
-                int adcTwoLength =  buf.readUnsignedByte();
-                if (adcTwoLength > 0){
+                buf.readUnsignedByte(); // adc2Index
+                int adc2Length = buf.readUnsignedByte();
+                if (adc2Length > 0) {
                     position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
                 }
             }
+            if ((buf.readableBytes() > 5)) {
+                buf.readUnsignedByte(); // adc2Index
+                int adc2Length = buf.readUnsignedByte();
+                if (adc2Length > 0 && adc2Length <= buf.readableBytes() - 2) {
+                    position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShort());
+                }
+            }
         }
-
         return position;
     }
-
-    @Override
-    protected Object decode( Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-        ByteBuf buffer = (ByteBuf) msg;
-        return parseData(channel, remoteAddress, buffer);
-    }
-
 }
