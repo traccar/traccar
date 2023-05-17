@@ -131,7 +131,9 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
         ByteBuf buf = (ByteBuf) msg;
+
         if (Arrays.equals(ByteBufUtil.getBytes(buf, 0, 2), STX)) {
             buf.readUnsignedShort();
         }
@@ -183,14 +185,14 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
 
         position.setNetwork(new Network(cellTower));
 
-        if (buf.readableBytes() > 2) {
+        if (buf.readableBytes() > 5) {
             buf.readUnsignedByte(); // odometerIndex
             int odometerLength = buf.readUnsignedByte();
             if (odometerLength > 0) {
                 int odometer = buf.readBytes(odometerLength).readInt();
                 position.set(Position.KEY_ODOMETER, odometer);
             }
-            if ((buf.readableBytes() > 2)) {
+            if ((buf.readableBytes() > 5)) {
                 buf.readUnsignedByte(); // tagIndex
                 int tagLength = buf.readUnsignedByte();
                 if (tagLength > 0) {
@@ -205,7 +207,7 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
             if ((buf.readableBytes() > 5)) {
-                buf.readUnsignedByte(); // adc2Index
+                buf.readUnsignedByte(); // adc3Index
                 int adc2Length = buf.readUnsignedByte();
                 if (adc2Length > 0 && adc2Length <= buf.readableBytes() - 2) {
                     position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShort());
