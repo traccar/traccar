@@ -35,7 +35,7 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
 
     private static final byte[] STX = new byte[]{0x3a, 0x3a};
 
-    private String getHardwareType(int type){
+    private String getHardwareType(int type) {
 
         switch (type) {
             case 1:
@@ -107,22 +107,28 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
             case 5:
                 position.set(Position.KEY_EVENT, 5);
                 break;
+            default:
+                position.set(Position.KEY_EVENT, "unknown");
         }
     }
 
-    private void decodePowerEngineParameters(Position position, int value){
+    private void decodePowerEngineParameters(Position position, int value) {
 
         position.set(Position.PREFIX_OUT + 1, BitUtil.check(value, 7));
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(value, 6));
         position.set(Position.PREFIX_IN + 3, BitUtil.check(value, 5));
-        if (BitUtil.check(value, 4)) position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+        if (BitUtil.check(value, 4)) {
+            position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+        }
         position.set(Position.KEY_IGNITION, BitUtil.check(value, 3));
         position.set("gpsFix", BitUtil.check(value, 0));
 
     }
 
-    private void decodeTrackerStatusParameters(Position position, int value){
-        if (BitUtil.check(value, 7)) position.set(Position.KEY_ARCHIVE, true);
+    private void decodeTrackerStatusParameters(Position position, int value) {
+        if (BitUtil.check(value, 7)) {
+            position.set(Position.KEY_ARCHIVE, true);
+        }
         if (BitUtil.check(value, 5)) {
             position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
         }
