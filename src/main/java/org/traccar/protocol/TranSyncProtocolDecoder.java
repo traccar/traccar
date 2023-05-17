@@ -108,18 +108,6 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private void sendResponse(Channel channel) {
-        if (channel != null) {
-            ByteBuf response = Unpooled.buffer(5);
-            response.writeByte(22);
-            response.writeByte(1);
-            response.writeShort(response.capacity()); // length
-            response.writeByte(4);
-
-            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
-        }
-    }
-
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf) msg;
@@ -203,7 +191,6 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
         }
-        sendResponse(channel);
         return position;
     }
 }
