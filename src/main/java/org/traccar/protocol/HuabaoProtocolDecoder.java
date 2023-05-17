@@ -333,10 +333,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // power level
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     break;
-                case 0x60:
-                    position.set(Position.KEY_EVENT, buf.readUnsignedShort());
-                    buf.skipBytes(length - 2);
-                    break;
                 case 0x61:
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     break;
@@ -487,6 +483,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         String lockStatus = stringValue.substring(8, 8 + 7);
                         position.set(Position.KEY_BATTERY, Integer.parseInt(lockStatus.substring(2, 5)) * 0.01);
                     }
+                    break;
+                case 0x60:
+                    position.set(Position.KEY_EVENT, buf.readUnsignedShort());
+                    buf.skipBytes(length - 2);
+                    break;
+                case 0x69:
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
                     break;
                 case 0x80:
                     buf.readUnsignedByte(); // content
@@ -916,14 +919,19 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.setTime(time);
                     break;
                 case 0x02:
-                    count = buf.readUnsignedByte();
+                    List<String> codes = new LinkedList<>();
+                    count = buf.readUnsignedShort();
                     for (int i = 0; i < count; i++) {
                         buf.readUnsignedInt(); // system id
                         int codeCount = buf.readUnsignedShort();
                         for (int j = 0; j < codeCount; j++) {
-                            buf.skipBytes(16); // code
+                            buf.readUnsignedInt(); // dtc
+                            buf.readUnsignedInt(); // status
+                            codes.add(buf.readCharSequence(
+                                    buf.readUnsignedShort(), StandardCharsets.US_ASCII).toString().trim());
                         }
                     }
+                    position.set(Position.KEY_DTCS, String.join(" ", codes));
                     getLastLocation(position, time);
                     decodeCoordinates(position, buf);
                     position.setTime(time);
@@ -934,6 +942,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         int id = buf.readUnsignedByte();
                         int length = buf.readUnsignedByte();
                         switch (id) {
+                            case 0x01:
+                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+                                break;
+                            case 0x02:
+                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                                break;
                             case 0x1A:
                                 position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
                                 break;
@@ -950,6 +964,15 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 break;
                             case 0x23:
                                 position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+                                break;
+                            case 0x26:
+                            case 0x27:
+                            case 0x28:
+                                position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                                break;
+                            case 0x31:
+                            case 0x32:
+                                position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
                                 break;
                             default:
                                 break;

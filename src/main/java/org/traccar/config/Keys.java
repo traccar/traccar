@@ -373,14 +373,15 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> EVENT_MOTION_PROCESS_INVALID_POSITIONS = new BooleanConfigKey(
             "event.motion.processInvalidPositions",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            false);
 
     /**
      * If the speed is above specified value, the object is considered to be in motion. Default value is 0.01 knots.
      */
     public static final ConfigKey<Double> EVENT_MOTION_SPEED_THRESHOLD = new DoubleConfigKey(
             "event.motion.speedThreshold",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             0.01);
 
     /**
@@ -1167,7 +1168,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DISTANCE = new LongConfigKey(
             "report.trip.minimalTripDistance",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             500L);
 
     /**
@@ -1175,7 +1176,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DURATION = new LongConfigKey(
             "report.trip.minimalTripDuration",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             300L);
 
     /**
@@ -1183,7 +1184,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_PARKING_DURATION = new LongConfigKey(
             "report.trip.minimalParkingDuration",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             300L);
 
     /**
@@ -1191,7 +1192,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_NO_DATA_DURATION = new LongConfigKey(
             "report.trip.minimalNoDataDuration",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             3600L);
 
     /**
@@ -1199,7 +1200,8 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> REPORT_TRIP_USE_IGNITION = new BooleanConfigKey(
             "report.trip.useIgnition",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            false);
 
     /**
      * Ignore odometer value reported by the device and use server-calculated total distance instead. This is useful
@@ -1207,7 +1209,8 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> REPORT_IGNORE_ODOMETER = new BooleanConfigKey(
             "report.ignoreOdometer",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            false);
 
     /**
      * Boolean flag to enable or disable position filtering.
