@@ -17,10 +17,8 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -36,6 +34,28 @@ import java.util.Arrays;
 public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
 
     private static final byte[] STX = new byte[]{0x3a, 0x3a};
+
+    private String getHardwareType(int type){
+
+        switch (type) {
+            case 1:
+                return  "basic";
+            case 2:
+                return "asset";
+            case 3:
+                return "bike";
+            case 4:
+                return "serial";
+            case 5:
+                return "obd";
+            case 6:
+                return "l1";
+            case 7:
+                return "ais-140";
+            default:
+                return "unknown";
+        }
+    }
 
     public TranSyncProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -102,10 +122,11 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeTrackerStatusParameters(Position position, int value){
-        if (BitUtil.check(value, 7)) position.set("restored", true);
+        if (BitUtil.check(value, 7)) position.set(Position.KEY_ARCHIVE, true);
         if (BitUtil.check(value, 5)) {
             position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
         }
+        position.set(Position.KEY_VERSION_HW, getHardwareType(BitUtil.between(value, 0, 3)));
     }
 
     @Override
@@ -143,7 +164,7 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
 
         decodePowerEngineParameters(position, buf.readUnsignedByte());
 
-        buf.readUnsignedByte(); // not in use
+        buf.readUnsignedByte(); // reserved
 
         decodeAlarm(position, buf.readUnsignedByte());
 
