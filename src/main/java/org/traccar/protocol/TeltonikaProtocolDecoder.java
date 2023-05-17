@@ -238,19 +238,19 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(69, null, (p, b) -> {
             switch (b.readUnsignedByte()) {
                     case 0:
-                        p.set(Position.KEY_GNSS_STATUS, "GNSS Off");
+                        p.set(Position.KEY_GPS, "GNSS Off");
                         break;
                     case 1:
-                        p.set(Position.KEY_GNSS_STATUS, "GNSS On wtih fix");
+                        p.set(Position.KEY_GPS, "GNSS On wtih fix");
                         break;
                     case 2:
-                        p.set(Position.KEY_GNSS_STATUS, "GNSS On without fix");
+                        p.set(Position.KEY_GPS, "GNSS On without fix");
                         break;
                     case 3:
-                        p.set(Position.KEY_GNSS_STATUS, "GNSS Sleep");
+                        p.set(Position.KEY_GPS, "GNSS Sleep");
                         break;
                     default:
-                        p.set(Position.KEY_GNSS_STATUS, b.readUnsignedByte());
+                        p.set(Position.KEY_GPS, b.readUnsignedByte());
                         break;	
                 }        
         });

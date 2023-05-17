@@ -26,7 +26,6 @@ import org.traccar.storage.StorageName;
 @StorageName("tc_positions")
 public class Position extends Message {
 
-    public static final String KEY_GNSS_STATUS = "gnssStatus";
     public static final String KEY_ORIGINAL = "raw";
     public static final String KEY_INDEX = "index";
     public static final String KEY_HDOP = "hdop";
