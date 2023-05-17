@@ -17,8 +17,10 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -106,6 +108,18 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void sendResponse(Channel channel) {
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer(5);
+            response.writeByte(22);
+            response.writeByte(1);
+            response.writeShort(response.capacity()); // length
+            response.writeByte(4);
+
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+        }
+    }
+
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf) msg;
@@ -189,6 +203,7 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
         }
+        sendResponse(channel);
         return position;
     }
 }
