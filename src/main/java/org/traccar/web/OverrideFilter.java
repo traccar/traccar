@@ -50,30 +50,32 @@ public class OverrideFilter implements Filter {
         chain.doFilter(request, wrappedResponse);
 
         byte[] bytes = wrappedResponse.getCapture();
-        if (wrappedResponse.getContentType() != null && wrappedResponse.getContentType().contains("text/html")
-                || ((HttpServletRequest) request).getPathInfo().endsWith("manifest.json")) {
+        if (bytes != null) {
+            if (wrappedResponse.getContentType() != null && wrappedResponse.getContentType().contains("text/html")
+                    || ((HttpServletRequest) request).getPathInfo().endsWith("manifest.json")) {
 
-            Server server;
-            try {
-                server = permissionsServiceProvider.get().getServer();
-            } catch (StorageException e) {
-                throw new RuntimeException(e);
+                Server server;
+                try {
+                    server = permissionsServiceProvider.get().getServer();
+                } catch (StorageException e) {
+                    throw new RuntimeException(e);
+                }
+
+                String title = server.getString("title", "Traccar");
+                String description = server.getString("description", "Traccar GPS Tracking System");
+                String colorPrimary = server.getString("colorPrimary", "#1a237e");
+
+                String alteredContent = new String(wrappedResponse.getCapture())
+                        .replace("${title}", title)
+                        .replace("${description}", description)
+                        .replace("${colorPrimary}", colorPrimary);
+
+                response.setContentLength(alteredContent.length());
+                response.getOutputStream().write(alteredContent.getBytes());
+
+            } else {
+                response.getOutputStream().write(bytes);
             }
-
-            String title = server.getString("title", "Traccar");
-            String description = server.getString("description", "Traccar GPS Tracking System");
-            String colorPrimary = server.getString("colorPrimary", "#1a237e");
-
-            String alteredContent = new String(wrappedResponse.getCapture())
-                    .replace("${title}", title)
-                    .replace("${description}", description)
-                    .replace("${colorPrimary}", colorPrimary);
-
-            response.setContentLength(alteredContent.length());
-            response.getOutputStream().write(alteredContent.getBytes());
-
-        } else {
-            response.getOutputStream().write(bytes);
         }
     }
 

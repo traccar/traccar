@@ -75,8 +75,9 @@ public class ResponseWrapper extends HttpServletResponseWrapper {
     public byte[] getCapture() throws IOException {
         if (output != null) {
             output.close();
+            return capture.toByteArray();
         }
-        return capture.toByteArray();
+        return null;
     }
 
 }
