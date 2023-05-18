@@ -45,12 +45,12 @@ public class OverrideFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        CharResponseWrapper wrappedResponse = new CharResponseWrapper((HttpServletResponse) response);
+        ResponseWrapper wrappedResponse = new ResponseWrapper((HttpServletResponse) response);
 
         chain.doFilter(request, wrappedResponse);
 
         byte[] bytes = wrappedResponse.getCapture();
-        if (wrappedResponse.getContentType().contains("text/html")
+        if (wrappedResponse.getContentType() != null && wrappedResponse.getContentType().contains("text/html")
                 || ((HttpServletRequest) request).getPathInfo().endsWith("manifest.json")) {
 
             Server server;

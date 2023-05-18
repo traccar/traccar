@@ -22,12 +22,12 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class CharResponseWrapper extends HttpServletResponseWrapper {
+public class ResponseWrapper extends HttpServletResponseWrapper {
 
     private final ByteArrayOutputStream capture;
     private ServletOutputStream output;
 
-    public CharResponseWrapper(HttpServletResponse response) {
+    public ResponseWrapper(HttpServletResponse response) {
         super(response);
         capture = new ByteArrayOutputStream(response.getBufferSize());
     }
