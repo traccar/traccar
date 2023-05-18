@@ -111,6 +111,15 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_EVENT, "unknown");
         }
     }
+    private void analizeNegativePosition(Position position, int value) {
+
+        if (!BitUtil.check(value, 1)) {
+            position.setLatitude(-position.getLatitude()); // 0/1 S/N
+        }
+        if (!BitUtil.check(value, 2)) {
+            position.setLongitude(-position.getLongitude()); // 0/1 W/E
+        }
+    }
 
     private void decodePowerEngineParameters(Position position, int value) {
 
@@ -122,7 +131,6 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
         }
         position.set(Position.KEY_IGNITION, BitUtil.check(value, 3));
         position.set("gpsFix", BitUtil.check(value, 0));
-
     }
 
     private void decodeTrackerStatusParameters(Position position, int value) {
@@ -169,8 +177,10 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
 
         int mobileNetworkCode = buf.readUnsignedByte();
         int cellTowerId = buf.readUnsignedShort();
+        int statusParameters = buf.readUnsignedByte();
 
-        decodePowerEngineParameters(position, buf.readUnsignedByte());
+        decodePowerEngineParameters(position, statusParameters);
+        analizeNegativePosition(position, statusParameters);
 
         buf.readUnsignedByte(); // reserved
 
