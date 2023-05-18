@@ -17,11 +17,37 @@ package org.traccar.web;
 
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.resource.Resource;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+
+import javax.inject.Inject;
+import java.io.File;
+import java.io.IOException;
 
 public class ModernDefaultServlet extends DefaultServlet {
 
+    private Resource overrideResource;
+
+    @Inject
+    public ModernDefaultServlet(Config config) {
+        String override = config.getString(Keys.WEB_OVERRIDE);
+        if (override != null) {
+            overrideResource = Resource.newResource(new File(override));
+        }
+    }
+
     @Override
     public Resource getResource(String pathInContext) {
+        if (overrideResource != null) {
+            try {
+                Resource override = overrideResource.addPath(pathInContext);
+                if (override.exists()) {
+                    return override;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return super.getResource(pathInContext.indexOf('.') < 0 ? "/" : pathInContext);
     }
 

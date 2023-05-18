@@ -754,6 +754,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Path to a folder with overrides. It can be used for branding to keep custom logos in a separate place.
+     */
+    public static final ConfigKey<String> WEB_OVERRIDE = new StringConfigKey(
+            "web.override",
+            List.of(KeyType.CONFIG));
+
+    /**
      * WebSocket connection timeout in milliseconds. Default timeout is 10 minutes.
      */
     public static final ConfigKey<Long> WEB_TIMEOUT = new LongConfigKey(
