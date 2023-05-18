@@ -919,14 +919,19 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.setTime(time);
                     break;
                 case 0x02:
-                    count = buf.readUnsignedByte();
+                    List<String> codes = new LinkedList<>();
+                    count = buf.readUnsignedShort();
                     for (int i = 0; i < count; i++) {
                         buf.readUnsignedInt(); // system id
                         int codeCount = buf.readUnsignedShort();
                         for (int j = 0; j < codeCount; j++) {
-                            buf.skipBytes(16); // code
+                            buf.readUnsignedInt(); // dtc
+                            buf.readUnsignedInt(); // status
+                            codes.add(buf.readCharSequence(
+                                    buf.readUnsignedShort(), StandardCharsets.US_ASCII).toString().trim());
                         }
                     }
+                    position.set(Position.KEY_DTCS, String.join(" ", codes));
                     getLastLocation(position, time);
                     decodeCoordinates(position, buf);
                     position.setTime(time);
