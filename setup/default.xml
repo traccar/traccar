@@ -288,5 +288,6 @@
     <entry key='g1rus.port'>5244</entry>
     <entry key='rftrack.port'>5245</entry>
     <entry key='vlt.port'>5246</entry>
+    <entry key='transync.port'>5247</entry>
 
 </properties>
