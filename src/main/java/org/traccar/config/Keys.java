@@ -1171,6 +1171,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Time threshold for fast reports. Fast reports are more efficient, but less accurate and missing some information.
+     * The value is in seconds. One day by default.
+     */
+    public static final ConfigKey<Long> REPORT_FAST_THRESHOLD = new LongConfigKey(
+            "report.fastThreshold",
+            List.of(KeyType.CONFIG),
+            86400L);
+
+    /**
      * Trips less than minimal duration and minimal distance are ignored. 300 seconds and 500 meters are default.
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DISTANCE = new LongConfigKey(
