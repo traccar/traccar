@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -227,6 +227,18 @@ public class Server extends ExtendedModel implements UserRestrictions {
     }
 
     private boolean geocoderEnabled;
+
+    private boolean textEnabled;
+
+    @QueryIgnore
+    public void setTextEnabled(boolean textEnabled) {
+        this.textEnabled = textEnabled;
+    }
+
+    @QueryIgnore
+    public Boolean getTextEnabled() {
+        return textEnabled;
+    }
 
     @QueryIgnore
     public void setGeocoderEnabled(boolean geocoderEnabled) {
