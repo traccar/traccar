@@ -17,6 +17,7 @@
 package org.traccar.handler.events;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
@@ -50,12 +51,19 @@ public class IgnitionEventHandler extends BaseEventHandler {
             if (lastPosition != null && lastPosition.getAttributes().containsKey(Position.KEY_IGNITION)) {
                 boolean oldIgnition = lastPosition.getBoolean(Position.KEY_IGNITION);
 
+                List<Long> geofenceIds = device.getGeofenceIds();
                 if (ignition && !oldIgnition) {
-                    result = Collections.singletonMap(
-                            new Event(Event.TYPE_IGNITION_ON, position.getDeviceId(), position.getId()), position);
+                    Event event = new Event(Event.TYPE_IGNITION_ON, position.getDeviceId(), position.getId());
+                    if (geofenceIds.size() > 0) {
+                        event.setGeofenceId(geofenceIds.get(0));
+                    }
+                    result = Collections.singletonMap(event, position);
                 } else if (!ignition && oldIgnition) {
-                    result = Collections.singletonMap(
-                            new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId()), position);
+                    Event event = new Event(Event.TYPE_IGNITION_OFF, position.getDeviceId(), position.getId());
+                    if (geofenceIds.size() > 0) {
+                        event.setGeofenceId(geofenceIds.get(0));
+                    }
+                    result = Collections.singletonMap(event, position);
                 }
             }
         }
