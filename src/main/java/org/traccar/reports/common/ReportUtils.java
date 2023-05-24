@@ -162,19 +162,7 @@ public class ReportUtils {
     }
 
     private TripReportItem calculateTrip(
-            Device device, List<Position> positions, int startIndex, int endIndex,
-            boolean ignoreOdometer) throws StorageException {
-
-        Position startTrip = positions.get(startIndex);
-        Position endTrip = positions.get(endIndex);
-
-        double speedMax = 0;
-        for (int i = startIndex; i <= endIndex; i++) {
-            double speed = positions.get(i).getSpeed();
-            if (speed > speedMax) {
-                speedMax = speed;
-            }
-        }
+            Device device, Position startTrip, Position endTrip, boolean ignoreOdometer) throws StorageException {
 
         TripReportItem trip = new TripReportItem();
 
@@ -208,7 +196,6 @@ public class ReportUtils {
         if (tripDuration > 0) {
             trip.setAverageSpeed(UnitsConverter.knotsFromMps(trip.getDistance() * 1000 / tripDuration));
         }
-        trip.setMaxSpeed(speedMax);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));
@@ -228,10 +215,7 @@ public class ReportUtils {
     }
 
     private StopReportItem calculateStop(
-            Device device, List<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
-
-        Position startStop = positions.get(startIndex);
-        Position endStop = positions.get(endIndex);
+            Device device, Position startStop, Position endStop, boolean ignoreOdometer) {
 
         StopReportItem stop = new StopReportItem();
 
@@ -279,9 +263,16 @@ public class ReportUtils {
             boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
 
         if (reportClass.equals(TripReportItem.class)) {
-            return (T) calculateTrip(device, positions, startIndex, endIndex, ignoreOdometer);
+            var result = calculateTrip(device, positions.get(startIndex), positions.get(endIndex), ignoreOdometer);
+            for (int i = startIndex; i <= endIndex; i++) {
+                double speed = positions.get(i).getSpeed();
+                if (speed > result.getMaxSpeed()) {
+                    result.setMaxSpeed(speed);
+                }
+            }
+            return (T) result;
         } else {
-            return (T) calculateStop(device, positions, startIndex, endIndex, ignoreOdometer);
+            return (T) calculateStop(device, positions.get(startIndex), positions.get(endIndex), ignoreOdometer);
         }
     }
 
