@@ -58,7 +58,6 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -291,14 +290,15 @@ public class ReportUtils {
         return positions.get(index).getBoolean(Position.KEY_MOTION);
     }
 
-    public <T extends BaseReportItem> Collection<T> detectTripsAndStops(
-            Device device, List<Position> positions, boolean ignoreOdometer,
-            Class<T> reportClass) throws StorageException {
+    public <T extends BaseReportItem> List<T> detectTripsAndStops(
+            Device device, Date from, Date to, Class<T> reportClass) throws StorageException {
 
-        Collection<T> result = new ArrayList<>();
+        List<T> result = new ArrayList<>();
         TripsConfig tripsConfig = new TripsConfig(
                 new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
+        boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
 
+        var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
         if (!positions.isEmpty()) {
             boolean trips = reportClass.equals(TripReportItem.class);
 
