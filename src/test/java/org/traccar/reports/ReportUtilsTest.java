@@ -281,7 +281,7 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testDetectStopsOnly() throws Exception {
 
-        Collection<Position> data = Arrays.asList(
+        var data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 0, 0),
                 position("2016-01-01 00:01:00.000", 0, 0),
                 position("2016-01-01 00:02:00.000", 1, 0),
@@ -309,7 +309,7 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testDetectStopsWithTripCut() throws Exception {
 
-        Collection<Position> data = Arrays.asList(
+        var data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 0, 0),
                 position("2016-01-01 00:01:00.000", 0, 0),
                 position("2016-01-01 00:02:00.000", 0, 0),
@@ -337,7 +337,7 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testDetectStopsStartedFromTrip() throws Exception {
 
-        Collection<Position> data = Arrays.asList(
+        var data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 2, 0),
                 position("2016-01-01 00:01:00.000", 1, 0),
                 position("2016-01-01 00:02:00.000", 0, 0),
@@ -365,7 +365,7 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testDetectStopsMoving() throws Exception {
 
-        Collection<Position> data = Arrays.asList(
+        var data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 5, 0),
                 position("2016-01-01 00:01:00.000", 5, 0),
                 position("2016-01-01 00:02:00.000", 3, 0),
@@ -387,7 +387,7 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testDetectTripAndStopByGap() throws Exception {
 
-        Collection<Position> data = Arrays.asList(
+        var data = Arrays.asList(
                 position("2016-01-01 00:00:00.000", 7, 100),
                 position("2016-01-01 00:01:00.000", 7, 300),
                 position("2016-01-01 00:02:00.000", 5, 500),

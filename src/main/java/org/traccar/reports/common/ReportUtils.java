@@ -162,7 +162,7 @@ public class ReportUtils {
     }
 
     private TripReportItem calculateTrip(
-            Device device, ArrayList<Position> positions, int startIndex, int endIndex,
+            Device device, List<Position> positions, int startIndex, int endIndex,
             boolean ignoreOdometer) throws StorageException {
 
         Position startTrip = positions.get(startIndex);
@@ -228,7 +228,7 @@ public class ReportUtils {
     }
 
     private StopReportItem calculateStop(
-            Device device, ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
+            Device device, List<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
 
         Position startStop = positions.get(startIndex);
         Position endStop = positions.get(endIndex);
@@ -275,7 +275,7 @@ public class ReportUtils {
 
     @SuppressWarnings("unchecked")
     private <T extends BaseReportItem> T calculateTripOrStop(
-            Device device, ArrayList<Position> positions, int startIndex, int endIndex,
+            Device device, List<Position> positions, int startIndex, int endIndex,
             boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
 
         if (reportClass.equals(TripReportItem.class)) {
@@ -285,7 +285,7 @@ public class ReportUtils {
         }
     }
 
-    private boolean isMoving(ArrayList<Position> positions, int index, TripsConfig tripsConfig) {
+    private boolean isMoving(List<Position> positions, int index, TripsConfig tripsConfig) {
         if (tripsConfig.getMinimalNoDataDuration() > 0) {
             boolean beforeGap = index < positions.size() - 1
                     && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
@@ -301,14 +301,13 @@ public class ReportUtils {
     }
 
     public <T extends BaseReportItem> Collection<T> detectTripsAndStops(
-            Device device, Collection<Position> positionCollection, boolean ignoreOdometer,
+            Device device, List<Position> positions, boolean ignoreOdometer,
             Class<T> reportClass) throws StorageException {
 
         Collection<T> result = new ArrayList<>();
         TripsConfig tripsConfig = new TripsConfig(
                 new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
 
-        ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (!positions.isEmpty()) {
             boolean trips = reportClass.equals(TripReportItem.class);
 
