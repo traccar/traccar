@@ -119,7 +119,7 @@ public class ReportUtilsTest extends BaseTest {
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var trips = reportUtils.detectTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
+        var trips = reportUtils.slowTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -133,7 +133,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        var stops = reportUtils.detectTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
+        var stops = reportUtils.slowTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -174,7 +174,7 @@ public class ReportUtilsTest extends BaseTest {
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var trips = reportUtils.detectTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
+        var trips = reportUtils.slowTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -188,7 +188,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        trips = reportUtils.detectTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
+        trips = reportUtils.slowTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -202,7 +202,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(3000, itemTrip.getDistance(), 0.01);
 
-        var stops = reportUtils.detectTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
+        var stops = reportUtils.slowTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -245,7 +245,7 @@ public class ReportUtilsTest extends BaseTest {
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var trips = reportUtils.detectTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
+        var trips = reportUtils.slowTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -259,7 +259,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(10, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(7000, itemTrip.getDistance(), 0.01);
 
-        var stops = reportUtils.detectTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
+        var stops = reportUtils.slowTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
@@ -296,7 +296,7 @@ public class ReportUtilsTest extends BaseTest {
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var result = reportUtils.detectTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
+        var result = reportUtils.slowTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -325,7 +325,7 @@ public class ReportUtilsTest extends BaseTest {
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var result = reportUtils.detectTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
+        var result = reportUtils.slowTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -354,7 +354,7 @@ public class ReportUtilsTest extends BaseTest {
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var result = reportUtils.detectTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
+        var result = reportUtils.slowTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -383,7 +383,7 @@ public class ReportUtilsTest extends BaseTest {
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var result = reportUtils.detectTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
+        var result = reportUtils.slowTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -408,7 +408,7 @@ public class ReportUtilsTest extends BaseTest {
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
 
-        var trips = reportUtils.detectTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
+        var trips = reportUtils.slowTripsAndStops(device, new Date(), new Date(), TripReportItem.class);
 
         assertNotNull(trips);
         assertFalse(trips.isEmpty());
@@ -422,7 +422,7 @@ public class ReportUtilsTest extends BaseTest {
         assertEquals(7, itemTrip.getMaxSpeed(), 0.01);
         assertEquals(600, itemTrip.getDistance(), 0.01);
 
-        var stops = reportUtils.detectTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
+        var stops = reportUtils.slowTripsAndStops(device, new Date(), new Date(), StopReportItem.class);
 
         assertNotNull(stops);
         assertFalse(stops.isEmpty());
