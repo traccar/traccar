@@ -118,7 +118,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         if (inputStatus >= 'A' && inputStatus <= 'D') {
             inputStatusInt = inputStatus - 'A';
-        } else if(inputStatus >= 'O' && inputStatus <= 'R') {
+        } else if (inputStatus >= 'O' && inputStatus <= 'R') {
             inputStatusInt = inputStatus - 'O' + 4;
         } else {
             return event;
