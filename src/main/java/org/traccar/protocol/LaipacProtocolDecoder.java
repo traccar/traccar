@@ -110,8 +110,9 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeEvent(String event, Position position) {
 
-        if (event.length() != 1)
+        if (event.length() != 1) {
             return event;
+        }
 
         int inputStatusInt = 0;
         char inputStatus = event.charAt(0);
