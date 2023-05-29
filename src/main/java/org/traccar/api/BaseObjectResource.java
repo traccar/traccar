@@ -16,6 +16,7 @@
  */
 package org.traccar.api;
 
+import org.traccar.api.security.ServiceAccountUser;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Group;
@@ -70,10 +71,13 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
         LogAction.create(getUserId(), entity);
-        storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
-        cacheManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId());
-        connectionManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId());
-        LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
+
+        if (getUserId() != ServiceAccountUser.ID) {
+            storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
+            cacheManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId());
+            connectionManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId());
+            LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
+        }
 
         return Response.ok(entity).build();
     }
