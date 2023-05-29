@@ -1163,6 +1163,27 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Viber notification API key.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_VIBER_KEY = new StringConfigKey(
+                    "notificator.viber.key",
+                    List.of(KeyType.CONFIG));
+
+    /**
+     * Viber notification chat id to post messages to.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_VIBER_CHAT_ID = new StringConfigKey(
+                    "notificator.viber.uid",
+                    List.of(KeyType.CONFIG));
+
+    /**
+     * Viber notification send location message.
+     */
+    public static final ConfigKey<Boolean> NOTIFICATOR_VIBER_SEND_LOCATION = new BooleanConfigKey(
+                    "notificator.viber.sendLocation",
+                    List.of(KeyType.CONFIG));
+
+    /**
      * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
      * By default there is no limit.
      */
