@@ -761,12 +761,12 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * WebSocket connection timeout in milliseconds. Default timeout is 10 minutes.
+     * WebSocket connection timeout in milliseconds. Default timeout is 5 minutes.
      */
     public static final ConfigKey<Long> WEB_TIMEOUT = new LongConfigKey(
             "web.timeout",
             List.of(KeyType.CONFIG),
-            60000L);
+            300000L);
 
     /**
      * Authentication sessions timeout in seconds. By default no timeout.
