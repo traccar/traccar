@@ -14,6 +14,9 @@ public class GoSafeProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, false, text(
                 "*GS06,357330050846344,RST#"));
 
+        verifyPositions(decoder, text(
+                "*GS06,353218073585128,181255300523,,SYS:Smart Track;V9.31;V1.1.5,GPS:A;5;N31.551856;E74.366920;0;0;;2.15;2.64,COT:0,ADC:10.78;0.02,DTT:4002;E1;0;0;0;1$181325300523,,SYS:Smart Track;V9.31;V1.1.5,GPS:A;6;N31.551856;E74.366920;0;0;;2.05;2.13,COT:0,ADC:10.79;0.02,DTT:4002;E1;0;0;0;1#"));
+
         verifyAttribute(decoder, text(
                 "*GS06,356449068350122,013519070819,,SYS:G6S;V3.37;V1.1.8,GPS:A;12;N23.169866;E113.450728;0;255;54;0.79,COT:18779;,ADC:12.66;0.58,DTT:4084;E1;0;0;0;1,IWD:0;1;ad031652643fff28;23.2;1;1;86031652504fff28;24.3;2;1;e603165252a5ff28;24.2;3;1;bb0416557da6ff28;24.0#"),
                 Position.PREFIX_TEMP + 3, 24.0);
