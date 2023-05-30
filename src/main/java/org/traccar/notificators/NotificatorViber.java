@@ -40,6 +40,7 @@ public class NotificatorViber implements Notificator {
     private final String urlSendText;
     private final String urlSendLocation;
     private final String chatId;
+    private final String apiKey;
     private final boolean sendLocation;
 
     public static class TextMessage {
@@ -76,6 +77,7 @@ public class NotificatorViber implements Notificator {
         this.config = config;
         urlSendText = "https://chatapi.viber.com/pa/send_message";
         urlSendLocation = "https://chatapi.viber.com/pa/send_message";
+        apiKey = config.getString(Keys.NOTIFICATOR_VIBER_KEY);
         chatId = config.getString(Keys.NOTIFICATOR_VIBER_CHAT_ID);
         sendLocation = config.getBoolean(Keys.NOTIFICATOR_VIBER_SEND_LOCATION);
     }
@@ -101,12 +103,12 @@ public class NotificatorViber implements Notificator {
         }
         message.text = shortMessage.getBody();
         client.target(urlSendText).request()
-                .header("X-Viber-Auth-Token", config.getString(Keys.NOTIFICATOR_VIBER_KEY))
+                .header("X-Viber-Auth-Token", apiKey)
                 .post(Entity.json(message))
                 .close();
         if (sendLocation && position != null) {
             client.target(urlSendLocation).request()
-                    .header("X-Viber-Auth-Token", config.getString(Keys.NOTIFICATOR_VIBER_KEY))
+                    .header("X-Viber-Auth-Token", apiKey)
                     .post(Entity.json(createLocationMessage(message.chatId, position)))
                     .close();
         }
