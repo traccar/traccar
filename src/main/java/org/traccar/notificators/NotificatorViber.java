@@ -53,7 +53,7 @@ public class NotificatorViber implements Notificator {
         private int minApiVersion = 1;
     }
 
-    public static class LatLng {
+    public static class Location {
         @JsonProperty("lat")
         private double latitude;
         @JsonProperty("lon")
@@ -64,7 +64,7 @@ public class NotificatorViber implements Notificator {
         @JsonProperty("receiver")
         private String chatId;
         @JsonProperty("location")
-        private LatLng location;
+        private Location location;
         @JsonProperty("min_api_version")
         private int minApiVersion = 1;
     }
@@ -83,9 +83,10 @@ public class NotificatorViber implements Notificator {
     private LocationMessage createLocationMessage(String messageChatId, Position position) {
         LocationMessage locationMessage = new LocationMessage();
         locationMessage.chatId = messageChatId;
-        locationMessage.location = new LatLng();
-        locationMessage.location.latitude = position.getLatitude();
-        locationMessage.location.longitude = position.getLongitude();
+        Location location = new Location();
+        location.latitude = position.getLatitude();
+        location.longitude = position.getLongitude();
+        locationMessage.location = location;
         return locationMessage;
     }
 
