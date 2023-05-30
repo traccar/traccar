@@ -99,12 +99,14 @@ public class NotificatorViber implements Notificator {
             message.chatId = chatId;
         }
         message.text = shortMessage.getBody();
-        client.target(urlSendText).request().header("X-Viber-Auth-Token",
-                config.getString(Keys.NOTIFICATOR_VIBER_KEY)).post(Entity.json(message)).close();
+        client.target(urlSendText).request()
+                .header("X-Viber-Auth-Token", config.getString(Keys.NOTIFICATOR_VIBER_KEY))
+                .post(Entity.json(message))
+                .close();
         if (sendLocation && position != null) {
-            client.target(urlSendLocation).request().header("X-Viber-Auth-Token",
-                    config.getString(Keys.NOTIFICATOR_VIBER_KEY)).post(
-                            Entity.json(createLocationMessage(message.chatId, position)))
+            client.target(urlSendLocation).request()
+                    .header("X-Viber-Auth-Token", config.getString(Keys.NOTIFICATOR_VIBER_KEY))
+                    .post(Entity.json(createLocationMessage(message.chatId, position)))
                     .close();
         }
     }
