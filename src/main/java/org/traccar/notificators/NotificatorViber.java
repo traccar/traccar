@@ -35,7 +35,6 @@ public class NotificatorViber implements Notificator {
 
     private final NotificationFormatter notificationFormatter;
     private final Client client;
-    private final Config config;
 
     private final String urlSendText;
     private final String urlSendLocation;
@@ -74,12 +73,11 @@ public class NotificatorViber implements Notificator {
     public NotificatorViber(Config config, NotificationFormatter notificationFormatter, Client client) {
         this.notificationFormatter = notificationFormatter;
         this.client = client;
-        this.config = config;
         urlSendText = "https://chatapi.viber.com/pa/send_message";
         urlSendLocation = "https://chatapi.viber.com/pa/send_message";
         apiKey = config.getString(Keys.NOTIFICATOR_VIBER_KEY);
         chatId = config.getString(Keys.NOTIFICATOR_VIBER_CHAT_ID);
-        sendLocation = config.getBoolean(Keys.NOTIFICATOR_VIBER_SEND_LOCATION);
+        sendLocation = config.getBoolean(Keys.NOTIFICATOR_SEND_LOCATION);
     }
 
     private LocationMessage createLocationMessage(String messageChatId, Position position) {

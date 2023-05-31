@@ -72,7 +72,7 @@ public class NotificatorTelegram implements Notificator {
         urlSendLocation = String.format(
                 "https://api.telegram.org/bot%s/sendLocation", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         chatId = config.getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
-        sendLocation = config.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
+        sendLocation = config.getBoolean(Keys.NOTIFICATOR_SEND_LOCATION);
     }
 
     private LocationMessage createLocationMessage(String messageChatId, Position position) {
