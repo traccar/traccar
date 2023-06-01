@@ -16,12 +16,14 @@
 package org.traccar.handler.events;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.IdentityManager;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -50,6 +52,11 @@ public class AlertEventHandler extends BaseEventHandler {
             if (!ignoreAlert) {
                 Event event = new Event(Event.TYPE_ALARM, position.getDeviceId(), position.getId());
                 event.set(Position.KEY_ALARM, (String) alarm);
+                Device device = identityManager.getById(position.getDeviceId());
+                List<Long> geofenceIds = device.getGeofenceIds();
+                if (geofenceIds.size() > 0) {
+                    event.setGeofenceId(geofenceIds.get(0));
+                }
                 return Collections.singletonMap(event, position);
             }
         }
