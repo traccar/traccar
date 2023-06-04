@@ -1,0 +1,15 @@
+.github
+.git
+nbactions.xml
+.classpath
+.project
+.settings
+.idea
+*.iml
+.DS_Store
+.checkstyle
+.gradle
+out
+bin
+build
+node_modules

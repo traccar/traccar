@@ -1,0 +1,63 @@
+version: "3.5"
+
+services:
+  # Mariadb
+  mysqldb:
+    image: 'mysql:8.0.20'
+    container_name: traccardatabase
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - mysqldata:/var/lib/mysql
+      - mysqllogs:/var/log/mysql
+    ports:
+      - 0.0.0.0:3306:3306
+    environment: 
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=traccardb
+      - MYSQL_USER=traccar
+      - MYSQL_PASSWORD=password
+    security_opt:
+      - seccomp:unconfined
+  
+  # PhpMyAdmin
+  phpmyadmin:
+    image: 'bitnami/phpmyadmin:4.9.0-1-r44'
+    container_name: traccarmyadmin
+    ports:
+      - 8181:80
+    volumes:
+      - phpmyadmindata:/bitnami
+    environment:
+      - PHPMYADMIN_ALLOW_NO_PASSWORD=false
+      - PHPMYADMIN_PASSWORD=password
+      - DATABASE_HOST=traccardatabase
+    depends_on:
+      - mysqldb
+  
+  # Mailer
+  mailer:
+    image: djfarrelly/maildev:1.0.0
+    container_name: traccarmailer
+    ports: 
+      - 1080:80
+      - 1025:25
+
+  traccar:
+    image: atmmotors/traccar:1.0
+    container_name: traccarapp
+    restart: always
+    volumes:
+        - ./setup/traccar.docker.xml:/opt/traccar/conf/traccar.xml
+        - traccarlogs:/opt/traccar/logs
+    ports:
+        - "5000-5150:5000-5150"
+        - "8082:8082"
+    depends_on:
+      - mysqldb  
+
+volumes:
+    phpmyadmindata:
+    mysqldata:
+    mysqllogs:
+    traccarlogs:
