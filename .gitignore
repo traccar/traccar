@@ -12,3 +12,8 @@ out
 build
 .vscode
 bin
+lib
+*.jar
+logs
+data
+media
