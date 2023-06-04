@@ -33,6 +33,7 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
 
     private String pendingCommand;
 
+
     public void setPendingCommand(String pendingCommand) {
         this.pendingCommand = pendingCommand;
     }
@@ -47,7 +48,7 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
             .expression("..,")                   // vendor
             .number("d{15},")                    // imei
             .expression("..,")                   // type
-            .number("[01],")                     // reserved
+            .number("d{1,3},")                     // reserved
             .number("(dd)(dd)(dd).d+,")          // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
@@ -67,7 +68,6 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(9, 24));
         if (deviceSession == null) {
             return null;
