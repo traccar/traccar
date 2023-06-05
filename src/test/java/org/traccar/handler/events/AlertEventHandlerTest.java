@@ -16,11 +16,12 @@ public class AlertEventHandlerTest extends BaseTest {
 
     @Test
     public void testAlertEventHandler() {
-        
+
         AlertEventHandler alertEventHandler = new AlertEventHandler(new Config(), new TestIdentityManager());
-        
+
         Position position = new Position();
         position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+        position.setDeviceId(1);
         Map<Event, Position> events = alertEventHandler.analyzePosition(position);
         assertNotNull(events);
         Event event = events.keySet().iterator().next();
