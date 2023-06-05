@@ -54,7 +54,7 @@ public class AlertEventHandler extends BaseEventHandler {
                 event.set(Position.KEY_ALARM, (String) alarm);
                 Device device = identityManager.getById(position.getDeviceId());
                 List<Long> geofenceIds = device.getGeofenceIds();
-                if (geofenceIds.size() > 0) {
+                if (geofenceIds != null && geofenceIds.size() > 0) {
                     event.setGeofenceId(geofenceIds.get(0));
                 }
                 return Collections.singletonMap(event, position);
