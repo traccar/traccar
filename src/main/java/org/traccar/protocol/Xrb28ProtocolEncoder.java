@@ -49,6 +49,14 @@ public class Xrb28ProtocolEncoder extends BaseProtocolEncoder {
                     }
                 }
                 return formatCommand(command, "R0,0,20,1234," + System.currentTimeMillis() / 1000);
+            case Command.TYPE_ALARM_ARM:
+                if (channel != null) {
+                    Xrb28ProtocolDecoder decoder = channel.pipeline().get(Xrb28ProtocolDecoder.class);
+                    if (decoder != null) {
+                        decoder.setPendingCommand(command.getType());
+                    }
+                }
+                return formatCommand(command, "R0,1,20,1234," + System.currentTimeMillis() / 1000);
             default:
                 return null;
         }
