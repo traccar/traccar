@@ -1163,6 +1163,33 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * MQTT Server URL;
+     */
+    public static final ConfigKey<String> NOTIFICATOR_MQTT_SERVER_URL = new StringConfigKey(
+            "notificator.mqtt.server.url",
+            List.of(KeyType.CONFIG));
+    /**
+     * MQTT Server Client ID;
+     */
+    public static final ConfigKey<String> NOTIFICATOR_MQTT_CLIENT_ID = new StringConfigKey(
+            "notificator.mqtt.client.id",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * MQTT Server Username;
+     */
+    public static final ConfigKey<String> NOTIFICATOR_MQTT_USERNAME = new StringConfigKey(
+            "notificator.mqtt.username",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * MQTT Server Password;
+     */
+    public static final ConfigKey<String> NOTIFICATOR_MQTT_PASSWORD = new StringConfigKey(
+            "notificator.mqtt.password",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
      * By default there is no limit.
      */

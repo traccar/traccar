@@ -49,7 +49,8 @@ public class NotificatorManager {
             "firebase", NotificatorFirebase.class,
             "traccar", NotificatorTraccar.class,
             "telegram", NotificatorTelegram.class,
-            "pushover", NotificatorPushover.class);
+            "pushover", NotificatorPushover.class,
+            "mqtt", NotificatorMqtt.class);
 
     private final Injector injector;
 
