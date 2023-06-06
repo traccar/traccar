@@ -29,7 +29,7 @@ import org.traccar.notificators.NotificatorSms;
 import org.traccar.notificators.NotificatorTelegram;
 import org.traccar.notificators.NotificatorTraccar;
 import org.traccar.notificators.NotificatorWeb;
-
+import org.traccar.notificators.NotificatorMqtt;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.Arrays;
