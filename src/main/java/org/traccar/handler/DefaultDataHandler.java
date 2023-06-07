@@ -15,13 +15,16 @@
  */
 package org.traccar.handler;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.channel.ChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
+import org.traccar.Context;
 import org.traccar.database.DataManager;
 import org.traccar.model.Position;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
 
 @ChannelHandler.Sharable
 public class DefaultDataHandler extends BaseDataHandler {
@@ -30,23 +33,28 @@ public class DefaultDataHandler extends BaseDataHandler {
 
     private final DataManager dataManager;
 
-    private final Jedis jedis;
+    private final JedisPool jedisPool;
 
     public DefaultDataHandler(DataManager dataManager) {
         this.dataManager = dataManager;
-        this.jedis = new Jedis("redis.pinme.io");
+        this.jedisPool = new JedisPool("redis.pinme.io");
     }
 
     @Override
     protected Position handlePosition(Position position) {
 
-        try {
+        try (Jedis jedis = jedisPool.getResource()) {
             dataManager.addObject(position);
             LOGGER.warn("redis position id would be {}", jedis.incr("dbid"));
         } catch(com.mysql.cj.jdbc.exceptions.MysqlDataTruncation error) {
             LOGGER.warn("Failed to store position, deviceId: {}, {}", position.getDeviceId(), error.getMessage());
         } catch (Exception error) {
-            LOGGER.warn("Failed to store position", error);
+            LOGGER.error("Failed to store position", error);
+            try {
+                LOGGER.error(Context.getObjectMapper().writeValueAsString(position));
+            } catch (JsonProcessingException e) {
+                LOGGER.error("Error serializing", e);
+            }
         }
 
         if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
