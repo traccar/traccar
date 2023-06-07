@@ -1756,6 +1756,14 @@ public final class Keys {
             "time,position,speed,course,accuracy,result");
 
     /**
+     * Broadcast method. Available options are "multicast" and "redis". Default is "multicast".
+     */
+    public static final ConfigKey<String> BROADCAST_TYPE = new StringConfigKey(
+            "broadcast.type",
+            List.of(KeyType.CONFIG),
+            "multicast");
+
+    /**
      * Multicast interface. It can be either an IP address or an interface name.
      */
     public static final ConfigKey<String> BROADCAST_INTERFACE = new StringConfigKey(

@@ -28,6 +28,7 @@ import io.netty.util.Timer;
 import org.apache.velocity.app.VelocityEngine;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.broadcast.MulticastBroadcastService;
+import org.traccar.broadcast.RedisBroadcastService;
 import org.traccar.broadcast.NullBroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -340,8 +341,16 @@ public class MainModule extends AbstractModule {
     @Provides
     public static BroadcastService provideBroadcastService(
             Config config, ObjectMapper objectMapper) throws IOException {
+        String broadcastType = config.getString(Keys.BROADCAST_TYPE);
         if (config.hasKey(Keys.BROADCAST_ADDRESS)) {
-            return new MulticastBroadcastService(config, objectMapper);
+            switch (broadcastType) {
+                case "multicast":
+                    return new MulticastBroadcastService(config, objectMapper);
+                case "redis":
+                    return new RedisBroadcastService(config, objectMapper);
+                default:
+                    return new NullBroadcastService();
+            }
         }
         return new NullBroadcastService();
     }
