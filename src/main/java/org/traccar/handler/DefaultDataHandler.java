@@ -54,10 +54,6 @@ public class DefaultDataHandler extends BaseDataHandler {
             }
         }
 
-        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-            LOGGER.warn("saved imported position {} for device {}", position.getId(), position.getDeviceId());
-        }
-
         return position;
     }
 
