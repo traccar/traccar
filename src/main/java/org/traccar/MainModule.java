@@ -349,7 +349,7 @@ public class MainModule extends AbstractModule {
                 case "redis":
                     return new RedisBroadcastService(config, objectMapper);
                 default:
-                    return new NullBroadcastService();
+                    break;
             }
         }
         return new NullBroadcastService();
