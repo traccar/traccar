@@ -75,7 +75,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds) throws StorageException {
+            @QueryParam("id") List<Long> deviceIds,
+            @QueryParam("attribute") List<String> attributes) throws StorageException {
 
         if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
 
@@ -111,6 +112,13 @@ public class DeviceResource extends BaseObjectResource<Device> {
                     permissionsService.checkUser(getUserId(), userId);
                     conditions.add(new Condition.Permission(User.class, userId, baseClass).excludeGroups());
                 }
+            }
+
+            for (String attribute: attributes) {
+                String[] parts = attribute.split(":");
+                String path = "$." + parts[0];
+                String value = parts[1];
+                conditions.add(new Condition.JsonContains("attributes", value, path));
             }
 
             return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));

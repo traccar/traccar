@@ -231,6 +231,10 @@ public class DatabaseStorage extends Storage {
             if (condition.getDeviceId() > 0) {
                 results.put("deviceId", condition.getDeviceId());
             }
+        } else if (genericCondition instanceof Condition.JsonContains) {
+            var condition = (Condition.JsonContains) genericCondition;
+            results.put("attributeKey", condition.getPath());
+            results.put("attributeValue", condition.getValue());
         }
         return results;
     }
@@ -294,6 +298,12 @@ public class DatabaseStorage extends Storage {
                 }
                 result.append(")");
 
+            } else if (genericCondition instanceof Condition.JsonContains) {
+
+                var condition = (Condition.JsonContains) genericCondition;
+                result.append("JSON_CONTAINS(");
+                result.append(condition.getColumn());
+                result.append(", :attributeValue, :attributeKey)");
             }
         }
         return result.toString();

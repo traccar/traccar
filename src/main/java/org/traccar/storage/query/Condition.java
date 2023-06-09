@@ -208,4 +208,27 @@ public interface Condition {
         }
     }
 
+    class JsonContains implements Condition {
+        private final String column;
+        private final String value;
+        private final String path;
+        public JsonContains(String column, String value, String path) {
+            this.column = column;
+            this.value = value;
+            this.path = path;
+        }
+
+        public String getColumn() {
+            return this.column;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+
+        public String getPath() {
+            return this.path;
+        }
+    }
+
 }
