@@ -1761,8 +1761,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> BROADCAST_TYPE = new StringConfigKey(
             "broadcast.type",
-            List.of(KeyType.CONFIG),
-            "");
+            List.of(KeyType.CONFIG));
 
     /**
      * Multicast interface. It can be either an IP address or an interface name.

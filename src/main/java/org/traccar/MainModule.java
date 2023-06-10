@@ -341,14 +341,17 @@ public class MainModule extends AbstractModule {
     @Provides
     public static BroadcastService provideBroadcastService(
             Config config, ObjectMapper objectMapper) throws IOException {
-        switch (config.getString(Keys.BROADCAST_TYPE)) {
-            case "multicast":
-                return new MulticastBroadcastService(config, objectMapper);
-            case "redis":
-                return new RedisBroadcastService(config, objectMapper);
-            default:
-                return new NullBroadcastService();
+        if (config.hasKey(Keys.BROADCAST_TYPE)) {
+            switch (config.getString(Keys.BROADCAST_TYPE)) {
+                case "multicast":
+                    return new MulticastBroadcastService(config, objectMapper);
+                case "redis":
+                    return new RedisBroadcastService(config, objectMapper);
+                default:
+                    break;
+            }
         }
+        return new NullBroadcastService();
     }
 
     @Singleton
