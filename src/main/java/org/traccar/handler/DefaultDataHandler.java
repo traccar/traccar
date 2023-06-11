@@ -44,10 +44,8 @@ public class DefaultDataHandler extends BaseDataHandler {
     protected Position handlePosition(Position position) {
 
         try (Jedis jedis = jedisPool.getResource()) {
-            dataManager.addObject(position);
-            // position.setId(jedis.incr("dbid"));
-        } catch(com.mysql.cj.jdbc.exceptions.MysqlDataTruncation error) {
-            LOGGER.error("Failed to store position, deviceId: {}, {}", position.getDeviceId(), error.getMessage());
+            // dataManager.addObject(position);
+            position.setId(jedis.incr("dbid"));
         } catch (Exception error) {
             LOGGER.error("Failed to store position", error);
             try {
