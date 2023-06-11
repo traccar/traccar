@@ -50,6 +50,7 @@ public class RouteReportProvider {
     private final Config config;
     private final ReportUtils reportUtils;
     private final Storage storage;
+
     private final Map<String, Integer> namesCount = new HashMap<>();
 
     @Inject
@@ -72,9 +73,10 @@ public class RouteReportProvider {
 
 
     private String getUniqueSheetName(String key) {
-        namesCount.compute(key, (k, value) -> (value == null) ? 1 : (value + 1));
-        return (namesCount.get(key) > 1 ? key + "-" + namesCount.get(key) : key);
+        namesCount.compute(key, (k, value) -> value == null ? 1 : (value + 1));
+        return namesCount.get(key) > 1 ? key + '-' + namesCount.get(key) : key;
     }
+
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
