@@ -42,6 +42,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RouteReportProvider {
 
@@ -66,7 +69,13 @@ public class RouteReportProvider {
         }
         return result;
     }
+    private final Map<String, Integer> uniqueSheetsTitle = new HashMap<>();
 
+    private String getUniqueSheetName(String key) {
+        AtomicInteger atomic = new AtomicInteger(uniqueSheetsTitle.getOrDefault(key, -1));
+        uniqueSheetsTitle.put(key, atomic.incrementAndGet());
+        return (uniqueSheetsTitle.get(key) > 0 ? key + "-" + uniqueSheetsTitle.get(key) : key);
+    }
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
@@ -78,7 +87,7 @@ public class RouteReportProvider {
             var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
             DeviceReportSection deviceRoutes = new DeviceReportSection();
             deviceRoutes.setDeviceName(device.getName());
-            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceRoutes.getDeviceName()));
+            sheetNames.add(WorkbookUtil.createSafeSheetName(getUniqueSheetName(deviceRoutes.getDeviceName())));
             if (device.getGroupId() > 0) {
                 Group group = storage.getObject(Group.class, new Request(
                         new Columns.All(), new Condition.Equals("id", device.getGroupId())));
