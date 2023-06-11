@@ -343,9 +343,11 @@ public class DataManager {
     }
 
     public void updateDeviceStatus(Device device) throws SQLException {
+        /*
         QueryBuilder.create(dataSource, getQuery(ACTION_UPDATE, Device.class, true))
                 .setObject(device)
                 .executeUpdate();
+         */
     }
 
     private Invocation.Builder getRequestBuilder(String url) {
@@ -365,10 +367,12 @@ public class DataManager {
     }
 
     public void updateLatestPosition(Position position) throws SQLException {
+        /*
         QueryBuilder.create(dataSource, getQuery("database.updateLatestPosition"))
                 .setDate("now", new Date())
                 .setObject(position)
                 .executeUpdate();
+         */
     }
 
     public Collection<Position> getLatestPositions() throws SQLException {
