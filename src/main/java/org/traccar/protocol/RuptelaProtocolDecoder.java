@@ -108,6 +108,9 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 30:
                 position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
                 break;
+            case 65:
+                position.set(Position.KEY_ODOMETER, readValue(buf, length, true));
+                break;
             case 74:
                 position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
                 break;
@@ -115,6 +118,9 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 79:
             case 80:
                 position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
+                break;
+            case 95:
+                position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(readValue(buf, length, true)));
                 break;
             case 134:
                 if (readValue(buf, length, false) > 0) {
@@ -128,6 +134,9 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 197:
                 position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
+                break;
+            case 645:
+                position.set(Position.KEY_OBD_ODOMETER, readValue(buf, length, true) * 1000);
                 break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
