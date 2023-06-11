@@ -327,7 +327,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
                     positions.put(position.getDeviceId(), position);
                 }
             } catch (SQLException error) {
-                LOGGER.warn("Load latest positions error", error);
+                LOGGER.error("Load latest positions error", error);
             }
         }
     }
