@@ -108,6 +108,9 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 30:
                 position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
                 break;
+            case 32:
+                position.set(Position.KEY_DEVICE_TEMP, readValue(buf, length, true));
+                break;
             case 65:
                 position.set(Position.KEY_ODOMETER, readValue(buf, length, true));
                 break;
@@ -132,8 +135,21 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
                 }
                 break;
+            case 170:
+                position.set(Position.KEY_CHARGE, readValue(buf, length, false) > 0);
+                break;
             case 197:
                 position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
+                break;
+            case 410:
+                if (readValue(buf, length, false) > 0) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+                }
+                break;
+            case 411:
+                if (readValue(buf, length, false) > 0) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                }
                 break;
             case 645:
                 position.set(Position.KEY_OBD_ODOMETER, readValue(buf, length, true) * 1000);
