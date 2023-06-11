@@ -44,13 +44,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class RouteReportProvider {
 
     private final Config config;
     private final ReportUtils reportUtils;
     private final Storage storage;
+    private final Map<String, Integer> namesCount = new HashMap<>();
 
     @Inject
     public RouteReportProvider(Config config, ReportUtils reportUtils, Storage storage) {
@@ -69,12 +69,11 @@ public class RouteReportProvider {
         }
         return result;
     }
-    private final Map<String, Integer> uniqueSheetsTitle = new HashMap<>();
+
 
     private String getUniqueSheetName(String key) {
-        AtomicInteger atomic = new AtomicInteger(uniqueSheetsTitle.getOrDefault(key, -1));
-        uniqueSheetsTitle.put(key, atomic.incrementAndGet());
-        return (uniqueSheetsTitle.get(key) > 0 ? key + "-" + uniqueSheetsTitle.get(key) : key);
+        namesCount.compute(key, (k, value) -> (value == null) ? 1 : (value + 1));
+        return (namesCount.get(key) > 1 ? key + "-" + namesCount.get(key) : key);
     }
     public void getExcel(OutputStream outputStream,
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
