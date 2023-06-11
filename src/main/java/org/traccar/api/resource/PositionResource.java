@@ -44,15 +44,7 @@ public class PositionResource extends BaseResource {
             @QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to)
             throws SQLException {
-        if (!positionIds.isEmpty()) {
-            ArrayList<Position> positions = new ArrayList<>();
-            for (Long positionId : positionIds) {
-                Position position = Context.getDataManager().getObject(Position.class, positionId);
-                Context.getPermissionsManager().checkDevice(getUserId(), position.getDeviceId());
-                positions.add(position);
-            }
-            return positions;
-        } else if (deviceId == 0) {
+        if (deviceId == 0) {
             return Context.getDeviceManager().getInitialState(getUserId());
         } else {
             Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
