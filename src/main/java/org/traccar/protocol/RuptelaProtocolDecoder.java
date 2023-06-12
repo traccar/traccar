@@ -177,7 +177,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
             case 415:
-                if (readValue(buf, length, false) != 1) {
+                if (readValue(buf, length, false) == 0) {
                     position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
                 }
                 break;
