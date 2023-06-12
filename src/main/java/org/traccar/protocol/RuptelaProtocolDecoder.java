@@ -98,19 +98,19 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 3:
             case 4:
             case 5:
-                position.set("di" + (id - 1), readValue(buf, length, false));
+                position.set(Position.PREFIX_IN + (id - 1), readValue(buf, length, false));
                 break;
             case 20:
-                position.set("ai3", readValue(buf, length, false));
+                position.set(Position.PREFIX_ADC + 3, readValue(buf, length, false));
                 break;
             case 21:
-                position.set("ai4", readValue(buf, length, false));
+                position.set(Position.PREFIX_ADC + 4, readValue(buf, length, false));
                 break;
             case 22:
-                position.set("ai1", readValue(buf, length, false));
+                position.set(Position.PREFIX_ADC + 1, readValue(buf, length, false));
                 break;
             case 23:
-                position.set("ai2", readValue(buf, length, false));
+                position.set(Position.PREFIX_ADC + 2, readValue(buf, length, false));
                 break;
             case 29:
                 position.set(Position.KEY_POWER, readValue(buf, length, false));
