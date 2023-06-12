@@ -97,10 +97,20 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 2:
             case 3:
             case 4:
-                position.set("di" + (id - 1), readValue(buf, length, false));
-                break;
             case 5:
-                position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
+                position.set(Position.PREFIX_IN + (id - 1), readValue(buf, length, false));
+                break;
+            case 20:
+                position.set(Position.PREFIX_ADC + 3, readValue(buf, length, false));
+                break;
+            case 21:
+                position.set(Position.PREFIX_ADC + 4, readValue(buf, length, false));
+                break;
+            case 22:
+                position.set(Position.PREFIX_ADC + 1, readValue(buf, length, false));
+                break;
+            case 23:
+                position.set(Position.PREFIX_ADC + 2, readValue(buf, length, false));
                 break;
             case 29:
                 position.set(Position.KEY_POWER, readValue(buf, length, false));
@@ -122,6 +132,11 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 80:
                 position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
                 break;
+            case 88:
+                if (readValue(buf, length, false) > 0) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                }
+                break;
             case 95:
                 position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(readValue(buf, length, true)));
                 break;
@@ -135,11 +150,21 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
                 }
                 break;
+            case 150:
+                position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
+                break;
             case 170:
                 position.set(Position.KEY_CHARGE, readValue(buf, length, false) > 0);
                 break;
+            case 173:
+                position.set(Position.KEY_MOTION, readValue(buf, length, false) > 0);
+                break;
             case 197:
                 position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
+                break;
+            case 251:
+            case 409:
+                position.set(Position.KEY_IGNITION, readValue(buf, length, false) > 0);
                 break;
             case 410:
                 if (readValue(buf, length, false) > 0) {
@@ -151,8 +176,18 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
                 }
                 break;
+            case 415:
+                if (readValue(buf, length, false) == 0) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
+                }
+                break;
             case 645:
                 position.set(Position.KEY_OBD_ODOMETER, readValue(buf, length, true) * 1000);
+                break;
+            case 758:
+                if (readValue(buf, length, false) == 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                }
                 break;
             default:
                 position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
