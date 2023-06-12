@@ -99,9 +99,6 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 4:
                 position.set("di" + (id - 1), readValue(buf, length, false));
                 break;
-            case 5:
-                position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
-                break;
             case 29:
                 position.set(Position.KEY_POWER, readValue(buf, length, false));
                 break;
@@ -140,6 +137,10 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 197:
                 position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
+                break;
+            case 251:
+            case 409:
+                position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
                 break;
             case 410:
                 if (readValue(buf, length, false) > 0) {
