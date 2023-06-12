@@ -133,7 +133,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
                 break;
             case 88:
-                if (readValue(buf, length, false) == 1) {
+                if (readValue(buf, length, false) > 0) {
                     position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
                 }
                 break;
