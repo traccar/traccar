@@ -157,14 +157,14 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_CHARGE, readValue(buf, length, false) > 0);
                 break;
             case 173:
-                position.set(Position.KEY_MOTION, readValue(buf, length, false) == 1);
+                position.set(Position.KEY_MOTION, readValue(buf, length, false) > 0);
                 break;
             case 197:
                 position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
                 break;
             case 251:
             case 409:
-                position.set(Position.KEY_IGNITION, readValue(buf, length, false) == 1);
+                position.set(Position.KEY_IGNITION, readValue(buf, length, false) > 0);
                 break;
             case 410:
                 if (readValue(buf, length, false) > 0) {
