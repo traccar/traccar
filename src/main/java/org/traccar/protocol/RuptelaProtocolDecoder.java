@@ -92,6 +92,16 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeDriver(Position position, String part1, String part2) {
+        Long driverIdPart1 = (Long) position.getAttributes().remove(part1);
+        Long driverIdPart2 = (Long) position.getAttributes().remove(part2);
+        if (driverIdPart1 != null && driverIdPart2 != null) {
+            ByteBuf driverId = Unpooled.copyLong(driverIdPart1, driverIdPart2);
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, driverId.toString(StandardCharsets.US_ASCII));
+            driverId.release();
+        }
+    }
+
     private void decodeParameter(Position position, int id, ByteBuf buf, int length) {
         switch (id) {
             case 2:
@@ -277,21 +287,11 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     decodeParameter(position, id, buf, 8);
                 }
 
-                Long driverIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 126);
-                Long driverIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 127);
-                if (driverIdPart1 != null && driverIdPart2 != null) {
-                    ByteBuf driverId = Unpooled.copyLong(driverIdPart1, driverIdPart2);
-                    position.set(Position.KEY_DRIVER_UNIQUE_ID, driverId.toString(StandardCharsets.US_ASCII));
-                    driverId.release();
-                }
+                // CAN first driver ID
+                decodeDriver(position, Position.PREFIX_IO + 126, Position.PREFIX_IO + 127);
 
-                driverIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 155);
-                driverIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 156);
-                if (driverIdPart1 != null && driverIdPart2 != null) {
-                    ByteBuf driverId = Unpooled.copyLong(driverIdPart1, driverIdPart2);
-                    position.set(Position.KEY_DRIVER_UNIQUE_ID, driverId.toString(StandardCharsets.US_ASCII));
-                    driverId.release();
-                }
+                // TCO first driver ID
+                decodeDriver(position, Position.PREFIX_IO + 155, Position.PREFIX_IO + 156);
 
                 Long tagIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 760);
                 Long tagIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 761);
