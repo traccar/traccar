@@ -287,11 +287,8 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     decodeParameter(position, id, buf, 8);
                 }
 
-                // CAN first driver ID
-                decodeDriver(position, Position.PREFIX_IO + 126, Position.PREFIX_IO + 127);
-
-                // TCO first driver ID
-                decodeDriver(position, Position.PREFIX_IO + 155, Position.PREFIX_IO + 156);
+                decodeDriver(position, Position.PREFIX_IO + 126, Position.PREFIX_IO + 127); // can driver
+                decodeDriver(position, Position.PREFIX_IO + 155, Position.PREFIX_IO + 156); // tco driver
 
                 Long tagIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 760);
                 Long tagIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 761);
