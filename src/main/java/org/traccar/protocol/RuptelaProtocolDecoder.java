@@ -285,18 +285,18 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     driverId.release();
                 }
 
-                Long tcoDriverIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 155);
-                Long tcoDriverIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 156);
-                if (tcoDriverIdPart1 != null && tcoDriverIdPart2 != null) {
-                    ByteBuf driverId = Unpooled.copyLong(tcoDriverIdPart1, tcoDriverIdPart2);
+                driverIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 155);
+                driverIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 156);
+                if (driverIdPart1 != null && driverIdPart2 != null) {
+                    ByteBuf driverId = Unpooled.copyLong(driverIdPart1, driverIdPart2);
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, driverId.toString(StandardCharsets.US_ASCII));
                     driverId.release();
                 }
 
-                Long bleBeaconIdP1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 760);
-                Long bleBeaconIdP2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 761);
-                if (bleBeaconIdP1 != null && bleBeaconIdP2 != null) {
-                    position.set("bleBeaconId", Long.toHexString(bleBeaconIdP1) + Long.toHexString(bleBeaconIdP2));
+                Long tagIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 760);
+                Long tagIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 761);
+                if (tagIdPart1 != null && tagIdPart2 != null) {
+                    position.set("tagId", Long.toHexString(tagIdPart1) + Long.toHexString(tagIdPart2));
                 }
 
                 positions.add(position);
