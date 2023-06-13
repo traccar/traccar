@@ -293,12 +293,10 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     driverId.release();
                 }
 
-                Long bleBeaconIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 760);
-                Long bleBeaconIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 761);
-                if (bleBeaconIdPart1 != null && bleBeaconIdPart2 != null) {
-                    ByteBuf bleBeaconId = Unpooled.copyLong(bleBeaconIdPart1, bleBeaconIdPart2);
-                    position.set("bleBeaconId", bleBeaconId.toString(StandardCharsets.US_ASCII));
-                    bleBeaconId.release();
+                Long bleBeaconIdP1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 760);
+                Long bleBeaconIdP2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 761);
+                if (bleBeaconIdP1 != null && bleBeaconIdP2 != null) {
+                    position.set("bleBeaconId", Long.toHexString(bleBeaconIdP1) + Long.toHexString(bleBeaconIdP2));
                 }
 
                 positions.add(position);
