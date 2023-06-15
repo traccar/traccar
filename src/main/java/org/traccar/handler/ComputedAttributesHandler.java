@@ -65,6 +65,14 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         JexlSandbox sandbox = new JexlSandbox(false);
         sandbox.allow("com.safe.Functions");
         sandbox.allow(Math.class.getName());
+        sandbox.allow(Double.class.getName());
+        sandbox.allow(Float.class.getName());
+        sandbox.allow(Integer.class.getName());
+        sandbox.allow(Long.class.getName());
+        sandbox.allow(Short.class.getName());
+        sandbox.allow(Character.class.getName());
+        sandbox.allow(Boolean.class.getName());
+        sandbox.allow(String.class.getName());
         features = new JexlFeatures()
                 .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
                 .loops(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOOPS))
