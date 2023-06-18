@@ -223,6 +223,9 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
+        if (filterDailyLimit(position)) {
+            filterType.append("DailyLimit ");
+        }
 
         // filter out excessive data
         long deviceId = position.getDeviceId();
