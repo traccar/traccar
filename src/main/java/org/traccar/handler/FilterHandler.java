@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Device;
@@ -57,15 +58,18 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
     private final int filterDistance;
     private final int filterMaxSpeed;
     private final long filterMinPeriod;
+    private final int filterDailyLimit;
     private final boolean filterRelative;
     private final long skipLimit;
     private final boolean skipAttributes;
 
     private final CacheManager cacheManager;
     private final Storage storage;
+    private final StatisticsManager statisticsManager;
 
     @Inject
-    public FilterHandler(Config config, CacheManager cacheManager, Storage storage) {
+    public FilterHandler(
+            Config config, CacheManager cacheManager, Storage storage, StatisticsManager statisticsManager) {
         enabled = config.getBoolean(Keys.FILTER_ENABLE);
         filterInvalid = config.getBoolean(Keys.FILTER_INVALID);
         filterZero = config.getBoolean(Keys.FILTER_ZERO);
@@ -79,11 +83,13 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
         filterDistance = config.getInteger(Keys.FILTER_DISTANCE);
         filterMaxSpeed = config.getInteger(Keys.FILTER_MAX_SPEED);
         filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000L;
+        filterDailyLimit = config.getInteger(Keys.FILTER_DAILY_LIMIT);
         filterRelative = config.getBoolean(Keys.FILTER_RELATIVE);
         skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
         skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
         this.cacheManager = cacheManager;
         this.storage = storage;
+        this.statisticsManager = statisticsManager;
     }
 
     private Position getPrecedingPosition(long deviceId, Date date) throws StorageException {
@@ -161,6 +167,13 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
         if (filterMinPeriod != 0 && last != null) {
             long time = position.getFixTime().getTime() - last.getFixTime().getTime();
             return time > 0 && time < filterMinPeriod;
+        }
+        return false;
+    }
+
+    private boolean filterDailyLimit(Position position) {
+        if (filterDailyLimit != 0) {
+            return statisticsManager.messageStoredCount(position.getDeviceId()) >= filterDailyLimit;
         }
         return false;
     }

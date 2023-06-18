@@ -29,7 +29,7 @@ public class FilterHandlerTest extends BaseTest {
         when(config.getBoolean(Keys.FILTER_ENABLE)).thenReturn(true);
         var cacheManager = mock(CacheManager.class);
         when(cacheManager.getConfig()).thenReturn(config);
-        passingHandler = new FilterHandler(config, cacheManager, null);
+        passingHandler = new FilterHandler(config, cacheManager, null, null);
     }
 
     @BeforeEach
@@ -50,7 +50,7 @@ public class FilterHandlerTest extends BaseTest {
         var cacheManager = mock(CacheManager.class);
         when(cacheManager.getConfig()).thenReturn(config);
         when(cacheManager.getObject(any(), anyLong())).thenReturn(mock(Device.class));
-        filteringHandler = new FilterHandler(config, cacheManager, null);
+        filteringHandler = new FilterHandler(config, cacheManager, null, null);
     }
 
     private Position createPosition(Date time, boolean valid, double speed) {

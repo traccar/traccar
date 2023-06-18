@@ -58,6 +58,7 @@ public class StatisticsManager {
 
     private final Set<Long> users = new HashSet<>();
     private final Map<Long, String> deviceProtocols = new HashMap<>();
+    private final Map<Long, Integer> deviceMessages = new HashMap<>();
 
     private int requests;
     private int messagesReceived;
@@ -101,6 +102,7 @@ public class StatisticsManager {
 
                 users.clear();
                 deviceProtocols.clear();
+                deviceMessages.clear();
                 requests = 0;
                 messagesReceived = 0;
                 messagesStored = 0;
@@ -163,7 +165,12 @@ public class StatisticsManager {
         messagesStored += 1;
         if (deviceId != 0) {
             deviceProtocols.put(deviceId, protocol);
+            deviceMessages.merge(deviceId, 1, Integer::sum);
         }
+    }
+
+    public synchronized int messageStoredCount(long deviceId) {
+        return deviceMessages.getOrDefault(deviceId, 0);
     }
 
     public synchronized void registerMail() {

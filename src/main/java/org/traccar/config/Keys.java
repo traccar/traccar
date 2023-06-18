@@ -1328,6 +1328,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Filter position if the daily limit is exceeded for the device.
+     */
+    public static final ConfigKey<Integer> FILTER_DAILY_LIMIT = new IntegerConfigKey(
+            "filter.dailyLimit",
+            List.of(KeyType.CONFIG));
+
+    /**
      * If false, the server expects all locations to come sequentially (for each device). Filter checks for duplicates,
      * distance, speed, or time period only against the location that was last received by server.
      * If true, the server expects locations to come at random order (since tracking device might go offline).
