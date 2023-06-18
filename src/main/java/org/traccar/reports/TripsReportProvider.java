@@ -20,7 +20,6 @@ import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.DeviceUtil;
-import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.common.ReportUtils;
@@ -56,12 +55,6 @@ public class TripsReportProvider {
         this.storage = storage;
     }
 
-    private Collection<TripReportItem> detectTrips(Device device, Date from, Date to) throws StorageException {
-        boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
-        var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
-        return reportUtils.detectTripsAndStops(device, positions, ignoreOdometer, TripReportItem.class);
-    }
-
     public Collection<TripReportItem> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
@@ -69,7 +62,7 @@ public class TripsReportProvider {
 
         ArrayList<TripReportItem> result = new ArrayList<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            result.addAll(detectTrips(device, from, to));
+            result.addAll(reportUtils.detectTripsAndStops(device, from, to, TripReportItem.class));
         }
         return result;
     }
@@ -82,7 +75,7 @@ public class TripsReportProvider {
         ArrayList<DeviceReportSection> devicesTrips = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            Collection<TripReportItem> trips = detectTrips(device, from, to);
+            Collection<TripReportItem> trips = reportUtils.detectTripsAndStops(device, from, to, TripReportItem.class);
             DeviceReportSection deviceTrips = new DeviceReportSection();
             deviceTrips.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceTrips.getDeviceName()));

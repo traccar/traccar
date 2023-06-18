@@ -9,7 +9,7 @@ write_files:
         <entry key="config.default">./conf/default.xml</entry>
   
         <entry key='database.driver'>com.mysql.jdbc.Driver</entry>
-        <entry key='database.url'>jdbc:mysql://localhost/traccar?serverTimezone=UTC&amp;allowPublicKeyRetrieval=true&amp;useSSL=false&amp;allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>
+        <entry key='database.url'>jdbc:mysql://localhost/traccar?zeroDateTimeBehavior=round&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true&amp;useSSL=false&amp;allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>
         <entry key='database.user'>root</entry>
         <entry key='database.password'>root</entry>
 

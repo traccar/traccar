@@ -373,14 +373,15 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> EVENT_MOTION_PROCESS_INVALID_POSITIONS = new BooleanConfigKey(
             "event.motion.processInvalidPositions",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            false);
 
     /**
      * If the speed is above specified value, the object is considered to be in motion. Default value is 0.01 knots.
      */
     public static final ConfigKey<Double> EVENT_MOTION_SPEED_THRESHOLD = new DoubleConfigKey(
             "event.motion.speedThreshold",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             0.01);
 
     /**
@@ -753,12 +754,19 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * WebSocket connection timeout in milliseconds. Default timeout is 10 minutes.
+     * Path to a folder with overrides. It can be used for branding to keep custom logos in a separate place.
+     */
+    public static final ConfigKey<String> WEB_OVERRIDE = new StringConfigKey(
+            "web.override",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * WebSocket connection timeout in milliseconds. Default timeout is 5 minutes.
      */
     public static final ConfigKey<Long> WEB_TIMEOUT = new LongConfigKey(
             "web.timeout",
             List.of(KeyType.CONFIG),
-            60000L);
+            300000L);
 
     /**
      * Authentication sessions timeout in seconds. By default no timeout.
@@ -1163,11 +1171,20 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Time threshold for fast reports. Fast reports are more efficient, but less accurate and missing some information.
+     * The value is in seconds. One day by default.
+     */
+    public static final ConfigKey<Long> REPORT_FAST_THRESHOLD = new LongConfigKey(
+            "report.fastThreshold",
+            List.of(KeyType.CONFIG),
+            86400L);
+
+    /**
      * Trips less than minimal duration and minimal distance are ignored. 300 seconds and 500 meters are default.
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DISTANCE = new LongConfigKey(
             "report.trip.minimalTripDistance",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             500L);
 
     /**
@@ -1175,7 +1192,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DURATION = new LongConfigKey(
             "report.trip.minimalTripDuration",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             300L);
 
     /**
@@ -1183,7 +1200,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_PARKING_DURATION = new LongConfigKey(
             "report.trip.minimalParkingDuration",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             300L);
 
     /**
@@ -1191,7 +1208,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_NO_DATA_DURATION = new LongConfigKey(
             "report.trip.minimalNoDataDuration",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             3600L);
 
     /**
@@ -1199,7 +1216,8 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> REPORT_TRIP_USE_IGNITION = new BooleanConfigKey(
             "report.trip.useIgnition",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            false);
 
     /**
      * Ignore odometer value reported by the device and use server-calculated total distance instead. This is useful
@@ -1207,7 +1225,8 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> REPORT_IGNORE_ODOMETER = new BooleanConfigKey(
             "report.ignoreOdometer",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            false);
 
     /**
      * Boolean flag to enable or disable position filtering.
@@ -1737,6 +1756,14 @@ public final class Keys {
             "time,position,speed,course,accuracy,result");
 
     /**
+     * Broadcast method. Available options are "multicast" and "redis". By default (if the value is not
+     * specified or does not matches available options) server disables broadcast.
+     */
+    public static final ConfigKey<String> BROADCAST_TYPE = new StringConfigKey(
+            "broadcast.type",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Multicast interface. It can be either an IP address or an interface name.
      */
     public static final ConfigKey<String> BROADCAST_INTERFACE = new StringConfigKey(
@@ -1744,7 +1771,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Multicast address for broadcasting synchronization events.
+     * Multicast address or Redis URL for broadcasting synchronization events.
      */
     public static final ConfigKey<String> BROADCAST_ADDRESS = new StringConfigKey(
             "broadcast.address",

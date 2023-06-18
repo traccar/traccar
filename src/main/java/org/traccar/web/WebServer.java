@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.EnumSet;
 
 public class WebServer implements LifecycleObject {
@@ -103,14 +100,8 @@ public class WebServer implements LifecycleObject {
             @Override
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
-                Path index = Paths.get(config.getString(Keys.WEB_PATH), "index.html");
-                if (code == HttpStatus.NOT_FOUND_404
-                        && !request.getPathInfo().startsWith("/api/") && Files.exists(index)) {
-                    writer.write(Files.readString(index));
-                } else {
-                    writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
-                            + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
-                }
+                writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
+                        + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
             }
         });
 
@@ -150,7 +141,7 @@ public class WebServer implements LifecycleObject {
     }
 
     private void initWebApp(ServletContextHandler servletHandler) {
-        ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
+        ServletHolder servletHolder = new ServletHolder(new ModernDefaultServlet(config));
         servletHolder.setInitParameter("resourceBase", new File(config.getString(Keys.WEB_PATH)).getAbsolutePath());
         servletHolder.setInitParameter("dirAllowed", "false");
         if (config.getBoolean(Keys.WEB_DEBUG)) {

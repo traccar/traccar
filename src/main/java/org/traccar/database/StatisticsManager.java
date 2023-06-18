@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.api.security.ServiceAccountUser;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
@@ -147,7 +148,7 @@ public class StatisticsManager {
     public synchronized void registerRequest(long userId) {
         checkSplit();
         requests += 1;
-        if (userId != 0) {
+        if (userId != 0 && userId != ServiceAccountUser.ID) {
             users.add(userId);
         }
     }

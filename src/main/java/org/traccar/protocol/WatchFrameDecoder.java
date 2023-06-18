@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,14 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ']') + 1;
+        int endIndex = -1;
+        for (int i = buf.writerIndex() - 1; i >= buf.readerIndex(); i--) {
+            if (buf.getByte(i) == ']') {
+                endIndex = i + 1;
+                break;
+            }
+        }
+
         if (endIndex > 0) {
             ByteBuf frame = Unpooled.buffer();
             while (buf.readerIndex() < endIndex) {
