@@ -238,7 +238,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
                 if (type == MSG_EXTENDED_RECORDS) {
                     int recordExtension = buf.readUnsignedByte();
-                    int mergeRecordCount = BitUtil.between(recordExtension, 4, 8);
+                    int mergeRecordCount = BitUtil.from(recordExtension, 4);
                     int currentRecord = BitUtil.to(recordExtension, 4);
 
                     if (currentRecord > 0 && currentRecord <= mergeRecordCount) {
