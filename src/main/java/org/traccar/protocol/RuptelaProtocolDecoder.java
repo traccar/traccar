@@ -241,7 +241,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     int noRecordsToMerge = BitUtil.between(recordExtension, 4, 8);
                     int currentRecord = BitUtil.to(recordExtension, 4);
 
-                    if (currentRecord > 0 && noRecordsToMerge >= currentRecord) {
+                    if (currentRecord > 0 && currentRecord <= noRecordsToMerge) {
                         if (!positions.isEmpty()
                                 && positions.get(positions.size() - 1).getDeviceTime()
                                    .compareTo(position.getDeviceTime()) == 0) {
