@@ -124,7 +124,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + 2, readValue(buf, length, false));
                 break;
             case 29:
-                position.set(Position.KEY_POWER, readValue(buf, length, false));
+                position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
                 break;
             case 30:
                 position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
