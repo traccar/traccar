@@ -22,6 +22,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
@@ -236,9 +237,9 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // timestamp extension
 
                 if (type == MSG_EXTENDED_RECORDS) {
-                    int b = buf.readUnsignedByte(); // record extension
-                    int noRecordsToMerge = (b & 0xf0) >> 4;
-                    int currentRecord = b & 0x0f;
+                    int recordExtension = buf.readUnsignedByte(); // record extension
+                    int noRecordsToMerge = BitUtil.between(recordExtension, 4, 8);
+                    int currentRecord = BitUtil.to(recordExtension, 4);
 
                     if (currentRecord > 0 && noRecordsToMerge >= currentRecord) {
                         if (!positions.isEmpty()
@@ -247,7 +248,6 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                             position = positions.remove(positions.size() - 1);
                         }
                     }
-
                 }
 
                 buf.readUnsignedByte(); // priority (reserved)
