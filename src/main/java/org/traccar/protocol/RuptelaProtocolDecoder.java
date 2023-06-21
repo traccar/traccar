@@ -238,15 +238,11 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
                 if (type == MSG_EXTENDED_RECORDS) {
                     int recordExtension = buf.readUnsignedByte();
-                    int noRecordsToMerge = BitUtil.between(recordExtension, 4, 8);
+                    int mergeRecordCount = BitUtil.between(recordExtension, 4, 8);
                     int currentRecord = BitUtil.to(recordExtension, 4);
 
-                    if (currentRecord > 0 && currentRecord <= noRecordsToMerge) {
-                        if (!positions.isEmpty()
-                                && positions.get(positions.size() - 1).getDeviceTime()
-                                   .compareTo(position.getDeviceTime()) == 0) {
-                            position = positions.remove(positions.size() - 1);
-                        }
+                    if (currentRecord > 0 && currentRecord <= mergeRecordCount) {
+                        position = positions.remove(positions.size() - 1);
                     }
                 }
 
