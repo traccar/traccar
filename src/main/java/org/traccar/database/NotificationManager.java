@@ -63,11 +63,11 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
     }
 
     public void updateEvent(Event event, Position position) {
-        try {
+        /*try {
             getDataManager().addObject(event);
         } catch (SQLException error) {
             LOGGER.warn("Event save error", error);
-        }
+        }*/
 
         if (position != null && geocodeOnRequest && Context.getGeocoder() != null && position.getAddress() == null) {
             position.setAddress(Context.getGeocoder()
