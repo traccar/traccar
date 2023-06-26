@@ -57,7 +57,7 @@ public class PositionResource extends BaseResource {
             }
             return positions;
         } else if (!positionIds.isEmpty()) {
-            LOGGER.warn("/positions without deviceId shouldn't happen first userId {}, positionId {}", getUserId(), positionIds.get(0));
+            LOGGER.warn("/positions without deviceId, userId {}, positionId {}", getUserId(), positionIds.get(0));
             ArrayList<Position> positions = new ArrayList<>();
             for (Long positionId : positionIds) {
                 Position position = Context.getDataManager().getObject(Position.class, positionId);
