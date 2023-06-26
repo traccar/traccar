@@ -15,6 +15,8 @@
  */
 package org.traccar.api.resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Position;
@@ -38,13 +40,24 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class PositionResource extends BaseResource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PositionResource.class);
+
 
     @GET
     public Collection<Position> getJson(
             @QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
             @QueryParam("from") Date from, @QueryParam("to") Date to)
             throws SQLException {
-        if (!positionIds.isEmpty()) {
+        if (!positionIds.isEmpty() && deviceId != 0) {
+            ArrayList<Position> positions = new ArrayList<>();
+            for (Long positionId : positionIds) {
+                Position position = Context.getDataManager().getPosition(deviceId, positionId);
+                Context.getPermissionsManager().checkDevice(getUserId(), position.getDeviceId());
+                positions.add(position);
+            }
+            return positions;
+        } else if (!positionIds.isEmpty()) {
+            LOGGER.warn("/positions without deviceId shouldn't happen first pos {}", positionIds.get(0));
             ArrayList<Position> positions = new ArrayList<>();
             for (Long positionId : positionIds) {
                 Position position = Context.getDataManager().getObject(Position.class, positionId);
