@@ -367,7 +367,7 @@ public class DataManager {
     }
 
     public Position getPosition(long deviceId, long positionId) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectPosition"))
+        return QueryBuilder.create(dataSource, getQuery("database.selectPositionByDevice"))
                 .setLong("deviceId", deviceId)
                 .setLong("positionId", positionId)
                 .executeQuerySingle(Position.class);
