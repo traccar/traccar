@@ -164,7 +164,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                         for (int j = 0; j < cellCount; j++) {
                             network.addCellTower(CellTower.from(
                                     buf.readUnsignedShort(), buf.readUnsignedShort(),
-                                    buf.readInt(), buf.readUnsignedInt(), buf.readUnsignedByte()));
+                                    buf.readInt(), buf.readUnsignedInt(), buf.readByte()));
                         }
                     }
                     if (network.getWifiAccessPoints() != null || network.getCellTowers() != null) {
