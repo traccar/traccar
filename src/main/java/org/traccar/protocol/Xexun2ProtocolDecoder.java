@@ -156,7 +156,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                         for (int j = 0; j < wifiCount; j++) {
                             String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
                             network.addWifiAccessPoint(WifiAccessPoint.from(
-                                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
+                                    mac.substring(0, mac.length() - 1), buf.readByte()));
                         }
                     }
                     if (BitUtil.check(positionMask, 2)) {
