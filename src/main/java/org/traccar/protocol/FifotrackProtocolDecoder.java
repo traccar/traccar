@@ -235,8 +235,8 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.setValid(parser.next().equals("A"));
             position.setFixTime(position.getDeviceTime());
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.setLatitude(parser.nextDouble());
             position.setLongitude(parser.nextDouble());
 
