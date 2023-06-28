@@ -1191,11 +1191,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        /*
-        Ecuatrack
-COMB,0,94.0,-1.0,,,HDC
-         */
-
         String data = Unpooled.wrappedBuffer(DataConverter.parseHex(parser.next()))
                 .toString(StandardCharsets.US_ASCII);
         if (data.contains("COMB")) {
