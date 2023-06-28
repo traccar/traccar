@@ -151,7 +151,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, remoteAddress, index, type, buf);
         }
 
-        if (type == MSG_DATA) {
+        if (type == MSG_DATA || type == MSG_SERVICES) {
 
             List<Position> positions = new LinkedList<>();
             Set<Integer> keys = new HashSet<>();
