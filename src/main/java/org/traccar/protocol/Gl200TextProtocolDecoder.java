@@ -15,7 +15,9 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.DataConverter;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -361,6 +363,21 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,2}),,,")               // fatigue degree
             .expression(PATTERN_LOCATION.pattern())
             .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private static final Pattern PATTERN_DTT = new PatternBuilder()
+            .text("+RESP:GTDTT,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,,,")              // device name
+            .number("d,")                        // data type
+            .number("d+,")                       // data length
+            .number("(x+),")                     // data
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
             .text(",")
@@ -1165,6 +1182,34 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Object decodeDtt(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_DTT, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        getLastLocation(position, null);
+
+        /*
+        Ecuatrack
+COMB,0,94.0,-1.0,,,HDC
+         */
+
+        String data = Unpooled.wrappedBuffer(DataConverter.parseHex(parser.next()))
+                .toString(StandardCharsets.US_ASCII);
+        if (data.contains("COMB")) {
+            String[] values = data.split(",");
+            position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(values[2]));
+        } else {
+            position.set(Position.KEY_RESULT, data);
+        }
+
+        decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
@@ -1358,6 +1403,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "DAR":
                     result = decodeDar(channel, remoteAddress, sentence);
+                    break;
+                case "DTT":
+                    result = decodeDtt(channel, remoteAddress, sentence);
                     break;
                 default:
                     result = decodeOther(channel, remoteAddress, sentence, type);
