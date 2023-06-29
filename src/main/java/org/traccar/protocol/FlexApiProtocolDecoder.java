@@ -41,6 +41,10 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
         String message = (String) msg;
         try {
 
+            var completed = message.startsWith("$") && message.length() > 3 && message.charAt(message.length() - 3) == '}';
+            if (!completed) {
+                return null;
+            }
             JsonObject root = Json.createReader(new StringReader(message.substring(1, message.length() - 2))).readObject();
             String topic = root.getString("topic");
             String clientId = topic.substring(3, topic.indexOf('/', 3));
