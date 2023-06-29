@@ -66,45 +66,45 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
                     getLastLocation(position, new Date(payload.getInt("time") * 1000L));
                     position.setTime(new Date(payload.getInt("time") * 1000L));
                 } else {
-                    getLastLocation(position, new Date(payload.getInt("gnss.ts") * 1000L));
-                    position.setTime(new Date(payload.getInt("gnss.ts") * 1000L));
+                    getLastLocation(position, new Date(payload.getInt("gnss.ul_ts") * 1000L));
+                    position.setTime(new Date(payload.getInt("gnss.ul_ts") * 1000L));
                 }
                 parseGnss(position, payload);
             } else if (topic.contains("/cellular1/")) {
-                if (payload.containsKey("modem1.ts")) {
-                    getLastLocation(position, new Date(payload.getInt("modem1.ts") * 1000L));
-                    position.setTime(new Date(payload.getInt("modem1.ts") * 1000L));
+                if (payload.containsKey("modem1.ul_ts")) {
+                    getLastLocation(position, new Date(payload.getInt("modem1.ul_ts") * 1000L));
+                    position.setTime(new Date(payload.getInt("modem1.ul_ts") * 1000L));
                 }
                 parseCellular(position, payload);
             } else if (topic.contains("/obd/")) {
-                if (payload.containsKey("obd.ts")) {
-                    getLastLocation(position, new Date(payload.getInt("obd.ts") * 1000L));
-                    position.setTime(new Date(payload.getInt("obd.ts") * 1000L));
+                if (payload.containsKey("obd.ul_ts")) {
+                    getLastLocation(position, new Date(payload.getInt("obd.ul_ts") * 1000L));
+                    position.setTime(new Date(payload.getInt("obd.ul_ts") * 1000L));
                 }
                 parseObd(position, payload);
             } else if (topic.contains("/motion/")) {
-                if (payload.containsKey("motion.ts")) {
-                    getLastLocation(position, new Date(payload.getInt("motion.ts") * 1000L));
-                    position.setTime(new Date(payload.getInt("motion.ts") * 1000L));
+                if (payload.containsKey("motion.ul_ts")) {
+                    getLastLocation(position, new Date(payload.getInt("motion.ul_ts") * 1000L));
+                    position.setTime(new Date(payload.getInt("motion.ul_ts") * 1000L));
                 }
                 parseMotion(position, payload);
             } else if (topic.contains("/io/")) {
-                if (payload.containsKey("io.ts")) {
-                    getLastLocation(position, new Date(payload.getInt("io.ts") * 1000L));
-                    position.setTime(new Date(payload.getInt("io.ts") * 1000L));
+                if (payload.containsKey("io.ul_ts")) {
+                    getLastLocation(position, new Date(payload.getInt("io.ul_ts") * 1000L));
+                    position.setTime(new Date(payload.getInt("io.ul_ts") * 1000L));
                 }
                 parseIO(position, payload);
 
             } else if (topic.contains("/sysinfo/")) {
 
-                getLastLocation(position, new Date(payload.getInt("sysinfo.ts") * 1000L));
-                position.setTime(new Date(payload.getInt("sysinfo.ts") * 1000L));
+                getLastLocation(position, new Date(payload.getInt("sysinfo.ul_ts") * 1000L));
+                position.setTime(new Date(payload.getInt("sysinfo.ul_ts") * 1000L));
                 position.set("serial", payload.getString("sysinfo.serial_number"));
                 position.set(Position.KEY_VERSION_FW, payload.getString("sysinfo.firmware_version"));
 
             } else if (topic.contains("/summary/")) {
-                getLastLocation(position, new Date(payload.getInt("summary.ts") * 1000L));
-                position.setTime(new Date(payload.getInt("summary.ts") * 1000L));
+                getLastLocation(position, new Date(payload.getInt("summary.ul_ts") * 1000L));
+                position.setTime(new Date(payload.getInt("summary.ul_ts") * 1000L));
                 parseIO(position, payload);
                 parseObd(position, payload);
                 parseCellular(position, payload);
@@ -122,6 +122,7 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
             }
             return position;
         } catch (Exception e) {
+
             e.printStackTrace();
         }
         Position position = new Position(getProtocolName());
@@ -178,7 +179,6 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ICCID, payload.getString("modem1.iccid"));
         }
 
-    
 
         if (payload.containsKey("modem1.operator")) {
             String operator = payload.getString("modem1.operator");
@@ -214,6 +214,7 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
         }
 
     }
+
     private void parseObd(Position position, JsonObject payload) {
         if (payload.containsKey("obd.speed")) {
             position.set(Position.KEY_OBD_SPEED, payload.getJsonNumber("obd.speed").doubleValue());
