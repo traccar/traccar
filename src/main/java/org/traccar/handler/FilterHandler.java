@@ -25,6 +25,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.helper.model.AttributeUtil;
+import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
@@ -259,9 +260,16 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
             }
         }
 
+        Device device = cacheManager.getObject(Device.class, deviceId);
+        if (device.getCalendarId() > 0) {
+            Calendar calendar = cacheManager.getObject(Calendar.class, device.getCalendarId());
+            if (!calendar.checkMoment(position.getFixTime())) {
+                filterType.append("Calendar ");
+            }
+        }
+
         if (filterType.length() > 0) {
-            String uniqueId = cacheManager.getObject(Device.class, deviceId).getUniqueId();
-            LOGGER.info("Position filtered by {}filters from device: {}", filterType, uniqueId);
+            LOGGER.info("Position filtered by {}filters from device: {}", filterType, device.getUniqueId());
             return true;
         }
 
