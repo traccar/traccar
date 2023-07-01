@@ -739,6 +739,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Maximum API request duration in seconds.
+     */
+    public static final ConfigKey<Integer> WEB_MAX_REQUEST_SECONDS = new IntegerConfigKey(
+            "web.maxRequestSec",
+            List.of(KeyType.CONFIG),
+            600);
+
+    /**
      * Sanitize all strings returned via API. This is needed to fix XSS issues in the old web interface. New React-based
      * interface doesn't require this.
      */
