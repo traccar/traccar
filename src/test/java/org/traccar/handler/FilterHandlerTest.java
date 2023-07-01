@@ -29,6 +29,7 @@ public class FilterHandlerTest extends BaseTest {
         when(config.getBoolean(Keys.FILTER_ENABLE)).thenReturn(true);
         var cacheManager = mock(CacheManager.class);
         when(cacheManager.getConfig()).thenReturn(config);
+        when(cacheManager.getObject(any(), anyLong())).thenReturn(mock(Device.class));
         passingHandler = new FilterHandler(config, cacheManager, null, null);
     }
 
