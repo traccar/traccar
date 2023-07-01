@@ -45,6 +45,11 @@ public class OverrideFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
+        if (((HttpServletRequest) request).getServletPath().startsWith("/api")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         ResponseWrapper wrappedResponse = new ResponseWrapper((HttpServletResponse) response);
 
         chain.doFilter(request, wrappedResponse);
