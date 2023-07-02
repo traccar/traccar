@@ -1154,6 +1154,104 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static final Pattern PATTERN_BAA = new PatternBuilder()
+            .text("+RESP:GTBAA,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("x+,")                       // index
+            .number("d,")                        // accessory type
+            .number("d,")                        // accessory model
+            .number("x+,")                       // alarm type
+            .number("(x{4}),")                   // append mask
+            .expression("((?:[^,]+,){0,6})")     // accessory optionals
+            .expression(PATTERN_LOCATION.pattern())
+            .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private Object decodeBaa(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_BAA, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        int mask = parser.nextHexInt();
+        String[] values = parser.next().split(",");
+        int index = 0;
+        if (BitUtil.check(mask, 0)) {
+            position.set("accessoryName", values[index++]);
+        }
+        if (BitUtil.check(mask, 1)) {
+            position.set("accessoryMac", values[index++]);
+        }
+        if (BitUtil.check(mask, 2)) {
+            position.set("accessoryStatus", Integer.parseInt(values[index++]));
+        }
+        if (BitUtil.check(mask, 3)) {
+            position.set("accessoryVoltage", Integer.parseInt(values[index++]) * 0.001);
+        }
+        if (BitUtil.check(mask, 4)) {
+            position.set("accessoryTemp", Integer.parseInt(values[index++]));
+        }
+        if (BitUtil.check(mask, 5)) {
+            position.set("accessoryHumidity", Integer.parseInt(values[index]));
+        }
+
+        decodeLocation(position, parser);
+
+        decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
+    private static final Pattern PATTERN_BID = new PatternBuilder()
+            .text("+RESP:GTBID,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("d,")                        // count
+            .number("d,")                        // accessory model
+            .number("(x{4}),")                   // append mask
+            .expression("((?:[^,]+,){0,2})")     // accessory optionals
+            .expression(PATTERN_LOCATION.pattern())
+            .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private Object decodeBid(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_BID, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        int mask = parser.nextHexInt();
+        String[] values = parser.next().split(",");
+        int index = 0;
+        if (BitUtil.check(mask, 1)) {
+            position.set("accessoryMac", values[index++]);
+        }
+        if (BitUtil.check(mask, 3)) {
+            position.set("accessoryVoltage", Integer.parseInt(values[index]) * 0.001);
+        }
+
+        decodeLocation(position, parser);
+
+        decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
     private static final Pattern PATTERN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
@@ -1401,6 +1499,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "DTT":
                     result = decodeDtt(channel, remoteAddress, sentence);
+                    break;
+                case "BAA":
+                    result = decodeBaa(channel, remoteAddress, sentence);
+                    break;
+                case "BID":
+                    result = decodeBid(channel, remoteAddress, sentence);
                     break;
                 default:
                     result = decodeOther(channel, remoteAddress, sentence, type);
