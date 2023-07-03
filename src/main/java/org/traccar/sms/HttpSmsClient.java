@@ -57,7 +57,10 @@ public class HttpSmsClient implements SmsManager {
             }
         }
         template = config.getString(Keys.SMS_HTTP_TEMPLATE).trim();
-        if (template.charAt(0) == '{' || template.charAt(0) == '[') {
+        if (template.charAt(0) == '<') {
+            encode = false;
+            mediaType = MediaType.APPLICATION_XML_TYPE;
+        } else if (template.charAt(0) == '{' || template.charAt(0) == '[') {
             encode = false;
             mediaType = MediaType.APPLICATION_JSON_TYPE;
         } else {

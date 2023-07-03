@@ -45,6 +45,7 @@ dependencies {
     implementation "commons-codec:commons-codec:1.15"
     implementation "com.h2database:h2:2.1.214"
     implementation "com.mysql:mysql-connector-j:8.0.33"
+    implementation "org.mariadb.jdbc:mariadb-java-client:3.1.4"
     implementation "org.postgresql:postgresql:42.6.0"
     implementation "com.microsoft.sqlserver:mssql-jdbc:12.2.0.jre11"
     implementation "com.zaxxer:HikariCP:5.0.1"

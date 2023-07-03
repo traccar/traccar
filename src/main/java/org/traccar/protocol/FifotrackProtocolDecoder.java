@@ -64,7 +64,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // course
             .number("(-?d+),")                   // altitude
             .number("(d+),")                     // odometer
-            .number("d+,")                       // runtime
+            .number("(d+),")                     // engine hours
             .number("(x+),")                     // status
             .number("(x+)?,")                    // input
             .number("(x+)?,")                    // output
@@ -235,8 +235,8 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.setValid(parser.next().equals("A"));
             position.setFixTime(position.getDeviceTime());
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.setLatitude(parser.nextDouble());
             position.setLongitude(parser.nextDouble());
 
@@ -290,6 +290,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextInt());
 
         position.set(Position.KEY_ODOMETER, parser.nextLong());
+        position.set(Position.KEY_HOURS, parser.nextLong() * 1000);
 
         long status = parser.nextHexLong();
         position.set(Position.KEY_RSSI, BitUtil.between(status, 3, 8));

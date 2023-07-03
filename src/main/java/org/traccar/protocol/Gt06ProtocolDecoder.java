@@ -828,6 +828,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
+            if (type == MSG_STATUS && variant == Variant.VXT01) {
+                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+            }
+
             if (type == MSG_GPS_LBS_1) {
                 if (variant == Variant.GT06E_CARD) {
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
@@ -1407,6 +1412,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x24) {
             variant = Variant.VXT01;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x24) {
+            variant = Variant.VXT01;
+        } else if (header == 0x7878 && type == MSG_STATUS && length == 0x0a) {
             variant = Variant.VXT01;
         } else if (header == 0x7878 && type == MSG_LBS_MULTIPLE_3 && length == 0x31) {
             variant = Variant.WANWAY_S20;

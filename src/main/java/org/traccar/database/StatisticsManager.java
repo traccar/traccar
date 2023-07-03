@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.api.security.ServiceAccountUser;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
@@ -57,6 +58,7 @@ public class StatisticsManager {
 
     private final Set<Long> users = new HashSet<>();
     private final Map<Long, String> deviceProtocols = new HashMap<>();
+    private final Map<Long, Integer> deviceMessages = new HashMap<>();
 
     private int requests;
     private int messagesReceived;
@@ -100,6 +102,7 @@ public class StatisticsManager {
 
                 users.clear();
                 deviceProtocols.clear();
+                deviceMessages.clear();
                 requests = 0;
                 messagesReceived = 0;
                 messagesStored = 0;
@@ -147,7 +150,7 @@ public class StatisticsManager {
     public synchronized void registerRequest(long userId) {
         checkSplit();
         requests += 1;
-        if (userId != 0) {
+        if (userId != 0 && userId != ServiceAccountUser.ID) {
             users.add(userId);
         }
     }
@@ -162,7 +165,12 @@ public class StatisticsManager {
         messagesStored += 1;
         if (deviceId != 0) {
             deviceProtocols.put(deviceId, protocol);
+            deviceMessages.merge(deviceId, 1, Integer::sum);
         }
+    }
+
+    public synchronized int messageStoredCount(long deviceId) {
+        return deviceMessages.getOrDefault(deviceId, 0);
     }
 
     public synchronized void registerMail() {

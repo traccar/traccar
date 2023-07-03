@@ -739,6 +739,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Maximum API request duration in seconds.
+     */
+    public static final ConfigKey<Integer> WEB_MAX_REQUEST_SECONDS = new IntegerConfigKey(
+            "web.maxRequestSec",
+            List.of(KeyType.CONFIG),
+            600);
+
+    /**
      * Sanitize all strings returned via API. This is needed to fix XSS issues in the old web interface. New React-based
      * interface doesn't require this.
      */
@@ -1328,6 +1336,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Filter position if the daily limit is exceeded for the device.
+     */
+    public static final ConfigKey<Integer> FILTER_DAILY_LIMIT = new IntegerConfigKey(
+            "filter.dailyLimit",
+            List.of(KeyType.CONFIG));
+
+    /**
      * If false, the server expects all locations to come sequentially (for each device). Filter checks for duplicates,
      * distance, speed, or time period only against the location that was last received by server.
      * If true, the server expects locations to come at random order (since tracking device might go offline).
@@ -1756,6 +1771,14 @@ public final class Keys {
             "time,position,speed,course,accuracy,result");
 
     /**
+     * Broadcast method. Available options are "multicast" and "redis". By default (if the value is not
+     * specified or does not matches available options) server disables broadcast.
+     */
+    public static final ConfigKey<String> BROADCAST_TYPE = new StringConfigKey(
+            "broadcast.type",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Multicast interface. It can be either an IP address or an interface name.
      */
     public static final ConfigKey<String> BROADCAST_INTERFACE = new StringConfigKey(
@@ -1763,7 +1786,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Multicast address for broadcasting synchronization events.
+     * Multicast address or Redis URL for broadcasting synchronization events.
      */
     public static final ConfigKey<String> BROADCAST_ADDRESS = new StringConfigKey(
             "broadcast.address",

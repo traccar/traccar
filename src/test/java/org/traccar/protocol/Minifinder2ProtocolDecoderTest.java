@@ -24,10 +24,10 @@ public class Minifinder2ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, binary(
                 "ab10350015ae59010110013836333932313033333836353231360924723a12610042535a182ac0f6b4f2923100c900af02215c2b9bfb5461736b4c4d53"));
 
-        verifyNull(decoder, binary(
+        verifyPositions(decoder, false, binary(
                 "ab10150076f1320003100133353534363530373130323933303602105a"));
 
-        verifyNull(decoder, binary(
+        verifyPositions(decoder, false, binary(
                 "AB101400594A01000310013836333932323033343437333734350112"));
 
         verifyPositions(decoder, binary(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import org.traccar.model.GroupedModel;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
-import org.traccar.model.ScheduledModel;
+import org.traccar.model.Schedulable;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
@@ -244,8 +244,8 @@ public class CacheManager implements BroadcastInterface {
             if (((GroupedModel) before).getGroupId() != ((GroupedModel) object).getGroupId()) {
                 invalidate = true;
             }
-        } else if (object instanceof ScheduledModel) {
-            if (((ScheduledModel) before).getCalendarId() != ((ScheduledModel) object).getCalendarId()) {
+        } else if (object instanceof Schedulable) {
+            if (((Schedulable) before).getCalendarId() != ((Schedulable) object).getCalendarId()) {
                 invalidate = true;
             }
         }
@@ -308,6 +308,12 @@ public class CacheManager implements BroadcastInterface {
                 new Columns.All(), new Condition.Equals("id", deviceId)));
         if (device != null) {
             addObject(deviceId, device);
+            if (device.getCalendarId() > 0) {
+                var calendar = storage.getObject(Calendar.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", device.getCalendarId())));
+                links.computeIfAbsent(Calendar.class, k -> new LinkedHashSet<>()).add(calendar.getId());
+                addObject(deviceId, calendar);
+            }
 
             int groupDepth = 0;
             long groupId = device.getGroupId();
@@ -326,13 +332,12 @@ public class CacheManager implements BroadcastInterface {
                 links.put(clazz, objects.stream().map(BaseModel::getId).collect(Collectors.toSet()));
                 for (var object : objects) {
                     addObject(deviceId, object);
-                    if (object instanceof ScheduledModel) {
-                        var scheduled = (ScheduledModel) object;
+                    if (object instanceof Schedulable) {
+                        var scheduled = (Schedulable) object;
                         if (scheduled.getCalendarId() > 0) {
                             var calendar = storage.getObject(Calendar.class, new Request(
                                     new Columns.All(), new Condition.Equals("id", scheduled.getCalendarId())));
-                            links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>())
-                                    .add(calendar.getId());
+                            links.computeIfAbsent(Calendar.class, k -> new LinkedHashSet<>()).add(calendar.getId());
                             addObject(deviceId, calendar);
                         }
                     }
@@ -350,14 +355,12 @@ public class CacheManager implements BroadcastInterface {
                         .filter(Notification::getAlways)
                         .collect(Collectors.toList());
                 for (var notification : notifications) {
-                    links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>())
-                            .add(notification.getId());
+                    links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>()).add(notification.getId());
                     addObject(deviceId, notification);
                     if (notification.getCalendarId() > 0) {
                         var calendar = storage.getObject(Calendar.class, new Request(
                                 new Columns.All(), new Condition.Equals("id", notification.getCalendarId())));
-                        links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>())
-                                .add(calendar.getId());
+                        links.computeIfAbsent(Calendar.class, k -> new LinkedHashSet<>()).add(calendar.getId());
                         addObject(deviceId, calendar);
                     }
                 }

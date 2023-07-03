@@ -22,8 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.database.StatisticsManager;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.helper.model.AttributeUtil;
+import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
@@ -57,15 +59,18 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
     private final int filterDistance;
     private final int filterMaxSpeed;
     private final long filterMinPeriod;
+    private final int filterDailyLimit;
     private final boolean filterRelative;
     private final long skipLimit;
     private final boolean skipAttributes;
 
     private final CacheManager cacheManager;
     private final Storage storage;
+    private final StatisticsManager statisticsManager;
 
     @Inject
-    public FilterHandler(Config config, CacheManager cacheManager, Storage storage) {
+    public FilterHandler(
+            Config config, CacheManager cacheManager, Storage storage, StatisticsManager statisticsManager) {
         enabled = config.getBoolean(Keys.FILTER_ENABLE);
         filterInvalid = config.getBoolean(Keys.FILTER_INVALID);
         filterZero = config.getBoolean(Keys.FILTER_ZERO);
@@ -79,11 +84,13 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
         filterDistance = config.getInteger(Keys.FILTER_DISTANCE);
         filterMaxSpeed = config.getInteger(Keys.FILTER_MAX_SPEED);
         filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000L;
+        filterDailyLimit = config.getInteger(Keys.FILTER_DAILY_LIMIT);
         filterRelative = config.getBoolean(Keys.FILTER_RELATIVE);
         skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
         skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
         this.cacheManager = cacheManager;
         this.storage = storage;
+        this.statisticsManager = statisticsManager;
     }
 
     private Position getPrecedingPosition(long deviceId, Date date) throws StorageException {
@@ -165,6 +172,13 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
         return false;
     }
 
+    private boolean filterDailyLimit(Position position) {
+        if (filterDailyLimit != 0) {
+            return statisticsManager.messageStoredCount(position.getDeviceId()) >= filterDailyLimit;
+        }
+        return false;
+    }
+
     private boolean skipLimit(Position position, Position last) {
         if (skipLimit != 0 && last != null) {
             return (position.getServerTime().getTime() - last.getServerTime().getTime()) > skipLimit;
@@ -210,6 +224,9 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
+        if (filterDailyLimit(position)) {
+            filterType.append("DailyLimit ");
+        }
 
         // filter out excessive data
         long deviceId = position.getDeviceId();
@@ -243,9 +260,16 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
             }
         }
 
+        Device device = cacheManager.getObject(Device.class, deviceId);
+        if (device.getCalendarId() > 0) {
+            Calendar calendar = cacheManager.getObject(Calendar.class, device.getCalendarId());
+            if (!calendar.checkMoment(position.getFixTime())) {
+                filterType.append("Calendar ");
+            }
+        }
+
         if (filterType.length() > 0) {
-            String uniqueId = cacheManager.getObject(Device.class, deviceId).getUniqueId();
-            LOGGER.info("Position filtered by {}filters from device: {}", filterType, uniqueId);
+            LOGGER.info("Position filtered by {}filters from device: {}", filterType, device.getUniqueId());
             return true;
         }
 

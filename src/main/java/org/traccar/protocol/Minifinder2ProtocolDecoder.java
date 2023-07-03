@@ -151,7 +151,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, remoteAddress, index, type, buf);
         }
 
-        if (type == MSG_DATA) {
+        if (type == MSG_DATA || type == MSG_SERVICES) {
 
             List<Position> positions = new LinkedList<>();
             Set<Integer> keys = new HashSet<>();
@@ -239,6 +239,14 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x24:
                         position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
                         long status = buf.readUnsignedIntLE();
+                        if (BitUtil.check(status, 4)) {
+                            position.set(Position.KEY_CHARGE, true);
+                        }
+                        if (BitUtil.check(status, 7)) {
+                            position.set(Position.KEY_ARCHIVE, true);
+                        }
+                        position.set(Position.KEY_MOTION, BitUtil.check(status, 9));
+                        position.set(Position.KEY_RSSI, BitUtil.between(status, 19, 24));
                         position.set(Position.KEY_BATTERY_LEVEL, BitUtil.from(status, 24));
                         position.set(Position.KEY_STATUS, status);
                         break;

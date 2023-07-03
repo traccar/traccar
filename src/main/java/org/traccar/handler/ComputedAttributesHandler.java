@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 import io.netty.channel.ChannelHandler;
 import org.apache.commons.jexl3.JexlFeatures;
@@ -65,6 +66,10 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         JexlSandbox sandbox = new JexlSandbox(false);
         sandbox.allow("com.safe.Functions");
         sandbox.allow(Math.class.getName());
+        List.of(
+            Double.class, Float.class, Integer.class, Long.class, Short.class,
+            Character.class, Boolean.class, String.class, Byte.class)
+                .forEach((type) -> sandbox.allow(type.getName()));
         features = new JexlFeatures()
                 .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
                 .loops(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOOPS))

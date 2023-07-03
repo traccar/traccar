@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,19 @@ import org.traccar.storage.StorageName;
 import java.util.Date;
 
 @StorageName("tc_devices")
-public class Device extends GroupedModel implements Disableable {
+public class Device extends GroupedModel implements Disableable, Schedulable {
+
+    private long calendarId;
+
+    @Override
+    public long getCalendarId() {
+        return calendarId;
+    }
+
+    @Override
+    public void setCalendarId(long calendarId) {
+        this.calendarId = calendarId;
+    }
 
     private String name;
 

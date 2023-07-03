@@ -614,6 +614,23 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "JN5":
                     buf.readUnsignedInt(); // pto fuel
                     break;
+                case "IN0":
+                    position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+                    break;
+                case "IN1":
+                case "IN2":
+                case "IN3":
+                    position.set(Position.PREFIX_IN + key.charAt(2), buf.readUnsignedByte() > 0);
+                    break;
+                case "HA":
+                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_ACCELERATION : null);
+                    break;
+                case "HB":
+                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_BRAKING : null);
+                    break;
+                case "HC":
+                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_CORNERING : null);
+                    break;
                 default:
                     break;
             }

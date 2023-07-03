@@ -24,7 +24,7 @@ import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
-import org.traccar.model.ScheduledModel;
+import org.traccar.model.Schedulable;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.model.UserRestrictions;
@@ -137,13 +137,13 @@ public class PermissionsService {
                     }
                 }
             }
-            if (object instanceof ScheduledModel) {
-                ScheduledModel after = ((ScheduledModel) object);
+            if (object instanceof Schedulable) {
+                Schedulable after = ((Schedulable) object);
                 if (after.getCalendarId() > 0) {
-                    ScheduledModel before = null;
+                    Schedulable before = null;
                     if (!addition) {
                         before = storage.getObject(after.getClass(), new Request(
-                                new Columns.Include("calendarId"), new Condition.Equals("id", after.getId())));
+                                new Columns.Include("calendarId"), new Condition.Equals("id", object.getId())));
                     }
                     if (before == null || before.getCalendarId() != after.getCalendarId()) {
                         checkPermission(Calendar.class, userId, after.getCalendarId());
@@ -156,7 +156,7 @@ public class PermissionsService {
                     Notification before = null;
                     if (!addition) {
                         before = storage.getObject(after.getClass(), new Request(
-                                new Columns.Include("commandId"), new Condition.Equals("id", after.getId())));
+                                new Columns.Include("commandId"), new Condition.Equals("id", object.getId())));
                     }
                     if (before == null || before.getCommandId() != after.getCommandId()) {
                         checkPermission(Command.class, userId, after.getCommandId());

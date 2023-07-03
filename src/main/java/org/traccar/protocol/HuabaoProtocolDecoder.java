@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -484,6 +484,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY, Integer.parseInt(lockStatus.substring(2, 5)) * 0.01);
                     }
                     break;
+                case 0x56:
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 10);
+                    buf.readUnsignedByte(); // reserved
+                    break;
                 case 0x60:
                     position.set(Position.KEY_EVENT, buf.readUnsignedShort());
                     buf.skipBytes(length - 2);
@@ -692,6 +696,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0xFE:
                     if (length == 1) {
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    } else if (length == 2) {
+                        position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
                     } else {
                         int mark = buf.readUnsignedByte();
                         if (mark == 0x7C) {
@@ -880,8 +886,14 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 0x0539:
                                 position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() * 0.01);
                                 break;
+                            case 0x052B:
+                                position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                                break;
                             case 0x052D:
                                 position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
+                                break;
+                            case 0x052E:
+                                position.set("airTemp", buf.readUnsignedByte() - 40);
                                 break;
                             case 0x0530:
                                 position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);
@@ -891,6 +903,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 break;
                             case 0x0536:
                                 position.set(Position.KEY_RPM, buf.readUnsignedShort());
+                                break;
+                            case 0x053D:
+                                position.set("intakePressure", buf.readUnsignedShort() * 0.1);
+                                break;
+                            case 0x0544:
+                                position.set("liquidLevel", buf.readUnsignedByte());
                                 break;
                             case 0x0547:
                             case 0x0548:
