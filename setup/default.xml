@@ -289,5 +289,6 @@
     <entry key='rftrack.port'>5245</entry>
     <entry key='vlt.port'>5246</entry>
     <entry key='transync.port'>5247</entry>
+    <entry key='t622iridium.port'>5248</entry>
 
 </properties>
