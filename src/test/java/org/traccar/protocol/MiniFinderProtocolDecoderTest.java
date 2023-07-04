@@ -21,6 +21,10 @@ public class MiniFinderProtocolDecoderTest extends ProtocolTest {
                 "!1,123456789012345"));
 
         verifyAttribute(decoder, text(
+                "!4,10,040123,,,1.0,110,0,0S,33"),
+                "phone1", "040123");
+
+        verifyAttribute(decoder, text(
                 "!5,17,V,50"),
                 Position.KEY_BATTERY_LEVEL, 50);
 
