@@ -72,12 +72,10 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)")                      // battery
             .expression("([^,]+)?")              // adc
             .groupBegin()
-            .text(",")
-            .number("d,")                        // extended
-            .expression("([^,]+)?")              // fuel
+            .number(",d+")                       // extended
+            .expression(",([^,]+)?")             // fuel
             .groupBegin()
-            .text(",")
-            .expression("([^,]+)?")              // temperature
+            .expression(",([^,]+)?")             // temperature
             .groupBegin()
             .text(",")
             .groupBegin()
@@ -91,9 +89,11 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)?|")                    // instant fuel
             .number("(d+)[%L]").optional()       // fuel level
             .groupEnd("?")
+            .number(",(d+)").optional()          // hours
             .groupEnd("?")
             .groupEnd("?")
             .groupEnd("?")
+            .any()
             .compile();
 
     private String decodeAlarm(int value) {
@@ -224,7 +224,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (parser.hasNextAny(6)) {
+        if (parser.hasNextAny(9)) {
             position.set(Position.KEY_RPM, parser.nextInt());
             position.set(Position.KEY_ENGINE_LOAD, parser.nextInt());
             position.set("airFlow", parser.nextInt());
@@ -240,6 +240,10 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt() * 0.1);
             }
             position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_HOURS, parser.nextInt() * 1000L);
         }
 
         return position;
