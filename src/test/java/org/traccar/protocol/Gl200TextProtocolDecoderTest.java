@@ -11,6 +11,9 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
+        verifyAttributes(decoder, buffer(
+                "+RESP:GTCAN,F1040C,862599050497393,GV350M,0,0,FFFFFFFF,,1,,,,,,,,,,,,,,,,,,,,,,,0,,,1,0.0,70,2961.6,-78.691750,-0.951135,20230703191659,,,,,,20230703191659,5A4A$"));
+
         verifyAttribute(decoder, buffer(
                 "+RESP:GTBAA,F1040C,862599050497393,GV350M,FF,3,0,04,000A,780541256AE9,3065,0,0.0,213,2908.3,-78.691944,-0.951426,20230511173150,,,,,,20230511175001,0159$"),
                 "accessoryVoltage", 3.065);

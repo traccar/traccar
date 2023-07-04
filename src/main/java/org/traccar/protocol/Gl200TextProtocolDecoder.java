@@ -400,7 +400,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
         position.setDeviceId(deviceSession.getDeviceId());
 
-        index += 1; // device name
+        String deviceName = values[index++];
         index += 1; // report type
         index += 1; // canbus state
         long reportMask = Long.parseLong(values[index++], 16);
@@ -442,11 +442,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 11) && !values[index++].isEmpty()) {
             position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Double.parseDouble(values[index - 1])));
         }
-        if (BitUtil.check(reportMask, 12)) {
-            position.set(Position.KEY_DRIVING_TIME, Double.parseDouble(values[index++]));
+        if (BitUtil.check(reportMask, 12) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_DRIVING_TIME, Double.parseDouble(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 13)) {
-            position.set("idleHours", Double.parseDouble(values[index++]));
+        if (BitUtil.check(reportMask, 13) && !values[index++].isEmpty()) {
+            position.set("idleHours", Double.parseDouble(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 14) && !values[index++].isEmpty()) {
             position.set("idleFuelConsumption", Double.parseDouble(values[index - 1]));
@@ -472,8 +472,19 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 21) && !values[index++].isEmpty()) {
             position.set("engineOverspeed", Double.parseDouble(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 29)) {
-            reportMaskExt = Long.parseLong(values[index++], 16);
+        if ("GV350M".equals(deviceName)) {
+            if (BitUtil.check(reportMask, 22)) {
+                index += 1; // impulse distance
+            }
+            if (BitUtil.check(reportMask, 23)) {
+                index += 1; // gross vehicle weight
+            }
+            if (BitUtil.check(reportMask, 24)) {
+                index += 1; // catalyst liquid level
+            }
+        }
+        if (BitUtil.check(reportMask, 29) && !values[index++].isEmpty()) {
+            reportMaskExt = Long.parseLong(values[index - 1], 16);
         }
         if (BitUtil.check(reportMaskExt, 0) && !values[index++].isEmpty()) {
             position.set("adBlueLevel", Integer.parseInt(values[index - 1]));
