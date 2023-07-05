@@ -31,11 +31,10 @@ public class DigitalPortHandler extends BaseDataHandler {
             //0 -> 1 - start counting
             if (null == last || !getProperty(last, Position.KEY_DP2)) {
                 position.set(Position.KEY_DP2_TIME, 0);
-            }
-            else { //1 -> 1 - keep counting
+            } else { //1 -> 1 - keep counting
                 long dpTime = last.getLong(Position.KEY_DP2_TIME);
                 long diff = position.getFixTime().getTime() - last.getFixTime().getTime();
-                position.set(Position.KEY_DP2_TIME, dpTime+diff);
+                position.set(Position.KEY_DP2_TIME, dpTime + diff);
             }
         }
         catch (Exception ex) {
