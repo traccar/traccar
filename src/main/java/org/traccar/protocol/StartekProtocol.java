@@ -29,12 +29,7 @@ import javax.inject.Inject;
 public class StartekProtocol extends BaseProtocol {
 
     @Inject
-    public StartekProtocol(Config config) {
-        setSupportedDataCommands(
-                Command.TYPE_CUSTOM,
-                Command.TYPE_OUTPUT_CONTROL,
-                Command.TYPE_ENGINE_STOP,
-                Command.TYPE_ENGINE_RESUME);
+    public StartekProtocol() {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
