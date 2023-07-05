@@ -35,9 +35,9 @@ public class StartekProtocol extends BaseProtocol {
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
-        addServer(new TrackerServer(config, getName(), false) {
+        addServer(new TrackerServer(false, getName()) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new LineBasedFrameDecoder(1100));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
