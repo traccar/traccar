@@ -92,7 +92,10 @@ public final class ReportUtils {
         return result;
     }
 
-    public static double calculateDistance(Position firstPosition, Position lastPosition, Collection<Position> positions) {
+    public static double calculateDistance(
+            Position firstPosition,
+            Position lastPosition,
+            Collection<Position> positions) {
         return calculateDistance(firstPosition, lastPosition, true, positions);
     }
 
@@ -103,8 +106,8 @@ public final class ReportUtils {
 
         if (useOdometer && (firstOdometer != 0.0 || lastOdometer != 0.0)) {
             distance = lastOdometer - firstOdometer;
-        } else if (firstPosition.getAttributes().containsKey("source") ||
-                (firstPosition.getProtocol() != null && firstPosition.getProtocol().equals("osmand"))) {
+        } else if (firstPosition.getAttributes().containsKey("source")
+                || (firstPosition.getProtocol() != null && firstPosition.getProtocol().equals("osmand"))) {
             distance = DistanceCalculator.distance(
                     firstPosition.getLatitude(), firstPosition.getLongitude(),
                     lastPosition.getLatitude(), lastPosition.getLongitude());
@@ -117,31 +120,34 @@ public final class ReportUtils {
         return distance;
     }
 
-    private static boolean isValid(Position start, Position end, double distance){
-
-        if(distance < 0){
+    private static boolean isValid(Position start, Position end, double distance) {
+        if (distance < 0) {
             return false;
         }
 
-        long t = end.getFixTime().getTime()-start.getFixTime().getTime();
-        if(0 == t){
+        long t = end.getFixTime().getTime() - start.getFixTime().getTime();
+        if (0 == t) {
             return (0 == distance);
         }
 
-        double kms = distance/1000.0;
-        double hours = t/3600000.0;
-        double averageSpeed = kms/hours;
+        double kms = distance / 1000.0;
+        double hours = t / 3600000.0;
+        double averageSpeed = kms / hours;
         return (averageSpeed < 200);
     }
 
-    public static double calculateDistance(Position firstPosition, Position lastPosition, boolean useOdometer, Collection<Position> positions) {
+    public static double calculateDistance(
+            Position firstPosition,
+            Position lastPosition,
+            boolean useOdometer,
+            Collection<Position> positions) {
 
         double distance = calculateDistance(firstPosition, lastPosition, useOdometer);
         if (null == positions) {
             return distance;
         }
-        if (isValid(firstPosition, lastPosition, distance) &&
-            firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
+        if (isValid(firstPosition, lastPosition, distance)
+                && firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
             return distance;
         }
 
@@ -149,14 +155,14 @@ public final class ReportUtils {
         Double fixedDistance = 0.0;
         Position previous = null;
         for (Position p : positions) {
-            if(p.getFixTime().before(firstPosition.getFixTime()) ||
-               p.getFixTime().after(lastPosition.getFixTime())){
+            if(p.getFixTime().before(firstPosition.getFixTime())
+                    || p.getFixTime().after(lastPosition.getFixTime())) {
                 continue;
             }
 
-            if(previous != null){
+            if (previous != null) {
                 double positionDistance = calculateDistance(previous, p, useOdometer);
-                if(isValid(previous, p, positionDistance)){
+                if (isValid(previous, p, positionDistance)) {
                     fixedDistance += positionDistance;
                 }
             }
