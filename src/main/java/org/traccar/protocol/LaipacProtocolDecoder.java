@@ -126,9 +126,9 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
                 return null;
             }
         }
-    
+
         return event;
-        
+
     }
 
     private void sendEventResponse(
