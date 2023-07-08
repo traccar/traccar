@@ -40,11 +40,6 @@ public class T622IridiumProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    @Override
-    protected void init() {
-        super.init();
-    }
-
     public List<Integer> getParameters(long deviceId) {
         String value = AttributeUtil.lookup(
                 getCacheManager(), Keys.PROTOCOL_FORMAT.withPrefix(getProtocolName()), deviceId);
