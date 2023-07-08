@@ -238,7 +238,7 @@ public final class Keys {
      */
     public static final ConfigSuffix<String> PROTOCOL_FORMAT = new StringConfigSuffix(
             ".format",
-            List.of(KeyType.DEVICE));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Protocol date format. Used by protocols that have configurable date format.
