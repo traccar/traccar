@@ -231,9 +231,6 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         if (device != null) {
             deviceModel = device.getModel();
         }
-        if (deviceModel == null) {
-            deviceModel = "";
-        }
 
         Position position = new Position(getProtocolName());
 
