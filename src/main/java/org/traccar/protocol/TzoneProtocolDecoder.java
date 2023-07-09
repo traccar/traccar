@@ -204,30 +204,39 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private void decodeTags(Position position, ByteBuf buf) {
+    private void decodeTags(Position position, ByteBuf buf, int hardware) {
 
         int blockLength = buf.readUnsignedShort();
         int blockEnd = buf.readerIndex() + blockLength;
 
         if (blockLength > 0) {
 
-            buf.readUnsignedByte(); // tag type
+            int type = buf.readUnsignedByte();
 
-            int count = buf.readUnsignedByte();
-            int tagLength = buf.readUnsignedByte();
+            if (hardware != 0x153 || type >= 2) {
 
-            for (int i = 1; i <= count; i++) {
-                int tagEnd = buf.readerIndex() + tagLength;
+                int count = buf.readUnsignedByte();
+                int tagLength = buf.readUnsignedByte();
 
-                buf.readUnsignedByte(); // status
-                buf.readUnsignedShortLE(); // battery voltage
+                for (int i = 1; i <= count; i++) {
+                    int tagEnd = buf.readerIndex() + tagLength;
 
-                position.set(Position.PREFIX_TEMP + i, (buf.readShortLE() & 0x3fff) * 0.1);
+                    buf.readUnsignedByte(); // status
+                    buf.readUnsignedShortLE(); // battery voltage
 
-                buf.readUnsignedByte(); // humidity
-                buf.readUnsignedByte(); // rssi
+                    position.set(Position.PREFIX_TEMP + i, (buf.readShortLE() & 0x3fff) * 0.1);
 
-                buf.readerIndex(tagEnd);
+                    buf.readUnsignedByte(); // humidity
+                    buf.readUnsignedByte(); // rssi
+
+                    buf.readerIndex(tagEnd);
+                }
+
+            } else if (type == 1) {
+
+                position.set(Position.KEY_CARD, buf.readCharSequence(
+                        blockEnd - buf.readerIndex(), StandardCharsets.UTF_8).toString());
+
             }
 
         }
@@ -364,9 +373,9 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        if (hardware == 0x406) {
+        if (hardware == 0x153 || hardware == 0x406) {
 
-            decodeTags(position, buf);
+            decodeTags(position, buf, hardware);
 
         }
 

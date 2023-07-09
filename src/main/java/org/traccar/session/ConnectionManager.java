@@ -123,7 +123,9 @@ public class ConnectionManager implements BroadcastInterface {
         Device device = deviceLookupService.lookup(uniqueIds);
 
         if (device == null && config.getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
-            device = addUnknownDevice(uniqueIds[0]);
+            if (uniqueIds[0].matches(config.getString(Keys.DATABASE_REGISTER_UNKNOWN_REGEX))) {
+                device = addUnknownDevice(uniqueIds[0]);
+            }
         }
 
         if (device != null) {

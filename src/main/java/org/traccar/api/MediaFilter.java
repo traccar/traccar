@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,7 +32,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
@@ -55,10 +54,6 @@ public class MediaFilter implements Filter {
         this.storage = storage;
         this.statisticsManager = statisticsManager;
         this.permissionsServiceProvider = permissionsServiceProvider;
-    }
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     @Override
@@ -97,10 +92,6 @@ public class MediaFilter implements Filter {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
             httpResponse.getWriter().println(Log.exceptionStack(e));
         }
-    }
-
-    @Override
-    public void destroy() {
     }
 
 }

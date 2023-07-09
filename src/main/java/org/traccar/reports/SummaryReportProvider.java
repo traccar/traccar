@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,7 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
@@ -29,6 +30,10 @@ import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.SummaryReportItem;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import java.io.File;
@@ -37,10 +42,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 public class SummaryReportProvider {
 
@@ -58,96 +66,105 @@ public class SummaryReportProvider {
         this.storage = storage;
     }
 
-    private SummaryReportItem calculateSummaryResult(Device device, Collection<Position> positions) {
+    private Position getEdgePosition(long deviceId, Date from, Date to, boolean end) throws StorageException {
+        return storage.getObject(Position.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("deviceId", deviceId),
+                        new Condition.Between("fixTime", "from", from, "to", to)),
+                new Order("fixTime", end, 1)));
+    }
+
+    private Collection<SummaryReportItem> calculateDeviceResult(
+            Device device, Date from, Date to, boolean fast) throws StorageException {
+
         SummaryReportItem result = new SummaryReportItem();
         result.setDeviceId(device.getId());
         result.setDeviceName(device.getName());
-        if (positions != null && !positions.isEmpty()) {
-            Position firstPosition = null;
-            Position previousPosition = null;
+
+        Position first = null;
+        Position last = null;
+        if (fast) {
+            first = getEdgePosition(device.getId(), from, to, false);
+            last = getEdgePosition(device.getId(), from, to, true);
+        } else {
+            var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
             for (Position position : positions) {
-                if (firstPosition == null) {
-                    firstPosition = position;
+                if (first == null) {
+                    first = position;
                 }
-                previousPosition = position;
                 if (position.getSpeed() > result.getMaxSpeed()) {
                     result.setMaxSpeed(position.getSpeed());
                 }
+                last = position;
             }
+        }
+
+        if (first != null && last != null) {
             boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
-            result.setDistance(PositionUtil.calculateDistance(firstPosition, previousPosition, !ignoreOdometer));
-            result.setSpentFuel(reportUtils.calculateFuel(firstPosition, previousPosition));
+            result.setDistance(PositionUtil.calculateDistance(first, last, !ignoreOdometer));
+            result.setSpentFuel(reportUtils.calculateFuel(first, last));
 
             long durationMilliseconds;
-            if (firstPosition.hasAttribute(Position.KEY_HOURS) && previousPosition.hasAttribute(Position.KEY_HOURS)) {
-                durationMilliseconds =
-                        previousPosition.getLong(Position.KEY_HOURS) - firstPosition.getLong(Position.KEY_HOURS);
+            if (first.hasAttribute(Position.KEY_HOURS) && last.hasAttribute(Position.KEY_HOURS)) {
+                durationMilliseconds = last.getLong(Position.KEY_HOURS) - first.getLong(Position.KEY_HOURS);
                 result.setEngineHours(durationMilliseconds);
             } else {
-                durationMilliseconds =
-                        previousPosition.getFixTime().getTime() - firstPosition.getFixTime().getTime();
+                durationMilliseconds = last.getFixTime().getTime() - first.getFixTime().getTime();
             }
 
             if (durationMilliseconds > 0) {
-                result.setAverageSpeed(
-                        UnitsConverter.knotsFromMps(result.getDistance() * 1000 / durationMilliseconds));
+                result.setAverageSpeed(UnitsConverter.knotsFromMps(result.getDistance() * 1000 / durationMilliseconds));
             }
 
             if (!ignoreOdometer
-                    && firstPosition.getDouble(Position.KEY_ODOMETER) != 0
-                    && previousPosition.getDouble(Position.KEY_ODOMETER) != 0) {
-                result.setStartOdometer(firstPosition.getDouble(Position.KEY_ODOMETER));
-                result.setEndOdometer(previousPosition.getDouble(Position.KEY_ODOMETER));
+                    && first.getDouble(Position.KEY_ODOMETER) != 0 && last.getDouble(Position.KEY_ODOMETER) != 0) {
+                result.setStartOdometer(first.getDouble(Position.KEY_ODOMETER));
+                result.setEndOdometer(last.getDouble(Position.KEY_ODOMETER));
             } else {
-                result.setStartOdometer(firstPosition.getDouble(Position.KEY_TOTAL_DISTANCE));
-                result.setEndOdometer(previousPosition.getDouble(Position.KEY_TOTAL_DISTANCE));
+                result.setStartOdometer(first.getDouble(Position.KEY_TOTAL_DISTANCE));
+                result.setEndOdometer(last.getDouble(Position.KEY_TOTAL_DISTANCE));
             }
 
-            result.setStartTime(firstPosition.getFixTime());
-            result.setEndTime(previousPosition.getFixTime());
+            result.setStartTime(first.getFixTime());
+            result.setEndTime(last.getFixTime());
+            return List.of(result);
         }
-        return result;
+
+        return List.of();
     }
 
-    private int getDay(long userId, Date date) throws StorageException {
-        Calendar calendar = Calendar.getInstance(UserUtil.getTimezone(
-                permissionsService.getServer(), permissionsService.getUser(userId)));
-        calendar.setTime(date);
-        return calendar.get(Calendar.DAY_OF_MONTH);
-    }
+    private Collection<SummaryReportItem> calculateDeviceResults(
+            Device device, ZonedDateTime from, ZonedDateTime to, boolean daily) throws StorageException {
 
-    private Collection<SummaryReportItem> calculateSummaryResults(
-            long userId, Device device, Date from, Date to, boolean daily) throws StorageException {
-
-        var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
+        boolean fast = Duration.between(from, to).toSeconds() > config.getLong(Keys.REPORT_FAST_THRESHOLD);
         var results = new ArrayList<SummaryReportItem>();
-        if (daily && !positions.isEmpty()) {
-            int startIndex = 0;
-            int startDay = getDay(userId, positions.iterator().next().getFixTime());
-            for (int i = 0; i < positions.size(); i++) {
-                int currentDay = getDay(userId, positions.get(i).getFixTime());
-                if (currentDay != startDay) {
-                    results.add(calculateSummaryResult(device, positions.subList(startIndex, i)));
-                    startIndex = i;
-                    startDay = currentDay;
-                }
+        if (daily) {
+            while (from.truncatedTo(ChronoUnit.DAYS).isBefore(to.truncatedTo(ChronoUnit.DAYS))) {
+                ZonedDateTime fromDay = from.truncatedTo(ChronoUnit.DAYS);
+                ZonedDateTime nextDay = fromDay.plus(1, ChronoUnit.DAYS);
+                results.addAll(calculateDeviceResult(
+                        device, Date.from(from.toInstant()), Date.from(nextDay.toInstant()), fast));
+                from = nextDay;
             }
-            results.add(calculateSummaryResult(device, positions.subList(startIndex, positions.size())));
+            results.addAll(calculateDeviceResult(device, Date.from(from.toInstant()), Date.from(to.toInstant()), fast));
         } else {
-            results.add(calculateSummaryResult(device, positions));
+            results.addAll(calculateDeviceResult(device, Date.from(from.toInstant()), Date.from(to.toInstant()), fast));
         }
-
         return results;
     }
 
     public Collection<SummaryReportItem> getObjects(
-            long userId, Collection<Long> deviceIds,
-            Collection<Long> groupIds, Date from, Date to, boolean daily) throws StorageException {
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+            Date from, Date to, boolean daily) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
 
+        var tz = UserUtil.getTimezone(permissionsService.getServer(), permissionsService.getUser(userId)).toZoneId();
+
         ArrayList<SummaryReportItem> result = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
-            Collection<SummaryReportItem> deviceResults = calculateSummaryResults(userId, device, from, to, daily);
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
+            var deviceResults = calculateDeviceResults(
+                    device, from.toInstant().atZone(tz), to.toInstant().atZone(tz), daily);
             for (SummaryReportItem summaryReport : deviceResults) {
                 if (summaryReport.getStartTime() != null && summaryReport.getEndTime() != null) {
                     result.add(summaryReport);

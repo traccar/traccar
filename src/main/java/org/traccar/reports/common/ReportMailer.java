@@ -55,7 +55,7 @@ public class ReportMailer {
                         stream.toByteArray(), "application/octet-stream")));
 
                 User user = permissionsService.getUser(userId);
-                mailManager.sendMessage(user, "Report", "The report is in the attachment.", attachment);
+                mailManager.sendMessage(user, false, "Report", "The report is in the attachment.", attachment);
             } catch (StorageException | IOException | MessagingException e) {
                 LOGGER.warn("Email report failed", e);
             }

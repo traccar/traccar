@@ -119,6 +119,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         SPACE10X,
         STANDARD,
         OBD6,
+        WETRUST,
     }
 
     private Variant variant;
@@ -805,7 +806,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (hasLbs(type) && buf.readableBytes() > 6) {
-                decodeLbs(position, buf, type, hasStatus(type) && type != MSG_LBS_ALARM && type != MSG_LBS_STATUS);
+                boolean hasLength = hasStatus(type)
+                        && type != MSG_LBS_STATUS
+                        && type != MSG_LBS_ALARM
+                        && (type != MSG_GPS_LBS_STATUS_1 || variant != Variant.VXT01);
+                decodeLbs(position, buf, type, hasLength);
             }
 
             if (hasStatus(type)) {
@@ -827,13 +832,18 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
+            if (type == MSG_STATUS && variant == Variant.VXT01) {
+                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+            }
+
             if (type == MSG_GPS_LBS_1) {
                 if (variant == Variant.GT06E_CARD) {
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     String data = buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString();
                     buf.readUnsignedByte(); // alarm
                     buf.readUnsignedByte(); // swiped
-                    position.set("driverLicense", data.trim());
+                    position.set(Position.KEY_CARD, data.trim());
                 } else if (variant == Variant.BENWAY) {
                     int mask = buf.readUnsignedShort();
                     position.set(Position.KEY_IGNITION, BitUtil.check(mask, 8 + 7));
@@ -869,6 +879,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     position.set(Position.PREFIX_TEMP + 1, temperature);
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 10);
+                } else if (variant == Variant.WETRUST) {
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                    position.set(Position.KEY_CARD, buf.readCharSequence(
+                            buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString());
+                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
+                    position.set("cardStatus", buf.readUnsignedByte());
+                    position.set(Position.KEY_DRIVING_TIME, buf.readUnsignedShort());
                 }
             }
 
@@ -1018,6 +1035,29 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (subType == 0x00) {
 
                 position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() * 0.01);
+                return position;
+
+            } else if (subType == 0x04) {
+
+                CharSequence content = buf.readCharSequence(buf.readableBytes() - 4 - 2, StandardCharsets.US_ASCII);
+                String[] values = content.toString().split(";");
+                for (String value : values) {
+                    String[] pair = value.split("=");
+                    switch (pair[0]) {
+                        case "ALM1":
+                        case "ALM2":
+                        case "ALM3":
+                            position.set("alarm" + pair[0].charAt(3) + "Status", Integer.parseInt(pair[1], 16));
+                        case "STA1":
+                            position.set("otherStatus", Integer.parseInt(pair[1], 16));
+                            break;
+                        case "DYD":
+                            position.set("engineStatus", Integer.parseInt(pair[1], 16));
+                            break;
+                        default:
+                            break;
+                    }
+                }
                 return position;
 
             } else if (subType == 0x05) {
@@ -1377,6 +1417,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.VXT01;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x24) {
             variant = Variant.VXT01;
+        } else if (header == 0x7878 && type == MSG_STATUS && length == 0x0a) {
+            variant = Variant.VXT01;
         } else if (header == 0x7878 && type == MSG_LBS_MULTIPLE_3 && length == 0x31) {
             variant = Variant.WANWAY_S20;
         } else if (header == 0x7878 && type == MSG_LBS_MULTIPLE_3 && length == 0x2e) {
@@ -1391,6 +1433,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.SPACE10X;
         } else if (header == 0x7878 && type == MSG_STATUS && length == 0x13) {
             variant = Variant.OBD6;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x29) {
+            variant = Variant.WETRUST;
         } else {
             variant = Variant.STANDARD;
         }

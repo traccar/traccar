@@ -44,7 +44,7 @@ public class NotificatorMail implements Notificator {
     public void send(Notification notification, User user, Event event, Position position) throws MessageException {
         try {
             var fullMessage = notificationFormatter.formatMessage(user, event, position, "full");
-            mailManager.sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
+            mailManager.sendMessage(user, false, fullMessage.getSubject(), fullMessage.getBody());
         } catch (MessagingException e) {
             throw new MessageException(e);
         }

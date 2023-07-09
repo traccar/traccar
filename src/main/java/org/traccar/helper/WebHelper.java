@@ -15,11 +15,18 @@
  */
 package org.traccar.helper;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import javax.servlet.http.HttpServletRequest;
 
-public final class ServletHelper {
+import org.eclipse.jetty.util.URIUtil;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 
-    private ServletHelper() {
+public final class WebHelper {
+
+    private WebHelper() {
     }
 
     public static String retrieveRemoteAddress(HttpServletRequest request) {
@@ -42,4 +49,17 @@ public final class ServletHelper {
         }
     }
 
+    public static String retrieveWebUrl(Config config) {
+        if (config.hasKey(Keys.WEB_URL)) {
+            return config.getString(Keys.WEB_URL).replaceAll("/$", "");
+        } else {
+            String address;
+            try {
+                address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
+            } catch (UnknownHostException e) {
+                address = "localhost";
+            }
+            return URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
+        }
+    }
 }

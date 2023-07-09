@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class L100FrameDecoderTest extends ProtocolTest {

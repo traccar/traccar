@@ -1,7 +1,8 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class TzoneProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,10 @@ public class TzoneProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new TzoneProtocolDecoder(null));
+
+        verifyAttribute(decoder, binary(
+                "545a00d424240153011300000863835029944118170316023b180016040485c73d2479187e170316023b1800000000060c000000000d1cc0406303019904aa00000000008a012520205e544f4e474c4f4d245049544f4f4e244d522e5e5e3f3b363030373634333132303130303134323234323d3139303631393538313032363d3f2b2020202020202020202020202032322020202020202020202020203120202020202020202020202030303234363238202031303730302020202020202020202020202020202020202020203f00030080000006e80e0d0a"),
+                Position.KEY_CARD, "%  ^TONGLOM$PITOON$MR.^^?;6007643120100142242=190619581026=?+             22            1            0024628  10700                     ?");
 
         verifyAttributes(decoder, binary(
                 "545a003724240407020200000180322000001610160b151019100000000c010a07320101088600007dca000baa102837016a0114025500000169e80d0a"));

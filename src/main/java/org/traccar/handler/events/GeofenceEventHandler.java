@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,22 @@
 package org.traccar.handler.events;
 
 import io.netty.channel.ChannelHandler;
+<<<<<<< HEAD
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.traccar.config.Config;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.model.GeofenceUtil;
+=======
+>>>>>>> upstream/master
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.*;
 import org.traccar.model.Calendar;
-import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
-import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
-import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -49,59 +45,42 @@ import java.util.Map;
 @ChannelHandler.Sharable
 public class GeofenceEventHandler extends BaseEventHandler {
 
+<<<<<<< HEAD
     private static final Logger LOGGER = LoggerFactory.getLogger(Geofence.class);
     private final Config config;
+=======
+>>>>>>> upstream/master
     private final CacheManager cacheManager;
-    private final ConnectionManager connectionManager;
-    private final Storage storage;
 
     private CommandsManager commandsManager;
 
     @Inject
-    public GeofenceEventHandler(
-            Config config, CacheManager cacheManager, ConnectionManager connectionManager, Storage storage) {
-        this.config = config;
+    public GeofenceEventHandler(CacheManager cacheManager) {
         this.cacheManager = cacheManager;
-        this.connectionManager = connectionManager;
-        this.storage = storage;
     }
 
     @Override
     protected Map<Event, Position> analyzePosition(Position position) {
-        Device device = cacheManager.getObject(Device.class, position.getDeviceId());
-        if (device == null) {
-            return null;
-        }
-        if (!PositionUtil.isLatest(cacheManager, position) || !position.getValid()) {
+        if (!PositionUtil.isLatest(cacheManager, position)) {
             return null;
         }
 
-        List<Long> currentGeofences = GeofenceUtil.getCurrentGeofences(config, cacheManager, position);
         List<Long> oldGeofences = new ArrayList<>();
-        if (device.getGeofenceIds() != null) {
-            oldGeofences.addAll(device.getGeofenceIds());
+        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
+        if (lastPosition != null && lastPosition.getGeofenceIds() != null) {
+            oldGeofences.addAll(lastPosition.getGeofenceIds());
         }
-        List<Long> newGeofences = new ArrayList<>(currentGeofences);
-        newGeofences.removeAll(oldGeofences);
-        oldGeofences.removeAll(currentGeofences);
 
-
-        if (!oldGeofences.isEmpty() || !newGeofences.isEmpty()) {
-            device.setGeofenceIds(currentGeofences.isEmpty() ? null : currentGeofences);
-
-            try {
-                storage.updateObject(device, new Request(
-                        new Columns.Include("geofenceIds"),
-                        new Condition.Equals("id", device.getId())));
-            } catch (StorageException e) {
-                throw new RuntimeException("Update device geofences error", e);
-            }
-
-            connectionManager.updateDevice(true, device);
+        List<Long> newGeofences = new ArrayList<>();
+        if (position.getGeofenceIds() != null) {
+            newGeofences.addAll(position.getGeofenceIds());
+            newGeofences.removeAll(oldGeofences);
+            oldGeofences.removeAll(position.getGeofenceIds());
         }
 
         Map<Event, Position> events = new HashMap<>();
         for (long geofenceId : oldGeofences) {
+<<<<<<< HEAD
             long calendarId = cacheManager.getObject(Geofence.class, geofenceId).getCalendarId();
             Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
@@ -124,6 +103,17 @@ public class GeofenceEventHandler extends BaseEventHandler {
                     events.put(event, position);
                 }
 
+=======
+            Geofence geofence = cacheManager.getObject(Geofence.class, geofenceId);
+            if (geofence != null) {
+                long calendarId = geofence.getCalendarId();
+                Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
+                if (calendar == null || calendar.checkMoment(position.getFixTime())) {
+                    Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position);
+                    event.setGeofenceId(geofenceId);
+                    events.put(event, position);
+                }
+>>>>>>> upstream/master
             }
         }
         for (long geofenceId : newGeofences) {

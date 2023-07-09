@@ -1,6 +1,6 @@
 package org.traccar.handler.events;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.BaseTest;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
@@ -13,8 +13,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class MotionEventHandlerTest extends BaseTest {
 
@@ -36,7 +36,7 @@ public class MotionEventHandlerTest extends BaseTest {
 
     @Test
     public void testMotionWithPosition() throws ParseException {
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, false, false, 0.01);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, false);
 
         MotionState state = new MotionState();
 
@@ -63,7 +63,7 @@ public class MotionEventHandlerTest extends BaseTest {
 
     @Test
     public void testMotionFluctuation() throws ParseException {
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, false, false, 0.01);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, false);
 
         MotionState state = new MotionState();
 
@@ -94,7 +94,7 @@ public class MotionEventHandlerTest extends BaseTest {
 
     @Test
     public void testStopWithPositionIgnition() throws ParseException {
-        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, true, false, 0.01);
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 0, true);
 
         MotionState state = new MotionState();
         state.setMotionStreak(true);

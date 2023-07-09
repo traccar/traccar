@@ -48,7 +48,7 @@ public class PermissionsResource  extends BaseResource {
     private void checkPermission(Permission permission) throws StorageException {
         if (permissionsService.notAdmin(getUserId())) {
             permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
-            permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
+            permissionsService.checkPermission(permission.getPropertyClass(), getUserId(), permission.getPropertyId());
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.handler.AcknowledgementHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DefaultDataHandler;
@@ -32,9 +33,11 @@ import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
+import org.traccar.handler.GeofenceHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
+import org.traccar.handler.NetworkForwarderHandler;
 import org.traccar.handler.NetworkMessageHandler;
 import org.traccar.handler.OpenChannelHandler;
 import org.traccar.handler.RemoteAddressHandler;
@@ -59,16 +62,20 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
     private final Injector injector;
     private final TrackerConnector connector;
+    private final Config config;
     private final String protocol;
-    private int timeout;
+    private final int timeout;
 
     public BasePipelineFactory(TrackerConnector connector, Config config, String protocol) {
         this.injector = Main.getInjector();
         this.connector = connector;
+        this.config = config;
         this.protocol = protocol;
-        timeout = config.getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
+        int timeout = config.getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
-            timeout = config.getInteger(Keys.SERVER_TIMEOUT);
+            this.timeout = config.getInteger(Keys.SERVER_TIMEOUT);
+        } else {
+            this.timeout = timeout;
         }
     }
 
@@ -110,8 +117,17 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             pipeline.addLast(new IdleStateHandler(timeout, 0, 0));
         }
         pipeline.addLast(new OpenChannelHandler(connector));
+        if (config.hasKey(Keys.SERVER_FORWARD)) {
+            int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
+            var handler = new NetworkForwarderHandler(port);
+            injector.injectMembers(handler);
+            pipeline.addLast(handler);
+        }
         pipeline.addLast(new NetworkMessageHandler());
         pipeline.addLast(new StandardLoggingHandler(protocol));
+        if (!config.getBoolean(Keys.SERVER_INSTANT_ACKNOWLEDGEMENT)) {
+            pipeline.addLast(new AcknowledgementHandler());
+        }
 
         addProtocolHandlers(handler -> {
             if (handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder) {
@@ -134,6 +150,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 DistanceHandler.class,
                 RemoteAddressHandler.class,
                 FilterHandler.class,
+                GeofenceHandler.class,
                 GeocoderHandler.class,
                 SpeedLimitHandler.class,
                 MotionHandler.class,

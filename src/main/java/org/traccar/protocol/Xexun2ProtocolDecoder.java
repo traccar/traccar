@@ -156,7 +156,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                         for (int j = 0; j < wifiCount; j++) {
                             String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
                             network.addWifiAccessPoint(WifiAccessPoint.from(
-                                    mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
+                                    mac.substring(0, mac.length() - 1), buf.readByte()));
                         }
                     }
                     if (BitUtil.check(positionMask, 2)) {
@@ -164,7 +164,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                         for (int j = 0; j < cellCount; j++) {
                             network.addCellTower(CellTower.from(
                                     buf.readUnsignedShort(), buf.readUnsignedShort(),
-                                    buf.readInt(), buf.readUnsignedInt(), buf.readUnsignedByte()));
+                                    buf.readInt(), buf.readUnsignedInt(), buf.readByte()));
                         }
                     }
                     if (network.getWifiAccessPoints() != null || network.getCellTowers() != null) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,12 +32,14 @@ public class LogMailManager implements MailManager {
     }
 
     @Override
-    public void sendMessage(User user, String subject, String body) throws MessagingException {
-        sendMessage(user, subject, body, null);
+    public void sendMessage(
+            User user, boolean system, String subject, String body) throws MessagingException {
+        sendMessage(user, system, subject, body, null);
     }
 
     @Override
-    public void sendMessage(User user, String subject, String body, MimeBodyPart attachment) throws MessagingException {
+    public void sendMessage(
+            User user, boolean system, String subject, String body, MimeBodyPart attachment) throws MessagingException {
         LOGGER.info(
                 "Email sent\nTo: {}\nSubject: {}\nAttachment: {}\nBody:\n{}",
                 user.getEmail(), subject, attachment != null ? attachment.getFileName() : null, body);

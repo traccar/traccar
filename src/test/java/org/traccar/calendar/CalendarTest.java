@@ -1,7 +1,7 @@
 package org.traccar.calendar;
 
 import net.fortuna.ical4j.data.ParserException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.model.Calendar;
 
 import java.io.IOException;
@@ -11,7 +11,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CalendarTest {
     
@@ -45,14 +46,12 @@ public class CalendarTest {
         calendar.setData(calendarString.getBytes());
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
 
-        Date date = format.parse("2016-12-13 22:59:59+05");
-        assertTrue(!calendar.checkMoment(date));
-        date = format.parse("2016-12-13 23:00:01+05");
-        assertTrue(calendar.checkMoment(date));
+        assertFalse(calendar.checkMoment(format.parse("2016-12-13 22:59:59+05")));
+        assertTrue(calendar.checkMoment(format.parse("2016-12-13 23:00:01+05")));
+        assertTrue(calendar.checkMoment(format.parse("2016-12-13 06:59:59+05")));
+        assertFalse(calendar.checkMoment(format.parse("2016-12-13 07:00:01+05")));
 
-        date = format.parse("2016-12-13 06:59:59+05");
-        assertTrue(calendar.checkMoment(date));
-        date = format.parse("2016-12-13 07:00:01+05");
-        assertTrue(!calendar.checkMoment(date));
+        var periods = calendar.findPeriods(format.parse("2016-12-13 06:59:59+05"));
+        assertFalse(periods.isEmpty());
     }
 }

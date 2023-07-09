@@ -1,7 +1,7 @@
 package org.traccar.protocol;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class NavtelecomFrameDecoderTest extends ProtocolTest {
@@ -24,7 +24,7 @@ public class NavtelecomFrameDecoderTest extends ProtocolTest {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testDecodeFull() throws Exception {
 

@@ -63,8 +63,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:NA|(d+));")              // outputs
             .expression("(?:NA|([^;]*));")       // adc
             .expression("(?:NA|([^;]*));")       // ibutton
-            .expression("(?:NA|(.*))")           // params
+            .expression("(?:NA|([^;]*))")        // params
             .groupEnd("?")
+            .any()
             .compile();
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String type, Integer number) {

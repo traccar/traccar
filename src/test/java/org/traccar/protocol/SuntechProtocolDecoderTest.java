@@ -1,7 +1,7 @@
 package org.traccar.protocol;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -209,7 +209,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
     }
 
-    @Ignore
+    @Disabled
     @Test
     public void testDecodeCrash() throws Exception {
 

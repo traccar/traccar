@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -10,6 +10,28 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new Gl200TextProtocolDecoder(null));
+
+        verifyAttributes(decoder, buffer(
+                "+RESP:GTCAN,F1040C,862599050497393,GV350M,0,0,FFFFFFFF,,1,,,,,,,,,,,,,,,,,,,,,,,0,,,1,0.0,70,2961.6,-78.691750,-0.951135,20230703191659,,,,,,20230703191659,5A4A$"));
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTBAA,F1040C,862599050497393,GV350M,FF,3,0,04,000A,780541256AE9,3065,0,0.0,213,2908.3,-78.691944,-0.951426,20230511173150,,,,,,20230511175001,0159$"),
+                "accessoryVoltage", 3.065);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTBID,C20105,866833040163013,GV350M,1,0,000A,B80EA11FF800,2934,0,0.0,0,1506.5,-99.192686,18.932709,20221026025339,0334,0020,0232,029D4E02,,20221026181026,9F1D$"),
+                "accessoryVoltage", 2.934);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTDTT,410502,864802030541621,,,,1,35,45637561747261636b0d0a434f4d422c302c39342e302c2d312e302c2c2c4844430d0a,20230421034626,EA2E$"),
+                Position.KEY_FUEL_LEVEL, 94.0);
+
+        verifyNull(decoder, buffer(
+                "+RESP:GTFRI,5E0100,862061048023666,,,12940,10,1,1,0.0,97,179.8,-90.366478,38.735379,20230616183231,0310,0410,6709,03ADF710,00,6223.7,,,,,110000,,,,202306161834$"));
+
+        verifyAttribute(decoder, buffer(
+                "+BUFF:GTERI,410502,864802030794634,,00000001,,10,1,1,0.0,0,3027.8,-78.706612,-0.955699,20230418170736,0740,0002,A08C,2AB72D,00,0.0,,,,100,110000,1,0099,20230418171004,8B98$"),
+                Position.KEY_FUEL_LEVEL, 153);
 
         verifyPositions(decoder, false, buffer(
                 "+BUFF:GTFRI,2E0503,861106050005423,,,0,1,,,,,,,,,,,,0,0,,98,1,0,,,20200101000001,0083$"));

@@ -89,12 +89,17 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
-    public String getString(String key) {
+    public String getString(String key, String defaultValue) {
         if (attributes.containsKey(key)) {
-            return attributes.get(key).toString();
+            Object value = attributes.get(key);
+            return value != null ? value.toString() : null;
         } else {
-            return null;
+            return defaultValue;
         }
+    }
+
+    public String getString(String key) {
+        return getString(key, null);
     }
 
     public double getDouble(String key) {

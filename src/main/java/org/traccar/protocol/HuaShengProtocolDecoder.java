@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,10 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_UPFAULT_RSP = 0xFF13;
     public static final int MSG_HSO_REQ = 0x0002;
     public static final int MSG_HSO_RSP = 0x0003;
+    public static final int MSG_SET_REQ = 0xAA04;
+    public static final int MSG_SET_RSP = 0xFF05;
+    public static final int MSG_CTRL_REQ = 0xAA16;
+    public static final int MSG_CTRL_RSP = 0xFF17;
 
     private void sendResponse(Channel channel, int type, int index, ByteBuf content) {
         if (channel != null) {
@@ -232,6 +236,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() > 4) {
             int subtype = buf.readUnsignedShort();
             int length = buf.readUnsignedShort() - 4;
+            int endIndex = buf.readerIndex() + length;
             switch (subtype) {
                 case 0x0001:
                     int coolantTemperature = buf.readUnsignedByte() - 40;
@@ -249,6 +254,9 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
                     buf.readUnsignedInt(); // trip id
+                    if (buf.readerIndex() < endIndex) {
+                        position.set("adBlueLevel", buf.readUnsignedByte() * 0.4);
+                    }
                     break;
                 case 0x0005:
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
@@ -291,6 +299,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     buf.skipBytes(length);
                     break;
             }
+            buf.readerIndex(endIndex);
         }
 
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {

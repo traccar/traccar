@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
+import org.traccar.model.Command;
 
 import javax.inject.Inject;
 
@@ -26,10 +27,17 @@ public class HuaShengProtocol extends BaseProtocol {
 
     @Inject
     public HuaShengProtocol(Config config) {
+        setSupportedDataCommands(
+                Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_OUTPUT_CONTROL,
+                Command.TYPE_ALARM_ARM,
+                Command.TYPE_ALARM_DISARM,
+                Command.TYPE_SET_SPEED_LIMIT);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new HuaShengFrameDecoder());
+                pipeline.addLast(new HuaShengProtocolEncoder(HuaShengProtocol.this));
                 pipeline.addLast(new HuaShengProtocolDecoder(HuaShengProtocol.this));
             }
         });

@@ -18,15 +18,18 @@ package org.traccar.api.resource;
 import org.traccar.api.BaseResource;
 import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
+import org.traccar.database.OpenIdProvider;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.LogAction;
-import org.traccar.helper.ServletHelper;
+import org.traccar.helper.WebHelper;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import com.nimbusds.oauth2.sdk.ParseException;
+import javax.annotation.Nullable;
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.servlet.http.Cookie;
@@ -49,6 +52,7 @@ import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.net.URI;
 
 @Path("session")
 @Produces(MediaType.APPLICATION_JSON)
@@ -61,6 +65,10 @@ public class SessionResource extends BaseResource {
 
     @Inject
     private LoginService loginService;
+
+    @Inject
+    @Nullable
+    private OpenIdProvider openIdProvider;
 
     @Inject
     private TokenManager tokenManager;
@@ -76,7 +84,7 @@ public class SessionResource extends BaseResource {
             User user = loginService.login(token);
             if (user != null) {
                 request.getSession().setAttribute(USER_ID_KEY, user.getId());
-                LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
+                LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
                 return user;
             }
         }
@@ -103,7 +111,7 @@ public class SessionResource extends BaseResource {
                 User user = loginService.login(email, password);
                 if (user != null) {
                     request.getSession().setAttribute(USER_ID_KEY, user.getId());
-                    LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
+                    LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
                     return user;
                 }
             }
@@ -123,11 +131,11 @@ public class SessionResource extends BaseResource {
     @Path("{id}")
     @GET
     public User get(@PathParam("id") long userId) throws StorageException {
-        permissionsService.checkAdmin(getUserId());
+        permissionsService.checkUser(getUserId(), userId);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", userId)));
         request.getSession().setAttribute(USER_ID_KEY, user.getId());
-        LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
+        LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
         return user;
     }
 
@@ -138,17 +146,17 @@ public class SessionResource extends BaseResource {
         User user = loginService.login(email, password);
         if (user != null) {
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
-            LogAction.login(user.getId(), ServletHelper.retrieveRemoteAddress(request));
+            LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
             return user;
         } else {
-            LogAction.failedLogin(ServletHelper.retrieveRemoteAddress(request));
+            LogAction.failedLogin(WebHelper.retrieveRemoteAddress(request));
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
     }
 
     @DELETE
     public Response remove() {
-        LogAction.logout(getUserId(), ServletHelper.retrieveRemoteAddress(request));
+        LogAction.logout(getUserId(), WebHelper.retrieveRemoteAddress(request));
         request.getSession().removeAttribute(USER_ID_KEY);
         return Response.noContent().build();
     }
@@ -160,4 +168,21 @@ public class SessionResource extends BaseResource {
         return tokenManager.generateToken(getUserId(), expiration);
     }
 
+    @PermitAll
+    @Path("openid/auth")
+    @GET
+    public Response openIdAuth() throws IOException {
+        return Response.seeOther(openIdProvider.createAuthUri()).build();
+    }
+
+    @PermitAll
+    @Path("openid/callback")
+    @GET
+    public Response requestToken() throws IOException, StorageException, ParseException, GeneralSecurityException {
+        StringBuilder requestUrl = new StringBuilder(request.getRequestURL().toString());
+        String queryString = request.getQueryString();
+        String requestUri = requestUrl.append('?').append(queryString).toString();
+
+        return Response.seeOther(openIdProvider.handleCallback(URI.create(requestUri), request)).build();
+    }
 }

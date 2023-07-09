@@ -1,13 +1,13 @@
 package org.traccar.database;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GroupTreeTest {
 

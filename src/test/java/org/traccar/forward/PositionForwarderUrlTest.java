@@ -1,13 +1,13 @@
 package org.traccar.forward;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

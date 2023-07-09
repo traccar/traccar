@@ -19,6 +19,7 @@ import org.traccar.api.signature.TokenManager;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
+import org.traccar.helper.model.UserUtil;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -35,21 +36,25 @@ import java.security.GeneralSecurityException;
 @Singleton
 public class LoginService {
 
+    private final Config config;
     private final Storage storage;
     private final TokenManager tokenManager;
     private final LdapProvider ldapProvider;
 
     private final String serviceAccountToken;
     private final boolean forceLdap;
+    private final boolean forceOpenId;
 
     @Inject
     public LoginService(
             Config config, Storage storage, TokenManager tokenManager, @Nullable LdapProvider ldapProvider) {
         this.storage = storage;
+        this.config = config;
         this.tokenManager = tokenManager;
         this.ldapProvider = ldapProvider;
         serviceAccountToken = config.getString(Keys.WEB_SERVICE_ACCOUNT_TOKEN);
         forceLdap = config.getBoolean(Keys.LDAP_FORCE);
+        forceOpenId = config.getBoolean(Keys.OPENID_FORCE);
     }
 
     public User login(String token) throws StorageException, GeneralSecurityException, IOException {
@@ -66,6 +71,10 @@ public class LoginService {
     }
 
     public User login(String email, String password) throws StorageException {
+        if (forceOpenId) {
+            return null;
+        }
+
         email = email.trim();
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
@@ -87,6 +96,27 @@ public class LoginService {
             }
         }
         return null;
+    }
+
+    public User login(String email, String name, Boolean administrator) throws StorageException {
+        User user = storage.getObject(User.class, new Request(
+            new Columns.All(),
+            new Condition.Equals("email", email)));
+
+        if (user != null) {
+            checkUserEnabled(user);
+            return user;
+        } else {
+            user = new User();
+            UserUtil.setUserDefaults(user, config);
+            user.setName(name);
+            user.setEmail(email);
+            user.setFixedEmail(true);
+            user.setAdministrator(administrator);
+            user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
+            checkUserEnabled(user);
+            return user;
+        }
     }
 
     private void checkUserEnabled(User user) throws SecurityException {

@@ -48,6 +48,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DATA = 0x01;
     public static final int MSG_CONFIGURATION = 0x02;
     public static final int MSG_SERVICES = 0x03;
+    public static final int MSG_SYSTEM_CONTROL = 0x04;
+    public static final int MSG_FIRMWARE = 0x7E;
     public static final int MSG_RESPONSE = 0x7F;
 
     private String decodeAlarm(long code) {
@@ -149,7 +151,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, remoteAddress, index, type, buf);
         }
 
-        if (type == MSG_DATA) {
+        if (type == MSG_DATA || type == MSG_SERVICES) {
 
             List<Position> positions = new LinkedList<>();
             Set<Integer> keys = new HashSet<>();
@@ -237,6 +239,14 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x24:
                         position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
                         long status = buf.readUnsignedIntLE();
+                        if (BitUtil.check(status, 4)) {
+                            position.set(Position.KEY_CHARGE, true);
+                        }
+                        if (BitUtil.check(status, 7)) {
+                            position.set(Position.KEY_ARCHIVE, true);
+                        }
+                        position.set(Position.KEY_MOTION, BitUtil.check(status, 9));
+                        position.set(Position.KEY_RSSI, BitUtil.between(status, 19, 24));
                         position.set(Position.KEY_BATTERY_LEVEL, BitUtil.from(status, 24));
                         position.set(Position.KEY_STATUS, status);
                         break;
@@ -276,6 +286,14 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             position.set("activity" + i, buf.readUnsignedIntLE());
                             i += 1;
                         }
+                        break;
+                    case 0x37:
+                        buf.readUnsignedIntLE(); // timestamp
+                        long barking = buf.readUnsignedIntLE();
+                        if (BitUtil.check(barking, 31)) {
+                            position.set("barkStop", true);
+                        }
+                        position.set("barkCount", BitUtil.to(barking, 31));
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp

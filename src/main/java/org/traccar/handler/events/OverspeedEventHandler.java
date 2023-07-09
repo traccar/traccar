@@ -84,8 +84,8 @@ public class OverspeedEventHandler extends BaseEventHandler {
         double geofenceSpeedLimit = 0;
         long overspeedGeofenceId = 0;
 
-        if (device.getGeofenceIds() != null) {
-            for (long geofenceId : device.getGeofenceIds()) {
+        if (position.getGeofenceIds() != null) {
+            for (long geofenceId : position.getGeofenceIds()) {
                 Geofence geofence = cacheManager.getObject(Geofence.class, geofenceId);
                 if (geofence != null) {
                     double currentSpeedLimit = geofence.getDouble(Keys.EVENT_OVERSPEED_LIMIT.getKey());

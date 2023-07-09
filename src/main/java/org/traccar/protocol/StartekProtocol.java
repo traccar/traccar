@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public class StartekProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LineBasedFrameDecoder(1024));
+                pipeline.addLast(new LineBasedFrameDecoder(1100));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StartekProtocolEncoder(StartekProtocol.this));

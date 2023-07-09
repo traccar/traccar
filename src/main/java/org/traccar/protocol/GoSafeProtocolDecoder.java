@@ -93,14 +93,14 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
                     position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(values[index - 1])));
                 }
                 position.setCourse(Integer.parseInt(values[index++]));
-                if (index < values.length) {
-                    position.setAltitude(Integer.parseInt(values[index++]));
+                if (index < values.length && !values[index++].isEmpty()) {
+                    position.setAltitude(Integer.parseInt(values[index - 1]));
                 }
-                if (index < values.length) {
-                    position.set(Position.KEY_HDOP, Double.parseDouble(values[index++]));
+                if (index < values.length && !values[index++].isEmpty()) {
+                    position.set(Position.KEY_HDOP, Double.parseDouble(values[index - 1]));
                 }
-                if (index < values.length) {
-                    position.set(Position.KEY_VDOP, Double.parseDouble(values[index++]));
+                if (index < values.length && !values[index++].isEmpty()) {
+                    position.set(Position.KEY_VDOP, Double.parseDouble(values[index - 1]));
                 }
                 break;
             case "GSM":

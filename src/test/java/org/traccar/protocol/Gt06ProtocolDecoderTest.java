@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -16,6 +16,21 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, binary(
                 "78780D01086471700328358100093F040D0A"));
+
+        verifyAttribute(decoder, binary(
+                "78782416160501000221c0027c5e180c2b9c8d00150301cc002503002bde20050f01000004bd320d0a"),
+                Position.KEY_ALARM, Position.ALARM_SOS);
+
+        verifyAttribute(decoder, binary(
+                "78780a130604ea04000006bc8a0d0a"),
+                Position.KEY_POWER, 0.0);
+
+        verifyAttributes(decoder, binary(
+                "797900849404414c4d313d43353b414c4d323d43433b414c4d333d35433b535441313d43303b4459443d30313b534f533d303133323838333730302c2c3b43454e5445523d303133323838333730303b46454e43453d46656e63652c4f46462c302c302e3030303030302c302e3030303030302c3330302c494e206f72204f55542c313b00b79d120d0a"));
+
+        verifyAttribute(decoder, binary(
+                "78782912170316053b3bcf015b51220af1201105d56100000000000000000000869c0130010000000238d1af0d0a"),
+                Position.KEY_DRIVING_TIME, 0);
 
         verifyAttribute(decoder, binary(
                 "78781219012ed042cc00954d00040419000056fe290d0a"),
@@ -186,7 +201,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, binary(
                 "79790008940000ed0289d6860d0a"));
 
-        verifyNull(decoder, binary(
+        verifyAttributes(decoder, binary(
                 "797900a59404414c4d313d34353b414c4d323d44353b414c4d333d35353b535441313d34303b4459443d30313b534f533d303538353036313536372c2c3b43454e5445523d3b46454e43453d46656e63652c4f46462c302c302e3030303030302c302e3030303030302c3330302c494e206f72204f55542c303b49434349443d38393937313033313031303038393539303432463b4d4f44453d4d4f44452c312c3138303b0008f65e0d0a"));
 
         verifyPosition(decoder, binary(

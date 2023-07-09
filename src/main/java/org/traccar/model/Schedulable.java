@@ -1,5 +1,6 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.protocol;
+package org.traccar.model;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import org.traccar.BaseFrameDecoder;
-
-public class NdtpV6FrameDecoder extends BaseFrameDecoder {
-
-    @Override
-    protected Object decode(
-            ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
-
-        return buf;
-    }
-
+public interface Schedulable {
+    long getCalendarId();
+    void setCalendarId(long calendarId);
 }

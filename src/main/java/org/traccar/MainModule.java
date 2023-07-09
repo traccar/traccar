@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,14 @@ import com.google.inject.name.Names;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.apache.velocity.app.VelocityEngine;
-import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.broadcast.MulticastBroadcastService;
+import org.traccar.broadcast.RedisBroadcastService;
 import org.traccar.broadcast.NullBroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
+import org.traccar.database.OpenIdProvider;
 import org.traccar.database.StatisticsManager;
 import org.traccar.forward.EventForwarder;
 import org.traccar.forward.EventForwarderJson;
@@ -41,6 +42,7 @@ import org.traccar.forward.EventForwarderMqtt;
 import org.traccar.forward.PositionForwarder;
 import org.traccar.forward.PositionForwarderJson;
 import org.traccar.forward.PositionForwarderKafka;
+import org.traccar.forward.PositionForwarderRedis;
 import org.traccar.forward.PositionForwarderUrl;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
@@ -73,6 +75,7 @@ import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.SanitizerModule;
+import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
 import org.traccar.mail.SmtpMailManager;
@@ -83,16 +86,18 @@ import org.traccar.sms.SnsSmsClient;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
 import org.traccar.storage.DatabaseStorage;
+import org.traccar.storage.MemoryStorage;
 import org.traccar.storage.Storage;
 import org.traccar.web.WebServer;
+import org.traccar.api.security.LoginService;
 
 import javax.annotation.Nullable;
 import javax.inject.Singleton;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
 import java.util.Properties;
 
 public class MainModule extends AbstractModule {
@@ -107,8 +112,17 @@ public class MainModule extends AbstractModule {
     protected void configure() {
         bindConstant().annotatedWith(Names.named("configFile")).to(configFile);
         bind(Config.class).asEagerSingleton();
-        bind(Storage.class).to(DatabaseStorage.class).in(Scopes.SINGLETON);
         bind(Timer.class).to(HashedWheelTimer.class).in(Scopes.SINGLETON);
+    }
+
+    @Singleton
+    @Provides
+    public static Storage provideStorage(Injector injector, Config config) {
+        if (config.getBoolean(Keys.DATABASE_MEMORY)) {
+            return injector.getInstance(MemoryStorage.class);
+        } else {
+            return injector.getInstance(DatabaseStorage.class);
+        }
     }
 
     @Singleton
@@ -155,6 +169,17 @@ public class MainModule extends AbstractModule {
     public static LdapProvider provideLdapProvider(Config config) {
         if (config.hasKey(Keys.LDAP_URL)) {
             return new LdapProvider(config);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static OpenIdProvider provideOpenIDProvider(
+        Config config, LoginService loginService, ObjectMapper objectMapper
+        ) throws InterruptedException, IOException, URISyntaxException {
+        if (config.hasKey(Keys.OPENID_CLIENT_ID)) {
+            return new OpenIdProvider(config, loginService, HttpClient.newHttpClient(), objectMapper);
         }
         return null;
     }
@@ -316,8 +341,15 @@ public class MainModule extends AbstractModule {
     @Provides
     public static BroadcastService provideBroadcastService(
             Config config, ObjectMapper objectMapper) throws IOException {
-        if (config.hasKey(Keys.BROADCAST_ADDRESS)) {
-            return new MulticastBroadcastService(config, objectMapper);
+        if (config.hasKey(Keys.BROADCAST_TYPE)) {
+            switch (config.getString(Keys.BROADCAST_TYPE)) {
+                case "multicast":
+                    return new MulticastBroadcastService(config, objectMapper);
+                case "redis":
+                    return new RedisBroadcastService(config, objectMapper);
+                default:
+                    break;
+            }
         }
         return new NullBroadcastService();
     }
@@ -332,6 +364,7 @@ public class MainModule extends AbstractModule {
                     return new EventForwarderKafka(config, objectMapper);
                 case "mqtt":
                     return new EventForwarderMqtt(config, objectMapper);
+                case "json":
                 default:
                     return new EventForwarderJson(config, client);
             }
@@ -348,6 +381,9 @@ public class MainModule extends AbstractModule {
                     return new PositionForwarderJson(config, client, objectMapper);
                 case "kafka":
                     return new PositionForwarderKafka(config, objectMapper);
+                case "redis":
+                    return new PositionForwarderRedis(config, objectMapper);
+                case "url":
                 default:
                     return new PositionForwarderUrl(config, client, objectMapper);
             }
@@ -360,19 +396,7 @@ public class MainModule extends AbstractModule {
     public static VelocityEngine provideVelocityEngine(Config config) {
         Properties properties = new Properties();
         properties.setProperty("resource.loader.file.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
-
-        if (config.hasKey(Keys.WEB_URL)) {
-            properties.setProperty("web.url", config.getString(Keys.WEB_URL).replaceAll("/$", ""));
-        } else {
-            String address;
-            try {
-                address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
-            } catch (UnknownHostException e) {
-                address = "localhost";
-            }
-            String url = URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
-            properties.setProperty("web.url", url);
-        }
+        properties.setProperty("web.url", WebHelper.retrieveWebUrl(config));
 
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.init(properties);
