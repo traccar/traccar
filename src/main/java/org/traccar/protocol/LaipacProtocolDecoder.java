@@ -28,6 +28,7 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.Device;
 import org.traccar.helper.BitUtil;
 
 import java.net.SocketAddress;
