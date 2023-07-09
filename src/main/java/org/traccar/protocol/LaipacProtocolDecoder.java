@@ -113,17 +113,22 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         if (event.length() == 1) {
             char inputStatus = event.charAt(0);
+            String deviceModel = device.getModel();
             if (inputStatus >= 'A' && inputStatus <= 'D') {
                 int inputStatusInt = inputStatus - 'A';
-                position.set(Position.PREFIX_IN + 1, BitUtil.check(inputStatusInt, 0));
-                position.set(Position.PREFIX_IN + 2, BitUtil.check(inputStatusInt, 1));
-                position.set(Position.PREFIX_IN + 3, 0);
+                position.set(Position.PREFIX_IN + 1, (boolean) BitUtil.check(inputStatusInt, 0));
+                position.set(Position.PREFIX_IN + 2, (boolean) BitUtil.check(inputStatusInt, 1));
+                if (deviceModel == "SF-Lite") {
+                    position.set(Position.PREFIX_IN + 3, false);
+                }
                 return null;
             } else if (inputStatus >= 'O' && inputStatus <= 'R') {
                 int inputStatusInt = inputStatus - 'O';
-                position.set(Position.PREFIX_IN + 1, BitUtil.check(inputStatusInt, 0));
-                position.set(Position.PREFIX_IN + 2, BitUtil.check(inputStatusInt, 1));
-                position.set(Position.PREFIX_IN + 3, 1);
+                position.set(Position.PREFIX_IN + 1, (boolean) BitUtil.check(inputStatusInt, 0));
+                position.set(Position.PREFIX_IN + 2, (boolean) BitUtil.check(inputStatusInt, 1));
+                if (deviceModel == "SF-Lite") {
+                    position.set(Position.PREFIX_IN + 3, true);
+                }
                 return null;
             }
         }
@@ -247,7 +252,11 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_GPS, parser.nextInt());
         position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
-        position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
+        
+        String deviceModel = device.getModel();
+        if (deviceModel == "AVL110" || deviceModel == "AVL120") {
+            position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
+        }
 
         Integer lac = parser.nextHexInt();
         Integer cid = parser.nextHexInt();
