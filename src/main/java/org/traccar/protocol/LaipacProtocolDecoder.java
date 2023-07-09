@@ -220,22 +220,21 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String deviceId = parser.next();
-
         DeviceSession deviceSession =
-            getDeviceSession(channel, remoteAddress, deviceId);
+            getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
 
         String deviceModel = null;
-        Device device = getCacheManager().getObject(Device.class, deviceId);
+        Device device = getCacheManager().getObject(Device.class, deviceSession.getDeviceId());
         if (device != null) {
             deviceModel = device.getModel();
         }
 
         Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceId);
+
+        position.setDeviceId(deviceSession.getDeviceId());
         DateBuilder dateBuilder = new DateBuilder()
                 .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
@@ -281,7 +280,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             sendAcknowledge(status, event, checksum, channel, remoteAddress);
 
             String devicePassword = AttributeUtil.getDevicePassword(
-                    getCacheManager(), deviceId, getProtocolName(), DEFAULT_DEVICE_PASSWORD);
+                    getCacheManager(), deviceSession.getDeviceId(), getProtocolName(), DEFAULT_DEVICE_PASSWORD);
             sendEventResponse(event, devicePassword, channel, remoteAddress);
         }
 
