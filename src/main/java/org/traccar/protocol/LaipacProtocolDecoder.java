@@ -231,6 +231,9 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         if (device != null) {
             deviceModel = device.getModel();
         }
+        if (deviceModel == null) {
+            deviceModel = "";
+        }
 
         Position position = new Position(getProtocolName());
 
@@ -261,6 +264,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         if ("AVL110".equals(deviceModel) || "AVL120".equals(deviceModel)) {
             position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
+        } else {
+            parser.next();
         }
 
         Integer lac = parser.nextHexInt();
