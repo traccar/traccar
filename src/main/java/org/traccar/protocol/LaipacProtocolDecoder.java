@@ -110,7 +110,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeEvent(String event, Position position, String deviceModel) {
+    private String decodeEvent(String event, Position position, String model) {
 
         if (event.length() == 1) {
             char inputStatus = event.charAt(0);
@@ -118,7 +118,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
                 int inputStatusInt = inputStatus - 'A';
                 position.set(Position.PREFIX_IN + 1, (boolean) BitUtil.check(inputStatusInt, 0));
                 position.set(Position.PREFIX_IN + 2, (boolean) BitUtil.check(inputStatusInt, 1));
-                if ("SF-Lite".equals(deviceModel)) {
+                if ("SF-Lite".equals(model)) {
                     position.set(Position.PREFIX_IN + 3, false);
                 }
                 return null;
@@ -126,7 +126,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
                 int inputStatusInt = inputStatus - 'O';
                 position.set(Position.PREFIX_IN + 1, (boolean) BitUtil.check(inputStatusInt, 0));
                 position.set(Position.PREFIX_IN + 2, (boolean) BitUtil.check(inputStatusInt, 1));
-                if ("SF-Lite".equals(deviceModel)) {
+                if ("SF-Lite".equals(model)) {
                     position.set(Position.PREFIX_IN + 3, true);
                 }
                 return null;
@@ -226,11 +226,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String deviceModel = null;
-        Device device = getCacheManager().getObject(Device.class, deviceSession.getDeviceId());
-        if (device != null) {
-            deviceModel = device.getModel();
-        }
+        String model = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
 
         Position position = new Position(getProtocolName());
 
@@ -253,13 +249,13 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         String event = parser.next();
         position.set(Position.KEY_ALARM, decodeAlarm(event));
-        position.set(Position.KEY_EVENT, decodeEvent(event, position, deviceModel));
+        position.set(Position.KEY_EVENT, decodeEvent(event, position, model));
         position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next().replaceAll("\\.", "")) * 0.001);
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_GPS, parser.nextInt());
         position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
 
-        if ("AVL110".equals(deviceModel) || "AVL120".equals(deviceModel)) {
+        if ("AVL110".equals(model) || "AVL120".equals(model)) {
             position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
         } else {
             parser.next();
