@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,7 +148,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
 
         if (BitUtil.check(flags, 4)) {
-            sendResponse(channel, remoteAddress, index, type, buf);
+            sendResponse(channel, remoteAddress, index, type, buf.slice());
         }
 
         if (type == MSG_DATA || type == MSG_SERVICES) {
@@ -179,8 +179,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x01:
                         deviceSession = getDeviceSession(
                                 channel, remoteAddress, buf.readCharSequence(15, StandardCharsets.US_ASCII).toString());
-
-                        position.setDeviceId(deviceSession.getDeviceId());
+                        if (deviceSession == null) {
+                            return null;
+                        }
                         break;
                     case 0x02:
                         long alarm = buf.readUnsignedIntLE();
