@@ -17,6 +17,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "78780D01086471700328358100093F040D0A"));
 
+        /*verifyAttribute(decoder, binary(
+                "797900109b0344373532304136320d0a000f87f00d0a"),
+                Position.KEY_DRIVER_UNIQUE_ID, "44373532304136320d0a");*/
+
         verifyAttribute(decoder, binary(
                 "7878241617070a150e24ca01fba0040780e177005c0001720253360027db6204e40400004bf1e90d0a"),
                 Position.KEY_ALARM, Position.ALARM_SOS);
@@ -111,8 +115,9 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "7878281520000000003c49434349443a38393838323339303030303039373330323635303e00020d446f260d0a"),
                 Position.KEY_ICCID, "89882390000097302650");
 
-        verifyNull(decoder, binary(
-                "797900099b0380d600046f91e90d0a"));
+        verifyAttribute(decoder, binary(
+                "797900099b0380d600046f91e90d0a"),
+                Position.KEY_RESULT, "80d600");
 
         verifyNull(decoder, binary(
                 "797900a56615010d081f3b012c323131303d30303033643238342c323130353d30303030316332302c323130623d30303030326537632c323130633d30303033643238342c323130663d30303030306331632c323130643d30303030323166632c323161363d30303030303030302c323130343d30303030306531302c323132663d30303030303030302c323134353d30303030303030302ccb03851f5f03c020525514a7003e216a0d0a"));
@@ -125,7 +130,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "7979000E9B0332382E33A1E60D0A0289BE490D0A"),
-                Position.PREFIX_TEMP + 1, 28.3);
+                Position.KEY_RESULT, "32382e33a1e60d0a");
 
         verifyPosition(decoder, binary(
                 "7878353714080d05000ac500a886eb0b7522f000100001fe0a05ea004f1b000001002e0400002328003b0217c0003c0401020001002c468a0d0a"));
@@ -168,7 +173,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "797900149b03023539303042343843454238410300139ba40d0a"),
-                Position.KEY_DRIVER_UNIQUE_ID, "5900B48CEB");
+                Position.KEY_RESULT, "0235393030423438434542384103");
 
         verifyPosition(decoder, binary(
                 "787821121303120b2524c70138e363085b549003d43301940057d200cd52c000006aa1ca0d0a"));

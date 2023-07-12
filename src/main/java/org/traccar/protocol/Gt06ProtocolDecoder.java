@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BufferUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -1382,19 +1383,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             buf.readUnsignedByte(); // external device type code
-            int length = buf.readableBytes() - 9; // line break + checksum + index + checksum + footer
 
-            if (length <= 0) {
-                return null;
-            } else if (length < 8) {
-                position.set(
-                        Position.PREFIX_TEMP + 1,
-                        Double.parseDouble(buf.readCharSequence(length - 1, StandardCharsets.US_ASCII).toString()));
+            ByteBuf data = buf.readSlice(buf.readableBytes() - 6); // index + checksum + footer
+            if (BufferUtil.isPrintable(data, data.readableBytes())) {
+                String value = data.readCharSequence(data.readableBytes(), StandardCharsets.US_ASCII).toString();
+                position.set(Position.KEY_RESULT, value.trim());
             } else {
-                buf.readUnsignedByte(); // card type
-                position.set(
-                        Position.KEY_DRIVER_UNIQUE_ID,
-                        buf.readCharSequence(length - 1, StandardCharsets.US_ASCII).toString());
+                position.set(Position.KEY_RESULT, ByteBufUtil.hexDump(data));
             }
 
             return position;
