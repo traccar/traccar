@@ -96,7 +96,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_INFO = 0x94;
     public static final int MSG_SERIAL = 0x9B;
     public static final int MSG_STRING_INFO = 0x21;
-    public static final int MSG_GPS_2 = 0xA0;              // GK310
+    public static final int MSG_GPS_LBS_7 = 0xA0;          // GK310 & JM-VL03
     public static final int MSG_LBS_2 = 0xA1;              // GK310
     public static final int MSG_WIFI_3 = 0xA2;             // GK310
     public static final int MSG_FENCE_SINGLE = 0xA3;       // GK310
@@ -170,7 +170,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_STATUS_4:
             case MSG_GPS_PHONE:
             case MSG_GPS_LBS_EXTEND:
-            case MSG_GPS_2:
+            case MSG_GPS_LBS_7:
             case MSG_FENCE_SINGLE:
             case MSG_FENCE_MULTI:
                 return true;
@@ -192,7 +192,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_STATUS_2:
             case MSG_GPS_LBS_STATUS_3:
             case MSG_GPS_LBS_STATUS_4:
-            case MSG_GPS_2:
+            case MSG_GPS_LBS_7:
             case MSG_FENCE_SINGLE:
             case MSG_FENCE_MULTI:
             case MSG_LBS_ALARM:
@@ -351,7 +351,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             lac = buf.readUnsignedShort();
         }
         long cid;
-        if (type == MSG_LBS_ALARM) {
+        if (type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7) {
             cid = buf.readLong();
         } else if (type == MSG_GPS_LBS_6) {
             cid = buf.readUnsignedInt();
@@ -917,6 +917,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         buf.skipBytes(subLength);
                         break;
                 }
+            }
+
+            if (type == MSG_GPS_LBS_7) {
+                position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+                buf.readUnsignedByte(); // upload mode
+                position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0 ? true : null);
             }
 
             if (buf.readableBytes() == 4 + 6) {
