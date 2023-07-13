@@ -324,6 +324,23 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
             return positions;
 
+        } else if (type == MSG_RESPONSE) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            buf.readUnsignedByte(); // length
+            position.set(Position.KEY_RESULT, String.valueOf(buf.readUnsignedByte()));
+
+            return position;
+
         }
 
         return null;
