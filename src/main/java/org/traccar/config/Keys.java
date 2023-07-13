@@ -837,7 +837,15 @@ public final class Keys {
             "url");
 
     /**
-     * Position forwarding Kafka topic.
+     * Position forwarding AMQP exchange.
+     */
+    public static final ConfigKey<String> FORWARD_EXCHANGE = new StringConfigKey(
+            "forward.exchange",
+            List.of(KeyType.CONFIG),
+            "traccar");
+
+    /**
+     * Position forwarding Kafka topic or AQMP Routing Key.
      */
     public static final ConfigKey<String> FORWARD_TOPIC = new StringConfigKey(
             "forward.topic",
@@ -906,7 +914,15 @@ public final class Keys {
             "json");
 
     /**
-     * Events forwarding Kafka topic.
+     * Events forwarding AMQP exchange.
+     */
+    public static final ConfigKey<String> EVENT_FORWARD_EXCHANGE = new StringConfigKey(
+            "event.forward.exchange",
+            List.of(KeyType.CONFIG),
+            "traccar");
+
+    /**
+     * Events forwarding Kafka topic or AQMP Routing Key.
      */
     public static final ConfigKey<String> EVENT_FORWARD_TOPIC = new StringConfigKey(
             "event.forward.topic",
