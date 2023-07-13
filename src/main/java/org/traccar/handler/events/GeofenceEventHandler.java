@@ -16,15 +16,9 @@
 package org.traccar.handler.events;
 
 import io.netty.channel.ChannelHandler;
-<<<<<<< HEAD
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.traccar.config.Config;
 import org.traccar.database.CommandsManager;
-import org.traccar.helper.model.GeofenceUtil;
-=======
->>>>>>> upstream/master
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.*;
 import org.traccar.model.Calendar;
@@ -45,15 +39,9 @@ import java.util.Map;
 @ChannelHandler.Sharable
 public class GeofenceEventHandler extends BaseEventHandler {
 
-<<<<<<< HEAD
     private static final Logger LOGGER = LoggerFactory.getLogger(Geofence.class);
-    private final Config config;
-=======
->>>>>>> upstream/master
     private final CacheManager cacheManager;
-
     private CommandsManager commandsManager;
-
     @Inject
     public GeofenceEventHandler(CacheManager cacheManager) {
         this.cacheManager = cacheManager;
@@ -80,40 +68,33 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
         Map<Event, Position> events = new HashMap<>();
         for (long geofenceId : oldGeofences) {
-<<<<<<< HEAD
-            long calendarId = cacheManager.getObject(Geofence.class, geofenceId).getCalendarId();
-            Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
-            if (calendar == null || calendar.checkMoment(position.getFixTime())) {
-                Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position);
-
-                if(cacheManager.getObject(Geofence.class, geofenceId).getStopOut()) {
-                    Command command = new Command();
-                    command.setDeviceId(position.getDeviceId());
-                    command.setType(Command.TYPE_ENGINE_STOP);
-
-                    try {
-                        if (!commandsManager.sendCommand(command)) {
-                            LOGGER.info("FoxGPS - BLOQUEIO SAIU DA CERCA:" + Response.accepted(command).build());
-                        }
-                    } catch (Exception e) {
-                        LOGGER.warn("FoxGPS - BLOQUEIO SAIU DA CERCA:" + e.getMessage());
-                    }
-
-                    event.setGeofenceId(geofenceId);
-                    events.put(event, position);
-                }
-
-=======
             Geofence geofence = cacheManager.getObject(Geofence.class, geofenceId);
             if (geofence != null) {
                 long calendarId = geofence.getCalendarId();
                 Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
                 if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                     Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position);
+
+                    if(cacheManager.getObject(Geofence.class, geofenceId).getStopOut()) {  // INICIO BLOQUEIO AO SAIR
+                        Command command = new Command();
+                        command.setDeviceId(position.getDeviceId());
+                        command.setType(Command.TYPE_ENGINE_STOP);
+
+                        try {
+                            if (!commandsManager.sendCommand(command)) {
+                                LOGGER.info("FoxGPS - BLOQUEIO SAIU DA CERCA:" + Response.accepted(command).build());
+                            }
+                        } catch (Exception e) {
+                            LOGGER.warn("FoxGPS - BLOQUEIO SAIU DA CERCA:" + e.getMessage());
+                        }
+
+                        event.setGeofenceId(geofenceId);
+                        events.put(event, position);  // FIM BLOQUEIO AO SAIR
+                    }
                     event.setGeofenceId(geofenceId);
                     events.put(event, position);
+
                 }
->>>>>>> upstream/master
             }
         }
         for (long geofenceId : newGeofences) {
@@ -122,7 +103,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position);
 
-                if(cacheManager.getObject(Geofence.class, geofenceId).getStopIn()) {
+                if(cacheManager.getObject(Geofence.class, geofenceId).getStopIn()) {  // INICIO BLOQUEIO AO ENTRAR
                     Command command = new Command();
                     command.setDeviceId(position.getDeviceId());
                     command.setType(Command.TYPE_ENGINE_STOP);
@@ -137,7 +118,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
                     event.setGeofenceId(geofenceId);
                     events.put(event, position);
-                }
+                }  // FIM BLOQUEIO AO ENTRAR
 
                 event.setGeofenceId(geofenceId);
                 events.put(event, position);
