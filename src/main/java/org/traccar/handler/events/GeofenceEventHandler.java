@@ -104,7 +104,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position);
 
 
-                if(cacheManager.getObject(Geofence.class, geofenceId).getStopIn()) {
+                if (cacheManager.getObject(Geofence.class, geofenceId).getStopIn()) {
                     Command command = new Command();
                     command.setDeviceId(position.getDeviceId());
                     command.setType(Command.TYPE_ENGINE_STOP);
