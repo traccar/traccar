@@ -20,8 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.model.PositionUtil;
-import org.traccar.model.*;
 import org.traccar.model.Calendar;
+import org.traccar.model.Command;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
@@ -75,7 +75,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
                 if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                     Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position);
 
-                    if(cacheManager.getObject(Geofence.class, geofenceId).getStopOut()) {  // INICIO BLOQUEIO AO SAIR
+                    if(cacheManager.getObject(Geofence.class, geofenceId).getStopOut()) {
                         Command command = new Command();
                         command.setDeviceId(position.getDeviceId());
                         command.setType(Command.TYPE_ENGINE_STOP);
@@ -89,7 +89,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
                         }
 
                         event.setGeofenceId(geofenceId);
-                        events.put(event, position);  // FIM BLOQUEIO AO SAIR
+                        events.put(event, position);
                     }
                     event.setGeofenceId(geofenceId);
                     events.put(event, position);
@@ -103,7 +103,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position);
 
-                if(cacheManager.getObject(Geofence.class, geofenceId).getStopIn()) {  // INICIO BLOQUEIO AO ENTRAR
+                if(cacheManager.getObject(Geofence.class, geofenceId).getStopIn()) {
                     Command command = new Command();
                     command.setDeviceId(position.getDeviceId());
                     command.setType(Command.TYPE_ENGINE_STOP);
@@ -118,7 +118,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
                     event.setGeofenceId(geofenceId);
                     events.put(event, position);
-                }  // FIM BLOQUEIO AO ENTRAR
+                }
 
                 event.setGeofenceId(geofenceId);
                 events.put(event, position);
