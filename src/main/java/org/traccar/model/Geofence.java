@@ -62,21 +62,21 @@ public class Geofence extends ExtendedModel implements Schedulable {
 
     private boolean stopOut;
 
-    public boolean getStopOut(){
+    public boolean getStopOut() {
         return stopOut;
     }
 
-    public void setStopOut(Boolean valueStopOut){
+    public void setStopOut(Boolean valueStopOut) {
         this.stopOut = valueStopOut;
     }
 
     private boolean stopIn;
 
-    public boolean getStopIn(){
+    public boolean getStopIn() {
         return stopIn;
     }
 
-    public void setStopIn(Boolean valueStopIn){
+    public void setStopIn(Boolean valueStopIn) {
         this.stopIn = valueStopIn;
     }
 
