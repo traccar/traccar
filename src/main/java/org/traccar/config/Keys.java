@@ -234,6 +234,13 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
+     * Disable commands for the protocol. Not all protocols support this option.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_DISABLE_COMMANDS = new BooleanConfigSuffix(
+            ".disableCommands",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Protocol format. Used by protocols that have configurable message format.
      */
     public static final ConfigSuffix<String> PROTOCOL_FORMAT = new StringConfigSuffix(
