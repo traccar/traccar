@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -323,6 +323,23 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             return positions;
+
+        } else if (type == MSG_RESPONSE) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            buf.readUnsignedByte(); // length
+            position.set(Position.KEY_RESULT, String.valueOf(buf.readUnsignedByte()));
+
+            return position;
 
         }
 
