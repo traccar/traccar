@@ -32,6 +32,7 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
+import org.traccar.geocoder.CustomGeocoder;
 import org.traccar.geocoder.FactualGeocoder;
 import org.traccar.geocoder.GeocodeFarmGeocoder;
 import org.traccar.geocoder.GeocodeXyzGeocoder;
@@ -182,6 +183,8 @@ public class MainModule extends AbstractModule {
                     return new TomTomGeocoder(url, key, cacheSize, addressFormat);
                 case "positionstack":
                     return new PositionStackGeocoder(key, cacheSize, addressFormat);
+                case "custom":
+                    return new CustomGeocoder(url, cacheSize);
                 default:
                     return new GoogleGeocoder(key, language, cacheSize, addressFormat);
             }
