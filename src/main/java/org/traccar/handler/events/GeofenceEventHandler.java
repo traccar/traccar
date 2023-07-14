@@ -75,7 +75,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
                 if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                     Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position);
 
-                    if(cacheManager.getObject(Geofence.class, geofenceId).getStopOut()) {
+                    if (cacheManager.getObject(Geofence.class, geofenceId).getStopOut()) {
                         Command command = new Command();
                         command.setDeviceId(position.getDeviceId());
                         command.setType(Command.TYPE_ENGINE_STOP);
@@ -91,9 +91,9 @@ public class GeofenceEventHandler extends BaseEventHandler {
                         event.setGeofenceId(geofenceId);
                         events.put(event, position);
                     }
+
                     event.setGeofenceId(geofenceId);
                     events.put(event, position);
-
                 }
             }
         }
@@ -102,6 +102,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
             Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position);
+
 
                 if(cacheManager.getObject(Geofence.class, geofenceId).getStopIn()) {
                     Command command = new Command();
