@@ -23,8 +23,8 @@ public class HereGeocoder extends JsonGeocoder {
         if (url == null) {
             url = "https://reverse.geocoder.ls.hereapi.com/6.2/reversegeocode.json";
         }
-        url += "?mode=retrieveAddresses&maxresults=1";
-        url += "&prox=%f,%f,0";
+        url += "?mode=trackPosition&maxresults=1&locationAttributes=related.nearByAddress";
+        url += "&pos=%f,%f,0";
         url += "&app_id=" + id;
         url += "&app_code=" + key;
         url += "&apiKey=" + key;
