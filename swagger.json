@@ -99,6 +99,7 @@
     "/commands": {
       "get": {
         "summary": "Fetch a list of Saved Commands",
+        "operationId": "getSavedCommands",
         "tags": [
           "Commands"
         ],
@@ -162,6 +163,7 @@
       },
       "post": {
         "summary": "Create a Saved Command",
+        "operationId": "postSavedCommands",
         "tags": [
           "Commands"
         ],
@@ -193,6 +195,7 @@
     "/commands/{id}": {
       "put": {
         "summary": "Update a Saved Command",
+        "operationId": "putSavedCommands",
         "tags": [
           "Commands"
         ],
@@ -232,6 +235,7 @@
       },
       "delete": {
         "summary": "Delete a Saved Command",
+        "operationId": "deleteSavedCommands",
         "tags": [
           "Commands"
         ],
@@ -256,6 +260,7 @@
     "/commands/send": {
       "get": {
         "summary": "Fetch a list of Saved Commands supported by Device at the moment",
+        "operationId": "getSavedCommandsByDevice",
         "description": "Return a list of saved commands linked to Device and its groups, filtered by current Device protocol support",
         "tags": [
           "Commands"
@@ -292,6 +297,7 @@
       },
       "post": {
         "summary": "Dispatch commands to device",
+        "operationId": "postSavedCommandsByDevice",
         "description": "Dispatch a new command or Saved Command if _body.id_ set",
         "tags": [
           "Commands"
@@ -338,6 +344,7 @@
     "/commands/types": {
       "get": {
         "summary": "Fetch a list of available Commands for the Device or all possible Commands if Device ommited",
+        "operationId": "getSavedCommandsByAll",
         "tags": [
           "Commands"
         ],
@@ -391,6 +398,7 @@
     "/devices": {
       "get": {
         "summary": "Fetch a list of Devices",
+        "operationId": "getDevices",
         "description": "Without any params, returns a list of the user's devices",
         "tags": [
           "Devices"
@@ -451,6 +459,7 @@
       },
       "post": {
         "summary": "Create a Device",
+        "operationId": "postDevices",
         "tags": [
           "Devices"
         ],
@@ -482,6 +491,7 @@
     "/devices/{id}": {
       "put": {
         "summary": "Update a Device",
+        "operationId": "putDevices",
         "tags": [
           "Devices"
         ],
@@ -521,6 +531,7 @@
       },
       "delete": {
         "summary": "Delete a Device",
+        "operationId": "deleteDevices",
         "tags": [
           "Devices"
         ],
@@ -545,6 +556,7 @@
     "/devices/{id}/accumulators": {
       "put": {
         "summary": "Update total distance and hours of the Device",
+        "operationId": "putDevicesDistance",
         "tags": [
           "Devices"
         ],
@@ -580,6 +592,7 @@
     "/groups": {
       "get": {
         "summary": "Fetch a list of Groups",
+        "operationId": "getGroups",
         "description": "Without any params, returns a list of the Groups the user belongs to",
         "tags": [
           "Groups"
@@ -620,6 +633,7 @@
       },
       "post": {
         "summary": "Create a Group",
+        "operationId": "postGroup",
         "tags": [
           "Groups"
         ],
@@ -655,6 +669,7 @@
     "/groups/{id}": {
       "put": {
         "summary": "Update a Group",
+        "operationId": "putGroup",
         "tags": [
           "Groups"
         ],
@@ -694,6 +709,7 @@
       },
       "delete": {
         "summary": "Delete a Group",
+        "operationId": "deleteGroup",
         "tags": [
           "Groups"
         ],
@@ -718,6 +734,7 @@
     "/permissions": {
       "post": {
         "summary": "Link an Object to another Object",
+        "operationId": "postObject",
         "tags": [
           "Permissions"
         ],
@@ -745,6 +762,7 @@
       },
       "delete": {
         "summary": "Unlink an Object from another Object",
+        "operationId": "deleteObject",
         "tags": [
           "Permissions"
         ],
@@ -770,7 +788,8 @@
     "/positions": {
       "get": {
         "summary": "Fetches a list of Positions",
-        "description": "We strongly recommend using [Traccar WebSocket API](https://www.traccar.org/traccar-api/) instead of periodically polling positions endpoint. Without any params, it returns a list of last known positions for all the user's Devices. _from_ and _to_ fields are not required with _id_.",
+        "operationId": "getPosition",
+        "description": "We strongly recommend using [WebSocket API](https://www.foxgps.com.br/api/) instead of periodically polling positions endpoint. Without any params, it returns a list of last known positions for all the user's Devices. _from_ and _to_ fields are not required with _id_.",
         "tags": [
           "Positions"
         ],
@@ -844,6 +863,7 @@
       },
       "delete": {
         "summary": "Deletes all the Positions of a device in the time span specified",
+        "operationId": "deletePositions",
         "description": "",
         "tags": [
           "Positions"
@@ -894,6 +914,7 @@
     "/server": {
       "get": {
         "summary": "Fetch Server information",
+        "operationId": "getServer",
         "tags": [
           "Server"
         ],
@@ -912,6 +933,7 @@
       },
       "put": {
         "summary": "Update Server information",
+        "operationId": "putServer",
         "tags": [
           "Server"
         ],
@@ -943,6 +965,7 @@
     "/session": {
       "get": {
         "summary": "Fetch Session information",
+        "operationId": "getSession",
         "tags": [
           "Session"
         ],
@@ -974,6 +997,7 @@
       },
       "post": {
         "summary": "Create a new Session",
+        "operationId": "postSession",
         "tags": [
           "Session"
         ],
@@ -1018,6 +1042,7 @@
       },
       "delete": {
         "summary": "Close the Session",
+        "operationId": "deleteSession",
         "tags": [
           "Session"
         ],
@@ -1032,6 +1057,7 @@
     "/session/openid/auth": {
       "get": {
         "summary": "Fetch Session information",
+        "operationId": "getSessionInfo",
         "tags": [
           "Session"
         ],
@@ -1040,7 +1066,7 @@
           }
         ],
         "responses": {
-          "303": {
+          "203": {
             "description": "Redirect to OpenID Connect identity provider",
             "content": { }
           }
@@ -1058,7 +1084,7 @@
           }
         ],
         "responses": {
-          "303": {
+          "203": {
             "description": "Successful authentication, redirect to homepage",
             "content": { }
           }
