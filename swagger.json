@@ -1,15 +1,9 @@
 {
   "openapi": "3.0.1",
   "info": {
-<<<<<<< HEAD
     "title": "FOX GPS",
-    "version": "5.6",
-    "description": "Documentação da API do servidor de rastreamento FOX GPS. Para usar a API, você precisa ter uma conta válida no servidor [criar conta](http://app.foxgps.com.br:8082/register).",
-=======
-    "title": "Traccar",
     "version": "5.8",
-    "description": "Traccar GPS tracking server API documentation. To use the API you need to have a server instance. For testing purposes you can use one of free [demo servers](https://www.traccar.org/demo-server/). For production use you can install your own server or get a [subscription service](https://www.traccar.org/product/tracking-server/).",
->>>>>>> upstream/master
+    "description": "Documentação da API do servidor de rastreamento FOX GPS. Para usar a API, você precisa ter uma conta válida no servidor [criar conta](http://app.foxgps.com.br:8082/register).",
     "contact": {
       "name": "FOX GPS Support",
       "url": "https://www.foxgps.com.br/",
@@ -25,7 +19,8 @@
       "url": "https://api.foxgps.com.br/api",
       "description": "FOX GPS Server"
     }
-  ],
+  ]
+},
   "security": [
     {
       "basicAuth": []
