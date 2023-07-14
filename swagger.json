@@ -19,8 +19,7 @@
       "url": "https://api.foxgps.com.br/api",
       "description": "FOX GPS Server"
     }
-  ]
-},
+  ],
   "security": [
     {
       "basicAuth": []
