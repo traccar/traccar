@@ -118,7 +118,9 @@ public class GeofenceEventHandler extends BaseEventHandler {
                 }
 
                 event.setGeofenceId(geofenceId);
-                callback.eventDetected(event);
+                events.put(event, position);
+
+
             }
         }
     }
