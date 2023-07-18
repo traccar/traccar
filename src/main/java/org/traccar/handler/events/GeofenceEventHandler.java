@@ -39,12 +39,14 @@ import java.util.Map;
 @ChannelHandler.Sharable
 public class GeofenceEventHandler extends BaseEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Geofence.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeofenceEventHandler.class);
     private final CacheManager cacheManager;
-    private CommandsManager commandsManager;
+    private final CommandsManager commandsManager;
+
     @Inject
-    public GeofenceEventHandler(CacheManager cacheManager) {
+    public GeofenceEventHandler(CacheManager cacheManager, CommandsManager commandsManager) {
         this.cacheManager = cacheManager;
+        this.commandsManager = commandsManager;
     }
 
     @Override
@@ -75,7 +77,7 @@ public class GeofenceEventHandler extends BaseEventHandler {
                 if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                     Event event = new Event(Event.TYPE_GEOFENCE_EXIT, position);
 
-                    if (cacheManager.getObject(Geofence.class, geofenceId).getStopOut()) {
+                    if (geofence.getStopOut()) {
                         Command command = new Command();
                         command.setDeviceId(position.getDeviceId());
                         command.setType(Command.TYPE_ENGINE_STOP);
@@ -103,7 +105,6 @@ public class GeofenceEventHandler extends BaseEventHandler {
             if (calendar == null || calendar.checkMoment(position.getFixTime())) {
                 Event event = new Event(Event.TYPE_GEOFENCE_ENTER, position);
 
-
                 if (cacheManager.getObject(Geofence.class, geofenceId).getStopIn()) {
                     Command command = new Command();
                     command.setDeviceId(position.getDeviceId());
@@ -123,11 +124,8 @@ public class GeofenceEventHandler extends BaseEventHandler {
 
                 event.setGeofenceId(geofenceId);
                 events.put(event, position);
-
-
             }
         }
         return events;
     }
-
 }
