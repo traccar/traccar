@@ -53,7 +53,7 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
     }
 
     public void setUniqueId(String uniqueId) {
-        this.uniqueId = uniqueId;
+        this.uniqueId = uniqueId != null ? uniqueId.trim() : null;
     }
 
     public static final String STATUS_UNKNOWN = "unknown";
@@ -100,7 +100,7 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        this.phone = phone != null ? phone.trim() : null;
     }
 
     private String model;
