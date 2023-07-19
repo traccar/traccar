@@ -193,14 +193,16 @@ public class WebServer implements LifecycleObject {
             sessionHandler.setSessionCache(sessionCache);
         }
 
+        SessionCookieConfig sessionCookieConfig = servletHandler.getServletContext().getSessionCookieConfig();
+
         int sessionTimeout = config.getInteger(Keys.WEB_SESSION_TIMEOUT);
         if (sessionTimeout > 0) {
             servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
+            sessionCookieConfig.setMaxAge(sessionTimeout);
         }
 
         String sameSiteCookie = config.getString(Keys.WEB_SAME_SITE_COOKIE);
         if (sameSiteCookie != null) {
-            SessionCookieConfig sessionCookieConfig = servletHandler.getServletContext().getSessionCookieConfig();
             switch (sameSiteCookie.toLowerCase()) {
                 case "lax":
                     sessionCookieConfig.setComment(HttpCookie.SAME_SITE_LAX_COMMENT);
