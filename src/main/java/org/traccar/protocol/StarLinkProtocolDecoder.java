@@ -61,10 +61,10 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected void init() {
         setFormat(getConfig().getString(
-                getProtocolName() + ".format", "#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,"
+                Keys.PROTOCOL_FORMAT.withPrefix(getProtocolName()), "#EDT#,#EID#,#PDT#,#LAT#,#LONG#,#SPD#,#HEAD#,#ODO#,"
                 + "#IN1#,#IN2#,#IN3#,#IN4#,#OUT1#,#OUT2#,#OUT3#,#OUT4#,#LAC#,#CID#,#VIN#,#VBAT#,#DEST#,#IGN#,#ENG#"));
 
-        setDateFormat(getConfig().getString(getProtocolName() + ".dateFormat", "yyMMddHHmmss"));
+        setDateFormat(getConfig().getString(Keys.PROTOCOL_DATE_FORMAT.withPrefix(getProtocolName()), "yyMMddHHmmss"));
     }
 
     public String[] getFormat(long deviceId) {

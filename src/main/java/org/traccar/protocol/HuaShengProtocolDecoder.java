@@ -284,7 +284,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                         String[] values = cell.split("@");
                         network.addCellTower(CellTower.from(
                                 Integer.parseInt(values[0]), Integer.parseInt(values[1]),
-                                Integer.parseInt(values[2], 16), Integer.parseInt(values[3], 16)));
+                                Integer.parseInt(values[2], 16), Long.parseLong(values[3], 16)));
                     }
                     break;
                 case 0x0021:
