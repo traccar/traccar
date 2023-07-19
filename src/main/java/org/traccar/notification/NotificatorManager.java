@@ -66,7 +66,7 @@ public class NotificatorManager {
 
     public Notificator getNotificator(String type) {
         var clazz = NOTIFICATORS_ALL.get(type);
-        if (clazz != null) {
+        if (clazz != null && types.contains(type)) {
             var notificator = injector.getInstance(clazz);
             if (notificator != null) {
                 return notificator;

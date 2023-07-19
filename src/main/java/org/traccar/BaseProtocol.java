@@ -105,7 +105,8 @@ public abstract class BaseProtocol implements Protocol {
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
             String data = command.getString(Command.KEY_DATA);
             if (BasePipelineFactory.getHandler(channel.pipeline(), StringEncoder.class) != null) {
-                channel.writeAndFlush(new NetworkMessage(data, remoteAddress));
+                channel.writeAndFlush(new NetworkMessage(
+                        data.replace("\\r", "\r").replace("\\n", "\n"), remoteAddress));
             } else {
                 ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
                 channel.writeAndFlush(new NetworkMessage(buf, remoteAddress));
