@@ -38,7 +38,7 @@ public class Driver extends ExtendedModel {
     }
 
     public void setUniqueId(String uniqueId) {
-        this.uniqueId = uniqueId != null ? uniqueId.trim() : null;
+        this.uniqueId = uniqueId.trim();
     }
 
 }
