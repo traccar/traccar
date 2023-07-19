@@ -18,8 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
 import org.traccar.helper.DataConverter;
@@ -38,8 +37,11 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
 
     public Xt2400ProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
 
-        String config = Context.getConfig().getString(Keys.PROTOCOL_CONFIG.withPrefix(getProtocolName()));
+    @Override
+    protected void init() {
+        String config = getConfig().getString(Keys.PROTOCOL_CONFIG.withPrefix(getProtocolName()));
         if (config != null) {
             setConfig(config);
         }

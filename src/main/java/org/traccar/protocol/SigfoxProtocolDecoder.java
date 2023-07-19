@@ -22,7 +22,8 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.helper.BufferUtil;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DataConverter;
@@ -159,18 +160,8 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
                 if (event == 0x0f || event == 0x1f) {
 
                     position.setValid(event >> 4 > 0);
-
-                    long value;
-                    value = buf.readUnsignedInt();
-                    position.setLatitude(BitUtil.to(value, 31) * 0.000001);
-                    if (BitUtil.check(value, 31)) {
-                        position.setLatitude(-position.getLatitude());
-                    }
-                    value = buf.readUnsignedInt();
-                    position.setLongitude(BitUtil.to(value, 31) * 0.000001);
-                    if (BitUtil.check(value, 31)) {
-                        position.setLongitude(-position.getLongitude());
-                    }
+                    position.setLatitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.000001);
+                    position.setLongitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.000001);
 
                     position.set(Position.KEY_BATTERY, (int) buf.readUnsignedByte());
 

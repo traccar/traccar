@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,25 +19,32 @@ import io.netty.channel.ChannelHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
-import org.traccar.database.DataManager;
 import org.traccar.model.Position;
+import org.traccar.storage.Storage;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Request;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+@Singleton
 @ChannelHandler.Sharable
 public class DefaultDataHandler extends BaseDataHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataHandler.class);
 
-    private final DataManager dataManager;
+    private final Storage storage;
 
-    public DefaultDataHandler(DataManager dataManager) {
-        this.dataManager = dataManager;
+    @Inject
+    public DefaultDataHandler(Storage storage) {
+        this.storage = storage;
     }
 
     @Override
     protected Position handlePosition(Position position) {
 
         try {
-            dataManager.addObject(position);
+            position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
         } catch (Exception error) {
             LOGGER.warn("Failed to store position", error);
         }

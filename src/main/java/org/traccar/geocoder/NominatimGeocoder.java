@@ -16,6 +16,7 @@
 package org.traccar.geocoder;
 
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 
 public class NominatimGeocoder extends JsonGeocoder {
 
@@ -33,8 +34,9 @@ public class NominatimGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public NominatimGeocoder(String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(url, key, language), cacheSize, addressFormat);
+    public NominatimGeocoder(
+            Client client, String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(url, key, language), cacheSize, addressFormat);
     }
 
     @Override

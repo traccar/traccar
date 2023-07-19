@@ -19,19 +19,23 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
+
+import javax.inject.Inject;
 
 public class CityeasyProtocol extends BaseProtocol {
 
-    public CityeasyProtocol() {
+    @Inject
+    public CityeasyProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,
                 Command.TYPE_POSITION_STOP,
                 Command.TYPE_SET_TIMEZONE);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 0));
                 pipeline.addLast(new CityeasyProtocolEncoder(CityeasyProtocol.this));
                 pipeline.addLast(new CityeasyProtocolDecoder(CityeasyProtocol.this));

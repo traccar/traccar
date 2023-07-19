@@ -15,5 +15,7 @@ Device: $device.name<br>
 Exceeds the speed: $speedString#{if}($geofence) in $geofence.name#{else}#{end}<br>
 Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
 Point: <a href="$webUrl?eventId=$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
 </body>
-</html>  
+</html>

@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class OmnicommFrameDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class OmnicommFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new OmnicommFrameDecoder();
+        var decoder = inject(new OmnicommFrameDecoder());
 
         verifyFrame(
                 binary("c08600004566"),

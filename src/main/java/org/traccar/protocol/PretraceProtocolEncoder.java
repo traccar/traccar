@@ -16,10 +16,9 @@
 package org.traccar.protocol;
 
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.Context;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
-import org.traccar.Protocol;
 
 public class PretraceProtocolEncoder extends BaseProtocolEncoder {
 
@@ -35,7 +34,7 @@ public class PretraceProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        String uniqueId = Context.getIdentityManager().getById(command.getDeviceId()).getUniqueId();
+        String uniqueId = getUniqueId(command.getDeviceId());
 
         switch (command.getType()) {
             case Command.TYPE_CUSTOM:

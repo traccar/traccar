@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class NetProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class NetProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new NetProtocolDecoder(null);
+        var decoder = inject(new NetProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "@L03686090604017761712271020161807037078881037233751000000010F850036980A4000"));

@@ -200,4 +200,19 @@ public final class Checksum {
         return (10 - (checksum % 10)) % 10;
     }
 
+    public static int ip(ByteBuffer data) {
+        int sum = 0;
+        while (data.remaining() > 0) {
+            sum += data.get() & 0xff;
+            if ((sum & 0x80000000) > 0) {
+                sum = (sum & 0xffff) + (sum >> 16);
+            }
+        }
+        while ((sum >> 16) > 0) {
+            sum = (sum & 0xffff) + sum >> 16;
+        }
+        sum = (sum == 0xffff) ? sum & 0xffff : (~sum) & 0xffff;
+        return sum;
+    }
+
 }

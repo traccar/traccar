@@ -21,13 +21,17 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class Tt8850Protocol extends BaseProtocol {
 
-    public Tt8850Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public Tt8850Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, "$"));
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());

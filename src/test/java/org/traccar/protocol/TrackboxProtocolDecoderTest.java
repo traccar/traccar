@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class TrackboxProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class TrackboxProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TrackboxProtocolDecoder(null);
+        var decoder = inject(new TrackboxProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "a=connect&v=11&i=111111111111111"));

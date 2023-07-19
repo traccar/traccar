@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class HaicomProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class HaicomProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new HaicomProtocolDecoder(null);
+        var decoder = inject(new HaicomProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$GPRS012497007097169,T100001,150618,230031,5402267400332464,0004,2014,000001,,,1,00#V040*"),

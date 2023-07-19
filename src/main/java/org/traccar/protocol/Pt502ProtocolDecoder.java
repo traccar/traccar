@@ -20,8 +20,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
@@ -175,14 +174,13 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
                 } else {
 
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-                    String uniqueId = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
 
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
 
                     getLastLocation(position, null);
 
-                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
+                    position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
                     photo.release();
                     photo = null;
 

@@ -1,17 +1,17 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class EasyTrackProtocolEncoderTest extends ProtocolTest {
 
     @Test
-    public void testEncodeEngineStop() {
+    public void testEncodeEngineStop() throws Exception {
 
-        var encoder = new EasyTrackProtocolEncoder(null);
+        var encoder = inject(new EasyTrackProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

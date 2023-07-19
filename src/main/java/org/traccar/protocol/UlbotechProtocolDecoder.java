@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -37,6 +37,7 @@ import org.traccar.model.Position;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
@@ -214,16 +215,17 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (deviceSession.getTimeZone() == null) {
-            deviceSession.setTimeZone(getTimeZone(deviceSession.getDeviceId()));
+        if (!deviceSession.contains(DeviceSession.KEY_TIMEZONE)) {
+            deviceSession.set(DeviceSession.KEY_TIMEZONE, getTimeZone(deviceSession.getDeviceId()));
         }
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
+        TimeZone timeZone = deviceSession.get(DeviceSession.KEY_TIMEZONE);
         long seconds = buf.readUnsignedInt() & 0x7fffffffL;
         seconds += 946684800L; // 2000-01-01 00:00
-        seconds -= deviceSession.getTimeZone().getRawOffset() / 1000;
+        seconds -= timeZone.getRawOffset() / 1000;
         Date time = new Date(seconds * 1000);
 
         boolean hasLocation = false;

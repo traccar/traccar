@@ -18,16 +18,20 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
+
+import javax.inject.Inject;
 
 public class UlbotechProtocol extends BaseProtocol {
 
-    public UlbotechProtocol() {
+    @Inject
+    public UlbotechProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new UlbotechFrameDecoder());
                 pipeline.addLast(new UlbotechProtocolEncoder(UlbotechProtocol.this));
                 pipeline.addLast(new UlbotechProtocolDecoder(UlbotechProtocol.this));

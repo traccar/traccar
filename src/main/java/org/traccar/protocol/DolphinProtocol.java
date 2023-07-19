@@ -19,15 +19,19 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 import java.nio.ByteOrder;
 
+import javax.inject.Inject;
+
 public class DolphinProtocol extends BaseProtocol {
 
-    public DolphinProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public DolphinProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 4096, 20, 4, 4, 0, true));
                 pipeline.addLast(new DolphinProtocolDecoder(DolphinProtocol.this));
             }

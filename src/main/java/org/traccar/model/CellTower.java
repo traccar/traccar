@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
+
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CellTower {
@@ -37,14 +39,12 @@ public class CellTower {
         return cellTower;
     }
 
-    public static CellTower fromLacCid(int lac, long cid) {
-        return from(
-                Context.getConfig().getInteger(Keys.GEOLOCATION_MCC),
-                Context.getConfig().getInteger(Keys.GEOLOCATION_MCC), lac, cid);
+    public static CellTower fromLacCid(Config config, int lac, long cid) {
+        return from(config.getInteger(Keys.GEOLOCATION_MCC), config.getInteger(Keys.GEOLOCATION_MNC), lac, cid);
     }
 
-    public static CellTower fromCidLac(long cid, int lac) {
-        return fromLacCid(lac, cid);
+    public static CellTower fromCidLac(Config config, long cid, int lac) {
+        return fromLacCid(config, lac, cid);
     }
 
     private String radioType;
@@ -111,6 +111,28 @@ public class CellTower {
         String operatorString = String.valueOf(operator);
         mobileCountryCode = Integer.parseInt(operatorString.substring(0, 3));
         mobileNetworkCode = Integer.parseInt(operatorString.substring(3));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CellTower cellTower = (CellTower) o;
+        return Objects.equals(radioType, cellTower.radioType)
+                && Objects.equals(cellId, cellTower.cellId)
+                && Objects.equals(locationAreaCode, cellTower.locationAreaCode)
+                && Objects.equals(mobileCountryCode, cellTower.mobileCountryCode)
+                && Objects.equals(mobileNetworkCode, cellTower.mobileNetworkCode)
+                && Objects.equals(signalStrength, cellTower.signalStrength);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(radioType, cellId, locationAreaCode, mobileCountryCode, mobileNetworkCode, signalStrength);
     }
 
 }

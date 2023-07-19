@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -184,9 +184,9 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
                     position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
 
-                    if (!BitUtil.check(input, 1)) {
+                    if (!BitUtil.check(status, 1)) {
                         position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                    } else if (BitUtil.check(input, 6)) {
+                    } else if (BitUtil.check(status, 6)) {
                         position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
                     }
 

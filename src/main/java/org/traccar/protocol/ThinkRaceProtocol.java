@@ -19,13 +19,17 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class ThinkRaceProtocol extends BaseProtocol {
 
-    public ThinkRaceProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public ThinkRaceProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2 + 12 + 1 + 1, 2, 2, 0));
                 pipeline.addLast(new ThinkRaceProtocolDecoder(ThinkRaceProtocol.this));
             }

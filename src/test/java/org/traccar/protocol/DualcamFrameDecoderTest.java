@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class DualcamFrameDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class DualcamFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new DualcamFrameDecoder();
+        var decoder = inject(new DualcamFrameDecoder());
 
         verifyFrame(
                 binary("000000050001403a4abaa31444000400"),

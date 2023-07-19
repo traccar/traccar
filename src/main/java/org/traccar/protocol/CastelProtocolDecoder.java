@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -160,6 +160,9 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
         for (int i = 0; i < count; i++) {
             int value;
+            if (!PID_LENGTH_MAP.containsKey(pids[i])) {
+                throw new RuntimeException(String.format("Unknown PID 0x%02x", pids[i]));
+            }
             switch (PID_LENGTH_MAP.get(pids[i])) {
                 case 1:
                     value = buf.readUnsignedByte();
@@ -443,7 +446,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 decodeStat(position, buf);
 
                 position.setNetwork(new Network(
-                        CellTower.fromLacCid(buf.readUnsignedShortLE(), buf.readUnsignedShortLE())));
+                        CellTower.fromLacCid(getConfig(), buf.readUnsignedShortLE(), buf.readUnsignedShortLE())));
 
                 return position;
 
@@ -499,7 +502,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // additional flags
 
                 position.setNetwork(new Network(
-                        CellTower.fromLacCid(buf.readUnsignedShortLE(), buf.readUnsignedShortLE())));
+                        CellTower.fromLacCid(getConfig(), buf.readUnsignedShortLE(), buf.readUnsignedShortLE())));
 
                 positions.add(position);
             }

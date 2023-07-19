@@ -16,6 +16,7 @@
 package org.traccar.geocoder;
 
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 
 public class GisgraphyGeocoder extends JsonGeocoder {
 
@@ -27,8 +28,8 @@ public class GisgraphyGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public GisgraphyGeocoder(String url, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(url), cacheSize, addressFormat);
+    public GisgraphyGeocoder(Client client, String url, int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(url), cacheSize, addressFormat);
     }
 
     @Override

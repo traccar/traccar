@@ -17,13 +17,11 @@ package org.traccar.geocoder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.Main;
 import org.traccar.database.StatisticsManager;
 
 import javax.json.JsonObject;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.InvocationCallback;
 import java.util.AbstractMap;
 import java.util.Collections;
@@ -34,22 +32,30 @@ public abstract class JsonGeocoder implements Geocoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonGeocoder.class);
 
+    private final Client client;
     private final String url;
     private final AddressFormat addressFormat;
+    private StatisticsManager statisticsManager;
 
     private Map<Map.Entry<Double, Double>, String> cache;
 
-    public JsonGeocoder(String url, final int cacheSize, AddressFormat addressFormat) {
+    public JsonGeocoder(Client client, String url, final int cacheSize, AddressFormat addressFormat) {
+        this.client = client;
         this.url = url;
         this.addressFormat = addressFormat;
         if (cacheSize > 0) {
-            this.cache = Collections.synchronizedMap(new LinkedHashMap<Map.Entry<Double, Double>, String>() {
+            this.cache = Collections.synchronizedMap(new LinkedHashMap<>() {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry eldest) {
                     return size() > cacheSize;
                 }
             });
         }
+    }
+
+    @Override
+    public void setStatisticsManager(StatisticsManager statisticsManager) {
+        this.statisticsManager = statisticsManager;
     }
 
     protected String readValue(JsonObject object, String key) {
@@ -97,11 +103,11 @@ public abstract class JsonGeocoder implements Geocoder {
             }
         }
 
-        if (Main.getInjector() != null) {
-            Main.getInjector().getInstance(StatisticsManager.class).registerGeocoderRequest();
+        if (statisticsManager != null) {
+            statisticsManager.registerGeocoderRequest();
         }
 
-        Invocation.Builder request = Context.getClient().target(String.format(url, latitude, longitude)).request();
+        var request = client.target(String.format(url, latitude, longitude)).request();
 
         if (callback != null) {
             request.async().get(new InvocationCallback<JsonObject>() {

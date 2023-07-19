@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
@@ -153,7 +153,7 @@ public class FreematicsProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_RSSI, Integer.parseInt(value));
                         break;
                     case 0x82:
-                        position.set(Position.KEY_DEVICE_TEMP, Integer.parseInt(value) * 0.1);
+                        position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(value) * 0.1);
                         break;
                     case 0x104:
                         position.set(Position.KEY_ENGINE_LOAD, Integer.parseInt(value));

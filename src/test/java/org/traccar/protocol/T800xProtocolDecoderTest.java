@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,7 +9,13 @@ public class T800xProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new T800xProtocolDecoder(null);
+        var decoder = inject(new T800xProtocolDecoder(null));
+
+        verifyAttributes(decoder, binary(
+                "272704004901380864112055585747c612230321220006000036435fc8acc2ee600f420000000000000000909019003900001356a18000012c0000a8c00000001e20d4800000c00000"));
+
+        verifyAttributes(decoder, binary(
+                "2525110055000208677300508924902206262035310c540045004c00430045004c0004454447450847534d20313930300f323134303734323036373835323839143839333430373131373930303936383037363846"));
 
         verifyAttributes(decoder, binary(
                 "27271000247bd00860112047066487210407034238000005d7d17365e625ff640a730148"));

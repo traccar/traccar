@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,10 +16,11 @@
  */
 package org.traccar.protocol;
 
-import org.traccar.Context;
-import org.traccar.StringProtocolEncoder;
-import org.traccar.model.Command;
 import org.traccar.Protocol;
+import org.traccar.StringProtocolEncoder;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.model.Command;
 
 import java.util.Date;
 
@@ -59,8 +60,9 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
                 return formatCommand(time, uniqueId, "S20", "1", "0");
             case Command.TYPE_POSITION_PERIODIC:
                 String frequency = command.getAttributes().get(Command.KEY_FREQUENCY).toString();
-                if (Context.getIdentityManager().lookupAttributeBoolean(
-                        command.getDeviceId(), getProtocolName() + ".alternative", false, false, true)) {
+                if (AttributeUtil.lookup(
+                        getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()),
+                        command.getDeviceId())) {
                     return formatCommand(time, uniqueId, "D1", frequency);
                 } else {
                     return formatCommand(time, uniqueId, "S71", "22", frequency);

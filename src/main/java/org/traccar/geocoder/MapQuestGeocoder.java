@@ -18,6 +18,7 @@ package org.traccar.geocoder;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 
 public class MapQuestGeocoder extends JsonGeocoder {
 
@@ -29,8 +30,8 @@ public class MapQuestGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public MapQuestGeocoder(String url, String key, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(url, key), cacheSize, addressFormat);
+    public MapQuestGeocoder(Client client, String url, String key, int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(url, key), cacheSize, addressFormat);
     }
 
     @Override

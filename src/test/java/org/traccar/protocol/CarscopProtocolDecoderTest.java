@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class CarscopProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class CarscopProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new CarscopProtocolDecoder(null);
+        var decoder = inject(new CarscopProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "*170821223045UB00HSO"));

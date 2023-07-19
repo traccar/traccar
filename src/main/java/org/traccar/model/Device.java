@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,26 @@
  */
 package org.traccar.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.traccar.storage.QueryIgnore;
+import org.traccar.storage.StorageName;
+
 import java.util.Date;
-import java.util.List;
 
-import org.traccar.database.QueryExtended;
-import org.traccar.database.QueryIgnore;
+@StorageName("tc_devices")
+public class Device extends GroupedModel implements Disableable, Schedulable {
 
-public class Device extends GroupedModel {
+    private long calendarId;
+
+    @Override
+    public long getCalendarId() {
+        return calendarId;
+    }
+
+    @Override
+    public void setCalendarId(long calendarId) {
+        this.calendarId = calendarId;
+    }
 
     private String name;
 
@@ -55,26 +68,18 @@ public class Device extends GroupedModel {
     }
 
     public void setStatus(String status) {
-        this.status = status;
+        this.status = status != null ? status.trim() : null;
     }
 
     private Date lastUpdate;
 
-    @QueryExtended
+    @QueryIgnore
     public Date getLastUpdate() {
-        if (lastUpdate != null) {
-            return new Date(lastUpdate.getTime());
-        } else {
-            return null;
-        }
+        return this.lastUpdate;
     }
 
     public void setLastUpdate(Date lastUpdate) {
-        if (lastUpdate != null) {
-            this.lastUpdate = new Date(lastUpdate.getTime());
-        } else {
-            this.lastUpdate = null;
-        }
+        this.lastUpdate = lastUpdate;
     }
 
     private long positionId;
@@ -86,17 +91,6 @@ public class Device extends GroupedModel {
 
     public void setPositionId(long positionId) {
         this.positionId = positionId;
-    }
-
-    private List<Long> geofenceIds;
-
-    @QueryIgnore
-    public List<Long> getGeofenceIds() {
-        return geofenceIds;
-    }
-
-    public void setGeofenceIds(List<Long> geofenceIds) {
-        this.geofenceIds = geofenceIds;
     }
 
     private String phone;
@@ -141,12 +135,117 @@ public class Device extends GroupedModel {
 
     private boolean disabled;
 
+    @Override
     public boolean getDisabled() {
         return disabled;
     }
 
+    @Override
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
+    }
+
+    private Date expirationTime;
+
+    @Override
+    public Date getExpirationTime() {
+        return expirationTime;
+    }
+
+    @Override
+    public void setExpirationTime(Date expirationTime) {
+        this.expirationTime = expirationTime;
+    }
+
+    private boolean motionStreak;
+
+    @QueryIgnore
+    @JsonIgnore
+    public boolean getMotionStreak() {
+        return motionStreak;
+    }
+
+    @JsonIgnore
+    public void setMotionStreak(boolean motionStreak) {
+        this.motionStreak = motionStreak;
+    }
+
+    private boolean motionState;
+
+    @QueryIgnore
+    @JsonIgnore
+    public boolean getMotionState() {
+        return motionState;
+    }
+
+    @JsonIgnore
+    public void setMotionState(boolean motionState) {
+        this.motionState = motionState;
+    }
+
+    private Date motionTime;
+
+    @QueryIgnore
+    @JsonIgnore
+    public Date getMotionTime() {
+        return motionTime;
+    }
+
+    @JsonIgnore
+    public void setMotionTime(Date motionTime) {
+        this.motionTime = motionTime;
+    }
+
+    private double motionDistance;
+
+    @QueryIgnore
+    @JsonIgnore
+    public double getMotionDistance() {
+        return motionDistance;
+    }
+
+    @JsonIgnore
+    public void setMotionDistance(double motionDistance) {
+        this.motionDistance = motionDistance;
+    }
+
+    private boolean overspeedState;
+
+    @QueryIgnore
+    @JsonIgnore
+    public boolean getOverspeedState() {
+        return overspeedState;
+    }
+
+    @JsonIgnore
+    public void setOverspeedState(boolean overspeedState) {
+        this.overspeedState = overspeedState;
+    }
+
+    private Date overspeedTime;
+
+    @QueryIgnore
+    @JsonIgnore
+    public Date getOverspeedTime() {
+        return overspeedTime;
+    }
+
+    @JsonIgnore
+    public void setOverspeedTime(Date overspeedTime) {
+        this.overspeedTime = overspeedTime;
+    }
+
+    private long overspeedGeofenceId;
+
+    @QueryIgnore
+    @JsonIgnore
+    public long getOverspeedGeofenceId() {
+        return overspeedGeofenceId;
+    }
+
+    @JsonIgnore
+    public void setOverspeedGeofenceId(long overspeedGeofenceId) {
+        this.overspeedGeofenceId = overspeedGeofenceId;
     }
 
 }

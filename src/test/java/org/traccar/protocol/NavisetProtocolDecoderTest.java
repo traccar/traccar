@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class NavisetProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class NavisetProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new NavisetProtocolDecoder(null);
+        var decoder = inject(new NavisetProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "1310e4073836383230343030353935383436362a060716"));

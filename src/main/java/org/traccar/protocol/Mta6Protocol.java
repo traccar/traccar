@@ -19,22 +19,25 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import org.traccar.BaseProtocol;
-import org.traccar.Context;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
+
+import javax.inject.Inject;
 
 public class Mta6Protocol extends BaseProtocol {
 
-    public Mta6Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public Mta6Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new HttpResponseEncoder());
                 pipeline.addLast(new HttpRequestDecoder());
                 pipeline.addLast(new HttpObjectAggregator(65535));
                 pipeline.addLast(new Mta6ProtocolDecoder(
-                        Mta6Protocol.this, !Context.getConfig().getBoolean(Keys.PROTOCOL_CAN.withPrefix(getName()))));
+                        Mta6Protocol.this, !config.getBoolean(Keys.PROTOCOL_CAN.withPrefix(getName()))));
             }
         });
     }

@@ -17,6 +17,7 @@ package org.traccar.geocoder;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.ws.rs.client.Client;
 
 public class TomTomGeocoder extends JsonGeocoder {
 
@@ -28,8 +29,8 @@ public class TomTomGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public TomTomGeocoder(String url, String key, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(url, key), cacheSize, addressFormat);
+    public TomTomGeocoder(Client client, String url, String key, int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(url, key), cacheSize, addressFormat);
     }
 
     @Override

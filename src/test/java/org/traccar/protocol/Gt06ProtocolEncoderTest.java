@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
@@ -9,7 +9,7 @@ public class Gt06ProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new Gt06ProtocolEncoder(null);
+        var encoder = inject(new Gt06ProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

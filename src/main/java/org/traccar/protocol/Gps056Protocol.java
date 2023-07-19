@@ -18,13 +18,17 @@ package org.traccar.protocol;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class Gps056Protocol extends BaseProtocol {
 
-    public Gps056Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public Gps056Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new Gps056FrameDecoder());
                 pipeline.addLast(new Gps056ProtocolDecoder(Gps056Protocol.this));
             }

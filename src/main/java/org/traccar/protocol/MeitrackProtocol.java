@@ -19,11 +19,15 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
+
+import javax.inject.Inject;
 
 public class MeitrackProtocol extends BaseProtocol {
 
-    public MeitrackProtocol() {
+    @Inject
+    public MeitrackProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_ENGINE_STOP,
@@ -32,18 +36,18 @@ public class MeitrackProtocol extends BaseProtocol {
                 Command.TYPE_ALARM_DISARM,
                 Command.TYPE_REQUEST_PHOTO,
                 Command.TYPE_SEND_SMS);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new MeitrackFrameDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new MeitrackProtocolEncoder(MeitrackProtocol.this));
                 pipeline.addLast(new MeitrackProtocolDecoder(MeitrackProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new MeitrackProtocolEncoder(MeitrackProtocol.this));
                 pipeline.addLast(new MeitrackProtocolDecoder(MeitrackProtocol.this));

@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class OmnicommProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class OmnicommProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new OmnicommProtocolDecoder(null);
+        var decoder = inject(new OmnicommProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "c080080061a61915340100001dec"));

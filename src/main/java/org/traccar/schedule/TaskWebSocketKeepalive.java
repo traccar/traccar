@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,31 @@
  */
 package org.traccar.schedule;
 
-import org.traccar.Context;
+import org.traccar.session.ConnectionManager;
 
+import javax.inject.Inject;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class TaskWebSocketKeepalive implements Runnable {
+public class TaskWebSocketKeepalive implements ScheduleTask {
 
     private static final long PERIOD_SECONDS = 55;
 
+    private final ConnectionManager connectionManager;
+
+    @Inject
+    public TaskWebSocketKeepalive(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+
+    @Override
     public void schedule(ScheduledExecutorService executor) {
         executor.scheduleAtFixedRate(this, PERIOD_SECONDS, PERIOD_SECONDS, TimeUnit.SECONDS);
     }
 
     @Override
     public void run() {
-        Context.getConnectionManager().sendKeepalive();
+        connectionManager.sendKeepalive();
     }
 
 }

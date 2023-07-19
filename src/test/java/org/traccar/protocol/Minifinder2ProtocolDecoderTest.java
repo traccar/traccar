@@ -1,22 +1,38 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class Minifinder2ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Minifinder2ProtocolDecoder(null);
+        var decoder = inject(new Minifinder2ProtocolDecoder(null));
+
+        verifyAttribute(decoder, binary(
+                "ab101c00d6f61e000110013836333932313033393939363038300937efd201640c000000"),
+                "barkCount", 12L);
+
+        verifyAttribute(decoder, binary(
+                "ab00030008c700007f0100"),
+                Position.KEY_RESULT, "0");
+
+        verifyAttribute(decoder, binary(
+                "ab102600080f1400011001383633393231303339393833343736092429b347633003a96409020000008027b34763"),
+                "bark", true);
+
+        verifyPositions(decoder, binary(
+                "AB103D0035A700000110013836373733303035333430333237390924AC5783620103C250162030CC5F0D5002FB432D00AF005A3158006D0A00000B0931EC5783620A000000"));
 
         verifyPositions(decoder, binary(
                 "ab10350015ae59010110013836333932313033333836353231360924723a12610042535a182ac0f6b4f2923100c900af02215c2b9bfb5461736b4c4d53"));
 
-        verifyNull(decoder, binary(
+        verifyPositions(decoder, false, binary(
                 "ab10150076f1320003100133353534363530373130323933303602105a"));
 
-        verifyNull(decoder, binary(
+        verifyPositions(decoder, false, binary(
                 "AB101400594A01000310013836333932323033343437333734350112"));
 
         verifyPositions(decoder, binary(

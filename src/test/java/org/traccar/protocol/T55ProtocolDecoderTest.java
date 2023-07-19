@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,7 +9,13 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new T55ProtocolDecoder(null);
+        var decoder = inject(new T55ProtocolDecoder(null));
+
+        verifyAttributes(decoder, text(
+                "$GPTXT,NET,1003,A1,-53,232 01*77"));
+
+        verifyPosition(decoder, text(
+                "$PUBX,00,130209.00,3650.51159,N,01346.10602,E,785.947,D3,4.1,5.2,0.163,87.43,-0.054,7.0,0.88,1.21,0.88,24,01012,0*6D"));
 
         verifyPosition(decoder, text(
                 "QZE,868994033976700,35,28062020,113553,22.13673,114.57263,0,22,A,0"));
@@ -121,7 +127,7 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
 
         // Maxon devices can send NMEA before identification
 
-        var decoder = new T55ProtocolDecoder(null);
+        var decoder = inject(new T55ProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "$GPRMC,012006,A,4828.10,N,1353.52,E,0.00,0.00,180915,020.3,E*42"));

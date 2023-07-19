@@ -20,13 +20,17 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class Ivt401Protocol extends BaseProtocol {
 
-    public Ivt401Protocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public Ivt401Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, ';'));
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new Ivt401ProtocolDecoder(Ivt401Protocol.this));

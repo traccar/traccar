@@ -15,18 +15,21 @@
  */
 package org.traccar.protocol;
 
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import javax.inject.Inject;
 
 public class Mavlink2Protocol extends BaseProtocol {
 
-    public Mavlink2Protocol() {
-        addServer(new TrackerServer(true, getName()) {
+    @Inject
+    public Mavlink2Protocol(Config config) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 1, 1, 10, 0));
                 pipeline.addLast(new Mavlink2ProtocolDecoder(Mavlink2Protocol.this));
             }

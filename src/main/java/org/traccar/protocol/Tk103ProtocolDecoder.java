@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,10 +15,12 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.helper.DataConverter;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -36,11 +38,15 @@ import java.util.regex.Pattern;
 
 public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
 
-    private final boolean decodeLow;
+    private boolean decodeLow;
 
     public Tk103ProtocolDecoder(Protocol protocol) {
         super(protocol);
-        decodeLow = Context.getConfig().getBoolean(Keys.PROTOCOL_DECODE_LOW.withPrefix(getProtocolName()));
+    }
+
+    @Override
+    protected void init() {
+        decodeLow = getConfig().getBoolean(Keys.PROTOCOL_DECODE_LOW.withPrefix(getProtocolName()));
     }
 
     private static final Pattern PATTERN = new PatternBuilder()
@@ -94,6 +100,16 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // power voltage
             .number("d+")                        // installed
             .any()
+            .compile();
+
+    private static final Pattern PATTERN_CELL = new PatternBuilder()
+            .text("(")
+            .number("(d{12})")                   // device id
+            .expression(".{4}")                  // type
+            .number("(?:d{15})?,")               // imei
+            .expression("(.+),")                 // cell
+            .number("(d{8})")                    // odometer
+            .text(")")
             .compile();
 
     private static final Pattern PATTERN_NETWORK = new PatternBuilder()
@@ -294,6 +310,39 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeCell(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_CELL, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        Network network = new Network();
+
+        String[] cells = parser.next().split("\n");
+        for (String cell : cells) {
+            String[] values = cell.substring(1, cell.length() - 1).split(",");
+            network.addCellTower(CellTower.from(
+                    Integer.parseInt(values[0]), Integer.parseInt(values[1]),
+                    Integer.parseInt(values[2]), Integer.parseInt(values[3])));
+        }
+
+        position.setNetwork(network);
+
+        position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
+
+        return position;
+    }
+
     private Position decodeNetwork(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_NETWORK, sentence);
         if (!parser.matches()) {
@@ -402,6 +451,106 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeBms(Channel channel, SocketAddress remoteAddress, String sentence) {
+        String id = sentence.substring(1, 13);
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        String payload = sentence.substring(1 + 12 + 4, sentence.length() - 1);
+
+        if (sentence.startsWith("BS50", 1 + 12)) {
+
+            ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(payload));
+
+            buf.readUnsignedByte();
+            buf.readUnsignedByte();
+            buf.readUnsignedByte(); // header
+
+            int batteryCount = buf.readUnsignedByte();
+            for (int i = 1; i <= 24; i++) {
+                int voltage = buf.readUnsignedShortLE();
+                if (i <= batteryCount) {
+                    position.set("battery" + i, voltage * 0.001);
+                }
+            }
+
+            position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 0);
+            position.set("current", buf.readUnsignedShortLE() * 0.1);
+            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
+            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+            position.set("batteryOverheat", buf.readUnsignedByte() > 0);
+            position.set("chargeProtection", buf.readUnsignedByte() > 0);
+            position.set("dischargeProtection", buf.readUnsignedByte() > 0);
+            buf.readUnsignedByte(); // drop line
+            buf.readUnsignedByte(); // balanced
+            position.set("cycles", buf.readUnsignedShortLE());
+            position.set("faultAlarm", buf.readUnsignedByte());
+
+            buf.skipBytes(6);
+
+            int temperatureCount = buf.readUnsignedByte();
+            position.set("powerTemp", buf.readUnsignedByte() - 40);
+            position.set("equilibriumTemp", buf.readUnsignedByte() - 40);
+            for (int i = 1; i <= 7; i++) {
+                int temperature = buf.readUnsignedByte() - 40;
+                if (i <= temperatureCount) {
+                    position.set("batteryTemp" + i, temperature);
+                }
+            }
+
+            position.set("calibrationCapacity", buf.readUnsignedShortLE() * 0.01);
+            position.set("dischargeCapacity", buf.readUnsignedIntLE());
+
+        } else {
+
+            String[] values = payload.split(",");
+            for (String value : values) {
+                String[] pair = value.split(":");
+                int key = Integer.parseInt(pair[0], 16);
+                ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(pair[1]));
+                switch (key) {
+                    case 0x90:
+                        position.set("cumulativeVoltage", buf.readUnsignedShortLE() * 0.1);
+                        position.set("gatherVoltage", buf.readUnsignedShortLE() * 0.1);
+                        position.set("current", (buf.readUnsignedShortLE() - 30000) * 0.1);
+                        position.set("soc", buf.readUnsignedShortLE() * 0.1);
+                        break;
+                    case 0x91:
+                        position.set("maxCellVoltage", buf.readUnsignedShortLE() * 0.001);
+                        position.set("maxCellVoltageCount", buf.readUnsignedByte());
+                        position.set("minCellVoltage", buf.readUnsignedShortLE() * 0.001);
+                        position.set("minCellVoltageCount", buf.readUnsignedByte());
+                        break;
+                    case 0x92:
+                        position.set("maxTemp", buf.readUnsignedByte() - 40);
+                        position.set("maxTempCount", buf.readUnsignedByte());
+                        position.set("minTemp", buf.readUnsignedByte() - 40);
+                        position.set("minTempCount", buf.readUnsignedByte());
+                        break;
+                    case 0x96:
+                        buf.readUnsignedByte(); // frame
+                        while (buf.isReadable()) {
+                            position.set("cellTemp" + buf.readerIndex(), buf.readUnsignedByte() - 40);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -419,7 +568,9 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (sentence.contains("ZC20")) {
+        if (sentence.indexOf('{') > 0 && sentence.indexOf('}') > 0) {
+            return decodeCell(channel, remoteAddress, sentence);
+        } else if (sentence.contains("ZC20")) {
             return decodeBattery(channel, remoteAddress, sentence);
         } else if (sentence.contains("BZ00")) {
             return decodeNetwork(channel, remoteAddress, sentence);
@@ -429,6 +580,8 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             return decodeLbsWifi(channel, remoteAddress, sentence);
         } else if (sentence.contains("BV00")) {
             return decodeVin(channel, remoteAddress, sentence);
+        } else if (sentence.contains("BS50") || sentence.contains("BS51")) {
+            return decodeBms(channel, remoteAddress, sentence);
         }
 
         Parser parser = new Parser(PATTERN, sentence);

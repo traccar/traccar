@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -104,7 +104,7 @@ public class ThinkRaceProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(buf.readUnsignedByte());
 
             position.setNetwork(new Network(
-                    CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedShort())));
+                    CellTower.fromLacCid(getConfig(), buf.readUnsignedShort(), buf.readUnsignedShort())));
 
             return position;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
@@ -260,7 +260,7 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
             MqttSubscribeMessage message = (MqttSubscribeMessage) msg;
 
             MqttMessage response = MqttMessageBuilders.subAck()
-                    .packetId((short) message.variableHeader().messageId())
+                    .packetId(message.variableHeader().messageId())
                     .build();
 
             if (channel != null) {
@@ -339,7 +339,7 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // checksum
 
             MqttMessage response = MqttMessageBuilders.pubAck()
-                    .packetId((short) message.variableHeader().packetId())
+                    .packetId(message.variableHeader().packetId())
                     .build();
 
             if (channel != null) {

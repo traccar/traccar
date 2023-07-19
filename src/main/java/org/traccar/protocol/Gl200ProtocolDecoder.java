@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,14 @@
  */
 package org.traccar.protocol;
 
+import com.google.inject.Injector;
 import org.traccar.BaseProtocolDecoder;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.Protocol;
 
+import javax.inject.Inject;
 import java.net.SocketAddress;
 
 public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
@@ -32,6 +34,12 @@ public class Gl200ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
         textProtocolDecoder = new Gl200TextProtocolDecoder(protocol);
         binaryProtocolDecoder = new Gl200BinaryProtocolDecoder(protocol);
+    }
+
+    @Inject
+    public void setInjector(Injector injector) {
+        injector.injectMembers(textProtocolDecoder);
+        injector.injectMembers(binaryProtocolDecoder);
     }
 
     @Override

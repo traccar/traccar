@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,21 @@
  */
 package org.traccar.speedlimit;
 
-import org.traccar.Context;
 import org.traccar.helper.UnitsConverter;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.ws.rs.client.AsyncInvoker;
+import javax.ws.rs.client.Client;
 import javax.ws.rs.client.InvocationCallback;
 
 public class OverpassSpeedLimitProvider implements SpeedLimitProvider {
 
+    private final Client client;
     private final String url;
 
-    public OverpassSpeedLimitProvider(String url) {
+    public OverpassSpeedLimitProvider(Client client, String url) {
+        this.client = client;
         this.url = url + "?data=[out:json];way[maxspeed](around:100.0,%f,%f);out%%20tags;";
     }
 
@@ -46,7 +48,7 @@ public class OverpassSpeedLimitProvider implements SpeedLimitProvider {
     @Override
     public void getSpeedLimit(double latitude, double longitude, SpeedLimitProviderCallback callback) {
         String formattedUrl = String.format(url, latitude, longitude);
-        AsyncInvoker invoker = Context.getClient().target(formattedUrl).request().async();
+        AsyncInvoker invoker = client.target(formattedUrl).request().async();
         invoker.get(new InvocationCallback<JsonObject>() {
             @Override
             public void completed(JsonObject json) {

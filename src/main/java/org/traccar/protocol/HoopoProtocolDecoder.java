@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.model.Position;
 
@@ -52,7 +52,7 @@ public class HoopoProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            Date time = new Date(OffsetDateTime.parse(eventData.getString("receiveTime")).toInstant().toEpochMilli());
+            Date time = new Date(OffsetDateTime.parse(json.getString("eventTime")).toInstant().toEpochMilli());
             position.setTime(time);
 
             position.setValid(true);
@@ -61,6 +61,10 @@ public class HoopoProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_EVENT, eventData.getString("eventType"));
             position.set(Position.KEY_BATTERY_LEVEL, eventData.getInt("batteryLevel"));
+
+            if (json.containsKey("movement")) {
+                position.setSpeed(json.getJsonObject("movement").getInt("Speed"));
+            }
 
             return position;
 

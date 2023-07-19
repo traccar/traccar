@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,32 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import javax.inject.Inject;
 
 public class ArknavProtocol extends BaseProtocol {
 
-    public ArknavProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public ArknavProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '\r'));
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new ArknavProtocolDecoder(ArknavProtocol.this));
             }
         });
+        addServer(new TrackerServer(config, getName(), true) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new ArknavProtocolDecoder(ArknavProtocol.this));
+            }
+        });
+
     }
 
 }
