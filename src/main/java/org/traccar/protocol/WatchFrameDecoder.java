@@ -27,9 +27,21 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
+        int brackets = 0;
         int endIndex = -1;
-        for (int i = buf.writerIndex() - 1; i >= buf.readerIndex(); i--) {
-            if (buf.getByte(i) == ']') {
+        for (int i = buf.readerIndex(); i < buf.writerIndex(); i++) {
+            byte b = buf.getByte(i);
+            switch (b) {
+                case '[':
+                    brackets += 1;
+                    break;
+                case ']':
+                    brackets -= 1;
+                    break;
+                default:
+                    break;
+            }
+            if (brackets == 0 && i > buf.readerIndex()) {
                 endIndex = i + 1;
                 break;
             }
