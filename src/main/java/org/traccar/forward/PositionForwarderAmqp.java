@@ -15,63 +15,31 @@
  */
 package org.traccar.forward;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rabbitmq.client.AMQP.BasicProperties;
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Properties;
-import java.util.concurrent.TimeoutException;
 
 public class PositionForwarderAmqp implements PositionForwarder {
 
-    private final Channel channel;
+    private final AmqpClient amqpClient;
     private final ObjectMapper objectMapper;
 
-    private final String exchange;
-    private final String topic;
-
     public PositionForwarderAmqp(Config config, ObjectMapper objectMapper) {
-        ConnectionFactory factory = new ConnectionFactory();
-        try {
-            factory.setUri(config.getString(Keys.FORWARD_URL));
-        } catch (NoSuchAlgorithmException | URISyntaxException | KeyManagementException e) {
-            throw new RuntimeException(e);
-        }
-
-        try {
-            Connection connection  = factory.newConnection();
-            topic = config.getString(Keys.FORWARD_TOPIC);
-            exchange = config.getString(Keys.EVENT_FORWARD_EXCHANGE);
-            channel = connection.createChannel();
-            channel.exchangeDeclare(exchange, "topic", true);
-            this.objectMapper = objectMapper;
-        } catch (IOException | TimeoutException e) {
-            throw new RuntimeException(e);
-        }
+        String connectionUrl = config.getString(Keys.FORWARD_URL);
+        String exchange = config.getString(Keys.FORWARD_EXCHANGE);
+        String topic = config.getString(Keys.FORWARD_TOPIC);
+        amqpClient = new AmqpClient(connectionUrl, exchange, topic);
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public void forward(PositionData positionData, ResultHandler resultHandler) {
         try {
             String value = objectMapper.writeValueAsString(positionData);
-
-            BasicProperties properties = new BasicProperties.Builder()
-                    .contentType("application/json")
-                    .contentEncoding("string")
-                    .deliveryMode(2)
-                    .priority(10)
-                    .build();
-
-            channel.basicPublish(exchange, topic, properties, value.getBytes());
+            amqpClient.publishMessage(value);
             resultHandler.onResult(true, null);
         } catch (IOException e) {
             resultHandler.onResult(false, e);
