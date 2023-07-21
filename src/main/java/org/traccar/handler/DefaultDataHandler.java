@@ -42,16 +42,19 @@ public class DefaultDataHandler extends BaseDataHandler {
 
     @Override
     protected Position handlePosition(Position position) {
-
-        try (Jedis jedis = jedisPool.getResource()) {
-            // dataManager.addObject(position);
-            position.setId(jedis.incr("dbid"));
-        } catch (Exception error) {
-            LOGGER.error("Failed to store position", error);
-            try {
-                LOGGER.error(Context.getObjectMapper().writeValueAsString(position));
-            } catch (JsonProcessingException e) {
-                LOGGER.error("Error serializing", e);
+        final int retries = 2;
+        for (int i=0; i<retries; i++) {
+            try (Jedis jedis = jedisPool.getResource()) {
+                position.setId(jedis.incr("dbid"));
+            } catch (Exception error) {
+                if (i == retries-1) {
+                    LOGGER.error("Failed to store position: " + error.getMessage());
+                    try {
+                        LOGGER.error(Context.getObjectMapper().writeValueAsString(position));
+                    } catch (JsonProcessingException e) {
+                        LOGGER.error("Error serializing", e);
+                    }
+                }
             }
         }
 
