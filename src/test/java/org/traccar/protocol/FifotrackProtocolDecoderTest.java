@@ -11,6 +11,9 @@ public class FifotrackProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new FifotrackProtocolDecoder(null));
 
+        verifyAttributes(decoder, buffer(
+                "$$159,866344056951341,399D,A03,,230716222659,240|8|2724|20EEF33,4.20,100,003E,1,AE233FC0D2E0:-65|3E286D5FB6E8:-65|28BD890A4A0E:-67|8ED81B5DFC3A:-70|8AD81B5DFC3A:-70*5F"));
+
         verifyAttribute(decoder, buffer(
                 "$$99,865413050150407,7F,A03,,230626072722,460|0|25FC|AC2AB0B,3.74,52,0019,0,A,0,13,22.643466,114.018211*74"),
                 Position.KEY_SATELLITES, 13);
