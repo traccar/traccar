@@ -62,11 +62,23 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         return encodedId.toString();
     }
 
+    private static String getCalibrationByteFromHexString(String data) {
+        String response = "";
+        int calib = 0;
+        int length = data.length() / 2;
+        for (int i = 0; i < length; i++) {
+            calib = calib ^ Integer.parseInt(data.substring(i * 2, i * 2 + 2), 16);
+        }
+        response = Integer.toHexString(calib).toUpperCase();
+        response = String.format("%2s", response).replace(' ', '0');
+        return response;
+    }
 
     private ByteBuf encodeContent(long deviceId, String mainOrder, String content) {
         // FIXME: implement this method
         return null;
     }
+
 
     @Override
     protected Object encodeCommand(Command command) {
