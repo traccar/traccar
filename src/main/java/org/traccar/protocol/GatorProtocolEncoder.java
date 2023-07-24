@@ -75,8 +75,14 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
     }
 
     private ByteBuf encodeContent(long deviceId, String mainOrder, String content) {
-        // FIXME: implement this method
-        return null;
+        String pseudoIPAddress = encodeId(deviceId);
+        int length = 4 + 1 + 1; // ip 4 bytes, calibration byte and end byte
+        String hexStringLength = String.format("%02X", length);
+
+        String packet = "2424" + mainOrder + "00" + hexStringLength + pseudoIPAddress;
+        String calibration = getCalibrationByteFromHexString(packet);
+        packet = packet + calibration + "0D";
+        return Unpooled.wrappedBuffer(DataConverter.parseHex(packet));
     }
 
 
