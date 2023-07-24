@@ -21,6 +21,7 @@ import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
@@ -33,9 +34,38 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         super(protocol);
     }
 
-    private ByteBuf encodeContent(long deviceId, String content) {
+
+    public static String encodeId(long deviceId) {
+        StringBuilder encodedId = new StringBuilder();
+
+        String imei = String.valueOf(deviceId);
+        String a = imei.substring(1, 3);
+        String b = imei.substring(3, 5);
+        String c = imei.substring(5, 7);
+        String d = imei.substring(7, 9);
+        String e = imei.substring(9);
+        String[] arr = {b, c, d, e};
+
+        String binaryFirstDigit = Integer.toBinaryString(Integer.valueOf(a) - 30);
+        binaryFirstDigit = String.format("%4s", binaryFirstDigit).replace(' ', '0');
+
+        for (int i = 0; i < 4; i++) {
+            int sum = Integer.parseInt(arr[i]) + Integer.parseInt(String.valueOf(binaryFirstDigit.charAt(i)) + "0000000", 2);
+            arr[i] = Integer.toHexString(sum).toUpperCase();
+            arr[i] = String.format("%2s", arr[i]).replace(' ', '0');
+        }
+
+        for (String s : arr) {
+            encodedId.append(s);
+        }
+
+        return encodedId.toString();
+    }
+
+
+    private ByteBuf encodeContent(long deviceId, String mainOrder, String content) {
         // FIXME: implement this method
-        return  null;
+        return null;
     }
 
     @Override
@@ -43,7 +73,7 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_ROLLCALL:
-                return encodeContent(command.getDeviceId(), "0x30");
+                return encodeContent(command.getDeviceId(), "30", null);
             default:
                 return null;
         }
