@@ -17,6 +17,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "78780D01086471700328358100093F040D0A"));
 
+        verifyAttribute(decoder, binary(
+                "787829a01707150f2d0ecd01635100041e96d000087c02d4020000912e000000000718798d000e0006ed3ce50d0a"),
+                Position.KEY_IGNITION, false);
+
         verifyNotNull(decoder, binary(
                 "787829a0170704112226cf0163fe7c0420f6f000091302d402000091290000000007186b8f01030001460d010d0a"));
 

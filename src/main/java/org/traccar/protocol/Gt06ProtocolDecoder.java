@@ -345,7 +345,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             mnc = buf.readUnsignedByte();
         }
         int lac;
-        if (type == MSG_LBS_ALARM) {
+        if (type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7) {
             lac = buf.readInt();
         } else {
             lac = buf.readUnsignedShort();
