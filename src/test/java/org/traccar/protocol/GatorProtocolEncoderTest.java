@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class GatorProtocolEncoderTest extends ProtocolTest {
 
     @Test
-    void encodeId() throws Exception {
+    void testEncodeId() throws Exception {
         var encoder = inject(new GatorProtocolEncoder(null));
         assertEquals("2008958C", encoder.encodeId(13332082112L));
     }
