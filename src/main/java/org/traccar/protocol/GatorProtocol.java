@@ -29,7 +29,7 @@ public class GatorProtocol extends BaseProtocol {
     @Inject
     public GatorProtocol(Config config) {
         setSupportedDataCommands(
-                Command.TYPE_ROLLCALL
+                Command.TYPE_POSITION_SINGLE
         );
         addServer(new TrackerServer(config, getName(), false) {
             @Override

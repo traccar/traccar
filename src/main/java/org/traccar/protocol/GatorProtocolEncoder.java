@@ -90,11 +90,11 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         switch (command.getType()) {
-            case Command.TYPE_ROLLCALL:
+            // According to Protocol Documentation, 0x30 is for rollcall command
+            case Command.TYPE_POSITION_SINGLE:
                 return encodeContent(command.getDeviceId(), "30", null);
             default:
                 return null;
         }
     }
-
 }

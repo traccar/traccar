@@ -19,7 +19,7 @@ public class GatorProtocolEncoderTest extends ProtocolTest {
         var encoder = inject(new GatorProtocolEncoder(null));
         Command command = new Command();
         command.setDeviceId(13332082112L);
-        command.setType(Command.TYPE_ROLLCALL);
+        command.setType(Command.TYPE_POSITION_SINGLE);
         verifyCommand(encoder, command, binary("24243000062008958C070D"));
     }
 }
