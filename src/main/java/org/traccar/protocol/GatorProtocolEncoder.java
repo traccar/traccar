@@ -53,7 +53,6 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         return buf;
     }
 
-
     private ByteBuf encodeContent(long deviceId, int mainOrder) {
         ByteBuf buf = Unpooled.buffer();
 
