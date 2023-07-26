@@ -60,9 +60,7 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(0x24);
         buf.writeByte(mainOrder);
         buf.writeByte(0x00);
-
-        int length = 4 + 1 + 1; // ip 4 bytes, calibration byte and end byte
-        buf.writeByte(length);
+        buf.writeByte(4 + 1 + 1); // ip 4 bytes, checksum and end byte
 
         ByteBuf pseudoIPAddress = encodeId(deviceId);
         buf.writeBytes(pseudoIPAddress);
@@ -80,7 +78,7 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_POSITION_SINGLE:
-                return encodeContent(command.getDeviceId(), 0x30);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_REQUEST);
             default:
                 return null;
         }
