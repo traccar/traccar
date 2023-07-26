@@ -19,16 +19,19 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.Checksum;
+import org.traccar.helper.BcdUtil;
+import org.traccar.helper.DateBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
-import org.traccar.helper.BcdUtil;
-import org.traccar.helper.Checksum;
-import org.traccar.helper.DateBuilder;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
+import java.util.Date;
+
 
 public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
@@ -47,6 +50,11 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PICTURE_FRAME = 0x54;
     public static final int MSG_CAMERA_RESPONSE = 0x56;
     public static final int MSG_PICTURE_DATA = 0x57;
+    public static final int MSG_RFID_DATA = 0x72;
+    public static final int MSG_LOCATE_IMMEDIATE = 0x30;
+    public static final int MSG_ENGINE_ENABLE = 0x38;
+    public static final int MSG_ENGINE_STOP = 0x39;
+
 
     public static String decodeId(int b1, int b2, int b3, int b4) {
 
@@ -90,7 +98,54 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
         sendResponse(channel, remoteAddress, type, buf.getByte(buf.writerIndex() - 2));
 
-        if (type == MSG_POSITION_DATA || type == MSG_ROLLCALL_RESPONSE
+        if (type == MSG_RFID_DATA) {
+            Position position = new Position(getProtocolName());
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, "1" + id, id);
+            if (deviceSession == null) {
+                return null;
+            }
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            int dataType = buf.readUnsignedByte();
+
+            // RFID Data Type - 0x02
+            if (dataType != 0x02) {
+                return null;
+            }
+
+            String rfidData;
+            int rfidDataEndIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x0D);
+            if (rfidDataEndIndex == -1) {
+                return null;
+            }
+
+            int length = rfidDataEndIndex - buf.readerIndex();
+            rfidData = buf.readCharSequence(length, Charset.defaultCharset()).toString();
+            buf.readUnsignedByte();
+
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, rfidData);
+
+            // Reserved - Skip 1 Byte
+            buf.readUnsignedByte();
+
+            int flags = buf.readUnsignedByte();
+            position.setValid((flags & 0x41) != 0);
+
+            DateBuilder dateBuilder = new DateBuilder()
+                    .setYear(BcdUtil.readInteger(buf, 2))
+                    .setMonth(BcdUtil.readInteger(buf, 2))
+                    .setDay(BcdUtil.readInteger(buf, 2))
+                    .setHour(BcdUtil.readInteger(buf, 2))
+                    .setMinute(BcdUtil.readInteger(buf, 2))
+                    .setSecond(BcdUtil.readInteger(buf, 2));
+            position.setTime(dateBuilder.getDate());
+
+            position.setLatitude(BcdUtil.readCoordinate(buf));
+            position.setLongitude(BcdUtil.readCoordinate(buf));
+
+            return position;
+        } else if (type == MSG_POSITION_DATA || type == MSG_ROLLCALL_RESPONSE
                 || type == MSG_ALARM_DATA || type == MSG_BLIND_AREA) {
 
             Position position = new Position(getProtocolName());
@@ -120,12 +175,82 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES, flags & 0x0f);
 
             position.set(Position.KEY_STATUS, buf.readUnsignedByte());
-            position.set("key", buf.readUnsignedByte());
+            position.set(Position.KEY_IGNITION, buf.readUnsignedByte() == 0x01);
 
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
             position.set(Position.PREFIX_ADC + 2, buf.readUnsignedByte() + buf.readUnsignedByte() * 0.01);
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+
+            if (type == MSG_ALARM_DATA || type  == MSG_POSITION_DATA) {
+                int temperatureSignPosition = buf.readUnsignedByte();
+                int temperaturePosition = buf.readUnsignedByte();
+
+                if (temperaturePosition != 0xFF) {
+                    if (temperatureSignPosition == 0x00) {
+                        position.set(Position.PREFIX_TEMP + 1, temperaturePosition);
+                    } else if (temperatureSignPosition == 0x01) {
+                        position.set(Position.PREFIX_TEMP + 1, -temperaturePosition);
+                    }
+                }
+            }
+            if (type == MSG_ALARM_DATA) {
+                int alarmDataByte1 = buf.readUnsignedByte();
+                int alarmDataByte2 = buf.readUnsignedByte();
+
+                if ((alarmDataByte1 & 0b00100000) >= 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+                }
+                if ((alarmDataByte1 & 0b00000001) >= 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+                }
+
+                if ((alarmDataByte2 & 0b10000000) >= 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
+                }
+                if ((alarmDataByte2 & 0b00100000) >= 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                }
+                if ((alarmDataByte2 & 0b00001000) >= 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+                }
+                if ((alarmDataByte2 & 0b00000100) >= 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_PARKING);
+                }
+                if ((alarmDataByte2 & 0b00000010) >= 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                }
+                if ((alarmDataByte2 & 0b00000001) >= 1) {
+                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                }
+            }
+
+            return position;
+        } else if (type == MSG_TERMINAL_ANSWER) {
+            Position position = new Position(getProtocolName());
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, "1" + id, id);
+            if (deviceSession == null) {
+                return null;
+            }
+
+            position.setDeviceId(deviceSession.getDeviceId());
+            position.setTime(new Date());
+
+            getLastLocation(position, null);
+
+            int mainType = buf.readUnsignedByte();
+
+            // Sub Type - Skip 1 Byte
+            buf.readUnsignedByte();
+
+            int commandExecuted = buf.readUnsignedByte();
+
+            // Reserved - Skip 2 Bytes
+            buf.readUnsignedShort();
+
+            position.set(Position.KEY_COMMAND, mainType);
+            position.set(Position.KEY_RESULT, Integer.toString(commandExecuted));
 
             return position;
         }
@@ -134,3 +259,4 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
     }
 
 }
+

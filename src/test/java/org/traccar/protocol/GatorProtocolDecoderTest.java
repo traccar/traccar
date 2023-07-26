@@ -47,7 +47,26 @@ public class GatorProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, binary(
                 "24248000260009632d141121072702059226180104367500000000c04700079c0c34000ad80b00ff000a0d"));
-        
+
+        verifyPosition(decoder, binary(
+                "24247200203c0d07330242313631394143430d2a412304171723280083075207656826e90d"));
+
+        verifyPosition(decoder, binary(
+                        "24247200203c0d07330242313631394143430d2a412304171742240083075307656824870d"),
+                position("2023-04-17 17:42:24.000", true, 8.51255, 76.94707));
+
+        verifyAttributes(decoder, binary(
+                "24247200203c0d07330242313631394143430d2a4123041420015600830758076568329f0d"));
+
+        verifyAttributes(decoder, binary(
+                "24248200273c0d0733230417173655008307520765681900000000c0470100000b510000bfce00ff0001720d"));
+
+        verifyPosition(decoder, binary(
+                "24248200273c0d0733230417173920008307530765682300000000c0470100000c010000bfd900ff0001730d"));
+
+        verifyPosition(decoder, binary(
+                        "24248200273c0d0733230417175405008307520765682000000000c047000000075f0000c02400ff0001ef0d"),
+                position("2023-04-17 17:54:05.000", true, 8.51253, 76.94700));
     }
 
 }
