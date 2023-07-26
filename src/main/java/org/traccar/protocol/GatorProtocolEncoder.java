@@ -22,43 +22,33 @@ import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
     public GatorProtocolEncoder(Protocol protocol) {
         super(protocol);
     }
 
-    public static ByteBuf encodeId(long deviceId) {
+    public ByteBuf encodeId(long deviceId) {
         ByteBuf buf = Unpooled.buffer();
 
-        String deviceIdStrVal = String.valueOf(deviceId);
-        List<String> partialDigits = new ArrayList<>();
-        for (int i = 1; i < deviceIdStrVal.length(); i += 2) {
-            partialDigits.add(deviceIdStrVal.substring(i, i + 2));
-        }
+        String id = getUniqueId(deviceId);
 
-        int firstDigit = Integer.parseInt(partialDigits.get(0)) - 30;
+        int firstDigit = Integer.parseInt(id.substring(1, 3)) - 30;
 
-        for (int i = 1; i < partialDigits.size(); i++) {
-            int shiftCount = 4 - i;
-            int addend = ((firstDigit & (1 << shiftCount)) >> shiftCount) << 7;
-            int sum = Integer.parseInt(partialDigits.get(i)) | addend;
-
-            buf.writeByte(sum);
-        }
+        buf.writeByte(Integer.parseInt(id.substring(3, 5)) | (((firstDigit >> 3) & 1) << 7));
+        buf.writeByte(Integer.parseInt(id.substring(5, 7)) | (((firstDigit >> 2) & 1) << 7));
+        buf.writeByte(Integer.parseInt(id.substring(7, 9)) | (((firstDigit >> 1) & 1) << 7));
+        buf.writeByte(Integer.parseInt(id.substring(9)) | ((firstDigit & 1) << 7));
 
         return buf;
     }
 
-    private ByteBuf encodeContent(long deviceId, int mainOrder) {
+    private ByteBuf encodeContent(long deviceId, int type) {
         ByteBuf buf = Unpooled.buffer();
 
         buf.writeByte(0x24);
         buf.writeByte(0x24);
-        buf.writeByte(mainOrder);
+        buf.writeByte(type);
         buf.writeByte(0x00);
         buf.writeByte(4 + 1 + 1); // ip 4 bytes, checksum and end byte
 
