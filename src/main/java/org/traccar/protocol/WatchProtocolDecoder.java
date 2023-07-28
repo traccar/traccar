@@ -305,11 +305,11 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(values[valueIndex]));
                     }
                 } else if (type.equalsIgnoreCase("oxygen")) {
-                    position.set("bloodOxygen", Integer.parseInt(values[++valueIndex]));
+                    position.set(Position.KEY_BLOOD_OXYGEN, Integer.parseInt(values[++valueIndex]));
                 } else {
                     if (type.equalsIgnoreCase("BPHRT") || type.equalsIgnoreCase("BLOOD")) {
-                        position.set("pressureHigh", values[valueIndex++]);
-                        position.set("pressureLow", values[valueIndex++]);
+                        position.set(Position.KEY_PRESSURE_HIGH, values[valueIndex++]);
+                        position.set(Position.KEY_PRESSURE_LOW, values[valueIndex++]);
                     }
                     if (valueIndex <= values.length - 1) {
                         position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[valueIndex]));

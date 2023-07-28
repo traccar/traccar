@@ -19,7 +19,7 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, buffer(
                         "[3G*9705141740*000B*oxygen,0,98]"),
-                "bloodOxygen", 98);
+                Position.KEY_BLOOD_OXYGEN, 98);
 
         verifyPosition(decoder, buffer(
                 "[3G*9705141740*00C2*UD_LTE,260723,185105,V,00.000000,,00.0000000,,0.00,0.0,0.0,0,100,67,0,0,00000000,2,0,605,1,10006,65799,14,10020,4104,4,3,,34:60:f9:ec:19:f8,-82,,98:48:27:55:18:20,-96,,34:e8:94:e4:06:18,-104,0.0]"));
