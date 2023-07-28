@@ -51,7 +51,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .expression("([AV]),")               // validity
             .number(" *(-?d+.d+),")              // latitude
-            .expression("([NS]),")
+            .expression("([NS])?,")
             .number(" *(-?d+.d+),")              // longitude
             .expression("([EW])?,")
             .number("(d+.?d*),")                 // speed
@@ -285,7 +285,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 || type.equalsIgnoreCase("BLOOD")
                 || type.equalsIgnoreCase("BPHRT")
                 || type.equalsIgnoreCase("TEMP")
-                || type.equalsIgnoreCase("btemp2")) {
+                || type.equalsIgnoreCase("btemp2")
+                || type.equalsIgnoreCase("oxygen")) {
 
             if (buf.isReadable()) {
 
@@ -303,6 +304,8 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                     if (Integer.parseInt(values[valueIndex++]) > 0) {
                         position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(values[valueIndex]));
                     }
+                } else if (type.equalsIgnoreCase("oxygen")) {
+                    position.set("bloodOxygen", Integer.parseInt(values[++valueIndex]));
                 } else {
                     if (type.equalsIgnoreCase("BPHRT") || type.equalsIgnoreCase("BLOOD")) {
                         position.set("pressureHigh", values[valueIndex++]);
