@@ -44,6 +44,9 @@ public class Position extends Message {
     public static final String KEY_ODOMETER_TRIP = "tripOdometer"; // meters
     public static final String KEY_HOURS = "hours"; // milliseconds
     public static final String KEY_STEPS = "steps";
+    public static final String KEY_BLOOD_OXYGEN = "bloodOxygen";
+    public static final String KEY_PRESSURE_HIGH = "pressureHigh";
+    public static final String KEY_PRESSURE_LOW = "pressureLow";
     public static final String KEY_HEART_RATE = "heartRate";
     public static final String KEY_INPUT = "input";
     public static final String KEY_OUTPUT = "output";
