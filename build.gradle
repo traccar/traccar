@@ -13,7 +13,7 @@ ext {
     guiceVersion = "4.2.3"
     jettyVersion = "9.4.30.v20200611"
     jerseyVersion = "2.31"
-    jacksonVersion = "2.10.1" // same version as jersey-media-json-jackson dependency
+    jacksonVersion = "2.14.1" // same version as jersey-media-json-jackson dependency
     protobufVersion = "3.18.0"
 }
 
