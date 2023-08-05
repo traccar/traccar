@@ -2965,39 +2965,43 @@
         "properties": {
           "userId": {
             "type": "integer",
-            "description": "User Id, can be only first parameter"
+            "description": "User id, can be only first parameter"
           },
           "deviceId": {
             "type": "integer",
-            "description": "Device Id, can be first parameter or second only in combination with userId"
+            "description": "Device id, can be first parameter or second only in combination with userId"
           },
           "groupId": {
             "type": "integer",
-            "description": "Group Id, can be first parameter or second only in combination with userId"
+            "description": "Group id, can be first parameter or second only in combination with userId"
           },
           "geofenceId": {
             "type": "integer",
-            "description": "Geofence Id, can be second parameter only"
+            "description": "Geofence id, can be second parameter only"
           },
           "notificationId": {
             "type": "integer",
-            "description": "Notification Id, can be second parameter only"
+            "description": "Notification id, can be second parameter only"
           },
           "calendarId": {
             "type": "integer",
-            "description": "Calendar Id, can be second parameter only and only in combination with userId"
+            "description": "Calendar id, can be second parameter only and only in combination with userId"
           },
           "attributeId": {
             "type": "integer",
-            "description": "Computed Attribute Id, can be second parameter only"
+            "description": "Computed attribute id, can be second parameter only"
           },
           "driverId": {
             "type": "integer",
-            "description": "Driver Id, can be second parameter only"
+            "description": "Driver id, can be second parameter only"
           },
           "managedUserId": {
             "type": "integer",
-            "description": "User Id, can be second parameter only and only in combination with userId"
+            "description": "User id, can be second parameter only and only in combination with userId"
+          },
+          "commandId": {
+            "type": "integer",
+            "description": "Saved command id, can be second parameter only"
           }
         },
         "description": "This is a permission map that contain two object indexes. It is used to link/unlink objects. Order is important. Example: { deviceId:8, geofenceId: 16 }"
