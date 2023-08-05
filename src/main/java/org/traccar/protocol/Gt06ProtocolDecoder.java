@@ -121,6 +121,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         STANDARD,
         OBD6,
         WETRUST,
+        JC400,
     }
 
     private Variant variant;
@@ -269,12 +270,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static boolean decodeGps(Position position, ByteBuf buf, boolean hasLength, TimeZone timezone) {
-        return decodeGps(position, buf, hasLength, true, true, timezone);
+        return decodeGps(position, buf, hasLength, true, true, false, timezone);
     }
 
     public static boolean decodeGps(
             Position position, ByteBuf buf, boolean hasLength, boolean hasSatellites,
-            boolean hasSpeed, TimeZone timezone) {
+            boolean hasSpeed, boolean longSpeed, TimeZone timezone) {
 
         DateBuilder dateBuilder = new DateBuilder(timezone)
                 .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -293,7 +294,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         double longitude = buf.readUnsignedInt() / 60.0 / 30000.0;
 
         if (hasSpeed) {
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+            position.setSpeed(UnitsConverter.knotsFromKph(
+                    longSpeed ? buf.readUnsignedShort() : buf.readUnsignedByte()));
         }
 
         int flags = buf.readUnsignedShort();
@@ -928,23 +930,43 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             boolean extendedAlarm = dataLength > 7;
             if (extendedAlarm) {
-                decodeGps(position, buf, false, false, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
+                if (variant == Variant.JC400) {
+                    buf.readUnsignedShort(); // marker
+                    buf.readUnsignedByte(); // version
+                }
+                decodeGps(
+                        position, buf, false,
+                        variant == Variant.JC400, variant == Variant.JC400, variant == Variant.JC400,
+                        deviceSession.get(DeviceSession.KEY_TIMEZONE));
             } else {
                 DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
                         .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                         .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
                 getLastLocation(position, dateBuilder.getDate());
             }
-            short alarmType = buf.readUnsignedByte();
-            switch (alarmType) {
+            if (variant == Variant.JC400) {
+                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
+            }
+            short event = buf.readUnsignedByte();
+            position.set(Position.KEY_EVENT, event);
+            switch (event) {
                 case 0x01:
                     position.set(Position.KEY_ALARM, extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
+                    break;
+                case 0x0E:
+                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                    break;
+                case 0x76:
+                    position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
                     break;
                 case 0x80:
                     position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
                     break;
                 case 0x87:
                     position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                    break;
+                case 0x88:
+                    position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
                     break;
                 case 0x90:
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
@@ -959,7 +981,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
                     break;
                 default:
-                    position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
                     break;
             }
 
@@ -1432,6 +1453,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.OBD6;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x29) {
             variant = Variant.WETRUST;
+        } else if (header == 0x7878 && type == MSG_ALARM && buf.getUnsignedShort(buf.readerIndex() + 4) == 0xffff) {
+            variant = Variant.JC400;
         } else {
             variant = Variant.STANDARD;
         }
