@@ -12,6 +12,14 @@ public class CastelProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new CastelProtocolDecoder(null));
 
         verifyAttribute(decoder, binary(
+                "40404700043231335732303139303033353400000000000000400BBE723A5DEF723A5D000000000000000000000000000000000000030100011900030001012603030145C90D0A"),
+                Position.KEY_DTCS, "P0326");
+
+        verifyAttribute(decoder, binary(
+                "40404500033231334c323031373030303432320000000000004006e1ad205bf1ad205b48510f000000000050160000000000020400053f007c000083040001511346160d0a"),
+                Position.KEY_DTCS, "P1351");
+
+        verifyAttribute(decoder, binary(
                 "40403a00043231334744503230313830323133343300000000a002000001000001012011004d414c43333831434d4b4d353637313438c8fc0d0a"),
                 Position.KEY_RESULT, "MALC381CMKM567148");
 

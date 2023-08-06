@@ -284,14 +284,26 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             case 0x0C:
                 position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
                 break;
+            case 0x0D:
+                position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+                break;
             case 0x0E:
                 position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+                break;
+            case 0x11:
+                position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                break;
+            case 0x12:
+                position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
                 break;
             case 0x16:
                 position.set(Position.KEY_IGNITION, true);
                 break;
             case 0x17:
                 position.set(Position.KEY_IGNITION, false);
+                break;
+            case 0x1C:
+                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
                 break;
             default:
                 break;
@@ -359,9 +371,9 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     int alarmCount = buf.readUnsignedByte();
                     for (int i = 0; i < alarmCount; i++) {
                         if (buf.readUnsignedByte() != 0) {
-                            int alarm = buf.readUnsignedByte();
+                            int event = buf.readUnsignedByte();
                             for (Position p : positions) {
-                                decodeAlarm(p, alarm);
+                                decodeAlarm(p, event);
                             }
                             buf.readUnsignedShortLE(); // description
                             buf.readUnsignedShortLE(); // threshold
@@ -421,12 +433,25 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 return position;
 
             case MSG_SC_DTCS_PASSENGER:
+            case MSG_SC_DTCS_COMMERCIAL:
                 position = createPosition(deviceSession);
 
                 decodeStat(position, buf);
 
                 buf.readUnsignedByte(); // flag
-                position.add(ObdDecoder.decodeCodes(ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte()))));
+
+                count = buf.readUnsignedByte();
+                StringBuilder codes = new StringBuilder();
+                for (int i = 0; i < count; i++) {
+                    if (type == MSG_SC_DTCS_COMMERCIAL) {
+                        codes.append(ObdDecoder.decodeCode(buf.readUnsignedShortLE()));
+                        buf.readUnsignedByte(); // attribute
+                        buf.readUnsignedByte(); // occurrence
+                    } else {
+                        codes.append(ObdDecoder.decodeCode(buf.readUnsignedShortLE()));
+                    }
+                }
+                position.set(Position.KEY_DTCS, codes.toString().trim());
 
                 return position;
 
