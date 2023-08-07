@@ -43,7 +43,8 @@ public class AmqpClient {
             throw new RuntimeException("Error while setting URI for RabbitMQ connection factory", e);
         }
 
-        try (Connection connection = factory.newConnection()) {
+        try {
+            Connection connection = factory.newConnection();
             channel = connection.createChannel();
             channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, true);
         } catch (IOException | TimeoutException e) {
