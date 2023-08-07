@@ -47,13 +47,6 @@ public class AmqpClient {
             Connection connection = factory.newConnection();
             channel = connection.createChannel();
             channel.exchangeDeclare(exchange, BuiltinExchangeType.TOPIC, true);
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                try {
-                    connection.close();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }));
         } catch (IOException | TimeoutException e) {
             throw new RuntimeException("Error while creating and configuring RabbitMQ channel", e);
         }
