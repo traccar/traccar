@@ -29,6 +29,8 @@ public class GatorProtocol extends BaseProtocol {
     @Inject
     public GatorProtocol(Config config) {
         setSupportedDataCommands(Command.TYPE_POSITION_SINGLE);
+        setSupportedDataCommands(Command.TYPE_ENGINE_RESUME);
+        setSupportedDataCommands(Command.TYPE_ENGINE_STOP);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
