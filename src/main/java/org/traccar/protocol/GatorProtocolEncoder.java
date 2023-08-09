@@ -69,6 +69,10 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         switch (command.getType()) {
             case Command.TYPE_POSITION_SINGLE:
                 return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_REQUEST);
+            case Command.TYPE_ENGINE_STOP:
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_CLOSE_THE_OIL_DUCT);
+            case Command.TYPE_ENGINE_RESUME:
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESTORES_THE_OIL_DUCT);
             default:
                 return null;
         }

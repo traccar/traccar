@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
@@ -27,6 +26,7 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 
@@ -38,6 +38,8 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_HEARTBEAT = 0x21;
     public static final int MSG_POSITION_REQUEST = 0x30;
+    public static final int MSG_RESTORES_THE_OIL_DUCT = 0x38;
+    public static final int MSG_CLOSE_THE_OIL_DUCT = 0x39;
     public static final int MSG_POSITION_DATA = 0x80;
     public static final int MSG_ROLLCALL_RESPONSE = 0x81;
     public static final int MSG_ALARM_DATA = 0x82;
