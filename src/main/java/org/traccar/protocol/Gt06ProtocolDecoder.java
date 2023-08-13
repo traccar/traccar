@@ -916,7 +916,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (type == MSG_GPS_LBS_7) {
+            if (buf.readableBytes() == 3 + 6 || buf.readableBytes() == 3 + 4 + 6) {
                 position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
                 buf.readUnsignedByte(); // upload mode
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0 ? true : null);
