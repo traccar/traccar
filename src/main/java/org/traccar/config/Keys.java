@@ -944,6 +944,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Events forwarding MQTT version. Default 5. Other valid values: 3
+     */
+    public static final ConfigKey<Integer> EVENT_FORWARD_MQTT_VERSION = new IntegerConfigKey(
+            "event.forward.mqttVersion",
+            List.of(KeyType.CONFIG),
+            5);
+
+    /**
      * Events forwarding headers. Example value:
      * FirstHeader: hello
      * SecondHeader: world

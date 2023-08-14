@@ -29,11 +29,8 @@ import java.net.URISyntaxException;
 import java.util.UUID;
 
 public class EventForwarderMqtt implements EventForwarder {
-
-    private final Mqtt5AsyncClient client;
+    private final MqttClient client;
     private final ObjectMapper objectMapper;
-
-    private final String topic;
 
     public EventForwarderMqtt(Config config, ObjectMapper objectMapper) {
         URI url;
@@ -42,41 +39,30 @@ public class EventForwarderMqtt implements EventForwarder {
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-
+        int version = config.getInteger(Keys.EVENT_FORWARD_MQTT_VERSION);
+        String host = url.getHost();
+        int port = url.getPort();
+        String username = null;
+        String password = null;
+        String topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
         String userInfo = url.getUserInfo();
-        Mqtt5SimpleAuth simpleAuth = null;
-        if (userInfo != null) {
+        if(userInfo != null) {
             int delimiter = userInfo.indexOf(':');
             if (delimiter == -1) {
                 throw new IllegalArgumentException("Wrong credentials. Should be in format \"username:password\"");
             } else {
-                simpleAuth = Mqtt5SimpleAuth.builder()
-                        .username(userInfo.substring(0, delimiter++))
-                        .password(userInfo.substring(delimiter).getBytes())
-                        .build();
+                username = userInfo.substring(0, delimiter++);
+                password = userInfo.substring(delimiter);
             }
         }
 
-        String host = url.getHost();
-        int port = url.getPort();
-        client = Mqtt5Client.builder()
-                .identifier("traccar-" + UUID.randomUUID())
-                .serverHost(host)
-                .serverPort(port)
-                .simpleAuth(simpleAuth)
-                .automaticReconnectWithDefaultConfig()
-                .buildAsync();
-
-        client.connectWith()
-                .send()
-                .whenComplete((message, e) -> {
-                    if (e != null) {
-                        throw new RuntimeException(e);
-                    }
-                });
-
+        if(version==3) {
+            client = new MqttClientV3(host, port, username, password, topic);
+        }
+        else {
+            client = new MqttClientV5(host, port, username, password, topic);
+        }
         this.objectMapper = objectMapper;
-        topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
     }
 
     @Override
@@ -89,12 +75,7 @@ public class EventForwarderMqtt implements EventForwarder {
             return;
         }
 
-        client.publishWith()
-                .topic(topic)
-                .qos(MqttQos.AT_LEAST_ONCE)
-                .payload(payload)
-                .send()
-                .whenComplete((message, e) -> resultHandler.onResult(e == null, e));
+        client.publish(payload, resultHandler);
     }
 
 }
