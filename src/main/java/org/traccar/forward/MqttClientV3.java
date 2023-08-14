@@ -15,24 +15,18 @@
  */
 package org.traccar.forward;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
 import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.UUID;
 
 public class MqttClientV3 implements MqttClient {
     private final Mqtt3AsyncClient client;
     private final String topic;
 
-    public MqttClientV3(final String host, int port, String user, String password, String topic) {
+    public MqttClientV3(String host, int port, String user, String password, String topic) {
         Mqtt3SimpleAuth simpleAuth = null;
         if (user != null && password != null) {
             simpleAuth = Mqtt3SimpleAuth.builder()
@@ -59,7 +53,7 @@ public class MqttClientV3 implements MqttClient {
     }
 
     @Override
-    public void publish(final byte[] payload, ResultHandler resultHandler) {
+    public void publish(byte[] payload, ResultHandler resultHandler) {
         client.publishWith()
                 .topic(topic)
                 .qos(MqttQos.AT_LEAST_ONCE)
