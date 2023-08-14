@@ -15,6 +15,8 @@
  */
 package org.traccar.forward;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.traccar.config.Config;
@@ -25,10 +27,11 @@ import java.net.URISyntaxException;
 import java.util.UUID;
 
 public class EventForwarderMqtt implements EventForwarder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventForwarderMqtt.class);
     private final MqttClient client;
     private final ObjectMapper objectMapper;
 
-    public EventForwarderMqtt(Config config, ObjectMapper objectMapper) {
+    public EventForwarderMqtt(Config config, ObjectMapper objectMapper, MqttClientFactory clientFactory) {
         URI url;
         try {
             url = new URI(config.getString(Keys.EVENT_FORWARD_URL));
@@ -51,13 +54,8 @@ public class EventForwarderMqtt implements EventForwarder {
                 password = userInfo.substring(delimiter);
             }
         }
-
-        if(version==3) {
-            client = new MqttClientV3(host, port, username, password, topic);
-        }
-        else {
-            client = new MqttClientV5(host, port, username, password, topic);
-        }
+        LOGGER.info("Creating EventForwarderMqtt for MQTT version " + version);
+        client = clientFactory.create(version, host, port, username, password, topic);
         this.objectMapper = objectMapper;
     }
 
