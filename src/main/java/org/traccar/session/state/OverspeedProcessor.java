@@ -34,7 +34,7 @@ public final class OverspeedProcessor {
         if (oldState) {
             boolean newState = position.getSpeed() > speedLimit;
             if (newState) {
-                setEvent(state, position, speedLimit, minimalDuration);
+                checkEvent(state, position, speedLimit, minimalDuration);
             } else {
                 state.setOverspeedState(false);
                 state.setOverspeedTime(null);
@@ -45,11 +45,11 @@ public final class OverspeedProcessor {
             state.setOverspeedTime(position.getFixTime());
             state.setOverspeedGeofenceId(geofenceId);
 
-            setEvent(state, position, speedLimit, minimalDuration);
+            checkEvent(state, position, speedLimit, minimalDuration);
         }
     }
 
-    private static void setEvent(OverspeedState state, Position position, double speedLimit, long minimalDuration) {
+    private static void checkEvent(OverspeedState state, Position position, double speedLimit, long minimalDuration) {
         if (state.getOverspeedTime() != null) {
             long oldTime = state.getOverspeedTime().getTime();
             long newTime = position.getFixTime().getTime();
