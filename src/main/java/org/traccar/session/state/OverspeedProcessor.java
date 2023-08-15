@@ -34,22 +34,7 @@ public final class OverspeedProcessor {
         if (oldState) {
             boolean newState = position.getSpeed() > speedLimit;
             if (newState) {
-                if (state.getOverspeedTime() != null) {
-                    long oldTime = state.getOverspeedTime().getTime();
-                    long newTime = position.getFixTime().getTime();
-                    if (newTime - oldTime > minimalDuration) {
-
-                        Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position);
-                        event.set(ATTRIBUTE_SPEED, position.getSpeed());
-                        event.set(Position.KEY_SPEED_LIMIT, speedLimit);
-                        event.setGeofenceId(state.getOverspeedGeofenceId());
-
-                        state.setOverspeedTime(null);
-                        state.setOverspeedGeofenceId(0);
-                        state.setEvent(event);
-
-                    }
-                }
+                checkEvent(state, position, speedLimit, minimalDuration);
             } else {
                 state.setOverspeedState(false);
                 state.setOverspeedTime(null);
@@ -59,7 +44,27 @@ public final class OverspeedProcessor {
             state.setOverspeedState(true);
             state.setOverspeedTime(position.getFixTime());
             state.setOverspeedGeofenceId(geofenceId);
+
+            checkEvent(state, position, speedLimit, minimalDuration);
         }
     }
 
+    private static void checkEvent(OverspeedState state, Position position, double speedLimit, long minimalDuration) {
+        if (state.getOverspeedTime() != null) {
+            long oldTime = state.getOverspeedTime().getTime();
+            long newTime = position.getFixTime().getTime();
+            if (newTime - oldTime >= minimalDuration) {
+
+                Event event = new Event(Event.TYPE_DEVICE_OVERSPEED, position);
+                event.set(ATTRIBUTE_SPEED, position.getSpeed());
+                event.set(Position.KEY_SPEED_LIMIT, speedLimit);
+                event.setGeofenceId(state.getOverspeedGeofenceId());
+
+                state.setOverspeedTime(null);
+                state.setOverspeedGeofenceId(0);
+                state.setEvent(event);
+
+            }
+        }
+    }
 }
