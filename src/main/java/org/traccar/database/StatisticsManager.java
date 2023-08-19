@@ -100,6 +100,8 @@ public class StatisticsManager {
                     statistics.setProtocols(protocols);
                 }
 
+                statistics.set("modern", config.getString(Keys.WEB_PATH).contains("modern"));
+
                 users.clear();
                 deviceProtocols.clear();
                 deviceMessages.clear();
@@ -139,6 +141,13 @@ public class StatisticsManager {
                         form.param("protocols", objectMapper.writeValueAsString(statistics.getProtocols()));
                     } catch (JsonProcessingException e) {
                         LOGGER.warn("Failed to serialize protocols", e);
+                    }
+                }
+                if (!statistics.getAttributes().isEmpty()) {
+                    try {
+                        form.param("attributes", objectMapper.writeValueAsString(statistics.getAttributes()));
+                    } catch (JsonProcessingException e) {
+                        LOGGER.warn("Failed to serialize attributes", e);
                     }
                 }
 
