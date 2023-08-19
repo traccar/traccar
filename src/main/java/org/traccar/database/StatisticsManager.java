@@ -29,11 +29,11 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.Form;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;

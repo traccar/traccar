@@ -24,7 +24,7 @@ import org.traccar.config.Config;
 
 import java.nio.charset.StandardCharsets;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class FlexApiProtocol extends BaseProtocol {
 

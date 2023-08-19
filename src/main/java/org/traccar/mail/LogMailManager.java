@@ -19,8 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.model.User;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeBodyPart;
 
 public class LogMailManager implements MailManager {
 

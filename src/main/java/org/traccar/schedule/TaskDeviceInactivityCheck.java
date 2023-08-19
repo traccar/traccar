@@ -27,7 +27,7 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;

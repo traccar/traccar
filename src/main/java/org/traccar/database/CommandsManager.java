@@ -34,9 +34,9 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.stream.Collectors;
 

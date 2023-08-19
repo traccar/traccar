@@ -31,12 +31,12 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.json.JsonObject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;

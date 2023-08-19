@@ -27,7 +27,7 @@ import org.traccar.handler.AcknowledgementHandler;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Position;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;

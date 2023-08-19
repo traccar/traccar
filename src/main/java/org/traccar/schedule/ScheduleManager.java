@@ -18,8 +18,8 @@ package org.traccar.schedule;
 import com.google.inject.Injector;
 import org.traccar.LifecycleObject;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;

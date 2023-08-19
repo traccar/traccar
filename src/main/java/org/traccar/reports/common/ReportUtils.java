@@ -52,8 +52,8 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

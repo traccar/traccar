@@ -23,7 +23,7 @@ import org.jvnet.hk2.guice.bridge.api.GuiceBridge;
 import org.jvnet.hk2.guice.bridge.api.GuiceIntoHK2Bridge;
 import org.traccar.Main;
 
-import javax.annotation.Priority;
+import jakarta.annotation.Priority;
 
 @Priority(20)
 public class WebInjectionManagerFactory implements InjectionManagerFactory {

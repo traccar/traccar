@@ -25,8 +25,8 @@ import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.sms.SmsManager;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class NotificatorSms implements Notificator {

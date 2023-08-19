@@ -23,8 +23,8 @@ import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

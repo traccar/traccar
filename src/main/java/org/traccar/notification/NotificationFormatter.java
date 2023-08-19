@@ -27,8 +27,8 @@ import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.session.cache.CacheManager;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class NotificationFormatter {

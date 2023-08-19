@@ -33,7 +33,7 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

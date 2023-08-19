@@ -18,7 +18,7 @@ package org.traccar.helper;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.util.URIUtil;
 import org.traccar.config.Config;

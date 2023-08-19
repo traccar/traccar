@@ -21,7 +21,7 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class UlbotechProtocol extends BaseProtocol {
 

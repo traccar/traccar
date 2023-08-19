@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.Client;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.client.Client;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 

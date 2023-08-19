@@ -23,8 +23,8 @@ import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.session.ConnectionManager;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public final class NotificatorWeb implements Notificator {

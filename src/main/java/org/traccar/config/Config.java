@@ -19,8 +19,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.name.Named;
 import org.traccar.helper.Log;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;

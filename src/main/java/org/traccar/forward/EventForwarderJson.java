@@ -18,10 +18,10 @@ package org.traccar.forward;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.InvocationCallback;
+import jakarta.ws.rs.core.Response;
 
 public class EventForwarderJson implements EventForwarder {
 

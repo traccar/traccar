@@ -22,7 +22,7 @@ import io.netty.channel.socket.DatagramChannel;
 import io.netty.channel.socket.DatagramPacket;
 import org.traccar.forward.NetworkForwarder;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 

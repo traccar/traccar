@@ -23,8 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.traccar.model.Position;
 import org.traccar.speedlimit.SpeedLimitProvider;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 @ChannelHandler.Sharable

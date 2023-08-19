@@ -20,8 +20,8 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
 import java.security.KeyPair;

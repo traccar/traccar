@@ -23,8 +23,8 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.QueryParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.QueryParam;
 import java.util.Collection;
 import java.util.LinkedList;
 

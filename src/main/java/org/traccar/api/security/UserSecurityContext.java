@@ -15,7 +15,7 @@
  */
 package org.traccar.api.security;
 
-import javax.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.SecurityContext;
 import java.security.Principal;
 
 public class UserSecurityContext implements SecurityContext {

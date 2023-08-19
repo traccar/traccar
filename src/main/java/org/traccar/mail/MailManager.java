@@ -17,8 +17,8 @@ package org.traccar.mail;
 
 import org.traccar.model.User;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeBodyPart;
 
 public interface MailManager {
 

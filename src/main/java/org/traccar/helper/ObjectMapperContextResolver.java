@@ -17,8 +17,8 @@ package org.traccar.helper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javax.inject.Inject;
-import javax.ws.rs.ext.ContextResolver;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.ext.ContextResolver;
 
 // This does not work as a lambda
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {

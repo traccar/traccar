@@ -19,10 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.database.StatisticsManager;
 
-import javax.json.JsonObject;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.InvocationCallback;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.InvocationCallback;
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;

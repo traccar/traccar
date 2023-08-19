@@ -3,8 +3,8 @@ package org.traccar.geocoder;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

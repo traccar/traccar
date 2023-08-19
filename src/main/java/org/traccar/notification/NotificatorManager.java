@@ -30,8 +30,8 @@ import org.traccar.notificators.NotificatorTelegram;
 import org.traccar.notificators.NotificatorTraccar;
 import org.traccar.notificators.NotificatorWeb;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;

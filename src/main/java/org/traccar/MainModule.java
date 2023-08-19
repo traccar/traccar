@@ -17,7 +17,7 @@ package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -93,10 +93,10 @@ import org.traccar.storage.Storage;
 import org.traccar.web.WebServer;
 import org.traccar.api.security.LoginService;
 
-import javax.annotation.Nullable;
-import javax.inject.Singleton;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -134,7 +134,7 @@ public class MainModule extends AbstractModule {
         if (config.getBoolean(Keys.WEB_SANITIZE)) {
             objectMapper.registerModule(new SanitizerModule());
         }
-        objectMapper.registerModule(new JSR353Module());
+        objectMapper.registerModule(new JSONPModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return objectMapper;
     }

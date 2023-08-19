@@ -52,11 +52,11 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.ObjectMapperContextResolver;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;

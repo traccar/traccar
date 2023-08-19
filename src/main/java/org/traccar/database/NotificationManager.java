@@ -38,9 +38,9 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;

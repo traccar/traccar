@@ -24,7 +24,7 @@ import org.traccar.model.Command;
 
 import java.nio.ByteOrder;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class Minifinder2Protocol extends BaseProtocol {
 

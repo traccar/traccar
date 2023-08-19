@@ -24,10 +24,10 @@ import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
