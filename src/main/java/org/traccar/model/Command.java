@@ -15,9 +15,8 @@
  */
 package org.traccar.model;
 
-import org.traccar.storage.QueryIgnore;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
 @StorageName("tc_commands")
@@ -72,6 +71,10 @@ public class Command extends BaseCommand {
 
     public static final String KEY_UNIQUE_ID = "uniqueId";
     public static final String KEY_FREQUENCY = "frequency";
+
+    public static final String KEY_ENGINE_OFF_INTERVAL = "engine_off_interval";
+    public static final String KEY_ENGINE_ON_INTERVAL = "engine_on_interval";
+    public static final String KEY_HEARTBEAT_INTERVAL = "heartbeat_interval";
     public static final String KEY_LANGUAGE = "language";
     public static final String KEY_TIMEZONE = "timezone";
     public static final String KEY_DEVICE_PASSWORD = "devicePassword";

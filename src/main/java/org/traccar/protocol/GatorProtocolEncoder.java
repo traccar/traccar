@@ -43,17 +43,23 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         return buf;
     }
 
-    private ByteBuf encodeContent(long deviceId, int type) {
+    private ByteBuf encodeContent(long deviceId, int type, ByteBuf content) {
         ByteBuf buf = Unpooled.buffer();
 
         buf.writeByte(0x24);
         buf.writeByte(0x24);
         buf.writeByte(type);
         buf.writeByte(0x00);
-        buf.writeByte(4 + 1 + 1); // ip 4 bytes, checksum and end byte
+
+        // ip 4 bytes, content length, checksum and end byte
+        buf.writeByte(4 + 1 + (content != null ? content.readableBytes() : 0) + 1);
 
         ByteBuf pseudoIPAddress = encodeId(deviceId);
         buf.writeBytes(pseudoIPAddress);
+
+        if (content != null) {
+            buf.writeBytes(content);
+        }
 
         int checksum = Checksum.xor(buf.nioBuffer());
         buf.writeByte(checksum);
@@ -66,13 +72,20 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
+        ByteBuf content = Unpooled.buffer();
+
         switch (command.getType()) {
             case Command.TYPE_POSITION_SINGLE:
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_REQUEST);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_REQUEST, content);
             case Command.TYPE_ENGINE_STOP:
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_CLOSE_THE_OIL_DUCT);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_CLOSE_THE_OIL_DUCT, content);
             case Command.TYPE_ENGINE_RESUME:
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESTORES_THE_OIL_DUCT);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESTORES_THE_OIL_DUCT, content);
+            case Command.TYPE_POSITION_PERIODIC:
+                content.writeShort(command.getInteger(Command.KEY_ENGINE_ON_INTERVAL));
+                content.writeShort(command.getInteger(Command.KEY_ENGINE_OFF_INTERVAL));
+                content.writeByte(command.getInteger(Command.KEY_HEARTBEAT_INTERVAL));
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_PERIODIC, content);
             default:
                 return null;
         }
