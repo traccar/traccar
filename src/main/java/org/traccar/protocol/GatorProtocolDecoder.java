@@ -38,7 +38,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_HEARTBEAT = 0x21;
     public static final int MSG_POSITION_REQUEST = 0x30;
-    public static final int MSG_SET_POSITION_REQUEST_INTERVAL = 0x34;
+    public static final int MSG_POSITION_PERIODIC = 0x34;
     public static final int MSG_SET_SPEED_LIMIT = 0x3F;
     public static final int MSG_SET_ODOMETER = 0x6B;
     public static final int MSG_RESTORES_THE_OIL_DUCT = 0x38;

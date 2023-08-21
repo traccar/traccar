@@ -91,7 +91,7 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
                 content.writeShort(command.getInteger(Command.KEY_ENGINE_ON_INTERVAL));
                 content.writeShort(command.getInteger(Command.KEY_ENGINE_OFF_INTERVAL));
                 content.writeByte(command.getInteger(Command.KEY_HEARTBEAT_INTERVAL));
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_SET_POSITION_REQUEST_INTERVAL, content);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_PERIODIC, content);
             default:
                 return null;
         }
