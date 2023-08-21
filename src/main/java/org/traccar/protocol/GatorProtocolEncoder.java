@@ -81,11 +81,17 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
                 return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_CLOSE_THE_OIL_DUCT, content);
             case Command.TYPE_ENGINE_RESUME:
                 return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESTORES_THE_OIL_DUCT, content);
+            case Command.TYPE_SET_SPEED_LIMIT:
+                content.writeByte(command.getInteger(Command.KEY_DATA));
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_SET_SPEED_LIMIT, content);
+            case Command.TYPE_SET_ODOMETER:
+                content.writeShort(command.getInteger(Command.KEY_DATA));
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_SET_ODOMETER, content);
             case Command.TYPE_POSITION_PERIODIC:
                 content.writeShort(command.getInteger(Command.KEY_ENGINE_ON_INTERVAL));
                 content.writeShort(command.getInteger(Command.KEY_ENGINE_OFF_INTERVAL));
                 content.writeByte(command.getInteger(Command.KEY_HEARTBEAT_INTERVAL));
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_PERIODIC, content);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_SET_POSITION_REQUEST_INTERVAL, content);
             default:
                 return null;
         }
