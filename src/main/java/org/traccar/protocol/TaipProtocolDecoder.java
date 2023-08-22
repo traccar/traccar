@@ -192,7 +192,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         }
 
-        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
+        position.setSpeed(convertSpeed(parser.nextDouble(0), "mph"));
         position.setCourse(parser.nextDouble(0));
 
         if (parser.hasNext(2)) {
