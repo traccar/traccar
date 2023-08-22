@@ -205,6 +205,9 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                                 }
                             }
                             break;
+                        case 0x20:
+                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                            break;
                         case 0x23:
                             Network network = new Network();
                             int count = buf.readUnsignedByte();

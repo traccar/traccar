@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class KhdProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,10 @@ public class KhdProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new KhdProtocolDecoder(null));
+
+        verifyAttribute(decoder, binary(
+                "2929a3003e1680ba0a2304180759500000000000000000000000007b00000080001914000000000000000000162001641b0b0000249002bc58030001cc46020000e70d"),
+                Position.KEY_BATTERY_LEVEL, 100);
 
         verifyPosition(decoder, binary(
                 "2929800028258b8c10210731035840031534240542120200000337fb000000ffff5a00000a0000000005005d0d"));
