@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.traccar.Context;
+
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
 @StorageName("tc_servers")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Server extends ExtendedModel {
+public class Server extends ExtendedModel implements UserRestrictions {
 
     private boolean registration;
 
@@ -36,6 +36,7 @@ public class Server extends ExtendedModel {
 
     private boolean readonly;
 
+    @Override
     public boolean getReadonly() {
         return readonly;
     }
@@ -46,6 +47,7 @@ public class Server extends ExtendedModel {
 
     private boolean deviceReadonly;
 
+    @Override
     public boolean getDeviceReadonly() {
         return deviceReadonly;
     }
@@ -82,6 +84,16 @@ public class Server extends ExtendedModel {
 
     public void setMapUrl(String mapUrl) {
         this.mapUrl = mapUrl;
+    }
+
+    private String overlayUrl;
+
+    public String getOverlayUrl() {
+        return overlayUrl;
+    }
+
+    public void setOverlayUrl(String overlayUrl) {
+        this.overlayUrl = overlayUrl;
     }
 
     private double latitude;
@@ -146,6 +158,7 @@ public class Server extends ExtendedModel {
 
     private boolean limitCommands;
 
+    @Override
     public boolean getLimitCommands() {
         return limitCommands;
     }
@@ -156,12 +169,24 @@ public class Server extends ExtendedModel {
 
     private boolean disableReports;
 
+    @Override
     public boolean getDisableReports() {
         return disableReports;
     }
 
     public void setDisableReports(boolean disableReports) {
         this.disableReports = disableReports;
+    }
+
+    private boolean fixedEmail;
+
+    @Override
+    public boolean getFixedEmail() {
+        return fixedEmail;
+    }
+
+    public void setFixedEmail(boolean fixedEmail) {
+        this.fixedEmail = fixedEmail;
     }
 
     private String poiLayer;
@@ -189,9 +214,87 @@ public class Server extends ExtendedModel {
         return getClass().getPackage().getImplementationVersion();
     }
 
+    private boolean emailEnabled;
+
     @QueryIgnore
-    public Boolean getEmailEnabled() {
-        return Context.getMailManager().getEmailEnabled();
+    public void setEmailEnabled(boolean emailEnabled) {
+        this.emailEnabled = emailEnabled;
     }
 
+    @QueryIgnore
+    public Boolean getEmailEnabled() {
+        return emailEnabled;
+    }
+
+    private boolean geocoderEnabled;
+
+    private boolean textEnabled;
+
+    @QueryIgnore
+    public void setTextEnabled(boolean textEnabled) {
+        this.textEnabled = textEnabled;
+    }
+
+    @QueryIgnore
+    public Boolean getTextEnabled() {
+        return textEnabled;
+    }
+
+    @QueryIgnore
+    public void setGeocoderEnabled(boolean geocoderEnabled) {
+        this.geocoderEnabled = geocoderEnabled;
+    }
+
+    @QueryIgnore
+    public boolean getGeocoderEnabled() {
+        return geocoderEnabled;
+    }
+
+    private long[] storageSpace;
+
+    @QueryIgnore
+    public long[] getStorageSpace() {
+        return storageSpace;
+    }
+
+    @QueryIgnore
+    public void setStorageSpace(long[] storageSpace) {
+        this.storageSpace = storageSpace;
+    }
+
+    private boolean newServer;
+
+    @QueryIgnore
+    public boolean getNewServer() {
+        return newServer;
+    }
+
+    @QueryIgnore
+    public void setNewServer(boolean newServer) {
+        this.newServer = newServer;
+    }
+
+    private boolean openIdEnabled;
+
+    @QueryIgnore
+    public boolean getOpenIdEnabled() {
+        return openIdEnabled;
+    }
+
+    @QueryIgnore
+    public void setOpenIdEnabled(boolean openIdEnabled) {
+        this.openIdEnabled = openIdEnabled;
+    }
+
+    private boolean openIdForce;
+
+    @QueryIgnore
+    public boolean getOpenIdForce() {
+        return openIdForce;
+    }
+
+    @QueryIgnore
+    public void setOpenIdForce(boolean openIdForce) {
+        this.openIdForce = openIdForce;
+    }
 }

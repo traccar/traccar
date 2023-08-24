@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class AquilaProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class AquilaProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecodeA() throws Exception {
 
-        var decoder = new AquilaProtocolDecoder(null);
+        var decoder = inject(new AquilaProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$$CLIENT_1ZF,170215089,20,18.462809,73.824188,170613182744,A,01,123456,*37"));

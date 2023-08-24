@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,23 +19,28 @@ package org.traccar.geofence;
 import java.text.ParseException;
 import java.util.ArrayList;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.DistanceCalculator;
+import org.traccar.model.Geofence;
 
 public class GeofencePolyline extends GeofenceGeometry {
 
     private ArrayList<Coordinate> coordinates;
-    private double distance;
 
     public GeofencePolyline() {
     }
 
-    public GeofencePolyline(String wkt, double distance) throws ParseException {
+    public GeofencePolyline(String wkt) throws ParseException {
         fromWkt(wkt);
-        this.distance = distance;
     }
 
     @Override
-    public boolean containsPoint(double latitude, double longitude) {
+    public boolean containsPoint(Config config, Geofence geofence, double latitude, double longitude) {
+        double distance = geofence.getDouble("polylineDistance");
+        if (distance == 0) {
+            distance = config.getDouble(Keys.GEOFENCE_POLYLINE_DISTANCE);
+        }
         for (int i = 1; i < coordinates.size(); i++) {
             if (DistanceCalculator.distanceToLine(
                     latitude, longitude, coordinates.get(i - 1).getLat(), coordinates.get(i - 1).getLon(),
@@ -56,9 +61,9 @@ public class GeofencePolyline extends GeofenceGeometry {
         StringBuilder buf = new StringBuilder();
         buf.append("LINESTRING (");
         for (Coordinate coordinate : coordinates) {
-            buf.append(String.valueOf(coordinate.getLat()));
+            buf.append(coordinate.getLat());
             buf.append(" ");
-            buf.append(String.valueOf(coordinate.getLon()));
+            buf.append(coordinate.getLon());
             buf.append(", ");
         }
         return buf.substring(0, buf.length() - 2) + ")";
@@ -103,10 +108,6 @@ public class GeofencePolyline extends GeofenceGeometry {
             coordinates.add(coordinate);
         }
 
-    }
-
-    public void setDistance(double distance) {
-        this.distance = distance;
     }
 
 }

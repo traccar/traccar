@@ -29,6 +29,16 @@
   <include file="changelog-4.11.xml" relativeToChangelogFile="true" />
   <include file="changelog-4.13.xml" relativeToChangelogFile="true" />
   <include file="changelog-4.15.xml" relativeToChangelogFile="true" />
-  <include file="changelog-4.16.xml" relativeToChangelogFile="true" />
+
+  <include file="changelog-5.0.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.1.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.2.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.3.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.4.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.5.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.6.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.7.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.8.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.9.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>

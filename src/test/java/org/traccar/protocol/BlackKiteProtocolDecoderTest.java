@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class BlackKiteProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class BlackKiteProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new BlackKiteProtocolDecoder(null);
+        var decoder = inject(new BlackKiteProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "01150003313131313131313131313131313131209836055605BA"));

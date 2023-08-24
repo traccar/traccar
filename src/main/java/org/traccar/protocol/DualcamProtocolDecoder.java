@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -47,7 +46,8 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
     private String uniqueId;
     private int packetCount;
     private int currentPacket;
-    private ByteBuf photo;
+    private boolean video;
+    private ByteBuf media;
 
     @Override
     protected Object decode(
@@ -65,13 +65,26 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 long settings = buf.readUnsignedInt();
                 if (channel != null && deviceSession != null) {
                     ByteBuf response = Unpooled.buffer();
-                    if (BitUtil.between(settings, 26, 28) > 0) {
+                    if (BitUtil.between(settings, 26, 30) > 0) {
                         response.writeShort(MSG_FILE_REQUEST);
-                        String file = BitUtil.check(settings, 26) ? "%photof" : "%photor";
+                        String file;
+                        if (BitUtil.check(settings, 26)) {
+                            video = false;
+                            file = "%photof";
+                        } else if (BitUtil.check(settings, 27)) {
+                            video = false;
+                            file = "%photor";
+                        } else if (BitUtil.check(settings, 28)) {
+                            video = true;
+                            file = "%videof";
+                        } else {
+                            video = true;
+                            file = "%videor";
+                        }
                         response.writeShort(file.length());
                         response.writeCharSequence(file, StandardCharsets.US_ASCII);
                     } else {
-                        response.writeShort(MSG_COMPLETE);
+                        response.writeShort(MSG_INIT);
                     }
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 }
@@ -80,7 +93,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedShort(); // length
                 packetCount = buf.readInt();
                 currentPacket = 1;
-                photo = Unpooled.buffer();
+                media = Unpooled.buffer();
                 if (channel != null) {
                     ByteBuf response = Unpooled.buffer();
                     response.writeShort(MSG_RESUME);
@@ -91,17 +104,21 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case MSG_DATA:
                 buf.readUnsignedShort(); // length
-                photo.writeBytes(buf, buf.readableBytes() - 2);
+                media.writeBytes(buf, buf.readableBytes() - 2);
                 if (currentPacket == packetCount) {
                     deviceSession = getDeviceSession(channel, remoteAddress);
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
                     getLastLocation(position, null);
                     try {
-                        position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
+                        if (video) {
+                            position.set(Position.KEY_VIDEO, writeMediaFile(uniqueId, media, "h265"));
+                        } else {
+                            position.set(Position.KEY_IMAGE, writeMediaFile(uniqueId, media, "jpg"));
+                        }
                     } finally {
-                        photo.release();
-                        photo = null;
+                        media.release();
+                        media = null;
                     }
                     if (channel != null) {
                         ByteBuf response = Unpooled.buffer();

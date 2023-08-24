@@ -20,15 +20,19 @@ import io.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 
 import java.nio.charset.StandardCharsets;
 
+import jakarta.inject.Inject;
+
 public class FlexApiProtocol extends BaseProtocol {
 
-    public FlexApiProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public FlexApiProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LineBasedFrameDecoder(5120));
                 pipeline.addLast(new StringDecoder(StandardCharsets.US_ASCII));
                 pipeline.addLast(new FlexApiProtocolDecoder(FlexApiProtocol.this));

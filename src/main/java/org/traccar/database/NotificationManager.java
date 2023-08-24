@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,128 +16,141 @@
  */
 package org.traccar.database;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.forward.EventData;
+import org.traccar.forward.EventForwarder;
+import org.traccar.geocoder.Geocoder;
 import org.traccar.model.Calendar;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.Geofence;
+import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
-import org.traccar.model.Typed;
+import org.traccar.notification.MessageException;
+import org.traccar.notification.NotificatorManager;
+import org.traccar.session.cache.CacheManager;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Request;
 
-public class NotificationManager extends ExtendedObjectManager<Notification> {
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
+@Singleton
+public class NotificationManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
 
+    private final Storage storage;
+    private final CacheManager cacheManager;
+    private final EventForwarder eventForwarder;
+    private final NotificatorManager notificatorManager;
+    private final Geocoder geocoder;
+
     private final boolean geocodeOnRequest;
 
-    public NotificationManager(DataManager dataManager) {
-        super(dataManager, Notification.class);
-        geocodeOnRequest = Context.getConfig().getBoolean(Keys.GEOCODER_ON_REQUEST);
+    @Inject
+    public NotificationManager(
+            Config config, Storage storage, CacheManager cacheManager, @Nullable EventForwarder eventForwarder,
+            NotificatorManager notificatorManager, @Nullable Geocoder geocoder) {
+        this.storage = storage;
+        this.cacheManager = cacheManager;
+        this.eventForwarder = eventForwarder;
+        this.notificatorManager = notificatorManager;
+        this.geocoder = geocoder;
+        geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
     }
 
-    private Set<Long> getEffectiveNotifications(long userId, long deviceId, Date time) {
-        Set<Long> result = new HashSet<>();
-        Set<Long> deviceNotifications = getAllDeviceItems(deviceId);
-        for (long itemId : getUserItems(userId)) {
-            if (getById(itemId).getAlways() || deviceNotifications.contains(itemId)) {
-                long calendarId = getById(itemId).getCalendarId();
-                Calendar calendar = calendarId != 0 ? Context.getCalendarManager().getById(calendarId) : null;
-                if (calendar == null || calendar.checkMoment(time)) {
-                    result.add(itemId);
-                }
-            }
-        }
-        return result;
-    }
-
-    public void updateEvent(Event event, Position position) {
+    private void updateEvent(Event event, Position position) {
         try {
-            getDataManager().addObject(event);
+            event.setId(storage.addObject(event, new Request(new Columns.Exclude("id"))));
         } catch (StorageException error) {
             LOGGER.warn("Event save error", error);
         }
 
-        long deviceId = event.getDeviceId();
-        Set<Long> users = Context.getPermissionsManager().getDeviceUsers(deviceId);
-        Set<Long> usersToForward = null;
-        if (Context.getEventForwarder() != null) {
-            usersToForward = new HashSet<>();
-        }
-        for (long userId : users) {
-            if ((event.getGeofenceId() == 0
-                    || Context.getGeofenceManager().checkItemPermission(userId, event.getGeofenceId()))
-                    && (event.getMaintenanceId() == 0
-                    || Context.getMaintenancesManager().checkItemPermission(userId, event.getMaintenanceId()))) {
-                if (usersToForward != null) {
-                    usersToForward.add(userId);
-                }
-                final Set<String> notificators = new HashSet<>();
-                for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getEventTime())) {
-                    Notification notification = getById(notificationId);
-                    if (getById(notificationId).getType().equals(event.getType())) {
-                        boolean filter = false;
-                        if (event.getType().equals(Event.TYPE_ALARM)) {
-                            String alarmsAttribute = notification.getString("alarms");
-                            if (alarmsAttribute == null) {
-                                filter = true;
-                            } else {
-                                List<String> alarms = Arrays.asList(alarmsAttribute.split(","));
-                                filter = !alarms.contains(event.getString(Position.KEY_ALARM));
-                            }
+        var notifications = cacheManager.getDeviceObjects(event.getDeviceId(), Notification.class).stream()
+                .filter(notification -> notification.getType().equals(event.getType()))
+                .filter(notification -> {
+                    if (event.getType().equals(Event.TYPE_ALARM)) {
+                        String alarmsAttribute = notification.getString("alarms");
+                        if (alarmsAttribute != null) {
+                            return Arrays.asList(alarmsAttribute.split(","))
+                                    .contains(event.getString(Position.KEY_ALARM));
                         }
-                        if (!filter) {
-                            notificators.addAll(notification.getNotificatorsTypes());
+                        return false;
+                    }
+                    return true;
+                })
+                .filter(notification -> {
+                    long calendarId = notification.getCalendarId();
+                    Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
+                    return calendar == null || calendar.checkMoment(event.getEventTime());
+                })
+                .collect(Collectors.toUnmodifiableList());
+
+        if (!notifications.isEmpty()) {
+            if (position != null && position.getAddress() == null && geocodeOnRequest && geocoder != null) {
+                position.setAddress(geocoder.getAddress(position.getLatitude(), position.getLongitude(), null));
+            }
+
+            notifications.forEach(notification -> {
+                cacheManager.getNotificationUsers(notification.getId(), event.getDeviceId()).forEach(user -> {
+                    for (String notificator : notification.getNotificatorsTypes()) {
+                        try {
+                            notificatorManager.getNotificator(notificator).send(notification, user, event, position);
+                        } catch (MessageException exception) {
+                            LOGGER.warn("Notification failed", exception);
                         }
                     }
-                }
-
-                if (position != null && position.getAddress() == null
-                        && geocodeOnRequest && Context.getGeocoder() != null) {
-                    position.setAddress(Context.getGeocoder()
-                            .getAddress(position.getLatitude(), position.getLongitude(), null));
-                }
-
-                for (String notificator : notificators) {
-                    Context.getNotificatorManager().getNotificator(notificator).sendAsync(userId, event, position);
-                }
-            }
+                });
+            });
         }
-        if (Context.getEventForwarder() != null) {
-            Context.getEventForwarder().forwardEvent(event, position, usersToForward);
+
+        forwardEvent(event, position);
+    }
+
+    private void forwardEvent(Event event, Position position) {
+        if (eventForwarder != null) {
+            EventData eventData = new EventData();
+            eventData.setEvent(event);
+            eventData.setPosition(position);
+            eventData.setDevice(cacheManager.getObject(Device.class, event.getDeviceId()));
+            if (event.getGeofenceId() != 0) {
+                eventData.setGeofence(cacheManager.getObject(Geofence.class, event.getGeofenceId()));
+            }
+            if (event.getMaintenanceId() != 0) {
+                eventData.setMaintenance(cacheManager.getObject(Maintenance.class, event.getMaintenanceId()));
+            }
+            eventForwarder.forward(eventData, (success, throwable) -> {
+                if (!success) {
+                    LOGGER.warn("Event forwarding failed", throwable);
+                }
+            });
         }
     }
 
     public void updateEvents(Map<Event, Position> events) {
-        for (Entry<Event, Position> event : events.entrySet()) {
-            updateEvent(event.getKey(), event.getValue());
-        }
-    }
-
-    public Set<Typed> getAllNotificationTypes() {
-        Set<Typed> types = new HashSet<>();
-        Field[] fields = Event.class.getDeclaredFields();
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers()) && field.getName().startsWith("TYPE_")) {
-                try {
-                    types.add(new Typed(field.get(null).toString()));
-                } catch (IllegalArgumentException | IllegalAccessException error) {
-                    LOGGER.warn("Get event types error", error);
-                }
+        for (Entry<Event, Position> entry : events.entrySet()) {
+            Event event = entry.getKey();
+            Position position = entry.getValue();
+            try {
+                cacheManager.addDevice(event.getDeviceId());
+                updateEvent(event, position);
+            } catch (StorageException e) {
+                throw new RuntimeException(e);
+            } finally {
+                cacheManager.removeDevice(event.getDeviceId());
             }
         }
-        return types;
     }
 }

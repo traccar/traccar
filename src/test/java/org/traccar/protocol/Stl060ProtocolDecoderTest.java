@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class Stl060ProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class Stl060ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Stl060ProtocolDecoder(null);
+        var decoder = inject(new Stl060ProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$1,357804048043099,D001,AP29AW0963,23/02/14,14:06:54,17248488N,078342226E,0.08,193.12,1,1,1,1,1,A"),

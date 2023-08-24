@@ -19,8 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -334,7 +333,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext() && parser.next().equals("V1")) {
             sendResponse(channel, remoteAddress, id, "V1");
-        } else if (Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+        } else if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
             sendResponse(channel, remoteAddress, id, "R12");
         }
 
@@ -392,7 +391,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setAltitude(parser.nextInt(0));
 
-            position.setNetwork(new Network(CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
+            position.setNetwork(new Network(CellTower.fromLacCid(
+                    getConfig(), parser.nextHexInt(0), parser.nextHexInt(0))));
         }
 
         if (parser.hasNext()) {

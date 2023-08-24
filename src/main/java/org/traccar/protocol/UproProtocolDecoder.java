@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -67,12 +67,11 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             DateBuilder dateBuilder = new DateBuilder()
                     .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
-            position.setValid(true);
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
 
             int flags = parser.nextInt(0);
-            position.setValid(BitUtil.check(flags, 0));
+            position.setValid(!BitUtil.check(flags, 0));
             if (!BitUtil.check(flags, 1)) {
                 position.setLatitude(-position.getLatitude());
             }

@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class OrbcommProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class OrbcommProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new OrbcommProtocolDecoder(null);
+        var decoder = inject(new OrbcommProtocolDecoder(null));
 
         verifyNull(decoder, response(
                 buffer("{\"ErrorID\":0,\"NextStartUTC\":\"\",\"Messages\":null}")));

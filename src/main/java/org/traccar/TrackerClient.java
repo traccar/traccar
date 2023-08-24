@@ -23,6 +23,7 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import javax.net.ssl.SSLContext;
@@ -52,15 +53,14 @@ public abstract class TrackerClient implements TrackerConnector {
         return secure;
     }
 
-    public TrackerClient(String protocol) {
+    public TrackerClient(Config config, String protocol) {
+        secure = config.getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
+        interval = config.getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol));
+        address = config.getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
+        port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol), secure ? 443 : 80);
+        devices = config.getString(Keys.PROTOCOL_DEVICES.withPrefix(protocol)).split("[, ]");
 
-        secure = Context.getConfig().getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
-        interval = Context.getConfig().getLong(Keys.PROTOCOL_INTERVAL.withPrefix(protocol));
-        address = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
-        port = Context.getConfig().getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol), secure ? 443 : 80);
-        devices = Context.getConfig().getString(Keys.PROTOCOL_DEVICES.withPrefix(protocol)).split("[, ]");
-
-        BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, protocol) {
+        BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, config, protocol) {
             @Override
             protected void addTransportHandlers(PipelineBuilder pipeline) {
                 try {
@@ -77,7 +77,7 @@ public abstract class TrackerClient implements TrackerConnector {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 try {
-                    TrackerClient.this.addProtocolHandlers(pipeline);
+                    TrackerClient.this.addProtocolHandlers(pipeline, config);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -90,7 +90,7 @@ public abstract class TrackerClient implements TrackerConnector {
                 .handler(pipelineFactory);
     }
 
-    protected abstract void addProtocolHandlers(PipelineBuilder pipeline) throws Exception;
+    protected abstract void addProtocolHandlers(PipelineBuilder pipeline, Config config) throws Exception;
 
     public String[] getDevices() {
         return devices;

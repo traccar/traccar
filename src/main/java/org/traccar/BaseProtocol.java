@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,10 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
+import org.traccar.sms.SmsManager;
 
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
 import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,6 +40,8 @@ public abstract class BaseProtocol implements Protocol {
     private final Set<String> supportedTextCommands = new HashSet<>();
     private final List<TrackerConnector> connectorList = new LinkedList<>();
 
+    private SmsManager smsManager;
+
     private StringProtocolEncoder textCommandEncoder = null;
 
     public static String nameFromClass(Class<?> clazz) {
@@ -46,6 +51,11 @@ public abstract class BaseProtocol implements Protocol {
 
     public BaseProtocol() {
         name = nameFromClass(getClass());
+    }
+
+    @Inject
+    public void setSmsManager(@Nullable SmsManager smsManager) {
+        this.smsManager = smsManager;
     }
 
     @Override
@@ -95,7 +105,8 @@ public abstract class BaseProtocol implements Protocol {
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
             String data = command.getString(Command.KEY_DATA);
             if (BasePipelineFactory.getHandler(channel.pipeline(), StringEncoder.class) != null) {
-                channel.writeAndFlush(new NetworkMessage(data, remoteAddress));
+                channel.writeAndFlush(new NetworkMessage(
+                        data.replace("\\r", "\r").replace("\\n", "\n"), remoteAddress));
             } else {
                 ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
                 channel.writeAndFlush(new NetworkMessage(buf, remoteAddress));
@@ -111,13 +122,13 @@ public abstract class BaseProtocol implements Protocol {
 
     @Override
     public void sendTextCommand(String destAddress, Command command) throws Exception {
-        if (Context.getSmsManager() != null) {
+        if (smsManager != null) {
             if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                Context.getSmsManager().sendMessageSync(destAddress, command.getString(Command.KEY_DATA), true);
+                smsManager.sendMessage(destAddress, command.getString(Command.KEY_DATA), true);
             } else if (supportedTextCommands.contains(command.getType()) && textCommandEncoder != null) {
                 String encodedCommand = (String) textCommandEncoder.encodeCommand(command);
                 if (encodedCommand != null) {
-                    Context.getSmsManager().sendMessageSync(destAddress, encodedCommand, true);
+                    smsManager.sendMessage(destAddress, encodedCommand, true);
                 } else {
                     throw new RuntimeException("Failed to encode command");
                 }

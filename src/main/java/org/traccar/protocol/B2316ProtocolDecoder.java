@@ -17,16 +17,16 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.util.Date;
@@ -116,8 +116,9 @@ public class B2316ProtocolDecoder extends BaseProtocolDecoder {
                 String[] points = item.getString("wi").split(";");
                 for (String point : points) {
                     String[] values = point.split(",");
+                    String mac = values[0].replaceAll("(..)", "$1:");
                     network.addWifiAccessPoint(WifiAccessPoint.from(
-                            values[0].replaceAll("(..)", "$1:"), Integer.parseInt(values[1])));
+                            mac.substring(0, mac.length() - 1), Integer.parseInt(values[1])));
                 }
             }
 

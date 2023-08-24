@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class TelemaxProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class TelemaxProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TelemaxProtocolDecoder(null);
+        var decoder = inject(new TelemaxProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "%067374070128"));

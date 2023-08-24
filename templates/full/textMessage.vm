@@ -3,7 +3,9 @@
 <html>
 <body>
 Device: $device.name<br>
-Message:  $event.getString("message")<br>
+Message: $event.getString("message")<br>
 Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
 </body>
-</html>  
+</html>

@@ -19,15 +19,15 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpResponse;
 import org.traccar.BasePipelineFactory;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -70,8 +70,7 @@ public class OrbcommProtocolDecoder extends BaseProtocolDecoder {
         JsonArray messages = json.getJsonArray("Messages");
         for (int i = 0; i < messages.size(); i++) {
             JsonObject message = messages.getJsonObject(i);
-            DeviceSession deviceSession = getDeviceSession(
-                    channel, remoteAddress, true, message.getString("MobileID"));
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, message.getString("MobileID"));
             if (deviceSession != null) {
 
                 Position position = new Position(getProtocolName());

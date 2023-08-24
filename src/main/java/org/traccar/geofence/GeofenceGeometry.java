@@ -15,11 +15,14 @@
  */
 package org.traccar.geofence;
 
+import org.traccar.config.Config;
+import org.traccar.model.Geofence;
+
 import java.text.ParseException;
 
 public abstract class GeofenceGeometry {
 
-    public abstract boolean containsPoint(double latitude, double longitude);
+    public abstract boolean containsPoint(Config config, Geofence geofence, double latitude, double longitude);
 
     public abstract double calculateArea();
 

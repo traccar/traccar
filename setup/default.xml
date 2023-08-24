@@ -11,12 +11,12 @@
     -->
 
     <entry key='web.port'>8082</entry>
-    <entry key='web.path'>./web</entry>
+    <entry key='web.path'>./modern</entry>
+    <entry key='web.sanitize'>false</entry>
     <entry key='web.persistSession'>false</entry>
 
     <entry key='geocoder.enable'>true</entry>
-    <entry key='geocoder.type'>nominatim</entry>
-    <entry key='geocoder.url'>https://us1.locationiq.com/v1/reverse.php</entry>
+    <entry key='geocoder.type'>locationiq</entry>
     <entry key='geocoder.key'>pk.689d849289c8c63708068b2ff1f63b2d</entry>
     <entry key='geocoder.onRequest'>true</entry>
     <entry key='geocoder.ignorePositions'>true</entry>
@@ -29,12 +29,10 @@
     <entry key='filter.future'>86400</entry>
 
     <entry key='event.ignoreDuplicateAlerts'>true</entry>
-    <entry key='processing.computedAttributes.enable'>true</entry>
-    <entry key='processing.engineHours.enable'>true</entry>
 
     <entry key='media.path'>./media</entry>
 
-    <entry key='notificator.types'>web,mail</entry>
+    <entry key='notificator.types'>web,mail,command</entry>
 
     <entry key='server.statistics'>https://www.traccar.org/analytics/</entry>
 
@@ -284,5 +282,13 @@
     <entry key='armoli.port'>5238</entry>
     <entry key='teratrack.port'>5239</entry>
     <entry key='envotech.port'>5240</entry>
+    <entry key='bstpl.port'>5241</entry>
+    <entry key='thuraya.port'>5242</entry>
+    <entry key='ndtpv6.port'>5243</entry>
+    <entry key='g1rus.port'>5244</entry>
+    <entry key='rftrack.port'>5245</entry>
+    <entry key='vlt.port'>5246</entry>
+    <entry key='transync.port'>5247</entry>
+    <entry key='t622iridium.port'>5248</entry>
 
 </properties>

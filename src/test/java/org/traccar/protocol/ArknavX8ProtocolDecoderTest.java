@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class ArknavX8ProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class ArknavX8ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new ArknavX8ProtocolDecoder(null);
+        var decoder = inject(new ArknavX8ProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "351856045213782,241111"));

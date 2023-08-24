@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,7 +9,7 @@ public class PluginProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new PluginProtocolDecoder(null);
+        var decoder = inject(new PluginProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "$$STATUS,000000900005,20210521111252,27.171105,-25.600934,62.0,323,0,-1,2,0.000,2147489155,0.00,0,0,0.0,0.0,0,0,0,0,0,0,0,0,0"));

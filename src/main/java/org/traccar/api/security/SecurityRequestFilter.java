@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,36 +15,33 @@
  */
 package org.traccar.api.security;
 
+import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
-import org.traccar.Main;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
-import javax.annotation.security.PermitAll;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.annotation.security.PermitAll;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
 
 public class SecurityRequestFilter implements ContainerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityRequestFilter.class);
-
-    public static final String AUTHORIZATION_HEADER = "Authorization";
-    public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
-    public static final String BASIC_REALM = "Basic realm=\"api\"";
-    public static final String X_REQUESTED_WITH = "X-Requested-With";
-    public static final String XML_HTTP_REQUEST = "XMLHttpRequest";
 
     public static String[] decodeBasicAuth(String auth) {
         auth = auth.replaceFirst("[B|b]asic ", "");
@@ -55,11 +52,20 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
         return null;
     }
 
-    @javax.ws.rs.core.Context
+    @Context
     private HttpServletRequest request;
 
-    @javax.ws.rs.core.Context
+    @Context
     private ResourceInfo resourceInfo;
+
+    @Inject
+    private LoginService loginService;
+
+    @Inject
+    private StatisticsManager statisticsManager;
+
+    @Inject
+    private Injector injector;
 
     @Override
     public void filter(ContainerRequestContext requestContext) {
@@ -72,17 +78,22 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
         try {
 
-            String authHeader = requestContext.getHeaderString(AUTHORIZATION_HEADER);
+            String authHeader = requestContext.getHeaderString("Authorization");
             if (authHeader != null) {
 
                 try {
-                    String[] auth = decodeBasicAuth(authHeader);
-                    User user = Context.getPermissionsManager().login(auth[0], auth[1]);
+                    User user;
+                    if (authHeader.startsWith("Bearer ")) {
+                        user = loginService.login(authHeader.substring(7));
+                    } else {
+                        String[] auth = decodeBasicAuth(authHeader);
+                        user = loginService.login(auth[0], auth[1]);
+                    }
                     if (user != null) {
-                        Main.getInjector().getInstance(StatisticsManager.class).registerRequest(user.getId());
+                        statisticsManager.registerRequest(user.getId());
                         securityContext = new UserSecurityContext(new UserPrincipal(user.getId()));
                     }
-                } catch (StorageException e) {
+                } catch (StorageException | GeneralSecurityException | IOException e) {
                     throw new WebApplicationException(e);
                 }
 
@@ -90,14 +101,14 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
                 Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
-                    Context.getPermissionsManager().checkUserEnabled(userId);
-                    Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
+                    injector.getInstance(PermissionsService.class).getUser(userId).checkDisabled();
+                    statisticsManager.registerRequest(userId);
                     securityContext = new UserSecurityContext(new UserPrincipal(userId));
                 }
 
             }
 
-        } catch (SecurityException e) {
+        } catch (SecurityException | StorageException e) {
             LOGGER.warn("Authentication error", e);
         }
 
@@ -107,8 +118,9 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
             Method method = resourceInfo.getResourceMethod();
             if (!method.isAnnotationPresent(PermitAll.class)) {
                 Response.ResponseBuilder responseBuilder = Response.status(Response.Status.UNAUTHORIZED);
-                if (!XML_HTTP_REQUEST.equals(request.getHeader(X_REQUESTED_WITH))) {
-                    responseBuilder.header(WWW_AUTHENTICATE, BASIC_REALM);
+                String accept = request.getHeader("Accept");
+                if (accept != null && accept.contains("text/html")) {
+                    responseBuilder.header("WWW-Authenticate", "Basic realm=\"api\"");
                 }
                 throw new WebApplicationException(responseBuilder.build());
             }

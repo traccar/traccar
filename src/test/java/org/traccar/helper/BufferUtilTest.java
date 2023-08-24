@@ -2,13 +2,19 @@ package org.traccar.helper;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BufferUtilTest {
+
+    @Test
+    public void testReadSignedMagnitudeInt() {
+        ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex("80000001"));
+        assertEquals(-1, BufferUtil.readSignedMagnitudeInt(buf));
+    }
 
     @Test
     public void test1() {

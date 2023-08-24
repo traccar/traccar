@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class S168ProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class S168ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new S168ProtocolDecoder(null);
+        var decoder = inject(new S168ProtocolDecoder(null));
 
         verifyAttributes(decoder, text(
                 "S168#861118010104168#00ec#0016#SYNC:0093;STATUS:91,51"));

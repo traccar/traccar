@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class SkypatrolProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class SkypatrolProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new SkypatrolProtocolDecoder(null);
+        var decoder = inject(new SkypatrolProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "000a02171101303131373232303031333537393833060200000006202020202020202020312020202020202030313137323230303133353739383320"));

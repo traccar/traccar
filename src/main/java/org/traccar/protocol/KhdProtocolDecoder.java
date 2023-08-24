@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
@@ -204,6 +204,9 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                                     position.set("fuel" + i, value / 0xFFFE);
                                 }
                             }
+                            break;
+                        case 0x20:
+                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                             break;
                         case 0x23:
                             Network network = new Network();

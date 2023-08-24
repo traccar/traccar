@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +19,17 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -54,11 +54,11 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
         List<Position> positions = new LinkedList<>();
         for (int i = 0; i < result.size(); i++) {
             JsonObject message = result.getJsonObject(i);
-            JsonString ident = message.getJsonString("ident");
-            if (ident == null) {
+            JsonString identifier = message.getJsonString("ident");
+            if (identifier == null) {
                 continue;
             }
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ident.getString());
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, identifier.getString());
             if (deviceSession == null) {
                 continue;
             }
@@ -125,12 +125,13 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.set(Position.KEY_PDOP, ((JsonNumber) value).doubleValue());
                 return true;
             case "din":
+                position.set(Position.KEY_INPUT, ((JsonNumber) value).intValue());
+                return true;
             case "dout":
-                if (name.equals("din")) {
-                    position.set(Position.KEY_INPUT, ((JsonNumber) value).intValue());
-                } else {
-                    position.set(Position.KEY_OUTPUT, ((JsonNumber) value).intValue());
-                }
+                position.set(Position.KEY_OUTPUT, ((JsonNumber) value).intValue());
+                return true;
+            case "report.reason":
+                position.set(Position.KEY_EVENT, ((JsonNumber) value).intValue());
                 return true;
             case "gps.vehicle.mileage":
                 position.set(Position.KEY_ODOMETER, ((JsonNumber) value).doubleValue());
@@ -140,6 +141,9 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 return true;
             case "battery.voltage":
                 position.set(Position.KEY_BATTERY, ((JsonNumber) value).doubleValue());
+                return true;
+            case "battery.level":
+                position.set(Position.KEY_BATTERY_LEVEL, ((JsonNumber) value).intValue());
                 return true;
             case "fuel.level":
             case "can.fuel.level":
@@ -227,6 +231,15 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 if (value == JsonValue.TRUE) {
                     position.set(Position.KEY_ALARM, Position.ALARM_BONNET);
                 }
+                return true;
+            case "custom.wln_accel_max":
+                position.set("maxAcceleration", ((JsonNumber) value).doubleValue());
+                return true;
+            case "custom.wln_brk_max":
+                position.set("maxBraking", ((JsonNumber) value).doubleValue());
+                return true;
+            case "custom.wln_crn_max":
+                position.set("maxCornering", ((JsonNumber) value).doubleValue());
                 return true;
             default:
                 return false;

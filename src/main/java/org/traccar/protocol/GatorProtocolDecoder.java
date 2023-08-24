@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
@@ -37,6 +37,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static final int MSG_HEARTBEAT = 0x21;
+    public static final int MSG_POSITION_REQUEST = 0x30;
     public static final int MSG_POSITION_DATA = 0x80;
     public static final int MSG_ROLLCALL_RESPONSE = 0x81;
     public static final int MSG_ALARM_DATA = 0x82;

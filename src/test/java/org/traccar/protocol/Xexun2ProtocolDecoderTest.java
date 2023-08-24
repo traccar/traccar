@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class Xexun2ProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class Xexun2ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Xexun2ProtocolDecoder(null);
+        var decoder = inject(new Xexun2ProtocolDecoder(null));
 
         verifyPositions(decoder, false, binary(
                 "faaf00140a5a8618810536243350005ed8e101005b64622880401b001482060864cc2296f840daa22aa884f008c87483c291efddc4f09fc2f49db3c058ef68005a9abe1ae8299d6449bac4e984e0c1d6baa8469d265ff2b60100cc00080000fb2e0013572a3600000002000000000000faaf"));
@@ -24,6 +24,10 @@ public class Xexun2ProtocolDecoderTest extends ProtocolTest {
 
         verifyPositions(decoder, binary(
                 "FAAF00140CF18626490454584530002BF2DD0200130013D360EFD7F514006402010D46322C4A450BA026D460EFD7FA14006402010D46322C4A450BA026FAAF"));
+
+        verifyPositions(decoder, binary(
+                "FAAF0014000C8622050512345670002DF3A001002A0062D9047400005E0280001E47001B400D4BA732DF505E40B4153AAF78FEF00109000000000042B36666FAAF"),
+                position("2022-07-21 07:47:00.000", true, 51.68715, 0.06103));
 
     }
 

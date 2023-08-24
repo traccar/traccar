@@ -17,14 +17,14 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.text.DateFormat;
@@ -63,7 +63,7 @@ public class TeraTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(json.getString("Speed"))));
 
         position.set(Position.KEY_ODOMETER, Integer.parseInt(json.getString("Mileage")));
-        position.set(Position.KEY_BLOCKED, json.getString("LockOpen").equals("0"));
+        position.set(Position.KEY_LOCK, json.getString("LockOpen").equals("0"));
         position.set(Position.KEY_DRIVER_UNIQUE_ID, json.getString("CardNo"));
         position.set(Position.KEY_ALARM, json.getString("LowPower").equals("1") ? Position.ALARM_LOW_POWER : null);
         position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(json.getString("Power")));

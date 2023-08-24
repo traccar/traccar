@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,33 +15,57 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
 import org.traccar.api.BaseObjectResource;
-import org.traccar.database.DeviceManager;
+import org.traccar.broadcast.BroadcastService;
+import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
+import org.traccar.model.Position;
+import org.traccar.model.User;
+import org.traccar.session.ConnectionManager;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import java.sql.SQLException;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class DeviceResource extends BaseObjectResource<Device> {
+
+    @Inject
+    private CacheManager cacheManager;
+
+    @Inject
+    private ConnectionManager connectionManager;
+
+    @Inject
+    private BroadcastService broadcastService;
+
+    @Inject
+    private MediaManager mediaManager;
 
     public DeviceResource() {
         super(Device.class);
@@ -51,51 +75,112 @@ public class DeviceResource extends BaseObjectResource<Device> {
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds) throws SQLException {
-        DeviceManager deviceManager = Context.getDeviceManager();
-        Set<Long> result;
-        if (all) {
-            if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
-                result = deviceManager.getAllItems();
-            } else {
-                Context.getPermissionsManager().checkManager(getUserId());
-                result = deviceManager.getManagedItems(getUserId());
-            }
-        } else if (uniqueIds.isEmpty() && deviceIds.isEmpty()) {
-            if (userId == 0) {
-                userId = getUserId();
-            }
-            Context.getPermissionsManager().checkUser(getUserId(), userId);
-            if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
-                result = deviceManager.getAllUserItems(userId);
-            } else {
-                result = deviceManager.getUserItems(userId);
-            }
-        } else {
-            result = new HashSet<>();
+            @QueryParam("id") List<Long> deviceIds) throws StorageException {
+
+        if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
+
+            List<Device> result = new LinkedList<>();
             for (String uniqueId : uniqueIds) {
-                Device device = deviceManager.getByUniqueId(uniqueId);
-                Context.getPermissionsManager().checkDevice(getUserId(), device.getId());
-                result.add(device.getId());
+                result.addAll(storage.getObjects(Device.class, new Request(
+                        new Columns.All(),
+                        new Condition.And(
+                                new Condition.Equals("uniqueId", uniqueId),
+                                new Condition.Permission(User.class, getUserId(), Device.class)))));
             }
             for (Long deviceId : deviceIds) {
-                Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
-                result.add(deviceId);
+                result.addAll(storage.getObjects(Device.class, new Request(
+                        new Columns.All(),
+                        new Condition.And(
+                                new Condition.Equals("id", deviceId),
+                                new Condition.Permission(User.class, getUserId(), Device.class)))));
             }
+            return result;
+
+        } else {
+
+            var conditions = new LinkedList<Condition>();
+
+            if (all) {
+                if (permissionsService.notAdmin(getUserId())) {
+                    conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
+                }
+            } else {
+                if (userId == 0) {
+                    conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
+                } else {
+                    permissionsService.checkUser(getUserId(), userId);
+                    conditions.add(new Condition.Permission(User.class, userId, baseClass).excludeGroups());
+                }
+            }
+
+            return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
+
         }
-        return deviceManager.getItems(result);
     }
 
     @Path("{id}/accumulators")
     @PUT
     public Response updateAccumulators(DeviceAccumulators entity) throws StorageException {
-        if (!Context.getPermissionsManager().getUserAdmin(getUserId())) {
-            Context.getPermissionsManager().checkManager(getUserId());
-            Context.getPermissionsManager().checkPermission(Device.class, getUserId(), entity.getDeviceId());
+        if (permissionsService.notAdmin(getUserId())) {
+            permissionsService.checkManager(getUserId());
+            permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
         }
-        Context.getDeviceManager().resetDeviceAccumulators(entity);
+
+        Position position = storage.getObject(Position.class, new Request(
+                new Columns.All(), new Condition.LatestPositions(entity.getDeviceId())));
+        if (position != null) {
+            if (entity.getTotalDistance() != null) {
+                position.getAttributes().put(Position.KEY_TOTAL_DISTANCE, entity.getTotalDistance());
+            }
+            if (entity.getHours() != null) {
+                position.getAttributes().put(Position.KEY_HOURS, entity.getHours());
+            }
+            position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
+
+            Device device = new Device();
+            device.setId(position.getDeviceId());
+            device.setPositionId(position.getId());
+            storage.updateObject(device, new Request(
+                    new Columns.Include("positionId"),
+                    new Condition.Equals("id", device.getId())));
+
+            try {
+                cacheManager.addDevice(position.getDeviceId());
+                cacheManager.updatePosition(position);
+                connectionManager.updatePosition(true, position);
+            } finally {
+                cacheManager.removeDevice(position.getDeviceId());
+            }
+        } else {
+            throw new IllegalArgumentException();
+        }
+
         LogAction.resetDeviceAccumulators(getUserId(), entity.getDeviceId());
         return Response.noContent().build();
+    }
+
+    @Path("{id}/image")
+    @POST
+    @Consumes("image/*")
+    public Response uploadImage(
+            @PathParam("id") long deviceId, File file,
+            @HeaderParam(HttpHeaders.CONTENT_TYPE) String type) throws StorageException, IOException {
+
+        Device device = storage.getObject(Device.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("id", deviceId),
+                        new Condition.Permission(User.class, getUserId(), Device.class))));
+        if (device != null) {
+            String name = "device";
+            String extension = type.substring("image/".length());
+            try (var input = new FileInputStream(file);
+                    var output = mediaManager.createFileStream(device.getUniqueId(), name, extension)) {
+                input.transferTo(output);
+            }
+            return Response.ok(name + "." + extension).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
 }

@@ -1,16 +1,16 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GranitFrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GranitFrameDecoder();
+        var decoder = inject(new GranitFrameDecoder());
 
         assertEquals(
                 binary("2b525243427e1a003e2934757c57b8b03c38d279b4e61e9bd7006b000000001c00002a4533"),

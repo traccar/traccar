@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class Xrb28ProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class Xrb28ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Xrb28ProtocolDecoder(null);
+        var decoder = inject(new Xrb28ProtocolDecoder(null));
 
         verifyAttributes(decoder, text(
                 "*SCOR,OM,123456789123456,Q0,412,80,28#"));

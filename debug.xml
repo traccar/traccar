@@ -10,7 +10,14 @@
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
 
+    <entry key='geocoder.type'>test</entry>
+
+    <entry key='media.path'>./target/media</entry>
+
     <entry key='logger.console'>true</entry>
+    <entry key='logger.queries'>false</entry>
+
+    <entry key='mail.debug'>true</entry>
 
     <entry key='database.driver'>org.h2.Driver</entry>
     <entry key='database.url'>jdbc:h2:./target/database</entry>

@@ -20,8 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -54,7 +53,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private static final int MIN_DATA_LENGTH = 40;
 
     private boolean longDate;
-    private final boolean decimalFuel;
+    private boolean decimalFuel;
     private boolean custom;
     private String form;
 
@@ -64,17 +63,20 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     public AtrackProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
 
-        longDate = Context.getConfig().getBoolean(Keys.PROTOCOL_LONG_DATE.withPrefix(getProtocolName()));
-        decimalFuel = Context.getConfig().getBoolean(Keys.PROTOCOL_DECIMAL_FUEL.withPrefix(getProtocolName()));
+    @Override
+    protected void init() {
+        longDate = getConfig().getBoolean(Keys.PROTOCOL_LONG_DATE.withPrefix(getProtocolName()));
+        decimalFuel = getConfig().getBoolean(Keys.PROTOCOL_DECIMAL_FUEL.withPrefix(getProtocolName()));
 
-        custom = Context.getConfig().getBoolean(Keys.PROTOCOL_CUSTOM.withPrefix(getProtocolName()));
-        form = Context.getConfig().getString(Keys.PROTOCOL_FORM.withPrefix(getProtocolName()));
+        custom = getConfig().getBoolean(Keys.PROTOCOL_CUSTOM.withPrefix(getProtocolName()));
+        form = getConfig().getString(Keys.PROTOCOL_FORM.withPrefix(getProtocolName()));
         if (form != null) {
             custom = true;
         }
 
-        String alarmMapString = Context.getConfig().getString(Keys.PROTOCOL_ALARM_MAP.withPrefix(getProtocolName()));
+        String alarmMapString = getConfig().getString(Keys.PROTOCOL_ALARM_MAP.withPrefix(getProtocolName()));
         if (alarmMapString != null) {
             for (String pair : alarmMapString.split(",")) {
                 if (!pair.isEmpty()) {
@@ -98,7 +100,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         this.form = form;
     }
 
-    private static void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, long rawId, int index) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer(12);
             response.writeShort(0xfe02);
@@ -427,6 +429,208 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "MP":
                     buf.readUnsignedByte(); // manifold absolute pressure
                     break;
+                case "EO":
+                    position.set(Position.KEY_ODOMETER, UnitsConverter.metersFromMiles(buf.readUnsignedInt()));
+                    break;
+                case "EH":
+                    position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 360000);
+                    break;
+                case "ZO1":
+                    buf.readUnsignedByte(); // brake stroke status
+                    break;
+                case "ZO2":
+                    buf.readUnsignedByte(); // warning indicator status
+                    break;
+                case "ZO3":
+                    buf.readUnsignedByte(); // abs control status
+                    break;
+                case "ZO4":
+                    position.set(Position.KEY_THROTTLE, buf.readUnsignedByte() * 0.4);
+                    break;
+                case "ZO5":
+                    buf.readUnsignedByte(); // parking brake status
+                    break;
+                case "ZO6":
+                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte() * 0.805);
+                    break;
+                case "ZO7":
+                    buf.readUnsignedByte(); // cruise control status
+                    break;
+                case "ZO8":
+                    buf.readUnsignedByte(); // accelector pedal position
+                    break;
+                case "ZO9":
+                    position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte() * 0.5);
+                    break;
+                case "ZO10":
+                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.5);
+                    break;
+                case "ZO11":
+                    buf.readUnsignedByte(); // engine oil pressure
+                    break;
+                case "ZO12":
+                    buf.readUnsignedByte(); // boost pressure
+                    break;
+                case "ZO13":
+                    buf.readUnsignedByte(); // intake temperature
+                    break;
+                case "ZO14":
+                    position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte());
+                    break;
+                case "ZO15":
+                    buf.readUnsignedByte(); // brake application pressure
+                    break;
+                case "ZO16":
+                    buf.readUnsignedByte(); // brake primary pressure
+                    break;
+                case "ZO17":
+                    buf.readUnsignedByte(); // brake secondary pressure
+                    break;
+                case "ZH1":
+                    buf.readUnsignedShort(); // cargo weight
+                    break;
+                case "ZH2":
+                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() * 16.428 / 3600);
+                    break;
+                case "ZH3":
+                    position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.25);
+                    break;
+                case "ZL1":
+                    buf.readUnsignedInt(); // fuel used (natural gas)
+                    break;
+                case "ZL2":
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 161);
+                    break;
+                case "ZL3":
+                    buf.readUnsignedInt(); // vehicle hours
+                    break;
+                case "ZL4":
+                    position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 5 * 36000);
+                    break;
+                case "ZS1":
+                    position.set(Position.KEY_VIN, readString(buf));
+                    break;
+                case "JO1":
+                    buf.readUnsignedByte(); // pedals
+                    break;
+                case "JO2":
+                    buf.readUnsignedByte(); // power takeoff device
+                    break;
+                case "JO3":
+                    buf.readUnsignedByte(); // accelector pedal position
+                    break;
+                case "JO4":
+                    position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
+                    break;
+                case "JO5":
+                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
+                    break;
+                case "JO6":
+                    buf.readUnsignedByte(); // fms vehicle interface
+                    break;
+                case "JO7":
+                    buf.readUnsignedByte(); // driver 2
+                    break;
+                case "JO8":
+                    buf.readUnsignedByte(); // driver 1
+                    break;
+                case "JO9":
+                    buf.readUnsignedByte(); // drivers
+                    break;
+                case "JO10":
+                    buf.readUnsignedByte(); // system information
+                    break;
+                case "JO11":
+                    position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
+                    break;
+                case "JO12":
+                    buf.readUnsignedByte(); // pto engaged
+                    break;
+                case "JH1":
+                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() / 256.0);
+                    break;
+                case "JH2":
+                    position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
+                    break;
+                case "JH3":
+                case "JH4":
+                case "JH5":
+                case "JH6":
+                case "JH7":
+                    int index = Integer.parseInt(key.substring(2)) - 2;
+                    position.set("axleWeight" + index, buf.readUnsignedShort() * 0.5);
+                    break;
+                case "JH8":
+                    position.set(Position.KEY_ODOMETER_SERVICE, buf.readUnsignedShort() * 5);
+                    break;
+                case "JH9":
+                    buf.readUnsignedShort(); // tachograph speed
+                    break;
+                case "JH10":
+                    buf.readUnsignedShort(); // ambient air temperature
+                    break;
+                case "JH11":
+                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() * 0.05);
+                    break;
+                case "JH12":
+                    buf.readUnsignedShort(); // fuel economy
+                    break;
+                case "JL1":
+                    position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.5);
+                    break;
+                case "JL2":
+                    position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 5 * 36000);
+                    break;
+                case "JL3":
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 1000);
+                    break;
+                case "JL4":
+                    position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.001);
+                    break;
+                case "JS1":
+                    position.set(Position.KEY_VIN, readString(buf));
+                    break;
+                case "JS2":
+                    readString(buf); // fms version supported
+                    break;
+                case "JS3":
+                    position.set("driver1", readString(buf));
+                    break;
+                case "JS4":
+                    position.set("driver2", readString(buf));
+                    break;
+                case "JN1":
+                    buf.readUnsignedInt(); // cruise control distance
+                    break;
+                case "JN2":
+                    buf.readUnsignedInt(); // excessive idling time
+                    break;
+                case "JN3":
+                    buf.readUnsignedInt(); // excessive idling fuel
+                    break;
+                case "JN4":
+                    buf.readUnsignedInt(); // pto time
+                    break;
+                case "JN5":
+                    buf.readUnsignedInt(); // pto fuel
+                    break;
+                case "IN0":
+                    position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+                    break;
+                case "IN1":
+                case "IN2":
+                case "IN3":
+                    position.set(Position.PREFIX_IN + key.charAt(2), buf.readUnsignedByte() > 0);
+                    break;
+                case "HA":
+                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_ACCELERATION : null);
+                    break;
+                case "HB":
+                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_BRAKING : null);
+                    break;
+                case "HC":
+                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_CORNERING : null);
+                    break;
                 default:
                     break;
             }
@@ -524,20 +728,24 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     private List<Position> decodeText(Channel channel, SocketAddress remoteAddress, String sentence) {
 
-        int startIndex = -1;
-        for (int i = 0; i < 4; i++) {
-            startIndex = sentence.indexOf(',', startIndex + 1);
+        int positionIndex = -1;
+        for (int i = 0; i < 5; i++) {
+            positionIndex = sentence.indexOf(',', positionIndex + 1);
         }
-        int endIndex = sentence.indexOf(',', startIndex + 1);
 
-        String imei = sentence.substring(startIndex + 1, endIndex);
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        String[] headers = sentence.substring(0, positionIndex).split(",");
+        long id = Long.parseLong(headers[2]);
+        int index = Integer.parseInt(headers[3]);
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, headers[4]);
         if (deviceSession == null) {
             return null;
         }
 
+        sendResponse(channel, remoteAddress, id, index);
+
         List<Position> positions = new LinkedList<>();
-        String[] lines = sentence.substring(endIndex + 1).split("\r\n");
+        String[] lines = sentence.substring(positionIndex + 1).split("\r\n");
 
         for (String line : lines) {
             Position position = decodeTextLine(deviceSession, line);
@@ -626,7 +834,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, new Date(time * 1000));
 
-            position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(String.valueOf(id), photo, "jpg"));
+            position.set(Position.KEY_IMAGE, writeMediaFile(String.valueOf(id), photo, "jpg"));
             photo.release();
             photo = null;
 

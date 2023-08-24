@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.helper.DataConverter;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -46,11 +47,15 @@ import java.util.regex.Pattern;
 
 public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
-    private final boolean ignoreFixTime;
+    private boolean ignoreFixTime;
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
-        ignoreFixTime = Context.getConfig().getBoolean(Keys.PROTOCOL_IGNORE_FIX_TIME.withPrefix(getProtocolName()));
+    }
+
+    @Override
+    protected void init() {
+        ignoreFixTime = getConfig().getBoolean(Keys.PROTOCOL_IGNORE_FIX_TIME.withPrefix(getProtocolName()));
     }
 
     private static final Pattern PATTERN_ACK = new PatternBuilder()
@@ -62,340 +67,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(xxxx)")                    // counter
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_INF = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GTINF,")
-            .number("[0-9A-Z]{2}xxxx,")          // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("(?:[0-9A-Z]{17},)?")    // vin
-            .expression("(?:[^,]+)?,")           // device name
-            .number("(xx),")                     // state
-            .expression("(?:[0-9Ff]{20})?,")     // iccid
-            .number("(d{1,2}),")                 // rssi
-            .number("d{1,2},")
-            .expression("[01]{1,2},")            // external power
-            .number("([d.]+)?,")                 // odometer or external power
-            .number("d*,")                       // backup battery or lightness
-            .number("(d+.d+),")                  // battery
-            .expression("([01]),")               // charging
-            .number("(?:d),")                    // led
-            .number("(?:d)?,")                   // gps on need
-            .number("(?:d)?,")                   // gps antenna type
-            .number("(?:d)?,").optional()        // gps antenna state
-            .number("d{14},")                    // last fix time
-            .groupBegin()
-            .number("(d+),")                     // battery percentage
-            .number("[d.]*,")                    // flash type / power
-            .number("(-?[d.]+)?,,,")             // temperature
-            .or()
-            .expression("(?:[01])?,").optional() // pin15 mode
-            .number("(d+)?,")                    // adc1
-            .number("(d+)?,").optional()         // adc2
-            .number("(xx)?,")                    // digital input
-            .number("(xx)?,")                    // digital output
-            .number("[-+]dddd,")                 // timezone
-            .expression("[01],")                 // daylight saving
-            .or()
-            .any()
-            .groupEnd()
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("(xxxx)")                    // counter
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_VER = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GTVER,")
-            .number("[0-9A-Z]{2}xxxx,")          // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
-            .expression("([^,]*),")              // device type
-            .number("(xxxx),")                   // firmware version
-            .number("(xxxx),")                   // hardware version
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("(xxxx)")                    // counter
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_LOCATION = new PatternBuilder()
-            .number("(d{1,2}.?d?)?,")            // hdop
-            .number("(d{1,3}.d)?,")              // speed
-            .number("(d{1,3}.?d?)?,")            // course
-            .number("(-?d{1,5}.d)?,")            // altitude
-            .number("(-?d{1,3}.d{6})?,")         // longitude
-            .number("(-?d{1,2}.d{6})?,")         // latitude
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(d+)?,")                    // mcc
-            .number("(d+)?,")                    // mnc
-            .groupBegin()
-            .number("(d+),")                     // lac
-            .number("(d+),")                     // cid
-            .or()
-            .number("(x+)?,")                    // lac
-            .number("(x+)?,")                    // cid
-            .groupEnd()
-            .number("(?:d+|(d+.d))?,")           // rssi / odometer
-            .compile();
-
-    private static final Pattern PATTERN_OBD = new PatternBuilder()
-            .text("+RESP:GTOBD,")
-            .number("[0-9A-Z]{2}xxxx,")          // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("(?:[0-9A-Z]{17})?,")    // vin
-            .expression("[^,]{0,20},")           // device name
-            .expression("[01],")                 // report type
-            .number("x{1,8},")                   // report mask
-            .expression("(?:[0-9A-Z]{17})?,")    // vin
-            .number("[01],")                     // obd connect
-            .number("(?:d{1,5})?,")              // obd voltage
-            .number("(?:x{8})?,")                // support pids
-            .number("(d{1,5})?,")                // engine rpm
-            .number("(d{1,3})?,")                // speed
-            .number("(-?d{1,3})?,")              // coolant temp
-            .number("(d+.?d*|Inf|NaN)?,")        // fuel consumption
-            .number("(d{1,5})?,")                // dtcs cleared distance
-            .number("(?:d{1,5})?,")
-            .expression("([01])?,")              // obd connect
-            .number("(d{1,3})?,")                // number of dtcs
-            .number("(x*),")                     // dtcs
-            .number("(d{1,3})?,")                // throttle
-            .number("(?:d{1,3})?,")              // engine load
-            .number("(d{1,3})?,")                // fuel level
-            .expression("(?:[0-9A],)?")          // obd protocol
-            .number("(d+),")                     // odometer
-            .expression(PATTERN_LOCATION.pattern())
-            .number("(d{1,7}.d)?,")              // odometer
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_FRI = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GT...,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("(?:([0-9A-Z]{17}),)?")  // vin
-            .expression("[^,]*,")                // device name
-            .number("(d+)?,")                    // power
-            .number("(d{1,2}),").optional()      // report type
-            .number("d{1,2},").optional()        // count
-            .number("d*,").optional()            // reserved
-            .number("(d+),").optional()          // battery
-            .expression("((?:")
-            .expression(PATTERN_LOCATION.pattern())
-            .expression(")+)")
-            .groupBegin()
-            .number("d{1,2},,")
-            .number("(d{1,3}),")                 // battery
-            .number("[01],")                     // mode
-            .number("(?:[01])?,")                // motion
-            .number("(?:-?d{1,2}.d)?,")          // temperature
-            .or()
-            .number("(d{1,7}.d)?,")              // odometer
-            .number("(d{5}:dd:dd)?,")            // hour meter
-            .number("(x+)?,")                    // adc 1
-            .number("(x+)?,")                    // adc 2
-            .number("(d{1,3})?,")                // battery
-            .number("(?:(xx)(xx)(xx))?,")        // device status
-            .number("(d+)?,")                    // rpm
-            .number("(?:d+.?d*|Inf|NaN)?,")      // fuel consumption
-            .number("(d+)?,")                    // fuel level
-            .or()
-            .number("(-?d),")                    // rssi
-            .number("(d{1,3}),")                 // battery
-            .or()
-            .number("(d{1,7}.d)?,").optional()   // odometer
-            .number("(d{1,3})?,")                // battery
-            .groupEnd()
-            .any()
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_ERI = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GTERI,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
-            .number("(x{8}),")                   // mask
-            .number("(d+)?,")                    // power
-            .number("d{1,2},")                   // report type
-            .number("d{1,2},")                   // count
-            .expression("((?:")
-            .expression(PATTERN_LOCATION.pattern())
-            .expression(")+)")
-            .groupBegin()
-            .number("(d{1,7}.d)?,")              // odometer
-            .number("(d{5}:dd:dd)?,")            // hour meter
-            .number("(x+)?,")                    // adc 1
-            .number("(x+)?,").optional()         // adc 2
-            .groupBegin()
-            .number("(x+)?,")                    // adc 3
-            .number("(xx),")                     // inputs
-            .number("(xx),")                     // outputs
-            .or()
-            .number("(d{1,3})?,")                // battery
-            .number("(?:(xx)(xx)(xx))?,")        // device status
-            .groupEnd()
-            .expression("(.*)")                  // additional data
-            .or()
-            .number("d*,,")
-            .number("(d+),")                     // battery
-            .any()
-            .groupEnd()
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_IGN = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GTIG[NF],")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
-            .number("d+,")                       // ignition off duration
-            .expression(PATTERN_LOCATION.pattern())
-            .number("(d{5}:dd:dd)?,")            // hour meter
-            .number("(d{1,7}.d)?,")              // odometer
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_LSW = new PatternBuilder()
-            .text("+RESP:").expression("GT[LT]SW,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
-            .number("[01],")                     // type
-            .number("([01]),")                   // state
-            .expression(PATTERN_LOCATION.pattern())
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_IDA = new PatternBuilder()
-            .text("+RESP:GTIDA,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,,")               // device name
-            .number("([^,]+),")                  // rfid
-            .expression("[01],")                 // report type
-            .number("1,")                        // count
-            .expression(PATTERN_LOCATION.pattern())
-            .number("(d+.d),")                   // odometer
-            .text(",,,,")
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_WIF = new PatternBuilder()
-            .text("+RESP:GTWIF,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
-            .number("(d+),")                     // count
-            .number("((?:x{12},-?d+,,,,)+),,,,") // wifi
-            .number("(d{1,3}),")                 // battery
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_GSM = new PatternBuilder()
-            .text("+RESP:GTGSM,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("(?:STR|CTN|NMR|RTL),")  // fix type
-            .expression("(.*)")                  // cells
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_PNA = new PatternBuilder()
-            .text("+RESP:GT").expression("P[NF]A,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GT...,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
-            .number("d*,")
-            .number("(x{1,2}),")                 // report type
-            .number("d{1,2},")                   // count
-            .expression(PATTERN_LOCATION.pattern())
-            .groupBegin()
-            .number("(d{1,7}.d)?,").optional()   // odometer
-            .number("(d{1,3})?,")                // battery
-            .or()
-            .number("(d{1,7}.d)?,")              // odometer
-            .groupEnd()
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)")  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private static final Pattern PATTERN_BASIC = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF)").text(":")
-            .expression("GT...,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,").optional() // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .any()
-            .text(",")
-            .number("(d{1,2})?,")                // hdop
-            .number("(d{1,3}.d)?,")              // speed
-            .number("(d{1,3})?,")                // course
-            .number("(-?d{1,5}.d)?,")            // altitude
-            .number("(-?d{1,3}.d{6})?,")         // longitude
-            .number("(-?d{1,2}.d{6})?,")         // latitude
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(d+),")                     // mcc
-            .number("(d+),")                     // mnc
-            .number("(x+),")                     // lac
-            .number("(x+),").optional(4)         // cell
-            .any()
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
             .text("$").optional()
             .compile();
 
@@ -450,12 +121,53 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     private Long parseHours(String hoursString) {
         if (hoursString != null) {
             String[] hours = hoursString.split(":");
-            return (long) (Integer.parseInt(hours[0]) * 3600
-                    + (hours.length > 1 ? Integer.parseInt(hours[1]) * 60 : 0)
+            return (Integer.parseInt(hours[0]) * 3600L
+                    + (hours.length > 1 ? Integer.parseInt(hours[1]) * 60L : 0)
                     + (hours.length > 2 ? Integer.parseInt(hours[2]) : 0)) * 1000;
         }
         return null;
     }
+
+    private static final Pattern PATTERN_INF = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GTINF,")
+            .number("[0-9A-Z]{2}xxxx,")          // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("(?:[0-9A-Z]{17},)?")    // vin
+            .expression("(?:[^,]+)?,")           // device name
+            .number("(xx),")                     // state
+            .expression("(?:[0-9Ff]{20})?,")     // iccid
+            .number("(d{1,2}),")                 // rssi
+            .number("d{1,2},")
+            .expression("[01]{1,2},")            // external power
+            .number("([d.]+)?,")                 // odometer or external power
+            .number("d*,")                       // backup battery or lightness
+            .number("(d+.d+),")                  // battery
+            .expression("([01]),")               // charging
+            .number("(?:d),")                    // led
+            .number("(?:d)?,")                   // gps on need
+            .number("(?:d)?,")                   // gps antenna type
+            .number("(?:d)?,").optional()        // gps antenna state
+            .number("d{14},")                    // last fix time
+            .groupBegin()
+            .number("(d+),")                     // battery percentage
+            .number("[d.]*,")                    // flash type / power
+            .number("(-?[d.]+)?,,,")             // temperature
+            .or()
+            .expression("(?:[01])?,").optional() // pin15 mode
+            .number("(d+)?,")                    // adc1
+            .number("(d+)?,").optional()         // adc2
+            .number("(xx)?,")                    // digital input
+            .number("(xx)?,")                    // digital output
+            .number("[-+]dddd,")                 // timezone
+            .expression("[01],")                 // daylight saving
+            .or()
+            .any()
+            .groupEnd()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(xxxx)")                    // counter
+            .text("$").optional()
+            .compile();
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_INF, sentence);
@@ -517,6 +229,20 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static final Pattern PATTERN_VER = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GTVER,")
+            .number("[0-9A-Z]{2}xxxx,")          // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .expression("([^,]*),")              // device type
+            .number("(xxxx),")                   // firmware version
+            .number("(xxxx),")                   // hardware version
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(xxxx)")                    // counter
+            .text("$").optional()
+            .compile();
+
     private Object decodeVer(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_VER, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
@@ -536,6 +262,28 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     private void skipLocation(Parser parser) {
         parser.skip(19);
     }
+
+    private static final Pattern PATTERN_LOCATION = new PatternBuilder()
+            .number("(d{1,2}.?d?)?,")            // hdop
+            .number("(d{1,3}.d)?,")              // speed
+            .number("(d{1,3}.?d?)?,")            // course
+            .number("(-?d{1,5}.d)?,")            // altitude
+            .number("(-?d{1,3}.d{6})?,")         // longitude
+            .number("(-?d{1,2}.d{6})?,")         // latitude
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(d+)?,")                    // mcc
+            .number("(d+)?,")                    // mnc
+            .groupBegin()
+            .number("(d+),")                     // lac
+            .number("(d+),")                     // cid
+            .or()
+            .number("(x+)?,")                    // lac
+            .number("(x+)?,")                    // cid
+            .groupEnd()
+            .number("(?:d+|(d+.d))?,")           // rssi / odometer
+            .compile();
 
     private void decodeLocation(Position position, Parser parser) {
         Double hdop = parser.nextDouble();
@@ -570,6 +318,41 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         }
     }
+
+    private static final Pattern PATTERN_OBD = new PatternBuilder()
+            .text("+RESP:GTOBD,")
+            .number("[0-9A-Z]{2}xxxx,")          // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("(?:[0-9A-Z]{17})?,")    // vin
+            .expression("[^,]{0,20},")           // device name
+            .expression("[01],")                 // report type
+            .number("x{1,8},")                   // report mask
+            .expression("(?:[0-9A-Z]{17})?,")    // vin
+            .number("[01],")                     // obd connect
+            .number("(?:d{1,5})?,")              // obd voltage
+            .number("(?:x{8})?,")                // support pids
+            .number("(d{1,5})?,")                // engine rpm
+            .number("(d{1,3})?,")                // speed
+            .number("(-?d{1,3})?,")              // coolant temp
+            .number("(d+.?d*|Inf|NaN)?,")        // fuel consumption
+            .number("(d{1,5})?,")                // dtcs cleared distance
+            .number("(?:d{1,5})?,")
+            .expression("([01])?,")              // obd connect
+            .number("(d{1,3})?,")                // number of dtcs
+            .number("(x*),")                     // dtcs
+            .number("(d{1,3})?,")                // throttle
+            .number("(?:d{1,3})?,")              // engine load
+            .number("(d{1,3})?,")                // fuel level
+            .expression("(?:[0-9A],)?")          // obd protocol
+            .number("(d+),")                     // odometer
+            .expression(PATTERN_LOCATION.pattern())
+            .number("(d{1,7}.d)?,")              // odometer
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
 
     private Object decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_OBD, sentence);
@@ -617,7 +400,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
         position.setDeviceId(deviceSession.getDeviceId());
 
-        index += 1; // device name
+        String deviceName = values[index++];
         index += 1; // report type
         index += 1; // canbus state
         long reportMask = Long.parseLong(values[index++], 16);
@@ -659,11 +442,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 11) && !values[index++].isEmpty()) {
             position.set(Position.KEY_HOURS, UnitsConverter.msFromHours(Double.parseDouble(values[index - 1])));
         }
-        if (BitUtil.check(reportMask, 12)) {
-            position.set("drivingHours", Double.parseDouble(values[index++]));
+        if (BitUtil.check(reportMask, 12) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_DRIVING_TIME, Double.parseDouble(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 13)) {
-            position.set("idleHours", Double.parseDouble(values[index++]));
+        if (BitUtil.check(reportMask, 13) && !values[index++].isEmpty()) {
+            position.set("idleHours", Double.parseDouble(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 14) && !values[index++].isEmpty()) {
             position.set("idleFuelConsumption", Double.parseDouble(values[index - 1]));
@@ -689,8 +472,19 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 21) && !values[index++].isEmpty()) {
             position.set("engineOverspeed", Double.parseDouble(values[index - 1]));
         }
-        if (BitUtil.check(reportMask, 29)) {
-            reportMaskExt = Long.parseLong(values[index++], 16);
+        if ("GV350M".equals(deviceName)) {
+            if (BitUtil.check(reportMask, 22)) {
+                index += 1; // impulse distance
+            }
+            if (BitUtil.check(reportMask, 23)) {
+                index += 1; // gross vehicle weight
+            }
+            if (BitUtil.check(reportMask, 24)) {
+                index += 1; // catalyst liquid level
+            }
+        }
+        if (BitUtil.check(reportMask, 29) && !values[index++].isEmpty()) {
+            reportMaskExt = Long.parseLong(values[index - 1], 16);
         }
         if (BitUtil.check(reportMaskExt, 0) && !values[index++].isEmpty()) {
             position.set("adBlueLevel", Integer.parseInt(values[index - 1]));
@@ -821,6 +615,51 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private static final Pattern PATTERN_FRI = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GT...,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("(?:([0-9A-Z]{17}),)?")  // vin
+            .expression("[^,]*,")                // device name
+            .number("(d+)?,")                    // power
+            .number("(d{1,2}),").optional()      // report type
+            .number("d{1,2},").optional()        // count
+            .number("d*,").optional()            // reserved
+            .number("(d+),").optional()          // battery
+            .expression("((?:")
+            .expression(PATTERN_LOCATION.pattern())
+            .expression(")+)")
+            .groupBegin()
+            .number("d{1,2},,")
+            .number("(d{1,3}),")                 // battery
+            .number("[01],")                     // mode
+            .number("(?:[01])?,")                // motion
+            .number("(?:-?d{1,2}.d)?,")          // temperature
+            .or()
+            .number("(d{1,7}.d)?,")              // odometer
+            .number("(d{5}:dd:dd)?,")            // hour meter
+            .number("(x+)?,")                    // adc 1
+            .number("(x+)?,")                    // adc 2
+            .number("(d{1,3})?,")                // battery
+            .number("(?:(xx)(xx)(xx))?,")        // device status
+            .number("(d+)?,")                    // rpm
+            .number("(?:d+.?d*|Inf|NaN)?,")      // fuel consumption
+            .number("(d+)?,")                    // fuel level
+            .or()
+            .number("(-?d),")                    // rssi
+            .number("(d{1,3}),")                 // battery
+            .or()
+            .number("(d{1,7}.d)?,").optional()   // odometer
+            .number("(d{1,3})?,")                // battery
+            .groupEnd()
+            .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_FRI, sentence);
         if (!parser.matches()) {
@@ -901,6 +740,44 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
+    private static final Pattern PATTERN_ERI = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GTERI,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("(x{8}),")                   // mask
+            .number("(d+)?,")                    // power
+            .number("d{1,2},")                   // report type
+            .number("d{1,2},")                   // count
+            .expression("((?:")
+            .expression(PATTERN_LOCATION.pattern())
+            .expression(")+)")
+            .groupBegin()
+            .number("(d{1,7}.d)?,")              // odometer
+            .number("(d{5}:dd:dd)?,")            // hour meter
+            .number("(x+)?,")                    // adc 1
+            .number("(x+)?,").optional()         // adc 2
+            .groupBegin()
+            .number("(x+)?,")                    // adc 3
+            .number("(xx),")                     // inputs
+            .number("(xx),")                     // outputs
+            .or()
+            .number("(d{1,3})?,")                // battery
+            .number("(?:(xx)(xx)(xx))?,")        // device status
+            .groupEnd()
+            .expression("(.*)")                  // additional data
+            .or()
+            .number("d*,,")
+            .number("(d+),")                     // battery
+            .any()
+            .groupEnd()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private Object decodeEri(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_ERI, sentence);
         if (!parser.matches()) {
@@ -936,7 +813,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, power * 0.001);
         }
 
-        if (parser.hasNext(12)) {
+        if (parser.hasNextAny(12)) {
 
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
             position.set(Position.KEY_HOURS, parseHours(parser.next()));
@@ -958,7 +835,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // device type
 
             if (BitUtil.check(mask, 0)) {
-                index += 1; // digital fuel sensor data
+                position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(data[index++], 16));
             }
 
             if (BitUtil.check(mask, 1)) {
@@ -1004,6 +881,22 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
+    private static final Pattern PATTERN_IGN = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GTIG[NF],")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("d+,")                       // ignition off duration
+            .expression(PATTERN_LOCATION.pattern())
+            .number("(d{5}:dd:dd)?,")            // hour meter
+            .number("(d{1,7}.d)?,")              // odometer
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private Object decodeIgn(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_IGN, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
@@ -1022,6 +915,21 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static final Pattern PATTERN_LSW = new PatternBuilder()
+            .text("+RESP:").expression("GT[LT]SW,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("[01],")                     // type
+            .number("([01]),")                   // state
+            .expression(PATTERN_LOCATION.pattern())
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private Object decodeLsw(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_LSW, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
@@ -1037,6 +945,24 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         return position;
     }
+
+    private static final Pattern PATTERN_IDA = new PatternBuilder()
+            .text("+RESP:GTIDA,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,,")               // device name
+            .number("([^,]+),")                  // rfid
+            .expression("[01],")                 // report type
+            .number("1,")                        // count
+            .expression(PATTERN_LOCATION.pattern())
+            .number("(d+.d),")                   // odometer
+            .text(",,,,")
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
 
     private Object decodeIda(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_IDA, sentence);
@@ -1055,6 +981,21 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         return position;
     }
+
+    private static final Pattern PATTERN_WIF = new PatternBuilder()
+            .text("+RESP:GTWIF,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("(d+),")                     // count
+            .number("((?:x{12},-?d+,,,,)+),,,,") // wifi
+            .number("(d{1,3}),")                 // battery
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
 
     private Object decodeWif(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_WIF, sentence);
@@ -1082,6 +1023,19 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static final Pattern PATTERN_GSM = new PatternBuilder()
+            .text("+RESP:GTGSM,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("(?:STR|CTN|NMR|RTL),")  // fix type
+            .expression("(.*)")                  // cells
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private Object decodeGsm(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_GSM, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
@@ -1108,6 +1062,18 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static final Pattern PATTERN_PNA = new PatternBuilder()
+            .text("+RESP:GT").expression("P[NF]A,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private Object decodePna(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_PNA, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
@@ -1121,6 +1087,204 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         return position;
     }
+
+    private static final Pattern PATTERN_DAR = new PatternBuilder()
+            .text("+RESP:GTDAR,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("(d),")                      // warning type
+            .number("(d{1,2}),,,")               // fatigue degree
+            .expression(PATTERN_LOCATION.pattern())
+            .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private Object decodeDar(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_DAR, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        int warningType = parser.nextInt();
+        int fatigueDegree = parser.nextInt();
+        if (warningType == 1) {
+            position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+            position.set("fatigueDegree", fatigueDegree);
+        } else {
+            position.set("warningType", warningType);
+        }
+
+        decodeLocation(position, parser);
+
+        decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
+    private static final Pattern PATTERN_DTT = new PatternBuilder()
+            .text("+RESP:GTDTT,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,,,")              // device name
+            .number("d,")                        // data type
+            .number("d+,")                       // data length
+            .number("(x+),")                     // data
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private Object decodeDtt(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_DTT, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        getLastLocation(position, null);
+
+        String data = Unpooled.wrappedBuffer(DataConverter.parseHex(parser.next()))
+                .toString(StandardCharsets.US_ASCII);
+        if (data.contains("COMB")) {
+            String[] values = data.split(",");
+            position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(values[2]));
+        } else {
+            position.set(Position.KEY_RESULT, data);
+        }
+
+        decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
+    private static final Pattern PATTERN_BAA = new PatternBuilder()
+            .text("+RESP:GTBAA,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("x+,")                       // index
+            .number("d,")                        // accessory type
+            .number("d,")                        // accessory model
+            .number("x+,")                       // alarm type
+            .number("(x{4}),")                   // append mask
+            .expression("((?:[^,]+,){0,6})")     // accessory optionals
+            .expression(PATTERN_LOCATION.pattern())
+            .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private Object decodeBaa(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_BAA, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        int mask = parser.nextHexInt();
+        String[] values = parser.next().split(",");
+        int index = 0;
+        if (BitUtil.check(mask, 0)) {
+            position.set("accessoryName", values[index++]);
+        }
+        if (BitUtil.check(mask, 1)) {
+            position.set("accessoryMac", values[index++]);
+        }
+        if (BitUtil.check(mask, 2)) {
+            position.set("accessoryStatus", Integer.parseInt(values[index++]));
+        }
+        if (BitUtil.check(mask, 3)) {
+            position.set("accessoryVoltage", Integer.parseInt(values[index++]) * 0.001);
+        }
+        if (BitUtil.check(mask, 4)) {
+            position.set("accessoryTemp", Integer.parseInt(values[index++]));
+        }
+        if (BitUtil.check(mask, 5)) {
+            position.set("accessoryHumidity", Integer.parseInt(values[index]));
+        }
+
+        decodeLocation(position, parser);
+
+        decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
+    private static final Pattern PATTERN_BID = new PatternBuilder()
+            .text("+RESP:GTBID,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("d,")                        // count
+            .number("d,")                        // accessory model
+            .number("(x{4}),")                   // append mask
+            .expression("((?:[^,]+,){0,2})")     // accessory optionals
+            .expression(PATTERN_LOCATION.pattern())
+            .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private Object decodeBid(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_BID, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        int mask = parser.nextHexInt();
+        String[] values = parser.next().split(",");
+        int index = 0;
+        if (BitUtil.check(mask, 1)) {
+            position.set("accessoryMac", values[index++]);
+        }
+        if (BitUtil.check(mask, 3)) {
+            position.set("accessoryVoltage", Integer.parseInt(values[index]) * 0.001);
+        }
+
+        decodeLocation(position, parser);
+
+        decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
+    private static final Pattern PATTERN = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GT...,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("d*,")
+            .number("(x{1,2}),")                 // report type
+            .number("d{1,2},")                   // count
+            .number("d*,").optional()            // reserved
+            .expression(PATTERN_LOCATION.pattern())
+            .groupBegin()
+            .number("(?:(d{1,7}.d)|0)?,").optional() // odometer
+            .number("(d{1,3})?,")                // battery
+            .or()
+            .number("(d{1,7}.d)?,")              // odometer
+            .groupEnd()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
 
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN, sentence);
@@ -1171,6 +1335,34 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         return position;
     }
+
+    private static final Pattern PATTERN_BASIC = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF)").text(":")
+            .expression("GT...,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,").optional() // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .any()
+            .text(",")
+            .number("(d{1,2})?,")                // hdop
+            .number("(d{1,3}.d)?,")              // speed
+            .number("(d{1,3})?,")                // course
+            .number("(-?d{1,5}.d)?,")            // altitude
+            .number("(-?d{1,3}.d{6})?,")         // longitude
+            .number("(-?d{1,2}.d{6})?,")         // latitude
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(d+),")                     // mcc
+            .number("(d+),")                     // mnc
+            .number("(x+),")                     // lac
+            .number("(x+),").optional(4)         // cell
+            .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
 
     private Object decodeBasic(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN_BASIC, sentence);
@@ -1313,6 +1505,18 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "PFA":
                     result = decodePna(channel, remoteAddress, sentence);
                     break;
+                case "DAR":
+                    result = decodeDar(channel, remoteAddress, sentence);
+                    break;
+                case "DTT":
+                    result = decodeDtt(channel, remoteAddress, sentence);
+                    break;
+                case "BAA":
+                    result = decodeBaa(channel, remoteAddress, sentence);
+                    break;
+                case "BID":
+                    result = decodeBid(channel, remoteAddress, sentence);
+                    break;
                 default:
                     result = decodeOther(channel, remoteAddress, sentence, type);
                     break;
@@ -1333,7 +1537,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (channel != null && Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+        if (channel != null && getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
             String checksum;
             if (sentence.endsWith("$")) {
                 checksum = sentence.substring(sentence.length() - 1 - 4, sentence.length() - 1);

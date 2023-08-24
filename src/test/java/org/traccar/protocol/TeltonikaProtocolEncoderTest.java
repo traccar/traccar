@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
@@ -9,7 +9,7 @@ public class TeltonikaProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new TeltonikaProtocolEncoder(null);
+        var encoder = inject(new TeltonikaProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.traccar.storage.QueryExtended;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.helper.Hashing;
 import org.traccar.storage.StorageName;
@@ -25,7 +24,7 @@ import org.traccar.storage.StorageName;
 import java.util.Date;
 
 @StorageName("tc_users")
-public class User extends ExtendedModel {
+public class User extends ExtendedModel implements UserRestrictions, Disableable {
 
     private String name;
 
@@ -64,11 +63,12 @@ public class User extends ExtendedModel {
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        this.phone = phone != null ? phone.trim() : null;
     }
 
     private boolean readonly;
 
+    @Override
     public boolean getReadonly() {
         return readonly;
     }
@@ -78,6 +78,12 @@ public class User extends ExtendedModel {
     }
 
     private boolean administrator;
+
+    @QueryIgnore
+    @JsonIgnore
+    public boolean getManager() {
+        return userLimit != 0;
+    }
 
     public boolean getAdministrator() {
         return administrator;
@@ -149,20 +155,24 @@ public class User extends ExtendedModel {
 
     private boolean disabled;
 
+    @Override
     public boolean getDisabled() {
         return disabled;
     }
 
+    @Override
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }
 
     private Date expirationTime;
 
+    @Override
     public Date getExpirationTime() {
         return expirationTime;
     }
 
+    @Override
     public void setExpirationTime(Date expirationTime) {
         this.expirationTime = expirationTime;
     }
@@ -189,6 +199,7 @@ public class User extends ExtendedModel {
 
     private boolean deviceReadonly;
 
+    @Override
     public boolean getDeviceReadonly() {
         return deviceReadonly;
     }
@@ -197,25 +208,9 @@ public class User extends ExtendedModel {
         this.deviceReadonly = deviceReadonly;
     }
 
-    private String token;
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        if (token != null && !token.isEmpty()) {
-            if (!token.matches("^[a-zA-Z0-9-]{16,}$")) {
-                throw new IllegalArgumentException("Illegal token");
-            }
-            this.token = token;
-        } else {
-            this.token = null;
-        }
-    }
-
     private boolean limitCommands;
 
+    @Override
     public boolean getLimitCommands() {
         return limitCommands;
     }
@@ -224,10 +219,9 @@ public class User extends ExtendedModel {
         this.limitCommands = limitCommands;
     }
 
-    private String poiLayer;
-
     private boolean disableReports;
 
+    @Override
     public boolean getDisableReports() {
         return disableReports;
     }
@@ -235,6 +229,19 @@ public class User extends ExtendedModel {
     public void setDisableReports(boolean disableReports) {
         this.disableReports = disableReports;
     }
+
+    private boolean fixedEmail;
+
+    @Override
+    public boolean getFixedEmail() {
+        return fixedEmail;
+    }
+
+    public void setFixedEmail(boolean fixedEmail) {
+        this.fixedEmail = fixedEmail;
+    }
+
+    private String poiLayer;
 
     public String getPoiLayer() {
         return poiLayer;
@@ -261,12 +268,12 @@ public class User extends ExtendedModel {
     private String hashedPassword;
 
     @JsonIgnore
-    @QueryExtended
+    @QueryIgnore
     public String getHashedPassword() {
         return hashedPassword;
     }
 
-    @QueryExtended
+    @QueryIgnore
     public void setHashedPassword(String hashedPassword) {
         this.hashedPassword = hashedPassword;
     }
@@ -274,12 +281,12 @@ public class User extends ExtendedModel {
     private String salt;
 
     @JsonIgnore
-    @QueryExtended
+    @QueryIgnore
     public String getSalt() {
         return salt;
     }
 
-    @QueryExtended
+    @QueryIgnore
     public void setSalt(String salt) {
         this.salt = salt;
     }

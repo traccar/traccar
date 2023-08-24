@@ -1,6 +1,6 @@
 package org.traccar.web;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;

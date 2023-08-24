@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,8 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
-import org.traccar.database.CommandsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
@@ -61,6 +59,8 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
         position.setValid(true);
 
         Network network = new Network();
+        Double latitude = null;
+        Double longitude = null;
 
         for (Map.Entry<String, List<String>> entry : params.entrySet()) {
             for (String value : entry.getValue()) {
@@ -94,15 +94,15 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         }
                         break;
                     case "lat":
-                        position.setLatitude(Double.parseDouble(value));
+                        latitude = Double.parseDouble(value);
                         break;
                     case "lon":
-                        position.setLongitude(Double.parseDouble(value));
+                        longitude = Double.parseDouble(value);
                         break;
                     case "location":
                         String[] location = value.split(",");
-                        position.setLatitude(Double.parseDouble(location[0]));
-                        position.setLongitude(Double.parseDouble(location[1]));
+                        latitude = Double.parseDouble(location[0]);
+                        longitude = Double.parseDouble(location[1]);
                         break;
                     case "cell":
                         String[] cell = value.split(",");
@@ -143,6 +143,9 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                     case "driverUniqueId":
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
                         break;
+                    case "charge":
+                        position.set(Position.KEY_CHARGE, Boolean.parseBoolean(value));
+                        break;
                     default:
                         try {
                             position.set(entry.getKey(), Double.parseDouble(value));
@@ -172,17 +175,17 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setNetwork(network);
         }
 
-        if (position.getLatitude() == 0 && position.getLongitude() == 0) {
+        if (latitude != null && longitude != null) {
+            position.setLatitude(latitude);
+            position.setLongitude(longitude);
+        } else {
             getLastLocation(position, position.getDeviceTime());
         }
 
         if (position.getDeviceId() != 0) {
             String response = null;
-            CommandsManager commandsManager = Context.getCommandsManager();
-            if (commandsManager != null) {
-                for (Command command : commandsManager.readQueuedCommands(position.getDeviceId(), 1)) {
-                    response = command.getString(Command.KEY_DATA);
-                }
+            for (Command command : getCommandsManager().readQueuedCommands(position.getDeviceId(), 1)) {
+                response = command.getString(Command.KEY_DATA);
             }
             if (response != null) {
                 sendResponse(channel, HttpResponseStatus.OK, Unpooled.copiedBuffer(response, StandardCharsets.UTF_8));

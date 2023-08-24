@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class UuxProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class UuxProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new UuxProtocolDecoder(null);
+        var decoder = inject(new UuxProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "81910b01ff"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,20 +21,24 @@ import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
 import org.traccar.model.Command;
+
+import jakarta.inject.Inject;
 
 public class StartekProtocol extends BaseProtocol {
 
-    public StartekProtocol() {
+    @Inject
+    public StartekProtocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
-        addServer(new TrackerServer(false, getName()) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new LineBasedFrameDecoder(1024));
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new LineBasedFrameDecoder(1100));
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StartekProtocolEncoder(StartekProtocol.this));

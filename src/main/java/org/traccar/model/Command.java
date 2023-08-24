@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.traccar.storage.StorageName;
 
 @StorageName("tc_commands")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Command extends Message implements Cloneable {
+public class Command extends BaseCommand {
 
     public static final String TYPE_CUSTOM = "custom";
     public static final String TYPE_IDENTIFICATION = "deviceIdentification";
@@ -58,11 +58,10 @@ public class Command extends Message implements Cloneable {
     public static final String TYPE_GET_MODEM_STATUS = "getModemStatus";
     public static final String TYPE_GET_DEVICE_STATUS = "getDeviceStatus";
     public static final String TYPE_SET_SPEED_LIMIT = "setSpeedLimit";
-
     public static final String TYPE_MODE_POWER_SAVING = "modePowerSaving";
     public static final String TYPE_MODE_DEEP_SLEEP = "modeDeepSleep";
 
-    public static final String TYPE_ALARM_GEOFENCE = "movementAlarm";
+    public static final String TYPE_ALARM_GEOFENCE = "alarmGeofence";
     public static final String TYPE_ALARM_BATTERY = "alarmBattery";
     public static final String TYPE_ALARM_SOS = "alarmSos";
     public static final String TYPE_ALARM_REMOVE = "alarmRemove";
@@ -84,21 +83,6 @@ public class Command extends Message implements Cloneable {
     public static final String KEY_PHONE = "phone";
     public static final String KEY_SERVER = "server";
     public static final String KEY_PORT = "port";
-
-    @Override
-    public Command clone() throws CloneNotSupportedException {
-        return (Command) super.clone();
-    }
-
-    private boolean textChannel;
-
-    public boolean getTextChannel() {
-        return textChannel;
-    }
-
-    public void setTextChannel(boolean textChannel) {
-        this.textChannel = textChannel;
-    }
 
     @QueryIgnore
     @Override

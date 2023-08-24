@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class Dsf22ProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class Dsf22ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Dsf22ProtocolDecoder(null);
+        var decoder = inject(new Dsf22ProtocolDecoder(null));
 
         verifyPositions(decoder, binary(
                 "4642a82d01c8f6aa1af1792c0c1411eb61001e0000"));

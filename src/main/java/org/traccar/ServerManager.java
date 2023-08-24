@@ -15,20 +15,28 @@
  */
 package org.traccar;
 
+import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.ClassScanner;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ConnectException;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Singleton
 public class ServerManager implements LifecycleObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerManager.class);
@@ -36,12 +44,21 @@ public class ServerManager implements LifecycleObject {
     private final List<TrackerConnector> connectorList = new LinkedList<>();
     private final Map<String, BaseProtocol> protocolList = new ConcurrentHashMap<>();
 
-    public ServerManager() throws IOException, URISyntaxException, ReflectiveOperationException {
+    @Inject
+    public ServerManager(
+            Injector injector, Config config) throws IOException, URISyntaxException, ReflectiveOperationException {
+        Set<String> enabledProtocols = null;
+        if (config.hasKey(Keys.PROTOCOLS_ENABLE)) {
+            enabledProtocols = new HashSet<>(Arrays.asList(config.getString(Keys.PROTOCOLS_ENABLE).split("[, ]")));
+        }
         for (Class<?> protocolClass : ClassScanner.findSubclasses(BaseProtocol.class, "org.traccar.protocol")) {
-            if (Context.getConfig().hasKey(Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(protocolClass)))) {
-                BaseProtocol protocol = (BaseProtocol) protocolClass.getDeclaredConstructor().newInstance();
-                connectorList.addAll(protocol.getConnectorList());
-                protocolList.put(protocol.getName(), protocol);
+            String protocolName = BaseProtocol.nameFromClass(protocolClass);
+            if (enabledProtocols == null || enabledProtocols.contains(protocolName)) {
+                if (config.hasKey(Keys.PROTOCOL_PORT.withPrefix(protocolName))) {
+                    BaseProtocol protocol = (BaseProtocol) injector.getInstance(protocolClass);
+                    connectorList.addAll(protocol.getConnectorList());
+                    protocolList.put(protocol.getName(), protocol);
+                }
             }
         }
     }
@@ -64,11 +81,14 @@ public class ServerManager implements LifecycleObject {
     }
 
     @Override
-    public void stop() {
-        for (TrackerConnector connector: connectorList) {
-            connector.stop();
+    public void stop() throws Exception {
+        try {
+            for (TrackerConnector connector : connectorList) {
+                connector.stop();
+            }
+        } finally {
+            GlobalTimer.release();
         }
-        GlobalTimer.release();
     }
 
 }

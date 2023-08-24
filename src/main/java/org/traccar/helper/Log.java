@@ -28,6 +28,10 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileStore;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.ConsoleHandler;
@@ -51,10 +55,12 @@ public final class Log {
         private String suffix;
         private Writer writer;
         private final boolean rotate;
+        private final String template;
 
-        RollingFileHandler(String name, boolean rotate) {
+        RollingFileHandler(String name, boolean rotate, String rotateInterval) {
             this.name = name;
             this.rotate = rotate;
+            this.template = rotateInterval.equalsIgnoreCase("HOUR") ? "yyyyMMddHH" : "yyyyMMdd";
         }
 
         @Override
@@ -63,7 +69,7 @@ public final class Log {
                 try {
                     String suffix = "";
                     if (rotate) {
-                        suffix = new SimpleDateFormat("yyyyMMdd").format(new Date(record.getMillis()));
+                        suffix = new SimpleDateFormat(template).format(new Date(record.getMillis()));
                         if (writer != null && !suffix.equals(this.suffix)) {
                             writer.close();
                             writer = null;
@@ -165,7 +171,7 @@ public final class Log {
 
     public static void setupDefaultLogger() {
         String path = null;
-        URL url =  ClassLoader.getSystemClassLoader().getResource(".");
+        URL url = ClassLoader.getSystemClassLoader().getResource(".");
         if (url != null) {
             File jarPath = new File(url.getPath());
             File logsPath = new File(jarPath, "logs");
@@ -174,7 +180,7 @@ public final class Log {
             }
             path = new File(logsPath, "tracker-server.log").getPath();
         }
-        setupLogger(path == null, path, Level.WARNING.getName(), false, true);
+        setupLogger(path == null, path, Level.WARNING.getName(), false, true, "DAY");
     }
 
     public static void setupLogger(Config config) {
@@ -183,11 +189,13 @@ public final class Log {
                 config.getString(Keys.LOGGER_FILE),
                 config.getString(Keys.LOGGER_LEVEL),
                 config.getBoolean(Keys.LOGGER_FULL_STACK_TRACES),
-                config.getBoolean(Keys.LOGGER_ROTATE));
+                config.getBoolean(Keys.LOGGER_ROTATE),
+                config.getString(Keys.LOGGER_ROTATE_INTERVAL));
     }
 
     private static void setupLogger(
-            boolean console, String file, String levelString, boolean fullStackTraces, boolean rotate) {
+            boolean console, String file, String levelString,
+            boolean fullStackTraces, boolean rotate, String rotateInterval) {
 
         Logger rootLogger = Logger.getLogger("");
         for (Handler handler : rootLogger.getHandlers()) {
@@ -198,7 +206,7 @@ public final class Log {
         if (console) {
             handler = new ConsoleHandler();
         } else {
-            handler = new RollingFileHandler(file, rotate);
+            handler = new RollingFileHandler(file, rotate, rotateInterval);
         }
 
         handler.setFormatter(new LogFormatter(fullStackTraces));
@@ -267,6 +275,20 @@ public final class Log {
             s.append(")");
         }
         return s.toString();
+    }
+
+    public static long[] getStorageSpace() {
+        long usable = 0;
+        long total = 0;
+        for (Path root : FileSystems.getDefault().getRootDirectories()) {
+            try {
+                FileStore store = Files.getFileStore(root);
+                usable += store.getUsableSpace();
+                total += store.getTotalSpace();
+            } catch (IOException ignored) {
+            }
+        }
+        return new long[]{usable, total};
     }
 
 }

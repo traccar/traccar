@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,24 @@
 package org.traccar.notificators;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
+import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
-import org.traccar.notification.NotificationMessage;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
 
-public class NotificatorPushover extends Notificator {
+@Singleton
+public class NotificatorPushover implements Notificator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorPushover.class);
+    private final NotificationFormatter notificationFormatter;
+    private final Client client;
 
     private final String url;
     private final String token;
@@ -50,58 +52,35 @@ public class NotificatorPushover extends Notificator {
         private String message;
     }
 
-    public NotificatorPushover() {
+    @Inject
+    public NotificatorPushover(Config config, NotificationFormatter notificationFormatter, Client client) {
+        this.notificationFormatter = notificationFormatter;
+        this.client = client;
         url = "https://api.pushover.net/1/messages.json";
-        token = Context.getConfig().getString(Keys.NOTIFICATOR_PUSHOVER_TOKEN);
-        user = Context.getConfig().getString(Keys.NOTIFICATOR_PUSHOVER_USER);
+        token = config.getString(Keys.NOTIFICATOR_PUSHOVER_TOKEN);
+        user = config.getString(Keys.NOTIFICATOR_PUSHOVER_USER);
     }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) {
-
-        final User user = Context.getPermissionsManager().getUser(userId);
-
-        String device = "";
-
-        if (user.getAttributes().containsKey("notificator.pushover.device")) {
-            device = user.getString("notificator.pushover.device").replaceAll(" *, *", ",");
-        }
-
-        if (token == null) {
-            LOGGER.warn("Pushover token not found");
-            return;
-        }
-
-        if (this.user == null) {
-            LOGGER.warn("Pushover user not found");
-            return;
-        }
-
-        NotificationMessage shortMessage = NotificationFormatter.formatMessage(userId, event, position, "short");
+    public void send(Notification notification, User user, Event event, Position position) {
+        var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
 
         Message message = new Message();
         message.token = token;
-        message.user = this.user;
-        message.device = device;
+
+        message.user = user.getString("pushoverUserKey");
+        if (message.user == null) {
+            message.user = this.user;
+        }
+
+        if (user.hasAttribute("pushoverDeviceNames")) {
+            message.device = user.getString("pushoverDeviceNames").replaceAll(" *, *", ",");
+        }
+
         message.title = shortMessage.getSubject();
         message.message = shortMessage.getBody();
 
-        Context.getClient().target(url).request()
-                .async().post(Entity.json(message), new InvocationCallback<Object>() {
-            @Override
-            public void completed(Object o) {
-            }
-
-            @Override
-            public void failed(Throwable throwable) {
-                LOGGER.warn("Pushover API error", throwable);
-            }
-        });
-    }
-
-    @Override
-    public void sendAsync(long userId, Event event, Position position) {
-        sendSync(userId, event, position);
+        client.target(url).request().post(Entity.json(message)).close();
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,15 @@ package org.traccar.database;
 import io.netty.buffer.ByteBuf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
@@ -30,14 +35,16 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+@Singleton
 public class MediaManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MediaManager.class);
 
-    private String path;
+    private final String path;
 
-    public MediaManager(String path) {
-        this.path = path;
+    @Inject
+    public MediaManager(Config config) {
+        this.path = config.getString(Keys.MEDIA_PATH);
     }
 
     private File createFile(String uniqueId, String name) throws IOException {
@@ -47,6 +54,10 @@ public class MediaManager {
             Files.createDirectories(directoryPath);
         }
         return filePath.toFile();
+    }
+
+    public OutputStream createFileStream(String uniqueId, String name, String extension) throws IOException {
+        return new FileOutputStream(createFile(uniqueId, name + "." + extension));
     }
 
     public String writeFile(String uniqueId, ByteBuf buf, String extension) {

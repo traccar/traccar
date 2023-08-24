@@ -2,7 +2,7 @@
   "openapi": "3.0.1",
   "info": {
     "title": "Traccar",
-    "version": "4.15",
+    "version": "5.8",
     "description": "Traccar GPS tracking server API documentation. To use the API you need to have a server instance. For testing purposes you can use one of free [demo servers](https://www.traccar.org/demo-server/). For production use you can install your own server or get a [subscription service](https://www.traccar.org/product/tracking-server/).",
     "contact": {
       "name": "Traccar Support",
@@ -26,6 +26,10 @@
     {
       "url": "https://demo3.traccar.org/api",
       "description": "Demo Server 3"
+    },
+    {
+      "url": "https://demo4.traccar.org/api",
+      "description": "Demo Server 4"
     },
     {
       "url": "https://server.traccar.org/api",
@@ -760,15 +764,9 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Permission"
-                }
-              }
-            }
+          "204": {
+            "description": "No Content",
+            "content": {}
           },
           "400": {
             "description": "No permission",
@@ -873,6 +871,54 @@
                 }
               }
             }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Deletes all the Positions of a device in the time span specified",
+        "description": "",
+        "tags": [
+          "Positions"
+        ],
+        "parameters": [
+          {
+            "name": "deviceId",
+            "in": "query",
+            "description": "",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "in IS0 8601 format. eg. `1963-11-22T18:30:00Z`",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content",
+            "content": {}
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {}
           }
         }
       }
@@ -1011,6 +1057,42 @@
           "204": {
             "description": "No Content",
             "content": {}
+          }
+        }
+      }
+    },
+    "/session/openid/auth": {
+      "get": {
+        "summary": "Fetch Session information",
+        "tags": [
+          "Session"
+        ],
+        "parameters": [
+          {
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect to OpenID Connect identity provider",
+            "content": { }
+          }
+        }
+      }
+    },
+    "/session/openid/callback": {
+      "get": {
+        "summary": "OpenID Callback",
+        "tags": [
+          "Session"
+        ],
+        "parameters": [
+          {
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Successful authentication, redirect to homepage",
+            "content": { }
           }
         }
       }
@@ -2643,6 +2725,12 @@
             "type": "object",
             "properties": {}
           },
+          "geofenceIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
           "attributes": {
             "type": "object",
             "properties": {}
@@ -2711,10 +2799,10 @@
           "limitCommands": {
             "type": "boolean"
           },
-          "poiLayer": {
-            "type": "string"
+          "fixedEmail": {
+            "type": "boolean"
           },
-          "token": {
+          "poiLayer": {
             "type": "string"
           },
           "attributes": {
@@ -2773,6 +2861,12 @@
           },
           "coordinateFormat": {
             "type": "string"
+          },
+          "openIdEnabled": {
+            "type": "boolean"
+          },
+          "openIdForce": {
+            "type": "boolean"
           },
           "attributes": {
             "type": "object",
@@ -2842,12 +2936,6 @@
           "category": {
             "type": "string"
           },
-          "geofenceIds": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
           "attributes": {
             "type": "object",
             "properties": {}
@@ -2877,39 +2965,43 @@
         "properties": {
           "userId": {
             "type": "integer",
-            "description": "User Id, can be only first parameter"
+            "description": "User id, can be only first parameter"
           },
           "deviceId": {
             "type": "integer",
-            "description": "Device Id, can be first parameter or second only in combination with userId"
+            "description": "Device id, can be first parameter or second only in combination with userId"
           },
           "groupId": {
             "type": "integer",
-            "description": "Group Id, can be first parameter or second only in combination with userId"
+            "description": "Group id, can be first parameter or second only in combination with userId"
           },
           "geofenceId": {
             "type": "integer",
-            "description": "Geofence Id, can be second parameter only"
+            "description": "Geofence id, can be second parameter only"
           },
           "notificationId": {
             "type": "integer",
-            "description": "Notification Id, can be second parameter only"
+            "description": "Notification id, can be second parameter only"
           },
           "calendarId": {
             "type": "integer",
-            "description": "Calendar Id, can be second parameter only and only in combination with userId"
+            "description": "Calendar id, can be second parameter only and only in combination with userId"
           },
           "attributeId": {
             "type": "integer",
-            "description": "Computed Attribute Id, can be second parameter only"
+            "description": "Computed attribute id, can be second parameter only"
           },
           "driverId": {
             "type": "integer",
-            "description": "Driver Id, can be second parameter only"
+            "description": "Driver id, can be second parameter only"
           },
           "managedUserId": {
             "type": "integer",
-            "description": "User Id, can be second parameter only and only in combination with userId"
+            "description": "User id, can be second parameter only and only in combination with userId"
+          },
+          "commandId": {
+            "type": "integer",
+            "description": "Saved command id, can be second parameter only"
           }
         },
         "description": "This is a permission map that contain two object indexes. It is used to link/unlink objects. Order is important. Example: { deviceId:8, geofenceId: 16 }"

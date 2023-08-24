@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
@@ -58,6 +60,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DRIVER_BEHAVIOR_1 = 0x05; // 0x2626
     public static final int MSG_DRIVER_BEHAVIOR_2 = 0x06; // 0x2626
     public static final int MSG_BLE = 0x10;
+    public static final int MSG_NETWORK_2 = 0x11;
     public static final int MSG_GPS_2 = 0x13;
     public static final int MSG_ALARM_2 = 0x14;
     public static final int MSG_COMMAND = 0x81;
@@ -167,7 +170,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
             return decodePosition(channel, deviceSession, buf, type, index, imei);
 
-        } else if (type == MSG_NETWORK && header == 0x2727) {
+        } else if (type == MSG_NETWORK && header == 0x2727 || type == MSG_NETWORK_2) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -397,6 +400,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         int alarm = buf.readUnsignedByte();
         position.set(Position.KEY_ALARM, header != 0x2727 ? decodeAlarm1(alarm) : decodeAlarm2(alarm));
+        position.set("alarmCode", alarm);
 
         if (header != 0x2727) {
 
@@ -467,6 +471,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             int inputStatus = buf.readUnsignedShort();
             position.set(Position.KEY_IGNITION, BitUtil.check(inputStatus, 2));
             position.set(Position.KEY_RSSI, BitUtil.between(inputStatus, 4, 11));
+            position.set(Position.KEY_INPUT, inputStatus);
 
             buf.readUnsignedShort(); // ignition on upload interval
             buf.readUnsignedInt(); // ignition off upload interval
@@ -510,7 +515,9 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (type == MSG_ALARM || type == MSG_ALARM_2) {
+        boolean acknowledgement = AttributeUtil.lookup(
+                getCacheManager(), Keys.PROTOCOL_ACK.withPrefix(getProtocolName()), deviceSession.getDeviceId());
+        if (acknowledgement || type == MSG_ALARM || type == MSG_ALARM_2) {
             sendResponse(channel, header, type, index, imei, alarm);
         }
 

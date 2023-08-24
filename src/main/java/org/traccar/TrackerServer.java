@@ -25,6 +25,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import javax.net.ssl.SSLContext;
@@ -54,14 +55,12 @@ public abstract class TrackerServer implements TrackerConnector {
         return secure;
     }
 
-    public TrackerServer(boolean datagram, String protocol) {
-        this.datagram = datagram;
+    public TrackerServer(Config config, String protocol, boolean datagram) {
+        secure = config.getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
+        address = config.getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
+        port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
 
-        secure = Context.getConfig().getBoolean(Keys.PROTOCOL_SSL.withPrefix(protocol));
-        address = Context.getConfig().getString(Keys.PROTOCOL_ADDRESS.withPrefix(protocol));
-        port = Context.getConfig().getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
-
-        BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, protocol) {
+        BasePipelineFactory pipelineFactory = new BasePipelineFactory(this, config, protocol) {
             @Override
             protected void addTransportHandlers(PipelineBuilder pipeline) {
                 try {
@@ -76,28 +75,25 @@ public abstract class TrackerServer implements TrackerConnector {
 
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                TrackerServer.this.addProtocolHandlers(pipeline);
+                TrackerServer.this.addProtocolHandlers(pipeline, config);
             }
         };
 
+        this.datagram = datagram;
         if (datagram) {
-
             bootstrap = new Bootstrap()
                     .group(EventLoopGroupFactory.getWorkerGroup())
                     .channel(NioDatagramChannel.class)
                     .handler(pipelineFactory);
-
         } else {
-
             bootstrap = new ServerBootstrap()
                     .group(EventLoopGroupFactory.getBossGroup(), EventLoopGroupFactory.getWorkerGroup())
                     .channel(NioServerSocketChannel.class)
                     .childHandler(pipelineFactory);
-
         }
     }
 
-    protected abstract void addProtocolHandlers(PipelineBuilder pipeline);
+    protected abstract void addProtocolHandlers(PipelineBuilder pipeline, Config config);
 
     public int getPort() {
         return port;

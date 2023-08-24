@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
@@ -86,8 +86,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    static boolean isLongFormat(ByteBuf buf, int flagIndex) {
-        return buf.getUnsignedByte(flagIndex) >> 4 >= 7;
+    static boolean isLongFormat(ByteBuf buf) {
+        return buf.getUnsignedByte(buf.readerIndex() + 8) == 0;
     }
 
     static void decodeBinaryLocation(ByteBuf buf, Position position) {
@@ -123,9 +123,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         List<Position> positions = new LinkedList<>();
 
-        buf.readByte(); // header
+        boolean longFormat = isLongFormat(buf);
 
-        boolean longFormat = isLongFormat(buf, buf.readerIndex());
+        buf.readByte(); // header
 
         String id = String.valueOf(Long.parseLong(ByteBufUtil.hexDump(buf.readSlice(5))));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
@@ -143,7 +143,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         boolean responseRequired = false;
 
-        while (buf.readableBytes() > 1) {
+        while (buf.readableBytes() >= 17) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -177,7 +177,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY_LEVEL, battery);
                 }
 
-                CellTower cellTower = CellTower.fromCidLac(buf.readUnsignedShort(), buf.readUnsignedShort());
+                CellTower cellTower = CellTower.fromCidLac(
+                        getConfig(), buf.readUnsignedShort(), buf.readUnsignedShort());
                 cellTower.setSignalStrength((int) buf.readUnsignedByte());
                 position.setNetwork(new Network(cellTower));
 
@@ -201,7 +202,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 int rssi = buf.readUnsignedByte();
 
                 if (cid != 0 && lac != 0) {
-                    CellTower cellTower = CellTower.fromCidLac(cid, lac);
+                    CellTower cellTower = CellTower.fromCidLac(getConfig(), cid, lac);
                     cellTower.setSignalStrength(rssi);
                     position.setNetwork(new Network(cellTower));
                 } else {
@@ -356,7 +357,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt(0));
         position.set(Position.KEY_STATUS, parser.nextBinInt(0));
 
-        CellTower cellTower = CellTower.fromCidLac(parser.nextInt(0), parser.nextInt(0));
+        CellTower cellTower = CellTower.fromCidLac(getConfig(), parser.nextInt(0), parser.nextInt(0));
         cellTower.setSignalStrength(parser.nextInt(0));
         position.setNetwork(new Network(cellTower));
 

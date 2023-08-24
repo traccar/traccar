@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -196,7 +196,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                     for (int j = 0; j < bits.length(); j++) {
                         if (bits.get(j)) {
 
-                            int value = 0;
+                            int value;
 
                             switch (j + 1) {
                                 case 1:
@@ -278,11 +278,11 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 42:
                                 case 43:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs485Fuel" + (j + 2 - 38), (value < 65500) ? value : null);
+                                    position.set("fuel" + (j + 2 - 38), (value < 65500) ? value : null);
                                     break;
                                 case 44:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("rs232Fuel", (value < 65500) ? value : null);
+                                    position.set(Position.KEY_FUEL_LEVEL, (value < 65500) ? value : null);
                                     break;
                                 case 45:
                                 case 46:
@@ -293,7 +293,17 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 51:
                                 case 52:
                                     value = buf.readByte();
-                                    position.set(Position.PREFIX_TEMP + (j + 2 - 45), (value != 0x80) ? value : null);
+                                    position.set(
+                                            Position.PREFIX_TEMP + (j + 2 - 45),
+                                            (value != (byte) 0x80) ? value : null);
+                                    break;
+                                case 78:
+                                case 79:
+                                case 80:
+                                case 81:
+                                case 82:
+                                case 83:
+                                    position.set("fuelTemp" + (j + 2 - 78), (int) buf.readByte());
                                     break;
                                 case 53:
                                     value = buf.readUnsignedShortLE();

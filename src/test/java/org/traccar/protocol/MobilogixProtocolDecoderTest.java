@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,7 +9,7 @@ public class MobilogixProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new MobilogixProtocolDecoder(null);
+        var decoder = inject(new MobilogixProtocolDecoder(null));
 
         verifyAttributes(decoder, text(
                 "[2021-08-20 19:27:14,T14,1,V1.3.5,201909000982,53,12.18"));

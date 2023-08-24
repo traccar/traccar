@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class CarTrackProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class CarTrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new CarTrackProtocolDecoder(null);
+        var decoder = inject(new CarTrackProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "$$020040????????&A0000"));

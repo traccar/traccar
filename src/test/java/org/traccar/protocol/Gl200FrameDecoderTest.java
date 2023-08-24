@@ -1,16 +1,16 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Gl200FrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Gl200FrameDecoder();
+        var decoder = inject(new Gl200FrameDecoder());
 
         assertEquals(
                 binary("2b4c474e00ff0026fe110b07020106563454040d054905000007e4031911213905083abd0d0a"),

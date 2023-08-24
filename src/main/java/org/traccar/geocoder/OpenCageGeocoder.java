@@ -16,8 +16,9 @@
  */
 package org.traccar.geocoder;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.Client;
 
 public class OpenCageGeocoder extends JsonGeocoder {
 
@@ -32,8 +33,9 @@ public class OpenCageGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public OpenCageGeocoder(String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(url, key, language), cacheSize, addressFormat);
+    public OpenCageGeocoder(
+            Client client, String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(url, key, language), cacheSize, addressFormat);
     }
 
     @Override

@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
@@ -107,7 +107,7 @@ public class S168ProtocolDecoder extends BaseProtocolDecoder {
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
             position.setNetwork(network);
         }
-        if (!position.getAttributes().containsKey(Position.KEY_SATELLITES)) {
+        if (!position.hasAttribute(Position.KEY_SATELLITES)) {
             getLastLocation(position, null);
         }
 

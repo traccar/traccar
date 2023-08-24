@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,7 +9,47 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Gl200TextProtocolDecoder(null);
+        var decoder = inject(new Gl200TextProtocolDecoder(null));
+
+        verifyNull(decoder, buffer(
+                "+RESP:GTFRI,8020040200,866314060109269,,,10,1,1,0.0,0,9.0,-71.596601,-33.524595,20230722145338,0730,0001,772A,052B253E,00,0.0,,,,,100,210100,,,,20230722145341,0F4C$"));
+
+        verifyAttributes(decoder, buffer(
+                "+RESP:GTCAN,F1040C,862599050497393,GV350M,0,0,FFFFFFFF,,1,,,,,,,,,,,,,,,,,,,,,,,0,,,1,0.0,70,2961.6,-78.691750,-0.951135,20230703191659,,,,,,20230703191659,5A4A$"));
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTBAA,F1040C,862599050497393,GV350M,FF,3,0,04,000A,780541256AE9,3065,0,0.0,213,2908.3,-78.691944,-0.951426,20230511173150,,,,,,20230511175001,0159$"),
+                "accessoryVoltage", 3.065);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTBID,C20105,866833040163013,GV350M,1,0,000A,B80EA11FF800,2934,0,0.0,0,1506.5,-99.192686,18.932709,20221026025339,0334,0020,0232,029D4E02,,20221026181026,9F1D$"),
+                "accessoryVoltage", 2.934);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTDTT,410502,864802030541621,,,,1,35,45637561747261636b0d0a434f4d422c302c39342e302c2d312e302c2c2c4844430d0a,20230421034626,EA2E$"),
+                Position.KEY_FUEL_LEVEL, 94.0);
+
+        verifyNull(decoder, buffer(
+                "+RESP:GTFRI,5E0100,862061048023666,,,12940,10,1,1,0.0,97,179.8,-90.366478,38.735379,20230616183231,0310,0410,6709,03ADF710,00,6223.7,,,,,110000,,,,202306161834$"));
+
+        verifyAttribute(decoder, buffer(
+                "+BUFF:GTERI,410502,864802030794634,,00000001,,10,1,1,0.0,0,3027.8,-78.706612,-0.955699,20230418170736,0740,0002,A08C,2AB72D,00,0.0,,,,100,110000,1,0099,20230418171004,8B98$"),
+                Position.KEY_FUEL_LEVEL, 153);
+
+        verifyPositions(decoder, false, buffer(
+                "+BUFF:GTFRI,2E0503,861106050005423,,,0,1,,,,,,,,,,,,0,0,,98,1,0,,,20200101000001,0083$"));
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTERI,271002,863457051562823,,00000002,,10,1,1,0.0,15,28.2,-58.695253,-34.625413,20230119193305,0722,0007,1168,16B3BB,00,0.0,,,,99,210100,2,1,28F8A149F69A3C25,1,0190,20230119193314,07C7$"),
+                Position.PREFIX_TEMP + 1, 25.0);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTDAR,F10406,865284049582228,,4,0,,,1,18.5,0,129.4,114.015430,22.537279,20210922004634,0460,0000,27BD,0DFC,,,,20210922004635,082B$"),
+                "warningType", 4);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTNMR,423033,355197370058831,,0,0,0,1,0,0.0,298,182.7,-79.257983,43.875152,20220627132020,,,,,15,0,74,20220627144928,03CF$"),
+                Position.KEY_BATTERY_LEVEL, 74);
 
         verifyPosition(decoder, buffer(
                 "+RESP:GTFRI,5E0100,861971050039361,,,,10,1,1,10.4,140,196.9,-80.709946,35.016525,20220302220944,0310,0260,1CE9,52A1,00,0.0,,,,,420000,,,,20220302220948,1B0B$"));

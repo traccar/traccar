@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,81 +15,99 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
 import org.traccar.api.BaseObjectResource;
-import org.traccar.config.Keys;
-import org.traccar.database.UsersManager;
+import org.traccar.config.Config;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.model.UserUtil;
 import org.traccar.model.ManagedUser;
+import org.traccar.model.Permission;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
-import javax.annotation.security.PermitAll;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import java.sql.SQLException;
+import jakarta.annotation.security.PermitAll;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Collection;
-import java.util.Date;
-import java.util.Set;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserResource extends BaseObjectResource<User> {
 
+    @Inject
+    private Config config;
+
     public UserResource() {
         super(User.class);
     }
 
     @GET
-    public Collection<User> get(@QueryParam("userId") long userId) throws SQLException {
-        UsersManager usersManager = Context.getUsersManager();
-        Set<Long> result;
-        if (Context.getPermissionsManager().getUserAdmin(getUserId())) {
-            if (userId != 0) {
-                result = usersManager.getUserItems(userId);
-            } else {
-                result = usersManager.getAllItems();
-            }
-        } else if (Context.getPermissionsManager().getUserManager(getUserId())) {
-            result = usersManager.getManagedItems(getUserId());
+    public Collection<User> get(@QueryParam("userId") long userId) throws StorageException {
+        if (userId > 0) {
+            permissionsService.checkUser(getUserId(), userId);
+            return storage.getObjects(baseClass, new Request(
+                    new Columns.All(),
+                    new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups()));
+        } else if (permissionsService.notAdmin(getUserId())) {
+            return storage.getObjects(baseClass, new Request(
+                    new Columns.All(),
+                    new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()));
         } else {
-            throw new SecurityException("Admin or manager access required");
+            return storage.getObjects(baseClass, new Request(new Columns.All()));
         }
-        return usersManager.getItems(result);
     }
 
     @Override
     @PermitAll
     @POST
     public Response add(User entity) throws StorageException {
-        if (!Context.getPermissionsManager().getUserAdmin(getUserId())) {
-            Context.getPermissionsManager().checkUserUpdate(getUserId(), new User(), entity);
-            if (Context.getPermissionsManager().getUserManager(getUserId())) {
-                Context.getPermissionsManager().checkUserLimit(getUserId());
-            } else {
-                Context.getPermissionsManager().checkRegistration(getUserId());
-                entity.setDeviceLimit(Context.getConfig().getInteger(Keys.USERS_DEFAULT_DEVICE_LIMIT));
-                int expirationDays = Context.getConfig().getInteger(Keys.USERS_DEFAULT_EXPIRATION_DAYS);
-                if (expirationDays > 0) {
-                    entity.setExpirationTime(
-                        new Date(System.currentTimeMillis() + (long) expirationDays * 24 * 3600 * 1000));
+        User currentUser = getUserId() > 0 ? permissionsService.getUser(getUserId()) : null;
+        if (currentUser == null || !currentUser.getAdministrator()) {
+            permissionsService.checkUserUpdate(getUserId(), new User(), entity);
+            if (currentUser != null && currentUser.getUserLimit() != 0) {
+                int userLimit = currentUser.getUserLimit();
+                if (userLimit > 0) {
+                    int userCount = storage.getObjects(baseClass, new Request(
+                            new Columns.All(),
+                            new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()))
+                            .size();
+                    if (userCount >= userLimit) {
+                        throw new SecurityException("Manager user limit reached");
+                    }
                 }
+            } else {
+                if (!permissionsService.getServer().getRegistration()) {
+                    throw new SecurityException("Registration disabled");
+                }
+                UserUtil.setUserDefaults(entity, config);
             }
         }
-        Context.getUsersManager().addItem(entity);
+
+        if (UserUtil.isEmpty(storage)) {
+            entity.setAdministrator(true);
+        }
+
+        entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
+        storage.updateObject(entity, new Request(
+                new Columns.Include("hashedPassword", "salt"),
+                new Condition.Equals("id", entity.getId())));
+
         LogAction.create(getUserId(), entity);
-        if (Context.getPermissionsManager().getUserManager(getUserId())) {
-            Context.getDataManager().linkObject(User.class, getUserId(), ManagedUser.class, entity.getId(), true);
+
+        if (currentUser != null && currentUser.getUserLimit() != 0) {
+            storage.addPermission(new Permission(User.class, getUserId(), ManagedUser.class, entity.getId()));
             LogAction.link(getUserId(), User.class, getUserId(), ManagedUser.class, entity.getId());
         }
-        Context.getUsersManager().refreshUserItems();
         return Response.ok(entity).build();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.traccar;
 
+import com.google.inject.Injector;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInboundHandler;
@@ -22,7 +23,9 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOutboundHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.timeout.IdleStateHandler;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.handler.AcknowledgementHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DefaultDataHandler;
@@ -30,9 +33,11 @@ import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
+import org.traccar.handler.GeofenceHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
+import org.traccar.handler.NetworkForwarderHandler;
 import org.traccar.handler.NetworkMessageHandler;
 import org.traccar.handler.OpenChannelHandler;
 import org.traccar.handler.RemoteAddressHandler;
@@ -43,10 +48,11 @@ import org.traccar.handler.events.AlertEventHandler;
 import org.traccar.handler.events.BehaviorEventHandler;
 import org.traccar.handler.events.CommandResultEventHandler;
 import org.traccar.handler.events.DriverEventHandler;
-import org.traccar.handler.events.FuelDropEventHandler;
+import org.traccar.handler.events.FuelEventHandler;
 import org.traccar.handler.events.GeofenceEventHandler;
 import org.traccar.handler.events.IgnitionEventHandler;
 import org.traccar.handler.events.MaintenanceEventHandler;
+import org.traccar.handler.events.MediaEventHandler;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 
@@ -54,16 +60,22 @@ import java.util.Map;
 
 public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
 
+    private final Injector injector;
     private final TrackerConnector connector;
+    private final Config config;
     private final String protocol;
-    private int timeout;
+    private final int timeout;
 
-    public BasePipelineFactory(TrackerConnector connector, String protocol) {
+    public BasePipelineFactory(TrackerConnector connector, Config config, String protocol) {
+        this.injector = Main.getInjector();
         this.connector = connector;
+        this.config = config;
         this.protocol = protocol;
-        timeout = Context.getConfig().getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
+        int timeout = config.getInteger(Keys.PROTOCOL_TIMEOUT.withPrefix(protocol));
         if (timeout == 0) {
-            timeout = Context.getConfig().getInteger(Keys.SERVER_TIMEOUT);
+            this.timeout = config.getInteger(Keys.SERVER_TIMEOUT);
+        } else {
+            this.timeout = timeout;
         }
     }
 
@@ -75,7 +87,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
     private void addHandlers(ChannelPipeline pipeline, Class<? extends ChannelHandler>... handlerClasses) {
         for (Class<? extends ChannelHandler> handlerClass : handlerClasses) {
             if (handlerClass != null) {
-                pipeline.addLast(Main.getInjector().getInstance(handlerClass));
+                pipeline.addLast(injector.getInstance(handlerClass));
             }
         }
     }
@@ -105,11 +117,22 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             pipeline.addLast(new IdleStateHandler(timeout, 0, 0));
         }
         pipeline.addLast(new OpenChannelHandler(connector));
+        if (config.hasKey(Keys.SERVER_FORWARD)) {
+            int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix(protocol));
+            var handler = new NetworkForwarderHandler(port);
+            injector.injectMembers(handler);
+            pipeline.addLast(handler);
+        }
         pipeline.addLast(new NetworkMessageHandler());
         pipeline.addLast(new StandardLoggingHandler(protocol));
+        if (!connector.isDatagram() && !config.getBoolean(Keys.SERVER_INSTANT_ACKNOWLEDGEMENT)) {
+            pipeline.addLast(new AcknowledgementHandler());
+        }
 
         addProtocolHandlers(handler -> {
-            if (!(handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder)) {
+            if (handler instanceof BaseProtocolDecoder || handler instanceof BaseProtocolEncoder) {
+                injector.injectMembers(handler);
+            } else {
                 if (handler instanceof ChannelInboundHandler) {
                     handler = new WrapperInboundHandler((ChannelInboundHandler) handler);
                 } else {
@@ -127,26 +150,27 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
                 DistanceHandler.class,
                 RemoteAddressHandler.class,
                 FilterHandler.class,
+                GeofenceHandler.class,
                 GeocoderHandler.class,
                 SpeedLimitHandler.class,
                 MotionHandler.class,
                 CopyAttributesHandler.class,
                 EngineHoursHandler.class,
                 ComputedAttributesHandler.class,
-                WebDataHandler.class,
+                PositionForwardingHandler.class,
                 DefaultDataHandler.class,
+                MediaEventHandler.class,
                 CommandResultEventHandler.class,
                 OverspeedEventHandler.class,
                 BehaviorEventHandler.class,
-                FuelDropEventHandler.class,
+                FuelEventHandler.class,
                 MotionEventHandler.class,
                 GeofenceEventHandler.class,
                 AlertEventHandler.class,
                 IgnitionEventHandler.class,
                 MaintenanceEventHandler.class,
-                DriverEventHandler.class);
-
-        pipeline.addLast(new MainEventHandler());
+                DriverEventHandler.class,
+                MainEventHandler.class);
     }
 
 }

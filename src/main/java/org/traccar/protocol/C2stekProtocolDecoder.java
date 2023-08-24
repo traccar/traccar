@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
@@ -49,10 +49,12 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+)#")                // altitude
             .number("(d+)#")                     // battery
             .number("d+#")                       // geo area alarm
-            .number("(x+)#")                     // alarm
-            .number("([01])?")                   // armed
+            .number("(x+)")                      // alarm
+            .groupBegin()
+            .number("#([01])?")                  // armed
             .number("([01])")                    // door
             .number("([01])#")                   // ignition
+            .groupEnd("?")
             .any()
             .text("$AP")
             .compile();
@@ -114,8 +116,10 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             position.set(Position.KEY_ARMED, parser.nextInt() > 0);
         }
-        position.set(Position.KEY_DOOR, parser.nextInt() > 0);
-        position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+        if (parser.hasNext(2)) {
+            position.set(Position.KEY_DOOR, parser.nextInt() > 0);
+            position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+        }
 
         return position;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,22 +18,27 @@ package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
 import org.traccar.BaseDataHandler;
-import org.traccar.database.IdentityManager;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+
+@Singleton
 @ChannelHandler.Sharable
 public class EngineHoursHandler extends BaseDataHandler {
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
 
-    public EngineHoursHandler(IdentityManager identityManager) {
-        this.identityManager = identityManager;
+    @Inject
+    public EngineHoursHandler(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     @Override
     protected Position handlePosition(Position position) {
-        if (!position.getAttributes().containsKey(Position.KEY_HOURS)) {
-            Position last = identityManager.getLastPosition(position.getDeviceId());
+        if (!position.hasAttribute(Position.KEY_HOURS)) {
+            Position last = cacheManager.getPosition(position.getDeviceId());
             if (last != null) {
                 long hours = last.getLong(Position.KEY_HOURS);
                 if (last.getBoolean(Position.KEY_IGNITION) && position.getBoolean(Position.KEY_IGNITION)) {

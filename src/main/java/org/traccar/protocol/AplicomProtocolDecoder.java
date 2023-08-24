@@ -21,8 +21,7 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
@@ -303,7 +302,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             decodeEventData(position, buf, event);
         }
 
-        if (Context.getConfig().getBoolean(Keys.PROTOCOL_CAN.withPrefix(getProtocolName()))
+        if (getConfig().getBoolean(Keys.PROTOCOL_CAN.withPrefix(getProtocolName()))
                 && buf.isReadable() && (selector & 0x1000) != 0 && event == EVENT_DATA) {
             decodeCanData(buf, position);
         }

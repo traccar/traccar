@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,13 +9,16 @@ public class TopinProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TopinProtocolDecoder(null);
+        var decoder = inject(new TopinProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "787801080D0A"));
 
         verifyNull(decoder, binary(
                 "78780d0103593390754169634d0d0a"));
+
+        verifyNotNull(decoder, binary(
+                "787803181604130318491475905bd30e25001e10bbf7635d14759006e626560401cc00000028660090df425f000028660090df576c00002866009487566700002866009ca15667000d0a"));
 
         verifyAttribute(decoder, binary(
                 "7878006921120412565802010601071e4a9764071e4a9864010d0a"),

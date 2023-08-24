@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -48,14 +48,15 @@ public class EnvotechProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd),")                    // battery
             .number("(xx)")                      // inputs
             .number("(xx),")                     // outputs
-            .number("(xxx)?,")                   // fuel
+            .number("(xxx)?")                    // fuel
+            .number("(xxx)?,")                   // weight
             .number("(x{8}),")                   // status
             .expression("[^']*'")
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
             .number("(d)")                       // fix
-            .number("(dd)(dd)(d+)([NS])")        // latitude
-            .number("(ddd)(dd)(d+)([EW])")       // longitude
+            .number("(d+)(d{5})([NS])")          // latitude
+            .number("(d+)(d{5})([EW])")          // longitude
             .number("(ddd)")                     // speed
             .number("(ddd)")                     // course
             .any()
@@ -72,7 +73,18 @@ public class EnvotechProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
 
-        position.set(Position.KEY_EVENT, parser.nextHexInt());
+        int event = parser.nextHexInt();
+        switch (event) {
+            case 0x60:
+                position.set(Position.KEY_ALARM, Position.ALARM_LOCK);
+                break;
+            case 0x61:
+                position.set(Position.KEY_ALARM, Position.ALARM_UNLOCK);
+                break;
+            default:
+                break;
+        }
+        position.set(Position.KEY_EVENT, event);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -88,12 +100,13 @@ public class EnvotechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INPUT, parser.nextHexInt());
         position.set(Position.PREFIX_OUT, parser.nextHexInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
-        position.set(Position.KEY_STATUS, parser.nextHexInt());
+        position.set("weight", parser.nextHexInt());
+        position.set(Position.KEY_STATUS, parser.nextHexLong());
 
         position.setFixTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
         position.setValid(parser.nextInt() > 0);
-        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
-        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
+        position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG_HEM));
+        position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_DEG_HEM));
         position.setSpeed(parser.nextInt());
         position.setCourse(parser.nextInt());
 

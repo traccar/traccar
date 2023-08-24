@@ -1,24 +1,25 @@
 package org.traccar.geolocation;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.traccar.BaseTest;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class GeolocationProviderTest extends BaseTest {
 
-    @Ignore
-    @Test
-    public void test() throws Exception {
-        testLocationProvider();
-    }
+    private final Client client = ClientBuilder.newClient();
 
-    public void testLocationProvider() throws Exception {
-        MozillaGeolocationProvider provider = new MozillaGeolocationProvider(null);
+    @Disabled
+    @Test
+    public void testMozilla() throws Exception {
+        MozillaGeolocationProvider provider = new MozillaGeolocationProvider(client, null);
 
         Network network = new Network(CellTower.from(208, 1, 2, 1234567));
 

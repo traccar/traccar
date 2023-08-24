@@ -15,9 +15,10 @@
  */
 package org.traccar.geocoder;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.ws.rs.client.Client;
 
 public class MapboxGeocoder extends JsonGeocoder {
 
@@ -25,8 +26,8 @@ public class MapboxGeocoder extends JsonGeocoder {
         return "https://api.mapbox.com/geocoding/v5/mapbox.places/%2$f,%1$f.json?access_token=" + key;
     }
 
-    public MapboxGeocoder(String key, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(key), cacheSize, addressFormat);
+    public MapboxGeocoder(Client client, String key, int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(key), cacheSize, addressFormat);
     }
 
     @Override

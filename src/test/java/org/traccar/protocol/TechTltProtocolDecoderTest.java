@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class TechTltProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class TechTltProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TechTltProtocolDecoder(null);
+        var decoder = inject(new TechTltProtocolDecoder(null));
 
         verifyPosition(decoder, text(
                 "002422269*POS=Y,16:21:20,25/11/09,3809.8063N,01444.7438E,4.17,117.23,0.4,09,40076,56341\r\n"),

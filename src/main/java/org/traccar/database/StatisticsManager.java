@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +19,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.api.security.ServiceAccountUser;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Statistics;
+import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.Form;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,6 +42,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Singleton
 public class StatisticsManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatisticsManager.class);
@@ -44,7 +50,7 @@ public class StatisticsManager {
     private static final int SPLIT_MODE = Calendar.DAY_OF_MONTH;
 
     private final Config config;
-    private final DataManager dataManager;
+    private final Storage storage;
     private final Client client;
     private final ObjectMapper objectMapper;
 
@@ -52,6 +58,7 @@ public class StatisticsManager {
 
     private final Set<Long> users = new HashSet<>();
     private final Map<Long, String> deviceProtocols = new HashMap<>();
+    private final Map<Long, Integer> deviceMessages = new HashMap<>();
 
     private int requests;
     private int messagesReceived;
@@ -62,9 +69,9 @@ public class StatisticsManager {
     private int geolocationRequests;
 
     @Inject
-    public StatisticsManager(Config config, DataManager dataManager, Client client, ObjectMapper objectMapper) {
+    public StatisticsManager(Config config, Storage storage, Client client, ObjectMapper objectMapper) {
         this.config = config;
-        this.dataManager = dataManager;
+        this.storage = storage;
         this.client = client;
         this.objectMapper = objectMapper;
     }
@@ -93,8 +100,11 @@ public class StatisticsManager {
                     statistics.setProtocols(protocols);
                 }
 
+                statistics.set("modern", config.getString(Keys.WEB_PATH).contains("modern"));
+
                 users.clear();
                 deviceProtocols.clear();
+                deviceMessages.clear();
                 requests = 0;
                 messagesReceived = 0;
                 messagesStored = 0;
@@ -105,7 +115,7 @@ public class StatisticsManager {
             }
 
             try {
-                dataManager.addObject(statistics);
+                storage.addObject(statistics, new Request(new Columns.Exclude("id")));
             } catch (StorageException e) {
                 LOGGER.warn("Error saving statistics", e);
             }
@@ -133,6 +143,13 @@ public class StatisticsManager {
                         LOGGER.warn("Failed to serialize protocols", e);
                     }
                 }
+                if (!statistics.getAttributes().isEmpty()) {
+                    try {
+                        form.param("attributes", objectMapper.writeValueAsString(statistics.getAttributes()));
+                    } catch (JsonProcessingException e) {
+                        LOGGER.warn("Failed to serialize attributes", e);
+                    }
+                }
 
                 client.target(url).request().async().post(Entity.form(form));
             }
@@ -142,7 +159,7 @@ public class StatisticsManager {
     public synchronized void registerRequest(long userId) {
         checkSplit();
         requests += 1;
-        if (userId != 0) {
+        if (userId != 0 && userId != ServiceAccountUser.ID) {
             users.add(userId);
         }
     }
@@ -157,7 +174,12 @@ public class StatisticsManager {
         messagesStored += 1;
         if (deviceId != 0) {
             deviceProtocols.put(deviceId, protocol);
+            deviceMessages.merge(deviceId, 1, Integer::sum);
         }
+    }
+
+    public synchronized int messageStoredCount(long deviceId) {
+        return deviceMessages.getOrDefault(deviceId, 0);
     }
 
     public synchronized void registerMail() {

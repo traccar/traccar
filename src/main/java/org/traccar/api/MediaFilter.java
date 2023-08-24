@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,35 +16,50 @@
  */
 package org.traccar.api;
 
-import java.io.IOException;
-import java.sql.SQLException;
-
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.traccar.Context;
-import org.traccar.Main;
+import com.google.inject.Provider;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.api.security.PermissionsService;
 import org.traccar.database.StatisticsManager;
 import org.traccar.helper.Log;
 import org.traccar.model.Device;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+
+@Singleton
 public class MediaFilter implements Filter {
 
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    private final Storage storage;
+    private final StatisticsManager statisticsManager;
+    private final Provider<PermissionsService> permissionsServiceProvider;
+
+    @Inject
+    public MediaFilter(
+            Storage storage, StatisticsManager statisticsManager,
+            Provider<PermissionsService> permissionsServiceProvider) {
+        this.storage = storage;
+        this.statisticsManager = statisticsManager;
+        this.permissionsServiceProvider = permissionsServiceProvider;
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
+
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         try {
             HttpSession session = ((HttpServletRequest) request).getSession(false);
@@ -52,8 +67,7 @@ public class MediaFilter implements Filter {
             if (session != null) {
                 userId = (Long) session.getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
-                    Context.getPermissionsManager().checkUserEnabled(userId);
-                    Main.getInjector().getInstance(StatisticsManager.class).registerRequest(userId);
+                    statisticsManager.registerRequest(userId);
                 }
             }
             if (userId == null) {
@@ -64,26 +78,20 @@ public class MediaFilter implements Filter {
             String path = ((HttpServletRequest) request).getPathInfo();
             String[] parts = path != null ? path.split("/") : null;
             if (parts != null && parts.length >= 2) {
-                Device device = Context.getDeviceManager().getByUniqueId(parts[1]);
+                Device device = storage.getObject(Device.class, new Request(
+                        new Columns.All(), new Condition.Equals("uniqueId", parts[1])));
                 if (device != null) {
-                    Context.getPermissionsManager().checkDevice(userId, device.getId());
+                    permissionsServiceProvider.get().checkPermission(Device.class, userId, device.getId());
                     chain.doFilter(request, response);
                     return;
                 }
             }
 
             httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
-        } catch (SecurityException e) {
+        } catch (SecurityException | StorageException e) {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
             httpResponse.getWriter().println(Log.exceptionStack(e));
-        } catch (SQLException e) {
-            httpResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            httpResponse.getWriter().println(Log.exceptionStack(e));
         }
-    }
-
-    @Override
-    public void destroy() {
     }
 
 }

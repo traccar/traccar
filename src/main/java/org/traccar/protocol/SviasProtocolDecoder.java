@@ -24,7 +24,7 @@ import org.traccar.helper.PatternBuilder;
 
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.helper.Parser;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;

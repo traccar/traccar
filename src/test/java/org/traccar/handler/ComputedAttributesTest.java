@@ -1,20 +1,20 @@
 package org.traccar.handler;
 
-import java.util.Date;
-
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.config.Config;
 import org.traccar.model.Attribute;
 import org.traccar.model.Position;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ComputedAttributesTest {
 
     @Test
     public void testComputedAttributes() {
 
-        ComputedAttributesHandler handler = new ComputedAttributesHandler(new Config(), null, null);
+        ComputedAttributesHandler handler = new ComputedAttributesHandler(new Config(), null);
 
         Date date = new Date();
         Position position = new Position();
@@ -41,7 +41,7 @@ public class ComputedAttributesTest {
         attribute.setExpression("(bitFlag & 4) != 0");
         assertEquals(true, handler.computeAttribute(attribute, position));
 
-        attribute.setExpression("if (event == 42) \"lowBattery\"");
+        attribute.setExpression("event == 42 ? \"lowBattery\" : null");
         assertEquals("lowBattery", handler.computeAttribute(attribute, position));
 
         attribute.setExpression("speed > 5 && valid");

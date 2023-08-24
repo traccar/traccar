@@ -1,7 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import urllib
-import httplib
+import http.client as httplib
 import time
 import datetime
 
@@ -25,7 +25,7 @@ points = [
 
 def send(conn, time, lat, lon, speed):
     params = (('id', id), ('timestamp', int(time)), ('lat', lat), ('lon', lon), ('speed', speed))
-    conn.request('POST', '?' + urllib.urlencode(params))
+    conn.request('POST', '?' + urllib.parse.urlencode(params))
     conn.getresponse().read()
 
 conn = httplib.HTTPConnection(server)

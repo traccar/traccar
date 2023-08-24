@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class Gps056ProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class Gps056ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Gps056ProtocolDecoder(null);
+        var decoder = inject(new Gps056ProtocolDecoder(null));
 
         verifyNull(decoder, buffer(
                 "$$25LOGN_118624620337829462.1#"));

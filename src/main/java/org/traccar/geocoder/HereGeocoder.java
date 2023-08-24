@@ -15,7 +15,8 @@
  */
 package org.traccar.geocoder;
 
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.Client;
 
 public class HereGeocoder extends JsonGeocoder {
 
@@ -35,8 +36,9 @@ public class HereGeocoder extends JsonGeocoder {
     }
 
     public HereGeocoder(
-            String url, String id, String key, String language, int cacheSize, AddressFormat addressFormat) {
-        super(formatUrl(url, id, key, language), cacheSize, addressFormat);
+            Client client, String url, String id, String key, String language,
+            int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(url, id, key, language), cacheSize, addressFormat);
     }
 
     @Override

@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -26,7 +26,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -192,7 +191,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         }
 
-        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
+        position.setSpeed(convertSpeed(parser.nextDouble(0), "mph"));
         position.setCourse(parser.nextDouble(0));
 
         if (parser.hasNext(2)) {
