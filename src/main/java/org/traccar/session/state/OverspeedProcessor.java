@@ -26,13 +26,14 @@ public final class OverspeedProcessor {
     }
 
     public static void updateState(
-            OverspeedState state, Position position, double speedLimit, long minimalDuration, long geofenceId) {
+            OverspeedState state, Position position,
+            double speedLimit, double multiplier, long minimalDuration, long geofenceId) {
 
         state.setEvent(null);
 
         boolean oldState = state.getOverspeedState();
         if (oldState) {
-            boolean newState = position.getSpeed() > speedLimit;
+            boolean newState = position.getSpeed() > speedLimit * multiplier;
             if (newState) {
                 checkEvent(state, position, speedLimit, minimalDuration);
             } else {
@@ -40,7 +41,7 @@ public final class OverspeedProcessor {
                 state.setOverspeedTime(null);
                 state.setOverspeedGeofenceId(0);
             }
-        } else if (position != null && position.getSpeed() > speedLimit) {
+        } else if (position != null && position.getSpeed() > speedLimit * multiplier) {
             state.setOverspeedState(true);
             state.setOverspeedTime(position.getFixTime());
             state.setOverspeedGeofenceId(geofenceId);

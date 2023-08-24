@@ -341,6 +341,15 @@ public final class Keys {
             0.0);
 
     /**
+     * Speed limit threshold multiplier. For example, if the speed limit is 100, but we only want to generate an event
+     * if the speed is higher than 105, this parameter can be set to 1.05. Default multiplier is 1.0.
+     */
+    public static final ConfigKey<Double> EVENT_OVERSPEED_THRESHOLD_MULTIPLIER = new DoubleConfigKey(
+            "event.overspeed.thresholdMultiplier",
+            List.of(KeyType.CONFIG),
+            1.0);
+
+    /**
      * Minimal over speed duration to trigger the event. Value in seconds.
      */
     public static final ConfigKey<Long> EVENT_OVERSPEED_MINIMAL_DURATION = new LongConfigKey(

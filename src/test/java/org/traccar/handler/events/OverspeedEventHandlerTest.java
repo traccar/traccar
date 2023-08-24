@@ -35,14 +35,14 @@ public class OverspeedEventHandlerTest  extends BaseTest {
     private void testOverspeedWithPosition(long geofenceId) throws ParseException {
         OverspeedState state = new OverspeedState();
 
-        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:00", 50), 40, 15000, geofenceId);
+        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:00", 50), 40, 1, 15000, geofenceId);
         assertNull(state.getEvent());
         verifyState(state, true, geofenceId);
 
-        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:10", 55), 40, 15000, geofenceId);
+        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:10", 55), 40, 1, 15000, geofenceId);
         assertNull(state.getEvent());
 
-        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:20", 55), 40, 15000, geofenceId);
+        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:20", 55), 40, 1, 15000, geofenceId);
         assertNotNull(state.getEvent());
         assertEquals(Event.TYPE_DEVICE_OVERSPEED, state.getEvent().getType());
         assertEquals(55, state.getEvent().getDouble("speed"), 0.1);
@@ -50,11 +50,11 @@ public class OverspeedEventHandlerTest  extends BaseTest {
         assertEquals(geofenceId, state.getEvent().getGeofenceId());
         verifyState(state, true, 0);
 
-        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:30", 55), 40, 15000, geofenceId);
+        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:30", 55), 40, 1, 15000, geofenceId);
         assertNull(state.getEvent());
         verifyState(state, true, 0);
 
-        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:30", 30), 40, 15000, geofenceId);
+        OverspeedProcessor.updateState(state, position("2017-01-01 00:00:30", 30), 40, 1, 15000, geofenceId);
         assertNull(state.getEvent());
         verifyState(state, false, 0);
     }
