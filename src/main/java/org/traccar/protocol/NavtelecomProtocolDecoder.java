@@ -208,6 +208,19 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 3:
                                     position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
                                     break;
+                                case 4:
+                                    value = buf.readUnsignedByte();
+                                    position.set(Position.KEY_ALARM, BitUtil.check(value, 2));
+                                    int guardMode = BitUtil.between(value, 3, 4);
+                                    position.set(
+                                            Position.KEY_ARMED,
+                                            (0 < guardMode) && (guardMode < 3));
+                                    break;
+
+                                case 5:
+                                    value = buf.readUnsignedByte();
+                                    position.set(Position.KEY_ROAMING, BitUtil.check(value, 6));
+                                    break;
                                 case 8:
                                     value = buf.readUnsignedByte();
                                     position.setValid(BitUtil.check(value, 1));
@@ -269,7 +282,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     position.set("freq" + (j + 2 - 35), buf.readUnsignedShortLE());
                                     break;
                                 case 37:
-                                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() / 60);
+                                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 1000);
                                     break;
                                 case 38:
                                 case 39:
@@ -278,11 +291,15 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 42:
                                 case 43:
                                     value = buf.readUnsignedShortLE();
-                                    position.set("fuel" + (j + 2 - 38), (value < 65500) ? value : null);
+                                    if (value < 65500) {
+                                        position.set("fuel" + (j + 2 - 38), value);
+                                    }
                                     break;
                                 case 44:
                                     value = buf.readUnsignedShortLE();
-                                    position.set(Position.KEY_FUEL_LEVEL, (value < 65500) ? value : null);
+                                    if (value < 65500) {
+                                        position.set(Position.KEY_FUEL_LEVEL, value);
+                                    }
                                     break;
                                 case 45:
                                 case 46:
@@ -293,29 +310,18 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 51:
                                 case 52:
                                     value = buf.readByte();
-                                    position.set(
-                                            Position.PREFIX_TEMP + (j + 2 - 45),
-                                            (value != (byte) 0x80) ? value : null);
-                                    break;
-                                case 78:
-                                case 79:
-                                case 80:
-                                case 81:
-                                case 82:
-                                case 83:
-                                    position.set("fuelTemp" + (j + 2 - 78), (int) buf.readByte());
+                                    if (value != (byte) 0x80) {
+                                        position.set(Position.PREFIX_TEMP + (j + 2 - 45), value);
+                                    }
                                     break;
                                 case 53:
                                     value = buf.readUnsignedShortLE();
-                                    if (value == 0x7FFF) {
-                                        position.set("fuelLevel", (Boolean) null);
-                                        position.set(Position.KEY_FUEL_LEVEL, (Boolean) null);
-                                    } else if (BitUtil.check(value, 7)) {
-                                        position.set("fuelLevel", BitUtil.to(value, 6));
-                                        position.set(Position.KEY_FUEL_LEVEL, (Boolean) null);
-                                    } else {
-                                        position.set("fuelLevel", (Boolean) null);
-                                        position.set(Position.KEY_FUEL_LEVEL, BitUtil.to(value, 6) / 10);
+                                    if (value != 0x7FFF) {
+                                        if (BitUtil.check(value, 7)) {
+                                            position.set("fuelLevel", BitUtil.to(value, 6));
+                                        } else {
+                                            position.set(Position.KEY_FUEL_LEVEL, BitUtil.to(value, 6) / 10);
+                                        }
                                     }
                                     break;
                                 case 54:
@@ -323,11 +329,15 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 55:
                                     value = buf.readUnsignedShortLE();
-                                    position.set(Position.KEY_RPM, (value != 0xFFFF) ? value : null);
+                                    if (value != 0xFFFF) {
+                                        position.set(Position.KEY_RPM, value);
+                                    }
                                     break;
                                 case 56:
                                     value = buf.readByte();
-                                    position.set(Position.KEY_COOLANT_TEMP, (value != 0x80) ? value : null);
+                                    if (value != (byte) 0x80) {
+                                        position.set(Position.KEY_COOLANT_TEMP, value);
+                                    }
                                     break;
                                 case 57:
                                     position.set(Position.KEY_OBD_ODOMETER, buf.readFloatLE());
@@ -338,47 +348,140 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 61:
                                 case 62:
                                     value = buf.readUnsignedShortLE();
-                                    position.set(
-                                            Position.KEY_AXLE_WEIGHT + (j + 2 - 58), (value != 65535) ? value : null);
+                                    if (value != 0xFFFF) {
+                                        position.set(Position.KEY_AXLE_WEIGHT + (j + 2 - 58), value);
+                                    }
                                     break;
                                 case 63:
                                     value = buf.readUnsignedByte();
-                                    position.set("obdAccelPos", (value != 0xFF) ? value : null);
+                                    if (value != 0xFF) {
+                                        position.set("acceleratorPosition", value);
+                                    }
                                     break;
                                 case 64:
                                     value = buf.readUnsignedByte();
-                                    position.set("obdBrakePos", (value != 0xFF) ? value : null);
+                                    if (value != 0xFF) {
+                                        position.set("brakePosition", value);
+                                    }
                                     break;
                                 case 65:
                                     value = buf.readUnsignedByte();
-                                    position.set(Position.KEY_ENGINE_LOAD, (value != 0xFF) ? value : null);
+                                    if (value != 0xFF) {
+                                        position.set(Position.KEY_ENGINE_LOAD, value);
+                                    }
                                     break;
                                 case 66:
                                     value = buf.readUnsignedShortLE();
-                                    if (value == 0x7FFF) {
-                                        position.set("obdAdBlueLevel", (Boolean) null);
-                                        position.set("obdAdBlue", (Boolean) null);
-                                    } else if (BitUtil.check(value, 7)) {
-                                        position.set("obdAdBlueLevel", BitUtil.to(value, 6));
-                                        position.set("obdAdBlue", (Boolean) null);
-                                    } else {
-                                        position.set("obdAdBlueLevel", (Boolean) null);
-                                        position.set("obdAdBlue", BitUtil.to(value, 6) / 10);
+                                    if (value != 0x7FFF) {
+                                        if (BitUtil.check(value, 7)) {
+                                            position.set("obdAdBlueLevel", BitUtil.to(value, 6));
+                                        } else {
+                                            position.set("obdAdBlue", BitUtil.to(value, 6) / 10);
+                                        }
                                     }
                                     break;
                                 case 67:
-                                    position.set("obdHours", buf.readUnsignedIntLE() / 60);
+                                    position.set("obdHours", buf.readUnsignedIntLE() * 1000);
                                     break;
                                 case 68:
                                     value = buf.readUnsignedShortLE();
-                                    position.set(
-                                            Position.KEY_ODOMETER_SERVICE, (value != 0xFFFF) ? (value * 5000) : null);
+                                    if (value != 0xFFFF) {
+                                        position.set(Position.KEY_ODOMETER_SERVICE, (value * 5000));
+                                    }
                                     break;
                                 case 69:
                                     value = buf.readUnsignedByte();
-                                    position.set(
-                                            Position.KEY_OBD_SPEED,
-                                            (value != 0xFF) ? UnitsConverter.knotsFromKph(value) : null);
+                                    if (value != 0xFF) {
+                                        position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(value));
+                                    }
+                                    break;
+                                case 78:
+                                case 79:
+                                case 80:
+                                case 81:
+                                case 82:
+                                case 83:
+                                    position.set("fuelTemp" + (j + 2 - 78), (int) buf.readByte());
+                                    break;
+                                case 163:
+                                case 164:
+                                case 165:
+                                case 166:
+                                    value = buf.readShortLE();
+                                    if (value != (short) 0x8000) {
+                                        position.set(
+                                                Position.PREFIX_TEMP + "HighPrecision" + (j + 2 - 163),
+                                                value * 0.05);
+                                    }
+                                    break;
+                                case 167:
+                                case 168:
+                                case 169:
+                                case 170:
+                                    value = buf.readUnsignedByte();
+                                    if (value != 0xFF) {
+                                        position.set("humidity" + (j + 2 - 167), value * 0.5);
+                                    }
+                                    break;
+                                case 206:
+                                    position.set("diagnostic", buf.readUnsignedIntLE());
+                                    break;
+                                case 207:
+                                case 208:
+                                case 209:
+                                case 210:
+                                case 211:
+                                case 212:
+                                case 213:
+                                case 214:
+                                case 215:
+                                case 216:
+                                case 217:
+                                case 218:
+                                case 219:
+                                case 220:
+                                case 221:
+                                case 222:
+                                    position.set("user1Byte" + (j + 2 - 207), buf.readUnsignedByte());
+                                    break;
+                                case 223:
+                                case 224:
+                                case 225:
+                                case 226:
+                                case 227:
+                                case 228:
+                                case 229:
+                                case 230:
+                                case 231:
+                                case 232:
+                                case 233:
+                                case 234:
+                                case 235:
+                                case 236:
+                                case 237:
+                                    position.set("user2Byte" + (j + 2 - 223), buf.readUnsignedShortLE());
+                                    break;
+                                case 238:
+                                case 239:
+                                case 240:
+                                case 241:
+                                case 242:
+                                case 243:
+                                case 244:
+                                case 245:
+                                case 246:
+                                case 247:
+                                case 248:
+                                case 249:
+                                case 250:
+                                case 251:
+                                case 252:
+                                    position.set("user4Byte" + (j + 2 - 238), buf.readUnsignedIntLE());
+                                    break;
+                                case 253:
+                                case 254:
+                                case 255:
+                                    position.set("user8Byte" + (j + 2 - 253), buf.readLongLE());
                                     break;
                                 default:
                                     buf.skipBytes(getItemLength(j + 1));
