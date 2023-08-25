@@ -210,14 +210,16 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 4:
                                     value = buf.readUnsignedByte();
-                                    position.set(Position.KEY_ALARM, BitUtil.check(value, 2));
+                                    position.set(
+                                            Position.KEY_ALARM,
+                                            BitUtil.check(value, 2) ? Position.ALARM_GENERAL : null);
                                     int guardMode = BitUtil.between(value, 3, 4);
                                     position.set(Position.KEY_ARMED, (0 < guardMode) && (guardMode < 3));
                                     break;
 
                                 case 5:
                                     value = buf.readUnsignedByte();
-                                    position.set(Position.KEY_ROAMING, BitUtil.check(value, 6));
+                                    position.set(Position.KEY_ROAMING, BitUtil.check(value, 6) ? true : null);
                                     break;
                                 case 8:
                                     value = buf.readUnsignedByte();
@@ -293,7 +295,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 44:
                                     value = buf.readUnsignedShortLE();
-                                    position.set(Position.KEY_FUEL_LEVEL, (value < 65500) ? value : null);
+                                    position.set("fuel", (value < 65500) ? value : null);
                                     break;
                                 case 45:
                                 case 46:
@@ -311,9 +313,9 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     value = buf.readUnsignedShortLE();
                                     if (value != 0x7FFF) {
                                         if (BitUtil.check(value, 7)) {
-                                            position.set("fuelLevel", BitUtil.to(value, 6));
+                                            position.set("obdFuelLevel", BitUtil.to(value, 6));
                                         } else {
-                                            position.set(Position.KEY_FUEL_LEVEL, BitUtil.to(value, 6) / 10);
+                                            position.set("obdFuel", BitUtil.to(value, 6) / 10);
                                         }
                                     }
                                     break;
@@ -337,8 +339,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 61:
                                 case 62:
                                     value = buf.readUnsignedShortLE();
-                                    position.set(
-                                            Position.KEY_AXLE_WEIGHT + (j + 2 - 58), (value != 0xFFFF) ? value : null);
+                                    position.set("axleWeight" + (j + 2 - 58), (value != 0xFFFF) ? value : null);
                                     break;
                                 case 63:
                                     value = buf.readUnsignedByte();
@@ -407,20 +408,16 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 default:
                                     if ((207 <= j) && (j <= 222)) {
                                         position.set("user1Byte" + (j + 2 - 207), buf.readUnsignedByte());
-                                        break;
                                     } else if ((223 <= j) && (j <= 237)) {
                                         position.set("user2Byte" + (j + 2 - 223), buf.readUnsignedShortLE());
-                                        break;
                                     } else if ((238 <= j) && (j <= 252)) {
                                         position.set("user4Byte" + (j + 2 - 238), buf.readUnsignedIntLE());
-                                        break;
                                     } else if ((253 <= j) && (j <= 255)) {
                                         position.set("user8Byte" + (j + 2 - 253), buf.readLongLE());
-                                        break;
                                     } else {
                                         buf.skipBytes(getItemLength(j + 1));
-                                        break;
                                     }
+                                    break;
                             }
                         }
                     }
