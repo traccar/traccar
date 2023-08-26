@@ -57,7 +57,7 @@ public class OverrideFilter implements Filter {
         byte[] bytes = wrappedResponse.getCapture();
         if (bytes != null) {
             if (wrappedResponse.getContentType() != null && wrappedResponse.getContentType().contains("text/html")
-                    || ((HttpServletRequest) request).getPathInfo().endsWith("manifest.json")) {
+                    || ((HttpServletRequest) request).getPathInfo().endsWith("manifest.webmanifest")) {
 
                 Server server;
                 try {

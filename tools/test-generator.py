@@ -8,7 +8,7 @@ import time
 import random
 
 id = '123456789012345'
-server = 'localhost:5055'
+server = '49.13.29.182:5055'
 period = 1
 step = 0.001
 device_speed = 40
