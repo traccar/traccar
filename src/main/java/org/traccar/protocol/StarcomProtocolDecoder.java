@@ -110,8 +110,8 @@ public class StarcomProtocolDecoder extends BaseProtocolDecoder {
                 case "extra1":
                 case "extra2":
                 case "extra3":
-                    position.set(key, value);
                 default:
+                    position.set(key, value);
                     break;
             }
         }

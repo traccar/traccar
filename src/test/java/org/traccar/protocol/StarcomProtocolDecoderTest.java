@@ -11,6 +11,9 @@ public class StarcomProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new StarcomProtocolDecoder(null));
 
         verifyPosition(decoder, text(
+                "|unit=579978,unittype=5,address=196.190.61.110,kind=1,pending=0,mileage=127268.864,odometer=339863,logic_state=1,reason=20,eventid=1,response=0,longitude=40.86503,latitude=9.06824,altitude=1809,gps_valid=1,gps_connected=1,satellites=7,velocity=23,heading=130,emergency=0,driver=0,ignition=1,door=1,arm=0,disarm=0,extra1=0,extra2=0,extra3=0,siren=0,lock=0,immobilizer=0,unlock=0,fuel=0,rpm=0,modemsignal=0,main_voltage=14.11,backup_voltage=100.00,analog1=3.38,analog2=0.00,analog3=0.00,datetime_utc=2023/08/24 14:56:29,datetime_actual=2023/08/24 14:56:23,network=TCPIP 6600|\r\n"));
+
+        verifyPosition(decoder, text(
                 "|unit=416307,unittype=5,address=186.167.243.28,kind=14,software_version=14.02.18,hardware_type=17,gps_type=6,longitude=-67.85891,latitude=10.21988,datetime_actual=2019/05/07 21:59:38,network=TCPIP.1|\r\n"));
 
         verifyAttributes(decoder, text(
