@@ -15,6 +15,10 @@
  */
 package org.traccar.api.resource;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseObjectResource;
 import org.traccar.config.Config;
 import org.traccar.helper.LogAction;
@@ -46,6 +50,9 @@ public class UserResource extends BaseObjectResource<User> {
 
     @Inject
     private Config config;
+
+    @Context
+    private HttpServletRequest request;
 
     public UserResource() {
         super(User.class);
@@ -109,6 +116,14 @@ public class UserResource extends BaseObjectResource<User> {
             LogAction.link(getUserId(), User.class, getUserId(), ManagedUser.class, entity.getId());
         }
         return Response.ok(entity).build();
+    }
+
+    @Path("{id}")
+    @DELETE
+    public Response remove(@PathParam("id") long id) throws StorageException {
+        Response response = super.remove(id);
+        request.getSession().removeAttribute(SessionResource.USER_ID_KEY);
+        return response;
     }
 
 }

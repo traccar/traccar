@@ -101,9 +101,12 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
                 Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
-                    injector.getInstance(PermissionsService.class).getUser(userId).checkDisabled();
-                    statisticsManager.registerRequest(userId);
-                    securityContext = new UserSecurityContext(new UserPrincipal(userId));
+                    User user = injector.getInstance(PermissionsService.class).getUser(userId);
+                    if (user != null) {
+                        user.checkDisabled();
+                        statisticsManager.registerRequest(userId);
+                        securityContext = new UserSecurityContext(new UserPrincipal(userId));
+                    }
                 }
 
             }
