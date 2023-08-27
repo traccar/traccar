@@ -75,7 +75,6 @@ public class StarcomProtocolDecoder extends BaseProtocolDecoder {
                 case "eventid":
                     position.set(Position.KEY_EVENT, Integer.parseInt(value));
                     break;
-                case "mileage":
                 case "odometer":
                     position.set(Position.KEY_ODOMETER, (long) (Double.parseDouble(value) * 1000));
                     break;
