@@ -91,7 +91,7 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
                 String[] data = command.getString(Command.KEY_FREQUENCY).split(";");
                 content.writeShort(Integer.valueOf(data[0]));
                 content.writeShort(Integer.valueOf(data[1]));
-                content.writeShort(Integer.valueOf(data[2]));
+                content.writeByte(Integer.valueOf(data[2]));
                 return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_PERIODIC, content);
             default:
                 return null;
