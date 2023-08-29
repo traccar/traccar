@@ -29,9 +29,7 @@ public class GatorProtocolEncoderTest extends ProtocolTest {
 
         Command command = new Command();
         command.setDeviceId(1);
-        command.set("heartbeat_interval", 120);
-        command.set("engine_off_interval", 5);
-        command.set("engine_on_interval", 5);
+        command.set(command.KEY_FREQUENCY, "5;5;120");
         command.setType(Command.TYPE_POSITION_PERIODIC);
         verifyCommand(encoder, command, binary("242434000b5800383a00050005781d0d"));
     }
