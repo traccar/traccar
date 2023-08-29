@@ -51,8 +51,7 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(type);
         buf.writeByte(0x00);
 
-        // ip 4 bytes, content length, checksum and end byte
-        buf.writeByte(4 + 1 + (content != null ? content.readableBytes() : 0) + 1);
+        buf.writeByte(4 + 1 + (content != null ? content.readableBytes() : 0) + 1); // length
 
         ByteBuf pseudoIPAddress = encodeId(deviceId);
         buf.writeBytes(pseudoIPAddress);
@@ -76,23 +75,17 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
         switch (command.getType()) {
             case Command.TYPE_POSITION_SINGLE:
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_REQUEST, content);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_REQUEST, null);
             case Command.TYPE_ENGINE_STOP:
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_CLOSE_THE_OIL_DUCT, content);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_CLOSE_OIL_DUCT, null);
             case Command.TYPE_ENGINE_RESUME:
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESTORES_THE_OIL_DUCT, content);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESTORE_OIL_DUCT, null);
             case Command.TYPE_SET_SPEED_LIMIT:
                 content.writeByte(command.getInteger(Command.KEY_DATA));
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_SET_SPEED_LIMIT, content);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESET_MILEAGE, content);
             case Command.TYPE_SET_ODOMETER:
                 content.writeShort(command.getInteger(Command.KEY_DATA));
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_SET_ODOMETER, content);
-            case Command.TYPE_POSITION_PERIODIC:
-                String[] data = command.getString(Command.KEY_FREQUENCY).split(";");
-                content.writeShort(Integer.valueOf(data[0]));
-                content.writeShort(Integer.valueOf(data[1]));
-                content.writeByte(Integer.valueOf(data[2]));
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_PERIODIC, content);
+                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_OVERSPEED_ALARM, content);
             default:
                 return null;
         }
