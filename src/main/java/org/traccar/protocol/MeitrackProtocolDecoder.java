@@ -551,7 +551,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x24:
                     case 0x25:
                         String wifiMAC = ByteBufUtil.hexDump(buf.readSlice(6));
-                        int wifiRSSI = buf.readUnsignedShortLE();
+                        int wifiRSSI = buf.readShortLE();
                         network.addWifiAccessPoint(WifiAccessPoint.from(wifiMAC, wifiRSSI));
                         break;
                     case 0x0E:
@@ -563,7 +563,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         int stationMNC = buf.readUnsignedShortLE();
                         int stationLAC = buf.readUnsignedShortLE();
                         long stationID = buf.readUnsignedIntLE();
-                        int stationRX_LEVEL = buf.readUnsignedShortLE();
+                        int stationRX_LEVEL = buf.readShortLE();
                         network.addCellTower(CellTower.from(stationMCC, stationMNC, stationLAC, stationID,
                             stationRX_LEVEL));
                         break;
