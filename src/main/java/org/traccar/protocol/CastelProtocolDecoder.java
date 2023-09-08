@@ -449,6 +449,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     } else {
                         codes.append(ObdDecoder.decodeCode(buf.readUnsignedShortLE()));
                     }
+                    codes.append(' ');
                 }
                 position.set(Position.KEY_DTCS, codes.toString().trim());
 
