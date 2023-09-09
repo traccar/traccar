@@ -291,5 +291,6 @@
     <entry key='transync.port'>5247</entry>
     <entry key='t622iridium.port'>5248</entry>
     <entry key='pui.port'>5249</entry>
+    <entry key='nto.port'>5250</entry>
 
 </properties>
