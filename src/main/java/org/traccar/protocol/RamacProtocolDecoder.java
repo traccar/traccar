@@ -71,8 +71,21 @@ public class RamacProtocolDecoder extends BaseHttpProtocolDecoder {
             }
         }
 
+        if (json.containsKey("GpsEvent")) {
+            position.set("gpsEvent", json.getInt("GpsEvent"));
+            if (json.containsKey("GpsEventText")) {
+                position.set("gpsEventText", json.getString("GpsEventText"));
+            }
+        }
+
         if (json.containsKey("Event")) {
             position.set(Position.KEY_EVENT, json.getInt("Event"));
+        }
+        if (json.containsKey("BatteryPercentage")) {
+            position.set(Position.KEY_BATTERY_LEVEL, json.getInt("BatteryPercentage"));
+        }
+        if (json.containsKey("Battery")) {
+            position.set(Position.KEY_BATTERY, json.getJsonNumber("Battery").doubleValue());
         }
 
         position.set("deviceType", json.getString("DeviceTypeText"));
