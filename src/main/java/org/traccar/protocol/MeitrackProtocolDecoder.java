@@ -550,7 +550,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x23:
                     case 0x24:
                     case 0x25:
-                        String wifiMAC = ByteBufUtil.hexDump(buf.readSlice(6));
+                        String wifiMAC = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
                         int wifiRSSI = buf.readShortLE();
                         network.addWifiAccessPoint(WifiAccessPoint.from(wifiMAC, wifiRSSI));
                         break;
@@ -559,13 +559,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x10:
                     case 0x12:
                     case 0x13:
-                        int stationMCC = buf.readUnsignedShortLE();
-                        int stationMNC = buf.readUnsignedShortLE();
-                        int stationLAC = buf.readUnsignedShortLE();
-                        long stationID = buf.readUnsignedIntLE();
-                        int stationRX_LEVEL = buf.readShortLE();
-                        network.addCellTower(CellTower.from(stationMCC, stationMNC, stationLAC, stationID,
-                            stationRX_LEVEL));
+                        network.addCellTower(CellTower.from(buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
+                            buf.readUnsignedShortLE(), buf.readUnsignedIntLE(), buf.readShortLE()));
                         break;
                     case 0x2A:
                     case 0x2B:
@@ -582,8 +577,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         position.set("networkVersion", buf.readUnsignedByte());
                         position.set("networkType", buf.readUnsignedByte());
                         int networkDescLen = buf.readUnsignedByte();
-                        String networkDesc = buf.readSlice(networkDescLen).toString(StandardCharsets.US_ASCII);
-                        network.setRadioType(networkDesc);
+                        network.setRadioType(buf.readSlice(networkDescLen).toString(StandardCharsets.US_ASCII));
                         break;
                     case 0xFE31:
                         buf.readUnsignedByte(); // alarm protocol
