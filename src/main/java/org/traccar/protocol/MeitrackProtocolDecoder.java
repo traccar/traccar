@@ -574,10 +574,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.PREFIX_TEMP + (id - 0x2A), buf.readShortLE() * 0.01);
                         break;
                     case 0x4B:
-                        position.set("networkVersion", buf.readUnsignedByte());
-                        position.set("networkType", buf.readUnsignedByte());
-                        int networkDescLen = buf.readUnsignedByte();
-                        network.setRadioType(buf.readSlice(networkDescLen).toString(StandardCharsets.US_ASCII));
+                        buf.skipBytes(length); // network information
                         break;
                     case 0xFE31:
                         buf.readUnsignedByte(); // alarm protocol
