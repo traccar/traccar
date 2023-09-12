@@ -1678,6 +1678,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Search radius for speed limit. Value is in meters. Default value is 100.
+     */
+    public static final ConfigKey<Integer> SPEED_LIMIT_ACCURACY = new IntegerConfigKey(
+            "speedLimit.accuracy",
+            List.of(KeyType.CONFIG),
+            100);
+
+    /**
      * Override latitude sign / hemisphere. Useful in cases where value is incorrect because of device bug. Value can be
      * N for North or S for South.
      */
