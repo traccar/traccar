@@ -189,8 +189,8 @@ public final class ReportUtils {
     }
 
     public static String findDriver(Position firstPosition, Position lastPosition) {
-        if (firstPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID) &&
-                !firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID).isEmpty()) {
+        if (firstPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)
+                && !firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID).isEmpty()) {
             return firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
         } else if (lastPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
             return lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
@@ -246,6 +246,7 @@ public final class ReportUtils {
         double speedSum = 0.0;
         long idleTime = 0;
         Position last = startTrip;
+        String driverUniqueId = null;
         for (int i = startIndex; i <= endIndex; i++) {
             Position position = positions.get(i);
             double speed = position.getSpeed();
@@ -255,6 +256,11 @@ public final class ReportUtils {
             }
             idleTime += getIdleTime(position, last);
             last = position;
+            if (driverUniqueId == null
+                    && position.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)
+                    && !position.getString(Position.KEY_DRIVER_UNIQUE_ID).isEmpty()) {
+                driverUniqueId = position.getString(Position.KEY_DRIVER_UNIQUE_ID);
+            }
         }
 
         TripReport trip = new TripReport();
@@ -293,7 +299,7 @@ public final class ReportUtils {
         trip.setIdleTime(idleTime);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 
-        trip.setDriverUniqueId(findDriver(startTrip, endTrip));
+        trip.setDriverUniqueId(driverUniqueId);
         trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
 
         if (!ignoreOdometer
