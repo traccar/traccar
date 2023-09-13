@@ -189,7 +189,8 @@ public final class ReportUtils {
     }
 
     public static String findDriver(Position firstPosition, Position lastPosition) {
-        if (firstPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID) && !firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID).isEmpty()) {
+        if (firstPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID) &&
+                !firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID).isEmpty()) {
             return firstPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
         } else if (lastPosition.getAttributes().containsKey(Position.KEY_DRIVER_UNIQUE_ID)) {
             return lastPosition.getString(Position.KEY_DRIVER_UNIQUE_ID);
