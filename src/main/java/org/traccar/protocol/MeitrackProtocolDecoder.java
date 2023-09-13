@@ -551,16 +551,17 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x24:
                     case 0x25:
                         String wifiMac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
-                        network.addWifiAccessPoint(WifiAccessPoint.from(wifiMac.substring(0, wifiMac.length() - 1),
-                            buf.readShortLE()));
+                        network.addWifiAccessPoint(WifiAccessPoint.from(
+                                wifiMac.substring(0, wifiMac.length() - 1), buf.readShortLE()));
                         break;
                     case 0x0E:
                     case 0x0F:
                     case 0x10:
                     case 0x12:
                     case 0x13:
-                        network.addCellTower(CellTower.from(buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
-                            buf.readUnsignedShortLE(), buf.readUnsignedIntLE(), buf.readShortLE()));
+                        network.addCellTower(CellTower.from(
+                                buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
+                                buf.readUnsignedShortLE(), buf.readUnsignedIntLE(), buf.readShortLE()));
                         break;
                     case 0x2A:
                     case 0x2B:
