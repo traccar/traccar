@@ -514,7 +514,6 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 2000-01-01
                         break;
                     case 0x0C:
-                    case 0x9B:
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                         break;
                     case 0x0D:
@@ -522,6 +521,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x25:
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
+                        break;
+                    case 0x9B:
+                        position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedIntLE());
                         break;
                     case 0xA0:
                         position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE() * 0.001);
