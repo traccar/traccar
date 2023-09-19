@@ -178,7 +178,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextInt());
         position.setAltitude(parser.nextInt());
 
-        position.set(Position.KEY_ODOMETER, parser.nextInt());
+        position.set(Position.KEY_ODOMETER, parser.nextLong());
 
         position.setNetwork(new Network(CellTower.from(
                 parser.nextInt(), parser.nextInt(), parser.nextHexInt(), parser.nextHexInt(), parser.nextInt())));
