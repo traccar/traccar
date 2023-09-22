@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.Position;
@@ -74,7 +75,16 @@ public class NtoProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(parser.nextDouble());
         position.setCourse(parser.nextInt());
 
-        position.set(Position.KEY_STATUS, parser.next());
+        long status = parser.nextHexLong();
+        position.set(Position.KEY_STATUS, status);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 1) ? Position.ALARM_JAMMING : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 3 * 8 + 1) ? Position.ALARM_POWER_CUT : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 3 * 8 + 2) ? Position.ALARM_OVERSPEED : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 3 * 8 + 3) ? Position.ALARM_VIBRATION : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 3 * 8 + 4) ? Position.ALARM_GEOFENCE_ENTER : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 3 * 8 + 5) ? Position.ALARM_GEOFENCE_EXIT : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 4 * 8) ? Position.ALARM_LOW_BATTERY : null);
+        position.set(Position.KEY_ALARM, BitUtil.check(status, 4 * 8 + 4) ? Position.ALARM_DOOR : null);
 
         return position;
     }
