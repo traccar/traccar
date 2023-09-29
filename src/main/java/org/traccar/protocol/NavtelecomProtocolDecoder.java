@@ -320,8 +320,8 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     }
                                     break;
                                 case 54:
-                                    double dValue = buf.readFloatLE() * 0.5;
-                                    position.set("fuelUsed", (dValue >= 0) ? dValue : null);
+                                    double fuelUsed = buf.readFloatLE() * 0.5;
+                                    position.set(Position.KEY_FUEL_USED, (fuelUsed >= 0) ? fuelUsed : null);
                                     break;
                                 case 55:
                                     value = buf.readUnsignedShortLE();
