@@ -315,13 +315,13 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                         if (BitUtil.check(value, 15)) {
                                             position.set("obdFuelLevel", BitUtil.to(value, 14));
                                         } else {
-                                            position.set("obdFuel", BitUtil.to(value, 14) / 10.0);
+                                            position.set("obdFuel", BitUtil.to(value, 14) * 0.1);
                                         }
                                     }
                                     break;
                                 case 54:
                                     double dValue = buf.readFloatLE() * 0.5;
-                                    position.set(Position.KEY_FUEL_USED, (dValue >= 0) ? dValue : null);
+                                    position.set("fuelUsed", (dValue >= 0) ? dValue : null);
                                     break;
                                 case 55:
                                     value = buf.readUnsignedShortLE();
@@ -360,7 +360,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                         if (BitUtil.check(value, 15)) {
                                             position.set("obdAdBlueLevel", BitUtil.to(value, 14));
                                         } else {
-                                            position.set("obdAdBlue", BitUtil.to(value, 14) / 10.0);
+                                            position.set("obdAdBlue", BitUtil.to(value, 14) * 0.1);
                                         }
                                     }
                                     break;
