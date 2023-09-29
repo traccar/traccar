@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseHttpProtocolDecoder;
+import org.traccar.config.Keys;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -64,6 +65,12 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
     private final XPath xPath;
     private final XPathExpression messageExpression;
 
+    private boolean alternative;
+
+    public void setAlternative(boolean alternative) {
+        this.alternative = alternative;
+    }
+
     public GlobalstarProtocolDecoder(Protocol protocol) {
         super(protocol);
         try {
@@ -80,6 +87,11 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
         } catch (ParserConfigurationException | XPathExpressionException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    protected void init() {
+        this.alternative = getConfig().getBoolean(Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()));
     }
 
     private void sendResponse(Channel channel, String messageId) throws TransformerException {
@@ -135,21 +147,30 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
-                position.setValid(true);
                 position.setTime(new Date(Long.parseLong(xPath.evaluate("unixTime", node)) * 1000));
 
                 ByteBuf buf = Unpooled.wrappedBuffer(
                         DataConverter.parseHex(xPath.evaluate("payload", node).substring(2)));
 
                 int flags = buf.readUnsignedByte();
-                position.set(Position.PREFIX_IN + 1, !BitUtil.check(flags, 1));
-                position.set(Position.PREFIX_IN + 2, !BitUtil.check(flags, 2));
-                position.set(Position.KEY_CHARGE, !BitUtil.check(flags, 3));
-                if (BitUtil.check(flags, 4)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                int type;
+                if (alternative) {
+                    type = BitUtil.to(flags, 1);
+                    position.setValid(true);
+                    position.set(Position.PREFIX_IN + 1, !BitUtil.check(flags, 1));
+                    position.set(Position.PREFIX_IN + 2, !BitUtil.check(flags, 2));
+                    position.set(Position.KEY_CHARGE, !BitUtil.check(flags, 3));
+                    if (BitUtil.check(flags, 4)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                    }
+                    position.setCourse(BitUtil.from(flags, 5) * 45);
+                } else {
+                    type = BitUtil.to(flags, 2);
+                    if (BitUtil.check(flags, 2)) {
+                        position.set("batteryReplace", true);
+                    }
+                    position.setValid(!BitUtil.check(flags, 3));
                 }
-
-                position.setCourse(BitUtil.from(flags, 5) * 45);
 
                 double latitude = buf.readUnsignedMedium() * 90.0 / (1 << 23);
                 position.setLatitude(latitude > 90 ? latitude - 180 : latitude);
@@ -157,10 +178,19 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                 double longitude = buf.readUnsignedMedium() * 180.0 / (1 << 23);
                 position.setLongitude(longitude > 180 ? longitude - 360 : longitude);
 
-                int speed = buf.readUnsignedByte();
-                position.setSpeed(UnitsConverter.knotsFromKph(speed));
-
-                position.set("batteryReplace", BitUtil.check(buf.readUnsignedByte(), 7));
+                int speed = 0;
+                if (alternative) {
+                    speed = buf.readUnsignedByte();
+                    position.setSpeed(UnitsConverter.knotsFromKph(speed));
+                    position.set("batteryReplace", BitUtil.check(buf.readUnsignedByte(), 7));
+                } else if (type == 0) {
+                    position.set(Position.KEY_INPUT, BitUtil.to(buf.readUnsignedByte(), 4));
+                    int other = buf.readUnsignedByte();
+                    if (BitUtil.check(other, 4)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                    }
+                    position.set(Position.KEY_MOTION, BitUtil.check(other, 6));
+                }
 
                 if (speed != 0xff) {
                     positions.add(position);
