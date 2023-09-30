@@ -243,7 +243,11 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     int currentRecord = BitUtil.to(recordExtension, 4);
 
                     if (currentRecord > 0 && currentRecord <= mergeRecordCount) {
-                        position = positions.remove(positions.size() - 1);
+                        if (positions.size() == 0) {
+                            getLastLocation(position, null);
+                        } else {
+                            position = positions.remove(positions.size() - 1);
+                        }
                     }
                 }
 
