@@ -227,92 +227,103 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
             List<Position> positions = new LinkedList<>();
 
-            buf.readUnsignedByte(); // records left
-            int count = buf.readUnsignedByte();
+            try {
+                buf.readUnsignedByte(); // records left
+                int count = buf.readUnsignedByte();
 
-            for (int i = 0; i < count; i++) {
-                Position position = new Position(getProtocolName());
-                position.setDeviceId(deviceSession.getDeviceId());
+                for (int i = 0; i < count; i++) {
+                    Position position = new Position(getProtocolName());
+                    position.setDeviceId(deviceSession.getDeviceId());
 
-                position.setTime(new Date(buf.readUnsignedInt() * 1000));
-                buf.readUnsignedByte(); // timestamp extension
+                    position.setTime(new Date(buf.readUnsignedInt() * 1000));
+                    buf.readUnsignedByte(); // timestamp extension
 
-                if (type == MSG_EXTENDED_RECORDS) {
-                    int recordExtension = buf.readUnsignedByte();
-                    int mergeRecordCount = BitUtil.from(recordExtension, 4);
-                    int currentRecord = BitUtil.to(recordExtension, 4);
+                    if (type == MSG_EXTENDED_RECORDS) {
+                        int recordExtension = buf.readUnsignedByte();
+                        int mergeRecordCount = BitUtil.from(recordExtension, 4);
+                        int currentRecord = BitUtil.to(recordExtension, 4);
 
-                    if (currentRecord > 0 && currentRecord <= mergeRecordCount) {
-                        if (positions.size() == 0) {
-                            getLastLocation(position, null);
-                        } else {
-                            position = positions.remove(positions.size() - 1);
+                        if (currentRecord > 0 && currentRecord <= mergeRecordCount) {
+                            if (positions.size() == 0) {
+                                getLastLocation(position, null);
+                            } else {
+                                position = positions.remove(positions.size() - 1);
+                            }
                         }
                     }
+
+                    buf.readUnsignedByte(); // priority (reserved)
+
+                    int longitude = buf.readInt();
+                    int latitude = buf.readInt();
+                    if (longitude > Integer.MIN_VALUE && latitude > Integer.MIN_VALUE) {
+                        position.setValid(true);
+                        position.setLongitude(longitude / 10000000.0);
+                        position.setLatitude(latitude / 10000000.0);
+                        position.setAltitude(buf.readUnsignedShort() / 10.0);
+                        position.setCourse(buf.readUnsignedShort() / 100.0);
+                        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                        position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+                        position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
+                    } else {
+                        buf.skipBytes(8);
+                        getLastLocation(position, null);
+                    }
+
+                    if (type == MSG_EXTENDED_RECORDS) {
+                        position.set(Position.KEY_EVENT, buf.readUnsignedShort());
+                    } else {
+                        position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+                    }
+
+                    // Read 1 byte data
+                    int valueCount = buf.readUnsignedByte();
+                    for (int j = 0; j < valueCount; j++) {
+                        int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                        decodeParameter(position, id, buf, 1);
+                    }
+
+                    // Read 2 byte data
+                    valueCount = buf.readUnsignedByte();
+                    for (int j = 0; j < valueCount; j++) {
+                        int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                        decodeParameter(position, id, buf, 2);
+                    }
+
+                    // Read 4 byte data
+                    valueCount = buf.readUnsignedByte();
+                    for (int j = 0; j < valueCount; j++) {
+                        int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                        decodeParameter(position, id, buf, 4);
+                    }
+
+                    // Read 8 byte data
+                    valueCount = buf.readUnsignedByte();
+                    for (int j = 0; j < valueCount; j++) {
+                        int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                        decodeParameter(position, id, buf, 8);
+                    }
+
+                    decodeDriver(position, Position.PREFIX_IO + 126, Position.PREFIX_IO + 127); // can driver
+                    decodeDriver(position, Position.PREFIX_IO + 155, Position.PREFIX_IO + 156); // tco driver
+
+                    Long tagIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 760);
+                    Long tagIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 761);
+                    if (tagIdPart1 != null && tagIdPart2 != null) {
+                        position.set("tagId", Long.toHexString(tagIdPart1) + Long.toHexString(tagIdPart2));
+                    }
+
+                    positions.add(position);
                 }
-
-                buf.readUnsignedByte(); // priority (reserved)
-
-                int longitude = buf.readInt();
-                int latitude = buf.readInt();
-                if (longitude > Integer.MIN_VALUE && latitude > Integer.MIN_VALUE) {
-                    position.setValid(true);
-                    position.setLongitude(longitude / 10000000.0);
-                    position.setLatitude(latitude / 10000000.0);
-                    position.setAltitude(buf.readUnsignedShort() / 10.0);
-                    position.setCourse(buf.readUnsignedShort() / 100.0);
-                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
-                    position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
-                } else {
-                    buf.skipBytes(8);
-                    getLastLocation(position, null);
+            } catch (Exception e) {
+                ByteBuf content = Unpooled.buffer();
+                content.writeByte(0);
+                ByteBuf response = RuptelaProtocolEncoder.encodeContent(0, content);
+                content.release();
+                if (channel != null) {
+                    channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 }
-
-                if (type == MSG_EXTENDED_RECORDS) {
-                    position.set(Position.KEY_EVENT, buf.readUnsignedShort());
-                } else {
-                    position.set(Position.KEY_EVENT, buf.readUnsignedByte());
-                }
-
-                // Read 1 byte data
-                int valueCount = buf.readUnsignedByte();
-                for (int j = 0; j < valueCount; j++) {
-                    int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                    decodeParameter(position, id, buf, 1);
-                }
-
-                // Read 2 byte data
-                valueCount = buf.readUnsignedByte();
-                for (int j = 0; j < valueCount; j++) {
-                    int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                    decodeParameter(position, id, buf, 2);
-                }
-
-                // Read 4 byte data
-                valueCount = buf.readUnsignedByte();
-                for (int j = 0; j < valueCount; j++) {
-                    int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                    decodeParameter(position, id, buf, 4);
-                }
-
-                // Read 8 byte data
-                valueCount = buf.readUnsignedByte();
-                for (int j = 0; j < valueCount; j++) {
-                    int id = type == MSG_EXTENDED_RECORDS ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                    decodeParameter(position, id, buf, 8);
-                }
-
-                decodeDriver(position, Position.PREFIX_IO + 126, Position.PREFIX_IO + 127); // can driver
-                decodeDriver(position, Position.PREFIX_IO + 155, Position.PREFIX_IO + 156); // tco driver
-
-                Long tagIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 760);
-                Long tagIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 761);
-                if (tagIdPart1 != null && tagIdPart2 != null) {
-                    position.set("tagId", Long.toHexString(tagIdPart1) + Long.toHexString(tagIdPart2));
-                }
-
-                positions.add(position);
+                throw e;
             }
 
             if (channel != null) {
