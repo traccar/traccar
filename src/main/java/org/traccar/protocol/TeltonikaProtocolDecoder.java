@@ -588,6 +588,34 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         }
                         index += 1;
                     }
+                } else if (id == 10829 || id == 10831) {
+                    ByteBuf data = buf.readSlice(length);
+                    data.readUnsignedByte(); // header
+                    for (int i = 1; data.isReadable(); i++) {
+                        ByteBuf beacon = data.readSlice(data.readUnsignedByte());
+                        while (beacon.isReadable()) {
+                            int parameterId = beacon.readUnsignedByte();
+                            int parameterLength = beacon.readUnsignedByte();
+                            switch (parameterId) {
+                                case 0:
+                                    position.set("tag" + i + "Rssi", (int) beacon.readByte());
+                                    break;
+                                case 1:
+                                    String beaconId = ByteBufUtil.hexDump(beacon.readSlice(parameterLength));
+                                    position.set("tag" + i + "Id", beaconId);
+                                    break;
+                                case 13:
+                                    position.set("tag" + i + "LowBattery", beacon.readUnsignedByte());
+                                    break;
+                                case 14:
+                                    position.set("tag" + i + "Battery", beacon.readUnsignedShort());
+                                    break;
+                                default:
+                                    beacon.skipBytes(parameterLength);
+                                    break;
+                            }
+                        }
+                    }
                 } else {
                     position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
                 }
