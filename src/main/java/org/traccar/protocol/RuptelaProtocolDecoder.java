@@ -51,6 +51,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_SMS_VIA_GPRS = 8;
     public static final int MSG_DTCS = 9;
     public static final int MSG_IDENTIFICATION = 15;
+    public static final int MSG_HEARTBEAT = 16;
     public static final int MSG_SET_IO = 17;
     public static final int MSG_FILES = 37;
     public static final int MSG_EXTENDED_RECORDS = 68;
@@ -388,7 +389,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
             return null;
 
-        } else if (type == MSG_IDENTIFICATION) {
+        } else if (type == MSG_IDENTIFICATION || type == MSG_HEARTBEAT) {
 
             ByteBuf content = Unpooled.buffer();
             content.writeByte(1);
