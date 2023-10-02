@@ -52,11 +52,11 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.ObjectMapperContextResolver;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
@@ -193,14 +193,16 @@ public class WebServer implements LifecycleObject {
             sessionHandler.setSessionCache(sessionCache);
         }
 
+        SessionCookieConfig sessionCookieConfig = servletHandler.getServletContext().getSessionCookieConfig();
+
         int sessionTimeout = config.getInteger(Keys.WEB_SESSION_TIMEOUT);
         if (sessionTimeout > 0) {
             servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
+            sessionCookieConfig.setMaxAge(sessionTimeout);
         }
 
         String sameSiteCookie = config.getString(Keys.WEB_SAME_SITE_COOKIE);
         if (sameSiteCookie != null) {
-            SessionCookieConfig sessionCookieConfig = servletHandler.getServletContext().getSessionCookieConfig();
             switch (sameSiteCookie.toLowerCase()) {
                 case "lax":
                     sessionCookieConfig.setComment(HttpCookie.SAME_SITE_LAX_COMMENT);

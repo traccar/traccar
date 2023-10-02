@@ -51,28 +51,32 @@ public final class ObdDecoder {
         StringBuilder codes = new StringBuilder();
         for (int i = 0; i < value.length() / 4; i++) {
             int numValue = Integer.parseInt(value.substring(i * 4, (i + 1) * 4), 16);
-            codes.append(' ');
-            switch (numValue >> 14) {
-                case 1:
-                    codes.append('C');
-                    break;
-                case 2:
-                    codes.append('B');
-                    break;
-                case 3:
-                    codes.append('U');
-                    break;
-                default:
-                    codes.append('P');
-                    break;
-            }
-            codes.append(String.format("%04X", numValue & 0x3FFF));
+            codes.append(' ').append(decodeCode(numValue));
         }
         if (codes.length() > 0) {
             return createEntry(Position.KEY_DTCS, codes.toString().trim());
         } else {
             return null;
         }
+    }
+
+    public static String decodeCode(int value) {
+        char prefix;
+        switch (value >> 14) {
+            case 1:
+                prefix = 'C';
+                break;
+            case 2:
+                prefix = 'B';
+                break;
+            case 3:
+                prefix = 'U';
+                break;
+            default:
+                prefix = 'P';
+                break;
+        }
+        return String.format("%c%04X", prefix, value & 0x3FFF);
     }
 
     public static Map.Entry<String, Object> decodeData(int pid, long value, boolean convert) {

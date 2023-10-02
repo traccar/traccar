@@ -20,7 +20,7 @@ import org.eclipse.jetty.util.resource.Resource;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 

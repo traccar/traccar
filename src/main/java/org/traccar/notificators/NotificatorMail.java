@@ -24,9 +24,9 @@ import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.mail.MessagingException;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.mail.MessagingException;
 
 @Singleton
 public class NotificatorMail implements Notificator {

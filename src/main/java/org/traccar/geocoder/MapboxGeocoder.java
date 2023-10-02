@@ -15,10 +15,10 @@
  */
 package org.traccar.geocoder;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.ws.rs.client.Client;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.ws.rs.client.Client;
 
 public class MapboxGeocoder extends JsonGeocoder {
 

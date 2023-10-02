@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,8 +36,8 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Collections;
 import java.util.Map;
 
@@ -52,6 +52,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
 
     private final long minimalDuration;
     private final boolean preferLowest;
+    private final double multiplier;
 
     @Inject
     public OverspeedEventHandler(
@@ -60,6 +61,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         this.storage = storage;
         minimalDuration = config.getLong(Keys.EVENT_OVERSPEED_MINIMAL_DURATION) * 1000;
         preferLowest = config.getBoolean(Keys.EVENT_OVERSPEED_PREFER_LOWEST);
+        multiplier = config.getDouble(Keys.EVENT_OVERSPEED_THRESHOLD_MULTIPLIER);
     }
 
     @Override
@@ -107,7 +109,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         }
 
         OverspeedState state = OverspeedState.fromDevice(device);
-        OverspeedProcessor.updateState(state, position, speedLimit, minimalDuration, overspeedGeofenceId);
+        OverspeedProcessor.updateState(state, position, speedLimit, multiplier, minimalDuration, overspeedGeofenceId);
         if (state.isChanged()) {
             state.toDevice(device);
             try {

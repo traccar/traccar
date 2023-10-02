@@ -8,6 +8,17 @@
 
   <changeSet author="author" id="changelog-5.7">
 
+    <addColumn tableName="tc_notifications">
+      <column name="commandid" type="INT" />
+    </addColumn>
+
+    <addForeignKeyConstraint
+            baseTableName="tc_notifications"
+            baseColumnNames="commandid"
+            constraintName="fk_notifications_commandid"
+            referencedTableName="tc_commands"
+            referencedColumnNames="id"
+            onDelete="CASCADE" />
 
   </changeSet>
 

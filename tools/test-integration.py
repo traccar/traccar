@@ -179,7 +179,7 @@ def send_message(port, message):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', port))
     s.send(message.encode('ascii'))
-    time.sleep(0.5)
+    time.sleep(1.0)
     s.close()
 
 def get_protocols(cookie, device_id):

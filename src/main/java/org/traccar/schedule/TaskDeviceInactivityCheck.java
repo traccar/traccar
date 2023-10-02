@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,17 +20,19 @@ import org.slf4j.LoggerFactory;
 import org.traccar.database.NotificationManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class TaskDeviceInactivityCheck implements ScheduleTask {
 
@@ -64,22 +66,45 @@ public class TaskDeviceInactivityCheck implements ScheduleTask {
         Map<Event, Position> events = new HashMap<>();
 
         try {
+            Map<Long, Group> groups = storage.getObjects(Group.class, new Request(new Columns.All()))
+                    .stream().collect(Collectors.toMap(Group::getId, group -> group));
             for (Device device : storage.getObjects(Device.class, new Request(new Columns.All()))) {
-                if (device.getLastUpdate() != null && checkDevice(device, currentTime, checkPeriod)) {
+                if (device.getLastUpdate() != null && checkDevice(device, groups, currentTime, checkPeriod)) {
                     Event event = new Event(Event.TYPE_DEVICE_INACTIVE, device.getId());
                     event.set(ATTRIBUTE_LAST_UPDATE, device.getLastUpdate().getTime());
                     events.put(event, null);
                 }
             }
         } catch (StorageException e) {
-            LOGGER.warn("Get devices error", e);
+            LOGGER.warn("Database error", e);
         }
 
         notificationManager.updateEvents(events);
     }
 
-    private boolean checkDevice(Device device, long currentTime, long checkPeriod) {
-        long deviceInactivityStart = device.getLong(ATTRIBUTE_DEVICE_INACTIVITY_START);
+    private long getAttribute(Device device, Map<Long, Group> groups, String key) {
+        long deviceValue = device.getLong(key);
+        if (deviceValue > 0) {
+            return deviceValue;
+        } else {
+            long groupId = device.getGroupId();
+            while (groupId > 0) {
+                Group group = groups.get(groupId);
+                if (group == null) {
+                    return 0;
+                }
+                long groupValue = group.getLong(key);
+                if (groupValue > 0) {
+                    return groupValue;
+                }
+                groupId = group.getGroupId();
+            }
+            return 0;
+        }
+    }
+
+    private boolean checkDevice(Device device, Map<Long, Group> groups, long currentTime, long checkPeriod) {
+        long deviceInactivityStart = getAttribute(device, groups, ATTRIBUTE_DEVICE_INACTIVITY_START);
         if (deviceInactivityStart > 0) {
             long timeThreshold = device.getLastUpdate().getTime() + deviceInactivityStart;
             if (currentTime >= timeThreshold) {
@@ -88,7 +113,7 @@ public class TaskDeviceInactivityCheck implements ScheduleTask {
                     return true;
                 }
 
-                long deviceInactivityPeriod = device.getLong(ATTRIBUTE_DEVICE_INACTIVITY_PERIOD);
+                long deviceInactivityPeriod = getAttribute(device, groups, ATTRIBUTE_DEVICE_INACTIVITY_PERIOD);
                 if (deviceInactivityPeriod > 0) {
                     long count = (currentTime - timeThreshold - 1) / deviceInactivityPeriod;
                     timeThreshold += count * deviceInactivityPeriod;

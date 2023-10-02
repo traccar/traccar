@@ -29,7 +29,7 @@ import liquibase.resource.ResourceAccessor;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;

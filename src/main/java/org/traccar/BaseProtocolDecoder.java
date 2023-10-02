@@ -31,7 +31,7 @@ import org.traccar.session.DeviceSession;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;

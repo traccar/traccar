@@ -29,11 +29,11 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Form;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.core.Form;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -100,6 +100,8 @@ public class StatisticsManager {
                     statistics.setProtocols(protocols);
                 }
 
+                statistics.set("modern", config.getString(Keys.WEB_PATH).contains("modern"));
+
                 users.clear();
                 deviceProtocols.clear();
                 deviceMessages.clear();
@@ -139,6 +141,13 @@ public class StatisticsManager {
                         form.param("protocols", objectMapper.writeValueAsString(statistics.getProtocols()));
                     } catch (JsonProcessingException e) {
                         LOGGER.warn("Failed to serialize protocols", e);
+                    }
+                }
+                if (!statistics.getAttributes().isEmpty()) {
+                    try {
+                        form.param("attributes", objectMapper.writeValueAsString(statistics.getAttributes()));
+                    } catch (JsonProcessingException e) {
+                        LOGGER.warn("Failed to serialize attributes", e);
                     }
                 }
 

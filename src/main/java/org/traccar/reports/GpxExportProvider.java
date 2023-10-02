@@ -24,7 +24,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;

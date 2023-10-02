@@ -17,11 +17,11 @@ package org.traccar.speedlimit;
 
 import org.traccar.helper.UnitsConverter;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.ws.rs.client.AsyncInvoker;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.InvocationCallback;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.AsyncInvoker;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.InvocationCallback;
 
 public class OverpassSpeedLimitProvider implements SpeedLimitProvider {
 

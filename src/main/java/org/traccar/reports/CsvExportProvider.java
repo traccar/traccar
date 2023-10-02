@@ -21,7 +21,7 @@ import org.traccar.model.Position;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;

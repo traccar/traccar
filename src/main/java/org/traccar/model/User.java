@@ -63,7 +63,7 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        this.phone = phone != null ? phone.trim() : null;
     }
 
     private boolean readonly;

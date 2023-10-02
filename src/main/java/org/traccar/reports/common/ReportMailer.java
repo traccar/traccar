@@ -22,11 +22,11 @@ import org.traccar.mail.MailManager;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
-import javax.activation.DataHandler;
-import javax.inject.Inject;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.util.ByteArrayDataSource;
+import jakarta.activation.DataHandler;
+import jakarta.inject.Inject;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.util.ByteArrayDataSource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 

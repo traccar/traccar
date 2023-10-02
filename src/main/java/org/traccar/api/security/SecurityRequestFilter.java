@@ -24,16 +24,16 @@ import org.traccar.helper.DataConverter;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
-import javax.annotation.security.PermitAll;
-import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.container.ResourceInfo;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.annotation.security.PermitAll;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.container.ContainerRequestContext;
+import jakarta.ws.rs.container.ContainerRequestFilter;
+import jakarta.ws.rs.container.ResourceInfo;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -101,9 +101,12 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
                 Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
-                    injector.getInstance(PermissionsService.class).getUser(userId).checkDisabled();
-                    statisticsManager.registerRequest(userId);
-                    securityContext = new UserSecurityContext(new UserPrincipal(userId));
+                    User user = injector.getInstance(PermissionsService.class).getUser(userId);
+                    if (user != null) {
+                        user.checkDisabled();
+                        statisticsManager.registerRequest(userId);
+                        securityContext = new UserSecurityContext(new UserPrincipal(userId));
+                    }
                 }
 
             }

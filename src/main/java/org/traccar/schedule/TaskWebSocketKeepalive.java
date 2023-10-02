@@ -17,7 +17,7 @@ package org.traccar.schedule;
 
 import org.traccar.session.ConnectionManager;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 

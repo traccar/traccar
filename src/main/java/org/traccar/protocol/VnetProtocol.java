@@ -23,7 +23,7 @@ import org.traccar.config.Config;
 
 import java.nio.ByteOrder;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class VnetProtocol extends BaseProtocol {
 

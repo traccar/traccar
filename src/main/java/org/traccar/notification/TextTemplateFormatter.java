@@ -29,8 +29,8 @@ import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;

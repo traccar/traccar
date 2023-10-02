@@ -23,7 +23,7 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerClient;
 import org.traccar.config.Config;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class OrbcommProtocol extends BaseProtocol {
 

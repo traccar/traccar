@@ -242,6 +242,8 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
+            getLastLocation(position, position.getDeviceTime());
+
             String[] points = parser.next().split("\\|");
             for (String point : points) {
                 String[] wifi = point.split(":");

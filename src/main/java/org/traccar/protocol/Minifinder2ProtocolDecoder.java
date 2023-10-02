@@ -155,7 +155,6 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
             List<Position> positions = new LinkedList<>();
             Set<Integer> keys = new HashSet<>();
-            boolean hasLocation = false;
             Position position = new Position(getProtocolName());
 
             DeviceSession deviceSession = null;
@@ -165,12 +164,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                 int key = buf.readUnsignedByte();
 
                 if (keys.contains(key)) {
-                    if (!hasLocation) {
-                        getLastLocation(position, null);
-                    }
                     positions.add(position);
                     keys.clear();
-                    hasLocation = false;
                     position = new Position(getProtocolName());
                 }
                 keys.add(key);
@@ -195,7 +190,6 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
                         break;
                     case 0x20:
-                        hasLocation = true;
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
@@ -235,7 +229,6 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
                         position.setValid(true);
-                        hasLocation = true;
                         break;
                     case 0x24:
                         position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
@@ -260,7 +253,6 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             position.setLatitude(buf.readIntLE() * 0.0000001);
                             position.setLongitude(buf.readIntLE() * 0.0000001);
                             position.setValid(true);
-                            hasLocation = true;
                         }
                         if (BitUtil.check(beaconFlags, 6)) {
                             position.set("description", buf.readCharSequence(
@@ -274,7 +266,6 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
                         position.setValid(true);
-                        hasLocation = true;
                         break;
                     case 0x30:
                         buf.readUnsignedIntLE(); // timestamp
@@ -309,14 +300,14 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readerIndex(endIndex);
             }
 
-            if (!hasLocation) {
-                getLastLocation(position, null);
-            }
             positions.add(position);
 
             if (deviceSession != null) {
                 for (Position p : positions) {
                     p.setDeviceId(deviceSession.getDeviceId());
+                    if (!p.getValid() && !p.hasAttribute(Position.KEY_HDOP)) {
+                        getLastLocation(p, null);
+                    }
                 }
             } else {
                 return null;

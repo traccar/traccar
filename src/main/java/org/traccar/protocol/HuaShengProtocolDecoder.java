@@ -229,7 +229,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(buf.readUnsignedShort());
         position.setAltitude(buf.readUnsignedShort());
 
-        position.set(Position.KEY_ODOMETER, buf.readUnsignedShort() * 1000);
+        buf.readUnsignedShort(); // odometer speed
 
         Network network = new Network();
 
@@ -264,8 +264,11 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedInt(); // run time
                     break;
                 case 0x0009:
-                    position.set(
-                            Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                    position.set(Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                    break;
+                case 0x0010:
+                    position.set(Position.KEY_ODOMETER, Double.parseDouble(
+                            buf.readCharSequence(length, StandardCharsets.US_ASCII).toString()) * 1000);
                     break;
                 case 0x0011:
                     position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 0.05);
@@ -284,7 +287,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                         String[] values = cell.split("@");
                         network.addCellTower(CellTower.from(
                                 Integer.parseInt(values[0]), Integer.parseInt(values[1]),
-                                Integer.parseInt(values[2], 16), Integer.parseInt(values[3], 16)));
+                                Integer.parseInt(values[2], 16), Long.parseLong(values[3], 16)));
                     }
                     break;
                 case 0x0021:

@@ -94,7 +94,7 @@ public class T622IridiumProtocolDecoder extends BaseProtocolDecoder {
                     position.setLongitude(buf.readIntLE() / 1000000.0);
                     break;
                 case 0x04:
-                    position.setTime(new Date((buf.readUnsignedIntLE() + 946713600) * 1000));
+                    position.setTime(new Date((buf.readUnsignedIntLE() + 946684800) * 1000));
                     break;
                 case 0x05:
                     position.setValid(buf.readUnsignedByte() > 0);

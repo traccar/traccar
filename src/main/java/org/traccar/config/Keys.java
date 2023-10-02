@@ -234,6 +234,13 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
+     * Disable commands for the protocol. Not all protocols support this option.
+     */
+    public static final ConfigSuffix<Boolean> PROTOCOL_DISABLE_COMMANDS = new BooleanConfigSuffix(
+            ".disableCommands",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Protocol format. Used by protocols that have configurable message format.
      */
     public static final ConfigSuffix<String> PROTOCOL_FORMAT = new StringConfigSuffix(
@@ -332,6 +339,15 @@ public final class Keys {
             "speedLimit",
             List.of(KeyType.SERVER, KeyType.DEVICE),
             0.0);
+
+    /**
+     * Speed limit threshold multiplier. For example, if the speed limit is 100, but we only want to generate an event
+     * if the speed is higher than 105, this parameter can be set to 1.05. Default multiplier is 1.0.
+     */
+    public static final ConfigKey<Double> EVENT_OVERSPEED_THRESHOLD_MULTIPLIER = new DoubleConfigKey(
+            "event.overspeed.thresholdMultiplier",
+            List.of(KeyType.CONFIG),
+            1.0);
 
     /**
      * Minimal over speed duration to trigger the event. Value in seconds.
@@ -837,7 +853,15 @@ public final class Keys {
             "url");
 
     /**
-     * Position forwarding Kafka topic.
+     * Position forwarding AMQP exchange.
+     */
+    public static final ConfigKey<String> FORWARD_EXCHANGE = new StringConfigKey(
+            "forward.exchange",
+            List.of(KeyType.CONFIG),
+            "traccar");
+
+    /**
+     * Position forwarding Kafka topic or AQMP Routing Key.
      */
     public static final ConfigKey<String> FORWARD_TOPIC = new StringConfigKey(
             "forward.topic",
@@ -906,7 +930,15 @@ public final class Keys {
             "json");
 
     /**
-     * Events forwarding Kafka topic.
+     * Events forwarding AMQP exchange.
+     */
+    public static final ConfigKey<String> EVENT_FORWARD_EXCHANGE = new StringConfigKey(
+            "event.forward.exchange",
+            List.of(KeyType.CONFIG),
+            "traccar");
+
+    /**
+     * Events forwarding Kafka topic or AQMP Routing Key.
      */
     public static final ConfigKey<String> EVENT_FORWARD_TOPIC = new StringConfigKey(
             "event.forward.topic",

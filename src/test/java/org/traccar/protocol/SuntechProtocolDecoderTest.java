@@ -12,6 +12,9 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new SuntechProtocolDecoder(null));
 
+        verifyAttributes(decoder, buffer(
+                "ST410STT;109815653;445;03;16531;724;10;-77;6011;7;16273;724;10;7511;0;0;13903;724;10;6011;0;0;7671;724;10;7111;0;0;16533;724;10;6011;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3.86;0;0098;1;003;;;;;;;;;"));
+
         verifyPosition(decoder, buffer(
                 "ALT;0840037569;FFFFFF;84;1.0.6;0;20221228;11:33:05;00004490;724;11;05D3;33;-22.845935;-46.322000;0.00;0.00;18;0;00000001;00000000;99;;;;08E3800F;4.1;12.37;0;0;0;0;4;;;;"));
 

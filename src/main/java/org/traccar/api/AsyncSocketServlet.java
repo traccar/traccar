@@ -24,9 +24,9 @@ import org.traccar.config.Keys;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpSession;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpSession;
 import java.time.Duration;
 
 @Singleton

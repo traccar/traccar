@@ -248,17 +248,21 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
                 buf.readUnsignedByte(); // priority (reserved)
 
-                position.setValid(true);
-                position.setLongitude(buf.readInt() / 10000000.0);
-                position.setLatitude(buf.readInt() / 10000000.0);
-                position.setAltitude(buf.readUnsignedShort() / 10.0);
-                position.setCourse(buf.readUnsignedShort() / 100.0);
-
-                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-
-                position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
-
-                position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
+                int longitude = buf.readInt();
+                int latitude = buf.readInt();
+                if (longitude > Integer.MIN_VALUE && latitude > Integer.MIN_VALUE) {
+                    position.setValid(true);
+                    position.setLongitude(longitude / 10000000.0);
+                    position.setLatitude(latitude / 10000000.0);
+                    position.setAltitude(buf.readUnsignedShort() / 10.0);
+                    position.setCourse(buf.readUnsignedShort() / 100.0);
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+                    position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
+                } else {
+                    buf.skipBytes(8);
+                    getLastLocation(position, null);
+                }
 
                 if (type == MSG_EXTENDED_RECORDS) {
                     position.set(Position.KEY_EVENT, buf.readUnsignedShort());

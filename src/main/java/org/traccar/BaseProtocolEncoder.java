@@ -27,7 +27,7 @@ import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.session.cache.CacheManager;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter {
 

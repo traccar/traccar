@@ -23,8 +23,8 @@ import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
 import org.traccar.sms.SmsManager;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
 import java.net.SocketAddress;
 import java.util.Arrays;
 import java.util.Collection;
