@@ -117,20 +117,30 @@ public class CommandResource extends ExtendedObjectResource<Command> {
         } else {
             permissionsService.checkRestriction(getUserId(), UserRestrictions::getLimitCommands);
         }
-        boolean result = true;
+
         if (groupId > 0) {
             permissionsService.checkPermission(Group.class, getUserId(), groupId);
             var devices = DeviceUtil.getAccessibleDevices(storage, getUserId(), List.of(), List.of(groupId));
+            List<QueuedCommand> queuedCommands = new ArrayList<>();
             for (Device device : devices) {
                 Command command = QueuedCommand.fromCommand(entity).toCommand();
                 command.setDeviceId(device.getId());
-                result = commandsManager.sendCommand(command) && result;
+                QueuedCommand queuedCommand = commandsManager.sendCommand(command);
+                if (queuedCommand != null) {
+                    queuedCommands.add(queuedCommand);
+                }
+            }
+            if (!queuedCommands.isEmpty()) {
+                return Response.accepted(queuedCommands).build();
             }
         } else {
             permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
-            result = commandsManager.sendCommand(entity);
+            QueuedCommand queuedCommand = commandsManager.sendCommand(entity);
+            if (queuedCommand != null) {
+                return Response.accepted(queuedCommand).build();
+            }
         }
-        return result ? Response.ok(entity).build() : Response.accepted(entity).build();
+        return Response.ok(entity).build();
     }
 
     @GET

@@ -61,7 +61,7 @@ public class CommandsManager implements BroadcastInterface {
         broadcastService.registerListener(this);
     }
 
-    public boolean sendCommand(Command command) throws Exception {
+    public QueuedCommand sendCommand(Command command) throws Exception {
         long deviceId = command.getDeviceId();
         if (command.getTextChannel()) {
             if (smsManager == null) {
@@ -84,12 +84,13 @@ public class CommandsManager implements BroadcastInterface {
             if (deviceSession != null && deviceSession.supportsLiveCommands()) {
                 deviceSession.sendCommand(command);
             } else {
-                storage.addObject(QueuedCommand.fromCommand(command), new Request(new Columns.Exclude("id")));
+                QueuedCommand queuedCommand = QueuedCommand.fromCommand(command);
+                queuedCommand.setId(storage.addObject(queuedCommand, new Request(new Columns.Exclude("id"))));
                 broadcastService.updateCommand(true, deviceId);
-                return false;
+                return queuedCommand;
             }
         }
-        return true;
+        return null;
     }
 
     public Collection<Command> readQueuedCommands(long deviceId) {
