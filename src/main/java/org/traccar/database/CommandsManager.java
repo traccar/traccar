@@ -22,6 +22,7 @@ import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
+import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.QueuedCommand;
 import org.traccar.session.ConnectionManager;
@@ -38,6 +39,8 @@ import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -48,16 +51,19 @@ public class CommandsManager implements BroadcastInterface {
     private final SmsManager smsManager;
     private final ConnectionManager connectionManager;
     private final BroadcastService broadcastService;
+    private final NotificationManager notificationManager;
 
     @Inject
     public CommandsManager(
             Storage storage, ServerManager serverManager, @Nullable SmsManager smsManager,
-            ConnectionManager connectionManager, BroadcastService broadcastService) {
+            ConnectionManager connectionManager, BroadcastService broadcastService,
+            NotificationManager notificationManager) {
         this.storage = storage;
         this.serverManager = serverManager;
         this.smsManager = smsManager;
         this.connectionManager = connectionManager;
         this.broadcastService = broadcastService;
+        this.notificationManager = notificationManager;
         broadcastService.registerListener(this);
     }
 
@@ -103,10 +109,16 @@ public class CommandsManager implements BroadcastInterface {
                     new Columns.All(),
                     new Condition.Equals("deviceId", deviceId),
                     new Order("id", false, count)));
+            Map<Event, Position> events = new HashMap<>();
             for (var command : commands) {
                 storage.removeObject(QueuedCommand.class, new Request(
                         new Condition.Equals("id", command.getId())));
+
+                Event event = new Event(Event.TYPE_QUEUED_COMMAND_SENT, command.getDeviceId());
+                event.set("id", command.getId());
+                events.put(event, null);
             }
+            notificationManager.updateEvents(events);
             return commands.stream().map(QueuedCommand::toCommand).collect(Collectors.toList());
         } catch (StorageException e) {
             throw new RuntimeException(e);
