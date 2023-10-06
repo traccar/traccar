@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -30,6 +31,7 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -394,6 +396,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
+            Network network = new Network();
+
             buf.readUnsignedShortLE(); // length
             buf.readUnsignedShortLE(); // index
 
@@ -510,7 +514,6 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 2000-01-01
                         break;
                     case 0x0C:
-                    case 0x9B:
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                         break;
                     case 0x0D:
@@ -518,6 +521,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x25:
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
+                        break;
+                    case 0x9B:
+                        position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedIntLE());
                         break;
                     case 0xA0:
                         position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE() * 0.001);
@@ -537,6 +543,28 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 int id = extension ? buf.readUnsignedShort() : buf.readUnsignedByte();
                 int length = buf.readUnsignedByte();
                 switch (id) {
+                    case 0x1D:
+                    case 0x1E:
+                    case 0x1F:
+                    case 0x20:
+                    case 0x21:
+                    case 0x22:
+                    case 0x23:
+                    case 0x24:
+                    case 0x25:
+                        String wifiMac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+                        network.addWifiAccessPoint(WifiAccessPoint.from(
+                                wifiMac.substring(0, wifiMac.length() - 1), buf.readShortLE()));
+                        break;
+                    case 0x0E:
+                    case 0x0F:
+                    case 0x10:
+                    case 0x12:
+                    case 0x13:
+                        network.addCellTower(CellTower.from(
+                                buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
+                                buf.readUnsignedShortLE(), buf.readUnsignedIntLE(), buf.readShortLE()));
+                        break;
                     case 0x2A:
                     case 0x2B:
                     case 0x2C:
@@ -547,6 +575,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x31:
                         buf.readUnsignedByte(); // label
                         position.set(Position.PREFIX_TEMP + (id - 0x2A), buf.readShortLE() * 0.01);
+                        break;
+                    case 0x4B:
+                        buf.skipBytes(length); // network information
                         break;
                     case 0xFE31:
                         buf.readUnsignedByte(); // alarm protocol
@@ -570,6 +601,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
+            if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+                position.setNetwork(network);
+            }
             positions.add(position);
         }
 

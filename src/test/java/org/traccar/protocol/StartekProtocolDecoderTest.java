@@ -11,6 +11,9 @@ public class StartekProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new StartekProtocolDecoder(null));
 
+        verifyPosition(decoder, text(
+                "&&l141,863911061945394,000,0,,230918072531,A,22.678598,114.045970,26,0.6,0,0,74,2286304571,460|0|249F|00001093,20,001C,00,00,04A7|019C|0000|0000,1,C0"));
+
         verifyAttribute(decoder, text(
                 "&&s148,868703050178631,000,37,,230704040211,A,22.678565,114.046011,31,0.5,0,339,77,8,460|0|249F|0AC2620D,27,0000001D,02,00,04F2|01A1|0000|0000,129,,,,949037"),
                 Position.KEY_HOURS, 9490000L);

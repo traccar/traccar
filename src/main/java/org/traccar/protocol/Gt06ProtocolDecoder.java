@@ -124,6 +124,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         WETRUST,
         JC400,
         SL4X,
+        SEEWORLD,
     }
 
     private Variant variant;
@@ -357,7 +358,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         long cid;
         if (type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7) {
             cid = buf.readLong();
-        } else if (type == MSG_GPS_LBS_6) {
+        } else if (type == MSG_GPS_LBS_6 || variant == Variant.SEEWORLD) {
             cid = buf.readUnsignedInt();
         } else {
             cid = buf.readUnsignedMedium();
@@ -899,6 +900,20 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set("cardStatus", buf.readUnsignedByte());
                     position.set(Position.KEY_DRIVING_TIME, buf.readUnsignedShort());
                 }
+            }
+
+            if (type == MSG_GPS_LBS_2 && variant == Variant.SEEWORLD) {
+                position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+                buf.readUnsignedByte(); // reporting mode
+                buf.readUnsignedByte(); // supplementary transmission
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                buf.readUnsignedInt(); // travel time
+                int temperature = buf.readUnsignedShort();
+                if (BitUtil.check(temperature, 15)) {
+                    temperature = -BitUtil.to(temperature, 15);
+                }
+                position.set(Position.PREFIX_TEMP + 1, temperature * 0.01);
+                position.set("humidity", buf.readUnsignedShort() * 0.01);
             }
 
             if ((type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_3 || type == MSG_GPS_LBS_4)
@@ -1468,6 +1483,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.JC400;
         } else if (header == 0x7878 && type == MSG_LBS_3 && length == 0x37) {
             variant = Variant.SL4X;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_2 && length == 0x2f) {
+            variant = Variant.SEEWORLD;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x26) {
+            variant = Variant.SEEWORLD;
         } else {
             variant = Variant.STANDARD;
         }

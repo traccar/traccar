@@ -51,7 +51,7 @@ public class PuiProtocolDecoder extends BaseMqttProtocolDecoder {
 
                 position.setValid(true);
 
-                DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss.SSS'Z'");
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                 position.setTime(dateFormat.parse(json.getString("ts")));
 
                 JsonObject location = json.getJsonObject("location");

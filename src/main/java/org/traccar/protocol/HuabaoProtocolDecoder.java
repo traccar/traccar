@@ -489,8 +489,22 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // reserved
                     break;
                 case 0x60:
-                    position.set(Position.KEY_EVENT, buf.readUnsignedShort());
-                    buf.skipBytes(length - 2);
+                    int event = buf.readUnsignedShort();
+                    position.set(Position.KEY_EVENT, event);
+                    if (event >= 0x0061 && event <= 0x0066) {
+                        buf.skipBytes(6); // lock id
+                        stringValue = buf.readCharSequence(8, StandardCharsets.US_ASCII).toString();
+                        position.set(Position.KEY_DRIVER_UNIQUE_ID, stringValue);
+                    }
+                    break;
+                case 0x63:
+                    for (int i = 1; i <= length / 11; i++) {
+                        position.set("lock" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                        position.set("lock" + i + "Battery", buf.readUnsignedShort() * 0.001);
+                        position.set("lock" + i + "Seal", buf.readUnsignedByte() == 0x31);
+                        buf.readUnsignedByte(); // physical state
+                        buf.readUnsignedByte(); // rssi
+                    }
                     break;
                 case 0x69:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);

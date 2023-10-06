@@ -391,7 +391,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 for (int i = 1; i <= adcCount; i++) {
                     String value = ByteBufUtil.hexDump(buf.readSlice(2));
                     if (!value.equals("ffff")) {
-                        position.set(Position.PREFIX_ADC + i, Integer.parseInt(value) * 0.01);
+                        position.set(Position.PREFIX_ADC + i, Integer.parseInt(value, 16) * 0.01);
                     }
                 }
             }

@@ -105,7 +105,7 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         FullHttpRequest request = (FullHttpRequest) msg;
         String content = request.content().toString(StandardCharsets.UTF_8);
         if (!content.startsWith("{")) {
-            content = URLDecoder.decode(content.split("=")[0], "UTF-8");
+            content = URLDecoder.decode(content.split("=")[0], StandardCharsets.UTF_8);
         }
         JsonObject json = Json.createReader(new StringReader(content)).readObject();
 

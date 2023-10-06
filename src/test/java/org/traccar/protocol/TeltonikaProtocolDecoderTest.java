@@ -16,6 +16,10 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
                 "000F313233343536373839303132333435"));
 
         verifyAttribute(decoder, binary(
+                "000000000000004b8e010000018368952793000f0e54fc209ab05800b300b40e00002a4f0001000000000000000000012a4f001e011c0001a40110eb47706aa38255aa96f21a154e2d00550d01000e020bd6010000823f"),
+                "tag1Battery", 3030);
+
+        verifyAttribute(decoder, binary(
                 "00000000000000240d01060000001c642b3ad14754534c7c367c317c307c31323734393838347c317c0d0a010000ec11"),
                 Position.KEY_DRIVER_UNIQUE_ID, "12749884");
 

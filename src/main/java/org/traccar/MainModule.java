@@ -303,7 +303,7 @@ public class MainModule extends AbstractModule {
             switch (type) {
                 case "overpass":
                 default:
-                    return new OverpassSpeedLimitProvider(client, url);
+                    return new OverpassSpeedLimitProvider(config, client, url);
             }
         }
         return null;

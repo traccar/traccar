@@ -11,6 +11,8 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new GlobalstarProtocolDecoder(null));
 
+        decoder.setAlternative(true);
+
         verifyNull(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n",
                 "<stuMessages xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://cody.glpconnect.com/XSD/StuMessage_Rev1_0_1.xsd\" timeStamp=\"16/09/2020 01:33:07 GMT\" messageID=\"567207180ae9100687cef8c81978371a\">\n",
@@ -21,6 +23,8 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
                 "<payload length=\"9\" source=\"pc\" encoding=\"hex\">0x63FFFF1BB4FFFFFFFF</payload>\n",
                 "</stuMessage>\n",
                 "</stuMessages>")));
+
+        decoder.setAlternative(false);
 
         verifyPositions(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",

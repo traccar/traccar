@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import org.traccar.config.Config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -16,7 +17,8 @@ public class OverpassSpeedLimitProviderTest {
     @Disabled
     @Test
     public void testOverpass() throws Exception {
-        SpeedLimitProvider provider = new OverpassSpeedLimitProvider(client, "http://8.8.8.8/api/interpreter");
+        var config = new Config();
+        SpeedLimitProvider provider = new OverpassSpeedLimitProvider(config, client, "http://8.8.8.8/api/interpreter");
 
         provider.getSpeedLimit(34.74767, -82.48098, new SpeedLimitProvider.SpeedLimitProviderCallback() {
             @Override
