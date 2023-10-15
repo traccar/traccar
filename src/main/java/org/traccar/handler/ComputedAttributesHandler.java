@@ -126,7 +126,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 }
             }
         }
-        return result;//Character.toUpperCase(column.charAt(0)) + column.substring(1)
+        return result;
     }
 
     private String prefixAttribute(String prefix, String key) {
