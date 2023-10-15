@@ -1482,10 +1482,17 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
-     * Enable computed attributes processing.
+     * Include device attributes in the computed attribute context.
      */
     public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES = new BooleanConfigKey(
             "processing.computedAttributes.deviceAttributes",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Include last position attributes in the computed attribute context.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LAST_ATTRIBUTES = new BooleanConfigKey(
+            "processing.computedAttributes.lastAttributes",
             List.of(KeyType.CONFIG));
 
     /**
