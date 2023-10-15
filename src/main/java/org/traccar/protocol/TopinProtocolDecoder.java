@@ -53,6 +53,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_WIFI_OFFLINE = 0x17;
     public static final int MSG_LBS_WIFI = 0x18;
     public static final int MSG_LBS_WIFI_OFFLINE = 0x19;
+    public static final int MSG_LBS_WIFI_2 = 0x1A;
     public static final int MSG_TIME_UPDATE = 0x30;
     public static final int MSG_SOS_NUMBER = 0x41;
     public static final int MSG_WIFI = 0x69;
@@ -221,7 +222,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             return position;
 
         } else if (type == MSG_WIFI || type == MSG_WIFI_OFFLINE
-                || type == MSG_LBS_WIFI || type == MSG_LBS_WIFI_OFFLINE) {
+                || type == MSG_LBS_WIFI || type == MSG_LBS_WIFI_2 || type == MSG_LBS_WIFI_OFFLINE) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());

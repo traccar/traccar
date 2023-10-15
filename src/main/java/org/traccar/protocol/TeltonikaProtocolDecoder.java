@@ -588,7 +588,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         }
                         index += 1;
                     }
-                } else if (id == 10829 || id == 10831) {
+                } else if (id == 548 || id == 10829 || id == 10831) {
                     ByteBuf data = buf.readSlice(length);
                     data.readUnsignedByte(); // header
                     for (int i = 1; data.isReadable(); i++) {
@@ -603,6 +603,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                                 case 1:
                                     String beaconId = ByteBufUtil.hexDump(beacon.readSlice(parameterLength));
                                     position.set("tag" + i + "Id", beaconId);
+                                    break;
+                                case 2:
+                                    String beaconData = ByteBufUtil.hexDump(beacon.readSlice(parameterLength));
+                                    position.set("tag" + i + "Data", beaconData);
                                     break;
                                 case 13:
                                     position.set("tag" + i + "LowBattery", beacon.readUnsignedByte());
