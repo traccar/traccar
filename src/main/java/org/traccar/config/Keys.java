@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1647,6 +1647,13 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> GEOLOCATION_REUSE = new BooleanConfigKey(
             "geolocation.reuse",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Process geolocation only when Wi-Fi information is available. This makes the result more accurate.
+     */
+    public static final ConfigKey<Boolean> GEOLOCATION_REQUIRE_WIFI = new BooleanConfigKey(
+            "geolocation.requireWifi",
             List.of(KeyType.CONFIG));
 
     /**

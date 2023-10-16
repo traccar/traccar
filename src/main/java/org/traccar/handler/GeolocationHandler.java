@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
     private final StatisticsManager statisticsManager;
     private final boolean processInvalidPositions;
     private final boolean reuse;
+    private final boolean requireWifi;
 
     public GeolocationHandler(
             Config config, GeolocationProvider geolocationProvider, CacheManager cacheManager,
@@ -46,6 +47,7 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
         this.statisticsManager = statisticsManager;
         processInvalidPositions = config.getBoolean(Keys.GEOLOCATION_PROCESS_INVALID_POSITIONS);
         reuse = config.getBoolean(Keys.GEOLOCATION_REUSE);
+        requireWifi = config.getBoolean(Keys.GEOLOCATION_REQUIRE_WIFI);
     }
 
     @Override
@@ -53,7 +55,8 @@ public class GeolocationHandler extends ChannelInboundHandlerAdapter {
         if (message instanceof Position) {
             final Position position = (Position) message;
             if ((position.getOutdated() || processInvalidPositions && !position.getValid())
-                    && position.getNetwork() != null) {
+                    && position.getNetwork() != null
+                    && (!requireWifi || position.getNetwork().getWifiAccessPoints() != null)) {
                 if (reuse) {
                     Position lastPosition = cacheManager.getPosition(position.getDeviceId());
                     if (lastPosition != null && position.getNetwork().equals(lastPosition.getNetwork())) {
