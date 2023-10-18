@@ -841,7 +841,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // working mode
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
                 } else {
-                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 100 / 6);
+                    int battery = buf.readUnsignedByte();
+                    position.set(Position.KEY_BATTERY_LEVEL, battery <= 6 ? battery * 100 / 6 : battery);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     short alarmExtension = buf.readUnsignedByte();
                     if (variant != Variant.VXT01) {
