@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_COMPLETE = 5;
     public static final int MSG_FILE_REQUEST = 8;
     public static final int MSG_INIT_REQUEST = 9;
+    public static final int MSG_PATH_REQUEST = 0x000C;
+    public static final int MSG_PATH_RESPONSE = 0x000D;
 
     private String uniqueId;
     private int packetCount;
@@ -65,7 +67,11 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 long settings = buf.readUnsignedInt();
                 if (channel != null && deviceSession != null) {
                     ByteBuf response = Unpooled.buffer();
-                    if (BitUtil.between(settings, 26, 30) > 0) {
+                    if (BitUtil.check(settings, 25)) {
+                        response.writeShort(MSG_PATH_REQUEST);
+                        response.writeShort(2);
+                        response.writeShort(0);
+                    } else if (BitUtil.between(settings, 26, 30) > 0) {
                         response.writeShort(MSG_FILE_REQUEST);
                         String file;
                         if (BitUtil.check(settings, 26)) {
@@ -129,6 +135,13 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 } else {
                     currentPacket += 1;
                 }
+                break;
+            case MSG_PATH_RESPONSE:
+                String file = buf.readCharSequence(buf.readUnsignedShort(), StandardCharsets.US_ASCII).toString();
+                ByteBuf response = Unpooled.buffer();
+                response.writeShort(MSG_FILE_REQUEST);
+                response.writeShort(file.length());
+                response.writeCharSequence(file, StandardCharsets.US_ASCII);
                 break;
             default:
                 break;
