@@ -14,6 +14,9 @@ public class DualcamProtocolDecoderTest extends ProtocolTest {
                 "000000050001403a4abaa31444000400"));
 
         verifyNull(decoder, binary(
+                "000d001e64736d2f706963747572652f3233313032302f3233313435322e6a706700"));
+
+        verifyNull(decoder, binary(
                 "00010006000000110000"));
 
         verifyNull(decoder, binary(

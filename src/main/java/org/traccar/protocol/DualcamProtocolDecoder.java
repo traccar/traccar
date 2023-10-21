@@ -138,10 +138,13 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case MSG_PATH_RESPONSE:
                 String file = buf.readCharSequence(buf.readUnsignedShort(), StandardCharsets.US_ASCII).toString();
-                ByteBuf response = Unpooled.buffer();
-                response.writeShort(MSG_FILE_REQUEST);
-                response.writeShort(file.length());
-                response.writeCharSequence(file, StandardCharsets.US_ASCII);
+                if (channel != null) {
+                    ByteBuf response = Unpooled.buffer();
+                    response.writeShort(MSG_FILE_REQUEST);
+                    response.writeShort(file.length());
+                    response.writeCharSequence(file, StandardCharsets.US_ASCII);
+                    channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+                }
                 break;
             default:
                 break;
