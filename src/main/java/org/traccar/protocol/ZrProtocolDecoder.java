@@ -119,7 +119,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
             switch (tag) {
                 case 0x2095:
                     position.setAccuracy((double) valueBuf.readUnsignedShort() / 100);
-                    position.setSpeed(valueBuf.readUnsignedShort());
+                    position.setSpeed(valueBuf.readUnsignedShort() * 0.1);
                     position.setCourse(valueBuf.readUnsignedShort());
                     position.setAltitude(valueBuf.readInt());
                     position.setLongitude(valueBuf.readInt() * 0.000001);
