@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.apache.commons.lang3.StringUtils;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.helper.DataConverter;
@@ -48,21 +49,14 @@ public class ZrProtocolEncoder extends BaseProtocolEncoder {
         request.writeShort(0x24c0);
 
         ByteBuf setConnectionCmd = Unpooled.buffer();
-        // 3: tcp long connection
-        setConnectionCmd.writeByte(3);
+        setConnectionCmd.writeByte(3); // 3: tcp long connection
         setConnectionCmd.writeByte(2);
-
-        // (N+M)*2
         setConnectionCmd.writeByte(1);
         setConnectionCmd.writeShort(command.getInteger(Command.KEY_PORT));
         setConnectionCmd.writeByte(command.getString(Command.KEY_SERVER).getBytes().length);
         setConnectionCmd.writeBytes(command.getString(Command.KEY_SERVER).getBytes());
-
         setConnectionCmd.writeByte(0);
-
-        // sms gateway
         setConnectionCmd.writeByte(0);
-
         setConnectionCmd.writeInt(300);
 
         request.writeShort(setConnectionCmd.readableBytes());
@@ -73,14 +67,24 @@ public class ZrProtocolEncoder extends BaseProtocolEncoder {
 
 
     /**
-     * If there are insufficient digits, add 0 from the left.
      * If the data parameter is given as 3242,and the targetLength parameter is set to 6,
      * the function will return 003242.
+     * <p>
+     * If the data parameter is given as 11323242,and the targetLength parameter is set to 6,
+     * the function will return 11323242,targetLength is unavailable
      *
      * @param data:data
      * @param targetLength:targetLength
+     * @return If there are insufficient digits, add 0 from the left.
+     * @throws RuntimeException when the targetLength less than zero
      */
     public static String strHexPaddingLeft(String data, int targetLength) {
+        if (targetLength <= 0) {
+            throw new RuntimeException("targetLength less than zero is not allowed!");
+        }
+        if (StringUtils.isEmpty(data)) {
+            data = "";
+        }
         int dataLength = data.length();
         if (dataLength < targetLength) {
             StringBuilder dataBuilder = new StringBuilder(data);

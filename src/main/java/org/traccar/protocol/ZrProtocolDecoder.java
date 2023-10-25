@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,12 @@ import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.util.Calendar;
+import java.util.Optional;
 import java.util.TimeZone;
 
 
 public class ZrProtocolDecoder extends BaseProtocolDecoder {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZrProtocolDecoder.class);
-
-    private static final String FRAME_HEADER = "dddd";
-    private static final String FRAME_TAIL = "ffff";
 
     private static final int MSG_HEARTBEAT = 0x0100;
     private static final int MSG_DEV_INFO = 0x0101;
@@ -53,7 +51,6 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_DEV_GEN_ACK = 0x0a00;
     public static final int MSG_QUERY = 0x0701;
     private static final int MSG_QUERY_ACK = 0x0a01;
-    private static final String STATE_ACC = "stateAcc";
 
     public ZrProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -63,20 +60,17 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         ByteBuf buf = (ByteBuf) msg;
 
-        // skip start marker
-        buf.readShort();
-        // skip msg len
+        buf.readShort(); // skip header
         buf.readUnsignedShort();
         short editionNum = buf.readShort();
         byte encryptionType = buf.readByte();
         ByteBuf id = buf.readSlice(10);
         int frameType = buf.readUnsignedShort();
-        String subpackageFlag = ByteBufUtil.hexDump(buf.readSlice(1));
+        ByteBufUtil.hexDump(buf.readSlice(1));
         Integer packageNo = buf.readUnsignedShort();
         int bodyLen = buf.readUnsignedByte();
         ByteBuf bodyBuf = buf.readSlice(bodyLen);
-        byte checkSum = buf.readByte();
-        // read all buf auto to release
+        buf.readByte();
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, decodeId(id));
         if (deviceSession == null) {
@@ -143,10 +137,10 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ALARM, decode2310(value));
 
                     if (BitUtil.check(value, 12)) {
-                        deviceSession.set(STATE_ACC, true);
+                        deviceSession.set(Position.KEY_IGNITION, true);
                     }
                     if (BitUtil.check(value, 13)) {
-                        deviceSession.set(STATE_ACC, false);
+                        deviceSession.set(Position.KEY_IGNITION, false);
                     }
                     break;
             }
@@ -158,11 +152,8 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Boolean accState = deviceSession.get(STATE_ACC);
-        if (accState == null) {
-            accState = false;
-        }
-        position.set(Position.KEY_IGNITION, accState);
+        Optional<Boolean> accStateOptional = Optional.ofNullable(deviceSession.get(Position.KEY_IGNITION));
+        position.set(Position.KEY_IGNITION, accStateOptional.orElse(false));
         return position;
     }
 
@@ -211,9 +202,8 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
     public static ByteBuf formatMessage(int type, ByteBuf id, short editionNum, byte encryptionType, Integer packageNo, ByteBuf body) {
         ByteBuf buffer = Unpooled.buffer();
 
-        buffer.writeBytes(ByteBufUtil.decodeHexDump(FRAME_HEADER));
-        // Message length, please specify one at will
-        buffer.writeShort(12);
+        buffer.writeBytes(ByteBufUtil.decodeHexDump("dddd"));
+        buffer.writeShort(12); // Message length, please specify one at will
         buffer.writeShort(editionNum);
         buffer.writeByte(encryptionType);
         buffer.writeBytes(id);
@@ -222,12 +212,10 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         buffer.writeShort(packageNo);
         buffer.writeByte(body.readableBytes());
         buffer.writeBytes(body);
-        // check sum
-        buffer.writeByte(12);
-        buffer.writeBytes(Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(FRAME_TAIL)));
+        buffer.writeByte(12); // check sum
+        buffer.writeBytes(ByteBufUtil.decodeHexDump("ffff"));
 
-        // Correct message length
-        buffer.setShort(2, buffer.readableBytes() - 6);
+        buffer.setShort(2, buffer.readableBytes() - 6); // Correct message length
         buffer.setByte(buffer.writerIndex() - 3, Checksum.xor(buffer.nioBuffer(2, buffer.readableBytes() - 5)));
 
         return buffer;
@@ -256,7 +244,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
     private static void sendTimeSynResponse(Channel channel, SocketAddress remoteAddress, DeviceSession deviceSession, ByteBuf id, int frameType, short editionNum, byte encryptionType, Integer packageNo) {
         ByteBuf response = Unpooled.buffer();
         addAuthTag(response);
-        addTimingTag(response, deviceSession);
+        addTimeSynTag(response, deviceSession);
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(formatMessage(MSG_TIME_SYN_ACK, id, editionNum, encryptionType, packageNo, response), remoteAddress));
         }
@@ -293,7 +281,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         bodyBuf.writeInt(0); // latitude
     }
 
-    private static void addTimingTag(ByteBuf bodyBuf, DeviceSession deviceSession) {
+    private static void addTimeSynTag(ByteBuf bodyBuf, DeviceSession deviceSession) {
         bodyBuf.writeShort(0x2510);
         bodyBuf.writeShort(9);
         TimeZone timeZone = deviceSession.get(DeviceSession.KEY_TIMEZONE);
