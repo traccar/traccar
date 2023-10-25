@@ -43,7 +43,7 @@ public class ZrProtocolEncoder extends BaseProtocolEncoder {
 
     private static ByteBuf formatSetConnectionCommand(ByteBuf id, Command command) {
         ByteBuf request = Unpooled.buffer();
-        ZrProtocolDecoder.add2391(request);
+        ZrProtocolDecoder.addAuthTag(request);
 
         request.writeShort(0x24c0);
 
