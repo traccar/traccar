@@ -158,7 +158,10 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        boolean accState = deviceSession.get(STATE_ACC);
+        Boolean accState = deviceSession.get(STATE_ACC);
+        if (accState == null) {
+            accState = false;
+        }
         position.set(Position.KEY_IGNITION, accState);
         return position;
     }
