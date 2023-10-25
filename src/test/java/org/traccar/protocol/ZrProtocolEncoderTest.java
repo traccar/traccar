@@ -5,11 +5,6 @@ import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
 
-/**
- * @author QingtaiJiang
- * @date 2023/10/24 14:04
- * @email qingtaij@163.com
- */
 public class ZrProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodePositionPeriodic() throws Exception {

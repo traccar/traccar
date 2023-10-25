@@ -1,3 +1,18 @@
+/*
+ * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.traccar.protocol;
 
 
@@ -18,29 +33,25 @@ import java.net.SocketAddress;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-/**
- * @author QingtaiJiang
- * @date 2023/9/18 16:54
- * @email qingtaij@163.com
- */
+
 public class ZrProtocolDecoder extends BaseProtocolDecoder {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZrProtocolDecoder.class);
 
     private static final String FRAME_HEADER = "dddd";
     private static final String FRAME_TAIL = "ffff";
 
-    private static final int FRAME_TYPE_HEARTBEAT = 0x0100;
-    private static final int FRAME_TYPE_DEV_INFO = 0x0101;
-    private static final int FRAME_TYPE_REPORT = 0x0102;
-    private static final int FRAME_TYPE_SER_GEN_ACK = 0x0400;
-    private static final int FRAME_TYPE_LBS_TRANSFER_LONG_LAT = 0x0103;
-    private static final int FRAME_TYPE_LBS_TRANSFER_LONG_LAT_ACK = 0x0403;
-    private static final int FRAME_TYPE_TIME_SYN = 0x0104;
-    private static final int FRAME_TYPE_TIME_SYN_ACK = 0x0404;
-    public static final int FRAME_TYPE_CFG = 0x0700;
-    private static final int FRAME_TYPE_DEV_GEN_ACK = 0x0a00;
-    public static final int FRAME_TYPE_QUERY = 0x0701;
-    private static final int FRAME_TYPE_QUERY_ACK = 0x0a01;
+    private static final int MSG_HEARTBEAT = 0x0100;
+    private static final int MSG_DEV_INFO = 0x0101;
+    private static final int MSG_REPORT = 0x0102;
+    private static final int MSG_SER_GEN_ACK = 0x0400;
+    private static final int MSG_LBS_TRANSFER_LONG_LAT = 0x0103;
+    private static final int MSG_LBS_TRANSFER_LONG_LAT_ACK = 0x0403;
+    private static final int MSG_TIME_SYN = 0x0104;
+    private static final int MSG_TIME_SYN_ACK = 0x0404;
+    public static final int MSG_CFG = 0x0700;
+    private static final int MSG_DEV_GEN_ACK = 0x0a00;
+    public static final int MSG_QUERY = 0x0701;
+    private static final int MSG_QUERY_ACK = 0x0a01;
 
     private static final String STATE_ACC = "stateAcc";
     private static final Integer ACC_ON = 1;
@@ -80,22 +91,22 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         }
 
         switch (frameType) {
-            case FRAME_TYPE_HEARTBEAT:
-            case FRAME_TYPE_DEV_INFO:
+            case MSG_HEARTBEAT:
+            case MSG_DEV_INFO:
                 sendGeneralResponse(channel, remoteAddress, id, frameType, editionNum, encryptionType, packageNo);
                 break;
-            case FRAME_TYPE_REPORT:
+            case MSG_REPORT:
                 sendGeneralResponse(channel, remoteAddress, id, frameType, editionNum, encryptionType, packageNo);
                 // GPS data
                 return decodeFrameTypeReport(deviceSession, bodyBuf);
-            case FRAME_TYPE_LBS_TRANSFER_LONG_LAT:
+            case MSG_LBS_TRANSFER_LONG_LAT:
                 sendLbsTransferResponse(channel, remoteAddress, id, frameType, editionNum, encryptionType, packageNo);
                 break;
-            case FRAME_TYPE_TIME_SYN:
+            case MSG_TIME_SYN:
                 sendTimeSynResponse(channel, remoteAddress, deviceSession, id, frameType, editionNum, encryptionType, packageNo);
                 break;
-            case FRAME_TYPE_DEV_GEN_ACK:
-            case FRAME_TYPE_QUERY_ACK:
+            case MSG_DEV_GEN_ACK:
+            case MSG_QUERY_ACK:
                 // nothing to do
                 break;
             default:
@@ -239,7 +250,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         add23A0(response, frameType, packageNo);
         add23A3(response);
         if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(formatMessage(FRAME_TYPE_SER_GEN_ACK, id, editionNum, encryptionType, packageNo, response), remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(formatMessage(MSG_SER_GEN_ACK, id, editionNum, encryptionType, packageNo, response), remoteAddress));
         }
     }
 
@@ -249,7 +260,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         add2094(response);
         add23A3(response);
         if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(formatMessage(FRAME_TYPE_LBS_TRANSFER_LONG_LAT_ACK, id, editionNum, encryptionType, packageNo, response), remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(formatMessage(MSG_LBS_TRANSFER_LONG_LAT_ACK, id, editionNum, encryptionType, packageNo, response), remoteAddress));
         }
     }
 
@@ -258,7 +269,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         add2391(response);
         add2510(response, deviceSession);
         if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(formatMessage(FRAME_TYPE_TIME_SYN_ACK, id, editionNum, encryptionType, packageNo, response), remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(formatMessage(MSG_TIME_SYN_ACK, id, editionNum, encryptionType, packageNo, response), remoteAddress));
         }
     }
 

@@ -3,11 +3,7 @@ package org.traccar.protocol;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
-/**
- * @author QingtaiJiang
- * @date 2023/10/24 14:01
- * @email qingtaij@163.com
- */
+
 public class ZrProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
