@@ -15,18 +15,14 @@
  */
 package org.traccar.forward;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.helper.MqttUtil;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.UUID;
 
 public class EventForwarderMqtt implements EventForwarder {
 
@@ -36,47 +32,9 @@ public class EventForwarderMqtt implements EventForwarder {
     private final String topic;
 
     public EventForwarderMqtt(Config config, ObjectMapper objectMapper) {
-        URI url;
-        try {
-            url = new URI(config.getString(Keys.EVENT_FORWARD_URL));
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-
-        String userInfo = url.getUserInfo();
-        Mqtt5SimpleAuth simpleAuth = null;
-        if (userInfo != null) {
-            int delimiter = userInfo.indexOf(':');
-            if (delimiter == -1) {
-                throw new IllegalArgumentException("Wrong credentials. Should be in format \"username:password\"");
-            } else {
-                simpleAuth = Mqtt5SimpleAuth.builder()
-                        .username(userInfo.substring(0, delimiter++))
-                        .password(userInfo.substring(delimiter).getBytes())
-                        .build();
-            }
-        }
-
-        String host = url.getHost();
-        int port = url.getPort();
-        client = Mqtt5Client.builder()
-                .identifier("traccar-" + UUID.randomUUID())
-                .serverHost(host)
-                .serverPort(port)
-                .simpleAuth(simpleAuth)
-                .automaticReconnectWithDefaultConfig()
-                .buildAsync();
-
-        client.connectWith()
-                .send()
-                .whenComplete((message, e) -> {
-                    if (e != null) {
-                        throw new RuntimeException(e);
-                    }
-                });
-
+        this.topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
+    	client = MqttUtil.createClient(config.getString(Keys.EVENT_FORWARD_URL), topic + "/state");
         this.objectMapper = objectMapper;
-        topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
     }
 
     @Override
