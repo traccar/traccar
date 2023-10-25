@@ -232,9 +232,9 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
 
     private static void sendGeneralResponse(Channel channel, SocketAddress remoteAddress, ByteBuf id, int frameType, short editionNum, byte encryptionType, Integer packageNo) {
         ByteBuf response = Unpooled.buffer();
-        add2391(response);
-        add23A0(response, frameType, packageNo);
-        add23A3(response);
+        addAuthTag(response);
+        addGeneralResponseTag(response, frameType, packageNo);
+        addUtcTimeTag(response);
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(formatMessage(MSG_SER_GEN_ACK, id, editionNum, encryptionType, packageNo, response), remoteAddress));
         }
@@ -242,9 +242,9 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
 
     private static void sendLbsTransferResponse(Channel channel, SocketAddress remoteAddress, ByteBuf id, int frameType, short editionNum, byte encryptionType, Integer packageNo) {
         ByteBuf response = Unpooled.buffer();
-        add2391(response);
-        add2094(response);
-        add23A3(response);
+        addAuthTag(response);
+        addLngLatRespTag(response);
+        addUtcTimeTag(response);
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(formatMessage(MSG_LBS_TRANSFER_LONG_LAT_ACK, id, editionNum, encryptionType, packageNo, response), remoteAddress));
         }
@@ -252,20 +252,20 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
 
     private static void sendTimeSynResponse(Channel channel, SocketAddress remoteAddress, DeviceSession deviceSession, ByteBuf id, int frameType, short editionNum, byte encryptionType, Integer packageNo) {
         ByteBuf response = Unpooled.buffer();
-        add2391(response);
-        add2510(response, deviceSession);
+        addAuthTag(response);
+        addTimingTag(response, deviceSession);
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(formatMessage(MSG_TIME_SYN_ACK, id, editionNum, encryptionType, packageNo, response), remoteAddress));
         }
     }
 
-    public static void add2391(ByteBuf bodyBuf) {
+    public static void addAuthTag(ByteBuf bodyBuf) {
         bodyBuf.writeShort(0x2391);
         bodyBuf.writeShort(3);
         bodyBuf.writeBytes(ByteBufUtil.decodeHexDump("123456"));
     }
 
-    private static void add23A0(ByteBuf bodyBuf, int frameType, Integer packageNo) {
+    private static void addGeneralResponseTag(ByteBuf bodyBuf, int frameType, Integer packageNo) {
         bodyBuf.writeShort(0x23a0);
         bodyBuf.writeShort(7); // len
 
@@ -275,21 +275,22 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         bodyBuf.writeShort(0);
     }
 
-    private static void add23A3(ByteBuf bodyBuf) {
+    private static void addUtcTimeTag(ByteBuf bodyBuf) {
         bodyBuf.writeShort(0x23a3);
         bodyBuf.writeShort(4);
         long time = System.currentTimeMillis() / 1000;
         bodyBuf.writeInt((int) time);
     }
 
-    private static void add2094(ByteBuf bodyBuf) {
+    private static void addLngLatRespTag(ByteBuf bodyBuf) {
+        // This return is invalid, the longitude and latitude are filled in by default 0
         bodyBuf.writeShort(0x2094);
         bodyBuf.writeShort(8);
         bodyBuf.writeInt(0); // longitude
         bodyBuf.writeInt(0); // latitude
     }
 
-    private static void add2510(ByteBuf bodyBuf, DeviceSession deviceSession) {
+    private static void addTimingTag(ByteBuf bodyBuf, DeviceSession deviceSession) {
         bodyBuf.writeShort(0x2510);
         bodyBuf.writeShort(9);
         TimeZone timeZone = deviceSession.get(DeviceSession.KEY_TIMEZONE);
