@@ -19,10 +19,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5ClientBuilder;
-import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
+import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 /**
@@ -37,7 +37,7 @@ public class MqttUtil {
      * @param url
      * @return
      */
-    public static Mqtt5AsyncClient createClient(final String url, final String willTopic) {
+    public static Mqtt3AsyncClient createClient(final String url, final String willTopic) {
         URI uri;
         try {
             uri = new URI(url);
@@ -45,17 +45,17 @@ public class MqttUtil {
             throw new RuntimeException(e);
         }
 
-        final Mqtt5SimpleAuth simpleAuth = getSimpleAuth(uri);
+        final Mqtt3SimpleAuth simpleAuth = getSimpleAuth(uri);
 
         final String host = uri.getHost();
         final int port = uri.getPort();
-        final Mqtt5ClientBuilder builder = Mqtt5Client.builder()
+        final Mqtt3ClientBuilder builder = Mqtt3Client.builder()
                 .identifier("traccar-" + UUID.randomUUID())
                 .serverHost(host)
                 .serverPort(port)
                 .simpleAuth(simpleAuth)
                 .automaticReconnectWithDefaultConfig();
-    	final Mqtt5AsyncClient client;
+    	final Mqtt3AsyncClient client;
         if (StringUtils.isNotBlank(willTopic)) {
         	client = builder.willPublish()
         				.topic(willTopic)
@@ -84,15 +84,15 @@ public class MqttUtil {
         return client;
     }
 
-	private static Mqtt5SimpleAuth getSimpleAuth(final URI uri) {
+	private static Mqtt3SimpleAuth getSimpleAuth(final URI uri) {
 		final String userInfo = uri.getUserInfo();
-        Mqtt5SimpleAuth simpleAuth = null;
+        Mqtt3SimpleAuth simpleAuth = null;
         if (userInfo != null) {
             int delimiter = userInfo.indexOf(':');
             if (delimiter == -1) {
                 throw new IllegalArgumentException("Wrong credentials. Should be in format \"username:password\"");
             } else {
-                simpleAuth = Mqtt5SimpleAuth.builder()
+                simpleAuth = Mqtt3SimpleAuth.builder()
                         .username(userInfo.substring(0, delimiter++))
                         .password(userInfo.substring(delimiter).getBytes())
                         .build();

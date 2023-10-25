@@ -27,12 +27,12 @@ import org.traccar.model.Position;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.datatypes.MqttQos;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
+import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 public class PositionForwarderMqtt implements PositionForwarder {
 
-	private final Mqtt5AsyncClient client;
+	private final Mqtt3AsyncClient client;
     private final ObjectMapper objectMapper;
     private final String topic;
 
