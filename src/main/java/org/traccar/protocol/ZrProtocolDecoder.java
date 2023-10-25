@@ -69,7 +69,6 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort();
         short editionNum = buf.readShort();
         byte encryptionType = buf.readByte();
-        // Device ID
         ByteBuf id = buf.readSlice(10);
         int frameType = buf.readUnsignedShort();
         String subpackageFlag = ByteBufUtil.hexDump(buf.readSlice(1));
@@ -131,9 +130,9 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
                     position.setAltitude(valueBuf.readInt());
                     position.setLongitude(valueBuf.readInt() * 0.000001);
                     position.setLatitude(valueBuf.readInt() * 0.000001);
-                    long l = valueBuf.readUnsignedInt(); // UTC second time
+                    long utcSecondTime = valueBuf.readUnsignedInt();
                     Calendar calendar = Calendar.getInstance((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE));
-                    calendar.setTimeInMillis(l * 1000L);
+                    calendar.setTimeInMillis(utcSecondTime * 1000L);
                     position.setTime(calendar.getTime());
                     break;
                 case 0x240c:
@@ -200,7 +199,6 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
             i++;
         }
         String devId = str.substring(i);
-        // if the devId is all zero return default 0
         if (devId.length() == 0) {
             return "0";
         }
@@ -210,29 +208,19 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
     public static ByteBuf formatMessage(int type, ByteBuf id, short editionNum, byte encryptionType, Integer packageNo, ByteBuf body) {
         ByteBuf buffer = Unpooled.buffer();
 
-        // header
-        buffer.writeBytes(Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(FRAME_HEADER)));
+        buffer.writeBytes(ByteBufUtil.decodeHexDump(FRAME_HEADER));
         // Message length, please specify one at will
         buffer.writeShort(12);
-        // Protocol version number
         buffer.writeShort(editionNum);
-        // Encryption type
         buffer.writeByte(encryptionType);
-        // Terminal device number
         buffer.writeBytes(id);
-        // msg id
         buffer.writeShort(type);
-        // subcontract item
         buffer.writeByte(0x11);
-        // packageNo
         buffer.writeShort(packageNo);
-        // body len
         buffer.writeByte(body.readableBytes());
-        // body
         buffer.writeBytes(body);
         // check sum
         buffer.writeByte(12);
-        // msg tail
         buffer.writeBytes(Unpooled.wrappedBuffer(ByteBufUtil.decodeHexDump(FRAME_TAIL)));
 
         // Correct message length
