@@ -34,39 +34,39 @@ public class ZrProtocolEncoder extends BaseProtocolEncoder {
         ByteBuf id = Unpooled.wrappedBuffer(DataConverter.parseHex(strHexPaddingLeft(getUniqueId(command.getDeviceId()), 20)));
         switch (command.getType()) {
             case Command.TYPE_SET_CONNECTION:
-                return registrationInformation(id, command);
+                return formatSetConnectionCommand(id, command);
             case Command.TYPE_ALARM_SPEED:
                 break;
         }
         return null;
     }
 
-    private static ByteBuf registrationInformation(ByteBuf id, Command command) {
+    private static ByteBuf formatSetConnectionCommand(ByteBuf id, Command command) {
         ByteBuf request = Unpooled.buffer();
         ZrProtocolDecoder.add2391(request);
 
         request.writeShort(0x24c0);
 
-        ByteBuf a24c0BytBuf = Unpooled.buffer();
+        ByteBuf setConnectionCmd = Unpooled.buffer();
         // 3: tcp long connection
-        a24c0BytBuf.writeByte(3);
-        a24c0BytBuf.writeByte(2);
+        setConnectionCmd.writeByte(3);
+        setConnectionCmd.writeByte(2);
 
         // (N+M)*2
-        a24c0BytBuf.writeByte(1);
-        a24c0BytBuf.writeShort(command.getInteger(Command.KEY_PORT));
-        a24c0BytBuf.writeByte(command.getString(Command.KEY_SERVER).getBytes().length);
-        a24c0BytBuf.writeBytes(command.getString(Command.KEY_SERVER).getBytes());
+        setConnectionCmd.writeByte(1);
+        setConnectionCmd.writeShort(command.getInteger(Command.KEY_PORT));
+        setConnectionCmd.writeByte(command.getString(Command.KEY_SERVER).getBytes().length);
+        setConnectionCmd.writeBytes(command.getString(Command.KEY_SERVER).getBytes());
 
-        a24c0BytBuf.writeByte(0);
+        setConnectionCmd.writeByte(0);
 
         // sms gateway
-        a24c0BytBuf.writeByte(0);
+        setConnectionCmd.writeByte(0);
 
-        a24c0BytBuf.writeInt(300);
+        setConnectionCmd.writeInt(300);
 
-        request.writeShort(a24c0BytBuf.readableBytes());
-        request.writeBytes(a24c0BytBuf);
+        request.writeShort(setConnectionCmd.readableBytes());
+        request.writeBytes(setConnectionCmd);
 
         return ZrProtocolDecoder.formatMessage(ZrProtocolDecoder.MSG_CFG, id, (short) 0x1040, (byte) 0, 1, request);
     }
@@ -74,16 +74,22 @@ public class ZrProtocolEncoder extends BaseProtocolEncoder {
 
     /**
      * If there are insufficient digits, add 0 from the left.
+     * If the data parameter is given as 3242,and the targetLength parameter is set to 6,
+     * the function will return 003242.
+     *
+     * @param data:data
+     * @param targetLength:targetLength
      */
-    public static String strHexPaddingLeft(String data, int length) {
+    public static String strHexPaddingLeft(String data, int targetLength) {
         int dataLength = data.length();
-        if (dataLength < length) {
+        if (dataLength < targetLength) {
             StringBuilder dataBuilder = new StringBuilder(data);
-            for (int i = dataLength; i < length; i++) {
+            for (int i = dataLength; i < targetLength; i++) {
                 dataBuilder.insert(0, "0");
             }
             data = dataBuilder.toString();
         }
         return data;
     }
+
 }

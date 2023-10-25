@@ -26,6 +26,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -52,10 +53,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
     private static final int MSG_DEV_GEN_ACK = 0x0a00;
     public static final int MSG_QUERY = 0x0701;
     private static final int MSG_QUERY_ACK = 0x0a01;
-
     private static final String STATE_ACC = "stateAcc";
-    private static final Integer ACC_ON = 1;
-    private static final Integer ACC_OFF = 0;
 
     public ZrProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -146,10 +144,10 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ALARM, decode2310(value));
 
                     if (BitUtil.check(value, 12)) {
-                        deviceSession.set(STATE_ACC, ACC_ON);
+                        deviceSession.set(STATE_ACC, true);
                     }
                     if (BitUtil.check(value, 13)) {
-                        deviceSession.set(STATE_ACC, ACC_OFF);
+                        deviceSession.set(STATE_ACC, false);
                     }
                     break;
             }
@@ -161,8 +159,8 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Integer accState = deviceSession.get(STATE_ACC);
-        position.set(Position.KEY_IGNITION, accState != null && accState.equals(ACC_ON));
+        boolean accState = deviceSession.get(STATE_ACC);
+        position.set(Position.KEY_IGNITION, accState);
         return position;
     }
 
@@ -239,7 +237,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
 
         // Correct message length
         buffer.setShort(2, buffer.readableBytes() - 6);
-        buffer.setByte(buffer.writerIndex() - 3, bcc(buffer));
+        buffer.setByte(buffer.writerIndex() - 3, Checksum.xor(buffer.nioBuffer(2, buffer.readableBytes() - 5)));
 
         return buffer;
     }
@@ -318,17 +316,6 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         bodyBuf.writeByte(calendar.get(Calendar.HOUR_OF_DAY));
         bodyBuf.writeByte(calendar.get(Calendar.MINUTE));
         bodyBuf.writeByte(calendar.get(Calendar.SECOND));
-    }
-
-    /**
-     * bcc check
-     */
-    private static byte bcc(ByteBuf byteBuf) {
-        byte cs = 0;
-        int readerIndex = byteBuf.readerIndex() + 2;
-        int writerIndex = byteBuf.writerIndex() + -3;
-        while (readerIndex < writerIndex) cs ^= byteBuf.getByte(readerIndex++);
-        return cs;
     }
 
 }
