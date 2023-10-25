@@ -16,6 +16,7 @@
 package org.traccar.forward;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,12 +27,11 @@ import org.traccar.model.Position;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 public class PositionForwarderMqtt implements PositionForwarder {
-
+	
 	private final Mqtt3AsyncClient client;
     private final ObjectMapper objectMapper;
     private final String topic;
@@ -80,14 +80,21 @@ public class PositionForwarderMqtt implements PositionForwarder {
 
     @Override
     public void forward(PositionData positionData, ResultHandler resultHandler) {
-    	final Set<String> options = new HashSet<>(Arrays.asList(positionData.getDevice().getString(MQTT_FORWARD_OPTIONS, "").split(",")));
-        /**
+
+    	// get options and remove spaces
+    	final String optionsSt = positionData.getDevice().getString(MQTT_FORWARD_OPTIONS, "").replaceAll(" ", "");
+    	final Set<String> options = StringUtils.isBlank(optionsSt) ? Collections.emptySet() : new HashSet<>(Arrays.asList(optionsSt.split(",")));
+    	
+    	/**
          * If mqtt.alias is defined on device publish position information
          * otherwhise publish full positionData
          * this make easy to parse specific device location
          */
         final String alias = positionData.getDevice().getString(MQTT_ALIAS, "");
-        if (StringUtils.isNotBlank(alias) && (options.isEmpty() || options.contains(OPTION_ALIAS)) && !options.contains(OPTION_NOALIAS)) {
+
+		if (StringUtils.isNotBlank(alias) && 
+				(options.isEmpty() || options.contains(OPTION_ALIAS)) && 
+				!options.contains(OPTION_NOALIAS)) {
             publishPosition(topic + "/" + alias , positionData.getPosition(), resultHandler, options);
         }
 
@@ -95,7 +102,7 @@ public class PositionForwarderMqtt implements PositionForwarder {
             publishPosition(topic + "/" + positionData.getPosition().getDeviceId() , positionData.getPosition(), resultHandler, options);
         }
         
-        if (StringUtils.isBlank(OPTION_ALIAS) || options.contains(OPTION_COMBINED)) {
+        if (StringUtils.isBlank(alias) || options.contains(OPTION_COMBINED)) {
             publish(topic, positionData, resultHandler);
         }
 
@@ -105,26 +112,23 @@ public class PositionForwarderMqtt implements PositionForwarder {
 	private void publishPosition(final String topic, final Position position,  
 			final ResultHandler resultHandler,
 			final Set<String> options) {
+		// TODO option to split position attributes in specific topics
+		// for now just publish single topic with json
 //		if (options.isEmpty() || options.contains(OPTION_DEVICE_JSON)) {
 	        publish(topic, position, resultHandler);
 //		}
-		//TODO option to publish with separate topics
 	}
 	
 	private void publish(final String pubTopic, final Object object,  final ResultHandler resultHandler) {
-        byte[] payload;
+        final String payload;
         try {
-            payload = objectMapper.writeValueAsString(object).getBytes();
+            payload = objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);
             return;
         }
-		client.publishWith()
-        	.topic(pubTopic)
-        	.qos(MqttQos.AT_LEAST_ONCE)
-        	.payload(payload)
-        	.send()
-        	.whenComplete((message, e) -> resultHandler.onResult(e == null, e));
+		MqttUtil.publish(client, pubTopic, payload, 
+				(message, e) -> resultHandler.onResult(e == null, e));
 	}
 
 }

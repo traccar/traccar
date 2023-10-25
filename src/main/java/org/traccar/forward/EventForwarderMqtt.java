@@ -21,7 +21,6 @@ import org.traccar.helper.MqttUtil;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 
 public class EventForwarderMqtt implements EventForwarder {
@@ -39,20 +38,16 @@ public class EventForwarderMqtt implements EventForwarder {
 
     @Override
     public void forward(EventData eventData, ResultHandler resultHandler) {
-        byte[] payload;
+        String payload;
         try {
-            payload = objectMapper.writeValueAsString(eventData).getBytes();
+            payload = objectMapper.writeValueAsString(eventData);
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);
             return;
         }
 
-        client.publishWith()
-                .topic(topic)
-                .qos(MqttQos.AT_LEAST_ONCE)
-                .payload(payload)
-                .send()
-                .whenComplete((message, e) -> resultHandler.onResult(e == null, e));
+        MqttUtil.publish(client, topic, payload, 
+        		(message, e) -> resultHandler.onResult(e == null, e));
     }
 
 }

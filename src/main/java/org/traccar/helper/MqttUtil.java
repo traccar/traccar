@@ -18,15 +18,18 @@ package org.traccar.helper;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
+import com.hivemq.client.mqtt.datatypes.MqttQos;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
 import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
+import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 /**
- * Wrapper for MQTT initialization 
+ * MQTT generic calls 
  * 
  */
 public class MqttUtil {
@@ -90,7 +93,7 @@ public class MqttUtil {
         if (userInfo != null) {
             int delimiter = userInfo.indexOf(':');
             if (delimiter == -1) {
-                throw new IllegalArgumentException("Wrong credentials. Should be in format \"username:password\"");
+                throw new IllegalArgumentException("Wrong MQTT credentials. Should be in format \"username:password\"");
             } else {
                 simpleAuth = Mqtt3SimpleAuth.builder()
                         .username(userInfo.substring(0, delimiter++))
@@ -101,5 +104,15 @@ public class MqttUtil {
 		return simpleAuth;
 	}
 
+	public static void publish(final Mqtt3AsyncClient client, 
+			final String pubTopic, final String payload,
+			final BiConsumer<? super Mqtt3Publish, ? super Throwable> whenComplete) {
+		client.publishWith()
+        	.topic(pubTopic)
+        	.qos(MqttQos.AT_LEAST_ONCE)
+        	.payload(payload.getBytes())
+        	.send()
+        	.whenComplete(whenComplete);
+	}
 
 }
