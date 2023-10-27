@@ -63,11 +63,12 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedShort();
 
+        DeviceSession deviceSession;
         switch (type) {
             case MSG_INIT:
                 buf.readUnsignedShort(); // protocol id
                 uniqueId = String.valueOf(buf.readLong());
-                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
+                deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
                 long settings = buf.readUnsignedInt();
                 if (channel != null && deviceSession != null) {
                     ByteBuf response = Unpooled.buffer();
@@ -113,7 +114,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
             case MSG_DATA:
-                int length = buf.readUnsignedShort();
+                int length = buf.readUnsignedShort() - 2;
                 media.writeBytes(buf, length);
                 boolean finished;
                 if (isPacketData()) {
