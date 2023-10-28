@@ -52,7 +52,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
     private ByteBuf media;
 
     private boolean isPacketData() {
-        return dataSize < 100;
+        return dataSize < 1000;
     }
 
     @Override
