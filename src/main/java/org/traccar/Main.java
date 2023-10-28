@@ -153,7 +153,8 @@ public final class Main {
             scheduleHealthCheck();
             scheduleDatabaseCleanup();
 
-            Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error("Thread exception", e));
+            Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error(
+                    "UncaughtException: " + e.getMessage() + ", thread name: " + t.getName(), e));
 
             Runtime.getRuntime().addShutdownHook(new Thread(() -> {
                 LOGGER.info("Shutting down server...");
