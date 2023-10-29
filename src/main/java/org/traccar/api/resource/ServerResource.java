@@ -30,6 +30,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.TimeZone;
 
 @Path("server")
 @Produces(MediaType.APPLICATION_JSON)
@@ -62,6 +65,11 @@ public class ServerResource extends BaseResource {
         } else {
             throw new RuntimeException("Reverse geocoding is not enabled");
         }
+    }
+    @Path("timezones")
+    @GET
+    public Collection<String> timezones() {
+        return Arrays.asList(TimeZone.getAvailableIDs());
     }
 
 }
