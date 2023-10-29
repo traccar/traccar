@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.api.security.CodeRequiredException;
 import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.database.OpenIdProvider;
@@ -108,7 +109,7 @@ public class SessionResource extends BaseResource {
                 }
             }
             if (email != null && password != null) {
-                User user = loginService.login(email, password);
+                User user = loginService.login(email, password, null);
                 if (user != null) {
                     request.getSession().setAttribute(USER_ID_KEY, user.getId());
                     LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
@@ -142,8 +143,19 @@ public class SessionResource extends BaseResource {
     @PermitAll
     @POST
     public User add(
-            @FormParam("email") String email, @FormParam("password") String password) throws StorageException {
-        User user = loginService.login(email, password);
+            @FormParam("email") String email,
+            @FormParam("password") String password,
+            @FormParam("code") Integer code) throws StorageException {
+        User user;
+        try {
+            user = loginService.login(email, password, code);
+        } catch (CodeRequiredException e) {
+            Response response = Response
+                    .status(Response.Status.UNAUTHORIZED)
+                    .header("WWW-Authenticate", "TOTP")
+                    .build();
+            throw new WebApplicationException(response);
+        }
         if (user != null) {
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
             LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
@@ -171,7 +183,7 @@ public class SessionResource extends BaseResource {
     @PermitAll
     @Path("openid/auth")
     @GET
-    public Response openIdAuth() throws IOException {
+    public Response openIdAuth() {
         return Response.seeOther(openIdProvider.createAuthUri()).build();
     }
 

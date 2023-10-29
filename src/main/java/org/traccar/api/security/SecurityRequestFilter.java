@@ -87,7 +87,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                         user = loginService.login(authHeader.substring(7));
                     } else {
                         String[] auth = decodeBasicAuth(authHeader);
-                        user = loginService.login(auth[0], auth[1]);
+                        user = loginService.login(auth[0], auth[1], null);
                     }
                     if (user != null) {
                         statisticsManager.registerRequest(user.getId());

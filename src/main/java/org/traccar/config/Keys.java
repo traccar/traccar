@@ -838,6 +838,20 @@ public final class Keys {
             "max-age=3600,public");
 
     /**
+     * Enable TOTP authentication on the server.
+     */
+    public static final ConfigKey<Boolean> WEB_TOTP_ENABLE = new BooleanConfigKey(
+            "totpEnable",
+            List.of(KeyType.SERVER));
+
+    /**
+     * Server attribute that indicates that TOTP authentication is required for new users.
+     */
+    public static final ConfigKey<Boolean> WEB_TOTP_FORCE = new BooleanConfigKey(
+            "totpForce",
+            List.of(KeyType.SERVER));
+
+    /**
      * Host for raw data forwarding.
      */
     public static final ConfigKey<String> SERVER_FORWARD = new StringConfigKey(
