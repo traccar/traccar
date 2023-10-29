@@ -97,7 +97,8 @@ public class OpenIdProvider {
 
             String httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString()).body();
 
-            Map<String, Object> discoveryMap = objectMapper.readValue(httpResponse, new TypeReference<>() {});
+            Map<String, Object> discoveryMap = objectMapper.readValue(httpResponse, new TypeReference<>() {
+            });
 
             authUrl = new URI((String) discoveryMap.get("authorization_endpoint"));
             tokenUrl = new URI((String) discoveryMap.get("token_endpoint"));
