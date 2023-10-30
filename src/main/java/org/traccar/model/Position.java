@@ -95,7 +95,7 @@ public class Position extends Message {
     public static final String KEY_DRIVING_TIME = "drivingTime";
 
     public static final String KEY_DTCS = "dtcs";
-    public static final String KEY_OBD_SPEED = "obdSpeed"; // knots
+    public static final String KEY_OBD_SPEED = "obdSpeed"; // km/h
     public static final String KEY_OBD_ODOMETER = "obdOdometer"; // meters
 
     public static final String KEY_RESULT = "result";
