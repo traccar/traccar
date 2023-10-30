@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Device;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -45,6 +46,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PATH_REQUEST = 0x000C;
     public static final int MSG_PATH_RESPONSE = 0x000D;
 
+    private String model;
     private String uniqueId;
     private int dataSize;
     private int dataCurrent;
@@ -52,7 +54,11 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
     private ByteBuf media;
 
     private boolean isPacketData() {
-        return dataSize < 1000;
+        if (model == null) {
+            return dataSize < 8192;
+        } else {
+            return !"DSM".equals(model);
+        }
     }
 
     @Override
@@ -71,6 +77,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
                 long settings = buf.readUnsignedInt();
                 if (channel != null && deviceSession != null) {
+                    model = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
                     ByteBuf response = Unpooled.buffer();
                     if (BitUtil.check(settings, 25)) {
                         response.writeShort(MSG_PATH_REQUEST);
