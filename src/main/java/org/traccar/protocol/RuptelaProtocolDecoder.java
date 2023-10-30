@@ -150,7 +150,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
             case 95:
-                position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(readValue(buf, length, true)));
+                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, true));
                 break;
             case 134:
                 if (readValue(buf, length, false) > 0) {
