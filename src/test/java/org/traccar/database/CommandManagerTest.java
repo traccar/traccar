@@ -124,11 +124,9 @@ public class CommandManagerTest {
         Command command = createCommand(1, true);
         Device device = createDevice(1, "samsung", 1);
         Position position = createPosition(1, "carrell");
-
         Mockito.when(storage.getObject(eq(Device.class), any(Request.class))).thenReturn(device);
         Mockito.when(storage.getObject(eq(Position.class), any(Request.class))).thenReturn(null);
         Mockito.doReturn(CarcellProtocol).when(serverManager).getProtocol(position.getProtocol());
-        //Mockito.when(command.getType().equals(Command.TYPE_CUSTOM)).thenReturn(true);
         doNothing().when(smsManager).sendMessage(device.getPhone(), command.getString(Command.KEY_DATA), true);
         commandsManager.sendCommand(command);
         verify(smsManager, times(1)).sendMessage(device.getPhone(), command.getString(Command.KEY_DATA), true);
