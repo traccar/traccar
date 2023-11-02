@@ -127,7 +127,7 @@ public class LoginService {
 
     private void checkUserCode(User user, Integer code) throws SecurityException {
         String key = user.getTotpKey();
-        if (key != null) {
+        if (key != null && !key.isEmpty()) {
             if (code == null) {
                 throw new CodeRequiredException();
             }
