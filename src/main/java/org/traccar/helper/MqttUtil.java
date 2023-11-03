@@ -29,14 +29,18 @@ import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 /**
- * MQTT generic calls 
- * 
+ * MQTT generic calls
+ *
  */
-public class MqttUtil {
+public final class MqttUtil {
+
+    private MqttUtil() {
+
+    }
 
     /**
      * Create client from url
-     * 
+     *
      * @param url
      * @return
      */
@@ -52,67 +56,46 @@ public class MqttUtil {
 
         final String host = uri.getHost();
         final int port = uri.getPort();
-        final Mqtt3ClientBuilder builder = Mqtt3Client.builder()
-                .identifier("traccar-" + UUID.randomUUID())
-                .serverHost(host)
-                .serverPort(port)
-                .simpleAuth(simpleAuth)
-                .automaticReconnectWithDefaultConfig();
-    	final Mqtt3AsyncClient client;
+        final Mqtt3ClientBuilder builder = Mqtt3Client.builder().identifier("traccar-" + UUID.randomUUID())
+                .serverHost(host).serverPort(port).simpleAuth(simpleAuth).automaticReconnectWithDefaultConfig();
+        final Mqtt3AsyncClient client;
         if (StringUtils.isNotBlank(willTopic)) {
-        	client = builder.willPublish()
-        				.topic(willTopic)
-        				.payload("disconnected".getBytes())
-        				.retain(true)
-        				.applyWillPublish()
-        				.buildAsync();
+            client = builder.willPublish().topic(willTopic).payload("disconnected".getBytes()).retain(true)
+                    .applyWillPublish().buildAsync();
         } else {
-        	client = builder.buildAsync(); 
+            client = builder.buildAsync();
         }
 
-        client.connectWith()
-                .send()
-                .whenComplete((message, e) -> {
-                    if (e != null) {
-                        throw new RuntimeException(e);
-                    } else if (StringUtils.isNotBlank(willTopic)) {
-                    	client.publishWith()
-                    		.topic(willTopic)
-                    		.payload("connected".getBytes())
-                    		.retain(true)
-                    		.send();
-                    }
-                });
+        client.connectWith().send().whenComplete((message, e) -> {
+            if (e != null) {
+                throw new RuntimeException(e);
+            } else if (StringUtils.isNotBlank(willTopic)) {
+                client.publishWith().topic(willTopic).payload("connected".getBytes()).retain(true).send();
+            }
+        });
 
         return client;
     }
 
-	private static Mqtt3SimpleAuth getSimpleAuth(final URI uri) {
-		final String userInfo = uri.getUserInfo();
+    private static Mqtt3SimpleAuth getSimpleAuth(final URI uri) {
+        final String userInfo = uri.getUserInfo();
         Mqtt3SimpleAuth simpleAuth = null;
         if (userInfo != null) {
             int delimiter = userInfo.indexOf(':');
             if (delimiter == -1) {
                 throw new IllegalArgumentException("Wrong MQTT credentials. Should be in format \"username:password\"");
             } else {
-                simpleAuth = Mqtt3SimpleAuth.builder()
-                        .username(userInfo.substring(0, delimiter++))
-                        .password(userInfo.substring(delimiter).getBytes())
-                        .build();
+                simpleAuth = Mqtt3SimpleAuth.builder().username(userInfo.substring(0, delimiter++))
+                        .password(userInfo.substring(delimiter).getBytes()).build();
             }
         }
-		return simpleAuth;
-	}
+        return simpleAuth;
+    }
 
-	public static void publish(final Mqtt3AsyncClient client, 
-			final String pubTopic, final String payload,
-			final BiConsumer<? super Mqtt3Publish, ? super Throwable> whenComplete) {
-		client.publishWith()
-        	.topic(pubTopic)
-        	.qos(MqttQos.AT_LEAST_ONCE)
-        	.payload(payload.getBytes())
-        	.send()
-        	.whenComplete(whenComplete);
-	}
+    public static void publish(final Mqtt3AsyncClient client, final String pubTopic, final String payload,
+            final BiConsumer<? super Mqtt3Publish, ? super Throwable> whenComplete) {
+        client.publishWith().topic(pubTopic).qos(MqttQos.AT_LEAST_ONCE).payload(payload.getBytes()).send()
+                .whenComplete(whenComplete);
+    }
 
 }

@@ -31,8 +31,8 @@ import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 public class PositionForwarderMqtt implements PositionForwarder {
-	
-	private final Mqtt3AsyncClient client;
+
+    private final Mqtt3AsyncClient client;
     private final ObjectMapper objectMapper;
     private final String topic;
 
@@ -41,37 +41,34 @@ public class PositionForwarderMqtt implements PositionForwarder {
      */
     private static final String MQTT_ALIAS = "mqtt.alias";
     /**
-     * Options for publishing
-     * empty/not defined - combined data, and if alias defined position information
-     * combined - combined data
-     * alias - device position
-     * deviceId - device position 
-     * noalias - dont publish with alias even when alias defined
+     * Options for publishing empty/not defined - combined data, and if alias
+     * defined position information combined - combined data alias - device position
+     * deviceId - device position noalias - dont publish with alias even when alias
+     * defined
      */
-	private static final String MQTT_FORWARD_OPTIONS = "mqtt.forward.options";
+    private static final String MQTT_FORWARD_OPTIONS = "mqtt.forward.options";
 
-	/**
-	 * Dont publish device information by alias
-	 */
-	private static final String OPTION_NOALIAS = "no_alias";
-	/**
-	 * publish all combined position data
-	 */
-	private static final String OPTION_COMBINED = "combined";
-	/**
-	 * publish by deviceId
-	 */
-	private static final String OPTION_DEVICE_ID = "deviceId";
-	/**
-	 * publish by alias (if {@link}MQTT_ALIAS is defined) 
-	 */
-	private static final String OPTION_ALIAS = "alias";
-	/**
-	 * publish device json data
-	 */
-	private static final String OPTION_DEVICE_JSON = "device_json";
-    
-    
+    /**
+     * Dont publish device information by alias
+     */
+    private static final String OPTION_NOALIAS = "no_alias";
+    /**
+     * publish all combined position data
+     */
+    private static final String OPTION_COMBINED = "combined";
+    /**
+     * publish by deviceId
+     */
+    private static final String OPTION_DEVICE_ID = "deviceId";
+    /**
+     * publish by alias (if {@link}MQTT_ALIAS is defined)
+     */
+    private static final String OPTION_ALIAS = "alias";
+    /**
+     * publish device json data (default when no option defined)
+     */
+    private static final String OPTION_DEVICE_JSON = "device_json";
+
     public PositionForwarderMqtt(Config config, ObjectMapper objectMapper) {
         this.topic = config.getString(Keys.FORWARD_TOPIC);
         this.client = MqttUtil.createClient(config.getString(Keys.FORWARD_URL), topic + "/state");
@@ -81,45 +78,45 @@ public class PositionForwarderMqtt implements PositionForwarder {
     @Override
     public void forward(PositionData positionData, ResultHandler resultHandler) {
 
-    	// get options and remove spaces
-    	final String optionsSt = positionData.getDevice().getString(MQTT_FORWARD_OPTIONS, "").replaceAll(" ", "");
-    	final Set<String> options = StringUtils.isBlank(optionsSt) ? Collections.emptySet() : new HashSet<>(Arrays.asList(optionsSt.split(",")));
-    	
-    	/**
-         * If mqtt.alias is defined on device publish position information
-         * otherwhise publish full positionData
-         * this make easy to parse specific device location
+        // get options and remove spaces
+        final String optionsSt = positionData.getDevice().getString(MQTT_FORWARD_OPTIONS, "").replaceAll(" ", "");
+        final Set<String> options = StringUtils.isBlank(optionsSt) ? Collections.emptySet()
+                : new HashSet<>(Arrays.asList(optionsSt.split(",")));
+
+        /**
+         * If mqtt.alias is defined on device publish position information otherwhise
+         * publish full positionData this make easy to parse specific device location
          */
         final String alias = positionData.getDevice().getString(MQTT_ALIAS, "");
 
-		if (StringUtils.isNotBlank(alias) && 
-				(options.isEmpty() || options.contains(OPTION_ALIAS)) && 
-				!options.contains(OPTION_NOALIAS)) {
-            publishPosition(topic + "/" + alias , positionData.getPosition(), resultHandler, options);
+        if (StringUtils.isNotBlank(alias) && (options.isEmpty() || options.contains(OPTION_ALIAS))
+                && !options.contains(OPTION_NOALIAS)) {
+            publishPosition(topic + "/" + alias, positionData.getPosition(), resultHandler, options);
         }
 
         if (options.contains(OPTION_DEVICE_ID)) {
-            publishPosition(topic + "/" + positionData.getPosition().getDeviceId() , positionData.getPosition(), resultHandler, options);
+            publishPosition(topic + "/" + positionData.getPosition().getDeviceId(), positionData.getPosition(),
+                    resultHandler, options);
         }
-        
+
         if (StringUtils.isBlank(alias) || options.contains(OPTION_COMBINED)) {
             publish(topic, positionData, resultHandler);
         }
 
-    	
     }
 
-	private void publishPosition(final String topic, final Position position,  
-			final ResultHandler resultHandler,
-			final Set<String> options) {
-		// TODO option to split position attributes in specific topics
-		// for now just publish single topic with json
-//		if (options.isEmpty() || options.contains(OPTION_DEVICE_JSON)) {
-	        publish(topic, position, resultHandler);
-//		}
-	}
-	
-	private void publish(final String pubTopic, final Object object,  final ResultHandler resultHandler) {
+    private void publishPosition(final String topic, final Position position, final ResultHandler resultHandler,
+            final Set<String> options) {
+        // TODO option to split position attributes in specific topics
+        // for now just publish single topic with json
+        if (options.isEmpty() || options.contains(OPTION_DEVICE_JSON)) {
+            publish(topic, position, resultHandler);
+        }
+
+        // TODO option to send geofence names
+    }
+
+    private void publish(final String pubTopic, final Object object, final ResultHandler resultHandler) {
         final String payload;
         try {
             payload = objectMapper.writeValueAsString(object);
@@ -127,8 +124,7 @@ public class PositionForwarderMqtt implements PositionForwarder {
             resultHandler.onResult(false, e);
             return;
         }
-		MqttUtil.publish(client, pubTopic, payload, 
-				(message, e) -> resultHandler.onResult(e == null, e));
-	}
+        MqttUtil.publish(client, pubTopic, payload, (message, e) -> resultHandler.onResult(e == null, e));
+    }
 
 }

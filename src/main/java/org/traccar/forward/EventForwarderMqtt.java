@@ -32,7 +32,7 @@ public class EventForwarderMqtt implements EventForwarder {
 
     public EventForwarderMqtt(Config config, ObjectMapper objectMapper) {
         this.topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
-    	client = MqttUtil.createClient(config.getString(Keys.EVENT_FORWARD_URL), topic + "/state");
+        client = MqttUtil.createClient(config.getString(Keys.EVENT_FORWARD_URL), topic + "/state");
         this.objectMapper = objectMapper;
     }
 
@@ -46,8 +46,7 @@ public class EventForwarderMqtt implements EventForwarder {
             return;
         }
 
-        MqttUtil.publish(client, topic, payload, 
-        		(message, e) -> resultHandler.onResult(e == null, e));
+        MqttUtil.publish(client, topic, payload, (message, e) -> resultHandler.onResult(e == null, e));
     }
 
 }
