@@ -25,7 +25,7 @@ public class PositrexProtocol extends BaseProtocol {
 
     @Inject
     public PositrexProtocol(Config config) {
-        addServer(new TrackerServer(config, getName(), false) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new PositrexProtocolDecoder(PositrexProtocol.this));
