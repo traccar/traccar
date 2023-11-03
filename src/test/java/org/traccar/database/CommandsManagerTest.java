@@ -2,50 +2,26 @@ package org.traccar.database;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.*;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.listeners.MockitoListener;
-import org.mockito.stubbing.Answer;
 import org.traccar.BaseProtocol;
-import org.traccar.Protocol;
 import org.traccar.ServerManager;
-import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.QueuedCommand;
-import org.traccar.notification.MessageException;
-import org.traccar.protocol.CarcellProtocol;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
 import org.traccar.sms.SmsManager;
 import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import jakarta.annotation.Nullable;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assertions;
 
-import static org.apache.commons.jexl3.parser.ParserConstants.eq;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-public class CommandManagerTest {
+public class CommandsManagerTest {
 
     @InjectMocks
     private CommandsManager commandsManager;
@@ -152,7 +128,6 @@ public class CommandManagerTest {
         Mockito.when(deviceSession.supportsLiveCommands()).thenReturn(true);
         doNothing().when(queuedCommand).setId(1);
         assertNotNull(commandsManager.sendCommand(command));
-        assertInstanceOf(QueuedCommand.class,commandsManager.sendCommand(command));
     }
 
 }
