@@ -177,7 +177,7 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
                     break;
                 case 0x57:
-                    position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
+                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort());
                     break;
                 case 0x65:
                     position.set(Position.KEY_VIN, buf.readSlice(17).toString(StandardCharsets.US_ASCII));

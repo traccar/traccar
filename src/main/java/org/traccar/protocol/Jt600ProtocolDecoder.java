@@ -386,7 +386,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([AV]),")               // validity
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
-            .number("d+,")                       // event source
+            .number("(d+),")                     // event source
             .number("d+,")                       // unlock verification
             .number("(d+),")                     // rfid
             .number("d+,")                       // password verification
@@ -418,6 +418,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
+
+        position.set("eventSource", parser.nextInt());
 
         String rfid = parser.next();
         if (!rfid.equals("0000000000")) {

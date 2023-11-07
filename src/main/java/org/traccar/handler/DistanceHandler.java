@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2015 Amila Silva
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,15 +36,15 @@ public class DistanceHandler extends BaseDataHandler {
     private final CacheManager cacheManager;
 
     private final boolean filter;
-    private final int coordinatesMinError;
-    private final int coordinatesMaxError;
+    private final int minError;
+    private final int maxError;
 
     @Inject
     public DistanceHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
         this.filter = config.getBoolean(Keys.COORDINATES_FILTER);
-        this.coordinatesMinError = config.getInteger(Keys.COORDINATES_MIN_ERROR);
-        this.coordinatesMaxError = config.getInteger(Keys.COORDINATES_MAX_ERROR);
+        this.minError = config.getInteger(Keys.COORDINATES_MIN_ERROR);
+        this.maxError = config.getInteger(Keys.COORDINATES_MAX_ERROR);
     }
 
     @Override
@@ -66,8 +66,8 @@ public class DistanceHandler extends BaseDataHandler {
                 distance = BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
             }
             if (filter && last.getLatitude() != 0 && last.getLongitude() != 0) {
-                boolean satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
-                boolean satisfiesMax = coordinatesMaxError == 0 || distance < coordinatesMaxError;
+                boolean satisfiesMin = minError == 0 || distance > minError;
+                boolean satisfiesMax = maxError == 0 || distance < maxError || position.getValid();
                 if (!satisfiesMin || !satisfiesMax) {
                     position.setValid(last.getValid());
                     position.setLatitude(last.getLatitude());

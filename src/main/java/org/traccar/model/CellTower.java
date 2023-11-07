@@ -104,7 +104,7 @@ public class CellTower {
     }
 
     public void setSignalStrength(Integer signalStrength) {
-        this.signalStrength = signalStrength;
+        this.signalStrength = signalStrength > 0 ? -signalStrength : signalStrength;
     }
 
     public void setOperator(long operator) {

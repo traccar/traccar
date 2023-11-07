@@ -15,6 +15,7 @@
  */
 package org.traccar.api.security;
 
+import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -70,7 +71,7 @@ public class LoginService {
         return user;
     }
 
-    public User login(String email, String password) throws StorageException {
+    public User login(String email, String password, Integer code) throws StorageException {
         if (forceOpenId) {
             return null;
         }
@@ -84,6 +85,7 @@ public class LoginService {
         if (user != null) {
             if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
                     || !forceLdap && user.isPasswordValid(password)) {
+                checkUserCode(user, code);
                 checkUserEnabled(user);
                 return user;
             }
@@ -98,15 +100,12 @@ public class LoginService {
         return null;
     }
 
-    public User login(String email, String name, Boolean administrator) throws StorageException {
+    public User login(String email, String name, boolean administrator) throws StorageException {
         User user = storage.getObject(User.class, new Request(
             new Columns.All(),
             new Condition.Equals("email", email)));
 
-        if (user != null) {
-            checkUserEnabled(user);
-            return user;
-        } else {
+        if (user == null) {
             user = new User();
             UserUtil.setUserDefaults(user, config);
             user.setName(name);
@@ -114,9 +113,9 @@ public class LoginService {
             user.setFixedEmail(true);
             user.setAdministrator(administrator);
             user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
-            checkUserEnabled(user);
-            return user;
         }
+        checkUserEnabled(user);
+        return user;
     }
 
     private void checkUserEnabled(User user) throws SecurityException {
@@ -124,6 +123,19 @@ public class LoginService {
             throw new SecurityException("Unknown account");
         }
         user.checkDisabled();
+    }
+
+    private void checkUserCode(User user, Integer code) throws SecurityException {
+        String key = user.getTotpKey();
+        if (key != null && !key.isEmpty()) {
+            if (code == null) {
+                throw new CodeRequiredException();
+            }
+            GoogleAuthenticator authenticator = new GoogleAuthenticator();
+            if (!authenticator.authorize(key, code)) {
+                throw new SecurityException("User authorization failed");
+            }
+        }
     }
 
 }

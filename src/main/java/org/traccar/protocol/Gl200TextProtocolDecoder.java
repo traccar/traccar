@@ -422,7 +422,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_RPM, Integer.parseInt(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 4) && !values[index++].isEmpty()) {
-            position.set(Position.KEY_OBD_SPEED, UnitsConverter.knotsFromKph(Integer.parseInt(values[index - 1])));
+            position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 6) && !values[index++].isEmpty()) {
             position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index - 1]));

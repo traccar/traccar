@@ -375,9 +375,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 69:
                                     value = buf.readUnsignedByte();
-                                    position.set(
-                                            Position.KEY_OBD_SPEED,
-                                            (value != 0xFF) ? UnitsConverter.knotsFromKph(value) : null);
+                                    position.set(Position.KEY_OBD_SPEED, (value != 0xFF) ? value : null);
                                     break;
                                 case 78:
                                 case 79:
