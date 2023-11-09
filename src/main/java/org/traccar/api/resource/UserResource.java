@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseObjectResource;
@@ -31,6 +32,7 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Pagination;
 import org.traccar.storage.query.Request;
 
 import jakarta.annotation.security.PermitAll;
@@ -61,18 +63,22 @@ public class UserResource extends BaseObjectResource<User> {
     }
 
     @GET
-    public Collection<User> get(@QueryParam("userId") long userId) throws StorageException {
+    public Collection<User> get(@QueryParam("userId") long userId, @QueryParam("skip") @DefaultValue("0") int skip, @QueryParam("limit") @DefaultValue("0") int limit) throws StorageException {
         if (userId > 0) {
             permissionsService.checkUser(getUserId(), userId);
             return storage.getObjects(baseClass, new Request(
                     new Columns.All(),
-                    new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups()));
+                    new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups(),
+                    null,
+                    new Pagination(skip, limit)));
         } else if (permissionsService.notAdmin(getUserId())) {
             return storage.getObjects(baseClass, new Request(
                     new Columns.All(),
                     new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()));
         } else {
-            return storage.getObjects(baseClass, new Request(new Columns.All()));
+            return storage.getObjects(baseClass, new Request(
+            		new Columns.All(),
+                    new Pagination(skip, limit)));
         }
     }
 
