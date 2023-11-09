@@ -316,15 +316,23 @@ public class DatabaseStorage extends Storage {
     private String formatPagination(Pagination pagination) {
         StringBuilder result = new StringBuilder();
         if (pagination != null) {
+        	if (databaseType.equals("Microsoft SQL Server")) {
+        		result.append(" OFFSET ");
+        		result.append(pagination.getSkip());
+        		result.append(" ROWS FETCH FIRST ");
+                result.append(pagination.getLimit());
+                result.append(" ROWS ONLY");
+                return result.toString();
+        	}
+        	
         	if(pagination.getSkip() > 0) {
         		result.append(" OFFSET ");
                 result.append(pagination.getSkip());
         	}
+        	
             if (pagination.getLimit() > 0) {
             	if (databaseType.equals("Microsoft SQL Server")) {
-                    result.append(" OFFSET 0 ROWS FETCH FIRST ");
-                    result.append(pagination.getLimit());
-                    result.append(" ROWS ONLY");
+                    
                 } else {
                     result.append(" LIMIT ");
                     result.append(pagination.getLimit());
