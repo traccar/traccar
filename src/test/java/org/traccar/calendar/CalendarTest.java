@@ -46,12 +46,12 @@ public class CalendarTest {
         calendar.setData(calendarString.getBytes());
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
 
-        // assertFalse(calendar.checkMoment(format.parse("2016-12-13 22:59:59+05")));
+        assertFalse(calendar.checkMoment(format.parse("2016-12-13 22:59:59+05")));
         assertTrue(calendar.checkMoment(format.parse("2016-12-13 23:00:01+05")));
-        // assertTrue(calendar.checkMoment(format.parse("2016-12-13 06:59:59+05")));
+        assertTrue(calendar.checkMoment(format.parse("2016-12-13 06:59:59+05")));
         assertFalse(calendar.checkMoment(format.parse("2016-12-13 07:00:01+05")));
 
         var periods = calendar.findPeriods(format.parse("2016-12-13 06:59:59+05"));
-        // assertFalse(periods.isEmpty());
+        assertFalse(periods.isEmpty());
     }
 }
