@@ -325,11 +325,6 @@ public class DatabaseStorage extends Storage {
                 return result.toString();
         	}
         	
-        	if(pagination.getSkip() > 0) {
-        		result.append(" OFFSET ");
-                result.append(pagination.getSkip());
-        	}
-        	
             if (pagination.getLimit() > 0) {
             	if (databaseType.equals("Microsoft SQL Server")) {
                     
@@ -338,6 +333,11 @@ public class DatabaseStorage extends Storage {
                     result.append(pagination.getLimit());
                 }
             }
+
+            if(pagination.getSkip() > 0) {
+        		result.append(" OFFSET ");
+                result.append(pagination.getSkip());
+        	}
         }
         return result.toString();
     }
