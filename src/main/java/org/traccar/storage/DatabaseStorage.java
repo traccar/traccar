@@ -326,12 +326,8 @@ public class DatabaseStorage extends Storage {
         	}
         	
             if (pagination.getLimit() > 0) {
-            	if (databaseType.equals("Microsoft SQL Server")) {
-                    
-                } else {
-                    result.append(" LIMIT ");
-                    result.append(pagination.getLimit());
-                }
+            	result.append(" LIMIT ");
+                result.append(pagination.getLimit());
             }
 
             if(pagination.getSkip() > 0) {

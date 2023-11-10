@@ -50,6 +50,10 @@ public class Request {
     	this(columns, condition, order, null);
     }
 
+    public Request(Columns columns, Condition condition, Pagination pagination) {
+    	this(columns, condition, null, pagination);
+    }
+
     public Request(Columns columns, Condition condition, Order order, Pagination pagination) {
         this.columns = columns;
         this.condition = condition;
