@@ -33,6 +33,7 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Pagination;
 import org.traccar.storage.query.Request;
 
 import jakarta.annotation.Nullable;
@@ -108,7 +109,8 @@ public class CommandsManager implements BroadcastInterface {
             var commands = storage.getObjects(QueuedCommand.class, new Request(
                     new Columns.All(),
                     new Condition.Equals("deviceId", deviceId),
-                    new Order("id", false, count)));
+                    new Order("id", false),
+                    new Pagination(0, 1)));
             Map<Event, Position> events = new HashMap<>();
             for (var command : commands) {
                 storage.removeObject(QueuedCommand.class, new Request(

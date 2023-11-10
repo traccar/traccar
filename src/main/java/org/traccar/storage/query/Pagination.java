@@ -15,26 +15,22 @@
  */
 package org.traccar.storage.query;
 
-public class Order {
+public class Pagination {
 
-    private final String column;
-    private final boolean descending;
+    private final int limit;
+    private final int skip;
 
-    public Order(String column) {
-        this(column, false);
+    public Pagination(int skip, int limit) {
+        this.skip = skip;
+        this.limit = limit;
     }
 
-    public Order(String column, boolean descending) {
-        this.column = column;
-        this.descending = descending;
-    }
-        
-    public String getColumn() {
-        return column;
+    public int getSkip() {
+        return skip;
     }
 
-    public boolean getDescending() {
-        return descending;
+    public int getLimit() {
+        return limit;
     }
 
 }
