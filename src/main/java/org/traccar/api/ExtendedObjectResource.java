@@ -23,8 +23,10 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Pagination;
 import org.traccar.storage.query.Request;
 
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.QueryParam;
 import java.util.Collection;
@@ -39,7 +41,9 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
     @GET
     public Collection<T> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
-            @QueryParam("groupId") long groupId, @QueryParam("deviceId") long deviceId) throws StorageException {
+            @QueryParam("groupId") long groupId, @QueryParam("deviceId") long deviceId, 
+            @QueryParam("skip") @DefaultValue("0") int skip,
+            @QueryParam("limit") @DefaultValue("0") int limit) throws StorageException {
 
         var conditions = new LinkedList<Condition>();
 
@@ -65,7 +69,7 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             conditions.add(new Condition.Permission(Device.class, deviceId, baseClass).excludeGroups());
         }
 
-        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
+        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions), new Pagination(skip, limit)));
     }
 
 }
