@@ -28,22 +28,12 @@ import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
 import com.nimbusds.oauth2.sdk.util.StringUtils;
 
-/**
- * MQTT generic calls
- *
- */
 public final class MqttUtil {
 
     private MqttUtil() {
 
     }
 
-    /**
-     * Create client from url
-     *
-     * @param url
-     * @return
-     */
     public static Mqtt3AsyncClient createClient(final String url, final String willTopic) {
         URI uri;
         try {

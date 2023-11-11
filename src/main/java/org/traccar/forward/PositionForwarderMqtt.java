@@ -15,11 +15,6 @@
  */
 package org.traccar.forward;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.MqttUtil;
@@ -37,83 +32,35 @@ public class PositionForwarderMqtt implements PositionForwarder {
     private final String topic;
 
     /*
-     * Device alias to be used when publising data
+     * Device alias to be used when publishing data
      */
     private static final String MQTT_ALIAS = "mqtt.alias";
-    /**
-     * Options for publishing empty/not defined - combined data, and if alias
-     * defined position information combined - combined data alias - device position
-     * deviceId - device position noalias - dont publish with alias even when alias
-     * defined
-     */
-    private static final String MQTT_FORWARD_OPTIONS = "mqtt.forward.options";
 
-    /**
-     * Dont publish device information by alias
-     */
-    private static final String OPTION_NOALIAS = "no_alias";
-    /**
-     * publish all combined position data
-     */
-    private static final String OPTION_COMBINED = "combined";
-    /**
-     * publish by deviceId
-     */
-    private static final String OPTION_DEVICE_ID = "deviceId";
-    /**
-     * publish by alias (if {@link}MQTT_ALIAS is defined)
-     */
-    private static final String OPTION_ALIAS = "alias";
-    /**
-     * publish device json data (default when no option defined)
-     */
-    private static final String OPTION_DEVICE_JSON = "device_json";
-
-    public PositionForwarderMqtt(Config config, ObjectMapper objectMapper) {
+    public PositionForwarderMqtt(final Config config, final ObjectMapper objectMapper) {
         this.topic = config.getString(Keys.FORWARD_TOPIC);
         this.client = MqttUtil.createClient(config.getString(Keys.FORWARD_URL), topic + "/state");
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public void forward(PositionData positionData, ResultHandler resultHandler) {
+    public void forward(final PositionData positionData, final ResultHandler resultHandler) {
 
-        // get options and remove spaces
-        final String optionsSt = positionData.getDevice().getString(MQTT_FORWARD_OPTIONS, "").replaceAll(" ", "");
-        final Set<String> options = StringUtils.isBlank(optionsSt) ? Collections.emptySet()
-                : new HashSet<>(Arrays.asList(optionsSt.split(",")));
-
-        /**
-         * If mqtt.alias is defined on device publish position information otherwhise
-         * publish full positionData this make easy to parse specific device location
-         */
+        // If have an alias defined for the device publish only position information for
+        // the device
+        // otherwise publish full positionData which have position and device attributes
         final String alias = positionData.getDevice().getString(MQTT_ALIAS, "");
-
-        if (StringUtils.isNotBlank(alias) && (options.isEmpty() || options.contains(OPTION_ALIAS))
-                && !options.contains(OPTION_NOALIAS)) {
-            publishPosition(topic + "/" + alias, positionData.getPosition(), resultHandler, options);
+        if (StringUtils.isNotBlank(alias)) {
+            publishPosition(topic + "/" + alias, positionData.getPosition(), resultHandler);
         }
 
-        if (options.contains(OPTION_DEVICE_ID)) {
-            publishPosition(topic + "/" + positionData.getPosition().getDeviceId(), positionData.getPosition(),
-                    resultHandler, options);
-        }
-
-        if (StringUtils.isBlank(alias) || options.contains(OPTION_COMBINED)) {
+        if (StringUtils.isBlank(alias)) {
             publish(topic, positionData, resultHandler);
         }
 
     }
 
-    private void publishPosition(final String topic, final Position position, final ResultHandler resultHandler,
-            final Set<String> options) {
-        // TODO option to split position attributes in specific topics
-        // for now just publish single topic with json
-        if (options.isEmpty() || options.contains(OPTION_DEVICE_JSON)) {
+    private void publishPosition(final String topic, final Position position, final ResultHandler resultHandler) {
             publish(topic, position, resultHandler);
-        }
-
-        // TODO option to send geofence names
     }
 
     private void publish(final String pubTopic, final Object object, final ResultHandler resultHandler) {
