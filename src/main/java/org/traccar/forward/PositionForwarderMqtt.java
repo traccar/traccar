@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,17 @@ package org.traccar.forward;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.MqttUtil;
-import org.traccar.model.Position;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
 
 public class PositionForwarderMqtt implements PositionForwarder {
 
     private final Mqtt3AsyncClient client;
     private final ObjectMapper objectMapper;
-    private final String topic;
+    protected final String topic;
 
-    /*
-     * Device alias to be used when publishing data
-     */
-    private static final String MQTT_ALIAS = "mqtt.alias";
 
     public PositionForwarderMqtt(final Config config, final ObjectMapper objectMapper) {
         this.topic = config.getString(Keys.FORWARD_TOPIC);
@@ -44,26 +38,10 @@ public class PositionForwarderMqtt implements PositionForwarder {
 
     @Override
     public void forward(final PositionData positionData, final ResultHandler resultHandler) {
-
-        // If have an alias defined for the device publish only position information for
-        // the device
-        // otherwise publish full positionData which have position and device attributes
-        final String alias = positionData.getDevice().getString(MQTT_ALIAS, "");
-        if (StringUtils.isNotBlank(alias)) {
-            publishPosition(topic + "/" + alias, positionData.getPosition(), resultHandler);
-        }
-
-        if (StringUtils.isBlank(alias)) {
-            publish(topic, positionData, resultHandler);
-        }
-
+        publish(topic, positionData, resultHandler);
     }
 
-    private void publishPosition(final String topic, final Position position, final ResultHandler resultHandler) {
-            publish(topic, position, resultHandler);
-    }
-
-    private void publish(final String pubTopic, final Object object, final ResultHandler resultHandler) {
+    protected void publish(final String pubTopic, final Object object, final ResultHandler resultHandler) {
         final String payload;
         try {
             payload = objectMapper.writeValueAsString(object);
