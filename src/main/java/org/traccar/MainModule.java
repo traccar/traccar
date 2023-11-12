@@ -200,7 +200,6 @@ public class MainModule extends AbstractModule {
         if (config.getBoolean(Keys.GEOCODER_ENABLE)) {
             String type = config.getString(Keys.GEOCODER_TYPE, "google");
             String url = config.getString(Keys.GEOCODER_URL);
-            String id = config.getString(Keys.GEOCODER_ID);
             String key = config.getString(Keys.GEOCODER_KEY);
             String language = config.getString(Keys.GEOCODER_LANGUAGE);
             String formatString = config.getString(Keys.GEOCODER_FORMAT);
@@ -243,7 +242,7 @@ public class MainModule extends AbstractModule {
                     geocoder = new BanGeocoder(client, cacheSize, addressFormat);
                     break;
                 case "here":
-                    geocoder = new HereGeocoder(client, url, id, key, language, cacheSize, addressFormat);
+                    geocoder = new HereGeocoder(client, url, key, language, cacheSize, addressFormat);
                     break;
                 case "mapmyindia":
                     geocoder = new MapmyIndiaGeocoder(client, url, key, cacheSize, addressFormat);

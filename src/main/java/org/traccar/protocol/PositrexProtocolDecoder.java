@@ -59,12 +59,11 @@ public class PositrexProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         int first = buf.getUnsignedByte(buf.readerIndex());
-        int second = buf.getUnsignedByte(buf.readerIndex() + 1);
         long deviceId;
         if (BitUtil.check(first, 7)) {
             if (BitUtil.check(first, 6)) {
                 deviceId = 73000000 + BitUtil.to(buf.readUnsignedInt(), 30);
-            } else if (second == 0) {
+            } else if (!BitUtil.check(first, 5) && !BitUtil.check(first, 4)) {
                 deviceId = 7590000 + BitUtil.to(buf.readUnsignedMedium(), 20);
             } else {
                 deviceId = 70000000 + BitUtil.to(buf.readUnsignedMedium(), 20);

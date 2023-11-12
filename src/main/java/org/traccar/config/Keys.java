@@ -1554,13 +1554,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * App id for use with Here provider.
-     */
-    public static final ConfigKey<String> GEOCODER_ID = new StringConfigKey(
-            "geocoder.id",
-            List.of(KeyType.CONFIG));
-
-    /**
      * Provider API key. Most providers require API keys.
      */
     public static final ConfigKey<String> GEOCODER_KEY = new StringConfigKey(
