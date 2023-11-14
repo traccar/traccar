@@ -17,17 +17,14 @@
 package org.traccar.handler;
 
 import io.netty.channel.ChannelHandler;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.traccar.BaseDataHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
-
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 @Singleton
 @ChannelHandler.Sharable
@@ -54,8 +51,7 @@ public class DistanceHandler extends BaseDataHandler {
         if (position.hasAttribute(Position.KEY_DISTANCE)) {
             distance = position.getDouble(Position.KEY_DISTANCE);
         }
-        double totalDistance = 0.0;
-
+        double totalDistance;
         Position last = cacheManager.getPosition(position.getDeviceId());
         if (last != null) {
             totalDistance = last.getDouble(Position.KEY_TOTAL_DISTANCE);
@@ -63,7 +59,6 @@ public class DistanceHandler extends BaseDataHandler {
                 distance = DistanceCalculator.distance(
                         position.getLatitude(), position.getLongitude(),
                         last.getLatitude(), last.getLongitude());
-                distance = BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
             }
             if (filter && last.getLatitude() != 0 && last.getLongitude() != 0) {
                 boolean satisfiesMin = minError == 0 || distance > minError;
@@ -75,10 +70,11 @@ public class DistanceHandler extends BaseDataHandler {
                     distance = 0;
                 }
             }
+        } else {
+            totalDistance = 0.0;
         }
         position.set(Position.KEY_DISTANCE, distance);
-        totalDistance = BigDecimal.valueOf(totalDistance + distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
-        position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);
+        position.set(Position.KEY_TOTAL_DISTANCE, totalDistance + distance);
 
         return position;
     }

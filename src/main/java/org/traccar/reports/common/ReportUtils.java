@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,8 @@
  */
 package org.traccar.reports.common;
 
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
@@ -52,13 +54,9 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import jakarta.annotation.Nullable;
-import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
@@ -102,14 +100,11 @@ public class ReportUtils {
         }
     }
 
-    public double calculateFuel(Position firstPosition, Position lastPosition) {
-
-        if (firstPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null
-                && lastPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
-
-            BigDecimal value = BigDecimal.valueOf(firstPosition.getDouble(Position.KEY_FUEL_LEVEL)
-                    - lastPosition.getDouble(Position.KEY_FUEL_LEVEL));
-            return value.setScale(1, RoundingMode.HALF_EVEN).doubleValue();
+    public double calculateFuel(Position first, Position last) {
+        if (first.hasAttribute(Position.KEY_FUEL_USED) && last.hasAttribute(Position.KEY_FUEL_USED)) {
+            return last.getDouble(Position.KEY_FUEL_USED) - first.getDouble(Position.KEY_FUEL_USED);
+        } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL) && last.hasAttribute(Position.KEY_FUEL_LEVEL)) {
+            return first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL);
         }
         return 0;
     }

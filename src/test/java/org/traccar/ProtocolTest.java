@@ -261,6 +261,10 @@ public class ProtocolTest extends BaseTest {
             assertTrue(attributes.get(Position.KEY_FUEL_LEVEL) instanceof Number);
         }
 
+        if (attributes.containsKey(Position.KEY_FUEL_USED)) {
+            assertTrue(attributes.get(Position.KEY_FUEL_USED) instanceof Number);
+        }
+
         if (attributes.containsKey(Position.KEY_POWER)) {
             assertTrue(attributes.get(Position.KEY_POWER) instanceof Number);
         }
