@@ -78,8 +78,9 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_WIFI = new PatternBuilder()
             .text("#")
             .number("(?:(dd)|x+)")               // cell or voltage
+            .expression("#?")
             .groupBegin()
-            .number("#(d+),")                    // mcc
+            .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(x+),")                     // lac
             .number("(x+)")                      // cell id
@@ -230,6 +231,8 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                     dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
                     getLastLocation(position, dateBuilder.getDate());
+                } else {
+                    continue;
                 }
 
             } else {
