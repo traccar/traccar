@@ -471,6 +471,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x1A:
                         position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
                         break;
+                    case 0x29:
+                        position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShortLE() * 0.01);
+                        break;
                     case 0x40:
                         position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
                         break;
