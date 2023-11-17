@@ -11,6 +11,9 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new TaipProtocolDecoder(null));
 
+        verifyPosition(decoder, text(
+                ">RCQ00151123235718-2782354-06407582055121FF0013501CDCC6313011100001514;#0805;ID=SIA056;*15<"));
+
         verifyNull(decoder, text(
                 ">RTT151123153149-4330468-06503640000009300DF2101 04101203 000 00000000130000040414;ID=8803;#1ABD;*2B<"));
 

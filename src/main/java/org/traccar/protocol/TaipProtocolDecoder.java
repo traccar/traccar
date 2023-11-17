@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .or()
             .groupBegin()
             .number("(xx)")                      // input
-            .number("(xx)")                      // satellites
+            .number("xx")                        // satellites / outputs
             .number("(ddd)")                     // battery
             .number("(x{8})")                    // odometer
             .number("[01]")                      // gps power
@@ -95,10 +95,12 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("[01]")                      // modem power
             .number("[0-5]")                     // gsm status
             .number("(dd)")                      // rssi
+            .groupBegin()
             .number("([-+]dddd)")                // temperature 1
             .number("xx")                        // seconds from last
             .number("([-+]dddd)")                // temperature 2
             .number("xx")                        // seconds from last
+            .groupEnd("?")
             .groupEnd("?")
             .groupEnd("?")
             .groupEnd()
@@ -216,17 +218,18 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_HDOP, parser.nextInt());
         }
 
-        if (parser.hasNext(4)) {
+        if (parser.hasNext(3)) {
             position.set(Position.KEY_INPUT, parser.nextHexInt(0));
-            position.set(Position.KEY_SATELLITES, parser.nextHexInt(0));
             position.set(Position.KEY_BATTERY, parser.nextInt(0));
             position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
         }
 
-        if (parser.hasNext(4)) {
+        if (parser.hasNext(3)) {
             valid = parser.nextInt() > 0;
             position.set(Position.KEY_PDOP, parser.nextInt());
             position.set(Position.KEY_RSSI, parser.nextInt());
+        }
+        if (parser.hasNext(2)) {
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt() * 0.01);
             position.set(Position.PREFIX_TEMP + 2, parser.nextInt() * 0.01);
         }
