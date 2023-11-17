@@ -260,7 +260,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void skipLocation(Parser parser) {
-        parser.skip(19);
+        parser.skip(20);
     }
 
     private static final Pattern PATTERN_LOCATION = new PatternBuilder()
@@ -272,6 +272,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d{1,2}.d{6})?,")         // latitude
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
             .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .groupBegin()
+            .number(",d+")                       // wifi count
+            .number("((?:,x{12},-d+,,,)+)")      // wifi
+            .groupEnd("?")
             .text(",")
             .number("(d+)?,")                    // mcc
             .number("(d+)?,")                    // mnc
@@ -303,15 +307,30 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
         }
 
+        Network network = new Network();
+
+        if (parser.hasNext()) {
+            String[] values = parser.next().split(",");
+            for (int i = 0; i < values.length; i += 5) {
+                String mac = values[i + 1].replaceAll("(..)", "$1:");
+                network.addWifiAccessPoint(WifiAccessPoint.from(
+                        mac.substring(0, mac.length() - 1), Integer.parseInt(values[i + 2])));
+            }
+        }
+
         if (parser.hasNext(6)) {
             int mcc = parser.nextInt();
             int mnc = parser.nextInt();
             if (parser.hasNext(2)) {
-                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextInt(), parser.nextInt())));
+                network.addCellTower(CellTower.from(mcc, mnc, parser.nextInt(), parser.nextInt()));
             }
             if (parser.hasNext(2)) {
-                position.setNetwork(new Network(CellTower.from(mcc, mnc, parser.nextHexInt(), parser.nextHexInt())));
+                network.addCellTower(CellTower.from(mcc, mnc, parser.nextHexInt(), parser.nextHexInt()));
             }
+        }
+
+        if (network.getWifiAccessPoints() != null || network.getCellTowers() != null) {
+            position.setNetwork(network);
         }
 
         if (parser.hasNext()) {
