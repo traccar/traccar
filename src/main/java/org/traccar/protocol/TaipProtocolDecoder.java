@@ -317,7 +317,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                     if (messageIndex.startsWith("#IP")) {
                         response = ">SAK;ID=" + uniqueId + ";" + messageIndex + "<";
                     } else {
-                        response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
+                        response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";*";
                         response += String.format("%02X", Checksum.xor(response)) + "<";
                     }
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
