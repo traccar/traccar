@@ -264,6 +264,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         String uniqueId = null;
         DeviceSession deviceSession = null;
         String messageIndex = null;
+        boolean indexFirst = true;
 
         if (attributes != null) {
             for (String attribute : attributes) {
@@ -277,6 +278,9 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                             deviceSession = getDeviceSession(channel, remoteAddress, value);
                             if (deviceSession != null) {
                                 position.setDeviceId(deviceSession.getDeviceId());
+                            }
+                            if (messageIndex == null) {
+                                indexFirst = false;
                             }
                             break;
                         case "io":
@@ -317,7 +321,11 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                     if (messageIndex.startsWith("#IP")) {
                         response = ">SAK;ID=" + uniqueId + ";" + messageIndex + "<";
                     } else {
-                        response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";*";
+                        if (indexFirst) {
+                            response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";*";
+                        } else {
+                            response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
+                        }
                         response += String.format("%02X", Checksum.xor(response)) + "<";
                     }
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
