@@ -1282,6 +1282,46 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static final Pattern PATTERN_LSA = new PatternBuilder()
+            .text("+RESP:GTLSA,")
+            .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("[^,]*,")                // device name
+            .number("d,")                        // event state 1
+            .number("d,")                        // event state 2
+            .number("d+,")                       // number
+            .expression(PATTERN_LOCATION.pattern())
+            .number("d+,")                       // bit error rate
+            .number("(d),")                      // light level
+            .number("(d+),")                     // battery level
+            .number("[01],")                     // mode selection
+            .number("[01]?,")                    // movement status
+            .number("(-?d+.d)?,")                // temperature
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
+    private Object decodeLsa(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Parser parser = new Parser(PATTERN_LSA, sentence);
+        Position position = initPosition(parser, channel, remoteAddress);
+        if (position == null) {
+            return null;
+        }
+
+        decodeLocation(position, parser);
+
+        position.set("lightLevel", parser.nextInt());
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
+
+        decodeDeviceTime(position, parser);
+
+        return position;
+    }
+
     private static final Pattern PATTERN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
             .number("(?:[0-9A-Z]{2}xxxx)?,")     // protocol version
@@ -1535,6 +1575,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "BID":
                     result = decodeBid(channel, remoteAddress, sentence);
+                    break;
+                case "LSA":
+                    result = decodeLsa(channel, remoteAddress, sentence);
                     break;
                 default:
                     result = decodeOther(channel, remoteAddress, sentence, type);
