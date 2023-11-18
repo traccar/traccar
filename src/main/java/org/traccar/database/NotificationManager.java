@@ -58,6 +58,7 @@ public class NotificationManager {
     private final Geocoder geocoder;
 
     private final boolean geocodeOnRequest;
+    private final long timeThreshold;
 
     @Inject
     public NotificationManager(
@@ -69,6 +70,7 @@ public class NotificationManager {
         this.notificatorManager = notificatorManager;
         this.geocoder = geocoder;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
+        timeThreshold = config.getLong(Keys.NOTIFICATOR_TIME_THRESHOLD);
     }
 
     private void updateEvent(Event event, Position position) {
@@ -76,6 +78,13 @@ public class NotificationManager {
             event.setId(storage.addObject(event, new Request(new Columns.Exclude("id"))));
         } catch (StorageException error) {
             LOGGER.warn("Event save error", error);
+        }
+
+        forwardEvent(event, position);
+
+        if (System.currentTimeMillis() - event.getEventTime().getTime() > timeThreshold) {
+            LOGGER.info("Skipping notifications for old event");
+            return;
         }
 
         var notifications = cacheManager.getDeviceObjects(event.getDeviceId(), Notification.class).stream()
@@ -115,8 +124,6 @@ public class NotificationManager {
                 });
             });
         }
-
-        forwardEvent(event, position);
     }
 
     private void forwardEvent(Event event, Position position) {
