@@ -78,58 +78,6 @@ public class SessionResource extends BaseResource {
     @Context
     private HttpServletRequest request;
 
-    /*@PermitAll
-    @GET*/
-    /*public User getUserGivenToken(@QueryParam("token") String token) throws StorageException, IOException, GeneralSecurityException {
-
-        if (token != null) {
-            User user = loginService.login(token);
-            if (user != null) {
-                request.getSession().setAttribute(USER_ID_KEY, user.getId());
-                LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
-                return user;
-            }
-
-        }
-
-        Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
-        if (userId == null) {
-
-            Cookie[] cookies = request.getCookies();
-            String email = null, password = null;
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(USER_COOKIE_KEY)) {
-                        byte[] emailBytes = DataConverter.parseBase64(
-                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII));
-                        email = new String(emailBytes, StandardCharsets.UTF_8);
-                    } else if (cookie.getName().equals(PASS_COOKIE_KEY)) {
-                        byte[] passwordBytes = DataConverter.parseBase64(
-                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII));
-                        password = new String(passwordBytes, StandardCharsets.UTF_8);
-                    }
-                }
-            }
-            if (email != null && password != null) {
-                User user = loginService.login(email, password, null);
-                if (user != null) {
-                    request.getSession().setAttribute(USER_ID_KEY, user.getId());
-                    LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
-                    return user;
-                }
-            }
-
-        } else {
-
-            User user = permissionsService.getUser(userId);
-            if (user != null) {
-                return user;
-            }
-
-        }
-
-        throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
-    }*/
     @PermitAll
     @GET
     public User getUserGivenToken(@QueryParam("token") String token)
