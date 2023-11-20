@@ -1,5 +1,5 @@
 [submodule "track-web"]
 	path = track-web
-	url = https://github.com/drolx/track-web.git
+	url = ../track-web.git
 	branch = master
 	ignore = all
