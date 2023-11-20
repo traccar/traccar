@@ -11,15 +11,14 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
-        verifyAttribute(decoder, buffer(
-                "+RESP:GTLSA,C50204,866356062524268,,1,0,1,0,0.0,0,123.3,4.730544,51.620446,20231116021001,0204,0008,0D0C,309C,18,1,7,96,0,,,20231116080602,0040$"),
-                "lightLevel", 7);
+        verifyPosition(decoder, buffer(
+                "+BUFF:GTFRI,8020040200,866314060249032,,12194,10,1,3,0.0,0,20.1,-71.596533,-33.524718,20230926200338,0730,0001,772A,052B253E,02,0,0.0,,,,,0,420000,,,,20230926200340,1549$"));
 
         verifyAttribute(decoder, buffer(
                 "+RESP:GTFRI,423037,866884047716519,GT501,0,1,1,5,12,0.1,0,46.8,-95.559173,30.109955,20231110185836,6,0e36c9916485,-50,,,,e831cd5eb79d,-73,,,,ccf4110c4bd5,-79,,,,acdb48973168,-79,,,,80ab4dc323c4,-82,,,,ec8eb5cfa1c6,-89,,,,310,10,711D,81ECF0F,00,,93,20231110185839,0005$"),
                 Position.KEY_BATTERY_LEVEL, 93);
 
-        verifyNull(decoder, buffer(
+        verifyPosition(decoder, buffer(
                 "+RESP:GTFRI,8020040200,866314060109269,,,10,1,1,0.0,0,9.0,-71.596601,-33.524595,20230722145338,0730,0001,772A,052B253E,00,0.0,,,,,100,210100,,,,20230722145341,0F4C$"));
 
         verifyAttributes(decoder, buffer(

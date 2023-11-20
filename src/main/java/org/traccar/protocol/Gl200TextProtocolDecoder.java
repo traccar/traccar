@@ -1398,7 +1398,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_BASIC = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF)").text(":")
             .expression("GT...,")
-            .number("(?:[0-9A-Z]{2}xxxx)?,").optional() // protocol version
+            .expression("[^,]+,").optional()     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .any()
             .text(",")
