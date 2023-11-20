@@ -69,7 +69,7 @@ dependencies {
     implementation "org.glassfish.hk2:guice-bridge:3.0.4" // same version as jersey-hk2
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jakarta-jsonp:$jacksonVersion"
-    implementation "org.liquibase:liquibase-core:4.24.0" // upgrade had issues
+    implementation "org.liquibase:liquibase-core:4.23.2" // upgrade has issues
     implementation "org.apache.commons:commons-jexl3:3.3"
     implementation "org.jxls:jxls:$jxlsVersion"
     implementation "org.jxls:jxls-poi:$jxlsVersion"
