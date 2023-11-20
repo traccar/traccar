@@ -61,11 +61,11 @@ public class TaskHealthCheck implements ScheduleTask {
         }
     }
 
-    private String getUrl() {
+    /*private String getUrl() {
         String address = config.getString(Keys.WEB_ADDRESS, "localhost");
         int port = config.getInteger(Keys.WEB_PORT);
         return "http://" + address + ":" + port + "/api/server";
-    }
+    }*/
 
     @Override
     public void schedule(ScheduledExecutorService executor) {
@@ -77,7 +77,7 @@ public class TaskHealthCheck implements ScheduleTask {
     @Override
     public void run() {
         LOGGER.debug("Health check running");
-        int status = client.target(getUrl()).request().get().getStatus();
+        int status = client.target(config.getUrl("/api/server", "localhost")).request().get().getStatus();
         if (status == 200) {
             int result = systemD.sd_notify(0, "WATCHDOG=1");
             if (result < 0) {

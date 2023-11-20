@@ -153,4 +153,9 @@ public class Config {
         return key.replaceAll("\\.", "_").replaceAll("(\\p{Lu})", "_$1").toUpperCase();
     }
 
+    public String getUrl(String extendedPath, String defaultValue) {
+        String address = getString(Keys.WEB_ADDRESS, defaultValue);
+        int port = getInteger(Keys.WEB_PORT);
+        return "http://" + address + ":" + port + extendedPath;
+    }
 }

@@ -60,6 +60,7 @@ import java.net.URI;
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class SessionResource extends BaseResource {
 
+
     public static final String USER_ID_KEY = "userId";
     public static final String USER_COOKIE_KEY = "user";
     public static final String PASS_COOKIE_KEY = "password";
@@ -77,9 +78,9 @@ public class SessionResource extends BaseResource {
     @Context
     private HttpServletRequest request;
 
-    @PermitAll
-    @GET
-    public User get(@QueryParam("token") String token) throws StorageException, IOException, GeneralSecurityException {
+    /*@PermitAll
+    @GET*/
+    /*public User getUserGivenToken(@QueryParam("token") String token) throws StorageException, IOException, GeneralSecurityException {
 
         if (token != null) {
             User user = loginService.login(token);
@@ -88,6 +89,7 @@ public class SessionResource extends BaseResource {
                 LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
                 return user;
             }
+
         }
 
         Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
@@ -127,11 +129,77 @@ public class SessionResource extends BaseResource {
         }
 
         throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+    }*/
+    @PermitAll
+    @GET
+    public User getUserGivenToken(@QueryParam("token") String token)
+            throws StorageException, IOException, GeneralSecurityException {
+        if (token != null) {
+            return getUserTokenAuthentication(token);
+        }
+        Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
+        if (userId == null) {
+            return getUserTokenCookieAuthentication();
+        } else {
+            User user = permissionsService.getUser(userId);
+            if (user != null) {
+                return user;
+            }
+        }
+        throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+
     }
+
+    private User getUserTokenAuthentication(String token)
+            throws StorageException, IOException, GeneralSecurityException {
+        User user = loginService.login(token);
+        if (user != null) {
+            request.getSession().setAttribute(USER_ID_KEY, user.getId());
+            LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+            return user;
+        }
+        return null;
+    }
+
+    private User getUserTokenCookieAuthentication()
+            throws StorageException {
+        Cookie[] cookies = request.getCookies();
+        String email = null, password = null;
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals(USER_COOKIE_KEY)) {
+                    byte[] emailBytes = DataConverter.parseBase64(
+                            URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII));
+                    email = new String(emailBytes, StandardCharsets.UTF_8);
+                } else if (cookie.getName().equals(PASS_COOKIE_KEY)) {
+                    byte[] passwordBytes = DataConverter.parseBase64(
+                            URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII));
+                    password = new String(passwordBytes, StandardCharsets.UTF_8);
+                }
+            }
+        }
+        if (email != null && password != null) {
+            return getUserTokenCredentialAuthentication(email, password);
+        }
+        return null;
+    }
+
+    private User getUserTokenCredentialAuthentication(String email, String password)
+            throws StorageException {
+        User user = loginService.login(email, password, null);
+        if (user != null) {
+            request.getSession().setAttribute(USER_ID_KEY, user.getId());
+            LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+            return user;
+        }
+        return null;
+    }
+
+
 
     @Path("{id}")
     @GET
-    public User get(@PathParam("id") long userId) throws StorageException {
+    public User getUserGivenId(@PathParam("id") long userId) throws StorageException {
         permissionsService.checkUser(getUserId(), userId);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", userId)));
@@ -195,6 +263,6 @@ public class SessionResource extends BaseResource {
         String queryString = request.getQueryString();
         String requestUri = requestUrl.append('?').append(queryString).toString();
 
-        return Response.seeOther(openIdProvider.handleCallback(URI.create(requestUri), request)).build();
+        return Response.seeOther(openIdProvider.handleCallback(URI.create(requestUri), request, USER_ID_KEY)).build();
     }
 }

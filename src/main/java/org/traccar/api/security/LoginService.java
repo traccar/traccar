@@ -71,6 +71,21 @@ public class LoginService {
         return user;
     }
 
+    public boolean isValidLdapUser(String email, String password, User user){
+        if(user == null){
+            return ldapProvider != null && ldapProvider.login(email, password);
+        } else {
+            return ldapProvider != null && user.getLogin()!= null && ldapProvider.login(user.getLogin(), password);
+        }
+    }
+
+    public boolean isValidPassword(User user, String password){
+        return !forceLdap && user.isPasswordValid(password);
+    }
+    public boolean isUserValid(String email, String password, User user){
+        return isValidLdapUser(email,password, user) || isValidPassword(user, password);
+    }
+
     public User login(String email, String password, Integer code) throws StorageException {
         if (forceOpenId) {
             return null;
@@ -83,14 +98,13 @@ public class LoginService {
                         new Condition.Equals("email", email),
                         new Condition.Equals("login", email))));
         if (user != null) {
-            if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
-                    || !forceLdap && user.isPasswordValid(password)) {
+            if (isUserValid(email, password, user)) {
                 checkUserCode(user, code);
                 checkUserEnabled(user);
                 return user;
             }
         } else {
-            if (ldapProvider != null && ldapProvider.login(email, password)) {
+            if (isValidLdapUser(email,password, null)) {
                 user = ldapProvider.getUser(email);
                 user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
                 checkUserEnabled(user);
