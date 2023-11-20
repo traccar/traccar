@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 
 public class AtrackProtocolDecoderDataReader {
 
-    public AtrackProtocolDecoderDataReader(){
+    public AtrackProtocolDecoderDataReader() {
 
     }
 
@@ -553,4 +553,5 @@ public class AtrackProtocolDecoderDataReader {
             position.set(Position.KEY_RSSI, cellTower.getSignalStrength());
         }
     }
+
 }

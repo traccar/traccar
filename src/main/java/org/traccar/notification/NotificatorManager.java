@@ -17,25 +17,12 @@
 package org.traccar.notification;
 
 import com.google.inject.Injector;
-import jakarta.ws.rs.core.Response;
-import org.traccar.api.security.PermissionsService;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Typed;
-import org.traccar.model.User;
-import org.traccar.notificators.Notificator;
-import org.traccar.notificators.NotificatorCommand;
-import org.traccar.notificators.NotificatorFirebase;
-import org.traccar.notificators.NotificatorMail;
-import org.traccar.notificators.NotificatorPushover;
-import org.traccar.notificators.NotificatorSms;
-import org.traccar.notificators.NotificatorTelegram;
-import org.traccar.notificators.NotificatorTraccar;
-import org.traccar.notificators.NotificatorWeb;
-
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import org.traccar.storage.StorageException;
+import org.traccar.notificators.*;
 
 import java.util.Arrays;
 import java.util.HashSet;

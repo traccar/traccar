@@ -16,36 +16,25 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
-import org.traccar.helper.BitUtil;
-import org.traccar.helper.DataConverter;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
-import org.traccar.model.CellTower;
-import org.traccar.model.Network;
 import org.traccar.model.Position;
-import org.traccar.protocol.AtrackProtocolDecoderDataReader;
+import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,7 +51,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     private final Map<Integer, String> alarmMap = new HashMap<>();
 
-    public AtrackProtocolDecoderDataReader APDDataReader = new AtrackProtocolDecoderDataReader();
+    private final AtrackProtocolDecoderDataReader ApdDataReader = new AtrackProtocolDecoderDataReader();
     public AtrackProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
@@ -277,7 +266,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 form = data.substring(0, data.indexOf(',')).substring("%CI".length());
                 data = data.substring(data.indexOf(',') + 1);
             }
-            APDDataReader.readTextCustomData(position, data, form);
+            ApdDataReader.readTextCustomData(position, data, form);
         }
 
         return position;
@@ -352,12 +341,12 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
             position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() * 0.001);
 
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, APDDataReader.readString(buf));
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, ApdDataReader.readString(buf));
 
             position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
             position.set(Position.PREFIX_TEMP + 2, buf.readShort() * 0.1);
 
-            String message = APDDataReader.readString(buf);
+            String message = ApdDataReader.readString(buf);
             if (message != null && !message.isEmpty()) {
                 Pattern pattern = Pattern.compile("FULS:F=(\\p{XDigit}+) t=(\\p{XDigit}+) N=(\\p{XDigit}+)");
                 Matcher matcher = pattern.matcher(message);
@@ -372,9 +361,9 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             if (custom) {
                 String form = this.form;
                 if (form == null) {
-                    form = APDDataReader.readString(buf).trim().substring("%CI".length());
+                    form = ApdDataReader.readString(buf).trim().substring("%CI".length());
                 }
-                APDDataReader.readBinaryCustomData(position, buf, form);
+                ApdDataReader.readBinaryCustomData(position, buf, form);
             }
 
             positions.add(position);
