@@ -194,6 +194,10 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 case 40:
                 case 41:
                     return Position.ALARM_TEMPERATURE;
+                case 53:
+                    return Position.ALARM_POWER_ON;
+                case 54:
+                    return Position.ALARM_POWER_OFF;
                 default:
                     return null;
             }
