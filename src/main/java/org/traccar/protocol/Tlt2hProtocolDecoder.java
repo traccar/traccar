@@ -210,7 +210,9 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 parser = new Parser(PATTERN_WIFI, message);
                 if (parser.matches()) {
 
-                    position.set(Position.KEY_BATTERY, parser.nextInt() * 0.1);
+                    if (parser.hasNext()) {
+                        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.1);
+                    }
 
                     Network network = new Network();
                     if (parser.hasNext(4)) {
