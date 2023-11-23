@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.{5});")               // firmware
             .number("(d{9});")                   // serial number
             .number("(d+);")                     // index
-            .number("(d+);")                     // type
+            .number("d+;")                       // type
             .groupBegin()
             .number("(dd)-(dd)-(dddd) ")         // event date
             .number("(dd):(dd):(dd);")           // event time
@@ -87,7 +87,6 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
         String firmware = parser.next();
         String serial = parser.next();
         int index = parser.nextInt();
-        int type = parser.nextInt();
 
         if (channel != null) {
             String response = "RST;A;" + model + ";" + firmware + ";" + serial + ";" + index + ";6;FIM;";
@@ -115,9 +114,16 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_HDOP, parser.nextInt());
-            position.set(Position.PREFIX_IN + 1, parser.nextHexInt());
-            position.set(Position.PREFIX_IN + 2, parser.nextHexInt());
-            position.set(Position.PREFIX_IN + 3, parser.nextHexInt());
+
+            int inputs1 = parser.nextHexInt();
+            int inputs2 = parser.nextHexInt();
+            int inputs3 = parser.nextHexInt();
+            position.set(Position.PREFIX_IN + 1, inputs1);
+            position.set(Position.PREFIX_IN + 2, inputs2);
+            position.set(Position.PREFIX_IN + 3, inputs3);
+
+            position.set(Position.KEY_IGNITION, BitUtil.check(inputs2, 7));
+
             position.set(Position.PREFIX_OUT + 1, parser.nextHexInt());
             position.set(Position.PREFIX_OUT + 2, parser.nextHexInt());
             position.set(Position.KEY_POWER, parser.nextDouble());
@@ -125,10 +131,7 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, parser.nextInt());
             position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.PREFIX_TEMP + 1, (int) parser.nextHexInt().byteValue());
-
-            int status = (parser.nextHexInt() << 8) + parser.nextHexInt();
-            position.set(Position.KEY_IGNITION, BitUtil.check(status, 7));
-            position.set(Position.KEY_STATUS, status);
+            position.set(Position.KEY_STATUS, (parser.nextHexInt() << 8) + parser.nextHexInt());
 
             return position;
 
