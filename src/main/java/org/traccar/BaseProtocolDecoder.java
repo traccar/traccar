@@ -125,12 +125,13 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     protected TimeZone getTimeZone(long deviceId, String defaultTimeZone) {
-        TimeZone result = TimeZone.getTimeZone(defaultTimeZone);
         String timeZoneName = AttributeUtil.lookup(cacheManager, Keys.DECODER_TIMEZONE, deviceId);
         if (timeZoneName != null) {
-            result = TimeZone.getTimeZone(timeZoneName);
+            return TimeZone.getTimeZone(timeZoneName);
+        } else if (defaultTimeZone != null) {
+            return TimeZone.getTimeZone(defaultTimeZone);
         }
-        return result;
+        return null;
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
