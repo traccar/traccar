@@ -16,7 +16,6 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseObjectResource;
-import org.traccar.broadcast.BroadcastService;
 import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
@@ -28,10 +27,12 @@ import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Pagination;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
@@ -62,9 +63,6 @@ public class DeviceResource extends BaseObjectResource<Device> {
     private ConnectionManager connectionManager;
 
     @Inject
-    private BroadcastService broadcastService;
-
-    @Inject
     private MediaManager mediaManager;
 
     public DeviceResource() {
@@ -75,7 +73,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds) throws StorageException {
+            @QueryParam("id") List<Long> deviceIds,
+            @QueryParam("skip") @DefaultValue("0") int skip,
+            @QueryParam("limit") @DefaultValue("0") int limit) throws StorageException {
 
         if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
 
@@ -113,8 +113,11 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 }
             }
 
-            return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
-
+            return storage.getObjects(baseClass, new Request(
+                new Columns.All(),
+                Condition.merge(conditions),
+                null,
+                new Pagination(skip, limit)));
         }
     }
 

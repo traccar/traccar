@@ -23,6 +23,7 @@ import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Pagination;
 import org.traccar.storage.query.Request;
 
 import java.util.Date;
@@ -36,7 +37,8 @@ public final class UserUtil {
     public static boolean isEmpty(Storage storage) throws StorageException {
         return storage.getObjects(User.class, new Request(
                 new Columns.Include("id"),
-                new Order("id", false, 1))).isEmpty();
+                new Order("id", false),
+                new Pagination(0, 1))).isEmpty();
     }
 
     public static String getDistanceUnit(Server server, User user) {
