@@ -15,12 +15,15 @@
  */
 package org.traccar.api.resource;
 
+import jakarta.ws.rs.FormParam;
 import org.traccar.api.BaseObjectResource;
+import org.traccar.api.signature.TokenManager;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
+import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
@@ -46,7 +49,9 @@ import jakarta.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -66,6 +71,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Inject
     private MediaManager mediaManager;
+
+    @Inject
+    private TokenManager tokenManager;
 
     public DeviceResource() {
         super(Device.class);
@@ -181,6 +189,35 @@ public class DeviceResource extends BaseObjectResource<Device> {
             return Response.ok(name + "." + extension).build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @Path("share")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @POST
+    public String shareDevice(
+            @FormParam("deviceId") long deviceId,
+            @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
+
+        User user = permissionsService.getUser(getUserId());
+
+        Device device = storage.getObject(Device.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("id", deviceId),
+                        new Condition.Permission(User.class, user.getId(), Device.class))));
+
+        User share = new User();
+        share.setName(device.getName());
+        share.setEmail(user.getEmail() + ":" + device.getUniqueId());
+        share.setExpirationTime(expiration);
+        share.setTemporary(true);
+        share.setReadonly(true);
+
+        share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
+
+        storage.addPermission(new Permission(User.class, share.getId(), Device.class, deviceId));
+
+        return tokenManager.generateToken(share.getId(), expiration);
     }
 
 }

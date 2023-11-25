@@ -261,6 +261,16 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         this.totpKey = totpKey;
     }
 
+    private boolean temporary;
+
+    public boolean getTemporary() {
+        return temporary;
+    }
+
+    public void setTemporary(boolean temporary) {
+        this.temporary = temporary;
+    }
+
     @QueryIgnore
     public String getPassword() {
         return null;

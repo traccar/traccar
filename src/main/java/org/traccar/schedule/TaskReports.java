@@ -51,7 +51,7 @@ public class TaskReports implements ScheduleTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskReports.class);
 
-    private static final long CHECK_PERIOD_MINUTES = 1;
+    private static final long CHECK_PERIOD_MINUTES = 15;
 
     private final Storage storage;
     private final Injector injector;
