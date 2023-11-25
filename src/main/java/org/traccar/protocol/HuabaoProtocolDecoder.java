@@ -770,12 +770,15 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         int battery = buf.readUnsignedByte();
         if (battery <= 100) {
             position.set(Position.KEY_BATTERY_LEVEL, battery);
-        } else if (battery == 0xAA) {
+        } else if (battery == 0xAA || battery == 0xAB) {
             position.set(Position.KEY_CHARGE, true);
         }
 
-        position.setNetwork(new Network(CellTower.fromCidLac(
-                getConfig(), buf.readUnsignedInt(), buf.readUnsignedShort())));
+        long cid = buf.readUnsignedInt();
+        int lac = buf.readUnsignedShort();
+        if (cid > 0 && lac > 0) {
+            position.setNetwork(new Network(CellTower.fromCidLac(getConfig(), cid, lac)));
+        }
 
         int product = buf.readUnsignedByte();
         int status = buf.readUnsignedShort();
@@ -787,6 +790,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             }
         } else if (product == 3) {
             position.set(Position.KEY_BLOCKED, BitUtil.check(status, 5));
+            if (BitUtil.check(alarm, 0)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            }
             if (BitUtil.check(alarm, 1)) {
                 position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
             }
@@ -795,6 +801,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             }
             if (BitUtil.check(alarm, 3)) {
                 position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+            }
+            if (BitUtil.check(alarm, 5)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+            }
+            if (BitUtil.check(alarm, 6)) {
+                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
             }
         }
 
@@ -806,6 +818,28 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             switch (id) {
                 case 0x02:
                     position.setAltitude(buf.readShort());
+                    break;
+                case 0x10:
+                    position.set("wakeSource", buf.readUnsignedByte());
+                    break;
+                case 0x0A:
+                    if (length == 3) {
+                        buf.readUnsignedShort(); // mcc
+                        buf.readUnsignedByte(); // mnc
+                    } else {
+                        buf.skipBytes(length);
+                    }
+                    break;
+                case 0x0B:
+                    position.set("lockCommand", buf.readUnsignedByte());
+                    if (length >= 5 && length <= 6) {
+                        position.set("lockCard", buf.readUnsignedInt());
+                    } else if (length >= 7) {
+                        position.set("lockPassword", buf.readCharSequence(6, StandardCharsets.US_ASCII).toString());
+                    }
+                    if (length % 2 == 0) {
+                        position.set("unlockResult", buf.readUnsignedByte());
+                    }
                     break;
                 case 0x0C:
                     int x = buf.readUnsignedShort();
@@ -821,6 +855,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         z -= 0x10000;
                     }
                     position.set("tilt", String.format("[%d,%d,%d]", x, y, z));
+                    break;
+                case 0xFC:
+                    position.set(Position.KEY_GEOFENCE, buf.readUnsignedByte());
                     break;
                 default:
                     buf.skipBytes(length);
