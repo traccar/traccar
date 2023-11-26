@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
 import org.traccar.api.security.CodeRequiredException;
+import org.traccar.api.security.LoginResult;
 import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.database.OpenIdProvider;
@@ -61,6 +62,7 @@ import java.net.URI;
 public class SessionResource extends BaseResource {
 
     public static final String USER_ID_KEY = "userId";
+    public static final String EXPIRATION_KEY = "expiration";
     public static final String USER_COOKIE_KEY = "user";
     public static final String PASS_COOKIE_KEY = "password";
 
@@ -82,9 +84,11 @@ public class SessionResource extends BaseResource {
     public User get(@QueryParam("token") String token) throws StorageException, IOException, GeneralSecurityException {
 
         if (token != null) {
-            User user = loginService.login(token).getUser();
+            LoginResult loginResult = loginService.login(token);
+            User user = loginResult.getUser();
             if (user != null) {
                 request.getSession().setAttribute(USER_ID_KEY, user.getId());
+                request.getSession().setAttribute(EXPIRATION_KEY, loginResult.getExpiration());
                 LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
                 return user;
             }
