@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,11 +35,19 @@ public class TokenManager {
     private final ObjectMapper objectMapper;
     private final CryptoManager cryptoManager;
 
-    public static class Data {
+    public static class TokenData {
         @JsonProperty("u")
         private long userId;
         @JsonProperty("e")
         private Date expiration;
+
+        public long getUserId() {
+            return userId;
+        }
+
+        public Date getExpiration() {
+            return expiration;
+        }
     }
 
     @Inject
@@ -54,7 +62,7 @@ public class TokenManager {
 
     public String generateToken(
             long userId, Date expiration) throws IOException, GeneralSecurityException, StorageException {
-        Data data = new Data();
+        TokenData data = new TokenData();
         data.userId = userId;
         if (expiration != null) {
             data.expiration = expiration;
@@ -65,13 +73,13 @@ public class TokenManager {
         return Base64.encodeBase64URLSafeString(cryptoManager.sign(encoded));
     }
 
-    public long verifyToken(String token) throws IOException, GeneralSecurityException, StorageException {
+    public TokenData verifyToken(String token) throws IOException, GeneralSecurityException, StorageException {
         byte[] encoded = cryptoManager.verify(Base64.decodeBase64(token));
-        Data data = objectMapper.readValue(encoded, Data.class);
+        TokenData data = objectMapper.readValue(encoded, TokenData.class);
         if (data.expiration.before(new Date())) {
             throw new SecurityException("Token has expired");
         }
-        return data.userId;
+        return data;
     }
 
 }

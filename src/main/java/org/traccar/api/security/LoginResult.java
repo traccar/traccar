@@ -10,8 +10,12 @@ public class LoginResult {
     private final Date expiration;
 
     public LoginResult(User user) {
+        this(user, null);
+    }
+
+    public LoginResult(User user, Date expiration) {
         this.user = user;
-        expiration = null;
+        this.expiration = expiration;
     }
 
     public User getUser() {

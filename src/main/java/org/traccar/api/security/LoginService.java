@@ -62,13 +62,13 @@ public class LoginService {
         if (serviceAccountToken != null && serviceAccountToken.equals(token)) {
             return new LoginResult(new ServiceAccountUser());
         }
-        long userId = tokenManager.verifyToken(token);
+        TokenManager.TokenData tokenData = tokenManager.verifyToken(token);
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("id", userId)));
+                new Columns.All(), new Condition.Equals("id", tokenData.getUserId())));
         if (user != null) {
             checkUserEnabled(user);
         }
-        return new LoginResult(user);
+        return new LoginResult(user, tokenData.getExpiration());
     }
 
     public LoginResult login(String email, String password, Integer code) throws StorageException {
