@@ -21,7 +21,6 @@ import org.traccar.api.security.LoginResult;
 import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.database.OpenIdProvider;
-import org.traccar.helper.DataConverter;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.WebHelper;
 import org.traccar.model.User;
@@ -34,7 +33,6 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -50,8 +48,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.net.URI;
@@ -63,8 +59,6 @@ public class SessionResource extends BaseResource {
 
     public static final String USER_ID_KEY = "userId";
     public static final String EXPIRATION_KEY = "expiration";
-    public static final String USER_COOKIE_KEY = "user";
-    public static final String PASS_COOKIE_KEY = "password";
 
     @Inject
     private LoginService loginService;
@@ -95,39 +89,11 @@ public class SessionResource extends BaseResource {
         }
 
         Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
-        if (userId == null) {
-
-            Cookie[] cookies = request.getCookies();
-            String email = null, password = null;
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(USER_COOKIE_KEY)) {
-                        byte[] emailBytes = DataConverter.parseBase64(
-                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII));
-                        email = new String(emailBytes, StandardCharsets.UTF_8);
-                    } else if (cookie.getName().equals(PASS_COOKIE_KEY)) {
-                        byte[] passwordBytes = DataConverter.parseBase64(
-                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII));
-                        password = new String(passwordBytes, StandardCharsets.UTF_8);
-                    }
-                }
-            }
-            if (email != null && password != null) {
-                User user = loginService.login(email, password, null).getUser();
-                if (user != null) {
-                    request.getSession().setAttribute(USER_ID_KEY, user.getId());
-                    LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
-                    return user;
-                }
-            }
-
-        } else {
-
+        if (userId != null) {
             User user = permissionsService.getUser(userId);
             if (user != null) {
                 return user;
             }
-
         }
 
         throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
