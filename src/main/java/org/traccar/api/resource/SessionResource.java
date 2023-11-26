@@ -181,6 +181,10 @@ public class SessionResource extends BaseResource {
     @POST
     public String requestToken(
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
+        Date currentExpiration = (Date) request.getSession().getAttribute(EXPIRATION_KEY);
+        if (currentExpiration != null && currentExpiration.before(expiration)) {
+            expiration = currentExpiration;
+        }
         return tokenManager.generateToken(getUserId(), expiration);
     }
 
