@@ -82,7 +82,7 @@ public class SessionResource extends BaseResource {
     public User get(@QueryParam("token") String token) throws StorageException, IOException, GeneralSecurityException {
 
         if (token != null) {
-            User user = loginService.login(token);
+            User user = loginService.login(token).getUser();
             if (user != null) {
                 request.getSession().setAttribute(USER_ID_KEY, user.getId());
                 LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
@@ -109,7 +109,7 @@ public class SessionResource extends BaseResource {
                 }
             }
             if (email != null && password != null) {
-                User user = loginService.login(email, password, null);
+                User user = loginService.login(email, password, null).getUser();
                 if (user != null) {
                     request.getSession().setAttribute(USER_ID_KEY, user.getId());
                     LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
@@ -148,7 +148,7 @@ public class SessionResource extends BaseResource {
             @FormParam("code") Integer code) throws StorageException {
         User user;
         try {
-            user = loginService.login(email, password, code);
+            user = loginService.login(email, password, code).getUser();
         } catch (CodeRequiredException e) {
             Response response = Response
                     .status(Response.Status.UNAUTHORIZED)

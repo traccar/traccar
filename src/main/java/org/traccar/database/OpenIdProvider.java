@@ -189,7 +189,8 @@ public class OpenIdProvider {
             throw new GeneralSecurityException("Your OpenID Groups do not permit access to Traccar.");
         }
 
-        User user = loginService.login(userInfo.getEmailAddress(), userInfo.getName(), administrator);
+        User user = loginService.login(
+                userInfo.getEmailAddress(), userInfo.getName(), administrator).getUser();
 
         request.getSession().setAttribute(SessionResource.USER_ID_KEY, user.getId());
         LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));

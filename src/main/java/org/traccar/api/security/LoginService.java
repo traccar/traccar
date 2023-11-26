@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,9 @@ public class LoginService {
         forceOpenId = config.getBoolean(Keys.OPENID_FORCE);
     }
 
-    public User login(String token) throws StorageException, GeneralSecurityException, IOException {
+    public LoginResult login(String token) throws StorageException, GeneralSecurityException, IOException {
         if (serviceAccountToken != null && serviceAccountToken.equals(token)) {
-            return new ServiceAccountUser();
+            return new LoginResult(new ServiceAccountUser());
         }
         long userId = tokenManager.verifyToken(token);
         User user = storage.getObject(User.class, new Request(
@@ -68,10 +68,10 @@ public class LoginService {
         if (user != null) {
             checkUserEnabled(user);
         }
-        return user;
+        return new LoginResult(user);
     }
 
-    public User login(String email, String password, Integer code) throws StorageException {
+    public LoginResult login(String email, String password, Integer code) throws StorageException {
         if (forceOpenId) {
             return null;
         }
@@ -87,20 +87,20 @@ public class LoginService {
                     || !forceLdap && user.isPasswordValid(password)) {
                 checkUserCode(user, code);
                 checkUserEnabled(user);
-                return user;
+                return new LoginResult(user);
             }
         } else {
             if (ldapProvider != null && ldapProvider.login(email, password)) {
                 user = ldapProvider.getUser(email);
                 user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
                 checkUserEnabled(user);
-                return user;
+                return new LoginResult(user);
             }
         }
         return null;
     }
 
-    public User login(String email, String name, boolean administrator) throws StorageException {
+    public LoginResult login(String email, String name, boolean administrator) throws StorageException {
         User user = storage.getObject(User.class, new Request(
             new Columns.All(),
             new Condition.Equals("email", email)));
@@ -115,7 +115,7 @@ public class LoginService {
             user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
         }
         checkUserEnabled(user);
-        return user;
+        return new LoginResult(user);
     }
 
     private void checkUserEnabled(User user) throws SecurityException {
