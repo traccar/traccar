@@ -18,6 +18,15 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
                 "$PUBX,00,130209.00,3650.51159,N,01346.10602,E,785.947,D3,4.1,5.2,0.163,87.43,-0.054,7.0,0.88,1.21,0.88,24,01012,0*6D"));
 
         verifyPosition(decoder, text(
+                "$GNRMC,164414.90,A,4650.5156500,N,01246.1059604,E,0.018,,091123,,,A,V*15"));
+
+        verifyPosition(decoder, text(
+                "$GNGGA,164414.90,4650.5156500,N,01246.1059604,E,1,12,0.84,740.729,M,44.804,M,,*4E"));
+
+        verifyNull(decoder, text(
+                "$GNGLL,4650.5156500,N,01246.1059604,E,164414.90,A,A*77"));
+
+        verifyPosition(decoder, text(
                 "QZE,868994033976700,35,28062020,113553,22.13673,114.57263,0,22,A,0"));
 
         verifyNull(decoder, text(
