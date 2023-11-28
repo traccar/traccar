@@ -97,20 +97,24 @@ public abstract class BaseBroadcastService implements BroadcastService {
         } else if (message.getCommandDeviceId() != null) {
             listeners.forEach(listener -> listener.updateCommand(false, message.getCommandDeviceId()));
         } else if (message.getChanges() != null) {
-            var iterator = message.getChanges().entrySet().iterator();
+            handleChanges(message.getChanges());
+        }
+    }
+
+    private void handleChanges(Map<String, Long> changes) {
+        var iterator = changes.entrySet().iterator();
+        if (iterator.hasNext()) {
+            var first = iterator.next();
             if (iterator.hasNext()) {
-                var first = iterator.next();
-                if (iterator.hasNext()) {
-                    var second = iterator.next();
-                    listeners.forEach(listener -> listener.invalidatePermission(
-                            false,
-                            Permission.getKeyClass(first.getKey()), first.getValue(),
-                            Permission.getKeyClass(second.getKey()), second.getValue()));
-                } else {
-                    listeners.forEach(listener -> listener.invalidateObject(
-                            false,
-                            Permission.getKeyClass(first.getKey()), first.getValue()));
-                }
+                var second = iterator.next();
+                listeners.forEach(listener -> listener.invalidatePermission(
+                        false,
+                        Permission.getKeyClass(first.getKey()), first.getValue(),
+                        Permission.getKeyClass(second.getKey()), second.getValue()));
+            } else {
+                listeners.forEach(listener -> listener.invalidateObject(
+                        false,
+                        Permission.getKeyClass(first.getKey()), first.getValue()));
             }
         }
     }
