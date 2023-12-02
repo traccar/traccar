@@ -246,10 +246,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(200, fmbXXX, (p, b) -> p.set("sleepMode", b.readUnsignedByte()));
         register(205, fmbXXX, (p, b) -> p.set("cid2g", b.readUnsignedShort()));
         register(206, fmbXXX, (p, b) -> p.set("lac", b.readUnsignedShort()));
-        register(232, fmbXXX, (p, b) -> p.set("cngStatus", b.readUnsignedByte() > 0)); //only available via additional CAN reader
-        register(233, fmbXXX, (p, b) -> p.set("cngUsed", b.readUnsignedInt() * 0.1)); //only available via additional CAN reader
-        register(234, fmbXXX, (p, b) -> p.set("cngLevel", b.readUnsignedShort())); //only available via additional CAN reader
-        register(235, fmbXXX, (p, b) -> p.set("oilLevel", b.readUnsignedByte())); //only available via additional CAN reader
+        register(232, fmbXXX, (p, b) -> p.set("cngStatus", b.readUnsignedByte() > 0));
+        register(233, fmbXXX, (p, b) -> p.set("cngUsed", b.readUnsignedInt() * 0.1));
+        register(234, fmbXXX, (p, b) -> p.set("cngLevel", b.readUnsignedShort()));
+        register(235, fmbXXX, (p, b) -> p.set("oilLevel", b.readUnsignedByte()));
         register(236, null, (p, b) -> {
             p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
         });
