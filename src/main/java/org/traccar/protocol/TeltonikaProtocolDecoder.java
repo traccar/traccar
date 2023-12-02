@@ -34,6 +34,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -628,6 +629,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         decodeNetwork(position, model);
 
+        if (model != null && model.matches("FM.6..")) {
+            Long driverMsb = (Long) position.getAttributes().get("io195");
+            Long driverLsb = (Long) position.getAttributes().get("io196");
+            if (driverMsb != null && driverLsb != null) {
+                String driver = new String(ByteBuffer.allocate(16).putLong(driverMsb).putLong(driverLsb).array());
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, driver);
+            }
+        }
     }
 
     private List<Position> parseData(
