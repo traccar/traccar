@@ -199,7 +199,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         var fmbXXX = Set.of(
                 "FMB001", "FMB010", "FMB002", "FMB020", "FMB003", "FMB110", "FMB120", "FMB122", "FMB125", "FMB130",
                 "FMB140", "FMU125", "FMB900", "FMB920", "FMB962", "FMB964", "FM3001", "FMB202", "FMB204", "FMB206",
-                "FMT100", "MTB100", "FMP100", "MSP500");
+                "FMT100", "MTB100", "FMP100", "MSP500", "FMC001", "FMM001", "FMC003", "FMM003", "FMC00A", "FMM00A");
 
         register(1, null, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
         register(2, null, (p, b) -> p.set(Position.PREFIX_IN + 2, b.readUnsignedByte() > 0));
@@ -236,15 +236,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             }
         });
         register(80, fmbXXX, (p, b) -> p.set("dataMode", b.readUnsignedByte()));
-        register(81, fmbXXX, (p, b) -> p.set(Position.KEY_OBD_SPEED, b.readUnsignedByte()));
-        register(82, fmbXXX, (p, b) -> p.set(Position.KEY_THROTTLE, b.readUnsignedByte()));
-        register(83, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() * 0.1));
-        register(84, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_LEVEL, b.readUnsignedShort() * 0.1));
-        register(85, fmbXXX, (p, b) -> p.set(Position.KEY_RPM, b.readUnsignedShort()));
-        register(87, fmbXXX, (p, b) -> p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt()));
-        register(89, fmbXXX, (p, b) -> p.set("fuelLevelPercentage", b.readUnsignedByte()));
         register(90, null, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedShort()));
-        register(110, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_CONSUMPTION, b.readUnsignedShort() * 0.1));
         register(113, fmbXXX, (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));
         register(179, null, (p, b) -> p.set(Position.PREFIX_OUT + 1, b.readUnsignedByte() > 0));
         register(180, null, (p, b) -> p.set(Position.PREFIX_OUT + 2, b.readUnsignedByte() > 0));
@@ -254,28 +246,16 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(200, fmbXXX, (p, b) -> p.set("sleepMode", b.readUnsignedByte()));
         register(205, fmbXXX, (p, b) -> p.set("cid2g", b.readUnsignedShort()));
         register(206, fmbXXX, (p, b) -> p.set("lac", b.readUnsignedShort()));
-        register(232, fmbXXX, (p, b) -> p.set("cngStatus", b.readUnsignedByte() > 0));
-        register(233, fmbXXX, (p, b) -> p.set("cngUsed", b.readUnsignedInt() * 0.1));
-        register(234, fmbXXX, (p, b) -> p.set("cngLevel", b.readUnsignedShort()));
-        register(235, fmbXXX, (p, b) -> p.set("oilLevel", b.readUnsignedByte()));
+        register(232, fmbXXX, (p, b) -> p.set("cngStatus", b.readUnsignedByte() > 0)); //only available via additional CAN reader
+        register(233, fmbXXX, (p, b) -> p.set("cngUsed", b.readUnsignedInt() * 0.1)); //only available via additional CAN reader
+        register(234, fmbXXX, (p, b) -> p.set("cngLevel", b.readUnsignedShort())); //only available via additional CAN reader
+        register(235, fmbXXX, (p, b) -> p.set("oilLevel", b.readUnsignedByte())); //only available via additional CAN reader
         register(236, null, (p, b) -> {
             p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
         });
         register(239, null, (p, b) -> p.set(Position.KEY_IGNITION, b.readUnsignedByte() > 0));
         register(240, null, (p, b) -> p.set(Position.KEY_MOTION, b.readUnsignedByte() > 0));
         register(241, null, (p, b) -> p.set(Position.KEY_OPERATOR, b.readUnsignedInt()));
-        register(246, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_TOW : null);
-        });
-        register(247, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_ACCIDENT : null);
-        });
-        register(249, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null);
-        });
-        register(252, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null);
-        });
         register(253, null, (p, b) -> {
             switch (b.readUnsignedByte()) {
                 case 1:
