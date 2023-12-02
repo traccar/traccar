@@ -649,11 +649,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression(PATTERN_LOCATION.pattern())
             .expression(")+)")
             .groupBegin()
-            .number("d{1,2},,")
-            .number("(d{1,3}),")                 // battery
+            .number("d{1,2},")
+            .number("(d{1,5})?,")                // battery
+            .number("(d{1,3}),")                 // battery level
             .number("[01],")                     // mode
             .number("(?:[01])?,")                // motion
-            .number("(?:-?d{1,2}.d)?,")          // temperature
+            .number("(-?d{1,2}.d)?,")            // temperature
             .or()
             .number("(d{1,7}.d)?,")              // odometer
             .number("(d{5}:dd:dd)?,")            // hour meter
@@ -721,8 +722,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+            position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
         }
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
 
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
