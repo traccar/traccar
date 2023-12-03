@@ -381,7 +381,7 @@ public class CacheManager implements BroadcastInterface {
             var key = new CacheKey(clazz, id);
             deviceCache.computeIfPresent(key, (k, value) -> {
                 value.release(deviceId);
-                return value.getReferences().size() > 0 ? value : null;
+                return value.getReferences().isEmpty() ? null : value;
             });
         }));
         devicePositions.remove(deviceId);
