@@ -17,7 +17,7 @@
 package org.traccar.api;
 
 import org.traccar.api.security.ServiceAccountUser;
-import org.traccar.broadcast.ObjectOperation;
+import org.traccar.model.ObjectOperation;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Group;

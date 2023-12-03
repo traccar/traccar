@@ -17,6 +17,7 @@ package org.traccar.broadcast;
 
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
 
 public class BroadcastMessage {

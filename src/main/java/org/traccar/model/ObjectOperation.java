@@ -1,4 +1,4 @@
-package org.traccar.broadcast;
+package org.traccar.model;
 
 public enum ObjectOperation {
     ADD,

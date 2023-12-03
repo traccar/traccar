@@ -18,6 +18,7 @@ package org.traccar.broadcast;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
 
 public interface BroadcastInterface {
