@@ -155,13 +155,6 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
-    public Driver findDriverByUniqueId(long deviceId, String driverUniqueId) {
-        return getDeviceObjects(deviceId, Driver.class).stream()
-                .filter(driver -> driver.getUniqueId().equals(driverUniqueId))
-                .findFirst()
-                .orElse(null);
-    }
-
     public void addDevice(long deviceId) throws StorageException {
         try {
             lock.writeLock().lock();
