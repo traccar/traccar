@@ -29,6 +29,7 @@ import com.google.firebase.messaging.MessagingErrorCode;
 import com.google.firebase.messaging.MulticastMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.broadcast.ObjectOperation;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
@@ -135,7 +136,7 @@ public class NotificatorFirebase implements Notificator {
                     storage.updateObject(user, new Request(
                             new Columns.Include("attributes"),
                             new Condition.Equals("id", user.getId())));
-                    cacheManager.updateOrInvalidate(true, user);
+                    cacheManager.updateOrInvalidate(true, user, ObjectOperation.UPDATE);
                 }
             } catch (FirebaseMessagingException | StorageException e) {
                 LOGGER.warn("Firebase error", e);

@@ -330,8 +330,9 @@ public class ConnectionManager implements BroadcastInterface {
     public synchronized void invalidatePermission(
             boolean local,
             Class<? extends BaseModel> clazz1, long id1,
-            Class<? extends BaseModel> clazz2, long id2) {
-        if (clazz1.equals(User.class) && clazz2.equals(Device.class)) {
+            Class<? extends BaseModel> clazz2, long id2,
+            boolean link) {
+        if (link && clazz1.equals(User.class) && clazz2.equals(Device.class)) {
             if (listeners.containsKey(id1)) {
                 userDevices.get(id1).add(id2);
                 deviceUsers.put(id2, new HashSet<>(List.of(id1)));

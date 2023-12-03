@@ -17,6 +17,7 @@
 package org.traccar.api;
 
 import org.traccar.api.security.ServiceAccountUser;
+import org.traccar.broadcast.ObjectOperation;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Group;
@@ -74,8 +75,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         if (getUserId() != ServiceAccountUser.ID) {
             storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
-            cacheManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId());
-            connectionManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId());
+            cacheManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId(), true);
+            connectionManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId(), true);
             LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
         }
 
@@ -110,7 +111,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                         new Condition.Equals("id", entity.getId())));
             }
         }
-        cacheManager.updateOrInvalidate(true, entity);
+        cacheManager.updateOrInvalidate(true, entity, ObjectOperation.UPDATE);
         LogAction.edit(getUserId(), entity);
 
         return Response.ok(entity).build();

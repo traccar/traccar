@@ -74,7 +74,8 @@ public class PermissionsResource  extends BaseResource {
             cacheManager.invalidatePermission(
                     true,
                     permission.getOwnerClass(), permission.getOwnerId(),
-                    permission.getPropertyClass(), permission.getPropertyId());
+                    permission.getPropertyClass(), permission.getPropertyId(),
+                    true);
             LogAction.link(getUserId(),
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
@@ -99,7 +100,8 @@ public class PermissionsResource  extends BaseResource {
             cacheManager.invalidatePermission(
                     true,
                     permission.getOwnerClass(), permission.getOwnerId(),
-                    permission.getPropertyClass(), permission.getPropertyId());
+                    permission.getPropertyClass(), permission.getPropertyId(),
+                    false);
             LogAction.unlink(getUserId(),
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());

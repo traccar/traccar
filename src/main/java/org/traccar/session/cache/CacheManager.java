@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
+import org.traccar.broadcast.ObjectOperation;
 import org.traccar.config.Config;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
@@ -201,12 +202,15 @@ public class CacheManager implements BroadcastInterface {
     }
 
     @Override
-    public void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
+    public void invalidateObject(
+            boolean local,
+            Class<? extends BaseModel> clazz, long id,
+            ObjectOperation operation) {
         try {
             var object = storage.getObject(clazz, new Request(
                     new Columns.All(), new Condition.Equals("id", id)));
             if (object != null) {
-                updateOrInvalidate(local, object);
+                updateOrInvalidate(local, object, operation);
             } else {
                 invalidate(clazz, id);
             }
@@ -215,9 +219,10 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
-    public <T extends BaseModel> void updateOrInvalidate(boolean local, T object) throws StorageException {
+    public <T extends BaseModel> void updateOrInvalidate(
+            boolean local, T object, ObjectOperation operation) throws StorageException {
         if (local) {
-            broadcastService.invalidateObject(true, object.getClass(), object.getId());
+            broadcastService.invalidateObject(true, object.getClass(), object.getId(), operation);
         }
 
         if (object instanceof Server) {
@@ -262,9 +267,10 @@ public class CacheManager implements BroadcastInterface {
     public void invalidatePermission(
             boolean local,
             Class<? extends BaseModel> clazz1, long id1,
-            Class<? extends BaseModel> clazz2, long id2) {
+            Class<? extends BaseModel> clazz2, long id2,
+            boolean link) {
         if (local) {
-            broadcastService.invalidatePermission(true, clazz1, id1, clazz2, id2);
+            broadcastService.invalidatePermission(true, clazz1, id1, clazz2, id2, link);
         }
 
         try {

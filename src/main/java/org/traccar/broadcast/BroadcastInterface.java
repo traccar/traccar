@@ -34,12 +34,16 @@ public interface BroadcastInterface {
     default void updateCommand(boolean local, long deviceId) {
     }
 
-    default void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
+    default void invalidateObject(
+            boolean local,
+            Class<? extends BaseModel> clazz, long id,
+            ObjectOperation operation) {
     }
 
     default void invalidatePermission(
             boolean local,
             Class<? extends BaseModel> clazz1, long id1,
-            Class<? extends BaseModel> clazz2, long id2) {
+            Class<? extends BaseModel> clazz2, long id2,
+            boolean link) {
     }
 }

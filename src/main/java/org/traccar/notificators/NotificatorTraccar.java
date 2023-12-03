@@ -18,6 +18,7 @@ package org.traccar.notificators;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.broadcast.ObjectOperation;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
@@ -128,7 +129,7 @@ public class NotificatorTraccar implements Notificator {
                     storage.updateObject(user, new Request(
                             new Columns.Include("attributes"),
                             new Condition.Equals("id", user.getId())));
-                    cacheManager.updateOrInvalidate(true, user);
+                    cacheManager.updateOrInvalidate(true, user, ObjectOperation.UPDATE);
                 }
             } catch (StorageException e) {
                 LOGGER.warn("Push error", e);

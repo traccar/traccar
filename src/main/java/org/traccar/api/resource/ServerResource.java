@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.broadcast.ObjectOperation;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.OpenIdProvider;
@@ -111,7 +112,7 @@ public class ServerResource extends BaseResource {
         storage.updateObject(entity, new Request(
                 new Columns.Exclude("id"),
                 new Condition.Equals("id", entity.getId())));
-        cacheManager.updateOrInvalidate(true, entity);
+        cacheManager.updateOrInvalidate(true, entity, ObjectOperation.UPDATE);
         LogAction.edit(getUserId(), entity);
         return Response.ok(entity).build();
     }

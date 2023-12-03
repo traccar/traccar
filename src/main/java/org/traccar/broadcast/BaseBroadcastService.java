@@ -16,7 +16,6 @@
 package org.traccar.broadcast;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.traccar.model.BaseModel;
@@ -69,9 +68,16 @@ public abstract class BaseBroadcastService implements BroadcastService {
     }
 
     @Override
-    public void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
+    public void invalidateObject(
+            boolean local,
+            Class<? extends BaseModel> clazz, long id,
+            ObjectOperation operation) {
         BroadcastMessage message = new BroadcastMessage();
-        message.setChanges(Map.of(Permission.getKey(clazz), id));
+        var invalidateObject = new BroadcastMessage.InvalidateObject();
+        invalidateObject.setClazz(Permission.getKey(clazz));
+        invalidateObject.setId(id);
+        invalidateObject.setOperation(operation);
+        message.setInvalidateObject(invalidateObject);
         sendMessage(message);
     }
 
@@ -79,9 +85,16 @@ public abstract class BaseBroadcastService implements BroadcastService {
     public void invalidatePermission(
             boolean local,
             Class<? extends BaseModel> clazz1, long id1,
-            Class<? extends BaseModel> clazz2, long id2) {
+            Class<? extends BaseModel> clazz2, long id2,
+            boolean link) {
         BroadcastMessage message = new BroadcastMessage();
-        message.setChanges(Map.of(Permission.getKey(clazz1), id1, Permission.getKey(clazz2), id2));
+        var invalidatePermission = new BroadcastMessage.InvalidatePermission();
+        invalidatePermission.setClazz1(Permission.getKey(clazz1));
+        invalidatePermission.setId1(id1);
+        invalidatePermission.setClazz2(Permission.getKey(clazz2));
+        invalidatePermission.setId2(id2);
+        invalidatePermission.setLink(link);
+        message.setInvalidatePermission(invalidatePermission);
         sendMessage(message);
     }
 
@@ -96,22 +109,19 @@ public abstract class BaseBroadcastService implements BroadcastService {
             listeners.forEach(listener -> listener.updateEvent(false, message.getUserId(), message.getEvent()));
         } else if (message.getCommandDeviceId() != null) {
             listeners.forEach(listener -> listener.updateCommand(false, message.getCommandDeviceId()));
-        } else if (message.getChanges() != null) {
-            var iterator = message.getChanges().entrySet().iterator();
-            if (iterator.hasNext()) {
-                var first = iterator.next();
-                if (iterator.hasNext()) {
-                    var second = iterator.next();
-                    listeners.forEach(listener -> listener.invalidatePermission(
-                            false,
-                            Permission.getKeyClass(first.getKey()), first.getValue(),
-                            Permission.getKeyClass(second.getKey()), second.getValue()));
-                } else {
-                    listeners.forEach(listener -> listener.invalidateObject(
-                            false,
-                            Permission.getKeyClass(first.getKey()), first.getValue()));
-                }
-            }
+        } else if (message.getInvalidateObject() != null) {
+            var invalidateObject = message.getInvalidateObject();
+            listeners.forEach(listeners -> listeners.invalidateObject(
+                    false,
+                    Permission.getKeyClass(invalidateObject.getClazz()), invalidateObject.getId(),
+                    invalidateObject.getOperation()));
+        } else if (message.getInvalidatePermission() != null) {
+            var invalidatePermission = message.getInvalidatePermission();
+            listeners.forEach(listener -> listener.invalidatePermission(
+                    false,
+                    Permission.getKeyClass(invalidatePermission.getClazz1()), invalidatePermission.getId1(),
+                    Permission.getKeyClass(invalidatePermission.getClazz2()), invalidatePermission.getId2(),
+                    invalidatePermission.getLink()));
         }
     }
 
