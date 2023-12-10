@@ -23,6 +23,7 @@ import org.traccar.config.Keys;
 import org.traccar.forward.EventData;
 import org.traccar.forward.EventForwarder;
 import org.traccar.geocoder.Geocoder;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -106,6 +107,14 @@ public class NotificationManager {
                     return calendar == null || calendar.checkMoment(event.getEventTime());
                 })
                 .collect(Collectors.toUnmodifiableList());
+
+        Device device = cacheManager.getObject(Device.class, event.getDeviceId());
+        LOGGER.info(
+                "Event id: {}, time: {}, type: {}, notifications: {}",
+                device.getUniqueId(),
+                DateUtil.formatDate(event.getEventTime(), false),
+                event.getType(),
+                notifications.size());
 
         if (!notifications.isEmpty()) {
             if (position != null && position.getAddress() == null && geocodeOnRequest && geocoder != null) {
