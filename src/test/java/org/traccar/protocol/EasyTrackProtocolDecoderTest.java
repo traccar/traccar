@@ -10,6 +10,9 @@ public class EasyTrackProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new EasyTrackProtocolDecoder(null));
 
+        verifyAttributes(decoder, text(
+                "*ET,358999999999916,OB,BD$V14.2;R08258;S166;P058.4;O079.2;C025;L081.5;XM091.393;M722379;F352.956;T0037184;A01;B00;D00;GX3;GY-6;GZ-268;@4#"));
+
         verifyNotNull(decoder, text(
                 "*ET,354522180593498,JZ,0,20222,262,724,4#"));
 
