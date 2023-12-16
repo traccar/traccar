@@ -293,6 +293,12 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
                 "ST300HTE;100850001;04;248;20110101;00:13:52;167559;12.28;004005;0.0;1;0;3;3;0;-22.881018;-047.070831;-22.881018;-047.070831;000.000;000.000;0;0;3;0;0;0;01E04D44160000"),
                 Position.KEY_DRIVER_UNIQUE_ID, "01E04D44160000");
 
+        decoder.setHbm(true);
+
+        verifyAttribute(decoder, buffer(
+                "ST300STT;807469112;45;315;20231215;15:25:03;104147;-16.030168;-047.989150;000.000;000.00;19;1;8600;12.14;000010;1;0456;000373;4.1;1;01B54221010000;0"),
+                Position.KEY_DRIVER_UNIQUE_ID, "01B54221010000");
+
     }
 
 }
