@@ -140,7 +140,12 @@ public class ServerResource extends BaseResource {
         permissionsService.checkAdmin(getUserId());
         String root = config.getString(Keys.WEB_OVERRIDE, config.getString(Keys.WEB_PATH));
 
-        var outputPath = Paths.get(root, path);
+        var rootPath = Paths.get(root).normalize();
+        var outputPath = rootPath.resolve(path).normalize();
+        if (!outputPath.startsWith(rootPath)) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
         var directoryPath = outputPath.getParent();
         if (directoryPath != null) {
             Files.createDirectories(directoryPath);
