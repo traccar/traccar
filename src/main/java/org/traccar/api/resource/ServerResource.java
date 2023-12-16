@@ -136,7 +136,7 @@ public class ServerResource extends BaseResource {
     @Path("file/{path}")
     @POST
     @Consumes("*/*")
-    public Response uploadImage(@PathParam("path") String path, File inputFile) throws IOException, StorageException {
+    public Response uploadFile(@PathParam("path") String path, File inputFile) throws IOException, StorageException {
         permissionsService.checkAdmin(getUserId());
         String root = config.getString(Keys.WEB_OVERRIDE, config.getString(Keys.WEB_PATH));
 
