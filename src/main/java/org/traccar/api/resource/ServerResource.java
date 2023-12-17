@@ -107,14 +107,14 @@ public class ServerResource extends BaseResource {
     }
 
     @PUT
-    public Response update(Server entity) throws StorageException {
+    public Response update(Server server) throws Exception {
         permissionsService.checkAdmin(getUserId());
-        storage.updateObject(entity, new Request(
+        storage.updateObject(server, new Request(
                 new Columns.Exclude("id"),
-                new Condition.Equals("id", entity.getId())));
-        cacheManager.updateOrInvalidate(true, entity, ObjectOperation.UPDATE);
-        LogAction.edit(getUserId(), entity);
-        return Response.ok(entity).build();
+                new Condition.Equals("id", server.getId())));
+        cacheManager.invalidateObject(true, Server.class, server.getId(), ObjectOperation.UPDATE);
+        LogAction.edit(getUserId(), server);
+        return Response.ok(server).build();
     }
 
     @Path("geocode")
@@ -155,6 +155,13 @@ public class ServerResource extends BaseResource {
             input.transferTo(output);
         }
         return Response.ok().build();
+    }
+
+    @Path("cache")
+    @GET
+    public String cache() throws StorageException {
+        permissionsService.checkAdmin(getUserId());
+        return cacheManager.toString();
     }
 
 }

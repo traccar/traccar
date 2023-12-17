@@ -128,7 +128,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Path("{id}/accumulators")
     @PUT
-    public Response updateAccumulators(DeviceAccumulators entity) throws StorageException {
+    public Response updateAccumulators(DeviceAccumulators entity) throws Exception {
         if (permissionsService.notAdmin(getUserId())) {
             permissionsService.checkManager(getUserId());
             permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());

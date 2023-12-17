@@ -69,10 +69,8 @@ public abstract class BaseBroadcastService implements BroadcastService {
     }
 
     @Override
-    public void invalidateObject(
-            boolean local,
-            Class<? extends BaseModel> clazz, long id,
-            ObjectOperation operation) {
+    public <T extends BaseModel> void invalidateObject(
+            boolean local, Class<T> clazz, long id, ObjectOperation operation) {
         BroadcastMessage message = new BroadcastMessage();
         var invalidateObject = new BroadcastMessage.InvalidateObject();
         invalidateObject.setClazz(Permission.getKey(clazz));
@@ -83,11 +81,8 @@ public abstract class BaseBroadcastService implements BroadcastService {
     }
 
     @Override
-    public void invalidatePermission(
-            boolean local,
-            Class<? extends BaseModel> clazz1, long id1,
-            Class<? extends BaseModel> clazz2, long id2,
-            boolean link) {
+    public synchronized <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
+            boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) {
         BroadcastMessage message = new BroadcastMessage();
         var invalidatePermission = new BroadcastMessage.InvalidatePermission();
         invalidatePermission.setClazz1(Permission.getKey(clazz1));
@@ -101,7 +96,7 @@ public abstract class BaseBroadcastService implements BroadcastService {
 
     protected abstract void sendMessage(BroadcastMessage message);
 
-    protected void handleMessage(BroadcastMessage message) {
+    protected void handleMessage(BroadcastMessage message) throws Exception {
         if (message.getDevice() != null) {
             listeners.forEach(listener -> listener.updateDevice(false, message.getDevice()));
         } else if (message.getPosition() != null) {
@@ -112,17 +107,21 @@ public abstract class BaseBroadcastService implements BroadcastService {
             listeners.forEach(listener -> listener.updateCommand(false, message.getCommandDeviceId()));
         } else if (message.getInvalidateObject() != null) {
             var invalidateObject = message.getInvalidateObject();
-            listeners.forEach(listeners -> listeners.invalidateObject(
-                    false,
-                    Permission.getKeyClass(invalidateObject.getClazz()), invalidateObject.getId(),
-                    invalidateObject.getOperation()));
+            for (BroadcastInterface listener : listeners) {
+                listener.invalidateObject(
+                        false,
+                        Permission.getKeyClass(invalidateObject.getClazz()), invalidateObject.getId(),
+                        invalidateObject.getOperation());
+            }
         } else if (message.getInvalidatePermission() != null) {
             var invalidatePermission = message.getInvalidatePermission();
-            listeners.forEach(listener -> listener.invalidatePermission(
-                    false,
-                    Permission.getKeyClass(invalidatePermission.getClazz1()), invalidatePermission.getId1(),
-                    Permission.getKeyClass(invalidatePermission.getClazz2()), invalidatePermission.getId2(),
-                    invalidatePermission.getLink()));
+            for (BroadcastInterface listener : listeners) {
+                listener.invalidatePermission(
+                        false,
+                        Permission.getKeyClass(invalidatePermission.getClazz1()), invalidatePermission.getId1(),
+                        Permission.getKeyClass(invalidatePermission.getClazz2()), invalidatePermission.getId2(),
+                        invalidatePermission.getLink());
+            }
         }
     }
 

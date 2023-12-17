@@ -29,7 +29,6 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
-import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificatorManager;
@@ -88,7 +87,7 @@ public class NotificationManager {
             return;
         }
 
-        var notifications = cacheManager.getDeviceObjects(event.getDeviceId(), Notification.class).stream()
+        var notifications = cacheManager.getDeviceNotifications(event.getDeviceId())
                 .filter(notification -> notification.getType().equals(event.getType()))
                 .filter(notification -> {
                     if (event.getType().equals(Event.TYPE_ALARM)) {
@@ -162,7 +161,7 @@ public class NotificationManager {
             try {
                 cacheManager.addDevice(event.getDeviceId());
                 updateEvent(event, position);
-            } catch (StorageException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
                 cacheManager.removeDevice(event.getDeviceId());

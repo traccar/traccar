@@ -6,14 +6,15 @@ import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.anyLong;
 
 public class MaintenanceEventHandlerTest extends BaseTest {
     
@@ -29,7 +30,7 @@ public class MaintenanceEventHandlerTest extends BaseTest {
 
         var maintenance = mock(Maintenance.class);
         when(maintenance.getType()).thenReturn(Position.KEY_TOTAL_DISTANCE);
-        var maintenances = Arrays.asList(maintenance);
+        var maintenances = Set.of(maintenance);
 
         var cacheManager = mock(CacheManager.class);
         when(cacheManager.getDeviceObjects(anyLong(), eq(Maintenance.class))).thenReturn(maintenances);
@@ -48,12 +49,12 @@ public class MaintenanceEventHandlerTest extends BaseTest {
         assertTrue(eventHandler.analyzePosition(position).isEmpty());
 
         lastPosition.set(Position.KEY_TOTAL_DISTANCE, 9999);
-        position.set(Position.KEY_TOTAL_DISTANCE, 10001);        
-        assertTrue(eventHandler.analyzePosition(position).size() == 1);
+        position.set(Position.KEY_TOTAL_DISTANCE, 10001);
+        assertEquals(1, eventHandler.analyzePosition(position).size());
 
         lastPosition.set(Position.KEY_TOTAL_DISTANCE, 11999);
-        position.set(Position.KEY_TOTAL_DISTANCE, 12001);        
-        assertTrue(eventHandler.analyzePosition(position).size() == 1);
+        position.set(Position.KEY_TOTAL_DISTANCE, 12001);
+        assertEquals(1, eventHandler.analyzePosition(position).size());
         
     }
 

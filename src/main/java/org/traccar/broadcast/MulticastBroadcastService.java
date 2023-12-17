@@ -103,7 +103,7 @@ public class MulticastBroadcastService extends BaseBroadcastService {
                 }
                 publisherSocket = null;
                 socket.leaveGroup(group, networkInterface);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }

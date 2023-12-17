@@ -102,7 +102,7 @@ public class ConnectionManager implements BroadcastInterface {
 
     public DeviceSession getDeviceSession(
             Protocol protocol, Channel channel, SocketAddress remoteAddress,
-            String... uniqueIds) throws StorageException {
+            String... uniqueIds) throws Exception {
 
         Endpoint endpoint = new Endpoint(channel, remoteAddress);
         Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.getOrDefault(
@@ -327,11 +327,8 @@ public class ConnectionManager implements BroadcastInterface {
     }
 
     @Override
-    public synchronized void invalidatePermission(
-            boolean local,
-            Class<? extends BaseModel> clazz1, long id1,
-            Class<? extends BaseModel> clazz2, long id2,
-            boolean link) {
+    public synchronized <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
+            boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) {
         if (link && clazz1.equals(User.class) && clazz2.equals(Device.class)) {
             if (listeners.containsKey(id1)) {
                 userDevices.get(id1).add(id2);

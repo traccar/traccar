@@ -67,7 +67,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     }
 
     @POST
-    public Response add(T entity) throws StorageException {
+    public Response add(T entity) throws Exception {
         permissionsService.checkEdit(getUserId(), entity, true);
 
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
@@ -85,7 +85,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Path("{id}")
     @PUT
-    public Response update(T entity) throws StorageException {
+    public Response update(T entity) throws Exception {
         permissionsService.checkEdit(getUserId(), entity, false);
         permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
 
@@ -111,7 +111,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                         new Condition.Equals("id", entity.getId())));
             }
         }
-        cacheManager.updateOrInvalidate(true, entity, ObjectOperation.UPDATE);
+        cacheManager.invalidateObject(true, entity.getClass(), entity.getId(), ObjectOperation.UPDATE);
         LogAction.edit(getUserId(), entity);
 
         return Response.ok(entity).build();
@@ -119,12 +119,12 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) throws StorageException {
+    public Response remove(@PathParam("id") long id) throws Exception {
         permissionsService.checkEdit(getUserId(), baseClass, false);
         permissionsService.checkPermission(baseClass, getUserId(), id);
 
         storage.removeObject(baseClass, new Request(new Condition.Equals("id", id)));
-        cacheManager.invalidate(baseClass, id);
+        cacheManager.invalidateObject(true, baseClass, id, ObjectOperation.DELETE);
 
         LogAction.remove(getUserId(), baseClass, id);
 

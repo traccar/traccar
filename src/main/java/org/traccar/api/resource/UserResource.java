@@ -126,7 +126,7 @@ public class UserResource extends BaseObjectResource<User> {
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) throws StorageException {
+    public Response remove(@PathParam("id") long id) throws Exception {
         Response response = super.remove(id);
         if (getUserId() == id) {
             request.getSession().removeAttribute(SessionResource.USER_ID_KEY);
