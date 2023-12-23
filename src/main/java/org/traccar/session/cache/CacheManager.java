@@ -157,6 +157,10 @@ public class CacheManager implements BroadcastInterface {
                         new Columns.All(), new Condition.Equals("id", deviceId)));
                 graph.addObject(device);
                 initializeCache(device);
+                if (device.getPositionId() > 0) {
+                    devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
+                            new Columns.All(), new Condition.Equals("id", device.getPositionId()))));
+                }
             }
         } finally {
             lock.writeLock().unlock();
