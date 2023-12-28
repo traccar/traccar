@@ -124,7 +124,11 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             pipeline.addLast(handler);
         }
         pipeline.addLast(new NetworkMessageHandler());
-        pipeline.addLast(new StandardLoggingHandler(protocol));
+
+        var loggingHandler = new StandardLoggingHandler(protocol);
+        injector.injectMembers(loggingHandler);
+        pipeline.addLast(loggingHandler);
+
         if (!connector.isDatagram() && !config.getBoolean(Keys.SERVER_INSTANT_ACKNOWLEDGEMENT)) {
             pipeline.addLast(new AcknowledgementHandler());
         }

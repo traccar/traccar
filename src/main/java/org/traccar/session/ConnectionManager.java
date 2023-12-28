@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.traccar.database.NotificationManager;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.LogRecord;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.session.cache.CacheManager;
@@ -64,7 +65,7 @@ public class ConnectionManager implements BroadcastInterface {
     private final long deviceTimeout;
 
     private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
-    private final Map<Endpoint, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
+    private final Map<SocketAddress, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
 
     private final Config config;
     private final CacheManager cacheManager;
@@ -104,9 +105,8 @@ public class ConnectionManager implements BroadcastInterface {
             Protocol protocol, Channel channel, SocketAddress remoteAddress,
             String... uniqueIds) throws Exception {
 
-        Endpoint endpoint = new Endpoint(channel, remoteAddress);
         Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.getOrDefault(
-                endpoint, new ConcurrentHashMap<>());
+                remoteAddress, new ConcurrentHashMap<>());
 
         uniqueIds = Arrays.stream(uniqueIds).filter(Objects::nonNull).toArray(String[]::new);
         if (uniqueIds.length > 0) {
@@ -133,19 +133,18 @@ public class ConnectionManager implements BroadcastInterface {
 
             DeviceSession oldSession = sessionsByDeviceId.remove(device.getId());
             if (oldSession != null) {
-                Endpoint oldEndpoint = new Endpoint(oldSession.getChannel(), oldSession.getRemoteAddress());
-                Map<String, DeviceSession> oldEndpointSessions = sessionsByEndpoint.get(oldEndpoint);
+                Map<String, DeviceSession> oldEndpointSessions = sessionsByEndpoint.get(oldSession.getRemoteAddress());
                 if (oldEndpointSessions != null && oldEndpointSessions.size() > 1) {
                     oldEndpointSessions.remove(device.getUniqueId());
                 } else {
-                    sessionsByEndpoint.remove(oldEndpoint);
+                    sessionsByEndpoint.remove(oldSession.getRemoteAddress());
                 }
             }
 
             DeviceSession deviceSession = new DeviceSession(
                     device.getId(), device.getUniqueId(), protocol, channel, remoteAddress);
             endpointSessions.put(device.getUniqueId(), deviceSession);
-            sessionsByEndpoint.put(endpoint, endpointSessions);
+            sessionsByEndpoint.put(remoteAddress, endpointSessions);
             sessionsByDeviceId.put(device.getId(), deviceSession);
 
             if (oldSession == null) {
@@ -182,8 +181,7 @@ public class ConnectionManager implements BroadcastInterface {
     }
 
     public void deviceDisconnected(Channel channel, boolean supportsOffline) {
-        Endpoint endpoint = new Endpoint(channel, channel.remoteAddress());
-        Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(endpoint);
+        Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(channel.remoteAddress());
         if (endpointSessions != null) {
             for (DeviceSession deviceSession : endpointSessions.values()) {
                 if (supportsOffline) {
@@ -204,8 +202,7 @@ public class ConnectionManager implements BroadcastInterface {
         DeviceSession deviceSession = sessionsByDeviceId.remove(deviceId);
         if (deviceSession != null) {
             cacheManager.removeDevice(deviceId);
-            Endpoint endpoint = new Endpoint(deviceSession.getChannel(), deviceSession.getRemoteAddress());
-            sessionsByEndpoint.computeIfPresent(endpoint, (e, sessions) -> {
+            sessionsByEndpoint.computeIfPresent(deviceSession.getRemoteAddress(), (e, sessions) -> {
                 sessions.remove(deviceSession.getUniqueId());
                 return sessions.isEmpty() ? null : sessions;
             });
@@ -337,11 +334,24 @@ public class ConnectionManager implements BroadcastInterface {
         }
     }
 
+    public synchronized void updateLog(LogRecord record) {
+        var sessions = sessionsByEndpoint.getOrDefault(record.getAddress(), Map.of());
+        for (var session : sessions.entrySet()) {
+            record.setUniqueId(session.getKey());
+            for (long userId : deviceUsers.getOrDefault(session.getValue().getDeviceId(), Set.of())) {
+                for (UpdateListener listener : listeners.getOrDefault(userId, Set.of())) {
+                    listener.onUpdateLog(record);
+                }
+            }
+        }
+    }
+
     public interface UpdateListener {
         void onKeepalive();
         void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
         void onUpdateEvent(Event event);
+        void onUpdateLog(LogRecord record);
     }
 
     public synchronized void addListener(long userId, UpdateListener listener) throws StorageException {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,17 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.helper.model.PositionUtil;
-import org.traccar.session.ConnectionManager;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.LogRecord;
 import org.traccar.model.Position;
+import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.UpdateListener {
@@ -41,11 +42,14 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private static final String KEY_DEVICES = "devices";
     private static final String KEY_POSITIONS = "positions";
     private static final String KEY_EVENTS = "events";
+    private static final String KEY_LOGS = "logs";
 
     private final ObjectMapper objectMapper;
     private final ConnectionManager connectionManager;
     private final Storage storage;
     private final long userId;
+
+    private boolean includeLogs;
 
     public AsyncSocket(ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage, long userId) {
         this.objectMapper = objectMapper;
@@ -76,29 +80,41 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     }
 
     @Override
+    public void onWebSocketText(String message) {
+        super.onWebSocketText(message);
+
+        try {
+            includeLogs = objectMapper.readTree(message).get("logs").asBoolean();
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Socket JSON parsing error", e);
+        }
+    }
+
+    @Override
     public void onKeepalive() {
         sendData(new HashMap<>());
     }
 
     @Override
     public void onUpdateDevice(Device device) {
-        Map<String, Collection<?>> data = new HashMap<>();
-        data.put(KEY_DEVICES, Collections.singletonList(device));
-        sendData(data);
+        sendData(Map.of(KEY_DEVICES, List.of(device)));
     }
 
     @Override
     public void onUpdatePosition(Position position) {
-        Map<String, Collection<?>> data = new HashMap<>();
-        data.put(KEY_POSITIONS, Collections.singletonList(position));
-        sendData(data);
+        sendData(Map.of(KEY_POSITIONS, List.of(position)));
     }
 
     @Override
     public void onUpdateEvent(Event event) {
-        Map<String, Collection<?>> data = new HashMap<>();
-        data.put(KEY_EVENTS, Collections.singletonList(event));
-        sendData(data);
+        sendData(Map.of(KEY_EVENTS, List.of(event)));
+    }
+
+    @Override
+    public void onUpdateLog(LogRecord record) {
+        if (includeLogs) {
+            sendData(Map.of(KEY_LOGS, List.of(record)));
+        }
     }
 
     private void sendData(Map<String, Collection<?>> data) {
