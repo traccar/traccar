@@ -68,6 +68,7 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
             if (networkMessage.getMessage() instanceof ByteBuf) {
                 LogRecord record = new LogRecord();
                 record.setAddress((InetSocketAddress) networkMessage.getRemoteAddress());
+                record.setProtocol(protocol);
                 record.setData(ByteBufUtil.hexDump((ByteBuf) networkMessage.getMessage()));
                 return record;
             }

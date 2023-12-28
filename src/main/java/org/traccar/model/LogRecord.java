@@ -32,12 +32,18 @@ public class LogRecord {
         return address;
     }
 
-    public int getPort() {
-        return address.getPort();
-    }
-
     public String getHost() {
         return address.getHostString();
+    }
+
+    private String protocol;
+
+    public String getProtocol() {
+        return protocol;
+    }
+
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     private String uniqueId;
