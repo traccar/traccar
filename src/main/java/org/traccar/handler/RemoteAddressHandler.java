@@ -38,9 +38,6 @@ public class RemoteAddressHandler extends ChannelInboundHandlerAdapter {
         if (msg instanceof Position) {
             Position position = (Position) msg;
             position.set(Position.KEY_IP, hostAddress);
-            if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-                LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
-            }
         }
 
         ctx.fireChannelRead(msg);

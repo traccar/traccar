@@ -22,7 +22,10 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.*;
+import org.traccar.BaseHttpProtocolDecoder;
+import org.traccar.Context;
+import org.traccar.DeviceSession;
+import org.traccar.Protocol;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.CellTower;
@@ -141,7 +144,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                     case "heading":
                         try {
                             position.setCourse(Double.parseDouble(value));
-                        } catch(Exception e) {
+                        } catch (Exception e) {
                             LOGGER.warn("{} parsing heading / bearing on deviceId {}", e, position.getDeviceId());
                         }
                         break;

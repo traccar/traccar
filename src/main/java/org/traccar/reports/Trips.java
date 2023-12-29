@@ -41,9 +41,11 @@ public final class Trips {
     private Trips() {
     }
 
-    public static Collection<TripReport> detectTrips(long deviceId, Collection<Position> positionCollection) throws SQLException {
+    public static Collection<TripReport> detectTrips(long deviceId, Collection<Position> positionCollection)
+            throws SQLException {
         boolean ignoreOdometer = Context.getDeviceManager()
-                .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
+                .lookupAttributeBoolean(deviceId, "report.ignoreOdometer",
+                        false, false, true);
 
         IdentityManager identityManager = Main.getInjector().getInstance(IdentityManager.class);
         DeviceManager deviceManager = Main.getInjector().getInstance(DeviceManager.class);
@@ -72,7 +74,8 @@ public final class Trips {
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<TripReport> trips = detectTrips(deviceId, Context.getDataManager().getPositions(deviceId, from, to));
+            Collection<TripReport> trips = detectTrips(deviceId,
+                    Context.getDataManager().getPositions(deviceId, from, to));
             DeviceReport deviceTrips = new DeviceReport();
             Device device = Context.getIdentityManager().getById(deviceId);
             deviceTrips.setDeviceName(device.getName());

@@ -42,7 +42,8 @@ public final class Stops {
     private Stops() {
     }
 
-    public static Collection<StopReport> detectStops(long deviceId, Collection<Position> positionCollection) throws SQLException {
+    public static Collection<StopReport> detectStops(long deviceId, Collection<Position> positionCollection)
+            throws SQLException {
         boolean ignoreOdometer = Context.getDeviceManager()
                 .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
 
@@ -74,7 +75,8 @@ public final class Stops {
         ArrayList<String> sheetNames = new ArrayList<>();
         for (long deviceId: ReportUtils.getDeviceList(deviceIds, groupIds)) {
             Context.getPermissionsManager().checkDevice(userId, deviceId);
-            Collection<StopReport> stops = detectStops(deviceId, Context.getDataManager().getPositions(deviceId, from, to));
+            Collection<StopReport> stops = detectStops(deviceId,
+                    Context.getDataManager().getPositions(deviceId, from, to));
             DeviceReport deviceStops = new DeviceReport();
             Device device = Context.getIdentityManager().getById(deviceId);
             deviceStops.setDeviceName(device.getName());

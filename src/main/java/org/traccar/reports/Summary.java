@@ -35,7 +35,8 @@ public final class Summary {
     private Summary() {
     }
 
-    public static SummaryReport calculateSummaryResult(long deviceId, Collection<Position> positions) throws SQLException {
+    public static SummaryReport calculateSummaryResult(long deviceId, Collection<Position> positions)
+            throws SQLException {
         SummaryReport result = new SummaryReport();
         result.setDeviceId(deviceId);
         result.setDeviceName(Context.getIdentityManager().getById(deviceId).getName());
@@ -60,8 +61,10 @@ public final class Summary {
                 result.setMaxSpeed(position.getSpeed());
             }
             boolean ignoreOdometer = Context.getDeviceManager()
-                    .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false, false, true);
-            result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition, !ignoreOdometer, positions));
+                    .lookupAttributeBoolean(deviceId, "report.ignoreOdometer", false,
+                            false, true);
+            result.setDistance(ReportUtils.calculateDistance(firstPosition, previousPosition,
+                    !ignoreOdometer, positions));
             result.setAverageSpeed(speedSum / positions.size());
             result.setSpentFuel(ReportUtils.calculateFuel(firstPosition, previousPosition));
 

@@ -20,7 +20,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.BaseDataHandler;
 import org.traccar.Context;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -80,7 +79,8 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
                     @Override
                     public void onSuccess(String address) {
                         if (ctx.pipeline().toMap().isEmpty()) {
-                            LOGGER.warn("empty pipeline on {} {} {}", position.getProtocol(), position.getDeviceId(), position.getFixTime());
+                            LOGGER.warn("empty pipeline on {} {} {}",
+                                    position.getProtocol(), position.getDeviceId(), position.getFixTime());
                         }
                         position.setAddress(address);
                         ctx.fireChannelRead(position);
@@ -90,8 +90,10 @@ public class GeocoderHandler extends ChannelInboundHandlerAdapter {
                     public void onFailure(Throwable e) {
                         LOGGER.warn("Geocoding failed {} {}", e, e);
                         ctx.fireChannelRead(position);
-                        if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
-                            LOGGER.warn("onFailure {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
+                        if (position.getAttributes().containsKey("source")
+                                && position.getAttributes().get("source").equals("import")) {
+                            LOGGER.warn("onFailure {} {} {}",
+                                    this.getClass(), position.getDeviceId(), position.getFixTime());
                         }
                     }
                 });

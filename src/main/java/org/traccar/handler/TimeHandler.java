@@ -20,7 +20,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.BaseDataHandler;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Context;
 import org.traccar.config.Config;
@@ -54,7 +53,8 @@ public class TimeHandler extends ChannelInboundHandlerAdapter {
                 || protocols.contains(ctx.pipeline().get(BaseProtocolDecoder.class).getProtocolName()))) {
 
             Position position = (Position) msg;
-            if (position.getAttributes().containsKey("source") && position.getAttributes().get("source").equals("import")) {
+            if (position.getAttributes().containsKey("source")
+                    && position.getAttributes().get("source").equals("import")) {
                 LOGGER.warn("channelRead {} {} {}", this.getClass(), position.getDeviceId(), position.getFixTime());
             }
 

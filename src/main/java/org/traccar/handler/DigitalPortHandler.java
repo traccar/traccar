@@ -36,24 +36,22 @@ public class DigitalPortHandler extends BaseDataHandler {
                 long diff = position.getFixTime().getTime() - last.getFixTime().getTime();
                 position.set(Position.KEY_DP2_TIME, dpTime + diff);
             }
-        }
-        catch (Exception ex) {
-            LOGGER.warn("Failed to process DigitalPortHandler, deviceId: {}, {}", position.getDeviceId(), ex.getMessage());
+        } catch (Exception ex) {
+            LOGGER.warn("DigitalPortHandler failed, deviceId: {}, {}", position.getDeviceId(), ex.getMessage());
         }
 
         return position;
     }
 
     private boolean getProperty(Position p, String property) {
-        if(!p.getAttributes().containsKey(property)) {
+        if (!p.getAttributes().containsKey(property)) {
             return false;
         }
 
         Object o = p.getAttributes().get(property);
-        if(o instanceof Boolean) {
+        if (o instanceof Boolean) {
             return (Boolean) o;
-        }
-        else if (o instanceof Number) {
+        } else if (o instanceof Number) {
             return ((Number) o).intValue() > 0;
         }
         return false;
