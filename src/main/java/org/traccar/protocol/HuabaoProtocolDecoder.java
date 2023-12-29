@@ -131,7 +131,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 8)) {
             return Position.ALARM_POWER_OFF;
         }
-        if (BitUtil.check(value, 17)) {
+        if (BitUtil.check(value, 15)) {
+            return Position.ALARM_VIBRATION;
+        }
+        if (BitUtil.check(value, 16) || BitUtil.check(value, 17)) {
             return Position.ALARM_TAMPERING;
         }
         if (BitUtil.check(value, 20)) {
@@ -140,7 +143,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 28)) {
             return Position.ALARM_MOVEMENT;
         }
-        if (BitUtil.check(value, 29)) {
+        if (BitUtil.check(value, 29) || BitUtil.check(value, 30)) {
             return Position.ALARM_ACCIDENT;
         }
         return null;
@@ -487,6 +490,14 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x56:
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 10);
                     buf.readUnsignedByte(); // reserved
+                    break;
+                case 0x57:
+                    int alarm = buf.readUnsignedShort();
+                    position.set(Position.KEY_ALARM, BitUtil.check(alarm, 8) ? Position.ALARM_ACCELERATION : null);
+                    position.set(Position.KEY_ALARM, BitUtil.check(alarm, 9) ? Position.ALARM_BRAKING : null);
+                    position.set(Position.KEY_ALARM, BitUtil.check(alarm, 10) ? Position.ALARM_CORNERING : null);
+                    buf.readUnsignedShort(); // external switch state
+                    buf.skipBytes(4); // reserved
                     break;
                 case 0x60:
                     int event = buf.readUnsignedShort();
