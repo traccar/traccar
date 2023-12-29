@@ -12,6 +12,9 @@ public class Gl100ProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Gl100ProtocolDecoder(null));
 
         verifyPosition(decoder, text(
+                "+RESP:GTRTL,359464032011616,1,0,0,0,0.1,0,1662.5,,36.822301,-1.309476,20230706032920,0639,0002,08DF,1F5E,00,095,0101050105,4470"));
+
+        verifyPosition(decoder, text(
                 "+RESP:GTLGL,359464030492644,1,2,1,0,0.4,0,299.7,1,5.455551,51.449776,20160311083229,0204,0016,03EC,BD94,00,0036,0102090501"));
 
         verifyPosition(decoder, text(
