@@ -1405,15 +1405,19 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{15}|x{14}),")            // imei
             .any()
             .text(",")
-            .number("(d{1,2})?,")                // hdop
-            .number("(d{1,3}.d)?,")              // speed
-            .number("(d{1,3})?,")                // course
-            .number("(-?d{1,5}.d)?,")            // altitude
-            .number("(-?d{1,3}.d{6})?,")         // longitude
-            .number("(-?d{1,2}.d{6})?,")         // latitude
+            .number("(d{1,2}),")                 // hdop
+            .groupBegin()
+            .number("(d{1,3}.d),")               // speed
+            .number("(d{1,3}),")                 // course
+            .number("(-?d{1,5}.d),")             // altitude
+            .number("(-?d{1,3}.d{6}),")          // longitude
+            .number("(-?d{1,2}.d{6}),")          // latitude
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .number("(dd)(dd)(dd)")              // time (hhmmss)
             .text(",")
+            .or()
+            .text(",,,,,,")
+            .groupEnd()
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(x+),")                     // lac
