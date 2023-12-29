@@ -2,9 +2,9 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ master ]
+    branches: [ fleetmap ]
   pull_request:
-    branches: [ master ]
+    branches: [ fleetmap ]
 
 jobs:
   build:
