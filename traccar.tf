@@ -15,5 +15,15 @@ resource "aws_elastic_beanstalk_environment" "traccar-env" {
         namespace = "aws:autoscaling:launchconfiguration"
         name = "IamInstanceProfile"
         value = "aws-elasticbeanstalk-ec2-role"
-    }
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:cloudwatch:logs"
+    name      = "StreamLogs"
+    value     = "true"
+  }
+  setting {
+    namespace = "aws:ec2:instances"
+    name      = "InstanceTypes"
+    value     = "t3.small"
+  }
 }
