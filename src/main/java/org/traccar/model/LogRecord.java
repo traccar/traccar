@@ -56,6 +56,16 @@ public class LogRecord {
         this.uniqueId = uniqueId;
     }
 
+    private long deviceId;
+
+    public long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(long deviceId) {
+        this.deviceId = deviceId;
+    }
+
     private String data;
 
     public String getData() {

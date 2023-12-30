@@ -66,6 +66,7 @@ public class ConnectionManager implements BroadcastInterface {
 
     private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
     private final Map<SocketAddress, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
+    private final Map<SocketAddress, String> unknownByEndpoint = new ConcurrentHashMap<>();
 
     private final Config config;
     private final CacheManager cacheManager;
@@ -122,13 +123,15 @@ public class ConnectionManager implements BroadcastInterface {
 
         Device device = deviceLookupService.lookup(uniqueIds);
 
+        String firstUniqueId = uniqueIds[0];
         if (device == null && config.getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
-            if (uniqueIds[0].matches(config.getString(Keys.DATABASE_REGISTER_UNKNOWN_REGEX))) {
-                device = addUnknownDevice(uniqueIds[0]);
+            if (firstUniqueId.matches(config.getString(Keys.DATABASE_REGISTER_UNKNOWN_REGEX))) {
+                device = addUnknownDevice(firstUniqueId);
             }
         }
 
         if (device != null) {
+            unknownByEndpoint.remove(remoteAddress);
             device.checkDisabled();
 
             DeviceSession oldSession = sessionsByDeviceId.remove(device.getId());
@@ -153,6 +156,7 @@ public class ConnectionManager implements BroadcastInterface {
 
             return deviceSession;
         } else {
+            unknownByEndpoint.put(remoteAddress, firstUniqueId);
             LOGGER.warn("Unknown device - " + String.join(" ", uniqueIds)
                     + " (" + ((InetSocketAddress) remoteAddress).getHostString() + ")");
             return null;
@@ -181,7 +185,8 @@ public class ConnectionManager implements BroadcastInterface {
     }
 
     public void deviceDisconnected(Channel channel, boolean supportsOffline) {
-        Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(channel.remoteAddress());
+        SocketAddress remoteAddress = channel.remoteAddress();
+        Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(remoteAddress);
         if (endpointSessions != null) {
             for (DeviceSession deviceSession : endpointSessions.values()) {
                 if (supportsOffline) {
@@ -191,6 +196,7 @@ public class ConnectionManager implements BroadcastInterface {
                 cacheManager.removeDevice(deviceSession.getDeviceId());
             }
         }
+        unknownByEndpoint.remove(remoteAddress);
     }
 
     public void deviceUnknown(long deviceId) {
@@ -336,9 +342,19 @@ public class ConnectionManager implements BroadcastInterface {
 
     public synchronized void updateLog(LogRecord record) {
         var sessions = sessionsByEndpoint.getOrDefault(record.getAddress(), Map.of());
-        for (var session : sessions.entrySet()) {
-            record.setUniqueId(session.getKey());
-            for (long userId : deviceUsers.getOrDefault(session.getValue().getDeviceId(), Set.of())) {
+        if (sessions.isEmpty()) {
+            String unknownUniqueId = unknownByEndpoint.get(record.getAddress());
+            if (unknownUniqueId != null) {
+                record.setUniqueId(unknownUniqueId);
+                listeners.values().stream()
+                        .flatMap(Set::stream)
+                        .forEach((listener) -> listener.onUpdateLog(record));
+            }
+        } else {
+            var firstEntry = sessions.entrySet().iterator().next();
+            record.setUniqueId(firstEntry.getKey());
+            record.setDeviceId(firstEntry.getValue().getDeviceId());
+            for (long userId : deviceUsers.getOrDefault(record.getDeviceId(), Set.of())) {
                 for (UpdateListener listener : listeners.getOrDefault(userId, Set.of())) {
                     listener.onUpdateLog(record);
                 }
