@@ -25,7 +25,7 @@ jobs:
       run: zip -r deploy.zip . -x '*.git*'
 
     - name: Set db pass
-      run: sed -i 's/DB_PASSWORD/$DB_PASSWORD/g' traccar.xml
+      run: sed -i 's/DB_PASSWORD/"$DB_PASSWORD"/g' traccar.xml
       shell: bash
       env:
         DB_PASSWORD: ${{secrets.DB_PASSWORD}}
