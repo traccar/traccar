@@ -24,15 +24,6 @@ jobs:
     - name: Generate deployment package
       run: zip -r deploy.zip . -x '*.git*'
 
-    - name: Set db pass
-      run: sed -i 's/DB_PASSWORD/"$DB_PASSWORD"/g' traccar.xml
-      shell: bash
-      env:
-        DB_PASSWORD: ${{secrets.DB_PASSWORD}}
-
-    - name: echo
-      run: cat traccar.xml
-
     - name: Deploy to EB
       uses: einaregilsson/beanstalk-deploy@v21
       with:
