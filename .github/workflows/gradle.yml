@@ -28,7 +28,7 @@ jobs:
       run: sed -i 's/DB_PASSWORD/${{ secrets.DB_PASSWORD }}/g' traccar.xml
 
     - name: echo
-      run: echo traccar.xml
+      run: cat traccar.xml
 
     - name: Deploy to EB
       uses: einaregilsson/beanstalk-deploy@v21
