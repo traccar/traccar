@@ -111,7 +111,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             packetData.readUnsignedShort(); // Engine RPM
             packetData.readUnsignedInt();   // Total Traveled Distance (GPS)
             packetData.readUnsignedInt();   // otal Traveled Distance (Vehicle Sensor)
-            packetData.readByte();  // IO Status
+            byte IOstatus = packetData.readByte();  // IO Status
             byte gpsStatus = packetData.readByte(); // GPS Status
             long latitude = packetData.readInt();   // Latitude
             long longitude= packetData.readInt();   // Longitude 
@@ -131,7 +131,9 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(bearing);
             position.set(Position.KEY_SATELLITES,numberOfSatellites);
             position.set(Position.KEY_PDOP, PDOP * 0.1);
-
+            position.set(Position.KEY_IGNITION, IOstatus & 0x40);
+            //position.set(Position.KEY_POWER, IOstatus & 0x80);
+            
             positions.add(position);
         }
         return positions;
