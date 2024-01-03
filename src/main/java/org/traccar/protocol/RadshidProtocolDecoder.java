@@ -77,7 +77,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
         if(dataChecksum != packetChecksum)
         {
             /* send response to device */
-            sendResponse(channel,remoteAddress,length+4,false);
+            sendResponse(channel,remoteAddress,length,false);
             return null;
         }
 
@@ -91,7 +91,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
         }
 
         /* Send response to device */
-        sendResponse(channel,remoteAddress,length+4,true);
+        sendResponse(channel,remoteAddress,length,true);
 
         List<Position> positions = new LinkedList<>();
         for (int i = 0; i < dataElement; i++) {
@@ -123,7 +123,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             packetData.readBytes(xLen); // scape extra data
 
             position.setValid((gpsStatus==0x00) ? true:false);
-            position.setTime(new Date(timeStamp));
+            position.setTime(new Date(timeStamp * 1000L));
             position.setLatitude(latitude * 0.0000001);
             position.setLongitude(longitude * 0.0000001);
             position.setAltitude(altitude);
