@@ -27,7 +27,6 @@ import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
@@ -129,9 +128,9 @@ public class NotificatorTraccar implements Notificator {
                     storage.updateObject(user, new Request(
                             new Columns.Include("attributes"),
                             new Condition.Equals("id", user.getId())));
-                    cacheManager.updateOrInvalidate(true, user, ObjectOperation.UPDATE);
+                    cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
                 }
-            } catch (StorageException e) {
+            } catch (Exception e) {
                 LOGGER.warn("Push error", e);
             }
         }

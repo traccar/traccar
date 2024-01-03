@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.traccar.database.NotificationManager;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.LogRecord;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.session.cache.CacheManager;
@@ -64,7 +65,8 @@ public class ConnectionManager implements BroadcastInterface {
     private final long deviceTimeout;
 
     private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
-    private final Map<Endpoint, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
+    private final Map<SocketAddress, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
+    private final Map<SocketAddress, String> unknownByEndpoint = new ConcurrentHashMap<>();
 
     private final Config config;
     private final CacheManager cacheManager;
@@ -102,11 +104,10 @@ public class ConnectionManager implements BroadcastInterface {
 
     public DeviceSession getDeviceSession(
             Protocol protocol, Channel channel, SocketAddress remoteAddress,
-            String... uniqueIds) throws StorageException {
+            String... uniqueIds) throws Exception {
 
-        Endpoint endpoint = new Endpoint(channel, remoteAddress);
         Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.getOrDefault(
-                endpoint, new ConcurrentHashMap<>());
+                remoteAddress, new ConcurrentHashMap<>());
 
         uniqueIds = Arrays.stream(uniqueIds).filter(Objects::nonNull).toArray(String[]::new);
         if (uniqueIds.length > 0) {
@@ -122,30 +123,31 @@ public class ConnectionManager implements BroadcastInterface {
 
         Device device = deviceLookupService.lookup(uniqueIds);
 
+        String firstUniqueId = uniqueIds[0];
         if (device == null && config.getBoolean(Keys.DATABASE_REGISTER_UNKNOWN)) {
-            if (uniqueIds[0].matches(config.getString(Keys.DATABASE_REGISTER_UNKNOWN_REGEX))) {
-                device = addUnknownDevice(uniqueIds[0]);
+            if (firstUniqueId.matches(config.getString(Keys.DATABASE_REGISTER_UNKNOWN_REGEX))) {
+                device = addUnknownDevice(firstUniqueId);
             }
         }
 
         if (device != null) {
+            unknownByEndpoint.remove(remoteAddress);
             device.checkDisabled();
 
             DeviceSession oldSession = sessionsByDeviceId.remove(device.getId());
             if (oldSession != null) {
-                Endpoint oldEndpoint = new Endpoint(oldSession.getChannel(), oldSession.getRemoteAddress());
-                Map<String, DeviceSession> oldEndpointSessions = sessionsByEndpoint.get(oldEndpoint);
+                Map<String, DeviceSession> oldEndpointSessions = sessionsByEndpoint.get(oldSession.getRemoteAddress());
                 if (oldEndpointSessions != null && oldEndpointSessions.size() > 1) {
                     oldEndpointSessions.remove(device.getUniqueId());
                 } else {
-                    sessionsByEndpoint.remove(oldEndpoint);
+                    sessionsByEndpoint.remove(oldSession.getRemoteAddress());
                 }
             }
 
             DeviceSession deviceSession = new DeviceSession(
                     device.getId(), device.getUniqueId(), protocol, channel, remoteAddress);
             endpointSessions.put(device.getUniqueId(), deviceSession);
-            sessionsByEndpoint.put(endpoint, endpointSessions);
+            sessionsByEndpoint.put(remoteAddress, endpointSessions);
             sessionsByDeviceId.put(device.getId(), deviceSession);
 
             if (oldSession == null) {
@@ -154,6 +156,7 @@ public class ConnectionManager implements BroadcastInterface {
 
             return deviceSession;
         } else {
+            unknownByEndpoint.put(remoteAddress, firstUniqueId);
             LOGGER.warn("Unknown device - " + String.join(" ", uniqueIds)
                     + " (" + ((InetSocketAddress) remoteAddress).getHostString() + ")");
             return null;
@@ -182,8 +185,8 @@ public class ConnectionManager implements BroadcastInterface {
     }
 
     public void deviceDisconnected(Channel channel, boolean supportsOffline) {
-        Endpoint endpoint = new Endpoint(channel, channel.remoteAddress());
-        Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(endpoint);
+        SocketAddress remoteAddress = channel.remoteAddress();
+        Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(remoteAddress);
         if (endpointSessions != null) {
             for (DeviceSession deviceSession : endpointSessions.values()) {
                 if (supportsOffline) {
@@ -193,6 +196,7 @@ public class ConnectionManager implements BroadcastInterface {
                 cacheManager.removeDevice(deviceSession.getDeviceId());
             }
         }
+        unknownByEndpoint.remove(remoteAddress);
     }
 
     public void deviceUnknown(long deviceId) {
@@ -204,8 +208,7 @@ public class ConnectionManager implements BroadcastInterface {
         DeviceSession deviceSession = sessionsByDeviceId.remove(deviceId);
         if (deviceSession != null) {
             cacheManager.removeDevice(deviceId);
-            Endpoint endpoint = new Endpoint(deviceSession.getChannel(), deviceSession.getRemoteAddress());
-            sessionsByEndpoint.computeIfPresent(endpoint, (e, sessions) -> {
+            sessionsByEndpoint.computeIfPresent(deviceSession.getRemoteAddress(), (e, sessions) -> {
                 sessions.remove(deviceSession.getUniqueId());
                 return sessions.isEmpty() ? null : sessions;
             });
@@ -327,15 +330,34 @@ public class ConnectionManager implements BroadcastInterface {
     }
 
     @Override
-    public synchronized void invalidatePermission(
-            boolean local,
-            Class<? extends BaseModel> clazz1, long id1,
-            Class<? extends BaseModel> clazz2, long id2,
-            boolean link) {
+    public synchronized <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
+            boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) {
         if (link && clazz1.equals(User.class) && clazz2.equals(Device.class)) {
             if (listeners.containsKey(id1)) {
                 userDevices.get(id1).add(id2);
                 deviceUsers.put(id2, new HashSet<>(List.of(id1)));
+            }
+        }
+    }
+
+    public synchronized void updateLog(LogRecord record) {
+        var sessions = sessionsByEndpoint.getOrDefault(record.getAddress(), Map.of());
+        if (sessions.isEmpty()) {
+            String unknownUniqueId = unknownByEndpoint.get(record.getAddress());
+            if (unknownUniqueId != null) {
+                record.setUniqueId(unknownUniqueId);
+                listeners.values().stream()
+                        .flatMap(Set::stream)
+                        .forEach((listener) -> listener.onUpdateLog(record));
+            }
+        } else {
+            var firstEntry = sessions.entrySet().iterator().next();
+            record.setUniqueId(firstEntry.getKey());
+            record.setDeviceId(firstEntry.getValue().getDeviceId());
+            for (long userId : deviceUsers.getOrDefault(record.getDeviceId(), Set.of())) {
+                for (UpdateListener listener : listeners.getOrDefault(userId, Set.of())) {
+                    listener.onUpdateLog(record);
+                }
             }
         }
     }
@@ -345,6 +367,7 @@ public class ConnectionManager implements BroadcastInterface {
         void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
         void onUpdateEvent(Event event);
+        void onUpdateLog(LogRecord record);
     }
 
     public synchronized void addListener(long userId, UpdateListener listener) throws StorageException {

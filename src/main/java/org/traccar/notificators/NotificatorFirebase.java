@@ -24,7 +24,6 @@ import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.ApnsConfig;
 import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.MessagingErrorCode;
 import com.google.firebase.messaging.MulticastMessage;
 import org.slf4j.Logger;
@@ -40,7 +39,6 @@ import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
@@ -136,9 +134,9 @@ public class NotificatorFirebase implements Notificator {
                     storage.updateObject(user, new Request(
                             new Columns.Include("attributes"),
                             new Condition.Equals("id", user.getId())));
-                    cacheManager.updateOrInvalidate(true, user, ObjectOperation.UPDATE);
+                    cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
                 }
-            } catch (FirebaseMessagingException | StorageException e) {
+            } catch (Exception e) {
                 LOGGER.warn("Firebase error", e);
             }
         }

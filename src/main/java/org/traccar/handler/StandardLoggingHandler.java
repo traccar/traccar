@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,68 +20,73 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.NetworkMessage;
 import org.traccar.helper.NetworkUtil;
+import org.traccar.model.LogRecord;
+import org.traccar.session.ConnectionManager;
 
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 public class StandardLoggingHandler extends ChannelDuplexHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoggingHandler.class);
 
     private final String protocol;
+    private ConnectionManager connectionManager;
 
     public StandardLoggingHandler(String protocol) {
         this.protocol = protocol;
     }
 
+    @Inject
+    public void setConnectionManager(ConnectionManager connectionManager) {
+        this.connectionManager = connectionManager;
+    }
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        log(ctx, false, msg);
+        LogRecord record = createLogRecord(msg);
+        log(ctx, false, record);
         super.channelRead(ctx, msg);
+        if (record != null) {
+            connectionManager.updateLog(record);
+        }
     }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        log(ctx, true, msg);
+        log(ctx, true, createLogRecord(msg));
         super.write(ctx, msg, promise);
     }
 
-    public void log(ChannelHandlerContext ctx, boolean downstream, Object o) {
-        if (o instanceof NetworkMessage) {
-            NetworkMessage networkMessage = (NetworkMessage) o;
+    private LogRecord createLogRecord(Object msg) {
+        if (msg instanceof NetworkMessage) {
+            NetworkMessage networkMessage = (NetworkMessage) msg;
             if (networkMessage.getMessage() instanceof ByteBuf) {
-                log(ctx, downstream, networkMessage.getRemoteAddress(), (ByteBuf) networkMessage.getMessage());
+                LogRecord record = new LogRecord();
+                record.setAddress((InetSocketAddress) networkMessage.getRemoteAddress());
+                record.setProtocol(protocol);
+                record.setData(ByteBufUtil.hexDump((ByteBuf) networkMessage.getMessage()));
+                return record;
             }
-        } else if (o instanceof ByteBuf) {
-            log(ctx, downstream, ctx.channel().remoteAddress(), (ByteBuf) o);
         }
+        return null;
     }
 
-    public void log(ChannelHandlerContext ctx, boolean downstream, SocketAddress remoteAddress, ByteBuf buf) {
-        StringBuilder message = new StringBuilder();
-
-        message.append("[").append(NetworkUtil.session(ctx.channel())).append(": ");
-        message.append(protocol);
-        if (downstream) {
-            message.append(" > ");
-        } else {
-            message.append(" < ");
+    private void log(ChannelHandlerContext ctx, boolean downstream, LogRecord record) {
+        if (record != null) {
+            StringBuilder message = new StringBuilder();
+            message.append("[").append(NetworkUtil.session(ctx.channel())).append(": ");
+            message.append(protocol);
+            message.append(downstream ? " > " : " < ");
+            message.append(record.getAddress().getHostString());
+            message.append("] ");
+            message.append(record.getData());
+            LOGGER.info(message.toString());
         }
-
-        if (remoteAddress instanceof InetSocketAddress) {
-            message.append(((InetSocketAddress) remoteAddress).getHostString());
-        } else {
-            message.append("unknown");
-        }
-        message.append("] ");
-
-        message.append(ByteBufUtil.hexDump(buf));
-
-        LOGGER.info(message.toString());
     }
 
 }

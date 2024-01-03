@@ -29,7 +29,6 @@ import org.traccar.model.Position;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
 import org.traccar.session.cache.CacheManager;
-import org.traccar.storage.StorageException;
 
 import jakarta.inject.Inject;
 import java.net.InetSocketAddress;
@@ -137,7 +136,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
         try {
             return connectionManager.getDeviceSession(protocol, channel, remoteAddress, uniqueIds);
-        } catch (StorageException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

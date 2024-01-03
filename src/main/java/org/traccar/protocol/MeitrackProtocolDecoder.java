@@ -534,6 +534,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0xA2:
                         position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE() * 0.01);
                         break;
+                    case 0xFEF4:
+                        position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 60000);
+                        break;
                     default:
                         buf.readUnsignedIntLE();
                         break;

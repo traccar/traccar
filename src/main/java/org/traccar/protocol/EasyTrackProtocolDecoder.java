@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,26 +79,45 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_OBD = new PatternBuilder()
+            .text("*").expression("..,")         // manufacturer
+            .number("(d+),")                     // imei
+            .text("OB,")                         // command
+            .text("BD$")
+            .number("V(d+.d);")                  // battery
+            .number("R(d+);")                    // rpm
+            .number("S(d+);")                    // speed
+            .number("P(d+.d);")                  // throttle
+            .number("O(d+.d);")                  // engine load
+            .number("C(d+);")                    // coolant temperature
+            .number("L(d+.d);")                  // fuel level
+            .number("[XY][MH]d+.d+;")
+            .number("M(d+);")                    // mileage
+            .number("F(d+.d+);")                 // fuel consumption
+            .number("T(d+);")                    // engine time
+            .any()
+            .compile();
+
     private String decodeAlarm(long status) {
-        if ((status & 0x02000000) != 0) {
+        if ((status & 0x02000000L) != 0) {
             return Position.ALARM_GEOFENCE_ENTER;
         }
-        if ((status & 0x04000000) != 0) {
+        if ((status & 0x04000000L) != 0) {
             return Position.ALARM_GEOFENCE_EXIT;
         }
-        if ((status & 0x08000000) != 0) {
+        if ((status & 0x08000000L) != 0) {
             return Position.ALARM_LOW_BATTERY;
         }
-        if ((status & 0x20000000) != 0) {
+        if ((status & 0x20000000L) != 0) {
             return Position.ALARM_VIBRATION;
         }
-        if ((status & 0x80000000) != 0) {
+        if ((status & 0x80000000L) != 0) {
             return Position.ALARM_OVERSPEED;
         }
-        if ((status & 0x00010000) != 0) {
+        if ((status & 0x00010000L) != 0) {
             return Position.ALARM_SOS;
         }
-        if ((status & 0x00040000) != 0) {
+        if ((status & 0x00040000L) != 0) {
             return Position.ALARM_POWER_CUT;
         }
         return null;
@@ -115,7 +134,9 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
         }
 
-        if (type.equals("JZ")) {
+        if (type.equals("OB")) {
+            return decodeObd(channel, remoteAddress, sentence);
+        } else if (type.equals("JZ")) {
             return decodeCell(channel, remoteAddress, sentence);
         } else {
             return decodeLocation(channel, remoteAddress, sentence);
@@ -215,6 +236,37 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         int mcc = parser.nextInt();
         int mnc = parser.nextInt();
         position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid)));
+
+        return position;
+    }
+
+    private Position decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_OBD, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_RPM, parser.nextInt());
+        position.set(Position.KEY_OBD_SPEED, parser.nextInt());
+        position.set(Position.KEY_THROTTLE, parser.nextDouble());
+        position.set(Position.KEY_ENGINE_LOAD, parser.nextDouble());
+        position.set(Position.KEY_COOLANT_TEMP, parser.nextInt());
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble());
+        position.set(Position.KEY_ODOMETER, parser.nextInt());
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble());
+        position.set(Position.KEY_HOURS, parser.nextInt());
 
         return position;
     }
