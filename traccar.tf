@@ -92,7 +92,7 @@ resource "aws_elastic_beanstalk_environment" "traccar-env" {
   }
 
   setting {
-    namespace = "aws:elasticbeanstalk:application:environment"
+    namespace = "aws:elasticbeanstalk:environment"
     name      = "EnvironmentType"
     value     = "SingleInstance"
   }
