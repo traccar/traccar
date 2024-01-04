@@ -88,7 +88,7 @@ resource "aws_elastic_beanstalk_environment" "traccar-env" {
   setting {
     namespace = "aws:ec2:instances"
     name      = "InstanceTypes"
-    value     = "t3.small"
+    value     = "t3.medium"
   }
 
   setting {
