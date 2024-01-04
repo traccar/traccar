@@ -74,28 +74,6 @@ resource "aws_elastic_beanstalk_environment" "traccar-env" {
     name      = "InstanceTypes"
     value     = "t3.small"
   }
-  setting {
-    namespace = "aws:elasticbeanstalk:environment"
-    name = "LoadBalancerType"
-    value = "application"
-  }
-  setting {
-    namespace = "aws:elbv2:listener:443"
-    name = "Protocol"
-    value = "HTTPS"
-  }
-
-  setting {
-    namespace = "aws:elbv2:listener:443"
-    name = "ListenerEnabled"
-    value = "true"
-  }
-
-  setting {
-    namespace = "aws:elbv2:listener:443"
-    name = "SSLCertificateArns"
-    value = var.loadbalancer_certificate_arn
-  }
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
