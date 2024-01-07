@@ -490,14 +490,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * By default, server syncs with the database if it encounters and unknown device. This flag allows to disable that
-     * behavior to improve performance in some cases.
-     */
-    public static final ConfigKey<Boolean> DATABASE_IGNORE_UNKNOWN = new BooleanConfigKey(
-            "database.ignoreUnknown",
-            List.of(KeyType.CONFIG));
-
-    /**
      * Automatically register unknown devices in the database.
      */
     public static final ConfigKey<Boolean> DATABASE_REGISTER_UNKNOWN = new BooleanConfigKey(
@@ -664,7 +656,7 @@ public final class Keys {
     /**
      * OpenID Connect Authorization URL.
      * This can usually be found in the documentation of your identity provider or by using the well-known
-     * configuration endpoint, eg. https://auth.example.com//.well-known/openid-configuration
+     * configuration endpoint, e.g. https://auth.example.com//.well-known/openid-configuration
      * Required to enable SSO if openid.issuerUrl is not set.
      */
     public static final ConfigKey<String> OPENID_AUTH_URL = new StringConfigKey(
@@ -1223,6 +1215,34 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> NOTIFICATOR_TELEGRAM_SEND_LOCATION = new BooleanConfigKey(
             "notificator.telegram.sendLocation",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Enable user expiration email notification.
+     */
+    public static final ConfigKey<Boolean> NOTIFICATION_EXPIRATION_USER = new BooleanConfigKey(
+            "notification.expiration.user",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * User expiration reminder. Value in milliseconds.
+     */
+    public static final ConfigKey<Long> NOTIFICATION_EXPIRATION_USER_REMINDER = new LongConfigKey(
+            "notification.expiration.user.reminder",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Enable device expiration email notification.
+     */
+    public static final ConfigKey<Boolean> NOTIFICATION_EXPIRATION_DEVICE = new BooleanConfigKey(
+            "notification.expiration.device",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Device expiration reminder. Value in milliseconds.
+     */
+    public static final ConfigKey<Long> NOTIFICATION_EXPIRATION_DEVICE_REMINDER = new LongConfigKey(
+            "notification.expiration.device.reminder",
             List.of(KeyType.CONFIG));
 
     /**
