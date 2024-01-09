@@ -131,8 +131,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             position.setCourse(bearing);
             position.set(Position.KEY_SATELLITES,numberOfSatellites);
             position.set(Position.KEY_PDOP, PDOP * 0.1);
-            position.set(Position.KEY_IGNITION, IOstatus & 0x40);
-            //position.set(Position.KEY_POWER, IOstatus & 0x80);
+            position.set(Position.KEY_IGNITION, (IOstatus & 0x40)!=0 ? true:false);
             
             positions.add(position);
         }
