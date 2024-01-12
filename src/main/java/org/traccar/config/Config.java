@@ -30,16 +30,19 @@ public class Config {
     public Config() {
     }
 
-    public Config(String file) throws IOException {
+    public Config(String file, boolean embedded) throws IOException {
         try {
             Properties mainProperties = new Properties();
-            try (InputStream inputStream = new FileInputStream(file)) {
+            try (InputStream inputStream = embedded ? getClass().getClassLoader().getResourceAsStream(file)
+                    : new FileInputStream(file)) {
                 mainProperties.loadFromXML(inputStream);
             }
 
             String defaultConfigFile = mainProperties.getProperty("config.default");
             if (defaultConfigFile != null) {
-                try (InputStream inputStream = new FileInputStream(defaultConfigFile)) {
+                try (InputStream inputStream = embedded
+                        ? getClass().getClassLoader().getResourceAsStream(defaultConfigFile)
+                        : new FileInputStream(defaultConfigFile)) {
                     properties.loadFromXML(inputStream);
                 }
             }
