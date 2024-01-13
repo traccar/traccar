@@ -48,6 +48,13 @@ public class Minifinder2ProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
+        if (command.getType().equals(Command.TYPE_CONFIGURATION)) {
+            ByteBuf content = Unpooled.buffer();
+            content.writeByte(Minifinder2ProtocolDecoder.MSG_CONFIGURATION);
+            content.writeByte(1); // length
+            content.writeByte(0xF0); // type
+        }
+
         Device device = getCacheManager().getObject(Device.class, command.getDeviceId());
         if ("Nano".equalsIgnoreCase(device.getModel())) {
             ByteBuf content = Unpooled.buffer();
