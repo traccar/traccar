@@ -1,3 +1,10 @@
+terraform {
+  cloud {
+    organization = "awsuseast1"
+    workspaces { name = "traccar" }
+  }
+}
+
 provider "aws" {
   profile    = "us.east.1"
   region     = "us-east-1"
@@ -107,4 +114,14 @@ resource "aws_elastic_beanstalk_environment" "traccar-env" {
       resource  = ""
     }
   }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "DATABASE_PASSWORD"
+    value     = var.db_password
+  }
+}
+
+resource "aws_ses_domain_identity" "ses_gpsmanager" {
+  domain = "gpsmanager.io"
 }
