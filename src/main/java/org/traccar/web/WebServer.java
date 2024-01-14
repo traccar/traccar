@@ -186,6 +186,7 @@ public class WebServer {
             jdbcSessionDataStoreFactory.setDatabaseAdaptor(databaseAdaptor);
             SessionHandler sessionHandler = servletHandler.getSessionHandler();
             SessionCache sessionCache = new DefaultSessionCache(sessionHandler);
+            sessionCache.setEvictionPolicy(1800); // 30 minutes
             sessionCache.setSessionDataStore(jdbcSessionDataStoreFactory.getSessionDataStore(sessionHandler));
             sessionHandler.setSessionCache(sessionCache);
         }
