@@ -88,7 +88,8 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                     usersToForward.add(userId);
                 }
                 final Set<String> notificators = new HashSet<>();
-                for (long notificationId : getEffectiveNotifications(userId, deviceId, event.getServerTime())) {
+                final Set<Long> notifications = getEffectiveNotifications(userId, deviceId, event.getServerTime());
+                for (long notificationId : notifications) {
                     Notification notification = getById(notificationId);
                     if (getById(notificationId).getType().equals(event.getType())) {
                         boolean filter = false;
@@ -108,6 +109,11 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 }
                 for (String notificator : notificators) {
                     Context.getNotificatorManager().getNotificator(notificator).sendAsync(userId, event, position);
+                }
+                if (!notifications.isEmpty() && Context.getEventForwarder() != null) {
+                    Set<Long> _users = new HashSet<>();
+                    _users.add(userId);
+                    Context.getEventForwarder().forwardEvent(event, position, _users, notifications);
                 }
             }
         }
