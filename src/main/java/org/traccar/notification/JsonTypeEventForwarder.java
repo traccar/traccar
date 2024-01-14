@@ -11,8 +11,8 @@ import javax.ws.rs.client.Entity;
 public class JsonTypeEventForwarder extends EventForwarder {
 
     @Override
-    protected void executeRequest(Event event, Position position, Set<Long> users, AsyncInvoker invoker) {
-        invoker.post(Entity.json(preparePayload(event, position, users)));
+    protected void executeRequest(Event event, Position position, Set<Long> users, Set<Long> notifications, AsyncInvoker invoker) {
+        invoker.post(Entity.json(preparePayload(event, position, users, notifications)));
     }
 
 }

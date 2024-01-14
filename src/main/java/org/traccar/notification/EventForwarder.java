@@ -44,8 +44,9 @@ public abstract class EventForwarder {
     private static final String KEY_DEVICE = "device";
     private static final String KEY_MAINTENANCE = "maintenance";
     private static final String KEY_USERS = "users";
+    private static final String KEY_NOTIFICATIONS = "notifications";
 
-    public final void forwardEvent(Event event, Position position, Set<Long> users) {
+    public final void forwardEvent(Event event, Position position, Set<Long> users, Set<Long> notifications) {
 
         Invocation.Builder requestBuilder = Context.getClient().target(url).request();
 
@@ -56,10 +57,15 @@ public abstract class EventForwarder {
             }
         }
 
-        executeRequest(event, position, users, requestBuilder.async());
+        executeRequest(event, position, users, notifications, requestBuilder.async());
     }
 
-    protected Map<String, Object> preparePayload(Event event, Position position, Set<Long> users) {
+    public final void forwardEvent(Event event, Position position, Set<Long> users) {
+
+        forwardEvent(event, position, users, null);
+    }
+
+    protected Map<String, Object> preparePayload(Event event, Position position, Set<Long> users, Set<Long> notifications) {
         Map<String, Object> data = new HashMap<>();
         data.put(KEY_EVENT, event);
         if (position != null) {
@@ -82,10 +88,13 @@ public abstract class EventForwarder {
             }
         }
         data.put(KEY_USERS, Context.getUsersManager().getItems(users));
+        if (notifications != null) {
+            data.put(KEY_NOTIFICATIONS, Context.getNotificationManager().getItems(notifications));
+        }
         return data;
     }
 
     protected abstract void executeRequest(
-            Event event, Position position, Set<Long> users, AsyncInvoker invoker);
+            Event event, Position position, Set<Long> users, Set<Long> notifications, AsyncInvoker invoker);
 
 }
