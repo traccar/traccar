@@ -117,6 +117,11 @@ resource "aws_elastic_beanstalk_environment" "traccar-env" {
 
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "CONFIG_USE_ENVIRONMENT_VARIABLES"
+    value     = "true"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "DATABASE_PASSWORD"
     value     = var.db_password
   }
@@ -124,4 +129,20 @@ resource "aws_elastic_beanstalk_environment" "traccar-env" {
 
 resource "aws_ses_domain_identity" "ses_gpsmanager" {
   domain = "gpsmanager.io"
+}
+
+resource "aws_sesv2_contact_list" "default" {
+  contact_list_name = "default"
+  topic {
+    default_subscription_status = "OPT_IN"
+    description                 = "Fleetmap Alerts"
+    display_name                = "Alerts"
+    topic_name                  = "Alerts"
+  }
+  topic {
+    default_subscription_status = "OPT_IN"
+    description                 = "Fleetmap Reports"
+    display_name                = "Reporting"
+    topic_name                  = "Reporting"
+  }
 }
