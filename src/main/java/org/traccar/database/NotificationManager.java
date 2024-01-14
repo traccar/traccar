@@ -113,7 +113,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 }
                 if (!notifications.isEmpty() && Context.getEventForwarder() != null) {
                     Set<Long> _users = new HashSet<>();
-                    users.add(userId);
+                    _users.add(userId);
                     Context.getEventForwarder().forwardEvent(event, position, _users, notifications);
                 }
             }
