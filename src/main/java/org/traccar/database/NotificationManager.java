@@ -111,7 +111,7 @@ public class NotificationManager extends ExtendedObjectManager<Notification> {
                 for (String notificator : notificators) {
                     Context.getNotificatorManager().getNotificator(notificator).sendAsync(userId, event, position);
                 }
-                if (!notificators.isEmpty() && Context.getEventForwarder() != null) {
+                if (!notifications.isEmpty() && Context.getEventForwarder() != null) {
                     Set<Long> _users = new HashSet<>();
                     users.add(userId);
                     Context.getEventForwarder().forwardEvent(event, position, _users, notifications);
