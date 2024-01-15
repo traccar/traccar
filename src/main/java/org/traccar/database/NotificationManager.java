@@ -87,7 +87,7 @@ public class NotificationManager {
             return;
         }
 
-        var notifications = cacheManager.getDeviceNotifications(event.getDeviceId())
+        var notifications = cacheManager.getDeviceNotifications(event.getDeviceId()).stream()
                 .filter(notification -> notification.getType().equals(event.getType()))
                 .filter(notification -> {
                     if (event.getType().equals(Event.TYPE_ALARM)) {
