@@ -85,7 +85,7 @@ public class NotificatorFirebase implements Notificator {
     public void send(Notification notification, User user, Event event, Position position) throws MessageException {
         if (user.hasAttribute("notificationTokens")) {
 
-            var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
+            var shortMessage = notificationFormatter.formatMessage(notification, user, event, position, "short");
 
             List<String> registrationTokens = new ArrayList<>(
                     Arrays.asList(user.getString("notificationTokens").split("[, ]")));

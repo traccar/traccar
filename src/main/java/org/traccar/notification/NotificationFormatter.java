@@ -23,6 +23,7 @@ import org.traccar.model.Driver;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
+import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.Server;
 import org.traccar.model.User;
@@ -44,13 +45,15 @@ public class NotificationFormatter {
         this.textTemplateFormatter = textTemplateFormatter;
     }
 
-    public NotificationMessage formatMessage(User user, Event event, Position position, String templatePath) {
+    public NotificationMessage formatMessage(
+            Notification notification, User user, Event event, Position position, String templatePath) {
 
         Server server = cacheManager.getServer();
         Device device = cacheManager.getObject(Device.class, event.getDeviceId());
 
         VelocityContext velocityContext = textTemplateFormatter.prepareContext(server, user);
 
+        velocityContext.put("notification", notification);
         velocityContext.put("device", device);
         velocityContext.put("event", event);
         if (position != null) {

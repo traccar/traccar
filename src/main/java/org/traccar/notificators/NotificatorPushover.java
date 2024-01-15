@@ -63,7 +63,7 @@ public class NotificatorPushover implements Notificator {
 
     @Override
     public void send(Notification notification, User user, Event event, Position position) {
-        var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
+        var shortMessage = notificationFormatter.formatMessage(notification, user, event, position, "short");
 
         Message message = new Message();
         message.token = token;

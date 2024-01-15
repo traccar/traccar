@@ -51,7 +51,7 @@ public final class NotificatorWeb implements Notificator {
         copy.setMaintenanceId(event.getMaintenanceId());
         copy.getAttributes().putAll(event.getAttributes());
 
-        var message = notificationFormatter.formatMessage(user, event, position, "short");
+        var message = notificationFormatter.formatMessage(notification, user, event, position, "short");
         copy.set("message", message.getBody());
 
         connectionManager.updateEvent(true, user.getId(), copy);
