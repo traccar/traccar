@@ -103,6 +103,12 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             case 5:
             case 6:
                 return Position.ALARM_DOOR;
+            case 17:
+                return Position.ALARM_LOW_POWER;
+            case 18:
+                return Position.ALARM_POWER_CUT;
+            case 19:
+                return Position.ALARM_POWER_RESTORED;
             case 39:
                 return Position.ALARM_ACCELERATION;
             case 40:
