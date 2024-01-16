@@ -1806,6 +1806,20 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Enable commands for a shared device.
+     */
+    public static final ConfigKey<Boolean> WEB_SHARE_DEVICE_COMMANDS = new BooleanConfigKey(
+            "web.shareDevice.commands",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Enable reports for a shared device.
+     */
+    public static final ConfigKey<Boolean> WEB_SHARE_DEVICE_REPORTS = new BooleanConfigKey(
+            "web.shareDevice.reports",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Output logging to the standard terminal output instead of a log file.
      */
     public static final ConfigKey<Boolean> LOGGER_CONSOLE = new BooleanConfigKey(

@@ -19,6 +19,8 @@ import jakarta.ws.rs.FormParam;
 import org.traccar.api.BaseObjectResource;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.broadcast.BroadcastService;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
@@ -59,6 +61,9 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class DeviceResource extends BaseObjectResource<Device> {
+
+    @Inject
+    private Config config;
 
     @Inject
     private CacheManager cacheManager;
@@ -212,6 +217,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
         share.setExpirationTime(expiration);
         share.setTemporary(true);
         share.setReadonly(true);
+        share.setLimitCommands(!config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
+        share.setDisableReports(!config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
 
         share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
 
