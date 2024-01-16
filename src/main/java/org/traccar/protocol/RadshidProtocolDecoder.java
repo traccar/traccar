@@ -54,6 +54,36 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private String decodeAlarm(int event) 
+    {
+        switch (event) 
+        {
+            case 0xD6: // GSM_Jamming_Event
+            case 0xD7: // GPS_Jamming_Event
+                return Position.ALARM_JAMMING;
+            case 0xEB: // SOS_PressEvent
+            case 0xEC: // SOS_ReleaseEvent
+                return Position.ALARM_SOS;
+            case 0xF0: // Battry_Level_Event
+                return Position.ALARM_LOW_BATTERY;
+            case 0xDC: // GeofenceEnable_Event
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 0xDD: // GeofenceDisable_Event
+                return Position.ALARM_GEOFENCE_EXIT;
+            case 0xEE: // OverSpeedEvent
+                return Position.ALARM_OVERSPEED;
+            case 0xE2: // DisconnetPowerLineEvent
+                return Position.ALARM_POWER_CUT;
+            case 0xE3: // ConnectPowerLineEvent
+                return Position.ALARM_POWER_RESTORED;
+            case 0xE5: // AccelerationEvent
+                return Position.ALARM_ACCELERATION;
+
+            default:
+                return null;
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -100,7 +130,7 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             packetData.readByte(); // Event Version
-            packetData.readByte(); // Event Code
+            byte event = packetData.readByte(); // Event Code
             packetData.readBytes(5); // Driver Id
             packetData.readUnsignedShort(); // Total Driving Tim
             long timeStamp = packetData.readUnsignedInt();   // Timestamp 
@@ -132,7 +162,8 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_SATELLITES,numberOfSatellites);
             position.set(Position.KEY_PDOP, PDOP * 0.1);
             position.set(Position.KEY_IGNITION, (IOstatus & 0x40)!=0 ? true:false);
-            
+            position.set(Position.KEY_ALARM, decodeAlarm((int)event));
+
             positions.add(position);
         }
         return positions;
