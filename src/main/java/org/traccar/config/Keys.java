@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1247,7 +1247,7 @@ public final class Keys {
 
     /**
      * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
-     * By default there is no limit.
+     * By default, there is no limit.
      */
     public static final ConfigKey<Long> REPORT_PERIOD_LIMIT = new LongConfigKey(
             "report.periodLimit",
@@ -1796,6 +1796,13 @@ public final class Keys {
      */
     public static final ConfigKey<String> WEB_URL = new StringConfigKey(
             "web.url",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Show logs from unknown devices.
+     */
+    public static final ConfigKey<Boolean> WEB_SHOW_UNKNOWN_DEVICES = new BooleanConfigKey(
+            "web.showUnknownDevices",
             List.of(KeyType.CONFIG));
 
     /**

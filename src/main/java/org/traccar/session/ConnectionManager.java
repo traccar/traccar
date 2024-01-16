@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ public class ConnectionManager implements BroadcastInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionManager.class);
 
     private final long deviceTimeout;
+    private final boolean showUnknownDevices;
 
     private final Map<Long, DeviceSession> sessionsByDeviceId = new ConcurrentHashMap<>();
     private final Map<SocketAddress, Map<String, DeviceSession>> sessionsByEndpoint = new ConcurrentHashMap<>();
@@ -95,6 +96,7 @@ public class ConnectionManager implements BroadcastInterface {
         this.broadcastService = broadcastService;
         this.deviceLookupService = deviceLookupService;
         deviceTimeout = config.getLong(Keys.STATUS_TIMEOUT);
+        showUnknownDevices = config.getBoolean(Keys.WEB_SHOW_UNKNOWN_DEVICES);
         broadcastService.registerListener(this);
     }
 
@@ -344,7 +346,7 @@ public class ConnectionManager implements BroadcastInterface {
         var sessions = sessionsByEndpoint.getOrDefault(record.getAddress(), Map.of());
         if (sessions.isEmpty()) {
             String unknownUniqueId = unknownByEndpoint.get(record.getAddress());
-            if (unknownUniqueId != null) {
+            if (unknownUniqueId != null && showUnknownDevices) {
                 record.setUniqueId(unknownUniqueId);
                 listeners.values().stream()
                         .flatMap(Set::stream)
