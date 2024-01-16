@@ -96,7 +96,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    private static class TimeReader extends FloatReader {
+    private static final class TimeReader extends FloatReader {
 
         private long weekNumber;
 

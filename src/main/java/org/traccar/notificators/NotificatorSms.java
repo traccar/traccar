@@ -46,7 +46,7 @@ public class NotificatorSms implements Notificator {
     @Override
     public void send(Notification notification, User user, Event event, Position position) throws MessageException {
         if (user.getPhone() != null) {
-            var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
+            var shortMessage = notificationFormatter.formatMessage(notification, user, event, position, "short");
             statisticsManager.registerSms();
             smsManager.sendMessage(user.getPhone(), shortMessage.getBody(), false);
         }

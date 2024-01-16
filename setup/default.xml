@@ -14,6 +14,7 @@
     <entry key='web.path'>./modern</entry>
     <entry key='web.sanitize'>false</entry>
     <entry key='web.persistSession'>false</entry>
+    <entry key='web.showUnknownDevices'>true</entry>
 
     <entry key='geocoder.enable'>true</entry>
     <entry key='geocoder.type'>locationiq</entry>

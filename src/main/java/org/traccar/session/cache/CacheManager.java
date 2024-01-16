@@ -49,7 +49,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Singleton
 public class CacheManager implements BroadcastInterface {
@@ -136,14 +135,15 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
-    public Stream<Notification> getDeviceNotifications(long deviceId) {
+    public Set<Notification> getDeviceNotifications(long deviceId) {
         try {
             lock.readLock().lock();
             var direct = graph.getObjects(Device.class, deviceId, Notification.class, Set.of(Group.class), true)
                     .map(BaseModel::getId)
                     .collect(Collectors.toUnmodifiableSet());
             return graph.getObjects(Device.class, deviceId, Notification.class, Set.of(Group.class, User.class), true)
-                    .filter(notification -> notification.getAlways() || direct.contains(notification.getId()));
+                    .filter(notification -> notification.getAlways() || direct.contains(notification.getId()))
+                    .collect(Collectors.toUnmodifiableSet());
         } finally {
             lock.readLock().unlock();
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -490,14 +490,6 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * By default, server syncs with the database if it encounters and unknown device. This flag allows to disable that
-     * behavior to improve performance in some cases.
-     */
-    public static final ConfigKey<Boolean> DATABASE_IGNORE_UNKNOWN = new BooleanConfigKey(
-            "database.ignoreUnknown",
-            List.of(KeyType.CONFIG));
-
-    /**
      * Automatically register unknown devices in the database.
      */
     public static final ConfigKey<Boolean> DATABASE_REGISTER_UNKNOWN = new BooleanConfigKey(
@@ -664,7 +656,7 @@ public final class Keys {
     /**
      * OpenID Connect Authorization URL.
      * This can usually be found in the documentation of your identity provider or by using the well-known
-     * configuration endpoint, eg. https://auth.example.com//.well-known/openid-configuration
+     * configuration endpoint, e.g. https://auth.example.com//.well-known/openid-configuration
      * Required to enable SSO if openid.issuerUrl is not set.
      */
     public static final ConfigKey<String> OPENID_AUTH_URL = new StringConfigKey(
@@ -1226,8 +1218,36 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Enable user expiration email notification.
+     */
+    public static final ConfigKey<Boolean> NOTIFICATION_EXPIRATION_USER = new BooleanConfigKey(
+            "notification.expiration.user",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * User expiration reminder. Value in milliseconds.
+     */
+    public static final ConfigKey<Long> NOTIFICATION_EXPIRATION_USER_REMINDER = new LongConfigKey(
+            "notification.expiration.user.reminder",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Enable device expiration email notification.
+     */
+    public static final ConfigKey<Boolean> NOTIFICATION_EXPIRATION_DEVICE = new BooleanConfigKey(
+            "notification.expiration.device",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Device expiration reminder. Value in milliseconds.
+     */
+    public static final ConfigKey<Long> NOTIFICATION_EXPIRATION_DEVICE_REMINDER = new LongConfigKey(
+            "notification.expiration.device.reminder",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
-     * By default there is no limit.
+     * By default, there is no limit.
      */
     public static final ConfigKey<Long> REPORT_PERIOD_LIMIT = new LongConfigKey(
             "report.periodLimit",
@@ -1776,6 +1796,27 @@ public final class Keys {
      */
     public static final ConfigKey<String> WEB_URL = new StringConfigKey(
             "web.url",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Show logs from unknown devices.
+     */
+    public static final ConfigKey<Boolean> WEB_SHOW_UNKNOWN_DEVICES = new BooleanConfigKey(
+            "web.showUnknownDevices",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Enable commands for a shared device.
+     */
+    public static final ConfigKey<Boolean> WEB_SHARE_DEVICE_COMMANDS = new BooleanConfigKey(
+            "web.shareDevice.commands",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Enable reports for a shared device.
+     */
+    public static final ConfigKey<Boolean> WEB_SHARE_DEVICE_REPORTS = new BooleanConfigKey(
+            "web.shareDevice.reports",
             List.of(KeyType.CONFIG));
 
     /**

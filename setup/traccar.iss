@@ -1,6 +1,6 @@
 [Setup]
 AppName=Traccar
-AppVersion=5.10
+AppVersion=5.11
 DefaultDirName={pf}\Traccar
 OutputBaseFilename=traccar-setup
 ArchitecturesInstallIn64BitMode=x64

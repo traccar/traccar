@@ -87,7 +87,7 @@ public class NotificatorTraccar implements Notificator {
     public void send(org.traccar.model.Notification notification, User user, Event event, Position position) {
         if (user.hasAttribute("notificationTokens")) {
 
-            var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
+            var shortMessage = notificationFormatter.formatMessage(notification, user, event, position, "short");
 
             NotificationObject item = new NotificationObject();
             item.title = shortMessage.getSubject();
