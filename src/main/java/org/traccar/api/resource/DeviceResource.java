@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -214,18 +214,24 @@ public class DeviceResource extends BaseObjectResource<Device> {
                         new Condition.Equals("id", deviceId),
                         new Condition.Permission(User.class, user.getId(), Device.class))));
 
-        User share = new User();
-        share.setName(device.getName());
-        share.setEmail(user.getEmail() + ":" + device.getUniqueId());
-        share.setExpirationTime(expiration);
-        share.setTemporary(true);
-        share.setReadonly(true);
-        share.setLimitCommands(!config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
-        share.setDisableReports(!config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
+        String shareEmail = user.getEmail() + ":" + device.getUniqueId();
+        User share = storage.getObject(User.class, new Request(
+                new Columns.All(), new Condition.Equals("email", shareEmail)));
 
-        share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
+        if (share == null) {
+            share = new User();
+            share.setName(device.getName());
+            share.setEmail(shareEmail);
+            share.setExpirationTime(expiration);
+            share.setTemporary(true);
+            share.setReadonly(true);
+            share.setLimitCommands(!config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
+            share.setDisableReports(!config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
 
-        storage.addPermission(new Permission(User.class, share.getId(), Device.class, deviceId));
+            share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
+
+            storage.addPermission(new Permission(User.class, share.getId(), Device.class, deviceId));
+        }
 
         return tokenManager.generateToken(share.getId(), expiration);
     }
