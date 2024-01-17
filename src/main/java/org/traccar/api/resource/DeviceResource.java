@@ -204,6 +204,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
 
         User user = permissionsService.getUser(getUserId());
+        if (user.getTemporary()) {
+            throw new SecurityException("Temporary user");
+        }
 
         Device device = storage.getObject(Device.class, new Request(
                 new Columns.All(),
