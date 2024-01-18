@@ -11,6 +11,11 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Tlt2hProtocolDecoder(null));
 
+        verifyAttribute(decoder, text(
+                "#867665041689485#MT700N#0000#HT#1\r\n",
+                "#5065$GPRMC,148996.00,A,2485.2458,N,01258.4535,E,,,151348,,,A*5D\r\n"),
+                Position.KEY_BATTERY, 5.065);
+
         verifyPositions(decoder, false, text(
                 "#862255061983166#MT700NW#0000#TOWED#1\r\n",
                 "#4502$WIFI,051550.00,A,-50,7683C2CBC0B0,-51,7683C29BC0B0,-51,7683C2BBC0B0,-51,7483C2DBC0B0,-51,7683C2ABC0B0,221123*78\r\n"));

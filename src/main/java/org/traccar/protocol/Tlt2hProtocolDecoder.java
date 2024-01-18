@@ -55,7 +55,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
             .text("#")
-            .number("(?:(dd)|x*)")               // cell or voltage
+            .number("(?:(dd|dddd)|x*)")          // cell or voltage
             .groupBegin()
             .number("#(d+),")                    // mcc
             .number("(d+),")                     // mnc
@@ -77,7 +77,7 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_WIFI = new PatternBuilder()
             .text("#")
-            .number("(?:(dd)|x+)")               // cell or voltage
+            .number("(?:(dd|dddd)|x+)")          // cell or voltage
             .expression("#?")
             .groupBegin()
             .number("(d+),")                     // mcc
@@ -179,7 +179,8 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 if (parser.matches()) {
 
                     if (parser.hasNext()) {
-                        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.1);
+                        int voltage = parser.nextInt();
+                        position.set(Position.KEY_BATTERY, voltage > 100 ? voltage * 0.001 : voltage * 0.1);
                     }
 
                     if (parser.hasNext(4)) {
@@ -211,7 +212,8 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 if (parser.matches()) {
 
                     if (parser.hasNext()) {
-                        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.1);
+                        int voltage = parser.nextInt();
+                        position.set(Position.KEY_BATTERY, voltage > 100 ? voltage * 0.001 : voltage * 0.1);
                     }
 
                     Network network = new Network();
