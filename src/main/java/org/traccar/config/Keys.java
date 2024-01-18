@@ -341,6 +341,13 @@ public final class Keys {
             0.0);
 
     /**
+     * Disable device sharing on the server.
+     */
+    public static final ConfigKey<Boolean> DEVICE_SHARE_DISABLE = new BooleanConfigKey(
+            "disableShare",
+            List.of(KeyType.SERVER));
+
+    /**
      * Speed limit threshold multiplier. For example, if the speed limit is 100, but we only want to generate an event
      * if the speed is higher than 105, this parameter can be set to 1.05. Default multiplier is 1.0.
      */

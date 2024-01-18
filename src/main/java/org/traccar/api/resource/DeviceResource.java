@@ -204,6 +204,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
 
         User user = permissionsService.getUser(getUserId());
+        if (permissionsService.getServer().getBoolean(Keys.DEVICE_SHARE_DISABLE.getKey())) {
+            throw new SecurityException("Sharing is disabled");
+        }
         if (user.getTemporary()) {
             throw new SecurityException("Temporary user");
         }
