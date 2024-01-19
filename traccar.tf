@@ -10,6 +10,12 @@ provider "aws" {
   region     = "us-east-1"
 }
 
+provider "aws" {
+  profile    = "us.east.1"
+  region     = "eu-west-3"
+  alias  = "eu-west-3"
+}
+
 resource "aws_security_group" "traccar-sg" {
   name        = "traccar-sg"
   ingress {
@@ -104,17 +110,6 @@ resource "aws_elastic_beanstalk_environment" "traccar-env" {
     value     = "SingleInstance"
   }
 
-  # Add environment variables if provided
-  dynamic "setting" {
-    for_each = var.env_vars
-    content {
-      namespace = "aws:elasticbeanstalk:application:environment"
-      name      = setting.key
-      value     = setting.value
-      resource  = ""
-    }
-  }
-
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "CONFIG_USE_ENVIRONMENT_VARIABLES"
@@ -125,6 +120,23 @@ resource "aws_elastic_beanstalk_environment" "traccar-env" {
     name      = "DATABASE_PASSWORD"
     value     = var.db_password
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "DOMAIN_LINK"
+    value     = "traccar.fleetmap.pt"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "EMAIL_LINK"
+    value     = "admin@fleetmap.i"
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "PORT"
+    value     = "8082"
+  }
+
+
 }
 
 resource "aws_ses_domain_identity" "ses_gpsmanager" {
@@ -145,4 +157,21 @@ resource "aws_sesv2_contact_list" "default" {
     display_name                = "Reporting"
     topic_name                  = "Reporting"
   }
+}
+
+resource "aws_api_gateway_rest_api" "pinme-backend" {
+  name = "pinme-backend"
+}
+resource "aws_api_gateway_rest_api" "alb-reports" {
+  name = "alb-reports"
+}
+
+import {
+  to = aws_api_gateway_rest_api.pinme-backend
+  id = "koutt85z24"
+}
+
+import {
+  to = aws_api_gateway_rest_api.alb-reports
+  id = "0uu3hlen0d"
 }
