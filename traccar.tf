@@ -118,7 +118,7 @@ resource "aws_elastic_beanstalk_environment" "traccar-env" {
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "DATABASE_PASSWORD"
-    value     = var.db_password
+    value     = jsondecode(data.aws_secretsmanager_secret_version.traccar.secret_string).db_password
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
