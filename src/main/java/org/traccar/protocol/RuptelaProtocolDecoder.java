@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -112,6 +112,10 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 5:
                 position.set(Position.PREFIX_IN + (id - 1), readValue(buf, length, false));
                 break;
+            case 13:
+            case 173:
+                position.set(Position.KEY_MOTION, readValue(buf, length, false) > 0);
+                break;
             case 20:
                 position.set(Position.PREFIX_ADC + 3, readValue(buf, length, false));
                 break;
@@ -133,6 +137,9 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 32:
                 position.set(Position.KEY_DEVICE_TEMP, readValue(buf, length, true));
                 break;
+            case 39:
+                position.set(Position.KEY_ENGINE_LOAD, readValue(buf, length, true));
+                break;
             case 65:
                 position.set(Position.KEY_ODOMETER, readValue(buf, length, true));
                 break;
@@ -149,8 +156,17 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
                 }
                 break;
+            case 94:
+                position.set(Position.KEY_RPM, readValue(buf, length, true) * 0.25);
+                break;
             case 95:
                 position.set(Position.KEY_OBD_SPEED, readValue(buf, length, true));
+                break;
+            case 98:
+                position.set("fuelRate", readValue(buf, length, true) * 100 / 255.0);
+                break;
+            case 100:
+                position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, true) / 20.0);
                 break;
             case 134:
                 if (readValue(buf, length, false) > 0) {
@@ -165,14 +181,30 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 150:
                 position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
                 break;
+            case 163:
+                position.set(Position.KEY_ODOMETER, readValue(buf, length, false) * 5);
+                break;
+            case 164:
+                position.set(Position.KEY_ODOMETER_TRIP, readValue(buf, length, false) * 5);
+                break;
+            case 165:
+                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false) / 256.0);
+                break;
+            case 166:
+            case 197:
+                position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
+                break;
             case 170:
                 position.set(Position.KEY_CHARGE, readValue(buf, length, false) > 0);
                 break;
-            case 173:
-                position.set(Position.KEY_MOTION, readValue(buf, length, false) > 0);
+            case 205:
+                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false));
                 break;
-            case 197:
-                position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
+            case 207:
+                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false) * 0.4);
+                break;
+            case 208:
+                position.set(Position.KEY_FUEL_USED, readValue(buf, length, false) * 0.5);
                 break;
             case 251:
             case 409:
