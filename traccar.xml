@@ -25,7 +25,7 @@
   <entry key='database.registerUnknown'>true</entry>
 
   <entry key='database.selectLatestPositions'>
-    SELECT p.* FROM tc_devices d join tc_positions p ON d.id = p.deviceid and d.positionid = p.id
+    SELECT * FROM tc_positions_last
   </entry>
 
   <entry key='database.selectPositionByDevice'>
