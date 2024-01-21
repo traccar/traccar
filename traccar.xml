@@ -71,10 +71,10 @@
 
   <entry key='falcom.port'>5195</entry>
 
-  <entry key='event.forward.url'>http://forward.pinme.io/push</entry>
+  <entry key='event.forward.url'>http://forward2.pinme.io/push</entry>
   <entry key='event.forward.enable'>true</entry>
 
-  <entry key='forward.url'>http://forward.pinme.io/pushPositions</entry>
+  <entry key='forward.url'>http://forward2.pinme.io/pushPositions</entry>
   <entry key='forward.enable'>true</entry>
   <entry key='forward.json'>true</entry>
   <entry key='forward.retry.enable'>true</entry>
