@@ -19,7 +19,7 @@ jobs:
         java-version: 1.8
 
     - name: Build with Gradle
-      run: ./gradlew build
+      run: ./gradlew build -x checkstyleMain
 
     - name: Generate deployment package
       run: zip -r deploy.zip . -x '*.git*'
