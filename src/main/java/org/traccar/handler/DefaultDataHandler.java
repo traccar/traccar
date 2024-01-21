@@ -49,7 +49,7 @@ public class DefaultDataHandler extends BaseDataHandler {
             // dataManager.addObject(position);
             position.setId(jedis.incr("dbid"));
         } catch (Exception error) {
-            LOGGER.error("Failed to store position using", this.jedisHost, error.getMessage());
+            LOGGER.error(String.format("%s trying to store position using %s", this.jedisHost, error.getMessage()));
             try {
                 LOGGER.error(Context.getObjectMapper().writeValueAsString(position));
             } catch (JsonProcessingException e) {
