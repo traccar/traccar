@@ -34,10 +34,12 @@ public class DefaultDataHandler extends BaseDataHandler {
     private final DataManager dataManager;
 
     private final JedisPool jedisPool;
+    private final String jedisHost;
 
     public DefaultDataHandler(DataManager dataManager) {
         this.dataManager = dataManager;
-        this.jedisPool = new JedisPool(Context.getConfig().getString("REDIS_HOST", "redis.pinme.io"));
+        this.jedisHost = Context.getConfig().getString("REDIS_HOST", "redis.pinme.io");
+        this.jedisPool = new JedisPool(this.jedisHost);
     }
 
     @Override
@@ -47,7 +49,7 @@ public class DefaultDataHandler extends BaseDataHandler {
             // dataManager.addObject(position);
             position.setId(jedis.incr("dbid"));
         } catch (Exception error) {
-            LOGGER.error("Failed to store position", error);
+            LOGGER.error("Failed to store position using", this.jedisHost, error.getMessage());
             try {
                 LOGGER.error(Context.getObjectMapper().writeValueAsString(position));
             } catch (JsonProcessingException e) {
