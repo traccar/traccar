@@ -38,7 +38,7 @@ public class DefaultDataHandler extends BaseDataHandler {
 
     public DefaultDataHandler(DataManager dataManager) {
         this.dataManager = dataManager;
-        this.jedisHost = Context.getConfig().getString("REDIS_HOST", "redis.pinme.io");
+        this.jedisHost = Context.getConfig().getString("redis.host", "redis.pinme.io");
         this.jedisPool = new JedisPool(this.jedisHost);
     }
 
