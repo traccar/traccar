@@ -228,8 +228,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
             share.setExpirationTime(expiration);
             share.setTemporary(true);
             share.setReadonly(true);
-            share.setLimitCommands(!config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
-            share.setDisableReports(!config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
+            share.setLimitCommands(user.getLimitCommands() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
+            share.setDisableReports(user.getDisableReports() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
 
             share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
 
