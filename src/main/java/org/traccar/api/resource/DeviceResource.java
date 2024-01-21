@@ -210,6 +210,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
         if (user.getTemporary()) {
             throw new SecurityException("Temporary user");
         }
+        if (user.getExpirationTime() != null && user.getExpirationTime().before(expiration)) {
+            expiration = user.getExpirationTime();
+        }
 
         Device device = storage.getObject(Device.class, new Request(
                 new Columns.All(),
