@@ -13,8 +13,9 @@
   <entry key='web.disableHealthCheck'>true</entry>
   <entry key='web.sameSiteCookie'>None</entry>
   <entry key='web.persistSession'>true</entry>
-  <entry key='web.request.log.enable'>true</entry>
-  <entry key='web.request.log.path'>./traccar-web</entry>
+  <entry key='web.requestLog.enable'>false</entry>
+  <entry key='web.requestLog.path'>./logs/jetty-yyyy_mm_dd.request.log</entry>
+  <entry key='web.requestLog.retainDays'>3</entry>
 
   <entry key='logger.level'>warning</entry>
   <entry key='logger.fullStackTraces'>true</entry>
