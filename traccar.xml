@@ -79,6 +79,7 @@
   <entry key='falcom.timeout'>120</entry>
   <entry key='mobilogix.port'>5216</entry>
   <entry key='rst.port'>5196</entry>
+  <entry key='dualcam.port'>5232</entry>
 
   <entry key='processing.digitalPortTime.enable'>true</entry>
 
