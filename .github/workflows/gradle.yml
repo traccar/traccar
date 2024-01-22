@@ -26,8 +26,7 @@ jobs:
         cd traccar-web-master/modern
         npm install
         npm run build
-        mv build modern
-        mv modern ../..
+        cp -r build/* ../../traccar-web
     - run: | 
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master*'
     - uses: einaregilsson/beanstalk-deploy@v21
