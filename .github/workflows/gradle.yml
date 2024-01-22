@@ -23,7 +23,7 @@ jobs:
         rm master.zip
     - uses: actions/setup-node@v4
     - run: |
-        cd traccar-web-master
+        cd traccar-web-master/modern
         npm install
         npm run build
     - run: zip -r deploy.zip . -x '*.git*'
