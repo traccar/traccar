@@ -26,7 +26,10 @@ jobs:
         cd traccar-web-master/modern
         npm install
         npm run build
-    - run: zip -r deploy.zip . -x '*.git*'
+    - run: | 
+        mv traccar-web-master/modern/build .
+        rm -rf traccar-web-master
+        zip -r deploy.zip . -x '*.git*'
     - uses: einaregilsson/beanstalk-deploy@v21
       with:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
