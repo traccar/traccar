@@ -28,7 +28,7 @@ jobs:
         npm run build
         cp -r build/* ../../traccar-web
     - run: | 
-        zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master*'
+        zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*'
     - uses: einaregilsson/beanstalk-deploy@v21
       with:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}

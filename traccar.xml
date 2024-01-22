@@ -7,7 +7,7 @@
 
 
   <entry key='web.origin'>*</entry>
-  <entry key='web.url'>https://fleetmap.io</entry>
+  <entry key='web.path'>./traccar-web</entry>
   <entry key='web.jmx.enable'>true</entry>
   <entry key='web.stats.enable'>true</entry>
   <entry key='web.disableHealthCheck'>true</entry>
