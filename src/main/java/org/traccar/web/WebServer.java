@@ -77,7 +77,11 @@ public class WebServer {
             Enumeration<String> headerNames = request.getHeaderNames();
             while (headerNames.hasMoreElements()) {
                 String headerName = headerNames.nextElement();
-                System.out.println(headerName + ": " + request.getHeader(headerName));
+                try {
+                    write(headerName + ": " + request.getHeader(headerName));
+                } catch (IOException e) {
+                    LOGGER.error("error logging", e);
+                }
             }
         }
     }
