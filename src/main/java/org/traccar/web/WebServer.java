@@ -130,19 +130,11 @@ public class WebServer {
         server.setHandler(handlers);
 
         if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
-            NCSARequestLog requestLog = new HeaderLoggingRequestLog(new CustomRequestLog.Writer() {
-                @Override
-                public void log(Request request, Response response) {
-                    super.log(request, response); // call the parent class's log method to preserve its logging functionality
-            
-                    // Log the request headers
-                    Enumeration<String> headerNames = request.getHeaderNames();
-                    while (headerNames.hasMoreElements()) {
-                        String headerName = headerNames.nextElement();
-                        System.out.println(headerName + ": " + request.getHeader(headerName));
-                    }
-                }
-            }, CustomRequestLog.EXTENDED_NCSA_FORMAT);
+            HeaderLoggingRequestLog requestLog = new HeaderLoggingRequestLog(config.getString(Keys.WEB_REQUEST_LOG_PATH));
+            requestLog.setAppend(true);
+            requestLog.setExtended(true);
+            requestLog.setLogLatency(true);
+            requestLog.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
             server.setRequestLog(requestLog);
         }
         ServerConnectionStatistics.addToAllConnectors(server);
