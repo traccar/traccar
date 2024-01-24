@@ -47,7 +47,6 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
 
     @Override
     public void onWebSocketConnect(Session session) {
-        LOGGER.warn("onWebSocketConnect {}", session);
         super.onWebSocketConnect(session);
 
         Map<String, Collection<?>> data = new HashMap<>();
