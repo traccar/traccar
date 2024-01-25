@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ public class TaskHealthCheck implements ScheduleTask {
 
     private final Config config;
     private final Client client;
+
+    private final long gracePeriod = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1);
 
     private SystemD systemD;
 
@@ -77,14 +79,22 @@ public class TaskHealthCheck implements ScheduleTask {
     @Override
     public void run() {
         LOGGER.debug("Health check running");
-        int status = client.target(getUrl()).request().get().getStatus();
-        if (status == 200) {
-            int result = systemD.sd_notify(0, "WATCHDOG=1");
-            if (result < 0) {
-                LOGGER.warn("Health check notify error {}", result);
+        if (System.currentTimeMillis() > gracePeriod) {
+            int status = client.target(getUrl()).request().get().getStatus();
+            if (status == 200) {
+                notifyWatchdog();
+            } else {
+                LOGGER.warn("Health check failed with status {}", status);
             }
         } else {
-            LOGGER.warn("Health check failed with status {}", status);
+            notifyWatchdog();
+        }
+    }
+
+    private void notifyWatchdog() {
+        int result = systemD.sd_notify(0, "WATCHDOG=1");
+        if (result < 0) {
+            LOGGER.warn("Health check notify error {}", result);
         }
     }
 
