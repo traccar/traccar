@@ -19,11 +19,9 @@
         </RollingFile>
     </Appenders>
     <Loggers>
-        <Root level="ERROR">
-            <AppenderRef ref="STDOUT"/>
-        </Root>
-        <Root level="WARN">
-            <AppenderRef ref="rollingFile"/>
+        <Root >
+            <AppenderRef ref="STDOUT" level="WARN"/>
+            <AppenderRef ref="rollingFile" level="ERROR"/>
         </Root>
     </Loggers>
 </Configuration>
