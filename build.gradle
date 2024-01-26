@@ -1,17 +1,22 @@
 plugins {
     id "java"
     id "checkstyle"
+    id 'distribution'
+ //   id 'maven-publish'
+    id 'application'
     id "com.google.protobuf" version "0.9.4"
     id "org.kordamp.gradle.project-enforcer" version "0.13.0"
+    id "org.liquibase.gradle" version "2.2.0"
 }
 
 repositories {
     mavenCentral()
 }
 
+group = 'org.traccar'
+version = '5.11'
 sourceCompatibility = "11"
 compileJava.options.encoding = "UTF-8"
-jar.destinationDirectory = file("$projectDir/target")
 
 checkstyle {
     toolVersion = "10.12.5"
@@ -33,6 +38,11 @@ ext {
     protobufVersion = "3.25.2"
     jxlsVersion = "2.14.0"
     junitVersion = "5.10.1"
+    javaMainClass = "org.traccar.Main"
+}
+
+application {
+    mainClassName = javaMainClass
 }
 
 protobuf {
@@ -99,17 +109,92 @@ test {
     useJUnitPlatform()
 }
 
-task copyDependencies(type: Copy) {
-    into "$projectDir/target/lib"
-    from configurations.runtimeClasspath
-}
-assemble.dependsOn(copyDependencies)
-
 jar {
     manifest {
         attributes(
-                "Main-Class": "org.traccar.Main",
-                "Implementation-Version": "5.11",
+                "Main-Class": javaMainClass,
+                "Implementation-Version": version,
                 "Class-Path": configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(" "))
     }
 }
+
+configurations {
+    runtimeLib.extendsFrom implementation
+}
+
+liquibase {
+    activities {
+        main {
+            changelogFile "./schema/changelog-master.xml"
+            url "${liquibaseDbUrl}"
+            username "${liquibaseUser}"
+            password "${liquibasePass}"
+        }
+    }
+}
+
+tasks.withType(Tar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType(Zip) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:deprecation"
+}
+
+distributions {
+    main {
+        distributionBaseName = 'tensortrack'
+        contents {
+            from jar
+            into('lib') {
+                from configurations.runtimeLib
+            }
+            into('schema') {
+                from 'schema'
+            }
+           into('templates') {
+                from 'templates'
+            }
+           into('legacy') {
+                from "${project.rootDir}/traccar-web/web"
+            }
+           into('modern') {
+                from "${project.rootDir}/traccar-web/modern/build/"
+            }
+           into('conf') {
+                from 'conf/default.xml'
+            }
+           into('conf') {
+                from 'conf/prod/traccar.xml'
+            }
+           into('conf') {
+                from 'conf/README.md'
+            }
+        }
+    }
+}
+
+// publishing {
+//     publications {
+//         distribution(MavenPublication) {
+//             groupId 'org.traccar'
+//             artifactId 'traccar'
+//             version version
+//             artifact (distZip) {}
+//         }
+//     }
+//     repositories {
+//         maven {
+//             credentials {
+//                 username "${mvnUsername}"
+//                 password "${mvnPassword}"
+//             }
+//             url mvnRepo
+//             allowInsecureProtocol false
+//         }
+//     }
+// }

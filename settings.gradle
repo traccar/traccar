@@ -1,1 +1,3 @@
 rootProject.name = "tracker-server"
+
+include 'traccar-web:modern'
