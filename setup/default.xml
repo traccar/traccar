@@ -296,5 +296,6 @@
     <entry key='ramac.port'>5251</entry>
     <entry key='positrex.port'>5252</entry>
     <entry key='dragino.port'>5253</entry>
+    <entry key='fleetguide.port'>5254</entry>
 
 </properties>
