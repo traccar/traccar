@@ -163,7 +163,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_OBD_SPEED, readValue(buf, length, true));
                 break;
             case 98:
-                position.set("fuelRate", readValue(buf, length, true) * 100 / 255.0);
+                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, true) * 100 / 255.0);
                 break;
             case 100:
                 position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, true) / 20.0);
