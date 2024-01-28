@@ -44,7 +44,6 @@ public class AsyncSocketServlet extends WebSocketServlet {
                         LOGGER.error("no userId: {}", req.getHeaders());
                     }
                 }
-                LOGGER.error("Invalid session: {}", req.getHeaders());
                 return new AsyncSocket(-1);
             }
         });
