@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,8 +49,8 @@ public class MaintenanceEventHandler extends BaseEventHandler {
         Map<Event, Position> events = new HashMap<>();
         for (Maintenance maintenance : cacheManager.getDeviceObjects(position.getDeviceId(), Maintenance.class)) {
             if (maintenance.getPeriod() != 0) {
-                double oldValue = lastPosition.getDouble(maintenance.getType());
-                double newValue = position.getDouble(maintenance.getType());
+                double oldValue = getValue(lastPosition, maintenance.getType());
+                double newValue = getValue(position, maintenance.getType());
                 if (oldValue != 0.0 && newValue != 0.0 && newValue >= maintenance.getStart()) {
                     if (oldValue < maintenance.getStart()
                         || (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
@@ -65,6 +65,19 @@ public class MaintenanceEventHandler extends BaseEventHandler {
         }
 
         return events;
+    }
+
+    private double getValue(Position position, String type) {
+        switch (type) {
+            case "serverTime":
+                return position.getServerTime().getTime();
+            case "deviceTime":
+                return position.getDeviceTime().getTime();
+            case "fixTime":
+                return position.getFixTime().getTime();
+            default:
+                return position.getDouble(type);
+        }
     }
 
 }
