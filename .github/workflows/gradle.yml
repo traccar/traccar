@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      SSL_PRIV_KEY: ${{ secrets.SSL_PRIV_KEY }}
+      SSL_PRIV_KEY: ${{ secrets.SSL_PRIVATE_KEY }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v1
