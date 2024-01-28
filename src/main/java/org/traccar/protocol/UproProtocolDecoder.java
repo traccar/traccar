@@ -311,10 +311,8 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 'd':
-                    if (data.readableBytes() > 3) {
-                        position.set(Position.PREFIX_ADC + 1, Integer.parseInt(data.readSlice(5).
-                                toString(StandardCharsets.US_ASCII)) * 0.01);
-                    }
+                    position.set(Position.PREFIX_ADC + 1, Integer.parseInt(data.
+                                toString(StandardCharsets.US_ASCII))/100.0);
                     break;
                 default:
                     break;

@@ -87,6 +87,10 @@ public class UproProtocolDecoderTest extends ProtocolTest {
                 "*HQ200862312328000001,AD1&A1520441548253003503696640017270124&B0000000000&C00000117&F0000&R2118&N01&V0125&X(J01E0)&K00300&Z000&d01286"),
                 Position.PREFIX_ADC + 1, 12.86);
 
+        verifyAttribute(decoder, buffer(
+                        "*HQ200862312328000001,BA&A1520461548253003503696640017270124&B0000000000&C00000117&F0000&R2218&N01&V0125&X(J01E0)&K00300&Z000&d01287"),
+                Position.PREFIX_ADC + 1, 12.87);
+
     }
 
 }
