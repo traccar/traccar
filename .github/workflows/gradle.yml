@@ -8,9 +8,9 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
+    env:
+      SSL_PRIV_KEY: ${{ secrets.SSL_PRIV_KEY }}
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v1
@@ -27,7 +27,8 @@ jobs:
         npm install
         npm run build
         cp -r build/* ../../traccar-web
-    - run: | 
+    - run: |
+        echo "$SSL_PRIV_KEY" > setup/privkey.pem
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
     - uses: einaregilsson/beanstalk-deploy@v21
       name: deploy eu
@@ -39,24 +40,3 @@ jobs:
         version_label: ${{ github.run_number }}
         region: eu-west-3
         deployment_package: deploy.zip
-    - uses: einaregilsson/beanstalk-deploy@v21
-      name: deploy us
-      with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: traccar-tf
-        environment_name: Traccar-env
-        version_label: ${{ github.run_number }}
-        region: us-east-1
-        deployment_package: deploy.zip
-    - uses: einaregilsson/beanstalk-deploy@v21
-      name: deploy sa
-      with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: traccar-tf
-        environment_name: Traccar-env
-        version_label: ${{ github.run_number }}
-        region: sa-east-1
-        deployment_package: deploy.zip
-
