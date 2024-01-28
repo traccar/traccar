@@ -37,7 +37,7 @@ jobs:
         application_name: traccar-tf
         environment_name: Traccar-env
         version_label: ${{ github.run_number }}
-        region: us-east-1
+        region: sa-east-1
         deployment_package: deploy.zip
     - uses: einaregilsson/beanstalk-deploy@v21
       name: deploy sa
@@ -47,7 +47,7 @@ jobs:
         application_name: traccar-tf
         environment_name: Traccar-env
         version_label: ${{ github.run_number }}
-        region: sa-east-1
+        region: us-east-1
         deployment_package: deploy.zip
     - uses: einaregilsson/beanstalk-deploy@v21
       name: deploy eu
