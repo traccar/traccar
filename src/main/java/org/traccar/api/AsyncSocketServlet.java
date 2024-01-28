@@ -45,7 +45,7 @@ public class AsyncSocketServlet extends WebSocketServlet {
                     }
                 }
                 LOGGER.error("Invalid session: {}", req.getHeaders());
-                return null;
+                return new AsyncSocket(-1);
             }
         });
     }
