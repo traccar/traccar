@@ -42,10 +42,10 @@ jobs:
 #        region: eu-west-3
 #        deployment_package: deploy.zip
 #      continue-on-error: true
-    - run: |
+    - name: package for sa
+      run: |
         rm deploy.zip
         echo ${{ vars.NGINX_FORWARD }} > .platform/nginx/nginx-forward.conf
-        cat .platform/nginx/nginx-forward.conf
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
     - uses: einaregilsson/beanstalk-deploy@v21
       name: deploy sa
