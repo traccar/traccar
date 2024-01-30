@@ -28,10 +28,11 @@ jobs:
         cd traccar-web-master/modern
         npm install
         npm run build
-        cp -r build/* ../../traccar-web
+        cp -r build/* ../../traccar-web        
     - run: |
         echo "$SSL_PRIV_KEY" > setup/privkey.pem
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
+        
 #    - uses: einaregilsson/beanstalk-deploy@v21
 #      name: deploy eu
 #      with:
