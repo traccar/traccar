@@ -44,7 +44,6 @@ jobs:
 #      continue-on-error: true
     - run: |
         rm deploy.zip
-        echo ${{ vars.NGINX_FORWARD }}
         echo ${{ vars.NGINX_FORWARD }} > .platform/nginx/nginx-forward.conf
         cat .platform/nginx/nginx-forward.conf
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
