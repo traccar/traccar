@@ -1,4 +1,4 @@
-name: Java CI with Gradle
+name: deploy
 
 on:
   push:
@@ -23,7 +23,8 @@ jobs:
         unzip master.zip
         rm master.zip
     - uses: actions/setup-node@v4
-    - run: |
+    - name: build traccar-web
+      run: |
         cd traccar-web-master/modern
         npm install
         npm run build
