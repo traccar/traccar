@@ -9,6 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: nginx
     env:
       SSL_PRIV_KEY: ${{ secrets.SSL_PRIVATE_KEY }}
     steps:
@@ -43,8 +44,8 @@ jobs:
 #      continue-on-error: true
     - run: |
         rm deploy.zip
-        echo ${{ env.NGINX_FORWARD }}
-        echo ${{ env.NGINX_FORWARD }} > .platform/nginx/nginx-forward.conf
+        echo ${{ vars.NGINX_FORWARD }}
+        echo ${{ vars.NGINX_FORWARD }} > .platform/nginx/nginx-forward.conf
         cat .platform/nginx/nginx-forward.conf
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
     - uses: einaregilsson/beanstalk-deploy@v21
