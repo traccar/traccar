@@ -30,19 +30,20 @@ jobs:
     - run: |
         echo "$SSL_PRIV_KEY" > setup/privkey.pem
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
-    - uses: einaregilsson/beanstalk-deploy@v21
-      name: deploy eu
-      with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: traccar-tf
-        environment_name: Traccar-env
-        version_label: ${{ github.run_number }}
-        region: eu-west-3
-        deployment_package: deploy.zip
-      continue-on-error: true
+#    - uses: einaregilsson/beanstalk-deploy@v21
+#      name: deploy eu
+#      with:
+#        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#        application_name: traccar-tf
+#        environment_name: Traccar-env
+#        version_label: ${{ github.run_number }}
+#        region: eu-west-3
+#        deployment_package: deploy.zip
+#      continue-on-error: true
     - run: |
         rm deploy.zip
+        echo ${{ github.NGINX_FORWARD }}
         echo ${{ github.NGINX_FORWARD }} > .platform/nginx/nginx-forward.conf
         cat .platform/nginx/nginx-forward.conf
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
