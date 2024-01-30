@@ -40,6 +40,7 @@ jobs:
         version_label: ${{ github.run_number }}
         region: eu-west-3
         deployment_package: deploy.zip
+      continue-on-error: true
     - uses: einaregilsson/beanstalk-deploy@v21
       name: deploy sa
       with:
