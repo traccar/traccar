@@ -43,12 +43,12 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedByte(); // signature
-        int options = buf.readUnsignedShort();
+        int options = buf.readUnsignedShortLE();
         int length = BitUtil.to(options, 11);
 
         DeviceSession deviceSession;
         if (BitUtil.check(options, 11)) {
-            deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(buf.readUnsignedInt()));
+            deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(buf.readUnsignedIntLE()));
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
         }
@@ -64,7 +64,7 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(options, 13)) {
-            buf.readUnsignedShort(); // acknowledgement
+            buf.readUnsignedShortLE(); // acknowledgement
         }
 
         ByteBuf data;
@@ -84,6 +84,7 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
         Class<?> clazz = Class.forName("io.netty.handler.codec.compression.FastLz");
         Method method = clazz.getDeclaredMethod(
                 "decompress", ByteBuf.class, int.class, int.class, ByteBuf.class, int.class, int.class);
+        method.setAccessible(true);
 
         ByteBuf output = Unpooled.buffer();
         int result = (Integer) method.invoke(
