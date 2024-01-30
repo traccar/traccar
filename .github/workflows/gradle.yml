@@ -46,8 +46,7 @@ jobs:
     - name: package for sa
       run: |
         rm deploy.zip
-        mkdir .ebextensions/nginx/conf.d
-        echo "${{ vars.NGINX_FORWARD }}" > .ebextensions/nginx/conf.d/nginx-forward.conf
+        echo "${{ vars.NGINX_FORWARD }}" > .platform/nginx/conf.d/nginx-forward.conf
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
     - uses: einaregilsson/beanstalk-deploy@v21
       name: deploy sa
