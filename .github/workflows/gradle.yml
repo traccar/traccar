@@ -43,8 +43,8 @@ jobs:
 #      continue-on-error: true
     - run: |
         rm deploy.zip
-        echo ${{ github.NGINX_FORWARD }}
-        echo ${{ github.NGINX_FORWARD }} > .platform/nginx/nginx-forward.conf
+        echo ${{ env.NGINX_FORWARD }}
+        echo ${{ env.NGINX_FORWARD }} > .platform/nginx/nginx-forward.conf
         cat .platform/nginx/nginx-forward.conf
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
     - uses: einaregilsson/beanstalk-deploy@v21
