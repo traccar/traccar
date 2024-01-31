@@ -138,10 +138,10 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_DEVICE_TEMP, readValue(buf, length, true));
                 break;
             case 39:
-                position.set(Position.KEY_ENGINE_LOAD, readValue(buf, length, true));
+                position.set(Position.KEY_ENGINE_LOAD, readValue(buf, length, false));
                 break;
             case 65:
-                position.set(Position.KEY_ODOMETER, readValue(buf, length, true));
+                position.set(Position.KEY_ODOMETER, readValue(buf, length, false));
                 break;
             case 74:
                 position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
@@ -157,16 +157,16 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
             case 94:
-                position.set(Position.KEY_RPM, readValue(buf, length, true) * 0.25);
+                position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.25);
                 break;
             case 95:
-                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, true));
+                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false));
                 break;
             case 98:
-                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, true) * 100 / 255.0);
+                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false) * 100 / 255.0);
                 break;
             case 100:
-                position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, true) / 20.0);
+                position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, false) / 20.0);
                 break;
             case 134:
                 if (readValue(buf, length, false) > 0) {
@@ -226,7 +226,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
             case 645:
-                position.set(Position.KEY_OBD_ODOMETER, readValue(buf, length, true) * 1000);
+                position.set(Position.KEY_OBD_ODOMETER, readValue(buf, length, false) * 1000);
                 break;
             case 758:
                 if (readValue(buf, length, false) == 1) {
