@@ -23,7 +23,6 @@ import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.session.DeviceSession;
 
-import java.lang.reflect.Method;
 import java.net.SocketAddress;
 
 public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
@@ -79,21 +78,47 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private ByteBuf decompress(ByteBuf input) throws ReflectiveOperationException {
+    private int readVarSize(ByteBuf buf) {
+        int b;
+        int y = 0;
+        do {
+            b = buf.readUnsignedByte();
+            y = (y << 7) | (b & 0x0000007f);
+        } while ((b & 0x00000080) > 0);
 
-        Class<?> clazz = Class.forName("io.netty.handler.codec.compression.FastLz");
-        Method method = clazz.getDeclaredMethod(
-                "decompress", ByteBuf.class, int.class, int.class, ByteBuf.class, int.class, int.class);
-        method.setAccessible(true);
+        return y;
+    }
 
-        ByteBuf output = Unpooled.buffer();
-        int result = (Integer) method.invoke(
-                null, input, input.readerIndex(), input.readableBytes(), output, 0, Integer.MAX_VALUE);
-        if (result <= 0) {
-            throw new IllegalArgumentException("FastLz decompression failed");
+    private ByteBuf decompress(ByteBuf in) {
+
+        ByteBuf out = Unpooled.buffer();
+
+        if (in.readableBytes() < 1) {
+            return out;
         }
 
-        return output;
+        int marker = in.readUnsignedByte();
+
+        do {
+            int symbol = in.readUnsignedByte();
+            if (symbol == marker) {
+                if (in.getUnsignedByte(in.readerIndex()) == 0) {
+                    out.writeByte(marker);
+                    in.skipBytes(1);
+                } else {
+                    int length = readVarSize(in);
+                    int offset = readVarSize(in);
+
+                    for (int i = 0; i < length; i++) {
+                        out.writeByte(out.getUnsignedByte(out.writerIndex() - offset));
+                    }
+                }
+            } else {
+                out.writeByte(symbol);
+            }
+        } while (in.isReadable());
+
+        return out;
     }
 
 }
