@@ -21,9 +21,16 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.UnitsConverter;
+import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
 
@@ -73,9 +80,77 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
             data = buf.readRetainedSlice(length);
         }
 
+        List<Position> positions = new LinkedList<>();
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        Set<Integer> recordTypes = new HashSet<>();
+
+        while (data.isReadable()) {
+
+            int recordHeader = data.readUnsignedShortLE();
+            int recordLength = BitUtil.to(recordHeader, 10);
+            int recordType = BitUtil.from(recordHeader, 10);
+            int recordEndIndex = data.readerIndex() + recordLength;
+
+            if (recordTypes.contains(recordType)) {
+                positions.add(processPosition(position));
+                position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                recordTypes.clear();
+            }
+            recordTypes.add(recordType);
+
+            switch (recordType) {
+                case 0:
+                    position.setTime(new Date((data.readUnsignedIntLE() + 1262304000) * 1000)); // since 2010-01-01
+                    break;
+                case 1:
+                    position.setLatitude(data.readUnsignedIntLE() * 90.0 / 0xFFFFFFFFL);
+                    position.setLongitude(data.readUnsignedIntLE() * 180.0 / 0xFFFFFFFFL);
+                    int speed = data.readUnsignedShortLE();
+                    position.setSpeed(UnitsConverter.knotsFromKph(BitUtil.to(speed, 14) * 0.1));
+                    if (BitUtil.check(speed, 14)) {
+                        position.setLatitude(-position.getLatitude());
+                    }
+                    if (BitUtil.check(speed, 15)) {
+                        position.setLongitude(-position.getLongitude());
+                    }
+                    int course = data.readUnsignedShortLE();
+                    position.setSpeed(BitUtil.to(course, 9));
+                    int motion = BitUtil.between(course, 9, 11);
+                    if (motion > 0) {
+                        position.set(Position.KEY_MOTION, motion == 1);
+                    }
+                    position.set(Position.KEY_SATELLITES, BitUtil.from(course, 11));
+                    int altitude = data.readUnsignedShortLE();
+                    position.setAltitude(BitUtil.to(altitude, 14));
+                    if (BitUtil.check(altitude, 14)) {
+                        position.setAltitude(-position.getAltitude());
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            data.readerIndex(recordEndIndex);
+
+        }
+
         data.release();
 
-        return null;
+        return positions.isEmpty() ? null : positions;
+    }
+
+    private Position processPosition(Position position) {
+        if (position.getFixTime() == null) {
+            position.setTime(new Date());
+        }
+        if (!position.getAttributes().containsKey(Position.KEY_SATELLITES)) {
+            getLastLocation(position, null);
+        }
+        return position;
     }
 
     private int readVarSize(ByteBuf buf) {
