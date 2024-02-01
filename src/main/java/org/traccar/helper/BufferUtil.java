@@ -83,4 +83,8 @@ public final class BufferUtil {
         return printable;
     }
 
+    public static String readString(ByteBuf buf, int length) {
+        return buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+    }
+
 }
