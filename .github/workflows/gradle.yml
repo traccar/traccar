@@ -48,7 +48,7 @@ jobs:
       run: |
         rm deploy.zip
         cp -v setup/nginx-forward.conf .platform/nginx/nginx.conf
-        echo "web: read" > Procfile
+        echo "web: /usr/bin/sleep 60" > Procfile
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
     - uses: einaregilsson/beanstalk-deploy@v21
       name: deploy sa
