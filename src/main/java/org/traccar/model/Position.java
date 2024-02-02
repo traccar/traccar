@@ -15,8 +15,6 @@
  */
 package org.traccar.model;
 
-import java.net.Inet4Address;
-import java.net.UnknownHostException;
 import java.util.Date;
 
 import org.traccar.database.QueryIgnore;
@@ -147,18 +145,6 @@ public class Position extends Message {
     public static final String ALARM_FUEL_LEAK = "fuelLeak";
     public static final String ALARM_TAMPERING = "tampering";
     public static final String ALARM_REMOVING = "removing";
-    public static final String KEY_SOURCE = "source";
-
-    private static String hostAddress;
-
-    static {
-        try {
-            hostAddress = Inet4Address.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            hostAddress = e.getMessage();
-        }
-    }
-
 
     public Position() {
     }
@@ -166,7 +152,6 @@ public class Position extends Message {
     public Position(String protocol) {
         this.protocol = protocol;
         this.serverTime = new Date();
-        this.set(KEY_SOURCE, hostAddress);
     }
 
     private String protocol;
