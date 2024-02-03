@@ -19,8 +19,10 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
@@ -38,9 +40,13 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    public static final int MSG_DATA = 0x10;
-    public static final int MSG_HEARTBEAT = 0x1A;
-    public static final int MSG_RESPONSE = 0x1C;
+    public static final int MSG_EMPTY = 0;
+    public static final int MSG_SYNC_REQ = 1;
+    public static final int MSG_SYNC_ACK = 2;
+    public static final int MSG_DATA_R_ACK = 3;
+    public static final int MSG_DATA_N_ACK = 4;
+    public static final int MSG_REP_R_ACK = 5;
+    public static final int MSG_REP_N_ACK = 6;
 
     @Override
     protected Object decode(
@@ -53,9 +59,12 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
         int length = BitUtil.to(options, 11);
 
         DeviceSession deviceSession;
+        Long deviceId;
         if (BitUtil.check(options, 11)) {
-            deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(buf.readUnsignedIntLE()));
+            deviceId = buf.readUnsignedIntLE();
+            deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(deviceId));
         } else {
+            deviceId = null;
             deviceSession = getDeviceSession(channel, remoteAddress);
         }
         if (deviceSession == null) {
@@ -63,11 +72,23 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int type;
+        Integer index;
         if (BitUtil.check(options, 12)) {
-            type = BitUtil.to(buf.readUnsignedByte(), 4);
+            int value = buf.readUnsignedByte();
+            type = BitUtil.to(value, 4);
+            index = BitUtil.from(value, 4);
         } else {
             type = 0;
+            index = null;
         }
+
+        Integer responseType;
+        if (type == MSG_SYNC_REQ) {
+            responseType = MSG_SYNC_ACK;
+        } else {
+            responseType = null;
+        }
+        sendResponse(channel, remoteAddress, deviceId, responseType, index);
 
         if (BitUtil.check(options, 13)) {
             buf.readUnsignedShortLE(); // acknowledgement
@@ -151,6 +172,43 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
         }
         return position;
+    }
+
+
+    private void sendResponse(
+            Channel channel, SocketAddress remoteAddress, Long deviceId, Integer type, Integer index) {
+        if (channel != null) {
+
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(0x53); // signature
+
+            int options = 0;
+            if (deviceId != null) {
+                options |= 1 << 11;
+            }
+            if (type != null) {
+                options |= 1 << 12;
+            }
+            if (index != null) {
+                options |= 1 << 13;
+            }
+            response.writeShortLE(options);
+
+            if (deviceId != null) {
+                response.writeIntLE(deviceId.intValue());
+            }
+            if (type != null) {
+                response.writeByte(type);
+            }
+            if (index != null) {
+                int mask = (1 << (index + 1)) - 1;
+                response.writeShortLE(mask);
+            }
+            response.writeShortLE(Checksum.crc16(
+                    Checksum.CRC16_CCITT_FALSE, response.nioBuffer(1, response.writerIndex() - 1)));
+
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
     }
 
     private int readVarSize(ByteBuf buf) {
