@@ -29,7 +29,7 @@ public class TeltonikaFrameDecoder extends BaseFrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        while (buf.isReadable() && buf.getByte(buf.readerIndex()) == (byte) 0xff) {
+        if (buf.isReadable() && buf.getByte(buf.readerIndex()) == (byte) 0xff) {
             return buf.readRetainedSlice(1);
         }
 
