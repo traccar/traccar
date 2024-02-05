@@ -20,7 +20,7 @@
     </Appenders>
     <Loggers>
         <Root >
-            <AppenderRef ref="STDOUT" level="WARN"/>
+            <AppenderRef ref="STDOUT" level="INFO"/>
             <AppenderRef ref="rollingFile" level="ERROR"/>
         </Root>
     </Loggers>
