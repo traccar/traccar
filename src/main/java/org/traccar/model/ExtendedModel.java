@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.traccar.model;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ExtendedModel extends BaseModel {
 
@@ -31,7 +32,7 @@ public class ExtendedModel extends BaseModel {
     }
 
     public void setAttributes(Map<String, Object> attributes) {
-        this.attributes = attributes;
+        this.attributes = Objects.requireNonNullElseGet(attributes, LinkedHashMap::new);
     }
 
     public void set(String key, Boolean value) {
@@ -88,17 +89,27 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
-    public String getString(String key) {
+    public String getString(String key, String defaultValue) {
         if (attributes.containsKey(key)) {
-            return (String) attributes.get(key);
+            Object value = attributes.get(key);
+            return value != null ? value.toString() : null;
         } else {
-            return null;
+            return defaultValue;
         }
+    }
+
+    public String getString(String key) {
+        return getString(key, null);
     }
 
     public double getDouble(String key) {
         if (attributes.containsKey(key)) {
-            return ((Number) attributes.get(key)).doubleValue();
+            Object value = attributes.get(key);
+            if (value instanceof Number) {
+                return ((Number) attributes.get(key)).doubleValue();
+            } else {
+                return Double.parseDouble(value.toString());
+            }
         } else {
             return 0.0;
         }
@@ -106,7 +117,12 @@ public class ExtendedModel extends BaseModel {
 
     public boolean getBoolean(String key) {
         if (attributes.containsKey(key)) {
-            return (Boolean) attributes.get(key);
+            Object value = attributes.get(key);
+            if (value instanceof Boolean) {
+                return (Boolean) attributes.get(key);
+            } else {
+                return Boolean.parseBoolean(value.toString());
+            }
         } else {
             return false;
         }
@@ -114,7 +130,12 @@ public class ExtendedModel extends BaseModel {
 
     public int getInteger(String key) {
         if (attributes.containsKey(key)) {
-            return ((Number) attributes.get(key)).intValue();
+            Object value = attributes.get(key);
+            if (value instanceof Number) {
+                return ((Number) attributes.get(key)).intValue();
+            } else {
+                return Integer.parseInt(value.toString());
+            }
         } else {
             return 0;
         }
@@ -122,7 +143,12 @@ public class ExtendedModel extends BaseModel {
 
     public long getLong(String key) {
         if (attributes.containsKey(key)) {
-            return ((Number) attributes.get(key)).longValue();
+            Object value = attributes.get(key);
+            if (value instanceof Number) {
+                return ((Number) attributes.get(key)).longValue();
+            } else {
+                return Long.parseLong(value.toString());
+            }
         } else {
             return 0;
         }

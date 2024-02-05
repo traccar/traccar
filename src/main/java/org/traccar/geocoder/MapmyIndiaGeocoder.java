@@ -15,9 +15,9 @@
  */
 package org.traccar.geocoder;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.ws.rs.client.Client;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.Client;
 
 public class MapmyIndiaGeocoder extends JsonGeocoder {
 

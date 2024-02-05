@@ -23,8 +23,8 @@ import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.model.Position;
 
-import javax.json.Json;
-import javax.json.JsonObject;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;

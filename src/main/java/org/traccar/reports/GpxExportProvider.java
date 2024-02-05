@@ -24,7 +24,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
@@ -42,7 +42,7 @@ public class GpxExportProvider {
             OutputStream outputStream, long deviceId, Date from, Date to) throws StorageException {
 
         var device = storage.getObject(Device.class, new Request(
-                new Columns.All(), new Condition.Equals("id", "id", deviceId)));
+                new Columns.All(), new Condition.Equals("id", deviceId)));
         var positions = PositionUtil.getPositions(storage, deviceId, from, to);
 
         try (PrintWriter writer = new PrintWriter(outputStream)) {

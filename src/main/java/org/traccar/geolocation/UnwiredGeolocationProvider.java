@@ -23,10 +23,10 @@ import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.WifiAccessPoint;
 
-import javax.json.JsonObject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.InvocationCallback;
 import java.util.Collection;
 
 public class UnwiredGeolocationProvider implements GeolocationProvider {

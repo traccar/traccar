@@ -10,10 +10,12 @@
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
 
+    <entry key='geocoder.type'>test</entry>
+
     <entry key='media.path'>./target/media</entry>
 
     <entry key='logger.console'>true</entry>
-    <entry key='logger.queries'>true</entry>
+    <entry key='logger.queries'>false</entry>
 
     <entry key='mail.debug'>true</entry>
 
@@ -24,9 +26,5 @@
 
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
-
-    <!--<entry key='broadcast.interface'>en0</entry>
-    <entry key='broadcast.address'>230.3.3.3</entry>
-    <entry key='broadcast.port'>7001</entry>-->
 
 </properties>

@@ -16,20 +16,19 @@
  */
 package org.traccar.api.resource;
 
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.traccar.api.ExtendedObjectResource;
-import org.traccar.config.Config;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -45,7 +44,7 @@ import org.traccar.storage.query.Request;
 public class AttributeResource extends ExtendedObjectResource<Attribute> {
 
     @Inject
-    private Config config;
+    private ComputedAttributesHandler computedAttributesHandler;
 
     public AttributeResource() {
         super(Attribute.class);
@@ -61,7 +60,7 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
                 new Columns.All(),
                 new Condition.LatestPositions(deviceId)));
 
-        Object result = new ComputedAttributesHandler(config, null).computeAttribute(entity, position);
+        Object result = computedAttributesHandler.computeAttribute(entity, position);
         if (result != null) {
             switch (entity.getType()) {
                 case "number":
@@ -79,21 +78,21 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
     }
 
     @POST
-    public Response add(Attribute entity) throws StorageException {
+    public Response add(Attribute entity) throws Exception {
         permissionsService.checkAdmin(getUserId());
         return super.add(entity);
     }
 
     @Path("{id}")
     @PUT
-    public Response update(Attribute entity) throws StorageException {
+    public Response update(Attribute entity) throws Exception {
         permissionsService.checkAdmin(getUserId());
         return super.update(entity);
     }
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) throws StorageException {
+    public Response remove(@PathParam("id") long id) throws Exception {
         permissionsService.checkAdmin(getUserId());
         return super.remove(id);
     }

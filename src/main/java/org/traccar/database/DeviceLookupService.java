@@ -20,6 +20,8 @@ import io.netty.util.Timer;
 import io.netty.util.TimerTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.model.Device;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -27,8 +29,8 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -45,7 +47,9 @@ public class DeviceLookupService {
     private final Storage storage;
     private final Timer timer;
 
-    private static class IdentifierInfo {
+    private final boolean throttlingEnabled;
+
+    private static final class IdentifierInfo {
         private long lastQuery;
         private long delay;
         private Timeout timeout;
@@ -70,36 +74,45 @@ public class DeviceLookupService {
     private final Map<String, IdentifierInfo> identifierMap = new ConcurrentHashMap<>();
 
     @Inject
-    public DeviceLookupService(Storage storage, Timer timer) {
+    public DeviceLookupService(Config config, Storage storage, Timer timer) {
         this.storage = storage;
         this.timer = timer;
+        throttlingEnabled = config.getBoolean(Keys.DATABASE_THROTTLE_UNKNOWN);
     }
 
     private synchronized boolean isThrottled(String uniqueId) {
-        IdentifierInfo info = identifierMap.get(uniqueId);
-        return info != null && System.currentTimeMillis() < info.lastQuery + info.delay;
+        if (throttlingEnabled) {
+            IdentifierInfo info = identifierMap.get(uniqueId);
+            return info != null && System.currentTimeMillis() < info.lastQuery + info.delay;
+        } else {
+            return false;
+        }
     }
 
     private synchronized void lookupSucceeded(String uniqueId) {
-        IdentifierInfo info = identifierMap.remove(uniqueId);
-        if (info != null) {
-            info.timeout.cancel();
+        if (throttlingEnabled) {
+            IdentifierInfo info = identifierMap.remove(uniqueId);
+            if (info != null) {
+                info.timeout.cancel();
+            }
         }
     }
 
     private synchronized void lookupFailed(String uniqueId) {
-        IdentifierInfo info = identifierMap.get(uniqueId);
-        if (info != null) {
-            info.timeout.cancel();
-            info.delay = Math.min(info.delay * 2, THROTTLE_MAX_MS);
-        } else {
-            info = new IdentifierInfo();
-            identifierMap.put(uniqueId, info);
-            info.delay = THROTTLE_MIN_MS;
+        if (throttlingEnabled) {
+            IdentifierInfo info = identifierMap.get(uniqueId);
+            if (info != null) {
+                info.timeout.cancel();
+                info.delay = Math.min(info.delay * 2, THROTTLE_MAX_MS);
+            } else {
+                info = new IdentifierInfo();
+                identifierMap.put(uniqueId, info);
+                info.delay = THROTTLE_MIN_MS;
+            }
+            info.lastQuery = System.currentTimeMillis();
+            info.timeout = timer.newTimeout(new IdentifierTask(uniqueId), INFO_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            LOGGER.debug("Device lookup {} throttled for {} ms", uniqueId, info.delay);
         }
-        info.lastQuery = System.currentTimeMillis();
-        info.timeout = timer.newTimeout(new IdentifierTask(uniqueId), INFO_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-        LOGGER.debug("Device lookup {} throttled for {} ms", uniqueId, info.delay);
     }
 
     public Device lookup(String[] uniqueIds) {
@@ -108,7 +121,7 @@ public class DeviceLookupService {
             for (String uniqueId : uniqueIds) {
                 if (!isThrottled(uniqueId)) {
                     device = storage.getObject(Device.class, new Request(
-                            new Columns.All(), new Condition.Equals("uniqueId", "uniqueId", uniqueId)));
+                            new Columns.All(), new Condition.Equals("uniqueId", uniqueId)));
                     if (device != null) {
                         lookupSucceeded(uniqueId);
                         break;

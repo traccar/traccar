@@ -21,7 +21,7 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 import org.traccar.model.Command;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class MeiligaoProtocol extends BaseProtocol {
 
@@ -30,6 +30,7 @@ public class MeiligaoProtocol extends BaseProtocol {
         setSupportedDataCommands(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_OUTPUT_CONTROL,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
                 Command.TYPE_ALARM_GEOFENCE,

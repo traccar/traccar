@@ -24,11 +24,10 @@ import org.traccar.model.GroupedModel;
 import org.traccar.model.Permission;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Limit;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -43,12 +42,19 @@ public class DatabaseStorage extends Storage {
     private final Config config;
     private final DataSource dataSource;
     private final ObjectMapper objectMapper;
+    private final String databaseType;
 
     @Inject
     public DatabaseStorage(Config config, DataSource dataSource, ObjectMapper objectMapper) {
         this.config = config;
         this.dataSource = dataSource;
         this.objectMapper = objectMapper;
+
+        try {
+            databaseType = dataSource.getConnection().getMetaData().getDatabaseProductName();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -57,12 +63,11 @@ public class DatabaseStorage extends Storage {
         if (request.getColumns() instanceof Columns.All) {
             query.append('*');
         } else {
-            query.append(formatColumns(request.getColumns(), clazz, "get", c -> c));
+            query.append(formatColumns(request.getColumns().getColumns(clazz, "set"), c -> c));
         }
         query.append(" FROM ").append(getStorageName(clazz));
         query.append(formatCondition(request.getCondition()));
         query.append(formatOrder(request.getOrder()));
-        query.append(formatLimit(request.getLimit()));
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
             for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
@@ -76,16 +81,17 @@ public class DatabaseStorage extends Storage {
 
     @Override
     public <T> long addObject(T entity, Request request) throws StorageException {
+        List<String> columns = request.getColumns().getColumns(entity.getClass(), "get");
         StringBuilder query = new StringBuilder("INSERT INTO ");
         query.append(getStorageName(entity.getClass()));
         query.append("(");
-        query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> c));
+        query.append(formatColumns(columns, c -> c));
         query.append(") VALUES (");
-        query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> ':' + c));
+        query.append(formatColumns(columns, c -> ':' + c));
         query.append(")");
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true);
-            builder.setObject(entity);
+            builder.setObject(entity, columns);
             return builder.executeUpdate();
         } catch (SQLException e) {
             throw new StorageException(e);
@@ -94,14 +100,15 @@ public class DatabaseStorage extends Storage {
 
     @Override
     public <T> void updateObject(T entity, Request request) throws StorageException {
+        List<String> columns = request.getColumns().getColumns(entity.getClass(), "get");
         StringBuilder query = new StringBuilder("UPDATE ");
         query.append(getStorageName(entity.getClass()));
         query.append(" SET ");
-        query.append(formatColumns(request.getColumns(), entity.getClass(), "set", c -> c + " = :" + c));
+        query.append(formatColumns(columns, c -> c + " = :" + c));
         query.append(formatCondition(request.getCondition()));
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
-            builder.setObject(entity);
+            builder.setObject(entity, columns);
             for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
                 builder.setValue(variable.getKey(), variable.getValue());
             }
@@ -135,12 +142,10 @@ public class DatabaseStorage extends Storage {
         query.append(Permission.getStorageName(ownerClass, propertyClass));
         var conditions = new LinkedList<Condition>();
         if (ownerId > 0) {
-            conditions.add(new Condition.Equals(
-                    Permission.getKey(ownerClass), Permission.getKey(ownerClass), ownerId));
+            conditions.add(new Condition.Equals(Permission.getKey(ownerClass), ownerId));
         }
         if (propertyId > 0) {
-            conditions.add(new Condition.Equals(
-                    Permission.getKey(propertyClass), Permission.getKey(propertyClass), propertyId));
+            conditions.add(new Condition.Equals(Permission.getKey(propertyClass), propertyId));
         }
         Condition combinedCondition = Condition.merge(conditions);
         query.append(formatCondition(combinedCondition));
@@ -230,9 +235,8 @@ public class DatabaseStorage extends Storage {
         return results;
     }
 
-    private String formatColumns(
-            Columns columns, Class<?> clazz, String type, Function<String, String> mapper) {
-        return columns.getColumns(clazz, type).stream().map(mapper).collect(Collectors.joining(", "));
+    private String formatColumns(List<String> columns, Function<String, String> mapper) {
+        return columns.stream().map(mapper).collect(Collectors.joining(", "));
     }
 
     private String formatCondition(Condition genericCondition) throws StorageException {
@@ -303,15 +307,16 @@ public class DatabaseStorage extends Storage {
             if (order.getDescending()) {
                 result.append(" DESC");
             }
-        }
-        return result.toString();
-    }
-
-    private String formatLimit(Limit limit) {
-        StringBuilder result = new StringBuilder();
-        if (limit != null) {
-            result.append(" LIMIT ");
-            result.append(limit.getValue());
+            if (order.getLimit() > 0) {
+                if (databaseType.equals("Microsoft SQL Server")) {
+                    result.append(" OFFSET 0 ROWS FETCH FIRST ");
+                    result.append(order.getLimit());
+                    result.append(" ROWS ONLY");
+                } else {
+                    result.append(" LIMIT ");
+                    result.append(order.getLimit());
+                }
+            }
         }
         return result.toString();
     }

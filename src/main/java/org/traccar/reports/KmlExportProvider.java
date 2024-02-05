@@ -23,7 +23,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -43,7 +43,7 @@ public class KmlExportProvider {
             OutputStream outputStream, long deviceId, Date from, Date to) throws StorageException {
 
         var device = storage.getObject(Device.class, new Request(
-                new Columns.All(), new Condition.Equals("id", "id", deviceId)));
+                new Columns.All(), new Condition.Equals("id", deviceId)));
         var positions = PositionUtil.getPositions(storage, deviceId, from, to);
 
         var dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");

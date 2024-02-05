@@ -22,8 +22,10 @@ import io.netty.channel.ChannelHandler;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
+@Singleton
 @ChannelHandler.Sharable
 public class CommandResultEventHandler extends BaseEventHandler {
 

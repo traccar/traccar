@@ -24,6 +24,7 @@ import net.fortuna.ical4j.filter.predicate.PeriodRule;
 import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.CalendarComponent;
+import net.fortuna.ical4j.model.component.VEvent;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
@@ -32,6 +33,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @StorageName("tc_calendars")
 public class Calendar extends ExtendedModel {
@@ -66,14 +69,24 @@ public class Calendar extends ExtendedModel {
         return calendar;
     }
 
-    public boolean checkMoment(Date date) {
+    private Collection<VEvent> findEvents(Date date) {
         if (calendar != null) {
-            Period period = new Period(new DateTime(date), Duration.ZERO);
-            Filter<CalendarComponent> filter = new Filter<>(new PeriodRule<>(period));
-            Collection<CalendarComponent> events = filter.filter(calendar.getComponents(CalendarComponent.VEVENT));
-            return events != null && !events.isEmpty();
+            var filter = new Filter<VEvent>(new PeriodRule<>(new Period(new DateTime(date), Duration.ZERO)));
+            return filter.filter(calendar.getComponents(CalendarComponent.VEVENT));
+        } else {
+            return List.of();
         }
-        return false;
+    }
+
+    public Collection<Period> findPeriods(Date date) {
+        var calendarDate = new net.fortuna.ical4j.model.Date(date);
+        return findEvents(date).stream()
+                .flatMap((event) -> event.getConsumedTime(calendarDate, calendarDate).stream())
+                .collect(Collectors.toSet());
+    }
+
+    public boolean checkMoment(Date date) {
+        return !findEvents(date).isEmpty();
     }
 
 }

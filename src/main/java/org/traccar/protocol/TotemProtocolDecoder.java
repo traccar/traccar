@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,7 +135,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN4 = new PatternBuilder()
             .text("$$")                          // header
             .number("dddd")                      // length
-            .number("(xx)")                      // type
+            .number("xx")                        // type
             .number("(d+)|")                     // imei
             .number("(x{8})")                    // status
             .number("(dd)(dd)(dd)")              // date (yymmdd)
@@ -176,7 +176,21 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private static final Pattern PATTERN_OBD = new PatternBuilder()
+    private static final Pattern PATTERN_E2 = new PatternBuilder()
+            .text("$$")                          // header
+            .number("dddd")                      // length
+            .number("xx")                        // type
+            .number("(d+)|")                     // imei
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(-?d+.d+),")                // longitude
+            .number("(-?d+.d+),")                // latitude
+            .expression("(.+)")                  // rfid
+            .number("|xx")                       // checksum
+            .any()
+            .compile();
+
+    private static final Pattern PATTERN_E5 = new PatternBuilder()
             .text("$$")                          // header
             .number("dddd")                      // length
             .number("xx")                        // type
@@ -257,7 +271,20 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private boolean decode12(Position position, Parser parser, Pattern pattern) {
+    private Position decode12(Channel channel, SocketAddress remoteAddress, String sentence, Pattern pattern) {
+
+        Parser parser = new Parser(pattern, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
             position.set(Position.KEY_ALARM, decodeAlarm123(Short.parseShort(parser.next(), 16)));
@@ -283,7 +310,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             year  = parser.nextInt(0);
         }
         if (year == 0) {
-            return false; // ignore invalid data
+            return null; // ignore invalid data
         }
         dateBuilder.setDate(year, month, day);
         position.setTime(dateBuilder.getDate());
@@ -331,10 +358,23 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, parser.next());
         position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
 
-        return true;
+        return position;
     }
 
-    private boolean decode3(Position position, Parser parser) {
+    private Position decode3(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN3, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
             position.set(Position.KEY_ALARM, decodeAlarm123(Short.parseShort(parser.next(), 16)));
@@ -363,10 +403,36 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        return true;
+        return position;
     }
 
-    private boolean decode4(Position position, Parser parser) {
+    private Position decode4(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        int type = Integer.parseInt(sentence.substring(6, 8), 16);
+
+        switch (type) {
+            case 0xE2:
+                return decodeE2(channel, remoteAddress, sentence);
+            case 0xE5:
+                return decodeE5(channel, remoteAddress, sentence);
+            default:
+                break;
+        }
+
+        Parser parser = new Parser(PATTERN4, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set(Position.KEY_ALARM, decodeAlarm4(type));
 
         long status = parser.nextHexLong();
 
@@ -427,10 +493,48 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        return true;
+        return position;
     }
 
-    private boolean decodeObd(Position position, Parser parser) {
+    private Position decodeE2(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_E2, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setValid(true);
+        position.setTime(parser.nextDateTime());
+        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble());
+
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+
+        return position;
+    }
+
+    private Position decodeE5(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_E5, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         position.setValid(true);
         position.setTime(parser.nextDateTime());
@@ -451,7 +555,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_THROTTLE, parser.nextInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
 
-        return true;
+        return position;
     }
 
     @Override
@@ -459,50 +563,23 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-        Pattern pattern = PATTERN3;
-        if (sentence.contains("$Cloud")) {
-            pattern = PATTERN_OBD;
-        } else if (sentence.charAt(2) == '0') {
-            pattern = PATTERN4;
+
+        Position position;
+        if (sentence.charAt(2) == '0') {
+            position = decode4(channel, remoteAddress, sentence);
         } else if (sentence.contains("$GPRMC")) {
-            pattern = PATTERN1;
+            position = decode12(channel, remoteAddress, sentence, PATTERN1);
         } else {
             int index = sentence.indexOf('|');
             if (index != -1 && sentence.indexOf('|', index + 1) != -1) {
-                pattern = PATTERN2;
+                position = decode12(channel, remoteAddress, sentence, PATTERN2);
+            } else {
+                position = decode3(channel, remoteAddress, sentence);
             }
         }
 
-        Parser parser = new Parser(pattern, sentence);
-        if (!parser.matches()) {
-            return null;
-        }
-
-        Position position = new Position(getProtocolName());
-
-        if (pattern == PATTERN4) {
-            position.set(Position.KEY_ALARM, decodeAlarm4(parser.nextHexInt()));
-        }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-        position.setDeviceId(deviceSession.getDeviceId());
-
-        boolean result;
-        if (pattern == PATTERN1 || pattern == PATTERN2) {
-            result = decode12(position, parser, pattern);
-        } else if (pattern == PATTERN3) {
-            result = decode3(position, parser);
-        } else if (pattern == PATTERN4) {
-            result = decode4(position, parser);
-        } else {
-            result = decodeObd(position, parser);
-        }
-
         if (channel != null) {
-            if (pattern == PATTERN4) {
+            if (sentence.charAt(2) == '0') {
                 String response = "$$0014AA" + sentence.substring(sentence.length() - 6, sentence.length() - 2);
                 response += String.format("%02X", Checksum.xor(response)).toUpperCase();
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
@@ -511,7 +588,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        return result ? position : null;
+        return position;
     }
 
 }

@@ -64,10 +64,20 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // mnc
             .number("(d+),")                     // lac
             .number("(d+)")                      // cell
+            .groupBegin()
+            .text(",")
+            .expression("(")
+            .groupBegin()
+            .expression("[^\\|]+")               // name
+            .number("|xx-xx-xx-xx-xx-xx")        // mac
+            .number("|d+&?")                     // signal
+            .groupEnd("+")
+            .expression(")")
+            .groupEnd("?")
             .any()
             .compile();
 
-    private static final Pattern PATTERN_HEATRBEAT = new PatternBuilder()
+    private static final Pattern PATTERN_HEARTBEAT = new PatternBuilder()
             .expression("[A-Z]{2,3}")
             .text("CP01,")
             .number("(ddd)")                     // gsm
@@ -130,6 +140,16 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeWifi(Network network, String data) {
+        for (String wifi : data.split("&")) {
+            if (!wifi.isEmpty()) {
+                String[] values = wifi.split("\\|");
+                network.addWifiAccessPoint(WifiAccessPoint.from(
+                        values[1].replace('-', ':'), Integer.parseInt(values[2])));
+            }
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -163,7 +183,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.equals("CP01")) {
 
-            Parser parser = new Parser(PATTERN_HEATRBEAT, sentence);
+            Parser parser = new Parser(PATTERN_HEARTBEAT, sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -208,8 +228,16 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             decodeCommon(position, parser);
 
-            position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt())));
+            Network network = new Network();
+
+            network.addCellTower(CellTower.from(
+                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt()));
+
+            if (parser.hasNext()) {
+                decodeWifi(network, parser.next());
+            }
+
+            position.setNetwork(network);
 
             return position;
 
@@ -241,12 +269,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            for (String wifi : parser.next().split("&")) {
-                if (!wifi.isEmpty()) {
-                    String[] values = wifi.split("\\|");
-                    network.addWifiAccessPoint(WifiAccessPoint.from(values[1], Integer.parseInt(values[2])));
-                }
-            }
+            decodeWifi(network, parser.next());
 
             position.setNetwork(network);
 

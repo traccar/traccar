@@ -1,13 +1,13 @@
 package org.traccar.notification;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import javax.mail.Message;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.Message;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 import java.util.Properties;
 
 public class NotificiationMailTest {
@@ -25,7 +25,7 @@ public class NotificiationMailTest {
 
     private static final int PORT = 25;
 
-    @Ignore
+    @Disabled
     @Test
     public void test() throws Exception {
 

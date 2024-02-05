@@ -1,10 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import sys
 import os
 import xml.etree.ElementTree
 import urllib
-import urllib2
+import urllib.request as urllib2
 import json
 import socket
 import time
@@ -18,10 +18,9 @@ messages = {
     't55' : '$PGID,123456789012345*0F\r\n$GPRMC,120500.000,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,,*33\r\n',
     'xexun' : '111111120009,+436763737552,GPRMC,120600.000,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,,,A*68,F,, imei:123456789012345,04,481.2,F:4.15V,0,139,2689,232,03,2725,0576\n',
     'totem' : '$$B3123456789012345|AA$GPRMC,120700.000,A,6000.0000,N,13000.0000,E,0.00,,010112,,,A*74|01.8|01.0|01.5|000000000000|20120403234603|14251914|00000000|0012D888|0000|0.0000|3674|940B\r\n',
-    'meiligao' : '$$\x00\x60\x12\x34\x56\xFF\xFF\xFF\xFF\x99\x55120900.000,A,6000.0000,N,13000.0000,E,0.00,,010112,,*1C|11.5|194|0000|0000,0000\x69\x62\x0D\x0A',
     'suntech' : 'SA200STT;123456;042;20120101;12:11:00;16d41;-15.618767;-056.083214;000.011;000.00;11;1;41557;12.21;000000;1;3205\r',
     'h02' : '*HQ,123456789012345,V1,121300,A,6000.0000,N,13000.0000,E,0.00,0.00,010112,ffffffff,000000,000000,000000,000000#',
-    'jt600' : '$\x00\x00\x12\x34\x56\x11\x00\x1B\x01\x01\x12\x12\x14\x00\x60\x00\x00\x00\x13\x00\x00\x00\x0F\x00\x00\x07\x50\x00\x00\x00\x2B\x91\x04\x4D\x1F\xA1',
+    'jt600' : '(1234567890,P45,290322,132412,25.28217,S,57.54683,W,A,0,0,5,0,0000000000,0,0,9,0)',
     'v680' : '#123456789012345#1000#0#1000#AUT#1#66830FFB#13000.0000,E,6000.0000,N,001.41,259#010112#121600##',
     'pt502' : '$POS,123456,121700.000,A,6000.0000,N,13000.0000,E,0.0,0.0,010112,,,A/00000,00000/0/23895000//\r\n',
     'tr20' : '%%123456789012345,A,120101121800,N6000.0000E13000.0000,0,000,0,01034802,150,[Message]\r\n',
@@ -114,6 +113,20 @@ messages = {
     's168': 'S168#123456789012345#0f12#0077#LOCA:G;CELL:1,1cc,2,2795,1435,64;GDATA:A,12,160412154800,22.564025,113.242329,5.5,152,900;ALERT:0000;STATUS:89,98;WAY:0$',
     'dingtek': '800001011e0692001a00000000016e008027c40000112345678901234581',
     'portman': '$PTMLA,123456789012345,A,200612153351,N2543.0681W10009.2974,0,190,NA,C9830000,NA,108,8,2.66,16,GNA\r\n',
+    'futureway': '410000003F2000020,IMEI:123456789012345,battery level:6,network type:7,CSQ:236F42410000009BA00004GPS:V,200902093333,0.000000N,0.000000E,0.000,0.000\r\nWIFI:3,1|90-67-1C-F7-21-6C|52&2|80-89-17-C6-79-A0|54&3|40-F4-20-EF-DD-2A|58\r\nLBS:460,0,46475066,69\r\n6A42',
+    'net': '@L03612345678901234512271020161807037078881037233751000000010F850036980A4000!',
+    'mobilogix': '[2020-10-25 20:45:09,T9,1,V1.2.3,123456789012,59,10.50,701,-25.236860,-45.708530,0,314]',
+    'swiftech': '@@123456789012345,,0,102040,1023.9670,N,07606.8160,E,2.26,151220,A,0127,1,1,03962,00000,#',
+    'ennfu': 'Ennfu:123456789012345,041504.00,A,3154.86654,N,11849.08737,E,0.053,,080121,20,3.72,21.4,V0.01$',
+    'startek': '&&o125,123456789012345,000,0,,210702235150,A,27.263505,153.037061,11,1.2,0,0,31,5125,505|1|7032|8C89802,20,0000002D,00,00,01E2|019DF0\r\n',
+    'hoopo': '{ "deviceId": "123456789012345", "assetName": "123456789012345", "assetType": "test", "eventData": { "latitude": 31.97498, "longitude": 34.80802, "locationName": "", "accuracyLevel": "High", "eventType": "Arrival", "batteryLevel": 100, "receiveTime": "2021-09-20T18:52:32Z" }, "eventTime": "2021-09-20T08:52:02Z", "serverReportTime": "0001-01-01T00:00:00Z" }',
+    'techtocruz': '$$A120,123456789012345,211005105836,A,FLEX,KCB 947C,000.0,0,-1.38047,S,36.93951,E,1648.4,243.140,21,28,12.1,3.7,0,1,0,0,0,*F6',
+    'flexapi': '${"topic":"v1/123456789012345/motion/info","payload":{"motion.ts":1641885877,"motion.ax":0.006344,"motion.ay":0.289384,"motion.az":-0.939156,"motion.gx":0.420000,"motion.gy":0.420000,"motion.gz":-0.280000}}xx\r\n',
+    'jido': '*123456789012345,03,130517,160435,1820.5845,N,07833.2478,E,1,58#',
+    'armoli': '[M123456789012345210122125205N38.735641E035.4727751E003340000000C00000E9E07FF:106AG505283H60E];',
+    'teratrack': '{"MDeviceID":"022043756090","DiviceType":"1","DataType":"1","DataLength":"69","DateTime":"2022-03-09 10:56:01","Latitude":"-6.846451","Longitude":"39.316324","LongitudeState":"1","LatitudeState":"0","Speed":"90","Mileage":"0","FenceAlarm":"0","AreaAlarmID":"0","LockCutOff":"0","SealTampered":"0","MessageAck":"1","LockRope":"1","LockStatus":"1","LockOpen":"0","PasswordError":"0","CardNo":"60000644","IllegalCard":"0","LowPower":"0","UnCoverBack":"0","CoverStatus":"1","LockStuck":"0","Power":"79","GSM":"16","IMEI":"123456789012345","Index":"20","Slave":[]}',
+    'envotech': '$80SLM,02,F,123456,130410155921,431750216,000040,0000,,00000000,\'13041015592110476673N10111459E001281*2A#',
+    'bstpl': 'BSTPL$1,123456789012345,V,200722,045113,00.000000,0,00.00000,0,0,0,000,00,0,17,1,1,0,0,00.01,0,04.19,15B_190821,8991000907387031196F,12.27#',
 }
 
 baseUrl = 'http://localhost:8082'
@@ -130,14 +143,14 @@ def load_ports():
         if key.endswith('.port'):
             ports[key[:-5]] = int(entry.text)
     if debug:
-        print '\nports: %s\n' % repr(ports)
+        print('\nports: {ports!r}\n')
     return ports
 
 def login():
     request = urllib2.Request(baseUrl + '/api/session')
-    response = urllib2.urlopen(request, urllib.urlencode(user))
+    response = urllib2.urlopen(request, urllib.parse.urlencode(user).encode())
     if debug:
-        print '\nlogin: %s\n' % repr(json.load(response))
+        print(f'\nlogin: {json.load(response)!r}\n')
     return response.headers.get('Set-Cookie')
 
 def remove_devices(cookie):
@@ -146,7 +159,7 @@ def remove_devices(cookie):
     response = urllib2.urlopen(request)
     data = json.load(response)
     if debug:
-        print '\ndevices: %s\n' % repr(data)
+        print(f'\ndevices: {data!r}\n')
     for device in data:
         request = urllib2.Request(baseUrl + '/api/devices/' + str(device['id']))
         request.add_header('Cookie', cookie)
@@ -158,20 +171,20 @@ def add_device(cookie, unique_id):
     request.add_header('Cookie', cookie)
     request.add_header('Content-Type', 'application/json')
     device = { 'name' : unique_id, 'uniqueId' : unique_id }
-    response = urllib2.urlopen(request, json.dumps(device))
+    response = urllib2.urlopen(request, json.dumps(device).encode())
     data = json.load(response)
     return data['id']
 
 def send_message(port, message):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', port))
-    s.send(message)
-    time.sleep(0.5)
+    s.send(message.encode('ascii'))
+    time.sleep(1.0)
     s.close()
 
 def get_protocols(cookie, device_id):
     params = { 'deviceId' : device_id, 'from' : '2000-01-01T00:00:00.000Z', 'to' : '2050-01-01T00:00:00.000Z' }
-    request = urllib2.Request(baseUrl + '/api/positions?' + urllib.urlencode(params))
+    request = urllib2.Request(baseUrl + '/api/positions?' + urllib.parse.urlencode(params))
     request.add_header('Cookie', cookie)
     request.add_header('Content-Type', 'application/json')
     request.add_header('Accept', 'application/json')
@@ -198,9 +211,9 @@ if __name__ == "__main__":
     all = set(ports.keys())
     protocols = set(messages.keys())
 
-    print 'Total: %d' % len(all)
-    print 'Missing: %d' % len(all - protocols)
-    print 'Covered: %d' % len(protocols)
+    print(f'Total: {len(all)}')
+    print(f'Missing: {len(all - protocols)}')
+    print(f'Covered: {len(protocols)}')
 
     for protocol in messages:
         send_message(ports[protocol], messages[protocol])
@@ -208,8 +221,8 @@ if __name__ == "__main__":
     for device in devices:
         protocols -= set(get_protocols(cookie, devices[device]))
 
-    print 'Success: %d' % (len(messages) - len(protocols))
-    print 'Failed: %d' % len(protocols)
+    print(f'Success: {len(messages) - len(protocols)}')
+    print(f'Failed:{len(protocols)}')
 
     if protocols:
-        print '\nFailed: %s' % repr(list(protocols))
+        print(f'\nFailed: {list(protocols)!r}')

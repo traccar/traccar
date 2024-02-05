@@ -24,9 +24,9 @@ import org.traccar.config.Keys;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.http.HttpSession;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpSession;
 import java.time.Duration;
 
 @Singleton
@@ -51,11 +51,12 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
         factory.setIdleTimeout(Duration.ofMillis(config.getLong(Keys.WEB_TIMEOUT)));
         factory.setCreator((req, resp) -> {
             if (req.getSession() != null) {
-                long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
-                return new AsyncSocket(objectMapper, connectionManager, storage, userId);
-            } else {
-                return null;
+                Long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
+                if (userId != null) {
+                    return new AsyncSocket(objectMapper, connectionManager, storage, userId);
+                }
             }
+            return null;
         });
     }
 

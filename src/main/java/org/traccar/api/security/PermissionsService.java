@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
 import org.traccar.model.ManagedUser;
-import org.traccar.model.ScheduledModel;
+import org.traccar.model.Notification;
+import org.traccar.model.Schedulable;
 import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.model.UserRestrictions;
@@ -33,7 +34,8 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
+import java.util.Objects;
 
 @RequestScoped
 public class PermissionsService {
@@ -62,7 +64,7 @@ public class PermissionsService {
                 user = new ServiceAccountUser();
             } else {
                 user = storage.getObject(
-                        User.class, new Request(new Columns.All(), new Condition.Equals("id", "id", userId)));
+                        User.class, new Request(new Columns.All(), new Condition.Equals("id", userId)));
             }
         }
         return user;
@@ -104,7 +106,7 @@ public class PermissionsService {
             } else if (clazz.equals(Device.class)) {
                 denied = getServer().getDeviceReadonly() || getUser(userId).getDeviceReadonly()
                         || addition && getUser(userId).getDeviceLimit() == 0;
-                if (addition && getUser(userId).getDeviceLimit() > 0) {
+                if (!denied && addition && getUser(userId).getDeviceLimit() > 0) {
                     int deviceCount = storage.getObjects(Device.class, new Request(
                             new Columns.Include("id"),
                             new Condition.Permission(User.class, userId, Device.class))).size();
@@ -119,24 +121,47 @@ public class PermissionsService {
         }
     }
 
-    public void checkEdit(long userId, Object object, boolean addition) throws StorageException, SecurityException {
+    public void checkEdit(long userId, BaseModel object, boolean addition) throws StorageException, SecurityException {
         if (!getUser(userId).getAdministrator()) {
             checkEdit(userId, object.getClass(), addition);
-            boolean denied = false;
             if (object instanceof GroupedModel) {
-                long groupId = ((GroupedModel) object).getGroupId();
-                if (groupId > 0) {
-                    checkPermission(Group.class, userId, groupId);
+                GroupedModel after = ((GroupedModel) object);
+                if (after.getGroupId() > 0) {
+                    GroupedModel before = null;
+                    if (!addition) {
+                        before = storage.getObject(after.getClass(), new Request(
+                                new Columns.Include("groupId"), new Condition.Equals("id", after.getId())));
+                    }
+                    if (before == null || before.getGroupId() != after.getGroupId()) {
+                        checkPermission(Group.class, userId, after.getGroupId());
+                    }
                 }
             }
-            if (object instanceof ScheduledModel) {
-                long calendarId = ((ScheduledModel) object).getCalendarId();
-                if (calendarId > 0) {
-                    denied = storage.getPermissions(User.class, userId, Calendar.class, calendarId).isEmpty();
+            if (object instanceof Schedulable) {
+                Schedulable after = ((Schedulable) object);
+                if (after.getCalendarId() > 0) {
+                    Schedulable before = null;
+                    if (!addition) {
+                        before = storage.getObject(after.getClass(), new Request(
+                                new Columns.Include("calendarId"), new Condition.Equals("id", object.getId())));
+                    }
+                    if (before == null || before.getCalendarId() != after.getCalendarId()) {
+                        checkPermission(Calendar.class, userId, after.getCalendarId());
+                    }
                 }
             }
-            if (denied) {
-                throw new SecurityException("Write access denied");
+            if (object instanceof Notification) {
+                Notification after = ((Notification) object);
+                if (after.getCommandId() > 0) {
+                    Notification before = null;
+                    if (!addition) {
+                        before = storage.getObject(after.getClass(), new Request(
+                                new Columns.Include("commandId"), new Condition.Equals("id", object.getId())));
+                    }
+                    if (before == null || before.getCommandId() != after.getCommandId()) {
+                        checkPermission(Command.class, userId, after.getCommandId());
+                    }
+                }
             }
         }
     }
@@ -156,8 +181,9 @@ public class PermissionsService {
                 || before.getUserLimit() != after.getUserLimit()) {
             checkAdmin(userId);
         }
-        User user = getUser(userId);
+        User user = userId > 0 ? getUser(userId) : null;
         if (user != null && user.getExpirationTime() != null
+                && !Objects.equals(before.getExpirationTime(), after.getExpirationTime())
                 && (after.getExpirationTime() == null
                 || user.getExpirationTime().compareTo(after.getExpirationTime()) < 0)) {
             checkAdmin(userId);
@@ -170,8 +196,10 @@ public class PermissionsService {
                 || before.getFixedEmail() != after.getFixedEmail()) {
             if (userId == after.getId()) {
                 checkAdmin(userId);
-            } else {
+            } else if (after.getId() > 0) {
                 checkUser(userId, after.getId());
+            } else {
+                checkManager(userId);
             }
         }
         if (before.getFixedEmail() && !before.getEmail().equals(after.getEmail())) {
@@ -185,7 +213,7 @@ public class PermissionsService {
             var object = storage.getObject(clazz, new Request(
                     new Columns.Include("id"),
                     new Condition.And(
-                            new Condition.Equals("id", "id", objectId),
+                            new Condition.Equals("id", objectId),
                             new Condition.Permission(
                                     User.class, userId, clazz.equals(User.class) ? ManagedUser.class : clazz))));
             if (object == null) {

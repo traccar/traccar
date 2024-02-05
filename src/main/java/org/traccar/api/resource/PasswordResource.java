@@ -25,16 +25,16 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.annotation.security.PermitAll;
-import javax.inject.Inject;
-import javax.mail.MessagingException;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.annotation.security.PermitAll;
+import jakarta.inject.Inject;
+import jakarta.mail.MessagingException;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
@@ -59,12 +59,11 @@ public class PasswordResource extends BaseResource {
             throws StorageException, MessagingException, GeneralSecurityException, IOException {
 
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("email", "email", email)));
+                new Columns.All(), new Condition.Equals("email", email)));
         if (user != null) {
             var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
-            velocityContext.put("token", tokenManager.generateToken(user.getId()));
             var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "passwordReset", "full");
-            mailManager.sendMessage(user, fullMessage.getSubject(), fullMessage.getBody());
+            mailManager.sendMessage(user, true, fullMessage.getSubject(), fullMessage.getBody());
         }
         return Response.ok().build();
     }
@@ -76,13 +75,14 @@ public class PasswordResource extends BaseResource {
             @FormParam("token") String token, @FormParam("password") String password)
             throws StorageException, GeneralSecurityException, IOException {
 
-        long userId = tokenManager.verifyToken(token);
+        long userId = tokenManager.verifyToken(token).getUserId();
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("id", "id", userId)));
+                new Columns.All(), new Condition.Equals("id", userId)));
         if (user != null) {
             user.setPassword(password);
             storage.updateObject(user, new Request(
-                    new Columns.Include("hashedPassword", "salt"), new Condition.Equals("id", "id")));
+                    new Columns.Include("hashedPassword", "salt"),
+                    new Condition.Equals("id", userId)));
             return Response.ok().build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();

@@ -59,7 +59,7 @@ public final class PositionUtil {
         return storage.getObjects(Position.class, new Request(
                 new Columns.All(),
                 new Condition.And(
-                        new Condition.Equals("deviceId", "deviceId", deviceId),
+                        new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("fixTime", "from", from, "to", to)),
                 new Order("fixTime")));
     }

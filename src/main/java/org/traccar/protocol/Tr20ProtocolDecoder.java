@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ public class Tr20ProtocolDecoder extends BaseProtocolDecoder {
             .number("(ddd)(dd.d+),")             // longitude
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
-            .number("(?:NA|[FC]?(-?d+)[^,]*),")  // temperature
+            .number("(?:NA|[BFC]?(-?d+)[^,]*),") // temperature
             .number("(x{8}),")                   // status
             .number("(d+)")                      // event
             .any()

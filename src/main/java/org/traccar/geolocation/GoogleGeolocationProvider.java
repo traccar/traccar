@@ -15,7 +15,7 @@
  */
 package org.traccar.geolocation;
 
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.client.Client;
 
 public class GoogleGeolocationProvider extends UniversalGeolocationProvider {
 

@@ -11,7 +11,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v3
@@ -28,13 +28,13 @@ jobs:
       - run: ./gradlew build
       - uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 18
           cache: npm
           cache-dependency-path: |
             traccar-web/package-lock.json
             traccar-web/modern/package-lock.json
       - run: |
-          wget -q http://cdn.sencha.com/cmd/7.1.0.15/no-jre/SenchaCmd-7.1.0.15-linux-i386.sh.zip
+          wget -q https://trials.sencha.com/cmd/7.6.0/SenchaCmd-7.6.0.87-linux-amd64.sh.zip
           unzip SenchaCmd-*.zip
           ./SenchaCmd-*.sh -q
           echo "$HOME/bin/Sencha/Cmd/" >> $GITHUB_PATH
@@ -42,14 +42,16 @@ jobs:
       - run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
+          sudo apt-get install libgcc-s1:i386 libstdc++6:i386
           sudo apt-get install innoextract makeself wine32 s3cmd
       - name: Build installers
         working-directory: ./setup
         run: |
           wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
-          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4+8/OpenJDK17U-jdk_x64_windows_hotspot_17.0.4_8.zip
-          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4+8/OpenJDK17U-jdk_x64_linux_hotspot_17.0.4_8.tar.gz
-          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.4+8/OpenJDK17U-jdk_arm_linux_hotspot_17.0.4_8.tar.gz
+          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_x64_windows_hotspot_17.0.6_10.zip
+          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.6_10.tar.gz
+          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_arm_linux_hotspot_17.0.6_10.tar.gz
+          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_aarch64_linux_hotspot_17.0.6_10.tar.gz
           ./package.sh ${{ github.event.inputs.version }}
       - name: Upload installers
         working-directory: ./setup

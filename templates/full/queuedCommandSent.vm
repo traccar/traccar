@@ -1,0 +1,11 @@
+#set($subject = "$device.name: queued command sent")
+<!DOCTYPE html>
+<html>
+<body>
+Device: $device.name<br>
+Queued command sent<br>
+Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+</body>
+</html>

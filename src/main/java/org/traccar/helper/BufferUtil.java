@@ -59,16 +59,32 @@ public final class BufferUtil {
     }
 
     public static int indexOf(ByteBuf needle, ByteBuf haystack, int startIndex, int endIndex) {
-        ByteBuf wrappedHaystack;
-        if (startIndex == haystack.readerIndex() && endIndex == haystack.writerIndex()) {
-            wrappedHaystack = haystack;
-        } else {
-            wrappedHaystack = Unpooled.wrappedBuffer(haystack);
-            wrappedHaystack.readerIndex(startIndex - haystack.readerIndex());
-            wrappedHaystack.writerIndex(endIndex - haystack.readerIndex());
+        int originalReaderIndex = haystack.readerIndex();
+        int originalWriterIndex = haystack.writerIndex();
+        try {
+            haystack.readerIndex(startIndex);
+            haystack.writerIndex(endIndex);
+            return ByteBufUtil.indexOf(needle, haystack);
+        } finally {
+            haystack.readerIndex(originalReaderIndex);
+            haystack.writerIndex(originalWriterIndex);
         }
-        int result = ByteBufUtil.indexOf(needle, wrappedHaystack);
-        return result < 0 ? result : startIndex + result;
+    }
+
+    public static boolean isPrintable(ByteBuf buf, int length) {
+        boolean printable = true;
+        for (int i = 0; i < length; i++) {
+            byte b = buf.getByte(buf.readerIndex() + i);
+            if (b < 32 && b != '\r' && b != '\n') {
+                printable = false;
+                break;
+            }
+        }
+        return printable;
+    }
+
+    public static String readString(ByteBuf buf, int length) {
+        return buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
     }
 
 }

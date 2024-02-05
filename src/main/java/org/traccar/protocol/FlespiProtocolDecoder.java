@@ -24,12 +24,12 @@ import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -125,12 +125,13 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.set(Position.KEY_PDOP, ((JsonNumber) value).doubleValue());
                 return true;
             case "din":
+                position.set(Position.KEY_INPUT, ((JsonNumber) value).intValue());
+                return true;
             case "dout":
-                if (name.equals("din")) {
-                    position.set(Position.KEY_INPUT, ((JsonNumber) value).intValue());
-                } else {
-                    position.set(Position.KEY_OUTPUT, ((JsonNumber) value).intValue());
-                }
+                position.set(Position.KEY_OUTPUT, ((JsonNumber) value).intValue());
+                return true;
+            case "report.reason":
+                position.set(Position.KEY_EVENT, ((JsonNumber) value).intValue());
                 return true;
             case "gps.vehicle.mileage":
                 position.set(Position.KEY_ODOMETER, ((JsonNumber) value).doubleValue());
@@ -140,6 +141,9 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 return true;
             case "battery.voltage":
                 position.set(Position.KEY_BATTERY, ((JsonNumber) value).doubleValue());
+                return true;
+            case "battery.level":
+                position.set(Position.KEY_BATTERY_LEVEL, ((JsonNumber) value).intValue());
                 return true;
             case "fuel.level":
             case "can.fuel.level":

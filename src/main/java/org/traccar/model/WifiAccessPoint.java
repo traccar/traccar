@@ -52,7 +52,7 @@ public class WifiAccessPoint {
     }
 
     public void setSignalStrength(Integer signalStrength) {
-        this.signalStrength = signalStrength;
+        this.signalStrength = signalStrength > 0 ? -signalStrength : signalStrength;
     }
 
     private Integer channel;

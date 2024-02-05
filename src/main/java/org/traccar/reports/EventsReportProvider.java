@@ -19,11 +19,13 @@ package org.traccar.reports;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.Maintenance;
+import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.Storage;
@@ -33,7 +35,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -64,7 +66,7 @@ public class EventsReportProvider {
         return storage.getObjects(Event.class, new Request(
                 new Columns.All(),
                 new Condition.And(
-                        new Condition.Equals("deviceId", "deviceId", deviceId),
+                        new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("eventTime", "from", from, "to", to)),
                 new Order("eventTime")));
     }
@@ -75,7 +77,7 @@ public class EventsReportProvider {
         reportUtils.checkPeriodLimit(from, to);
 
         ArrayList<Event> result = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             Collection<Event> events = getEvents(device.getId(), from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Event event : events) {
@@ -102,7 +104,8 @@ public class EventsReportProvider {
         ArrayList<String> sheetNames = new ArrayList<>();
         HashMap<Long, String> geofenceNames = new HashMap<>();
         HashMap<Long, String> maintenanceNames = new HashMap<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
+        HashMap<Long, Position> positions = new HashMap<>();
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             Collection<Event> events = getEvents(device.getId(), from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
@@ -129,12 +132,20 @@ public class EventsReportProvider {
                     iterator.remove();
                 }
             }
+            for (Event event : events) {
+                long positionId = event.getPositionId();
+                if (positionId > 0) {
+                    Position position = storage.getObject(Position.class, new Request(
+                            new Columns.All(), new Condition.Equals("id", positionId)));
+                    positions.put(positionId, position);
+                }
+            }
             DeviceReportSection deviceEvents = new DeviceReportSection();
             deviceEvents.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
             if (device.getGroupId() > 0) {
                 Group group = storage.getObject(Group.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", "id", device.getGroupId())));
+                        new Columns.All(), new Condition.Equals("id", device.getGroupId())));
                 if (group != null) {
                     deviceEvents.setGroupName(group.getName());
                 }
@@ -150,6 +161,7 @@ public class EventsReportProvider {
             context.putVar("sheetNames", sheetNames);
             context.putVar("geofenceNames", geofenceNames);
             context.putVar("maintenanceNames", maintenanceNames);
+            context.putVar("positions", positions);
             context.putVar("from", from);
             context.putVar("to", to);
             reportUtils.processTemplateWithSheets(inputStream, outputStream, context);

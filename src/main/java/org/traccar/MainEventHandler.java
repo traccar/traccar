@@ -16,6 +16,7 @@
 package org.traccar;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramChannel;
@@ -23,10 +24,10 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
+import org.traccar.handler.AcknowledgementHandler;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.NetworkUtil;
 import org.traccar.helper.model.PositionUtil;
@@ -40,12 +41,15 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+@Singleton
+@ChannelHandler.Sharable
 public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainEventHandler.class);
@@ -57,17 +61,15 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     private final Storage storage;
     private final ConnectionManager connectionManager;
     private final StatisticsManager statisticsManager;
-    private final BroadcastService broadcastService;
 
     @Inject
     public MainEventHandler(
             Config config, CacheManager cacheManager, Storage storage, ConnectionManager connectionManager,
-            StatisticsManager statisticsManager, BroadcastService broadcastService) {
+            StatisticsManager statisticsManager) {
         this.cacheManager = cacheManager;
         this.storage = storage;
         this.connectionManager = connectionManager;
         this.statisticsManager = statisticsManager;
-        this.broadcastService = broadcastService;
         String connectionlessProtocolList = config.getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split("[, ]")));
@@ -89,7 +91,7 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
                     updatedDevice.setPositionId(position.getId());
                     storage.updateObject(updatedDevice, new Request(
                             new Columns.Include("positionId"),
-                            new Condition.Equals("id", "id")));
+                            new Condition.Equals("id", updatedDevice.getId())));
 
                     cacheManager.updatePosition(position);
                     connectionManager.updatePosition(true, position);
@@ -144,6 +146,8 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
             LOGGER.info(builder.toString());
 
             statisticsManager.registerMessageStored(position.getDeviceId(), position.getProtocol());
+
+            ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
         }
     }
 

@@ -143,7 +143,7 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-        if (deviceSession == null || !sentence.matches("![35A-D],.*")) {
+        if (deviceSession == null || !sentence.matches("![345A-D],.*")) {
             return null;
         }
 
@@ -158,6 +158,20 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             position.set(Position.KEY_RESULT, sentence.substring(3));
+
+            return position;
+
+        } else if (type.equals("4")) {
+
+            String[] values = sentence.split(",");
+
+            getLastLocation(position, null);
+
+            for (int i = 1; i <= 3; i++) {
+                if (!values[i + 1].isEmpty()) {
+                    position.set("phone" + i, values[i + 1]);
+                }
+            }
 
             return position;
 

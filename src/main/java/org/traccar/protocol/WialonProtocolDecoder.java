@@ -63,8 +63,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:NA|(d+));")              // outputs
             .expression("(?:NA|([^;]*));")       // adc
             .expression("(?:NA|([^;]*));")       // ibutton
-            .expression("(?:NA|(.*))")           // params
+            .expression("(?:NA|([^;]*))")        // params
             .groupEnd("?")
+            .any()
             .compile();
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String type, Integer number) {
@@ -101,7 +102,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date());
         }
 
-        if (parser.hasNext(9)) {
+        if (parser.hasNextAny(9)) {
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
@@ -135,10 +136,22 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             for (String param : values) {
                 Matcher paramParser = Pattern.compile("(.*):[1-3]:(.*)").matcher(param);
                 if (paramParser.matches()) {
+                    String key = paramParser.group(1).toLowerCase();
+                    String value = paramParser.group(2);
                     try {
-                        position.set(paramParser.group(1).toLowerCase(), Double.parseDouble(paramParser.group(2)));
+                        if (key.equals("accuracy")) {
+                            position.setAccuracy(Double.parseDouble(value));
+                        } else {
+                            position.set(key, Double.parseDouble(value));
+                        }
                     } catch (NumberFormatException e) {
-                        position.set(paramParser.group(1).toLowerCase(), paramParser.group(2));
+                        if (value.equalsIgnoreCase("true")) {
+                            position.set(key, true);
+                        } else if (value.equalsIgnoreCase("false")) {
+                            position.set(key, false);
+                        } else {
+                            position.set(key, value);
+                        }
                     }
                 }
             }

@@ -63,7 +63,7 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        this.phone = phone != null ? phone.trim() : null;
     }
 
     private boolean readonly;
@@ -249,6 +249,26 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
 
     public void setPoiLayer(String poiLayer) {
         this.poiLayer = poiLayer;
+    }
+
+    private String totpKey;
+
+    public String getTotpKey() {
+        return totpKey;
+    }
+
+    public void setTotpKey(String totpKey) {
+        this.totpKey = totpKey;
+    }
+
+    private boolean temporary;
+
+    public boolean getTemporary() {
+        return temporary;
+    }
+
+    public void setTemporary(boolean temporary) {
+        this.temporary = temporary;
     }
 
     @QueryIgnore

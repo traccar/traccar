@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,27 +17,19 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.channel.Channel;
-import io.netty.handler.codec.mqtt.MqttConnectMessage;
-import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
-import io.netty.handler.codec.mqtt.MqttMessage;
-import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
-import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
-import org.traccar.NetworkMessage;
+import org.traccar.BaseMqttProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
-import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class IotmProtocolDecoder extends BaseProtocolDecoder {
+public class IotmProtocolDecoder extends BaseMqttProtocolDecoder {
 
     public IotmProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -236,121 +228,72 @@ public class IotmProtocolDecoder extends BaseProtocolDecoder {
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+            DeviceSession deviceSession, MqttPublishMessage message) throws Exception {
 
-        if (msg instanceof MqttConnectMessage) {
+        List<Position> positions = new LinkedList<>();
 
-            MqttConnectMessage message = (MqttConnectMessage) msg;
+        ByteBuf buf = message.payload();
 
-            DeviceSession deviceSession = getDeviceSession(
-                    channel, remoteAddress, message.payload().clientIdentifier());
+        buf.readUnsignedByte(); // structure version
 
-            MqttConnectReturnCode returnCode = deviceSession != null
-                    ? MqttConnectReturnCode.CONNECTION_ACCEPTED
-                    : MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED;
+        while (buf.readableBytes() > 1) {
+            int type = buf.readUnsignedByte();
+            int length = buf.readUnsignedShortLE();
+            ByteBuf record = buf.readSlice(length);
+            if (type == 1) {
 
-            MqttMessage response = MqttMessageBuilders.connAck().returnCode(returnCode).build();
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                position.setTime(new Date(record.readUnsignedIntLE() * 1000));
 
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-            }
+                while (record.readableBytes() > 0) {
+                    int sensorType = record.readUnsignedByte();
+                    int sensorId = record.readUnsignedShortLE();
+                    if (sensorType == 14) {
 
-        } else if (msg instanceof MqttSubscribeMessage) {
+                        position.setValid(true);
+                        position.setLatitude(record.readFloatLE());
+                        position.setLongitude(record.readFloatLE());
+                        position.setSpeed(UnitsConverter.knotsFromKph(record.readUnsignedShortLE()));
 
-            MqttSubscribeMessage message = (MqttSubscribeMessage) msg;
+                        position.set(Position.KEY_HDOP, record.readUnsignedByte());
+                        position.set(Position.KEY_SATELLITES, record.readUnsignedByte());
 
-            MqttMessage response = MqttMessageBuilders.subAck()
-                    .packetId(message.variableHeader().messageId())
-                    .build();
+                        position.setCourse(record.readUnsignedShortLE());
+                        position.setAltitude(record.readShortLE());
 
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-            }
+                    } else {
 
-        } else if (msg instanceof MqttPublishMessage) {
-
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-            if (deviceSession == null) {
-                return null;
-            }
-
-            List<Position> positions = new LinkedList<>();
-
-            MqttPublishMessage message = (MqttPublishMessage) msg;
-            ByteBuf buf = message.payload();
-
-            buf.readUnsignedByte(); // structure version
-
-            while (buf.readableBytes() > 1) {
-                int type = buf.readUnsignedByte();
-                int length = buf.readUnsignedShortLE();
-                ByteBuf record = buf.readSlice(length);
-                if (type == 1) {
-
-                    Position position = new Position(getProtocolName());
-                    position.setDeviceId(deviceSession.getDeviceId());
-                    position.setTime(new Date(record.readUnsignedIntLE() * 1000));
-
-                    while (record.readableBytes() > 0) {
-                        int sensorType = record.readUnsignedByte();
-                        int sensorId = record.readUnsignedShortLE();
-                        if (sensorType == 14) {
-
-                            position.setValid(true);
-                            position.setLatitude(record.readFloatLE());
-                            position.setLongitude(record.readFloatLE());
-                            position.setSpeed(UnitsConverter.knotsFromKph(record.readUnsignedShortLE()));
-
-                            position.set(Position.KEY_HDOP, record.readUnsignedByte());
-                            position.set(Position.KEY_SATELLITES, record.readUnsignedByte());
-
-                            position.setCourse(record.readUnsignedShortLE());
-                            position.setAltitude(record.readShortLE());
-
-                        } else {
-
-                            if (sensorType == 3) {
-                                continue;
-                            }
-
-                            decodeSensor(position, record, sensorType, sensorId);
-
+                        if (sensorType == 3) {
+                            continue;
                         }
+
+                        decodeSensor(position, record, sensorType, sensorId);
+
                     }
-
-                    positions.add(position);
-
-                } else if (type == 3) {
-
-                    Position position = new Position(getProtocolName());
-                    position.setDeviceId(deviceSession.getDeviceId());
-
-                    getLastLocation(position, new Date(record.readUnsignedIntLE() * 1000));
-
-                    record.readUnsignedByte(); // function identifier
-
-                    position.set(Position.KEY_EVENT, record.readUnsignedByte());
-
-                    positions.add(position);
-
                 }
+
+                positions.add(position);
+
+            } else if (type == 3) {
+
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+
+                getLastLocation(position, new Date(record.readUnsignedIntLE() * 1000));
+
+                record.readUnsignedByte(); // function identifier
+
+                position.set(Position.KEY_EVENT, record.readUnsignedByte());
+
+                positions.add(position);
+
             }
-
-            buf.readUnsignedByte(); // checksum
-
-            MqttMessage response = MqttMessageBuilders.pubAck()
-                    .packetId(message.variableHeader().packetId())
-                    .build();
-
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-            }
-
-            return positions.isEmpty() ? null : positions;
-
         }
 
-        return null;
+        buf.readUnsignedByte(); // checksum
+
+        return positions.isEmpty() ? null : positions;
     }
 
 }

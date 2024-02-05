@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -10,6 +10,9 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new H02ProtocolDecoder(null));
+
+        verifyPosition(decoder, buffer(
+                "*HQ,3177718238,V6,002926,V,3514.4088,N,9733.2842,W,0.00,0.00,151222,FFF7FBFF,310,260,32936,13641,8944501311217563382F,#"));
 
         verifyPosition(decoder, buffer(
                 "*HQ,5905101893,V1,105759,A,37573392,S,145037022,E,000.00,173,280122,FF7FFBFF,,,9059e2c,8232,4#"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
+import org.traccar.model.Device;
 
 import java.nio.charset.StandardCharsets;
 
@@ -73,13 +74,25 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
         String password = AttributeUtil.getDevicePassword(
                 getCacheManager(), command.getDeviceId(), getProtocolName(), "123456");
 
+        Device device = getCacheManager().getObject(Device.class, command.getDeviceId());
+
         switch (command.getType()) {
             case Command.TYPE_ENGINE_STOP:
-                return encodeContent(command.getDeviceId(),
-                    alternative ? "DYD," + password + "#" : "Relay,1#");
+                if ("G109".equals(device.getModel())) {
+                    return encodeContent(command.getDeviceId(), "DYD#");
+                } else if (alternative) {
+                    return encodeContent(command.getDeviceId(), "DYD," + password + "#");
+                } else {
+                    return encodeContent(command.getDeviceId(), "Relay,1#");
+                }
             case Command.TYPE_ENGINE_RESUME:
-                return encodeContent(command.getDeviceId(),
-                    alternative ? "HFYD," + password + "#" : "Relay,0#");
+                if ("G109".equals(device.getModel())) {
+                    return encodeContent(command.getDeviceId(), "HFYD#");
+                } else if (alternative) {
+                    return encodeContent(command.getDeviceId(), "HFYD," + password + "#");
+                } else {
+                    return encodeContent(command.getDeviceId(), "Relay,0#");
+                }
             case Command.TYPE_CUSTOM:
                 return encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA));
             default:

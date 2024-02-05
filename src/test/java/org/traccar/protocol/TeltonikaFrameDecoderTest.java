@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class TeltonikaFrameDecoderTest extends ProtocolTest {
@@ -11,7 +11,7 @@ public class TeltonikaFrameDecoderTest extends ProtocolTest {
         var decoder = inject(new TeltonikaFrameDecoder());
 
         verifyFrame(
-                binary("000F313233343536373839303132333435"),
+                binary("ff"),
                 decoder.decode(null, null, binary("FF000F313233343536373839303132333435")));
 
         verifyFrame(

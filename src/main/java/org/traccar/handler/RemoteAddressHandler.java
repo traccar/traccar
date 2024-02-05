@@ -22,9 +22,11 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Position;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.net.InetSocketAddress;
 
+@Singleton
 @ChannelHandler.Sharable
 public class RemoteAddressHandler extends ChannelInboundHandlerAdapter {
 

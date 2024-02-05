@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BufferUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -48,9 +49,11 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_DATA = 0x01;
     public static final int MSG_CONFIGURATION = 0x02;
     public static final int MSG_SERVICES = 0x03;
+    public static final int MSG_SYSTEM_CONTROL = 0x04;
+    public static final int MSG_FIRMWARE = 0x7E;
     public static final int MSG_RESPONSE = 0x7F;
 
-    private String decodeAlarm(int code) {
+    private String decodeAlarm(long code) {
         if (BitUtil.check(code, 0)) {
             return Position.ALARM_LOW_BATTERY;
         }
@@ -146,14 +149,13 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
 
         if (BitUtil.check(flags, 4)) {
-            sendResponse(channel, remoteAddress, index, type, buf);
+            sendResponse(channel, remoteAddress, index, type, buf.slice());
         }
 
-        if (type == MSG_DATA) {
+        if (type == MSG_DATA || type == MSG_SERVICES) {
 
             List<Position> positions = new LinkedList<>();
             Set<Integer> keys = new HashSet<>();
-            boolean hasLocation = false;
             Position position = new Position(getProtocolName());
 
             DeviceSession deviceSession = null;
@@ -163,12 +165,8 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                 int key = buf.readUnsignedByte();
 
                 if (keys.contains(key)) {
-                    if (!hasLocation) {
-                        getLastLocation(position, null);
-                    }
                     positions.add(position);
                     keys.clear();
-                    hasLocation = false;
                     position = new Position(getProtocolName());
                 }
                 keys.add(key);
@@ -177,24 +175,30 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x01:
                         deviceSession = getDeviceSession(
                                 channel, remoteAddress, buf.readCharSequence(15, StandardCharsets.US_ASCII).toString());
-
-                        position.setDeviceId(deviceSession.getDeviceId());
+                        if (deviceSession == null) {
+                            return null;
+                        }
                         break;
                     case 0x02:
-                        position.set(Position.KEY_ALARM, decodeAlarm(buf.readIntLE()));
+                        long alarm = buf.readUnsignedIntLE();
+                        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
+                        if (BitUtil.check(alarm, 31)) {
+                            position.set("bark", true);
+                        }
                         break;
                     case 0x14:
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                         position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
                         break;
                     case 0x20:
-                        hasLocation = true;
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
                         position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
                         position.setCourse(buf.readUnsignedShortLE());
                         position.setAltitude(buf.readShortLE());
-                        position.setValid(buf.readUnsignedShortLE() > 0);
+                        int hdop = buf.readUnsignedShortLE();
+                        position.setValid(hdop > 0);
+                        position.set(Position.KEY_HDOP, hdop * 0.1);
                         position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                         break;
@@ -226,11 +230,18 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
                         position.setValid(true);
-                        hasLocation = true;
                         break;
                     case 0x24:
                         position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
                         long status = buf.readUnsignedIntLE();
+                        if (BitUtil.check(status, 4)) {
+                            position.set(Position.KEY_CHARGE, true);
+                        }
+                        if (BitUtil.check(status, 7)) {
+                            position.set(Position.KEY_ARCHIVE, true);
+                        }
+                        position.set(Position.KEY_MOTION, BitUtil.check(status, 9));
+                        position.set(Position.KEY_RSSI, BitUtil.between(status, 19, 24));
                         position.set(Position.KEY_BATTERY_LEVEL, BitUtil.from(status, 24));
                         position.set(Position.KEY_STATUS, status);
                         break;
@@ -243,7 +254,6 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             position.setLatitude(buf.readIntLE() * 0.0000001);
                             position.setLongitude(buf.readIntLE() * 0.0000001);
                             position.setValid(true);
-                            hasLocation = true;
                         }
                         if (BitUtil.check(beaconFlags, 6)) {
                             position.set("description", buf.readCharSequence(
@@ -257,19 +267,26 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
                         position.setValid(true);
-                        hasLocation = true;
                         break;
                     case 0x30:
-                        buf.readUnsignedInt(); // timestamp
-                        position.set(Position.KEY_STEPS, buf.readUnsignedInt());
+                        buf.readUnsignedIntLE(); // timestamp
+                        position.set(Position.KEY_STEPS, buf.readUnsignedIntLE());
                         break;
                     case 0x31:
                         int i = 1;
                         while (buf.readerIndex() < endIndex) {
-                            position.set("activity" + i + "Time", buf.readUnsignedInt());
-                            position.set("activity" + i, buf.readUnsignedInt());
+                            position.set("activity" + i + "Time", buf.readUnsignedIntLE());
+                            position.set("activity" + i, buf.readUnsignedIntLE());
                             i += 1;
                         }
+                        break;
+                    case 0x37:
+                        buf.readUnsignedIntLE(); // timestamp
+                        long barking = buf.readUnsignedIntLE();
+                        if (BitUtil.check(barking, 31)) {
+                            position.set("barkStop", true);
+                        }
+                        position.set("barkCount", BitUtil.to(barking, 31));
                         break;
                     case 0x40:
                         buf.readUnsignedIntLE(); // timestamp
@@ -284,14 +301,14 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readerIndex(endIndex);
             }
 
-            if (!hasLocation) {
-                getLastLocation(position, null);
-            }
             positions.add(position);
 
             if (deviceSession != null) {
                 for (Position p : positions) {
                     p.setDeviceId(deviceSession.getDeviceId());
+                    if (!p.getValid() && !p.hasAttribute(Position.KEY_HDOP)) {
+                        getLastLocation(p, null);
+                    }
                 }
             } else {
                 return null;
@@ -299,9 +316,195 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
 
             return positions;
 
+        } else if (type == MSG_CONFIGURATION) {
+
+            return decodeConfiguration(channel, remoteAddress, buf);
+
+        } else if (type == MSG_RESPONSE) {
+
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            buf.readUnsignedByte(); // length
+            position.set(Position.KEY_RESULT, String.valueOf(buf.readUnsignedByte()));
+
+            return position;
+
         }
 
         return null;
+    }
+
+    private Position decodeConfiguration(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        while (buf.isReadable()) {
+            int length = buf.readUnsignedByte() - 1;
+            int endIndex = buf.readerIndex() + length + 1;
+            int key = buf.readUnsignedByte();
+
+            switch (key) {
+                case 0x01:
+                    position.set("moduleNumber", buf.readUnsignedInt());
+                    break;
+                case 0x02:
+                    position.set(Position.KEY_VERSION_FW, String.valueOf(buf.readUnsignedInt()));
+                    break;
+                case 0x03:
+                    position.set("imei", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                    break;
+                case 0x04:
+                    position.set(Position.KEY_ICCID, BufferUtil.readString(buf, length));
+                    break;
+                case 0x05:
+                    position.set("bleMac", ByteBufUtil.hexDump(buf.readSlice(length)));
+                    break;
+                case 0x06:
+                    position.set("settingTime", buf.readUnsignedInt());
+                    break;
+                case 0x07:
+                    position.set("runTimes", buf.readUnsignedInt());
+                    break;
+                case 0x0A:
+                    position.set("interval", buf.readUnsignedMedium());
+                    position.set("petMode", buf.readUnsignedByte());
+                    break;
+                case 0x0D:
+                    position.set("passwordProtect", buf.readUnsignedInt());
+                    break;
+                case 0x0E:
+                    position.set("timeZone", (int) buf.readByte());
+                    break;
+                case 0x0F:
+                    position.set("enableControl", buf.readUnsignedInt());
+                    break;
+                case 0x13:
+                    position.set("deviceName", BufferUtil.readString(buf, length));
+                    break;
+                case 0x14:
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
+                    break;
+                case 0x15:
+                    position.set("bleLatitude", buf.readIntLE() * 0.0000001);
+                    position.set("bleLongitude", buf.readIntLE() * 0.0000001);
+                    position.set("bleLocation", BufferUtil.readString(buf, length - 8));
+                    break;
+                case 0x17:
+                    position.set("gpsUrl", BufferUtil.readString(buf, length));
+                    break;
+                case 0x18:
+                    position.set("lbsUrl", BufferUtil.readString(buf, length));
+                    break;
+                case 0x1A:
+                    position.set("firmware", BufferUtil.readString(buf, length));
+                    break;
+                case 0x1B:
+                    position.set("gsmModule", BufferUtil.readString(buf, length));
+                    break;
+                case 0x1D:
+                    position.set("agpsUpdate", buf.readUnsignedByte());
+                    position.set("agpsLatitude", buf.readIntLE() * 0.0000001);
+                    position.set("agpsLongitude", buf.readIntLE() * 0.0000001);
+                    break;
+                case 0x30:
+                    position.set("numberFlag", buf.readUnsignedByte());
+                    position.set("number", BufferUtil.readString(buf, length - 1));
+                    break;
+                case 0x31:
+                    position.set("prefixFlag", buf.readUnsignedByte());
+                    position.set("prefix", BufferUtil.readString(buf, length - 1));
+                    break;
+                case 0x33:
+                    position.set("phoneSwitches", buf.readUnsignedByte());
+                    break;
+                case 0x40:
+                    position.set("apn", BufferUtil.readString(buf, length));
+                    break;
+                case 0x41:
+                    position.set("apnUser", BufferUtil.readString(buf, length));
+                    break;
+                case 0x42:
+                    position.set("apnPassword", BufferUtil.readString(buf, length));
+                    break;
+                case 0x43:
+                    buf.readUnsignedByte(); // flag
+                    position.set("port", buf.readUnsignedShort());
+                    position.set("server", BufferUtil.readString(buf, length - 3));
+                    break;
+                case 0x44:
+                    position.set("heartbeatInterval", buf.readUnsignedInt());
+                    position.set("uploadInterval", buf.readUnsignedInt());
+                    position.set("uploadLazyInterval", buf.readUnsignedInt());
+                    break;
+                case 0x47:
+                    position.set("deviceId", BufferUtil.readString(buf, length));
+                    break;
+                case 0x4E:
+                    position.set("gsmBand", buf.readUnsignedByte());
+                    break;
+                case 0x50:
+                    position.set("powerAlert", buf.readUnsignedInt());
+                    break;
+                case 0x51:
+                    position.set("geoAlert", buf.readUnsignedInt());
+                    break;
+                case 0x53:
+                    position.set("motionAlert", buf.readUnsignedInt());
+                    break;
+                case 0x5C:
+                    position.set("barkLevel", buf.readUnsignedByte());
+                    position.set("barkInterval", buf.readUnsignedInt());
+                    break;
+                case 0x61:
+                    position.set("msisdn", BufferUtil.readString(buf, length));
+                    break;
+                case 0x62:
+                    position.set("wifiWhitelist", buf.readUnsignedByte());
+                    position.set("wifiWhitelistMac", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    break;
+                case 0x64:
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    position.set("networkBand", buf.readUnsignedInt());
+                    position.set(Position.KEY_OPERATOR, BufferUtil.readString(buf, length - 5));
+                    break;
+                case 0x65:
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    position.set("networkStatus", buf.readUnsignedByte());
+                    position.set("serverStatus", buf.readUnsignedByte());
+                    position.set("networkPlmn", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    position.set("homePlmn", ByteBufUtil.hexDump(buf.readSlice(6)));
+                    break;
+                case 0x66:
+                    position.set("imsi", BufferUtil.readString(buf, length));
+                    break;
+                case 0x75:
+                    position.set("extraEnableControl", buf.readUnsignedInt());
+                    break;
+                default:
+                    break;
+            }
+
+            buf.readerIndex(endIndex);
+        }
+
+        return position;
     }
 
 }

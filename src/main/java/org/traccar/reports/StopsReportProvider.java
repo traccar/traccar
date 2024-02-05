@@ -19,7 +19,7 @@ package org.traccar.reports;
 import org.apache.poi.ss.util.WorkbookUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.helper.model.PositionUtil;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.common.ReportUtils;
@@ -31,7 +31,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -55,20 +55,14 @@ public class StopsReportProvider {
         this.storage = storage;
     }
 
-    private Collection<StopReportItem> detectStops(Device device, Date from, Date to) throws StorageException {
-        boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
-        var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
-        return reportUtils.detectTripsAndStops(device, positions, ignoreOdometer, StopReportItem.class);
-    }
-
     public Collection<StopReportItem> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
 
         ArrayList<StopReportItem> result = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
-            result.addAll(detectStops(device, from, to));
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
+            result.addAll(reportUtils.detectTripsAndStops(device, from, to, StopReportItem.class));
         }
         return result;
     }
@@ -80,14 +74,14 @@ public class StopsReportProvider {
 
         ArrayList<DeviceReportSection> devicesStops = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (Device device: reportUtils.getAccessibleDevices(userId, deviceIds, groupIds)) {
-            Collection<StopReportItem> stops = detectStops(device, from, to);
+        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
+            Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(device, from, to, StopReportItem.class);
             DeviceReportSection deviceStops = new DeviceReportSection();
             deviceStops.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
             if (device.getGroupId() > 0) {
                 Group group = storage.getObject(Group.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", "id", device.getGroupId())));
+                        new Columns.All(), new Condition.Equals("id", device.getGroupId())));
                 if (group != null) {
                     deviceStops.setGroupName(group.getName());
                 }

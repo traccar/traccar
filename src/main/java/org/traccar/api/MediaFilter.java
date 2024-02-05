@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,17 +28,16 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 @Singleton
@@ -55,10 +54,6 @@ public class MediaFilter implements Filter {
         this.storage = storage;
         this.statisticsManager = statisticsManager;
         this.permissionsServiceProvider = permissionsServiceProvider;
-    }
-
-    @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     @Override
@@ -84,7 +79,7 @@ public class MediaFilter implements Filter {
             String[] parts = path != null ? path.split("/") : null;
             if (parts != null && parts.length >= 2) {
                 Device device = storage.getObject(Device.class, new Request(
-                        new Columns.All(), new Condition.Equals("uniqueId", "uniqueId", parts[1])));
+                        new Columns.All(), new Condition.Equals("uniqueId", parts[1])));
                 if (device != null) {
                     permissionsServiceProvider.get().checkPermission(Device.class, userId, device.getId());
                     chain.doFilter(request, response);
@@ -97,10 +92,6 @@ public class MediaFilter implements Filter {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
             httpResponse.getWriter().println(Log.exceptionStack(e));
         }
-    }
-
-    @Override
-    public void destroy() {
     }
 
 }

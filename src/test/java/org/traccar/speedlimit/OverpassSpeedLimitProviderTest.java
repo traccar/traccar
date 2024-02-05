@@ -1,22 +1,24 @@
 package org.traccar.speedlimit;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import org.traccar.config.Config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class OverpassSpeedLimitProviderTest {
 
     private final Client client = ClientBuilder.newClient();
 
-    @Ignore
+    @Disabled
     @Test
     public void testOverpass() throws Exception {
-        SpeedLimitProvider provider = new OverpassSpeedLimitProvider(client, "http://8.8.8.8/api/interpreter");
+        var config = new Config();
+        SpeedLimitProvider provider = new OverpassSpeedLimitProvider(config, client, "http://8.8.8.8/api/interpreter");
 
         provider.getSpeedLimit(34.74767, -82.48098, new SpeedLimitProvider.SpeedLimitProviderCallback() {
             @Override

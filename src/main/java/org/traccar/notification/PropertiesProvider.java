@@ -37,7 +37,8 @@ public class PropertiesProvider {
         if (config != null) {
             return config.getString(key);
         } else {
-            return extendedModel.getString(key.getKey());
+            String result = extendedModel.getString(key.getKey());
+            return result != null ? result : key.getDefaultValue();
         }
     }
 

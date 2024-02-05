@@ -20,12 +20,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.forward.EventData;
+import org.traccar.forward.EventForwarder;
 import org.traccar.geocoder.Geocoder;
+import org.traccar.helper.DateUtil;
 import org.traccar.model.Calendar;
+import org.traccar.model.Device;
 import org.traccar.model.Event;
-import org.traccar.model.Notification;
+import org.traccar.model.Geofence;
+import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
-import org.traccar.notification.EventForwarder;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.session.cache.CacheManager;
@@ -34,13 +38,15 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Request;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+@Singleton
 public class NotificationManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
@@ -52,6 +58,7 @@ public class NotificationManager {
     private final Geocoder geocoder;
 
     private final boolean geocodeOnRequest;
+    private final long timeThreshold;
 
     @Inject
     public NotificationManager(
@@ -63,6 +70,7 @@ public class NotificationManager {
         this.notificatorManager = notificatorManager;
         this.geocoder = geocoder;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
+        timeThreshold = config.getLong(Keys.NOTIFICATOR_TIME_THRESHOLD);
     }
 
     private void updateEvent(Event event, Position position) {
@@ -72,7 +80,14 @@ public class NotificationManager {
             LOGGER.warn("Event save error", error);
         }
 
-        var notifications = cacheManager.getDeviceObjects(event.getDeviceId(), Notification.class).stream()
+        forwardEvent(event, position);
+
+        if (System.currentTimeMillis() - event.getEventTime().getTime() > timeThreshold) {
+            LOGGER.info("Skipping notifications for old event");
+            return;
+        }
+
+        var notifications = cacheManager.getDeviceNotifications(event.getDeviceId()).stream()
                 .filter(notification -> notification.getType().equals(event.getType()))
                 .filter(notification -> {
                     if (event.getType().equals(Event.TYPE_ALARM)) {
@@ -92,6 +107,14 @@ public class NotificationManager {
                 })
                 .collect(Collectors.toUnmodifiableList());
 
+        Device device = cacheManager.getObject(Device.class, event.getDeviceId());
+        LOGGER.info(
+                "Event id: {}, time: {}, type: {}, notifications: {}",
+                device.getUniqueId(),
+                DateUtil.formatDate(event.getEventTime(), false),
+                event.getType(),
+                notifications.size());
+
         if (!notifications.isEmpty()) {
             if (position != null && position.getAddress() == null && geocodeOnRequest && geocoder != null) {
                 position.setAddress(geocoder.getAddress(position.getLatitude(), position.getLongitude(), null));
@@ -101,17 +124,33 @@ public class NotificationManager {
                 cacheManager.getNotificationUsers(notification.getId(), event.getDeviceId()).forEach(user -> {
                     for (String notificator : notification.getNotificatorsTypes()) {
                         try {
-                            notificatorManager.getNotificator(notificator).send(user, event, position);
-                        } catch (MessageException | InterruptedException exception) {
+                            notificatorManager.getNotificator(notificator).send(notification, user, event, position);
+                        } catch (MessageException exception) {
                             LOGGER.warn("Notification failed", exception);
                         }
                     }
                 });
             });
         }
+    }
 
+    private void forwardEvent(Event event, Position position) {
         if (eventForwarder != null) {
-            eventForwarder.forwardEvent(event, position);
+            EventData eventData = new EventData();
+            eventData.setEvent(event);
+            eventData.setPosition(position);
+            eventData.setDevice(cacheManager.getObject(Device.class, event.getDeviceId()));
+            if (event.getGeofenceId() != 0) {
+                eventData.setGeofence(cacheManager.getObject(Geofence.class, event.getGeofenceId()));
+            }
+            if (event.getMaintenanceId() != 0) {
+                eventData.setMaintenance(cacheManager.getObject(Maintenance.class, event.getMaintenanceId()));
+            }
+            eventForwarder.forward(eventData, (success, throwable) -> {
+                if (!success) {
+                    LOGGER.warn("Event forwarding failed", throwable);
+                }
+            });
         }
     }
 
@@ -122,7 +161,7 @@ public class NotificationManager {
             try {
                 cacheManager.addDevice(event.getDeviceId());
                 updateEvent(event, position);
-            } catch (StorageException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
                 cacheManager.removeDevice(event.getDeviceId());

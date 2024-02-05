@@ -21,7 +21,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.SocketAddress;
 
 public class ArnaviProtocolDecoder extends BaseProtocolDecoder {

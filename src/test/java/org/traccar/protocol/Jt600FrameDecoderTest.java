@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class Jt600FrameDecoderTest extends ProtocolTest {
@@ -9,6 +9,14 @@ public class Jt600FrameDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new Jt600FrameDecoder());
+
+        verifyFrame(
+                binary("2460201102320112003401010000000422434199114158229e000000000009000000000010e06400000000000020100e0868817043592664000000000000"),
+                decoder.decode(null, null, binary("2460201102320112003401010000000422434199114158229e000000000009000000000010e06400000000000020100e0868817043592664000000000000")));
+
+        verifyFrame(
+                binary("24657060730131001b13111710361906538525079524797f000000000000000003f300036c"),
+                decoder.decode(null, null, binary("24657060730131001b13111710361906538525079524797f000000000000000003f300036c")));
 
         verifyFrame(
                 binary("2480413009781914003406102107544354193631006213423b00000000006c070000000020e064f91ea0671d00020f0f0f0f0f0f0f0f0f0f07f100ea0f6e"),

@@ -23,25 +23,29 @@ import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.database.CommandsManager;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
+import org.traccar.model.Group;
 import org.traccar.model.Position;
+import org.traccar.model.QueuedCommand;
 import org.traccar.model.Typed;
+import org.traccar.model.User;
 import org.traccar.model.UserRestrictions;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -82,7 +86,15 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     public Collection<Command> get(@QueryParam("deviceId") long deviceId) throws StorageException {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
         BaseProtocol protocol = getDeviceProtocol(deviceId);
-        return get(false, 0, 0, deviceId).stream().filter(command -> {
+
+        var commands = storage.getObjects(baseClass, new Request(
+                new Columns.All(),
+                Condition.merge(List.of(
+                        new Condition.Permission(User.class, getUserId(), baseClass),
+                        new Condition.Permission(Device.class, deviceId, baseClass)
+                ))));
+
+        return commands.stream().filter(command -> {
             String type = command.getType();
             if (protocol != null) {
                 return command.getTextChannel() && protocol.getSupportedTextCommands().contains(type)
@@ -95,12 +107,38 @@ public class CommandResource extends ExtendedObjectResource<Command> {
 
     @POST
     @Path("send")
-    public Response send(Command entity) throws Exception {
-        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
-        permissionsService.checkRestriction(getUserId(), UserRestrictions::getLimitCommands);
-        permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
-        if (!commandsManager.sendCommand(entity)) {
-            return Response.accepted(entity).build();
+    public Response send(Command entity, @QueryParam("groupId") long groupId) throws Exception {
+        if (entity.getId() > 0) {
+            permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
+            long deviceId = entity.getDeviceId();
+            entity = storage.getObject(baseClass, new Request(
+                    new Columns.All(), new Condition.Equals("id", entity.getId())));
+            entity.setDeviceId(deviceId);
+        } else {
+            permissionsService.checkRestriction(getUserId(), UserRestrictions::getLimitCommands);
+        }
+
+        if (groupId > 0) {
+            permissionsService.checkPermission(Group.class, getUserId(), groupId);
+            var devices = DeviceUtil.getAccessibleDevices(storage, getUserId(), List.of(), List.of(groupId));
+            List<QueuedCommand> queuedCommands = new ArrayList<>();
+            for (Device device : devices) {
+                Command command = QueuedCommand.fromCommand(entity).toCommand();
+                command.setDeviceId(device.getId());
+                QueuedCommand queuedCommand = commandsManager.sendCommand(command);
+                if (queuedCommand != null) {
+                    queuedCommands.add(queuedCommand);
+                }
+            }
+            if (!queuedCommands.isEmpty()) {
+                return Response.accepted(queuedCommands).build();
+            }
+        } else {
+            permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
+            QueuedCommand queuedCommand = commandsManager.sendCommand(entity);
+            if (queuedCommand != null) {
+                return Response.accepted(queuedCommand).build();
+            }
         }
         return Response.ok(entity).build();
     }

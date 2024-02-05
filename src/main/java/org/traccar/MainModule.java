@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr353.JSR353Module;
+import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -26,15 +26,26 @@ import com.google.inject.name.Names;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.log.NullLogChute;
-import org.eclipse.jetty.util.URIUtil;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.broadcast.MulticastBroadcastService;
+import org.traccar.broadcast.RedisBroadcastService;
 import org.traccar.broadcast.NullBroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
+import org.traccar.database.OpenIdProvider;
 import org.traccar.database.StatisticsManager;
+import org.traccar.forward.EventForwarder;
+import org.traccar.forward.EventForwarderJson;
+import org.traccar.forward.EventForwarderAmqp;
+import org.traccar.forward.EventForwarderKafka;
+import org.traccar.forward.EventForwarderMqtt;
+import org.traccar.forward.PositionForwarder;
+import org.traccar.forward.PositionForwarderJson;
+import org.traccar.forward.PositionForwarderAmqp;
+import org.traccar.forward.PositionForwarderKafka;
+import org.traccar.forward.PositionForwarderRedis;
+import org.traccar.forward.PositionForwarderUrl;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
@@ -46,6 +57,7 @@ import org.traccar.geocoder.Geocoder;
 import org.traccar.geocoder.GisgraphyGeocoder;
 import org.traccar.geocoder.GoogleGeocoder;
 import org.traccar.geocoder.HereGeocoder;
+import org.traccar.geocoder.LocationIqGeocoder;
 import org.traccar.geocoder.MapQuestGeocoder;
 import org.traccar.geocoder.MapTilerGeocoder;
 import org.traccar.geocoder.MapboxGeocoder;
@@ -53,6 +65,7 @@ import org.traccar.geocoder.MapmyIndiaGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.PositionStackGeocoder;
+import org.traccar.geocoder.TestGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
@@ -62,11 +75,12 @@ import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
+import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.SanitizerModule;
+import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
 import org.traccar.mail.SmtpMailManager;
-import org.traccar.notification.EventForwarder;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
@@ -74,17 +88,18 @@ import org.traccar.sms.SnsSmsClient;
 import org.traccar.speedlimit.OverpassSpeedLimitProvider;
 import org.traccar.speedlimit.SpeedLimitProvider;
 import org.traccar.storage.DatabaseStorage;
+import org.traccar.storage.MemoryStorage;
 import org.traccar.storage.Storage;
 import org.traccar.web.WebServer;
+import org.traccar.api.security.LoginService;
 
-import javax.annotation.Nullable;
-import javax.inject.Singleton;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.ext.ContextResolver;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Singleton;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
 import java.util.Properties;
 
 public class MainModule extends AbstractModule {
@@ -99,25 +114,35 @@ public class MainModule extends AbstractModule {
     protected void configure() {
         bindConstant().annotatedWith(Names.named("configFile")).to(configFile);
         bind(Config.class).asEagerSingleton();
-        bind(Storage.class).to(DatabaseStorage.class);
         bind(Timer.class).to(HashedWheelTimer.class).in(Scopes.SINGLETON);
     }
 
+    @Singleton
+    @Provides
+    public static Storage provideStorage(Injector injector, Config config) {
+        if (config.getBoolean(Keys.DATABASE_MEMORY)) {
+            return injector.getInstance(MemoryStorage.class);
+        } else {
+            return injector.getInstance(DatabaseStorage.class);
+        }
+    }
+
+    @Singleton
     @Provides
     public static ObjectMapper provideObjectMapper(Config config) {
         ObjectMapper objectMapper = new ObjectMapper();
         if (config.getBoolean(Keys.WEB_SANITIZE)) {
             objectMapper.registerModule(new SanitizerModule());
         }
-        objectMapper.registerModule(new JSR353Module());
-        objectMapper.setConfig(objectMapper
-                .getSerializationConfig().without(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS));
+        objectMapper.registerModule(new JSONPModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return objectMapper;
     }
 
+    @Singleton
     @Provides
-    public static Client provideClient(ObjectMapper objectMapper) {
-        return ClientBuilder.newClient().register((ContextResolver<ObjectMapper>) clazz -> objectMapper);
+    public static Client provideClient(ObjectMapperContextResolver objectMapperContextResolver) {
+        return ClientBuilder.newClient().register(objectMapperContextResolver);
     }
 
     @Singleton
@@ -131,6 +156,7 @@ public class MainModule extends AbstractModule {
         return null;
     }
 
+    @Singleton
     @Provides
     public static MailManager provideMailManager(Config config, StatisticsManager statisticsManager) {
         if (config.getBoolean(Keys.MAIL_DEBUG)) {
@@ -149,6 +175,17 @@ public class MainModule extends AbstractModule {
         return null;
     }
 
+    @Singleton
+    @Provides
+    public static OpenIdProvider provideOpenIDProvider(
+        Config config, LoginService loginService, ObjectMapper objectMapper
+        ) throws InterruptedException, IOException, URISyntaxException {
+        if (config.hasKey(Keys.OPENID_CLIENT_ID)) {
+            return new OpenIdProvider(config, loginService, HttpClient.newHttpClient(), objectMapper);
+        }
+        return null;
+    }
+
     @Provides
     public static WebServer provideWebServer(Injector injector, Config config) {
         if (config.hasKey(Keys.WEB_PORT)) {
@@ -163,7 +200,6 @@ public class MainModule extends AbstractModule {
         if (config.getBoolean(Keys.GEOCODER_ENABLE)) {
             String type = config.getString(Keys.GEOCODER_TYPE, "google");
             String url = config.getString(Keys.GEOCODER_URL);
-            String id = config.getString(Keys.GEOCODER_ID);
             String key = config.getString(Keys.GEOCODER_KEY);
             String language = config.getString(Keys.GEOCODER_LANGUAGE);
             String formatString = config.getString(Keys.GEOCODER_FORMAT);
@@ -172,8 +208,14 @@ public class MainModule extends AbstractModule {
             int cacheSize = config.getInteger(Keys.GEOCODER_CACHE_SIZE);
             Geocoder geocoder;
             switch (type) {
+                case "test":
+                    geocoder = new TestGeocoder();
+                    break;
                 case "nominatim":
                     geocoder = new NominatimGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    break;
+                case "locationiq":
+                    geocoder = new LocationIqGeocoder(client, url, key, language, cacheSize, addressFormat);
                     break;
                 case "gisgraphy":
                     geocoder = new GisgraphyGeocoder(client, url, cacheSize, addressFormat);
@@ -200,7 +242,7 @@ public class MainModule extends AbstractModule {
                     geocoder = new BanGeocoder(client, cacheSize, addressFormat);
                     break;
                 case "here":
-                    geocoder = new HereGeocoder(client, url, id, key, language, cacheSize, addressFormat);
+                    geocoder = new HereGeocoder(client, url, key, language, cacheSize, addressFormat);
                     break;
                 case "mapmyindia":
                     geocoder = new MapmyIndiaGeocoder(client, url, key, cacheSize, addressFormat);
@@ -260,12 +302,13 @@ public class MainModule extends AbstractModule {
             switch (type) {
                 case "overpass":
                 default:
-                    return new OverpassSpeedLimitProvider(client, url);
+                    return new OverpassSpeedLimitProvider(config, client, url);
             }
         }
         return null;
     }
 
+    @Singleton
     @Provides
     public static GeolocationHandler provideGeolocationHandler(
             Config config, @Nullable GeolocationProvider geolocationProvider, CacheManager cacheManager,
@@ -276,6 +319,7 @@ public class MainModule extends AbstractModule {
         return null;
     }
 
+    @Singleton
     @Provides
     public static GeocoderHandler provideGeocoderHandler(
             Config config, @Nullable Geocoder geocoder, CacheManager cacheManager) {
@@ -285,6 +329,7 @@ public class MainModule extends AbstractModule {
         return null;
     }
 
+    @Singleton
     @Provides
     public static SpeedLimitHandler provideSpeedLimitHandler(@Nullable SpeedLimitProvider speedLimitProvider) {
         if (speedLimitProvider != null) {
@@ -297,16 +342,56 @@ public class MainModule extends AbstractModule {
     @Provides
     public static BroadcastService provideBroadcastService(
             Config config, ObjectMapper objectMapper) throws IOException {
-        if (config.hasKey(Keys.BROADCAST_ADDRESS)) {
-            return new MulticastBroadcastService(config, objectMapper);
+        if (config.hasKey(Keys.BROADCAST_TYPE)) {
+            switch (config.getString(Keys.BROADCAST_TYPE)) {
+                case "multicast":
+                    return new MulticastBroadcastService(config, objectMapper);
+                case "redis":
+                    return new RedisBroadcastService(config, objectMapper);
+                default:
+                    break;
+            }
         }
         return new NullBroadcastService();
     }
 
+    @Singleton
     @Provides
-    public static EventForwarder provideEventForwarder(Config config, Client client, CacheManager cacheManager) {
+    public static EventForwarder provideEventForwarder(Config config, Client client, ObjectMapper objectMapper) {
         if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
-            return new EventForwarder(config, client, cacheManager);
+            String forwardType = config.getString(Keys.EVENT_FORWARD_TYPE);
+            switch (forwardType) {
+                case "amqp":
+                    return new EventForwarderAmqp(config, objectMapper);
+                case "kafka":
+                    return new EventForwarderKafka(config, objectMapper);
+                case "mqtt":
+                    return new EventForwarderMqtt(config, objectMapper);
+                case "json":
+                default:
+                    return new EventForwarderJson(config, client);
+            }
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static PositionForwarder providePositionForwarder(Config config, Client client, ObjectMapper objectMapper) {
+        if (config.hasKey(Keys.FORWARD_URL)) {
+            switch (config.getString(Keys.FORWARD_TYPE)) {
+                case "json":
+                    return new PositionForwarderJson(config, client, objectMapper);
+                case "amqp":
+                    return new PositionForwarderAmqp(config, objectMapper);
+                case "kafka":
+                    return new PositionForwarderKafka(config, objectMapper);
+                case "redis":
+                    return new PositionForwarderRedis(config, objectMapper);
+                case "url":
+                default:
+                    return new PositionForwarderUrl(config, client, objectMapper);
+            }
         }
         return null;
     }
@@ -315,21 +400,8 @@ public class MainModule extends AbstractModule {
     @Provides
     public static VelocityEngine provideVelocityEngine(Config config) {
         Properties properties = new Properties();
-        properties.setProperty("file.resource.loader.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
-        properties.setProperty("runtime.log.logsystem.class", NullLogChute.class.getName());
-
-        if (config.hasKey(Keys.WEB_URL)) {
-            properties.setProperty("web.url", config.getString(Keys.WEB_URL).replaceAll("/$", ""));
-        } else {
-            String address;
-            try {
-                address = config.getString(Keys.WEB_ADDRESS, InetAddress.getLocalHost().getHostAddress());
-            } catch (UnknownHostException e) {
-                address = "localhost";
-            }
-            String url = URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
-            properties.setProperty("web.url", url);
-        }
+        properties.setProperty("resource.loader.file.path", config.getString(Keys.TEMPLATES_ROOT) + "/");
+        properties.setProperty("web.url", WebHelper.retrieveWebUrl(config));
 
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.init(properties);

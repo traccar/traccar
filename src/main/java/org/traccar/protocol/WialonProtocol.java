@@ -27,7 +27,7 @@ import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 public class WialonProtocol extends BaseProtocol {
 

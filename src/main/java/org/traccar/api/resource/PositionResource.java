@@ -28,21 +28,23 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.StreamingOutput;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.LinkedList;
 
 @Path("positions")
 @Produces(MediaType.APPLICATION_JSON)
@@ -67,7 +69,7 @@ public class PositionResource extends BaseResource {
             var positions = new ArrayList<Position>();
             for (long positionId : positionIds) {
                 Position position = storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", "id", positionId)));
+                        new Columns.All(), new Condition.Equals("id", positionId)));
                 permissionsService.checkPermission(Device.class, getUserId(), position.getDeviceId());
                 positions.add(position);
             }
@@ -84,6 +86,21 @@ public class PositionResource extends BaseResource {
         } else {
             return PositionUtil.getLatestPositions(storage, getUserId());
         }
+    }
+
+    @DELETE
+    public Response remove(
+            @QueryParam("deviceId") long deviceId,
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
+
+        var conditions = new LinkedList<Condition>();
+        conditions.add(new Condition.Equals("deviceId", deviceId));
+        conditions.add(new Condition.Between("fixTime", "from", from, "to", to));
+        storage.removeObject(Position.class, new Request(Condition.merge(conditions)));
+
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @Path("kml")

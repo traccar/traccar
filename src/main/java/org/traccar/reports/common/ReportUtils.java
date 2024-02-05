@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,8 @@
  */
 package org.traccar.reports.common;
 
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
@@ -30,43 +32,37 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.geocoder.Geocoder;
-import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
-import org.traccar.model.Group;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.reports.model.BaseReportItem;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.TripReportItem;
-import org.traccar.session.DeviceState;
+import org.traccar.session.state.MotionProcessor;
+import org.traccar.session.state.MotionState;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import javax.annotation.Nullable;
-import javax.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ReportUtils {
@@ -74,18 +70,16 @@ public class ReportUtils {
     private final Config config;
     private final Storage storage;
     private final PermissionsService permissionsService;
-    private final TripsConfig tripsConfig;
     private final VelocityEngine velocityEngine;
     private final Geocoder geocoder;
 
     @Inject
     public ReportUtils(
             Config config, Storage storage, PermissionsService permissionsService,
-            TripsConfig tripsConfig, VelocityEngine velocityEngine, @Nullable Geocoder geocoder) {
+            VelocityEngine velocityEngine, @Nullable Geocoder geocoder) {
         this.config = config;
         this.storage = storage;
         this.permissionsService = permissionsService;
-        this.tripsConfig = tripsConfig;
         this.velocityEngine = velocityEngine;
         this.geocoder = geocoder;
     }
@@ -93,9 +87,9 @@ public class ReportUtils {
     public <T extends BaseModel> T getObject(
             long userId, Class<T> clazz, long objectId) throws StorageException, SecurityException {
         return storage.getObject(clazz, new Request(
-                new Columns.Include("id"),
+                new Columns.All(),
                 new Condition.And(
-                        new Condition.Equals("id", "id", objectId),
+                        new Condition.Equals("id", objectId),
                         new Condition.Permission(User.class, userId, clazz))));
     }
 
@@ -106,49 +100,11 @@ public class ReportUtils {
         }
     }
 
-    public Collection<Device> getAccessibleDevices(
-            long userId, Collection<Long> deviceIds, Collection<Long> groupIds) throws StorageException {
-
-        var devices = storage.getObjects(Device.class, new Request(
-                new Columns.All(),
-                new Condition.Permission(User.class, userId, Device.class)));
-        var deviceById = devices.stream()
-                .collect(Collectors.toUnmodifiableMap(Device::getId, x -> x));
-        var devicesByGroup = devices.stream()
-                .filter(x -> x.getGroupId() > 0)
-                .collect(Collectors.groupingBy(Device::getGroupId));
-
-        var groups = storage.getObjects(Group.class, new Request(
-                new Columns.All(),
-                new Condition.Permission(User.class, userId, Group.class)));
-        var groupsByGroup = groups.stream()
-                .filter(x -> x.getGroupId() > 0)
-                .collect(Collectors.groupingBy(Group::getGroupId));
-
-        var results = deviceIds.stream()
-                .map(deviceById::get)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-
-        var groupQueue = new LinkedList<>(groupIds);
-        while (!groupQueue.isEmpty()) {
-            long groupId = groupQueue.pop();
-            results.addAll(devicesByGroup.getOrDefault(groupId, Collections.emptyList()));
-            groupQueue.addAll(groupsByGroup.getOrDefault(groupId, Collections.emptyList())
-                    .stream().map(Group::getId).collect(Collectors.toUnmodifiableList()));
-        }
-
-        return results;
-    }
-
-    public double calculateFuel(Position firstPosition, Position lastPosition) {
-
-        if (firstPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null
-                && lastPosition.getAttributes().get(Position.KEY_FUEL_LEVEL) != null) {
-
-            BigDecimal value = BigDecimal.valueOf(firstPosition.getDouble(Position.KEY_FUEL_LEVEL)
-                    - lastPosition.getDouble(Position.KEY_FUEL_LEVEL));
-            return value.setScale(1, RoundingMode.HALF_EVEN).doubleValue();
+    public double calculateFuel(Position first, Position last) {
+        if (first.hasAttribute(Position.KEY_FUEL_USED) && last.hasAttribute(Position.KEY_FUEL_USED)) {
+            return last.getDouble(Position.KEY_FUEL_USED) - first.getDouble(Position.KEY_FUEL_USED);
+        } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL) && last.hasAttribute(Position.KEY_FUEL_LEVEL)) {
+            return first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL);
         }
         return 0;
     }
@@ -166,7 +122,7 @@ public class ReportUtils {
         if (driverUniqueId != null) {
             Driver driver = storage.getObject(Driver.class, new Request(
                     new Columns.All(),
-                    new Condition.Equals("uniqueId", "uniqueId", driverUniqueId)));
+                    new Condition.Equals("uniqueId", driverUniqueId)));
             if (driver != null) {
                 return driver.getName();
             }
@@ -205,19 +161,8 @@ public class ReportUtils {
     }
 
     private TripReportItem calculateTrip(
-            Device device, ArrayList<Position> positions, int startIndex, int endIndex,
+            Device device, Position startTrip, Position endTrip, double maxSpeed,
             boolean ignoreOdometer) throws StorageException {
-
-        Position startTrip = positions.get(startIndex);
-        Position endTrip = positions.get(endIndex);
-
-        double speedMax = 0;
-        for (int i = startIndex; i <= endIndex; i++) {
-            double speed = positions.get(i).getSpeed();
-            if (speed > speedMax) {
-                speedMax = speed;
-            }
-        }
 
         TripReportItem trip = new TripReportItem();
 
@@ -251,7 +196,7 @@ public class ReportUtils {
         if (tripDuration > 0) {
             trip.setAverageSpeed(UnitsConverter.knotsFromMps(trip.getDistance() * 1000 / tripDuration));
         }
-        trip.setMaxSpeed(speedMax);
+        trip.setMaxSpeed(maxSpeed);
         trip.setSpentFuel(calculateFuel(startTrip, endTrip));
 
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));
@@ -271,10 +216,7 @@ public class ReportUtils {
     }
 
     private StopReportItem calculateStop(
-            Device device, ArrayList<Position> positions, int startIndex, int endIndex, boolean ignoreOdometer) {
-
-        Position startStop = positions.get(startIndex);
-        Position endStop = positions.get(endIndex);
+            Device device, Position startStop, Position endStop, boolean ignoreOdometer) {
 
         StopReportItem stop = new StopReportItem();
 
@@ -318,17 +260,17 @@ public class ReportUtils {
 
     @SuppressWarnings("unchecked")
     private <T extends BaseReportItem> T calculateTripOrStop(
-            Device device, ArrayList<Position> positions, int startIndex, int endIndex,
+            Device device, Position startPosition, Position endPosition, double maxSpeed,
             boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
 
         if (reportClass.equals(TripReportItem.class)) {
-            return (T) calculateTrip(device, positions, startIndex, endIndex, ignoreOdometer);
+            return (T) calculateTrip(device, startPosition, endPosition, maxSpeed, ignoreOdometer);
         } else {
-            return (T) calculateStop(device, positions, startIndex, endIndex, ignoreOdometer);
+            return (T) calculateStop(device, startPosition, endPosition, ignoreOdometer);
         }
     }
 
-    private boolean isMoving(ArrayList<Position> positions, int index, TripsConfig tripsConfig) {
+    private boolean isMoving(List<Position> positions, int index, TripsConfig tripsConfig) {
         if (tripsConfig.getMinimalNoDataDuration() > 0) {
             boolean beforeGap = index < positions.size() - 1
                     && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
@@ -343,50 +285,113 @@ public class ReportUtils {
         return positions.get(index).getBoolean(Position.KEY_MOTION);
     }
 
-    public <T extends BaseReportItem> Collection<T> detectTripsAndStops(
-            Device device, Collection<Position> positionCollection, boolean ignoreOdometer,
-            Class<T> reportClass) throws StorageException {
+    public <T extends BaseReportItem> List<T> detectTripsAndStops(
+            Device device, Date from, Date to, Class<T> reportClass) throws StorageException {
 
-        Collection<T> result = new ArrayList<>();
+        long threshold = config.getLong(Keys.REPORT_FAST_THRESHOLD);
+        if (Duration.between(from.toInstant(), to.toInstant()).toSeconds() > threshold) {
+            return fastTripsAndStops(device, from, to, reportClass);
+        } else {
+            return slowTripsAndStops(device, from, to, reportClass);
+        }
+    }
 
-        ArrayList<Position> positions = new ArrayList<>(positionCollection);
+    public <T extends BaseReportItem> List<T> slowTripsAndStops(
+            Device device, Date from, Date to, Class<T> reportClass) throws StorageException {
+
+        List<T> result = new ArrayList<>();
+        TripsConfig tripsConfig = new TripsConfig(
+                new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
+        boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
+
+        var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
         if (!positions.isEmpty()) {
             boolean trips = reportClass.equals(TripReportItem.class);
-            MotionEventHandler motionHandler = new MotionEventHandler(null, null, tripsConfig);
-            DeviceState deviceState = new DeviceState();
-            deviceState.setMotionState(isMoving(positions, 0, tripsConfig));
-            int startEventIndex = trips == deviceState.getMotionState() ? 0 : -1;
+
+            MotionState motionState = new MotionState();
+            boolean initialValue = isMoving(positions, 0, tripsConfig);
+            motionState.setMotionStreak(initialValue);
+            motionState.setMotionState(initialValue);
+
+            boolean detected = trips == motionState.getMotionState();
+            double maxSpeed = 0;
+            int startEventIndex = detected ? 0 : -1;
             int startNoEventIndex = -1;
             for (int i = 0; i < positions.size(); i++) {
-                Map<Event, Position> event = motionHandler.updateMotionState(deviceState, positions.get(i),
-                        isMoving(positions, i, tripsConfig));
-                if (startEventIndex == -1
-                        && (trips != deviceState.getMotionState() && deviceState.getMotionPosition() != null
-                        || trips == deviceState.getMotionState() && event != null)) {
-                    startEventIndex = i;
-                    startNoEventIndex = -1;
-                } else if (trips != deviceState.getMotionState() && startEventIndex != -1
-                        && deviceState.getMotionPosition() == null && event == null) {
-                    startEventIndex = -1;
+                boolean motion = isMoving(positions, i, tripsConfig);
+                if (motionState.getMotionState() != motion) {
+                    if (motion == trips) {
+                        if (!detected) {
+                            startEventIndex = i;
+                            maxSpeed = positions.get(i).getSpeed();
+                        }
+                        startNoEventIndex = -1;
+                    } else {
+                        startNoEventIndex = i;
+                    }
+                } else {
+                    maxSpeed = Math.max(maxSpeed, positions.get(i).getSpeed());
                 }
-                if (startNoEventIndex == -1
-                        && (trips == deviceState.getMotionState() && deviceState.getMotionPosition() != null
-                        || trips != deviceState.getMotionState() && event != null)) {
-                    startNoEventIndex = i;
-                } else if (startNoEventIndex != -1 && deviceState.getMotionPosition() == null && event == null) {
-                    startNoEventIndex = -1;
-                }
-                if (startEventIndex != -1 && startNoEventIndex != -1 && event != null
-                        && trips != deviceState.getMotionState()) {
-                    result.add(calculateTripOrStop(
-                            device, positions, startEventIndex, startNoEventIndex, ignoreOdometer, reportClass));
-                    startEventIndex = -1;
+
+                MotionProcessor.updateState(motionState, positions.get(i), motion, tripsConfig);
+                if (motionState.getEvent() != null) {
+                    if (motion == trips) {
+                        detected = true;
+                        startNoEventIndex = -1;
+                    } else if (startEventIndex >= 0 && startNoEventIndex >= 0) {
+                        result.add(calculateTripOrStop(
+                                device, positions.get(startEventIndex), positions.get(startNoEventIndex),
+                                maxSpeed, ignoreOdometer, reportClass));
+                        detected = false;
+                        startEventIndex = -1;
+                        startNoEventIndex = -1;
+                    }
                 }
             }
-            if (startEventIndex != -1 && (startNoEventIndex != -1 || !trips)) {
-                int endIndex = startNoEventIndex != -1 ? startNoEventIndex : positions.size() - 1;
+            if (detected & startEventIndex >= 0 && startEventIndex < positions.size() - 1) {
+                int endIndex = startNoEventIndex >= 0 ? startNoEventIndex : positions.size() - 1;
                 result.add(calculateTripOrStop(
-                        device, positions, startEventIndex, endIndex, ignoreOdometer, reportClass));
+                        device, positions.get(startEventIndex), positions.get(endIndex),
+                        maxSpeed, ignoreOdometer, reportClass));
+            }
+        }
+
+        return result;
+    }
+
+    public <T extends BaseReportItem> List<T> fastTripsAndStops(
+            Device device, Date from, Date to, Class<T> reportClass) throws StorageException {
+
+        List<T> result = new ArrayList<>();
+        boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
+        boolean trips = reportClass.equals(TripReportItem.class);
+        Set<String> filter = Set.of(Event.TYPE_DEVICE_MOVING, Event.TYPE_DEVICE_STOPPED);
+
+        var events = storage.getObjects(Event.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("deviceId", device.getId()),
+                        new Condition.Between("eventTime", "from", from, "to", to)),
+                new Order("eventTime")));
+        var filteredEvents = events.stream()
+                .filter(event -> filter.contains(event.getType()))
+                .collect(Collectors.toList());
+
+        Event startEvent = null;
+        for (Event event : filteredEvents) {
+            boolean motion = event.getType().equals(Event.TYPE_DEVICE_MOVING);
+            if (motion == trips) {
+                startEvent = event;
+            } else if (startEvent != null) {
+                Position startPosition = storage.getObject(Position.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", startEvent.getPositionId())));
+                Position endPosition = storage.getObject(Position.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", event.getPositionId())));
+                if (startPosition != null && endPosition != null) {
+                    result.add(calculateTripOrStop(
+                            device, startPosition, endPosition, 0, ignoreOdometer, reportClass));
+                }
+                startEvent = null;
             }
         }
 

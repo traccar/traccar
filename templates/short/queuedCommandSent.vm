@@ -1,0 +1,2 @@
+#set($subject = "$device.name: queued command sent")
+Queued command sent to $device.name at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

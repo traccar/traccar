@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
@@ -35,6 +35,10 @@ public class MeiligaoProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_RADIUS, 1000);
 
         verifyCommand(encoder, command, binary("4040001312345678901234410603e87bb00d0a"));
+
+        command.setType(Command.TYPE_ENGINE_STOP);
+
+        verifyCommand(encoder, command, binary("4040001212345678901234411501fd460d0a"));
 
     }
 

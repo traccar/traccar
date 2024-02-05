@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-5.6">
+
+  <changeSet author="author" id="changelog-5.6">
+
+    <addColumn tableName="tc_devices">
+      <column name="motionstreak" type="BOOLEAN" defaultValueBoolean="false" />
+    </addColumn>
+
+    <createTable tableName="tc_reports">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="type" type="VARCHAR(32)">
+        <constraints nullable="false" />
+      </column>
+      <column name="description" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="calendarid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_reports" baseColumnNames="calendarid" constraintName="fk_reports_calendarid" referencedTableName="tc_calendars" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="tc_user_report">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="reportid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_user_report" baseColumnNames="userid" constraintName="fk_user_report_userid" referencedTableName="tc_users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="tc_user_report" baseColumnNames="reportid" constraintName="fk_user_report_reportid" referencedTableName="tc_reports" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="tc_group_report">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="reportid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_group_report" baseColumnNames="groupid" constraintName="fk_group_report_groupid" referencedTableName="tc_groups" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="tc_group_report" baseColumnNames="reportid" constraintName="fk_group_report_reportid" referencedTableName="tc_reports" referencedColumnNames="id" onDelete="CASCADE" />
+
+    <createTable tableName="tc_device_report">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="reportid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_device_report" baseColumnNames="deviceid" constraintName="fk_device_report_deviceid" referencedTableName="tc_devices" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="tc_device_report" baseColumnNames="reportid" constraintName="fk_device_report_reportid" referencedTableName="tc_reports" referencedColumnNames="id" onDelete="CASCADE" />
+
+  </changeSet>
+
+</databaseChangeLog>

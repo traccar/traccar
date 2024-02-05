@@ -34,6 +34,10 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
@@ -60,7 +64,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // course
             .number("(-?d+),")                   // altitude
             .number("(d+),")                     // odometer
-            .number("d+,")                       // runtime
+            .number("(d+),")                     // engine hours
             .number("(x+),")                     // status
             .number("(x+)?,")                    // input
             .number("(x+)?,")                    // output
@@ -78,7 +82,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .text("$$")
             .number("d+,")                       // length
             .number("(d+),")                     // imei
-            .number("x+,")                       // index
+            .number("(x+),")                     // index
             .text("A03,")                        // type
             .number("(d+)?,")                    // alarm
             .number("(dd)(dd)(dd)")              // date (yymmdd)
@@ -137,14 +141,18 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             .number("xx")
             .compile();
 
-    private void requestPhoto(Channel channel, SocketAddress socketAddress, String imei, String file) {
+    private void sendResponse(Channel channel, SocketAddress remoteAddress, String imei, String content) {
         if (channel != null) {
-            String content = "1,D06," + file + "," + photo.writerIndex() + "," + Math.min(1024, photo.writableBytes());
             int length = 1 + imei.length() + 1 + content.length();
             String response = String.format("##%02d,%s,%s*", length, imei, content);
             response += Checksum.sum(response) + "\r\n";
-            channel.writeAndFlush(new NetworkMessage(response, socketAddress));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
+    }
+
+    private void requestPhoto(Channel channel, SocketAddress remoteAddress, String imei, String file) {
+        String content = "1,D06," + file + "," + photo.writerIndex() + "," + Math.min(1024, photo.writableBytes());
+        sendResponse(channel, remoteAddress, imei, content);
     }
 
     private String decodeAlarm(Integer alarm) {
@@ -175,6 +183,8 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 case 30:
                 case 32:
                     return Position.ALARM_JAMMING;
+                case 31:
+                    return Position.ALARM_FALL_DOWN;
                 case 33:
                     return Position.ALARM_GEOFENCE_EXIT;
                 case 34:
@@ -184,6 +194,10 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 case 40:
                 case 41:
                     return Position.ALARM_TEMPERATURE;
+                case 53:
+                    return Position.ALARM_POWER_ON;
+                case 54:
+                    return Position.ALARM_POWER_OFF;
                 default:
                     return null;
             }
@@ -200,10 +214,13 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        String imei = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
             return null;
         }
+
+        String index = parser.next();
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -224,12 +241,14 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
             position.setValid(parser.next().equals("A"));
             position.setFixTime(position.getDeviceTime());
-            position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.setLatitude(parser.nextDouble());
             position.setLongitude(parser.nextDouble());
 
         } else {
+
+            getLastLocation(position, position.getDeviceTime());
 
             String[] points = parser.next().split("\\|");
             for (String point : points) {
@@ -242,6 +261,11 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.setNetwork(network);
+
+        DateFormat dateFormat = new SimpleDateFormat("yyMMddHHmmss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String response = index + ",A03," + dateFormat.format(new Date());
+        sendResponse(channel, remoteAddress, imei, response);
 
         return position;
     }
@@ -274,6 +298,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextInt());
 
         position.set(Position.KEY_ODOMETER, parser.nextLong());
+        position.set(Position.KEY_HOURS, parser.nextLong() * 1000);
 
         long status = parser.nextHexLong();
         position.set(Position.KEY_RSSI, BitUtil.between(status, 3, 8));
@@ -292,11 +317,11 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            String rfid = parser.next();
-            if (rfid.matches("\\p{XDigit}+")) {
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(Integer.parseInt(rfid, 16)));
+            String value = parser.next();
+            if (value.matches("\\p{XDigit}+")) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(Integer.parseInt(value, 16)));
             } else {
-                position.set("driverLicense", rfid);
+                position.set(Position.KEY_CARD, value);
             }
         }
 

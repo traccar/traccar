@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,11 +24,15 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.List;
 
 import io.netty.channel.ChannelHandler;
-import org.apache.commons.jexl2.JexlEngine;
-import org.apache.commons.jexl2.JexlException;
-import org.apache.commons.jexl2.MapContext;
+import org.apache.commons.jexl3.JexlFeatures;
+import org.apache.commons.jexl3.JexlEngine;
+import org.apache.commons.jexl3.JexlBuilder;
+import org.apache.commons.jexl3.introspection.JexlSandbox;
+import org.apache.commons.jexl3.JexlException;
+import org.apache.commons.jexl3.MapContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
@@ -39,8 +43,10 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
+@Singleton
 @ChannelHandler.Sharable
 public class ComputedAttributesHandler extends BaseDataHandler {
 
@@ -50,15 +56,33 @@ public class ComputedAttributesHandler extends BaseDataHandler {
 
     private final JexlEngine engine;
 
+    private final JexlFeatures features;
+
     private final boolean includeDeviceAttributes;
+    private final boolean includeLastAttributes;
 
     @Inject
     public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
-        engine = new JexlEngine();
-        engine.setStrict(true);
-        engine.setFunctions(Collections.singletonMap("math", Math.class));
+        JexlSandbox sandbox = new JexlSandbox(false);
+        sandbox.allow("com.safe.Functions");
+        sandbox.allow(Math.class.getName());
+        List.of(
+            Double.class, Float.class, Integer.class, Long.class, Short.class,
+            Character.class, Boolean.class, String.class, Byte.class)
+                .forEach((type) -> sandbox.allow(type.getName()));
+        features = new JexlFeatures()
+                .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
+                .loops(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOOPS))
+                .newInstance(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_NEW_INSTANCE_CREATION))
+                .structuredLiteral(true);
+        engine = new JexlBuilder()
+                .strict(true)
+                .namespaces(Collections.singletonMap("math", Math.class))
+                .sandbox(sandbox)
+                .create();
         includeDeviceAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_DEVICE_ATTRIBUTES);
+        includeLastAttributes = config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LAST_ATTRIBUTES);
     }
 
     private MapContext prepareContext(Position position) {
@@ -66,13 +90,17 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         if (includeDeviceAttributes) {
             Device device = cacheManager.getObject(Device.class, position.getDeviceId());
             if (device != null) {
-                for (Object key : device.getAttributes().keySet()) {
-                    result.set((String) key, device.getAttributes().get(key));
+                for (String key : device.getAttributes().keySet()) {
+                    result.set(key, device.getAttributes().get(key));
                 }
             }
         }
+        Position last = null;
+        if (includeLastAttributes) {
+            last = cacheManager.getPosition(position.getDeviceId());
+        }
         Set<Method> methods = new HashSet<>(Arrays.asList(position.getClass().getMethods()));
-        methods.removeAll(Arrays.asList(Object.class.getMethods()));
+        Arrays.asList(Object.class.getMethods()).forEach(methods::remove);
         for (Method method : methods) {
             if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
                 String name = Character.toLowerCase(method.getName().charAt(3)) + method.getName().substring(4);
@@ -80,9 +108,17 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 try {
                     if (!method.getReturnType().equals(Map.class)) {
                         result.set(name, method.invoke(position));
+                        if (last != null) {
+                            result.set(prefixAttribute("last", name), method.invoke(last));
+                        }
                     } else {
-                        for (Object key : ((Map) method.invoke(position)).keySet()) {
-                            result.set((String) key, ((Map) method.invoke(position)).get(key));
+                        for (Map.Entry<?, ?> entry : ((Map<?, ?>) method.invoke(position)).entrySet()) {
+                            result.set((String) entry.getKey(), entry.getValue());
+                        }
+                        if (last != null) {
+                            for (Map.Entry<?, ?> entry : ((Map<?, ?>) method.invoke(last)).entrySet()) {
+                                result.set(prefixAttribute("last", (String) entry.getKey()), entry.getValue());
+                            }
                         }
                     }
                 } catch (IllegalAccessException | InvocationTargetException error) {
@@ -93,12 +129,18 @@ public class ComputedAttributesHandler extends BaseDataHandler {
         return result;
     }
 
+    private String prefixAttribute(String prefix, String key) {
+        return prefix + Character.toUpperCase(key.charAt(0)) + key.substring(1);
+    }
+
     /**
      * @deprecated logic needs to be extracted to be used in API resource
      */
     @Deprecated
     public Object computeAttribute(Attribute attribute, Position position) throws JexlException {
-        return engine.createExpression(attribute.getExpression()).evaluate(prepareContext(position));
+        return engine
+                .createScript(features, engine.createInfo(), attribute.getExpression())
+                .execute(prepareContext(position));
     }
 
     @Override
@@ -114,17 +156,45 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 }
                 if (result != null) {
                     try {
-                        switch (attribute.getType()) {
-                            case "number":
-                                Number numberValue = (Number) result;
-                                position.getAttributes().put(attribute.getAttribute(), numberValue);
+                        switch (attribute.getAttribute()) {
+                            case "valid":
+                                position.setValid((Boolean) result);
                                 break;
-                            case "boolean":
-                                Boolean booleanValue = (Boolean) result;
-                                position.getAttributes().put(attribute.getAttribute(), booleanValue);
+                            case "latitude":
+                                position.setLatitude(((Number) result).doubleValue());
+                                break;
+                            case "longitude":
+                                position.setLongitude(((Number) result).doubleValue());
+                                break;
+                            case "altitude":
+                                position.setAltitude(((Number) result).doubleValue());
+                                break;
+                            case "speed":
+                                position.setSpeed(((Number) result).doubleValue());
+                                break;
+                            case "course":
+                                position.setCourse(((Number) result).doubleValue());
+                                break;
+                            case "address":
+                                position.setAddress((String) result);
+                                break;
+                            case "accuracy":
+                                position.setAccuracy(((Number) result).doubleValue());
                                 break;
                             default:
-                                position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                switch (attribute.getType()) {
+                                    case "number":
+                                        Number numberValue = (Number) result;
+                                        position.getAttributes().put(attribute.getAttribute(), numberValue);
+                                        break;
+                                    case "boolean":
+                                        Boolean booleanValue = (Boolean) result;
+                                        position.getAttributes().put(attribute.getAttribute(), booleanValue);
+                                        break;
+                                    default:
+                                        position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                }
+                                break;
                         }
                     } catch (ClassCastException error) {
                         LOGGER.warn("Attribute cast error", error);

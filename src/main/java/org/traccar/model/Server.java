@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
@@ -227,6 +228,18 @@ public class Server extends ExtendedModel implements UserRestrictions {
 
     private boolean geocoderEnabled;
 
+    private boolean textEnabled;
+
+    @QueryIgnore
+    public void setTextEnabled(boolean textEnabled) {
+        this.textEnabled = textEnabled;
+    }
+
+    @QueryIgnore
+    public Boolean getTextEnabled() {
+        return textEnabled;
+    }
+
     @QueryIgnore
     public void setGeocoderEnabled(boolean geocoderEnabled) {
         this.geocoderEnabled = geocoderEnabled;
@@ -249,4 +262,39 @@ public class Server extends ExtendedModel implements UserRestrictions {
         this.storageSpace = storageSpace;
     }
 
+    private boolean newServer;
+
+    @QueryIgnore
+    public boolean getNewServer() {
+        return newServer;
+    }
+
+    @QueryIgnore
+    public void setNewServer(boolean newServer) {
+        this.newServer = newServer;
+    }
+
+    private boolean openIdEnabled;
+
+    @QueryIgnore
+    public boolean getOpenIdEnabled() {
+        return openIdEnabled;
+    }
+
+    @QueryIgnore
+    public void setOpenIdEnabled(boolean openIdEnabled) {
+        this.openIdEnabled = openIdEnabled;
+    }
+
+    private boolean openIdForce;
+
+    @QueryIgnore
+    public boolean getOpenIdForce() {
+        return openIdForce;
+    }
+
+    @QueryIgnore
+    public void setOpenIdForce(boolean openIdForce) {
+        this.openIdForce = openIdForce;
+    }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,22 +15,25 @@
  */
 package org.traccar.speedlimit;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.ws.rs.client.AsyncInvoker;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.InvocationCallback;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.AsyncInvoker;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.InvocationCallback;
 
 public class OverpassSpeedLimitProvider implements SpeedLimitProvider {
 
     private final Client client;
     private final String url;
 
-    public OverpassSpeedLimitProvider(Client client, String url) {
+    public OverpassSpeedLimitProvider(Config config, Client client, String url) {
+        int accuracy = config.getInteger(Keys.SPEED_LIMIT_ACCURACY);
         this.client = client;
-        this.url = url + "?data=[out:json];way[maxspeed](around:100.0,%f,%f);out%%20tags;";
+        this.url = url + "?data=[out:json];way[maxspeed](around:" + accuracy + ",%f,%f);out%%20tags;";
     }
 
     private Double parseSpeed(String value) {

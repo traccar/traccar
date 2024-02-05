@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     }
 
-    static boolean isLongFormat(ByteBuf buf, int flagIndex) {
-        return buf.getUnsignedByte(flagIndex) >> 4 >= 7;
+    static boolean isLongFormat(ByteBuf buf) {
+        return buf.getUnsignedByte(buf.readerIndex() + 8) == 0;
     }
 
     static void decodeBinaryLocation(ByteBuf buf, Position position) {
@@ -105,15 +105,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         double longitude = convertCoordinate(BcdUtil.readInteger(buf, 9));
 
         byte flags = buf.readByte();
-        position.setValid((flags & 0x1) == 0x1);
-        if ((flags & 0x2) == 0) {
-            latitude = -latitude;
-        }
-        position.setLatitude(latitude);
-        if ((flags & 0x4) == 0) {
-            longitude = -longitude;
-        }
-        position.setLongitude(longitude);
+        position.setValid(BitUtil.check(flags, 0));
+        position.setLatitude(BitUtil.check(flags, 1) ? latitude : -latitude);
+        position.setLongitude(BitUtil.check(flags, 2) ? longitude : -longitude);
 
         position.setSpeed(BcdUtil.readInteger(buf, 2));
         position.setCourse(buf.readUnsignedByte() * 2.0);
@@ -123,9 +117,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         List<Position> positions = new LinkedList<>();
 
-        buf.readByte(); // header
+        boolean longFormat = isLongFormat(buf);
 
-        boolean longFormat = isLongFormat(buf, buf.readerIndex());
+        buf.readByte(); // header
 
         String id = String.valueOf(Long.parseLong(ByteBufUtil.hexDump(buf.readSlice(5))));
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, id);
@@ -143,7 +137,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         boolean responseRequired = false;
 
-        while (buf.readableBytes() > 1) {
+        while (buf.readableBytes() >= 17) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -386,7 +380,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([AV]),")               // validity
             .number("(d+),")                     // speed
             .number("(d+),")                     // course
-            .number("d+,")                       // event source
+            .number("(d+),")                     // event source
             .number("d+,")                       // unlock verification
             .number("(d+),")                     // rfid
             .number("d+,")                       // password verification
@@ -418,6 +412,8 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble()));
         position.setCourse(parser.nextDouble());
+
+        position.set("eventSource", parser.nextInt());
 
         String rfid = parser.next();
         if (!rfid.equals("0000000000")) {

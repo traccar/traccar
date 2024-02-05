@@ -20,7 +20,6 @@ import org.traccar.notification.MessageException;
 
 public interface SmsManager {
 
-    void sendMessage(
-            String destAddress, String message, boolean command) throws InterruptedException, MessageException;
+    void sendMessage(String destAddress, String message, boolean command) throws MessageException;
 
 }

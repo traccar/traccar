@@ -23,15 +23,15 @@ import org.traccar.model.UserRestrictions;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,7 +48,7 @@ public class PermissionsResource  extends BaseResource {
     private void checkPermission(Permission permission) throws StorageException {
         if (permissionsService.notAdmin(getUserId())) {
             permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
-            permissionsService.checkPermission(permission.getOwnerClass(), getUserId(), permission.getOwnerId());
+            permissionsService.checkPermission(permission.getPropertyClass(), getUserId(), permission.getPropertyId());
         }
     }
 
@@ -64,7 +64,7 @@ public class PermissionsResource  extends BaseResource {
 
     @Path("bulk")
     @POST
-    public Response add(List<LinkedHashMap<String, Long>> entities) throws StorageException, ClassNotFoundException {
+    public Response add(List<LinkedHashMap<String, Long>> entities) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
@@ -74,7 +74,8 @@ public class PermissionsResource  extends BaseResource {
             cacheManager.invalidatePermission(
                     true,
                     permission.getOwnerClass(), permission.getOwnerId(),
-                    permission.getPropertyClass(), permission.getPropertyId());
+                    permission.getPropertyClass(), permission.getPropertyId(),
+                    true);
             LogAction.link(getUserId(),
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
@@ -83,13 +84,13 @@ public class PermissionsResource  extends BaseResource {
     }
 
     @POST
-    public Response add(LinkedHashMap<String, Long> entity) throws StorageException, ClassNotFoundException {
+    public Response add(LinkedHashMap<String, Long> entity) throws Exception {
         return add(Collections.singletonList(entity));
     }
 
     @DELETE
     @Path("bulk")
-    public Response remove(List<LinkedHashMap<String, Long>> entities) throws StorageException, ClassNotFoundException {
+    public Response remove(List<LinkedHashMap<String, Long>> entities) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
@@ -99,7 +100,8 @@ public class PermissionsResource  extends BaseResource {
             cacheManager.invalidatePermission(
                     true,
                     permission.getOwnerClass(), permission.getOwnerId(),
-                    permission.getPropertyClass(), permission.getPropertyId());
+                    permission.getPropertyClass(), permission.getPropertyId(),
+                    false);
             LogAction.unlink(getUserId(),
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
@@ -108,7 +110,7 @@ public class PermissionsResource  extends BaseResource {
     }
 
     @DELETE
-    public Response remove(LinkedHashMap<String, Long> entity) throws StorageException, ClassNotFoundException {
+    public Response remove(LinkedHashMap<String, Long> entity) throws Exception {
         return remove(Collections.singletonList(entity));
     }
 

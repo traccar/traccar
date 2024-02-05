@@ -19,9 +19,9 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.api.security.UserPrincipal;
 import org.traccar.storage.Storage;
 
-import javax.inject.Inject;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.SecurityContext;
 
 public class BaseResource {
 

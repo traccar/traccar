@@ -13,7 +13,7 @@
     </addColumn>
 
     <addColumn tableName="tc_devices">
-      <column name="geofenceIds" type="VARCHAR(128)" />
+      <column name="geofenceids" type="VARCHAR(128)" />
     </addColumn>
 
   </changeSet>

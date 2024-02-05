@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,12 +17,13 @@
 package org.traccar.notificators;
 
 import org.traccar.model.Event;
+import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 
 public interface Notificator {
 
-    void send(User user, Event event, Position position) throws MessageException, InterruptedException;
+    void send(Notification notification, User user, Event event, Position position) throws MessageException;
 
 }

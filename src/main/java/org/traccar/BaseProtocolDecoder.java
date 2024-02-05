@@ -29,9 +29,8 @@ import org.traccar.model.Position;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
 import org.traccar.session.cache.CacheManager;
-import org.traccar.storage.StorageException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
@@ -125,18 +124,19 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     protected TimeZone getTimeZone(long deviceId, String defaultTimeZone) {
-        TimeZone result = TimeZone.getTimeZone(defaultTimeZone);
         String timeZoneName = AttributeUtil.lookup(cacheManager, Keys.DECODER_TIMEZONE, deviceId);
         if (timeZoneName != null) {
-            result = TimeZone.getTimeZone(timeZoneName);
+            return TimeZone.getTimeZone(timeZoneName);
+        } else if (defaultTimeZone != null) {
+            return TimeZone.getTimeZone(defaultTimeZone);
         }
-        return result;
+        return null;
     }
 
     public DeviceSession getDeviceSession(Channel channel, SocketAddress remoteAddress, String... uniqueIds) {
         try {
             return connectionManager.getDeviceSession(protocol, channel, remoteAddress, uniqueIds);
-        } catch (StorageException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

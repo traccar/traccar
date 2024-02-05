@@ -23,16 +23,16 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.model.User;
 import org.traccar.notification.PropertiesProvider;
 
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Multipart;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
+import jakarta.mail.BodyPart;
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Multipart;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMessage;
+import jakarta.mail.internet.MimeMultipart;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
@@ -93,19 +93,21 @@ public final class SmtpMailManager implements MailManager {
         return config.hasKey(Keys.MAIL_SMTP_HOST);
     }
 
+    @Override
     public void sendMessage(
-            User user, String subject, String body) throws MessagingException {
-        sendMessage(user, subject, body, null);
+            User user, boolean system, String subject, String body) throws MessagingException {
+        sendMessage(user, system, subject, body, null);
     }
 
+    @Override
     public void sendMessage(
-            User user, String subject, String body, MimeBodyPart attachment) throws MessagingException {
+            User user, boolean system, String subject, String body, MimeBodyPart attachment) throws MessagingException {
 
         Properties properties = null;
         if (!config.getBoolean(Keys.MAIL_SMTP_IGNORE_USER_CONFIG)) {
             properties = getProperties(new PropertiesProvider(user));
         }
-        if (properties == null) {
+        if (properties == null && (system || !config.getBoolean(Keys.MAIL_SMTP_SYSTEM_ONLY))) {
             properties = getProperties(new PropertiesProvider(config));
         }
         if (properties == null) {

@@ -16,6 +16,8 @@
 package org.traccar.model;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.storage.QueryIgnore;
@@ -40,7 +42,7 @@ public class Position extends Message {
     public static final String KEY_ODOMETER = "odometer"; // meters
     public static final String KEY_ODOMETER_SERVICE = "serviceOdometer"; // meters
     public static final String KEY_ODOMETER_TRIP = "tripOdometer"; // meters
-    public static final String KEY_HOURS = "hours";
+    public static final String KEY_HOURS = "hours"; // milliseconds
     public static final String KEY_STEPS = "steps";
     public static final String KEY_HEART_RATE = "heartRate";
     public static final String KEY_INPUT = "input";
@@ -83,20 +85,23 @@ public class Position extends Message {
     public static final String KEY_OPERATOR = "operator";
     public static final String KEY_COMMAND = "command";
     public static final String KEY_BLOCKED = "blocked";
+    public static final String KEY_LOCK = "lock";
     public static final String KEY_DOOR = "door";
     public static final String KEY_AXLE_WEIGHT = "axleWeight";
     public static final String KEY_G_SENSOR = "gSensor";
     public static final String KEY_ICCID = "iccid";
     public static final String KEY_PHONE = "phone";
     public static final String KEY_SPEED_LIMIT = "speedLimit";
+    public static final String KEY_DRIVING_TIME = "drivingTime";
 
     public static final String KEY_DTCS = "dtcs";
-    public static final String KEY_OBD_SPEED = "obdSpeed"; // knots
+    public static final String KEY_OBD_SPEED = "obdSpeed"; // km/h
     public static final String KEY_OBD_ODOMETER = "obdOdometer"; // meters
 
     public static final String KEY_RESULT = "result";
 
     public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
+    public static final String KEY_CARD = "card";
 
     // Start with 1 not 0
     public static final String PREFIX_TEMP = "temp";
@@ -227,9 +232,10 @@ public class Position extends Message {
     }
 
     public void setLatitude(double latitude) {
-        if (latitude >= -90 && latitude <= 90) {
-            this.latitude = latitude;
+        if (latitude < -90 || latitude > 90) {
+            throw new IllegalArgumentException("Latitude out of range");
         }
+        this.latitude = latitude;
     }
 
     private double longitude;
@@ -239,9 +245,10 @@ public class Position extends Message {
     }
 
     public void setLongitude(double longitude) {
-        if (longitude >= -180 && longitude <= 180) {
-            this.longitude = longitude;
+        if (longitude < -180 || longitude > 180) {
+            throw new IllegalArgumentException("Longitude out of range");
         }
+        this.longitude = longitude;
     }
 
     private double altitude; // value in meters
@@ -302,6 +309,20 @@ public class Position extends Message {
 
     public void setNetwork(Network network) {
         this.network = network;
+    }
+
+    private List<Long> geofenceIds;
+
+    public List<Long> getGeofenceIds() {
+        return geofenceIds;
+    }
+
+    public void setGeofenceIds(List<? extends Number> geofenceIds) {
+        if (geofenceIds != null) {
+            this.geofenceIds = geofenceIds.stream().map(Number::longValue).collect(Collectors.toList());
+        } else {
+            this.geofenceIds = null;
+        }
     }
 
     @JsonIgnore

@@ -1,7 +1,8 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class TotemProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,10 @@ public class TotemProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new TotemProtocolDecoder(null));
+
+        verifyAttribute(decoder, text(
+                "$$0494E2123456789012345|150425223945,113.925525,22.55814,1122334455|38"),
+                Position.KEY_DRIVER_UNIQUE_ID, "1122334455");
 
         verifyPosition(decoder, text(
                 "$$0111AA353081090067318|0804400022070722520240400005B364ED5003107300001.700000002245.3919N10231.6952W000001860E"));

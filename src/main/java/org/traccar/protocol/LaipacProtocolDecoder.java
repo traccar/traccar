@@ -28,6 +28,8 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.Device;
+import org.traccar.helper.BitUtil;
 
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
@@ -108,19 +110,31 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeEvent(String event, Position position) {
+    private String decodeEvent(String event, Position position, String model) {
 
         if (event.length() == 1) {
             char inputStatus = event.charAt(0);
             if (inputStatus >= 'A' && inputStatus <= 'D') {
                 int inputStatusInt = inputStatus - 'A';
-                position.set(Position.PREFIX_IN + 1, inputStatusInt & 1);
-                position.set(Position.PREFIX_IN + 2, inputStatusInt & 2);
+                position.set(Position.PREFIX_IN + 1, (boolean) BitUtil.check(inputStatusInt, 0));
+                position.set(Position.PREFIX_IN + 2, (boolean) BitUtil.check(inputStatusInt, 1));
+                if ("SF-Lite".equals(model)) {
+                    position.set(Position.PREFIX_IN + 3, false);
+                }
+                return null;
+            } else if (inputStatus >= 'O' && inputStatus <= 'R') {
+                int inputStatusInt = inputStatus - 'O';
+                position.set(Position.PREFIX_IN + 1, (boolean) BitUtil.check(inputStatusInt, 0));
+                position.set(Position.PREFIX_IN + 2, (boolean) BitUtil.check(inputStatusInt, 1));
+                if ("SF-Lite".equals(model)) {
+                    position.set(Position.PREFIX_IN + 3, true);
+                }
                 return null;
             }
         }
 
         return event;
+
     }
 
     private void sendEventResponse(
@@ -131,6 +145,9 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         switch (event) {
             case "3":
                 responseCode = "d";
+                break;
+            case "M":
+                responseCode = "m";
                 break;
             case "S":
             case "T":
@@ -209,6 +226,8 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        String model = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
+
         Position position = new Position(getProtocolName());
 
         position.setDeviceId(deviceSession.getDeviceId());
@@ -230,12 +249,17 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
 
         String event = parser.next();
         position.set(Position.KEY_ALARM, decodeAlarm(event));
-        position.set(Position.KEY_EVENT, decodeEvent(event, position));
+        position.set(Position.KEY_EVENT, decodeEvent(event, position, model));
         position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next().replaceAll("\\.", "")) * 0.001);
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_GPS, parser.nextInt());
         position.set(Position.PREFIX_ADC + 1, parser.nextDouble() * 0.001);
-        position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
+
+        if ("AVL110".equals(model) || "AVL120".equals(model)) {
+            position.set(Position.PREFIX_ADC + 2, parser.nextDouble() * 0.001);
+        } else {
+            parser.next();
+        }
 
         Integer lac = parser.nextHexInt();
         Integer cid = parser.nextHexInt();

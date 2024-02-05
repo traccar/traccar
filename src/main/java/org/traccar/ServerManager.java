@@ -22,8 +22,8 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.ClassScanner;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ConnectException;

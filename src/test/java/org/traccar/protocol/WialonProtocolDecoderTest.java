@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class WialonProtocolDecoderTest extends ProtocolTest {
@@ -12,6 +12,10 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, text(
                 "#L#2.0;42001300083;;CE45"));
+
+        verifyAttribute(decoder, text(
+                "#D#220323;114150;2234.80479;N;11354.87786;E;0;NA;59;11;NA;NA;NA;;NA;d_battr:1:94,d_csq:1:21,di_light:1:1;E7C9"),
+                "di_light", 1.0);
 
         verifyAttributes(decoder, text(
                 "#D#NA;NA;5429.681944502211763;N;02654.60403650999069;E;NA;NA;NA;NA;NA;NA;NA;1.0;NA;m1:1:9196679,d1:1:15397,t1:1:20,b1:1:162,fuel1:2:21588.0,pv1:2:35.98,finish:1:1;0x9b0"));
@@ -75,6 +79,9 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, text(
                 "#B#110315;045857;5364.0167;N;06127.8262;E;0;155;965;7;2.40;4;0;14.77,0.02,3.6;AB45DF01145;"));
 
+        verifyAttribute(decoder, text(
+                "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;motion:3:false"),
+                "motion", false);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.proxy.AsyncProxyServlet;
-import org.eclipse.jetty.server.CustomRequestLog;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.RequestLogWriter;
 import org.eclipse.jetty.server.Server;
@@ -45,27 +44,23 @@ import org.slf4j.LoggerFactory;
 import org.traccar.LifecycleObject;
 import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.DateParameterConverterProvider;
-import org.traccar.api.ObjectMapperProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.resource.ServerResource;
 import org.traccar.api.security.SecurityRequestFilter;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.ObjectMapperContextResolver;
 
-import javax.inject.Inject;
-import javax.servlet.DispatcherType;
-import javax.servlet.ServletException;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.EnumSet;
 
 public class WebServer implements LifecycleObject {
@@ -76,7 +71,6 @@ public class WebServer implements LifecycleObject {
     private final Config config;
     private final Server server;
 
-    @Inject
     public WebServer(Injector injector, Config config) {
         this.injector = injector;
         this.config = config;
@@ -105,14 +99,8 @@ public class WebServer implements LifecycleObject {
             @Override
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
-                Path index = Paths.get(config.getString(Keys.WEB_PATH), "index.html");
-                if (code == HttpStatus.NOT_FOUND_404
-                        && !request.getPathInfo().startsWith("/api/") && Files.exists(index)) {
-                    writer.write(Files.readString(index));
-                } else {
-                    writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
-                            + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
-                }
+                writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
+                        + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
             }
         });
 
@@ -126,8 +114,7 @@ public class WebServer implements LifecycleObject {
             RequestLogWriter logWriter = new RequestLogWriter(config.getString(Keys.WEB_REQUEST_LOG_PATH));
             logWriter.setAppend(true);
             logWriter.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
-            CustomRequestLog requestLog = new CustomRequestLog(logWriter, CustomRequestLog.NCSA_FORMAT);
-            server.setRequestLog(requestLog);
+            server.setRequestLog(new WebRequestLog(logWriter));
         }
     }
 
@@ -152,7 +139,7 @@ public class WebServer implements LifecycleObject {
     }
 
     private void initWebApp(ServletContextHandler servletHandler) {
-        ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
+        ServletHolder servletHolder = new ServletHolder(new ModernDefaultServlet(config));
         servletHolder.setInitParameter("resourceBase", new File(config.getString(Keys.WEB_PATH)).getAbsolutePath());
         servletHolder.setInitParameter("dirAllowed", "false");
         if (config.getBoolean(Keys.WEB_DEBUG)) {
@@ -180,7 +167,7 @@ public class WebServer implements LifecycleObject {
         ResourceConfig resourceConfig = new ResourceConfig();
         resourceConfig.registerClasses(
                 JacksonFeature.class,
-                ObjectMapperProvider.class,
+                ObjectMapperContextResolver.class,
                 DateParameterConverterProvider.class,
                 SecurityRequestFilter.class,
                 CorsResponseFilter.class,
@@ -204,14 +191,16 @@ public class WebServer implements LifecycleObject {
             sessionHandler.setSessionCache(sessionCache);
         }
 
+        SessionCookieConfig sessionCookieConfig = servletHandler.getServletContext().getSessionCookieConfig();
+
         int sessionTimeout = config.getInteger(Keys.WEB_SESSION_TIMEOUT);
         if (sessionTimeout > 0) {
             servletHandler.getSessionHandler().setMaxInactiveInterval(sessionTimeout);
+            sessionCookieConfig.setMaxAge(sessionTimeout);
         }
 
         String sameSiteCookie = config.getString(Keys.WEB_SAME_SITE_COOKIE);
         if (sameSiteCookie != null) {
-            SessionCookieConfig sessionCookieConfig = servletHandler.getServletContext().getSessionCookieConfig();
             switch (sameSiteCookie.toLowerCase()) {
                 case "lax":
                     sessionCookieConfig.setComment(HttpCookie.SAME_SITE_LAX_COMMENT);

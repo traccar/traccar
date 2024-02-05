@@ -5,7 +5,6 @@
 Device: $device.name<br>
 Status is unknown<br>
 Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
-Link: <a href="$webUrl?eventId=$event.id">$webUrl?eventId=$event.id</a><br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
 </body>

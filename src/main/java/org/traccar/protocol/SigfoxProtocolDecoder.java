@@ -32,11 +32,11 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
-import javax.json.Json;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
+import jakarta.json.Json;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.net.URLDecoder;
@@ -105,7 +105,7 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         FullHttpRequest request = (FullHttpRequest) msg;
         String content = request.content().toString(StandardCharsets.UTF_8);
         if (!content.startsWith("{")) {
-            content = URLDecoder.decode(content.split("=")[0], "UTF-8");
+            content = URLDecoder.decode(content.split("=")[0], StandardCharsets.UTF_8);
         }
         JsonObject json = Json.createReader(new StringReader(content)).readObject();
 

@@ -18,9 +18,9 @@ package org.traccar.geolocation;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 
-import javax.json.JsonObject;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.InvocationCallback;
+import jakarta.json.JsonObject;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.InvocationCallback;
 
 public class OpenCellIdGeolocationProvider implements GeolocationProvider {
 

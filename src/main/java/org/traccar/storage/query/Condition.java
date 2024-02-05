@@ -34,12 +34,8 @@ public interface Condition {
     }
 
     class Equals extends Compare {
-        public Equals(String column, String variable) {
-            this(column, variable, null);
-        }
-
-        public Equals(String column, String variable, Object value) {
-            super(column, "=", variable, value);
+        public Equals(String column, Object value) {
+            super(column, "=", column, value);
         }
     }
 

@@ -15,6 +15,7 @@ usage () {
   echo "Available platforms:"
   echo " * linux-64"
   echo " * linux-arm"
+  echo " * linux-arm64"
   echo " * windows-64"
   echo " * other"
   exit 1
@@ -64,14 +65,17 @@ if [ $PLATFORM = "all" -o $PLATFORM = "windows-64" ]; then
   check_requirement "Windows 64 Java" "ls OpenJDK*64_windows*.zip" "Missing Windows 64 JDK (https://adoptium.net/)"
   check_requirement "Wine" "which wine" "Missing wine binary"
 fi
-if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" -o $PLATFORM = "linux-arm" ]; then
+if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" -o $PLATFORM = "linux-arm" -o $PLATFORM = "linux-arm64" ]; then
   check_requirement "Makeself" "which makeself" "Missing makeself binary"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" ]; then
-  check_requirement "Linux 64 Java" "ls OpenJDK*64_linux*.tar.gz" "Missing Linux 64 JDK (https://adoptium.net/)"
+  check_requirement "Linux 64 Java" "ls OpenJDK*x64_linux*.tar.gz" "Missing Linux 64 JDK (https://adoptium.net/)"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-arm" ]; then
   check_requirement "Linux ARM Java" "ls OpenJDK*arm_linux*.tar.gz" "Missing Linux ARM JDK (https://adoptium.net/)"
+fi
+if [ $PLATFORM = "all" -o $PLATFORM = "linux-arm64" ]; then
+  check_requirement "Linux ARM 64 Java" "ls OpenJDK*aarch64_linux*.tar.gz" "Missing Linux ARM 64 JDK (https://adoptium.net/)"
 fi
 if [ $PREREQ = false ]; then
   info "Missing build requirements, aborting..."
@@ -120,7 +124,7 @@ package_other () {
 package_windows () {
   info "Building Windows 64 installer"
   unzip -q OpenJDK*64_windows*.zip
-  jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec --output out/jre
+  jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
   rm -rf jdk-*
   wine app/ISCC.exe traccar.iss >/dev/null
   rm -rf out/jre
@@ -133,8 +137,8 @@ package_linux () {
   cp setup.sh out
   cp traccar.service out
 
-  tar -xf OpenJDK*$1_linux*.tar.gz
-  jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec --output out/jre
+  tar -xf OpenJDK*$2_linux*.tar.gz
+  jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
   rm -rf jdk-*
   makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
   rm -rf out/jre
@@ -148,14 +152,20 @@ package_linux () {
 
 package_linux_64 () {
   info "Building Linux 64 installer"
-  package_linux 64
+  package_linux 64 x64
   ok "Created Linux 64 installer"
 }
 
 package_linux_arm () {
   info "Building Linux ARM installer"
-  package_linux arm
+  package_linux arm arm
   ok "Created Linux ARM installer"
+}
+
+package_linux_arm64 () {
+  info "Building Linux ARM 64 installer"
+  package_linux arm64 aarch64
+  ok "Created Linux ARM 64 installer"
 }
 
 prepare
@@ -164,6 +174,7 @@ case $PLATFORM in
   all)
 	package_linux_64
 	package_linux_arm
+	package_linux_arm64
 	package_windows
 	package_other
 	;;
@@ -174,6 +185,10 @@ case $PLATFORM in
 
   linux-arm)
 	package_linux_arm
+	;;
+
+  linux-arm64)
+	package_linux_arm64
 	;;
 
   windows-64)

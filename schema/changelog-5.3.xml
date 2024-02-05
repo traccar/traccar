@@ -24,10 +24,10 @@
       <column autoIncrement="true" name="id" type="INT">
         <constraints primaryKey="true" />
       </column>
-      <column name="publickey" type="BLOB">
+      <column name="publickey" type="MEDIUMBLOB">
         <constraints nullable="false" />
       </column>
-      <column name="privatekey" type="BLOB">
+      <column name="privatekey" type="MEDIUMBLOB">
         <constraints nullable="false" />
       </column>
     </createTable>

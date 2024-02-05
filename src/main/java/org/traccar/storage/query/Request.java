@@ -20,7 +20,6 @@ public class Request {
     private final Columns columns;
     private final Condition condition;
     private final Order order;
-    private final Limit limit;
 
     public Request(Columns columns) {
         this(columns, null, null);
@@ -34,15 +33,14 @@ public class Request {
         this(columns, condition, null);
     }
 
-    public Request(Columns columns, Condition condition, Order order) {
-        this(columns, condition, order, null);
+    public Request(Columns columns, Order order) {
+        this(columns, null, order);
     }
 
-    public Request(Columns columns, Condition condition, Order order, Limit limit) {
+    public Request(Columns columns, Condition condition, Order order) {
         this.columns = columns;
         this.condition = condition;
         this.order = order;
-        this.limit = limit;
     }
 
     public Columns getColumns() {
@@ -55,10 +53,6 @@ public class Request {
 
     public Order getOrder() {
         return order;
-    }
-
-    public Limit getLimit() {
-        return limit;
     }
 
 }
