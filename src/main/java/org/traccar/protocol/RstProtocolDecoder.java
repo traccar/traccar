@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,6 +140,17 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             if (type == 55) {
                 position.set(Position.KEY_DRIVER_UNIQUE_ID, values[0]);
             }
+
+            return position;
+
+        } else if (type == 134) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RESULT, String.valueOf(type));
 
             return position;
 

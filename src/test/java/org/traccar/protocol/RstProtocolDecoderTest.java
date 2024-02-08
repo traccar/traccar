@@ -12,6 +12,10 @@ public class RstProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new RstProtocolDecoder(null));
 
         verifyAttribute(decoder, text(
+                "RST;A;RST-MINI-4Gv3;V9.10;009521405;1;134;FIM;"),
+                Position.KEY_RESULT, "134");
+
+        verifyAttribute(decoder, text(
                 "RST;A;RST-MINIv5;V9.08;009767055;248;55;14-12-2023 19:34:20;14-12-2023 19:34:21;-12.923640;-38.388313;0;14;17;1;4;15;00;B0;00;1A;02;12.18;4.02;65;21;FE;0000;01;C0;001606017031;0002;FIM;"),
                 Position.KEY_DRIVER_UNIQUE_ID, "001606017031");
 
