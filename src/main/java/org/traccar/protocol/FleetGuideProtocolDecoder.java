@@ -82,13 +82,15 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
             index = null;
         }
 
-        Integer responseType;
-        if (type == MSG_SYNC_REQ) {
-            responseType = MSG_SYNC_ACK;
-        } else {
-            responseType = null;
+        if (type != MSG_DATA_N_ACK && type != MSG_REP_N_ACK) {
+            Integer responseType;
+            if (type == MSG_SYNC_REQ) {
+                responseType = MSG_SYNC_ACK;
+            } else {
+                responseType = null;
+            }
+            sendResponse(channel, remoteAddress, deviceId, responseType, index);
         }
-        sendResponse(channel, remoteAddress, deviceId, responseType, index);
 
         if (BitUtil.check(options, 13)) {
             buf.readUnsignedShortLE(); // acknowledgement
@@ -116,7 +118,7 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
             int recordEndIndex = data.readerIndex() + recordLength;
 
             if (recordTypes.contains(recordType)) {
-                positions.add(processPosition(position));
+                processPosition(positions, position);
                 position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
                 recordTypes.clear();
@@ -159,19 +161,23 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
+        processPosition(positions, position);
+
         data.release();
 
         return positions.isEmpty() ? null : positions;
     }
 
-    private Position processPosition(Position position) {
-        if (position.getFixTime() == null) {
-            position.setTime(new Date());
+    private void processPosition(List<Position> positions, Position position) {
+        if (!position.getAttributes().isEmpty()) {
+            if (position.getFixTime() == null) {
+                position.setTime(new Date());
+            }
+            if (!position.getAttributes().containsKey(Position.KEY_SATELLITES)) {
+                getLastLocation(position, null);
+            }
+            positions.add(position);
         }
-        if (!position.getAttributes().containsKey(Position.KEY_SATELLITES)) {
-            getLastLocation(position, null);
-        }
-        return position;
     }
 
 
