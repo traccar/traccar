@@ -21,7 +21,7 @@
     <Loggers>
         <Root>
             <AppenderRef ref="STDOUT" level="INFO"/>
-            <AppenderRef ref="rollingFile" level="ERROR"/>
+            <AppenderRef ref="rollingFile" level="WARN"/>
         </Root>
     </Loggers>
 </Configuration>
