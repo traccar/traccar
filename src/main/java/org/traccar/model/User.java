@@ -177,7 +177,7 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         this.expirationTime = expirationTime;
     }
 
-    private int deviceLimit;
+    private int deviceLimit = -1;
 
     public int getDeviceLimit() {
         return deviceLimit;
@@ -187,7 +187,7 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         this.deviceLimit = deviceLimit;
     }
 
-    private int userLimit;
+    private int userLimit = -1;
 
     public int getUserLimit() {
         return userLimit;
