@@ -28,7 +28,6 @@ import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 
 import liquibase.Contexts;
@@ -43,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.Context;
-import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;

@@ -15,16 +15,14 @@
  */
 package org.traccar;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
-import org.traccar.database.CommandsManager;
-import org.traccar.database.ConnectionManager;
-import org.traccar.database.IdentityManager;
-import org.traccar.database.StatisticsManager;
+import org.traccar.database.*;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
@@ -51,6 +49,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private final ConnectionManager connectionManager = Context.getConnectionManager();
     private final StatisticsManager statisticsManager;
     private final Protocol protocol;
+    private MediaManager mediaManager = Context.getMediaManager();
 
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
@@ -270,5 +269,14 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
             return null;
         }
     }
+
+    public String writeMediaFile(String uniqueId, ByteBuf buf, String extension) {
+        return mediaManager.writeFile(uniqueId, buf, extension);
+    }
+
+    public void setMediaManager(MediaManager mediaManager) {
+        this.mediaManager = mediaManager;
+    }
+
 
 }

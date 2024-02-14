@@ -271,9 +271,13 @@ public final class Context {
     }
 
     public static void init(String configFile) throws Exception {
+        init(configFile, false);
+    }
+
+    public static void init(String configFile, boolean embedded) throws Exception {
 
         try {
-            config = new Config(configFile);
+            config = new Config(configFile, embedded);
         } catch (Exception e) {
             config = new Config();
             Log.setupDefaultLogger();

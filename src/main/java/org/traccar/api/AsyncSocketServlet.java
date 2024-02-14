@@ -40,10 +40,11 @@ public class AsyncSocketServlet extends WebSocketServlet {
                     Object userId = req.getSession().getAttribute(SessionResource.USER_ID_KEY);
                     if (userId != null) {
                         return new AsyncSocket((Long) userId);
+                    } else {
+                        LOGGER.error("no userId: {}", req.getHeaders());
                     }
                 }
-                LOGGER.warn("Invalid session: {}", req.getHeaders());
-                return null;
+                return new AsyncSocket(-1);
             }
         });
     }

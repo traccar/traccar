@@ -421,7 +421,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         if (result != null) {
             try {
                 return result instanceof String ? Double.parseDouble((String) result) : ((Number) result).doubleValue();
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOGGER.error("lookupAttributeDouble deviceId " + deviceId, e);
                 return defaultValue;
             }

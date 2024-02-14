@@ -20,10 +20,7 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.jmx.MBeanContainer;
 import org.eclipse.jetty.proxy.AsyncProxyServlet;
-import org.eclipse.jetty.server.NCSARequestLog;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnectionStatistics;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.session.DatabaseAdaptor;
@@ -63,8 +60,31 @@ import java.io.Writer;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.EnumSet;
+import java.util.Enumeration;
 
 public class WebServer {
+    public class HeaderLoggingRequestLog extends NCSARequestLog {
+
+        public HeaderLoggingRequestLog(String filename) {
+            super(filename);
+        }
+
+        @Override
+        public void log(Request request, Response response) {
+            super.log(request, response); // call the parent class's log method to preserve its logging functionality
+
+            // Log the request headers
+            Enumeration<String> headerNames = request.getHeaderNames();
+            while (headerNames.hasMoreElements()) {
+                String headerName = headerNames.nextElement();
+                try {
+                    write(headerName + ": " + request.getHeader(headerName));
+                } catch (IOException e) {
+                    LOGGER.error("error logging", e);
+                }
+            }
+        }
+    }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebServer.class);
 
@@ -112,10 +132,12 @@ public class WebServer {
         server.setHandler(handlers);
 
         if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
-            NCSARequestLog requestLog = new NCSARequestLog(config.getString(Keys.WEB_REQUEST_LOG_PATH));
+            HeaderLoggingRequestLog requestLog = new HeaderLoggingRequestLog(config.getString(Keys.WEB_REQUEST_LOG_PATH));
             requestLog.setAppend(true);
             requestLog.setExtended(true);
             requestLog.setLogLatency(true);
+            requestLog.setLogCookies(true);
+            requestLog.setLogServer(true);
             requestLog.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
             server.setRequestLog(requestLog);
         }

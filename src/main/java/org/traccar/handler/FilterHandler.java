@@ -192,7 +192,7 @@ public class FilterHandler extends BaseDataHandler {
                 LOGGER.warn(message.toString());
                 LOGGER.warn("fixTime: {}", position.getFixTime());
                 return true;
-            } catch(Exception e) {
+            } catch (Exception e) {
                 LOGGER.warn("{} {}", filterType, e);
                 return true;
             }

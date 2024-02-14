@@ -5,7 +5,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
 import org.traccar.database.IdentityManager;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
+
+import static org.traccar.model.Position.KEY_ALARM;
 
 @ChannelHandler.Sharable
 public class DigitalPortHandler extends BaseDataHandler {
@@ -36,24 +39,33 @@ public class DigitalPortHandler extends BaseDataHandler {
                 long diff = position.getFixTime().getTime() - last.getFixTime().getTime();
                 position.set(Position.KEY_DP2_TIME, dpTime + diff);
             }
-        }
-        catch (Exception ex) {
-            LOGGER.warn("Failed to process DigitalPortHandler, deviceId: {}, {}", position.getDeviceId(), ex.getMessage());
+            Device device = identityManager.getById(position.getDeviceId());
+            for(int i=1; i<=3; i++) {
+                String sensor = "sensor" + i;
+                String attribute = "sensor"+i+"Attribute";
+                if (device.getAttributes().containsKey(sensor) && device.getAttributes().containsKey(attribute)) {
+                    if (last.getAttributes().get(device.getAttributes().get(attribute)) !=
+                            position.getAttributes().get(device.getAttributes().get(attribute))) {
+                        position.set(KEY_ALARM, device.getAttributes().get(sensor).toString());
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            LOGGER.warn("DigitalPortHandler failed, deviceId: {}, {}", position.getDeviceId(), ex.getMessage());
         }
 
         return position;
     }
 
     private boolean getProperty(Position p, String property) {
-        if(!p.getAttributes().containsKey(property)) {
+        if (!p.getAttributes().containsKey(property)) {
             return false;
         }
 
         Object o = p.getAttributes().get(property);
-        if(o instanceof Boolean) {
+        if (o instanceof Boolean) {
             return (Boolean) o;
-        }
-        else if (o instanceof Number) {
+        } else if (o instanceof Number) {
             return ((Number) o).intValue() > 0;
         }
         return false;

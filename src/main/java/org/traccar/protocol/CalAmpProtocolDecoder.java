@@ -27,8 +27,12 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
+import java.net.Inet4Address;
 import java.net.SocketAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
+
+import static org.traccar.model.Position.KEY_SOURCE;
 
 public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
@@ -53,6 +57,16 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
     public static final int SERVICE_ACKNOWLEDGED = 1;
     public static final int SERVICE_RESPONSE = 2;
 
+    private static String hostAddress;
+
+    static {
+        try {
+            hostAddress = Inet4Address.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            hostAddress = e.getMessage();
+        }
+    }
+
     private void sendResponse(Channel channel, SocketAddress remoteAddress, int type, int index, int result) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer(10);
@@ -71,6 +85,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+        position.set(KEY_SOURCE, hostAddress);
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         if (type != MSG_MINI_EVENT_REPORT) {

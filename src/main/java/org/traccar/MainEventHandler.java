@@ -27,7 +27,6 @@ import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Position;
 
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
