@@ -25,20 +25,7 @@ public class DigitalPortHandler extends BaseDataHandler {
     protected Position handlePosition(Position position) {
 
         try {
-            // no dp || 0 -> 0 || 1 -> 0 - clear
-            if (!getProperty(position, Position.KEY_DP2)) {
-                return position;
-            }
-
             Position last = identityManager.getLastPosition(position.getDeviceId());
-            //0 -> 1 - start counting
-            if (null == last || !getProperty(last, Position.KEY_DP2)) {
-                position.set(Position.KEY_DP2_TIME, 0);
-            } else { //1 -> 1 - keep counting
-                long dpTime = last.getLong(Position.KEY_DP2_TIME);
-                long diff = position.getFixTime().getTime() - last.getFixTime().getTime();
-                position.set(Position.KEY_DP2_TIME, dpTime + diff);
-            }
             Device device = identityManager.getById(position.getDeviceId());
             for(int i=1; i<=3; i++) {
                 String sensor = "sensor" + i;
@@ -49,6 +36,19 @@ public class DigitalPortHandler extends BaseDataHandler {
                         position.set(KEY_ALARM, device.getAttributes().get(sensor).toString());
                     }
                 }
+            }
+            // no dp || 0 -> 0 || 1 -> 0 - clear
+            if (!getProperty(position, Position.KEY_DP2)) {
+                return position;
+            }
+
+            //0 -> 1 - start counting
+            if (null == last || !getProperty(last, Position.KEY_DP2)) {
+                position.set(Position.KEY_DP2_TIME, 0);
+            } else { //1 -> 1 - keep counting
+                long dpTime = last.getLong(Position.KEY_DP2_TIME);
+                long diff = position.getFixTime().getTime() - last.getFixTime().getTime();
+                position.set(Position.KEY_DP2_TIME, dpTime + diff);
             }
         } catch (Exception ex) {
             LOGGER.warn("DigitalPortHandler failed, deviceId: {}, {}", position.getDeviceId(), ex.getMessage());
