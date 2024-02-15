@@ -56,8 +56,10 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     @Override
     public void onWebSocketText(String message) {
         super.onWebSocketText(message);
-        userId = Context.getUsersManager().getUserByToken(message).getId();
-        initSession();
+        if (userId == -1) {
+            userId = Context.getUsersManager().getUserByToken(message).getId();
+            initSession();
+        }
     }
 
     private void initSession() {
