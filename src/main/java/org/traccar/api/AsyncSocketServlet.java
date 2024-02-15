@@ -31,7 +31,6 @@ import org.traccar.storage.StorageException;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.servlet.http.HttpSession;
-import jakarta.ws.rs.core.Context;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -67,22 +66,21 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
                 Long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
                     return new AsyncSocket(objectMapper, connectionManager, storage, userId);
-                } else {
-                    Map<String, String> params = getQueryMap(req.getQueryString());
-                    String token = (String) params.get(KEY_TOKEN);
-                    if (token != null) {
-                        LoginResult loginResult;
-                        try {
-                            loginResult = loginService.login(token);
-                        } catch (StorageException | GeneralSecurityException | IOException e) {
-                            return null;
-                        }
-                        User user = loginResult.getUser();
-                        if (user != null) {
-                            return new AsyncSocket(objectMapper, connectionManager, storage, user.getId());
-                        }
+                }
+            } else {
+                Map<String, String> params = getQueryMap(req.getQueryString());
+                String token = (String) params.get(KEY_TOKEN);
+                if (token != null) {
+                    LoginResult loginResult;
+                    try {
+                        loginResult = loginService.login(token);
+                    } catch (StorageException | GeneralSecurityException | IOException e) {
+                        return null;
                     }
-                    return null;
+                    User user = loginResult.getUser();
+                    if (user != null) {
+                        return new AsyncSocket(objectMapper, connectionManager, storage, user.getId());
+                    }
                 }
             }
             return null;
