@@ -29,7 +29,7 @@ public class DigitalPortHandler extends BaseDataHandler {
                 String sensor = "sensor" + i;
                 String attribute = sensor + "Attribute";
                 if (last != null && device.getAttributes().containsKey(sensor) && device.getAttributes().containsKey(attribute)) {
-                    if (getProperty(last, attribute) != getProperty(position, attribute)) {
+                    if (getProperty(last, device.getString(attribute)) != getProperty(position, device.getString(attribute))) {
                         position.set(Position.KEY_ALARM, device.getAttributes().get(sensor).toString());
                     }
                 }
