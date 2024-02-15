@@ -19,15 +19,24 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
 import org.traccar.api.resource.SessionResource;
+import org.traccar.api.security.LoginResult;
+import org.traccar.api.security.LoginService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.servlet.http.HttpSession;
+import jakarta.ws.rs.core.Context;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.util.*;
 
 @Singleton
 public class AsyncSocketServlet extends JettyWebSocketServlet {
@@ -36,6 +45,10 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
     private final ObjectMapper objectMapper;
     private final ConnectionManager connectionManager;
     private final Storage storage;
+    private static final String KEY_TOKEN = "token";
+
+    @Inject
+    private LoginService loginService;
 
     @Inject
     public AsyncSocketServlet(
@@ -54,10 +67,40 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
                 Long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
                     return new AsyncSocket(objectMapper, connectionManager, storage, userId);
+                } else {
+                    Map<String, String> params = getQueryMap(req.getQueryString());
+                    String token = (String) params.get(KEY_TOKEN);
+                    if (token != null) {
+                        LoginResult loginResult;
+                        try {
+                            loginResult = loginService.login(token);
+                        } catch (StorageException | GeneralSecurityException | IOException e) {
+                            return null;
+                        }
+                        User user = loginResult.getUser();
+                        if (user != null) {
+                            return new AsyncSocket(objectMapper, connectionManager, storage, user.getId());
+                        }
+                    }
+                    return null;
                 }
             }
             return null;
         });
     }
+
+    public static Map<String, String> getQueryMap(String query)  
+    {  
+        String[] params = query.split("&");  
+        Map<String, String> map = new HashMap<String, String>();  
+        for (String param : params)  
+        {  String [] p=param.split("=");
+            String name = p[0];  
+          if(p.length>1)  {String value = p[1];  
+            map.put(name, value);
+          }  
+        }  
+        return map;  
+    } 
 
 }
