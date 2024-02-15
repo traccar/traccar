@@ -8,8 +8,6 @@ import org.traccar.database.IdentityManager;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 
-import static org.traccar.model.Position.KEY_ALARM;
-
 @ChannelHandler.Sharable
 public class DigitalPortHandler extends BaseDataHandler {
 
@@ -31,9 +29,8 @@ public class DigitalPortHandler extends BaseDataHandler {
                 String sensor = "sensor" + i;
                 String attribute = "sensor"+i+"Attribute";
                 if (device.getAttributes().containsKey(sensor) && device.getAttributes().containsKey(attribute)) {
-                    if (last.getAttributes().get(device.getAttributes().get(attribute)) !=
-                            position.getAttributes().get(device.getAttributes().get(attribute))) {
-                        position.set(KEY_ALARM, device.getAttributes().get(sensor).toString());
+                    if (getProperty(last, attribute) != getProperty(position, attribute)) {
+                        position.set(Position.KEY_ALARM, device.getAttributes().get(sensor).toString());
                     }
                 }
             }
