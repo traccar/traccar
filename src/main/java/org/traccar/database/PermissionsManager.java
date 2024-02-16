@@ -60,6 +60,12 @@ public class PermissionsManager {
         refreshDeviceAndGroupPermissions();
     }
 
+    //For reports
+    public PermissionsManager(){
+        this.dataManager = null;
+        this.usersManager = null;
+    }
+
     public User getUser(long userId) {
         return usersManager.getById(userId);
     }

@@ -138,6 +138,8 @@ public final class Context {
         return deviceManager;
     }
 
+    public static void setDeviceManager(DeviceManager value) { identityManager = deviceManager = value; }
+
     private static ConnectionManager connectionManager;
 
     public static ConnectionManager getConnectionManager() {
@@ -149,6 +151,8 @@ public final class Context {
     public static PermissionsManager getPermissionsManager() {
         return permissionsManager;
     }
+
+    public static void setPermissionsManager(PermissionsManager value) { permissionsManager = value; }
 
     public static Geocoder getGeocoder() {
         return Main.getInjector() != null ? Main.getInjector().getInstance(Geocoder.class) : null;
@@ -177,6 +181,8 @@ public final class Context {
     public static GeofenceManager getGeofenceManager() {
         return geofenceManager;
     }
+
+    public static void setGeofenceManager(GeofenceManager value) { geofenceManager = value; }
 
     private static CalendarManager calendarManager;
 
@@ -226,6 +232,8 @@ public final class Context {
         return driversManager;
     }
 
+    public static void setDriversManager(DriversManager value) { driversManager = value; }
+
     private static CommandsManager commandsManager;
 
     public static CommandsManager getCommandsManager() {
@@ -237,6 +245,8 @@ public final class Context {
     public static MaintenancesManager getMaintenancesManager() {
         return maintenancesManager;
     }
+
+    public static void setMaintenancesManager(MaintenancesManager value) { maintenancesManager = value; }
 
     private static SmsManager smsManager;
 
@@ -271,10 +281,10 @@ public final class Context {
     }
 
     public static void init(String configFile) throws Exception {
-        init(configFile, false);
+        init(configFile, false, true);
     }
 
-    public static void init(String configFile, boolean embedded) throws Exception {
+    public static void init(String configFile, boolean embedded, boolean loadEntities) throws Exception {
 
         try {
             config = new Config(configFile, embedded);
@@ -311,7 +321,7 @@ public final class Context {
 
         mediaManager = new MediaManager(config.getString("media.path"));
 
-        if (dataManager != null) {
+        if (dataManager != null && loadEntities) {
             usersManager = new UsersManager(dataManager);
             groupsManager = new GroupsManager(dataManager);
             deviceManager = new DeviceManager(dataManager);
@@ -323,7 +333,9 @@ public final class Context {
             webServer = new WebServer(config);
         }
 
-        permissionsManager = new PermissionsManager(dataManager, usersManager);
+        if(loadEntities) {
+            permissionsManager = new PermissionsManager(dataManager, usersManager);
+        }
 
         connectionManager = new ConnectionManager();
 
@@ -339,7 +351,7 @@ public final class Context {
         }
 
         if (config.getBoolean("event.enable")) {
-            initEventsModule();
+            initEventsModule(loadEntities);
         }
 
         serverManager = new ServerManager();
@@ -349,21 +361,25 @@ public final class Context {
             eventForwarder = new JsonTypeEventForwarder();
         }
 
-        attributesManager = new AttributesManager(dataManager);
+        if(loadEntities){
+            attributesManager = new AttributesManager(dataManager);
 
-        driversManager = new DriversManager(dataManager);
+            driversManager = new DriversManager(dataManager);
 
-        commandsManager = new CommandsManager(dataManager, config.getBoolean("commands.queueing"));
-
+            commandsManager = new CommandsManager(dataManager, config.getBoolean("commands.queueing"));
+        }
     }
 
-    private static void initEventsModule() {
+    private static void initEventsModule(boolean loadEntities) {
 
-        geofenceManager = new GeofenceManager(dataManager);
-        calendarManager = new CalendarManager(dataManager);
-        maintenancesManager = new MaintenancesManager(dataManager);
-        notificationManager = new NotificationManager(dataManager);
-        notificatorManager = new NotificatorManager();
+        if(loadEntities){
+            geofenceManager = new GeofenceManager(dataManager);
+            calendarManager = new CalendarManager(dataManager);
+            maintenancesManager = new MaintenancesManager(dataManager);
+            notificationManager = new NotificationManager(dataManager);
+            notificatorManager = new NotificatorManager();
+        }
+
         Properties velocityProperties = new Properties();
         velocityProperties.setProperty("file.resource.loader.path",
                 Context.getConfig().getString("templates.rootPath", "templates") + "/");

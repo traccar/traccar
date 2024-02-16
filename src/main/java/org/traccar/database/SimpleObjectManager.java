@@ -64,7 +64,8 @@ public abstract class SimpleObjectManager<T extends BaseModel> extends BaseObjec
         return result;
     }
 
-    public final boolean checkItemPermission(long userId, long itemId) {
+    //removed final so it can be overrided by reports
+    public boolean checkItemPermission(long userId, long itemId) {
         return getUserItems(userId).contains(itemId);
     }
 
