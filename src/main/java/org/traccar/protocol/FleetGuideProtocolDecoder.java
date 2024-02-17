@@ -29,10 +29,8 @@ import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
 
@@ -108,8 +106,6 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        Set<Integer> recordTypes = new HashSet<>();
-
         while (data.isReadable()) {
 
             int recordHeader = data.readUnsignedShortLE();
@@ -117,13 +113,11 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
             int recordType = BitUtil.from(recordHeader, 10);
             int recordEndIndex = data.readerIndex() + recordLength;
 
-            if (recordTypes.contains(recordType)) {
+            if (recordType == 0 && position.getDeviceTime() != null) {
                 processPosition(positions, position);
                 position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
-                recordTypes.clear();
             }
-            recordTypes.add(recordType);
 
             switch (recordType) {
                 case 0:
@@ -151,6 +145,77 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
                     position.setAltitude(BitUtil.to(altitude, 14));
                     if (BitUtil.check(altitude, 14)) {
                         position.setAltitude(-position.getAltitude());
+                    }
+                    break;
+                case 3:
+                    int powerLow = data.readUnsignedByte();
+                    int powerFlags = data.readUnsignedByte();
+                    int batteryHigh = data.readUnsignedByte();
+                    position.set(Position.KEY_POWER, (powerLow + (BitUtil.to(powerFlags, 5) << 8)) * 0.01);
+                    position.set(Position.KEY_IGNITION, BitUtil.check(powerFlags, 5));
+                    position.set(Position.KEY_BATTERY, (BitUtil.from(powerFlags, 6) + (batteryHigh << 2)) * 0.01);
+                    if (recordLength >= 4) {
+                        int extraFlags = data.readUnsignedByte();
+                        if (BitUtil.check(extraFlags, 0)) {
+                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                        }
+                        if (BitUtil.check(extraFlags, 1)) {
+                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                        }
+                    }
+                    break;
+                case 6:
+                    position.set(Position.KEY_INPUT, data.readUnsignedByte());
+                    break;
+                case 7:
+                    position.set(Position.KEY_OUTPUT, data.readUnsignedByte());
+                    break;
+                case 8:
+                    int adcMask = data.readUnsignedByte();
+                    for (int i = 0; i < 8; i++) {
+                        if (BitUtil.check(adcMask, i)) {
+                            position.set(Position.PREFIX_ADC + (i + 1), data.readUnsignedShortLE());
+                        }
+                    }
+                    break;
+                case 11:
+                    int fuelMask = data.readUnsignedByte();
+                    for (int i = 1; i < 8; i++) {
+                        if (BitUtil.check(fuelMask, i)) {
+                            position.set("fuel" + i, data.readUnsignedShortLE());
+                        }
+                    }
+                    break;
+                case 12:
+                    int fuelTempMask = data.readUnsignedByte();
+                    for (int i = 1; i < 8; i++) {
+                        if (BitUtil.check(fuelTempMask, i)) {
+                            position.set("fuelTemp" + i, (int) data.readByte());
+                        }
+                    }
+                    break;
+                case 13:
+                    int tempMask = data.readUnsignedByte();
+                    for (int i = 0; i < 8; i++) {
+                        if (BitUtil.check(tempMask, i)) {
+                            position.set(Position.PREFIX_TEMP + (i + 1), data.readShortLE() * 0.01);
+                        }
+                    }
+                    break;
+                case 18:
+                    int sensorIndex = data.readUnsignedByte();
+                    switch (recordLength - 1) {
+                        case 1:
+                            position.set("sensor" + sensorIndex, data.readUnsignedByte());
+                            break;
+                        case 2:
+                            position.set("sensor" + sensorIndex, data.readUnsignedShortLE());
+                            break;
+                        case 4:
+                            position.set("sensor" + sensorIndex, data.readUnsignedIntLE());
+                            break;
+                        default:
+                            break;
                     }
                     break;
                 default:
