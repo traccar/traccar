@@ -116,6 +116,7 @@ public class WebServer implements LifecycleObject {
             logWriter.setRetainDays(config.getInteger(Keys.WEB_REQUEST_LOG_RETAIN_DAYS));
             server.setRequestLog(new WebRequestLog(logWriter));
         }
+        servletHandler.addBean(new HttpSessionCollector());
     }
 
     private void initClientProxy(HandlerList handlers) {

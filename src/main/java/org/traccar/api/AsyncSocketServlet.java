@@ -18,6 +18,8 @@ package org.traccar.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.api.security.LoginResult;
 import org.traccar.api.security.LoginService;
@@ -27,6 +29,7 @@ import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.web.HttpSessionCollector;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -40,11 +43,14 @@ import java.util.*;
 @Singleton
 public class AsyncSocketServlet extends JettyWebSocketServlet {
 
+    // private static final Logger LOGGER =
+    // LoggerFactory.getLogger(AsyncSocketServlet.class);
     private final Config config;
     private final ObjectMapper objectMapper;
     private final ConnectionManager connectionManager;
     private final Storage storage;
     private static final String KEY_TOKEN = "token";
+    private static final String KEY_SESSION = "session";
 
     @Inject
     private LoginService loginService;
@@ -67,38 +73,43 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
                 if (userId != null) {
                     return new AsyncSocket(objectMapper, connectionManager, storage, userId);
                 }
-            } else {
+            } else if (req.getQueryString().contains(KEY_SESSION)) {
+                Map<String, String> params = getQueryMap(req.getQueryString());
+                String sessionID = (String) params.get(KEY_SESSION);
+                HttpSession httpSession = HttpSessionCollector.find(sessionID);
+                Long userId = (Long) httpSession.getAttribute(SessionResource.USER_ID_KEY);
+                if (userId != null) {
+                    return new AsyncSocket(objectMapper, connectionManager, storage, userId);
+                }
+            } else if (req.getQueryString().contains(KEY_TOKEN)) { // not secure
                 Map<String, String> params = getQueryMap(req.getQueryString());
                 String token = (String) params.get(KEY_TOKEN);
-                if (token != null) {
-                    LoginResult loginResult;
-                    try {
-                        loginResult = loginService.login(token);
-                    } catch (StorageException | GeneralSecurityException | IOException e) {
-                        return null;
-                    }
-                    User user = loginResult.getUser();
-                    if (user != null) {
-                        return new AsyncSocket(objectMapper, connectionManager, storage, user.getId());
-                    }
+                LoginResult loginResult;
+                try {
+                    loginResult = loginService.login(token);
+                } catch (StorageException | GeneralSecurityException | IOException e) {
+                    return null;
+                }
+                if (loginResult.getUser() != null) {
+                    return new AsyncSocket(objectMapper, connectionManager, storage, loginResult.getUser().getId());
                 }
             }
             return null;
         });
     }
 
-    public static Map<String, String> getQueryMap(String query)  
-    {  
-        String[] params = query.split("&");  
-        Map<String, String> map = new HashMap<String, String>();  
-        for (String param : params)  
-        {  String [] p=param.split("=");
-            String name = p[0];  
-          if(p.length>1)  {String value = p[1];  
-            map.put(name, value);
-          }  
-        }  
-        return map;  
-    } 
+    public static Map<String, String> getQueryMap(String query) {
+        String[] params = query.split("&");
+        Map<String, String> map = new HashMap<String, String>();
+        for (String param : params) {
+            String[] p = param.split("=");
+            String name = p[0];
+            if (p.length > 1) {
+                String value = p[1];
+                map.put(name, value);
+            }
+        }
+        return map;
+    }
 
 }
