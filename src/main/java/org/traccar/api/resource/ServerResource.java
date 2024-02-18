@@ -93,15 +93,10 @@ public class ServerResource extends BaseResource {
         server.setOpenIdEnabled(openIdProvider != null);
         server.setOpenIdForce(openIdProvider != null && openIdProvider.getForce());
         User user = permissionsService.getUser(getUserId());
-        if (user != null) {
-            if (user.getAdministrator()) {
-                server.setStorageSpace(Log.getStorageSpace());
-            }
-        } else {
-            server.setNewServer(UserUtil.isEmpty(storage));
-        }
         if (user != null && user.getAdministrator()) {
             server.setStorageSpace(Log.getStorageSpace());
+        } else {
+            server.setNewServer(UserUtil.isEmpty(storage));
         }
         return server;
     }
