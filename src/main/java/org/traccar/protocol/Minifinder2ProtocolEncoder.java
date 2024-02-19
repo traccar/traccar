@@ -21,7 +21,6 @@ import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
-import org.traccar.model.Device;
 
 import java.nio.charset.StandardCharsets;
 
@@ -55,8 +54,7 @@ public class Minifinder2ProtocolEncoder extends BaseProtocolEncoder {
             content.writeByte(0xF0); // type
         }
 
-        Device device = getCacheManager().getObject(Device.class, command.getDeviceId());
-        if ("Nano".equalsIgnoreCase(device.getModel())) {
+        if ("Nano".equalsIgnoreCase(getDeviceModel(command.getDeviceId()))) {
             ByteBuf content = Unpooled.buffer();
             if (command.getType().equals(Command.TYPE_FIRMWARE_UPDATE)) {
                 String url = command.getString(Command.KEY_DATA);

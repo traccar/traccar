@@ -29,14 +29,17 @@ public class DeviceSession {
 
     private final long deviceId;
     private final String uniqueId;
+    private final String model;
     private final Protocol protocol;
     private final Channel channel;
     private final SocketAddress remoteAddress;
 
     public DeviceSession(
-            long deviceId, String uniqueId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
+            long deviceId, String uniqueId, String model,
+            Protocol protocol, Channel channel, SocketAddress remoteAddress) {
         this.deviceId = deviceId;
         this.uniqueId = uniqueId;
+        this.model = model;
         this.protocol = protocol;
         this.channel = channel;
         this.remoteAddress = remoteAddress;
@@ -48,6 +51,10 @@ public class DeviceSession {
 
     public String getUniqueId() {
         return uniqueId;
+    }
+
+    public String getModel() {
+        return model;
     }
 
     public Channel getChannel() {

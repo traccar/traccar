@@ -23,7 +23,6 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.helper.BufferUtil;
-import org.traccar.model.Device;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -155,12 +154,10 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
         } else if (jsonContains(json, "data")) {
 
-            String model = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
-
             ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(json.getString("data")));
             try {
                 int header = buf.readUnsignedByte();
-                if ("Amber".equals(model)) {
+                if ("Amber".equals(getDeviceModel(deviceSession))) {
 
                     int flags = buf.readUnsignedByte();
                     position.set(Position.KEY_MOTION, BitUtil.check(flags, 1));

@@ -21,7 +21,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BufferUtil;
-import org.traccar.model.Device;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -654,7 +653,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
-        String model = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
 
         for (int i = 0; i < count; i++) {
             Position position = new Position(getProtocolName());
@@ -680,7 +678,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             } else if (codec == CODEC_12) {
                 decodeSerial(channel, remoteAddress, deviceSession, position, buf);
             } else {
-                decodeLocation(position, buf, codec, model);
+                decodeLocation(position, buf, codec, getDeviceModel(deviceSession));
             }
 
             if (!position.getOutdated() || !position.getAttributes().isEmpty()) {

@@ -24,7 +24,6 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
-import org.traccar.model.Device;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
@@ -64,7 +63,7 @@ public class MeiligaoProtocolEncoder extends BaseProtocolEncoder {
         int outputCount;
         int outputType;
 
-        String model = getCacheManager().getObject(Device.class, deviceId).getModel();
+        String model = getDeviceModel(deviceId);
 
         if (model != null && Set.of("TK510", "GT08", "TK208", "TK228", "MT05").contains(model)) {
             outputCount = 5;
