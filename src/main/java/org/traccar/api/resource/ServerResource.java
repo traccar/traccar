@@ -100,9 +100,6 @@ public class ServerResource extends BaseResource {
         } else {
             server.setNewServer(UserUtil.isEmpty(storage));
         }
-        if (user != null && user.getAdministrator()) {
-            server.setStorageSpace(Log.getStorageSpace());
-        }
         return server;
     }
 
