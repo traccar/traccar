@@ -1,5 +1,9 @@
 # [Traccar Custom](https://www.traccar.org)
 
+![master](https://img.shields.io/github/last-commit/badges/shields/master)
+[![GitHub Release](https://img.shields.io/github/release/tterb/PlayMusic.svg?style=flat)]() 
+[![Downloads](https://pepy.tech/badge/global-chem)](https://pepy.tech/project/global-chem)
+
 ## Overview
 
 Traccar is an open source GPS tracking system. This repository contains Java-based back-end service. It supports more than 200 GPS protocols and more than 2000 models of GPS tracking devices. Traccar can be used with any major SQL database system. It also provides easy to use [REST API](https://www.traccar.org/traccar-api/).
