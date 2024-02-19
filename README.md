@@ -19,9 +19,7 @@ The session ID can be retrieved as cookies from the response on these API endpoi
 - [api/devices](https://www.traccar.org/api-reference/#tag/Devices/paths/~1devices/get) | _Fetch a list of Devices_
 
 ```js
-const socket = new WebSocket(
-  "./api/socket?session=node01d8bcd8o4su6u1ug70qdrena0i1"
-);
+const socket = new WebSocket("./api/socket?session=node01d8bcd8o4su6u1ug70qdrena0i1");
 socket.onerror = (error) => {
   console.log("socket error: ", error);
 };
@@ -33,9 +31,7 @@ socket.onmessage = function (event) {
 ##### Using user _Access Token_
 
 ```js
-const socket = new WebSocket(
-  "./api/socket?token=SDBGAiEA4SC67Qk5lrCsB2I53EDp5gAR1uips64FRn6W0Dt0jrMCIQDnZ....."
-);
+const socket = new WebSocket("./api/socket?token=SDBGAiEA4SC67Qk5lrCsB2I53EDp5gAR1uips64FRn6W0Dt0jrMCIQDnZ.....");
 socket.onerror = (error) => {
   console.log("socket error: ", error);
 };
