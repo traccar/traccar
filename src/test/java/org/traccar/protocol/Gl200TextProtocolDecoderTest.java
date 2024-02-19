@@ -478,6 +478,11 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, buffer(
                 "+ACK:GTGEO,1A0102,135790246811220,,0,0008,20100310172830,11F0"));
 
+        decoder.setModelOverride("GV355CEU");
+
+        verifyAttributes(decoder, buffer(
+                "+RESP:GTCAN,8020050605,867488060270575,,00,1,FFFFFFFF,8LBETF3W4N0001613,,,22.54,0,,,,,,,7.84,4.61,3.24,3.33,,8080,,,00,0.00,0.00,1,14,14,2371,0,001FFFFF,,,,,,,,,7158,9998,0,7.84,0.00,0.00,558,,,,,,,C0,,,,,0,0.0,346,2848.5,-78.592371,-0.968132,20240202083437,0740,0002,526C,00AE7907,00,20240202083440,3F6D$"));
+
     }
 
 }
