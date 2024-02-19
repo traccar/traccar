@@ -28,6 +28,7 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
+import org.traccar.web.HttpSessionCollector;
 
 import com.nimbusds.oauth2.sdk.ParseException;
 import jakarta.annotation.Nullable;
@@ -50,6 +51,8 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.net.URI;
 
 @Path("session")
@@ -97,6 +100,21 @@ public class SessionResource extends BaseResource {
         }
 
         throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
+    }
+
+    @PermitAll
+    @Path("check-sid")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response check(@QueryParam("sid") String sessionID) {
+        if (sessionID != null) {
+            boolean exists = HttpSessionCollector.exist(sessionID);
+            Map<String, Boolean> responseMap = new HashMap<>();
+            responseMap.put("status", exists);
+            return Response.ok(responseMap).build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Missing session ID").build();
+        }
     }
 
     @Path("{id}")
@@ -171,4 +189,5 @@ public class SessionResource extends BaseResource {
 
         return Response.seeOther(openIdProvider.handleCallback(URI.create(requestUri), request)).build();
     }
+
 }

@@ -18,14 +18,11 @@ package org.traccar.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 import org.traccar.api.resource.SessionResource;
 import org.traccar.api.security.LoginResult;
 import org.traccar.api.security.LoginService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -38,13 +35,10 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Duration;
-import java.util.*;
 
 @Singleton
 public class AsyncSocketServlet extends JettyWebSocketServlet {
 
-    // private static final Logger LOGGER =
-    // LoggerFactory.getLogger(AsyncSocketServlet.class);
     private final Config config;
     private final ObjectMapper objectMapper;
     private final ConnectionManager connectionManager;
@@ -74,42 +68,25 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
                     return new AsyncSocket(objectMapper, connectionManager, storage, userId);
                 }
             } else if (req.getQueryString().contains(KEY_SESSION)) {
-                Map<String, String> params = getQueryMap(req.getQueryString());
-                String sessionID = (String) params.get(KEY_SESSION);
+                String sessionID = (String) req.getParameterMap().get(KEY_SESSION).get(0);
                 HttpSession httpSession = HttpSessionCollector.find(sessionID);
                 Long userId = (Long) httpSession.getAttribute(SessionResource.USER_ID_KEY);
                 if (userId != null) {
                     return new AsyncSocket(objectMapper, connectionManager, storage, userId);
                 }
-            } else if (req.getQueryString().contains(KEY_TOKEN)) { // not secure
-                Map<String, String> params = getQueryMap(req.getQueryString());
-                String token = (String) params.get(KEY_TOKEN);
-                LoginResult loginResult;
+            } else if (req.getQueryString().contains(KEY_TOKEN)) {
+                String token = (String) req.getParameterMap().get(KEY_TOKEN).get(0);
                 try {
-                    loginResult = loginService.login(token);
+                    LoginResult loginResult = loginService.login(token);
+                    if (loginResult.getUser() != null) {
+                        return new AsyncSocket(objectMapper, connectionManager, storage, loginResult.getUser().getId());
+                    }
                 } catch (StorageException | GeneralSecurityException | IOException e) {
                     return null;
-                }
-                if (loginResult.getUser() != null) {
-                    return new AsyncSocket(objectMapper, connectionManager, storage, loginResult.getUser().getId());
                 }
             }
             return null;
         });
-    }
-
-    public static Map<String, String> getQueryMap(String query) {
-        String[] params = query.split("&");
-        Map<String, String> map = new HashMap<String, String>();
-        for (String param : params) {
-            String[] p = param.split("=");
-            String name = p[0];
-            if (p.length > 1) {
-                String value = p[1];
-                map.put(name, value);
-            }
-        }
-        return map;
     }
 
 }
