@@ -1,0 +1,46 @@
+$ sudo apt install default-jdk
+$ sudo apt install maven
+
+$ git clone https://github.com/mr-wolf-gb/traccar-custom/traccar.git
+$ cd traccar-custom
+$ git clone https://github.com/tananaev/traccar-web.git
+
+$ mvn package
+
+$ cd ..
+$ wget http://cdn.sencha.com/ext/gpl/ext-6.2.0-gpl.zip
+
+$ unzip ext-6.2.0-gpl.zip
+
+$ wget http://cdn.sencha.com/cmd/6.2.1/no-jre/SenchaCmd-6.2.1-linux-amd64.sh.zip
+
+$ unzip SenchaCmd-6.2.1-linux-amd64.sh.zip
+
+$ sudo ./SenchaCmd-6.2.1.29-linux-amd64.sh -q -dir /bin
+
+$ cd traccar-custom/traccar-web/modern
+
+$ npm install
+$ npm run build
+
+$ cd ../../setup
+
+# download from (https://adoptium.net/) without extracting.
+
+# OpenJDK18U-jdk_aarch64_linux_hotspot_18.0.2.1_1.tar.gz
+# OpenJDK18U-jdk_arm_linux_hotspot_18.0.2.1_1.tar.gz
+# OpenJDK18U-jdk_x64_linux_hotspot_18.0.2.1_1.tar.gz
+# OpenJDK18U-jdk_x64_windows_hotspot_18.0.2.1_1.zip
+
+
+$ wget https://excellmedia.dl.sourceforge.net/project/yajsw/yajsw/yajsw-stable-12.08/yajsw-stable-12.08.zip
+$ wget https://mlaan2.home.xs4all.nl/ispack/innosetup-5.5.9.exe
+$ sudo apt install wine-stable
+$ sudo apt install innoextract
+$ sudo apt install makeself
+$ sudo apt install dos2unix
+$ sudo dpkg --add-architecture i386 
+$ sudo apt update 
+$ sudo apt install wine32
+
+$ ./package.sh vxx.xx-latest
