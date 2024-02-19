@@ -1,8 +1,9 @@
 # [Traccar Custom](https://www.traccar.org)
 
-![master](https://img.shields.io/github/last-commit/badges/shields/master)
-[![GitHub Release](https://img.shields.io/github/release/tterb/PlayMusic.svg?style=flat)]() 
-[![Downloads](https://pepy.tech/badge/global-chem)](https://pepy.tech/project/global-chem)
+[![GitHub Release](https://badgen.net/github/assets-dl/mr-wolf-gb/traccar-custom)]()
+[![GitHub Release](https://badgen.net/github/release/mr-wolf-gb/traccar-custom/stable)]()
+[![Licence](https://badgen.net/github/license/mr-wolf-gb/traccar-custom)]()
+[![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/)
 
 ## Overview
 
