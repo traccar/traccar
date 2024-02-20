@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.Unpooled;
+import org.apache.commons.lang3.StringUtils;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.DataConverter;
 import org.traccar.session.DeviceSession;
@@ -419,17 +420,17 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
         position.setDeviceId(deviceSession.getDeviceId());
 
-        String deviceName = values[index++];
+        String model = StringUtils.firstNonEmpty(values[index++], getDeviceModel(deviceSession));
         index += 1; // report type
-        index += 1; // canbus state
+        index += 1; // can bus state
         long reportMask = Long.parseLong(values[index++], 16);
         long reportMaskExt = 0;
 
         if (BitUtil.check(reportMask, 0)) {
             position.set(Position.KEY_VIN, values[index++]);
         }
-        if (BitUtil.check(reportMask, 1)) {
-            position.set(Position.KEY_IGNITION, Integer.parseInt(values[index++]) > 0);
+        if (BitUtil.check(reportMask, 1) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_IGNITION, Integer.parseInt(values[index - 1]) > 0);
         }
         if (BitUtil.check(reportMask, 2)) {
             position.set(Position.KEY_OBD_ODOMETER, values[index++]);
@@ -491,7 +492,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 21) && !values[index++].isEmpty()) {
             position.set("engineOverspeed", Double.parseDouble(values[index - 1]));
         }
-        if ("GV350M".equals(deviceName)) {
+        if ("GV350M".equals(model)) {
             if (BitUtil.check(reportMask, 22)) {
                 index += 1; // impulse distance
             }
@@ -500,6 +501,28 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
             if (BitUtil.check(reportMask, 24)) {
                 index += 1; // catalyst liquid level
+            }
+        } else if ("GV355CEU".equals(model)) {
+            if (BitUtil.check(reportMask, 22)) {
+                index += 1; // impulse distance
+            }
+            if (BitUtil.check(reportMask, 23)) {
+                index += 1; // engine cold starts
+            }
+            if (BitUtil.check(reportMask, 24)) {
+                index += 1; // engine all starts
+            }
+            if (BitUtil.check(reportMask, 25)) {
+                index += 1; // engine starts by ignition
+            }
+            if (BitUtil.check(reportMask, 26)) {
+                index += 1; // total engine cold running time
+            }
+            if (BitUtil.check(reportMask, 27)) {
+                index += 1; // handbrake applies during ride
+            }
+            if (BitUtil.check(reportMask, 28)) {
+                index += 1; // electric report mask
             }
         }
         if (BitUtil.check(reportMask, 29) && !values[index++].isEmpty()) {
@@ -581,7 +604,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        if (BitUtil.check(reportMask, 30)) {
+        if (!"GV355CEU".equals(model) && BitUtil.check(reportMask, 30)) {
             while (values[index].isEmpty()) {
                 index += 1;
             }
@@ -606,6 +629,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // reserved
         }
 
+        index = values.length - 2;
         if (ignoreFixTime) {
             position.setTime(dateFormat.parse(values[index]));
         } else {

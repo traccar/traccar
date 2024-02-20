@@ -51,6 +51,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private MediaManager mediaManager;
     private CommandsManager commandsManager;
 
+    private String modelOverride;
+
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
     }
@@ -139,6 +141,14 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void setModelOverride(String modelOverride) {
+        this.modelOverride = modelOverride;
+    }
+
+    public String getDeviceModel(DeviceSession deviceSession) {
+        return modelOverride != null ? modelOverride : deviceSession.getModel();
     }
 
     public void getLastLocation(Position position, Date deviceTime) {

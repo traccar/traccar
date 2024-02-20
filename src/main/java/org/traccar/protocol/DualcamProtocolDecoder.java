@@ -19,7 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Device;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -77,7 +76,7 @@ public class DualcamProtocolDecoder extends BaseProtocolDecoder {
                 deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
                 long settings = buf.readUnsignedInt();
                 if (channel != null && deviceSession != null) {
-                    model = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
+                    model = getDeviceModel(deviceSession);
                     ByteBuf response = Unpooled.buffer();
                     if (BitUtil.check(settings, 25)) {
                         response.writeShort(MSG_PATH_REQUEST);
