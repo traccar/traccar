@@ -18,16 +18,22 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
+import org.traccar.model.WifiAccessPoint;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.net.SocketAddress;
 import java.util.regex.Pattern;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
@@ -231,21 +237,51 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private static final Pattern PATTERN_COMMAND_RESULT_OLD = new PatternBuilder()
+            .text("$")                           // start
+            .number("(d+),")                     // device id
+            .expression("(.*);")				 // command
+            .number("xx")                     	 // checksum
+            .any()               				 // 
+            .compile();
+    
+    private Position decodeCommandResultOld(Channel channel, SocketAddress remoteAddress, String sentence) {
+		
+		Parser parser = new Parser(PATTERN_COMMAND_RESULT_OLD, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+        
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        
+        getLastLocation(position, null);
+        
+        position.set(Position.KEY_RESULT, parser.next());
+        
+        return position;
+	}
+
     private static final Pattern PATTERN_NEW = new PatternBuilder()
             .number("dddd").optional()
             .text("$MGV")
             .number("ddd,")
             .number("(d+),")                     // imei
-            .expression("[^,]*,")                // name
-            .expression("([RS]),")
+            .expression("[^,]*,")                // device name
+            .expression("([RS]),")				 // R = Realtime data, S = Stored data
             .number("(dd)(dd)(dd),")             // date (ddmmyy)
             .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .expression("([AV]),")               // validity
+            .expression("([AV]),")               // validity, A = GPS fix, V = GPS can not fix
             .number("(d+)(dd.d+),([NS]),")       // latitude
             .number("(d+)(dd.d+),([EW]),")       // longitude
-            .number("dd,")
-            .number("(dd),")                     // satellites
-            .number("dd,")
+            .number("(dd),")					 // satellites BDS
+            .number("(dd),")                     // satellites GPS
+            .number("(dd),")					 // satellites GLONASS
             .number("(d+.d+)?,")                 // hdop
             .number("(d+.d+)?,")                 // speed
             .number("(d+.d+)?,")                 // course
@@ -255,7 +291,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)?,")                    // mnc
             .number("(xxxx)?,")                  // lac
             .number("(x+)?,")                    // cid
-            .number("(d+)?,")                    // gsm
+            .number("(d+)?,")                    // gsm signal strength
             .groupBegin()
             .number("([01]{4})?,")               // input
             .number("([01]{4})?,")               // output
@@ -280,9 +316,10 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)?,")                    // rfid
             .number("([01])(d)?").optional()     // charge and belt status
             .expression("[^,]*,")
-            .number("(d+)?,")                    // battery
-            .expression("([^,]*)[,;]")           // alert
-            .any()
+            .number("(d+)?,")                    // batteryLevel
+            .expression("([^,]*)[,;]{1}")        // alert
+            .expression("([a-z0-9:|]*)?[,;]{1}?")// wifi data
+            .any()								 
             .compile();
 
     private Position decodeNew(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -310,7 +347,13 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+        int sat_BDS = parser.nextInt(0);
+		int sat_GPS = parser.nextInt(0);
+		int sat_GLONASS = parser.nextInt(0);
+        position.set(Position.KEY_SATELLITES, sat_BDS+sat_GPS+sat_GLONASS);
+        position.set("sat_BDS", sat_BDS);
+		position.set("sat_GPS", sat_GPS);
+		position.set("sat_GLONASS", sat_GLONASS);
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
 
         position.setSpeed(parser.nextDouble(0));
@@ -320,19 +363,21 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
         }
-
+        
+        Network network = new Network();
+        
         if (parser.hasNext(5)) {
             int mcc = parser.nextInt();
             int mnc = parser.nextInt();
             Integer lac = parser.nextHexInt();
             Integer cid = parser.nextHexInt();
             Integer rssi = parser.nextInt();
-            if (lac != null && cid != null) {
-                CellTower tower = CellTower.from(mcc, mnc, lac, cid);
-                if (rssi != null) {
-                    tower.setSignalStrength(rssi);
+            if (lac != null && cid != null) {                
+                if (rssi != null) {                    
+                    network.addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
+                } else {
+	                network.addCellTower(CellTower.from(mcc, mnc, lac, cid));
                 }
-                position.setNetwork(new Network(tower));
             }
         }
 
@@ -365,15 +410,29 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
         }
         if (parser.hasNext()) {
-            position.set("belt", parser.nextInt());
+	        position.set(Position.KEY_LOCK, parser.nextInt() > 0);          
         }
-
-        String battery = parser.next();
-        if (battery != null) {
-            position.set(Position.KEY_BATTERY, Integer.parseInt(battery));
-        }
+        
+        if (parser.hasNext()) {
+	        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+	    }
 
         position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+        
+        if (parser.hasNext()) {        
+        	String[] wifimacs = parser.next().split("\\|");
+            int wifiCount = wifimacs.length;
+            if (wifiCount <= 10) {
+                for (int i = 0; i < wifiCount; i++) {
+                    String[] wifiinfo = wifimacs[i].split(":");
+                    network.addWifiAccessPoint(WifiAccessPoint.from(wifiinfo[0].replaceAll(".{2}(?=.)", "$0:"),Integer.parseInt(wifiinfo[1])*-1));
+                }
+            }
+        }
+
+        if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+            position.setNetwork(network);
+        }
 
         return position;
     }
@@ -389,6 +448,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         }
         switch (value) {
             case "pw on":
+            case "restart":
             case "poweron":
                 return Position.ALARM_POWER_ON;
             case "poweroff":
@@ -423,19 +483,60 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             case "psr":
                 return Position.ALARM_POWER_RESTORED;
             case "hit":
-                return Position.ALARM_VIBRATION;
+                return Position.ALARM_ACCIDENT;
             case "belt on":
             case "belton":
                 return Position.ALARM_LOCK;
             case "belt off":
             case "beltoff":
                 return Position.ALARM_UNLOCK;
+            case "detect water":
+            	return Position.ALARM_FUEL_LEAK;
             case "error":
                 return Position.ALARM_FAULT;
             default:
                 return null;
         }
     }
+    
+    private static final Pattern PATTERN_COMMAND_RESULT_NEW = new PatternBuilder()
+            .text("$")                           // start
+            .number("(d{15});")                  // emei
+            .expression("(.*)")                  // message
+            .expression("(?:!)?")                // end
+            .compile();
+    
+    private Position decodeCommandResultNew(Channel channel, SocketAddress remoteAddress, String sentence) {
+		
+		Parser parser = new Parser(PATTERN_COMMAND_RESULT_NEW, sentence);
+        if (!parser.matches()) {
+	        
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+        
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        
+        getLastLocation(position, null);
+        
+        //position.set(Position.KEY_EVENT, "commandResult");
+        position.set(Position.KEY_RESULT, parser.next());
+                
+        // Check if the device does do a Q051 request, to send the current date and time back to the device
+        if (sentence.contains(";Q051;")) {			
+	        DateFormat deviceDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	        deviceDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+			String response = "$GPRS," + sentence.substring(1, 16) + ";W051," + deviceDateFormat.format(new Date()) + ";!";
+	        channel.write(new NetworkMessage(response, remoteAddress));
+	    }
+        
+        return position;
+	}
 
     @Override
     protected Object decode(
@@ -445,6 +546,10 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
 
         if (sentence.contains("$MG")) {
             return decodeNew(channel, remoteAddress, sentence);
+        } else if (sentence.matches("^\\$\\d{15};.*")) {
+	        return decodeCommandResultNew(channel, remoteAddress, sentence);
+        } else if (sentence.matches("^\\$,\\d+,.*")) {
+	        return decodeCommandResultOld(channel, remoteAddress, sentence);
         } else {
             return decodeOld(channel, remoteAddress, sentence);
         }
