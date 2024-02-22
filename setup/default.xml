@@ -297,5 +297,6 @@
     <entry key='positrex.port'>5252</entry>
     <entry key='dragino.port'>5253</entry>
     <entry key='fleetguide.port'>5254</entry>
+    <entry key='valtrack.port'>5255</entry>
 
 </properties>
