@@ -75,19 +75,8 @@ public class TextTemplateFormatter {
     }
 
     public Template getTemplate(String name, String path) {
-
-        String templateFilePath;
-        Template template;
-
-        try {
-            templateFilePath = Paths.get(path, name + ".vm").toString();
-            template = velocityEngine.getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
-        } catch (ResourceNotFoundException error) {
-            LOGGER.warn("Notification template error", error);
-            templateFilePath = Paths.get(path, "unknown.vm").toString();
-            template = velocityEngine.getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
-        }
-        return template;
+        String templateFilePath = Paths.get(path, name + ".vm").toString();
+        return velocityEngine.getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
     }
 
     public NotificationMessage formatMessage(VelocityContext velocityContext, String name, String templatePath) {
