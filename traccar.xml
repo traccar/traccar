@@ -53,6 +53,7 @@
   <entry key='processing.copyAttributes'>ignition,fuel</entry>
   <entry key='processing.computedAttributes.deviceAttributes'>true</entry>
 
+  <entry key='event.forward.enable'>false</entry>
   <entry key='event.overspeed.notRepeat'>true</entry>
   <entry key='event.motion.speedThreshold'>0.5</entry>
 
