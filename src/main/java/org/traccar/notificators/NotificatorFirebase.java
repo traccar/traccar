@@ -108,7 +108,7 @@ public class NotificatorFirebase extends Notificator {
             }
 
             try {
-                var result = FirebaseMessaging.getInstance().sendMulticast(messageBuilder.build());
+                var result = FirebaseMessaging.getInstance().sendEachForMulticast(messageBuilder.build());
                 List<String> failedTokens = new LinkedList<>();
                 var iterator = result.getResponses().listIterator();
                 while (iterator.hasNext()) {
