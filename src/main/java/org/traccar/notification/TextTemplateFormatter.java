@@ -15,10 +15,11 @@
  */
 package org.traccar.notification;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
@@ -29,8 +30,6 @@ import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
