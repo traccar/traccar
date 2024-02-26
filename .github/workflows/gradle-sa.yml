@@ -3,8 +3,6 @@ name: deploy-sa
 on:
   push:
     branches: [ fleetmap ]
-  pull_request:
-    branches: [ fleetmap ]
 
 jobs:
   build:

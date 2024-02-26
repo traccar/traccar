@@ -1,0 +1,70 @@
+<jmxtrans-agent>
+  <queries>
+    <!-- OS -->
+    <query objectName="java.lang:type=OperatingSystem" attribute="SystemLoadAverage" resultAlias="os.systemLoadAverage"/>
+
+    <!-- JVM -->
+    <query objectName="java.lang:type=Memory" attribute="HeapMemoryUsage" key="max"
+           resultAlias="jvm.heapMemoryUsage.max"/>
+    <query objectName="java.lang:type=Memory" attribute="HeapMemoryUsage" key="used"
+           resultAlias="jvm.heapMemoryUsage.used"/>
+    <query objectName="java.lang:type=Memory" attribute="HeapMemoryUsage" key="committed"
+           resultAlias="jvm.heapMemoryUsage.committed"/>
+    <query objectName="java.lang:type=Memory" attribute="NonHeapMemoryUsage" key="used"
+           resultAlias="jvm.nonHeapMemoryUsage.used"/>
+    <query objectName="java.lang:type=Memory" attribute="NonHeapMemoryUsage" key="committed"
+           resultAlias="jvm.nonHeapMemoryUsage.committed"/>
+    <query objectName="java.lang:type=Threading" attribute="ThreadCount" resultAlias="jvm.thread"/>
+
+    <!-- JETTY Sessions -->
+    <query objectName="org.eclipse.jetty.server.session:context=ROOT,type=defaultsessioncache,id=0"
+           attribute="sessionsCurrent"
+           resultAlias="traccar.sessionsCurrent"/>
+    <query objectName="org.eclipse.jetty.server.session:context=ROOT,type=defaultsessioncache,id=0"
+           attribute="sessionsMax"
+           resultAlias="traccar.sessionsMax"/>
+    <query objectName="org.eclipse.jetty.server.session:context=ROOT,type=defaultsessioncache,id=0"
+           attribute="sessionsTotal"
+           resultAlias="traccar.sessionsTotal"/>
+
+    <!-- JETTY Connections -->
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="connectionDurationMax"
+           resultAlias="traccar.connectionDurationMax"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="connectionDurationMean"
+           resultAlias="traccar.connectionDurationMean"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="connectionDurationStdDev"
+           resultAlias="traccar.connectionDurationStdDev"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="connections"
+           resultAlias="traccar.connections"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="connectionsMax"
+           resultAlias="traccar.connectionsMax"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="connectionsTotal"
+           resultAlias="traccar.connectionsTotal"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="receivedBytes"
+           resultAlias="traccar.receivedBytes"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="receivedBytesRate"
+           resultAlias="traccar.receivedBytesRate"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="sentBytes"
+           resultAlias="traccar.sentBytes"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="sentBytesRate"
+           resultAlias="traccar.sentBytesRate"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="sentMessages"
+           resultAlias="traccar.sentMessages"/>
+    <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
+           attribute="sentMessagesRate"
+           resultAlias="traccar.sentMessagesRate"/>
+  </queries>
+  <outputWriter class="org.jmxtrans.agent.CloudWatchOutputWriter"/>
+  <collectIntervalInSeconds>30</collectIntervalInSeconds>
+</jmxtrans-agent>

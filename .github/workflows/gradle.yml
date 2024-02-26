@@ -3,8 +3,6 @@ name: deploy
 on:
   push:
     branches: [ fleetmap ]
-  pull_request:
-    branches: [ fleetmap ]
 
 jobs:
   build:
