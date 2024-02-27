@@ -41,7 +41,7 @@ public class AsyncSocketServlet extends WebSocketServlet {
                     if (userId != null) {
                         return new AsyncSocket((Long) userId);
                     } else {
-                        LOGGER.error("no userId: {}", req.getHeaders());
+                        LOGGER.warn("no userId: {}", req.getHeaders());
                     }
                 }
                 return new AsyncSocket(-1);
