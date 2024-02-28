@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -344,7 +344,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         int mcc = buf.readUnsignedShort();
         int mnc;
-        if (BitUtil.check(mcc, 15) || type == MSG_GPS_LBS_6) {
+        if (BitUtil.check(mcc, 15) || type == MSG_GPS_LBS_6 || variant == Variant.SL4X) {
             mnc = buf.readUnsignedShort();
         } else {
             mnc = buf.readUnsignedByte();
@@ -441,15 +441,18 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_REMOVING;
             case 0x23:
                 return Position.ALARM_FALL_DOWN;
+            case 0x28:
+                return Position.ALARM_BRAKING;
             case 0x29:
                 return Position.ALARM_ACCELERATION;
-            case 0x30:
-                return Position.ALARM_BRAKING;
             case 0x2A:
             case 0x2B:
+            case 0x2E:
                 return Position.ALARM_CORNERING;
             case 0x2C:
                 return Position.ALARM_ACCIDENT;
+            case 0x30:
+                return Position.ALARM_JAMMING;
             default:
                 return null;
         }
@@ -1476,6 +1479,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         } else if (header == 0x7878 && type == MSG_ALARM && buf.getUnsignedShort(buf.readerIndex() + 4) == 0xffff) {
             variant = Variant.JC400;
         } else if (header == 0x7878 && type == MSG_LBS_3 && length == 0x37) {
+            variant = Variant.SL4X;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_4 && length == 0x27) {
             variant = Variant.SL4X;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_2 && length == 0x2f) {
             variant = Variant.SEEWORLD;

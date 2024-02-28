@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,13 +27,14 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 
 @Singleton
-public final class NotificatorWeb implements Notificator {
+public final class NotificatorWeb extends Notificator {
 
     private final ConnectionManager connectionManager;
     private final NotificationFormatter notificationFormatter;
 
     @Inject
     public NotificatorWeb(ConnectionManager connectionManager, NotificationFormatter notificationFormatter) {
+        super(null, null);
         this.connectionManager = connectionManager;
         this.notificationFormatter = notificationFormatter;
     }

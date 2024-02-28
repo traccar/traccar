@@ -18,6 +18,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttribute(decoder, binary(
+                "78782732180214123324ca0162bdf0041f45d900190b0a02d4000bc5270000ec025206040202005e07e10d0a"),
+                Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+
+        verifyAttribute(decoder, binary(
                 "78782616170A080C0E24C0027C58AD0C2B8B0100454E0901CC0025030328E7A0005D4B13021EC373170D0A"),
                 Position.KEY_BATTERY_LEVEL, 93);
 
