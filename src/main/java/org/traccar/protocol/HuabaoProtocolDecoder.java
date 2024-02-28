@@ -948,6 +948,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
 
         if (type == 0xF0) {
+
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
@@ -1115,6 +1116,24 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             }
 
             return position;
+
+        } else if (type == 0xFF) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            position.setValid(true);
+            position.setTime(readDate(buf, deviceSession.get(DeviceSession.KEY_TIMEZONE)));
+            position.setLatitude(buf.readInt() * 0.000001);
+            position.setLongitude(buf.readInt() * 0.000001);
+            position.setAltitude(buf.readShort());
+            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
+            position.setCourse(buf.readUnsignedShort());
+
+            // TODO more positions and g sensor data
+
+            return position;
+
         }
 
         return null;
