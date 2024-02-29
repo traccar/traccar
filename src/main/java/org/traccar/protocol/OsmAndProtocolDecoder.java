@@ -69,6 +69,9 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
         for (Map.Entry<String, List<String>> entry : params.entrySet()) {
             for (String value : entry.getValue()) {
                 switch (entry.getKey()) {
+                    case "positionid":
+                        position.setId(Long.parseLong(value));
+                        break;
                     case "id":
                     case "deviceid":
                         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
