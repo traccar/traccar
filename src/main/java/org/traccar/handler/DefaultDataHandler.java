@@ -45,6 +45,10 @@ public class DefaultDataHandler extends BaseDataHandler {
     @Override
     protected Position handlePosition(Position position) {
 
+        if(position.getId() > 0){
+            return position;
+        }
+
         try (Jedis jedis = jedisPool.getResource()) {
             // dataManager.addObject(position);
             position.setId(jedis.incr("dbid"));
