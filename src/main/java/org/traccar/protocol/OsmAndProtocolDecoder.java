@@ -154,6 +154,9 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                     case "accuracy":
                         position.setAccuracy(Double.parseDouble(value));
                         break;
+                    case "protocol":
+                        position.setProtocol(value);
+                        break;
                     case "hdop":
                         position.set(Position.KEY_HDOP, Double.parseDouble(value));
                         break;
