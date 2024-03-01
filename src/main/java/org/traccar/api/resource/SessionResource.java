@@ -145,7 +145,7 @@ public class SessionResource extends BaseResource {
             throw new WebApplicationException(response);
         }
         if (loginResult != null) {
-            User user = new User();
+            User user = loginResult.getUser();
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
             LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
             return user;

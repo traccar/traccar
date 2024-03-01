@@ -432,8 +432,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(reportMask, 1) && !values[index++].isEmpty()) {
             position.set(Position.KEY_IGNITION, Integer.parseInt(values[index - 1]) > 0);
         }
-        if (BitUtil.check(reportMask, 2)) {
-            position.set(Position.KEY_OBD_ODOMETER, values[index++]);
+        if (BitUtil.check(reportMask, 2) && !values[index++].isEmpty()) {
+            position.set(Position.KEY_OBD_ODOMETER, Integer.parseInt(values[index - 1].substring(1)));
         }
         if (BitUtil.check(reportMask, 3) && !values[index++].isEmpty()) {
             position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index - 1]));
@@ -448,7 +448,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index - 1]));
         }
         if (BitUtil.check(reportMask, 7) && !values[index++].isEmpty()) {
-            position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1].substring(1)));
+            String value = values[index - 1];
+            if (value.startsWith("L/H")) {
+                position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(value.substring(3)));
+            }
         }
         if (BitUtil.check(reportMask, 8) && !values[index++].isEmpty()) {
             position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(values[index - 1].substring(1)));
