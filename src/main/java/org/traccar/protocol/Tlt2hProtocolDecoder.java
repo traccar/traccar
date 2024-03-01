@@ -57,10 +57,13 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             .text("#")
             .number("(?:(dd|dddd)|x*)")          // cell or voltage
             .groupBegin()
-            .number("#(d+),")                    // mcc
+            .text("#")
+            .groupBegin()
+            .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(x+),")                     // lac
             .number("(x+)")                      // cell id
+            .groupEnd("?")
             .groupEnd("?")
             .text("$GPRMC,")
             .number("(?:(dd)(dd)(dd).d+)?,")     // time (hhmmss.sss)
