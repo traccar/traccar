@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,44 +59,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         ignoreFixTime = getConfig().getBoolean(Keys.PROTOCOL_IGNORE_FIX_TIME.withPrefix(getProtocolName()));
     }
 
-    private static final Pattern PATTERN_ACK = new PatternBuilder()
-            .text("+ACK:GT")
-            .expression("...,")                  // type
-            .expression("(.{6}|.{10}),")         // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .any().text(",")
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("(xxxx)")                    // counter
-            .text("$").optional()
-            .compile();
-
-    private Object decodeAck(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
-        Parser parser = new Parser(PATTERN_ACK, sentence);
-        if (parser.matches()) {
-            String protocolVersion = parser.next();
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-            if (deviceSession == null) {
-                return null;
-            }
-            if (type.equals("HBD")) {
-                if (channel != null) {
-                    parser.skip(6);
-                    channel.writeAndFlush(new NetworkMessage(
-                            "+SACK:GTHBD," + protocolVersion + "," + parser.next() + "$", remoteAddress));
-                }
-            } else {
-                Position position = new Position(getProtocolName());
-                position.setDeviceId(deviceSession.getDeviceId());
-                getLastLocation(position, parser.nextDateTime());
-                position.setValid(false);
-                position.set(Position.KEY_RESULT, "Command " + type + " accepted");
-                return position;
-            }
-        }
-        return null;
-    }
-
     private Position initPosition(Parser parser, Channel channel, SocketAddress remoteAddress) {
         if (parser.matches()) {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
@@ -125,6 +87,28 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return (Integer.parseInt(hours[0]) * 3600L
                     + (hours.length > 1 ? Integer.parseInt(hours[1]) * 60L : 0)
                     + (hours.length > 2 ? Integer.parseInt(hours[2]) : 0)) * 1000;
+        }
+        return null;
+    }
+
+    private Position decodeAck(
+            Channel channel, SocketAddress remoteAddress, String[] values, String type) throws Exception {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[2]);
+        if (deviceSession == null) {
+            return null;
+        }
+        if (type.equals("HBD")) {
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage(
+                        "+SACK:GTHBD," + values[1] + "," + values[values.length - 1] + "$", remoteAddress));
+            }
+        } else {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            getLastLocation(position, new SimpleDateFormat("yyyyMMddHHmmss").parse(values[values.length - 2]));
+            position.setValid(false);
+            position.set(Position.KEY_RESULT, values[0]);
+            return position;
         }
         return null;
     }
@@ -1541,17 +1525,19 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        String sentence = ((ByteBuf) msg).toString(StandardCharsets.US_ASCII);
+        String sentence = ((ByteBuf) msg).toString(StandardCharsets.US_ASCII).replaceAll("\\$$", "");
 
         int typeIndex = sentence.indexOf(":GT");
         if (typeIndex < 0) {
             return null;
         }
 
+        String[] values = sentence.split(",");
+
         Object result;
         String type = sentence.substring(typeIndex + 3, typeIndex + 6);
         if (sentence.startsWith("+ACK")) {
-            result = decodeAck(channel, remoteAddress, sentence, type);
+            result = decodeAck(channel, remoteAddress, values, type);
         } else {
             switch (type) {
                 case "INF":
@@ -1634,13 +1620,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (channel != null && getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
-            String checksum;
-            if (sentence.endsWith("$")) {
-                checksum = sentence.substring(sentence.length() - 1 - 4, sentence.length() - 1);
-            } else {
-                checksum = sentence.substring(sentence.length() - 4);
-            }
-            channel.writeAndFlush(new NetworkMessage("+SACK:" + checksum + "$", remoteAddress));
+            channel.writeAndFlush(new NetworkMessage("+SACK:" + values[values.length - 1] + "$", remoteAddress));
         }
 
         return result;
