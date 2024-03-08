@@ -49,7 +49,7 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+)[+;]")               // speed
             .number("(d+)[+;]")                  // course
             .groupBegin()
-            .text("0x").number("(d+)[+;]")       // input
+            .text("0x").number("(x+)[+;]")       // input
             .number("(d+)[+;]")                  // message type
             .number("(d+)[+;]")                  // odometer
             .groupEnd("?")
