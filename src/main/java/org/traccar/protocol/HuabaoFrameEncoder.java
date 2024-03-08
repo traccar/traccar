@@ -23,21 +23,21 @@ public class HuabaoFrameEncoder extends MessageToByteEncoder<ByteBuf> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) {
+        int index = 0;
+        int end = msg.readableBytes();
 
         while (msg.isReadable()) {
             int b = msg.readUnsignedByte();
-            switch (b) {
-                case 0x7d:
-                    out.writeByte(0x7d);
-                    out.writeByte(0x01);
-                    break;
-                case 0x7e:
-                    out.writeByte(0x7d);
-                    out.writeByte(0x02);
-                    break;
-                default:
+            if (++index > 1 && index < end) {
+                if (b == 0x7E) {
+                    out.writeBytes(new byte[]{0x7D, 0x02});
+                } else if (b == 0x7D) {
+                    out.writeBytes(new byte[]{0x7D, 0x01});
+                } else {
                     out.writeByte(b);
-                    break;
+                }
+            } else {
+                out.writeByte(b);
             }
         }
     }
