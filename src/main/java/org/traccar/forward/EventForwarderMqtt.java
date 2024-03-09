@@ -15,12 +15,10 @@
  */
 package org.traccar.forward;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hivemq.client.mqtt.datatypes.MqttQos;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
-import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
@@ -29,54 +27,36 @@ import java.net.URISyntaxException;
 import java.util.UUID;
 
 public class EventForwarderMqtt implements EventForwarder {
-
-    private final Mqtt5AsyncClient client;
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventForwarderMqtt.class);
+    private final MqttClient client;
     private final ObjectMapper objectMapper;
 
-    private final String topic;
-
-    public EventForwarderMqtt(Config config, ObjectMapper objectMapper) {
+    public EventForwarderMqtt(Config config, ObjectMapper objectMapper, MqttClientFactory clientFactory) {
         URI url;
         try {
             url = new URI(config.getString(Keys.EVENT_FORWARD_URL));
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
-
+        int version = config.getInteger(Keys.EVENT_FORWARD_MQTT_VERSION);
+        String host = url.getHost();
+        int port = url.getPort();
+        String username = null;
+        String password = null;
+        String topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
         String userInfo = url.getUserInfo();
-        Mqtt5SimpleAuth simpleAuth = null;
-        if (userInfo != null) {
+        if(userInfo != null) {
             int delimiter = userInfo.indexOf(':');
             if (delimiter == -1) {
                 throw new IllegalArgumentException("Wrong credentials. Should be in format \"username:password\"");
             } else {
-                simpleAuth = Mqtt5SimpleAuth.builder()
-                        .username(userInfo.substring(0, delimiter++))
-                        .password(userInfo.substring(delimiter).getBytes())
-                        .build();
+                username = userInfo.substring(0, delimiter++);
+                password = userInfo.substring(delimiter);
             }
         }
-
-        String host = url.getHost();
-        int port = url.getPort();
-        client = Mqtt5Client.builder()
-                .identifier("traccar-" + UUID.randomUUID())
-                .serverHost(host)
-                .serverPort(port)
-                .simpleAuth(simpleAuth)
-                .automaticReconnectWithDefaultConfig()
-                .buildAsync();
-
-        client.connectWith()
-                .send()
-                .whenComplete((message, e) -> {
-                    if (e != null) {
-                        throw new RuntimeException(e);
-                    }
-                });
-
+        LOGGER.info("Creating EventForwarderMqtt for MQTT version " + version);
+        client = clientFactory.create(version, host, port, username, password, topic);
         this.objectMapper = objectMapper;
-        topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
     }
 
     @Override
@@ -89,12 +69,7 @@ public class EventForwarderMqtt implements EventForwarder {
             return;
         }
 
-        client.publishWith()
-                .topic(topic)
-                .qos(MqttQos.AT_LEAST_ONCE)
-                .payload(payload)
-                .send()
-                .whenComplete((message, e) -> resultHandler.onResult(e == null, e));
+        client.publish(payload, resultHandler);
     }
 
 }

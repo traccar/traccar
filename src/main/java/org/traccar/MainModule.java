@@ -35,6 +35,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
 import org.traccar.database.OpenIdProvider;
 import org.traccar.database.StatisticsManager;
+import org.traccar.forward.MqttClientFactory;
 import org.traccar.forward.EventForwarder;
 import org.traccar.forward.EventForwarderJson;
 import org.traccar.forward.EventForwarderAmqp;
@@ -366,7 +367,7 @@ public class MainModule extends AbstractModule {
                 case "kafka":
                     return new EventForwarderKafka(config, objectMapper);
                 case "mqtt":
-                    return new EventForwarderMqtt(config, objectMapper);
+                    return new EventForwarderMqtt(config, objectMapper, new MqttClientFactory());
                 case "json":
                 default:
                     return new EventForwarderJson(config, client);
