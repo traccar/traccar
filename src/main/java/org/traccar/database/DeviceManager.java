@@ -362,13 +362,16 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     }
 
     public Collection<Position> getInitialState(long userId) {
+        if (Context.getPermissionsManager().getUserAdmin(userId)) {
+            return positions.values();
+        }
 
         List<Position> result = new LinkedList<>();
 
         if (Context.getPermissionsManager() != null) {
             for (long deviceId : Context.getPermissionsManager().getUserAdmin(userId)
                     ? getAllUserItems(userId) : getUserItems(userId)) {
-                if (positions.containsKey(deviceId) || Context.getPermissionsManager().getUserAdmin(userId)) {
+                if (positions.containsKey(deviceId)) {
                     result.add(positions.get(deviceId));
                 }
             }
