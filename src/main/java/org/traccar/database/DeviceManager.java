@@ -368,7 +368,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
         if (Context.getPermissionsManager() != null) {
             for (long deviceId : Context.getPermissionsManager().getUserAdmin(userId)
                     ? getAllUserItems(userId) : getUserItems(userId)) {
-                if (positions.containsKey(deviceId)) {
+                if (positions.containsKey(deviceId) || Context.getPermissionsManager().getUserAdmin(userId)) {
                     result.add(positions.get(deviceId));
                 }
             }
