@@ -17,6 +17,7 @@
   <entry key='web.requestLog.path'>./logs/jetty-yyyy_mm_dd.request.log</entry>
   <entry key='web.requestLog.retainDays'>3</entry>
 
+  <entry key='logger.console'>true</entry>
   <entry key='logger.level'>warning</entry>
   <entry key='logger.fullStackTraces'>true</entry>
 
