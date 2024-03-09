@@ -362,6 +362,9 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
     }
 
     public Collection<Position> getInitialState(long userId) {
+        if (Context.getPermissionsManager().getUserAdmin(userId)) {
+            return positions.values();
+        }
 
         List<Position> result = new LinkedList<>();
 
