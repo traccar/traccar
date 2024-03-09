@@ -17,6 +17,7 @@
   <entry key='web.requestLog.path'>./logs/jetty-yyyy_mm_dd.request.log</entry>
   <entry key='web.requestLog.retainDays'>3</entry>
 
+  <entry key='logger.console'>true</entry>
   <entry key='logger.level'>warning</entry>
   <entry key='logger.fullStackTraces'>true</entry>
 
@@ -53,6 +54,7 @@
   <entry key='processing.copyAttributes'>ignition,fuel</entry>
   <entry key='processing.computedAttributes.deviceAttributes'>true</entry>
 
+  <entry key='event.forward.enable'>false</entry>
   <entry key='event.overspeed.notRepeat'>true</entry>
   <entry key='event.motion.speedThreshold'>0.5</entry>
 

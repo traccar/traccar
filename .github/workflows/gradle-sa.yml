@@ -1,0 +1,29 @@
+name: deploy-sa
+
+on:
+  push:
+    branches: [ fleetmap ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: nginx
+    env:
+      SSL_PRIV_KEY: ${{ secrets.SSL_PRIVATE_KEY }}
+    steps:
+    - uses: actions/checkout@v4
+    - name: package for sa
+      run: |
+        cp -v setup/nginx-forward.conf .platform/nginx/nginx.conf
+        echo "web: /usr/bin/sleep 60" > Procfile
+        zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
+    - uses: einaregilsson/beanstalk-deploy@v21
+      name: deploy sa
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: traccar-tf
+        environment_name: Traccar-env
+        version_label: ${{ github.run_number }}
+        region: sa-east-1
+        deployment_package: deploy.zip

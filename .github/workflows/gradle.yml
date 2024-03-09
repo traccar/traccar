@@ -3,8 +3,6 @@ name: deploy
 on:
   push:
     branches: [ fleetmap ]
-  pull_request:
-    branches: [ fleetmap ]
 
 jobs:
   build:
@@ -28,7 +26,7 @@ jobs:
         cd traccar-web-master/modern
         npm install
         npm run build
-        cp -r build/* ../../traccar-web        
+        cp -r build/* ../../traccar-web
     - run: |
         echo "$SSL_PRIV_KEY" > setup/privkey.pem
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
@@ -42,21 +40,4 @@ jobs:
         environment_name: Traccar-env
         version_label: ${{ github.run_number }}
         region: eu-west-3
-        deployment_package: deploy.zip
-      continue-on-error: true
-    - name: package for sa
-      run: |
-        rm deploy.zip
-        cp -v setup/nginx-forward.conf .platform/nginx/nginx.conf
-        echo "web: /usr/bin/sleep 60" > Procfile
-        zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
-    - uses: einaregilsson/beanstalk-deploy@v21
-      name: deploy sa
-      with:
-        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        application_name: traccar-tf
-        environment_name: Traccar-env
-        version_label: ${{ github.run_number }}
-        region: sa-east-1
         deployment_package: deploy.zip

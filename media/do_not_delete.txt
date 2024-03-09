@@ -1,0 +1,2 @@
+this is required so the folder will exist in the server.
+camera photos and videos will be saved here
