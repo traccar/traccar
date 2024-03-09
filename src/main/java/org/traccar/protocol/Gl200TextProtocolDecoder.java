@@ -468,7 +468,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         index += 1; // report type
         index += 1; // can bus state
         long reportMask = Long.parseLong(v[index++], 16);
-        long reportMaskExt = 0;
 
         if (BitUtil.check(reportMask, 0)) {
             position.set(Position.KEY_VIN, v[index++]);
@@ -572,6 +571,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 index += 1; // electric report mask
             }
         }
+
+        long reportMaskExt = 0;
         if (BitUtil.check(reportMask, 29) && !v[index++].isEmpty()) {
             reportMaskExt = Long.parseLong(v[index - 1], 16);
         }
@@ -646,6 +647,41 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         if (BitUtil.check(reportMaskExt, 23)) {
             index += 1; // engine torque
+        }
+        if (BitUtil.check(reportMaskExt, 24)) {
+            index += 1; // service distance
+        }
+        if (BitUtil.check(reportMaskExt, 25)) {
+            index += 1; // ambient temperature
+        }
+        if (BitUtil.check(reportMaskExt, 26)) {
+            index += 1; // tachograph driver1 working time mask
+        }
+        if (BitUtil.check(reportMaskExt, 27)) {
+            index += 1; // tachograph driver2 working time mask
+        }
+        if (BitUtil.check(reportMaskExt, 28)) {
+            index += 1; // dtc codes
+        }
+        if (BitUtil.check(reportMaskExt, 29)) {
+            index += 1; // gaseous fuel level
+        }
+        if (BitUtil.check(reportMaskExt, 30)) {
+            index += 1; // tachograph information expand
+        }
+
+        long reportMaskCan = 0;
+        if (BitUtil.check(reportMaskExt, 31) && !v[index++].isEmpty()) {
+            reportMaskCan = Long.parseLong(v[index - 1], 16);
+        }
+        if (BitUtil.check(reportMaskCan, 0)) {
+            index += 1; // retarder usage
+        }
+        if (BitUtil.check(reportMaskCan, 1)) {
+            index += 1; // power mode
+        }
+        if (BitUtil.check(reportMaskCan, 2)) {
+            index += 1; // tachograph timestamp
         }
 
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
