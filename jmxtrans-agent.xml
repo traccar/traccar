@@ -64,6 +64,9 @@
     <query objectName="org.eclipse.jetty.io:context=*,type=connectionstatistics,id=0"
            attribute="sentMessagesRate"
            resultAlias="traccar.sentMessagesRate"/>
+    <query objectName="org.eclipse.jetty.server.handler=*,type=statisticshandler,id=0"
+           attribute="responses5xx"
+           resultAlias="responses5xx"/>
   </queries>
   <outputWriter class="org.jmxtrans.agent.CloudWatchOutputWriter"/>
   <collectIntervalInSeconds>30</collectIntervalInSeconds>
