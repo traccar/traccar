@@ -23,7 +23,6 @@ import org.eclipse.jetty.proxy.AsyncProxyServlet;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.server.handler.ErrorHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.server.handler.StatisticsHandler;
 import org.eclipse.jetty.server.session.DatabaseAdaptor;
 import org.eclipse.jetty.server.session.DefaultSessionCache;
 import org.eclipse.jetty.server.session.JDBCSessionDataStoreFactory;
@@ -130,7 +129,6 @@ public class WebServer {
         HandlerList handlers = new HandlerList();
         initClientProxy(config, handlers);
         handlers.addHandler(servletHandler);
-        handlers.addHandler(new StatisticsHandler());
         server.setHandler(handlers);
 
         if (config.getBoolean(Keys.WEB_REQUEST_LOG_ENABLE)) {
