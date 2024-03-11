@@ -21,11 +21,11 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 
 import com.hivemq.client.mqtt.datatypes.MqttQos;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3Client;
-import com.hivemq.client.mqtt.mqtt3.Mqtt3ClientBuilder;
-import com.hivemq.client.mqtt.mqtt3.message.auth.Mqtt3SimpleAuth;
-import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5Client;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5ClientBuilder;
+import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
+import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PublishResult;
 
 public final class MqttUtil {
 
@@ -33,7 +33,7 @@ public final class MqttUtil {
 
     }
 
-    public static Mqtt3AsyncClient createClient(final String url) {
+    public static Mqtt5AsyncClient createClient(final String url) {
         URI uri;
         try {
             uri = new URI(url);
@@ -41,17 +41,14 @@ public final class MqttUtil {
             throw new RuntimeException(e);
         }
 
-        final Mqtt3SimpleAuth simpleAuth = getSimpleAuth(uri);
+        Mqtt5SimpleAuth simpleAuth = getSimpleAuth(uri);
 
-        final String host = uri.getHost();
-        final int port = uri.getPort();
-        final Mqtt3ClientBuilder builder = Mqtt3Client.builder().identifier("traccar-" + UUID.randomUUID())
+        String host = uri.getHost();
+        int port = uri.getPort();
+        Mqtt5ClientBuilder builder = Mqtt5Client.builder().identifier("traccar-" + UUID.randomUUID())
                 .serverHost(host).serverPort(port).simpleAuth(simpleAuth).automaticReconnectWithDefaultConfig();
-        final Mqtt3AsyncClient client;
-        
+        Mqtt5AsyncClient client;
         client = builder.buildAsync();
-        
-
         client.connectWith().send().whenComplete((message, e) -> {
             throw new RuntimeException(e);
         });
@@ -59,23 +56,24 @@ public final class MqttUtil {
         return client;
     }
 
-    private static Mqtt3SimpleAuth getSimpleAuth(final URI uri) {
-        final String userInfo = uri.getUserInfo();
-        Mqtt3SimpleAuth simpleAuth = null;
+    private static Mqtt5SimpleAuth getSimpleAuth(final URI uri) {
+        String userInfo = uri.getUserInfo();
+        Mqtt5SimpleAuth simpleAuth = null;
         if (userInfo != null) {
             int delimiter = userInfo.indexOf(':');
             if (delimiter == -1) {
                 throw new IllegalArgumentException("Wrong MQTT credentials. Should be in format \"username:password\"");
             } else {
-                simpleAuth = Mqtt3SimpleAuth.builder().username(userInfo.substring(0, delimiter++))
+                simpleAuth = Mqtt5SimpleAuth.builder().username(userInfo.substring(0, delimiter++))
                         .password(userInfo.substring(delimiter).getBytes()).build();
             }
         }
         return simpleAuth;
     }
 
-    public static void publish(final Mqtt3AsyncClient client, final String pubTopic, final String payload,
-            final BiConsumer<? super Mqtt3Publish, ? super Throwable> whenComplete) {
+    public static void publish(final Mqtt5AsyncClient client, final String pubTopic, final String payload,
+            final BiConsumer<? super Mqtt5PublishResult,
+                    ? super Throwable> whenComplete) {
         client.publishWith().topic(pubTopic).qos(MqttQos.AT_LEAST_ONCE).payload(payload.getBytes()).send()
                 .whenComplete(whenComplete);
     }
