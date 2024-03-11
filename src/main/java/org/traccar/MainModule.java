@@ -35,17 +35,7 @@ import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
 import org.traccar.database.OpenIdProvider;
 import org.traccar.database.StatisticsManager;
-import org.traccar.forward.EventForwarder;
-import org.traccar.forward.EventForwarderJson;
-import org.traccar.forward.EventForwarderAmqp;
-import org.traccar.forward.EventForwarderKafka;
-import org.traccar.forward.EventForwarderMqtt;
-import org.traccar.forward.PositionForwarder;
-import org.traccar.forward.PositionForwarderJson;
-import org.traccar.forward.PositionForwarderAmqp;
-import org.traccar.forward.PositionForwarderKafka;
-import org.traccar.forward.PositionForwarderRedis;
-import org.traccar.forward.PositionForwarderUrl;
+import org.traccar.forward.*;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
@@ -386,6 +376,8 @@ public class MainModule extends AbstractModule {
                     return new PositionForwarderAmqp(config, objectMapper);
                 case "kafka":
                     return new PositionForwarderKafka(config, objectMapper);
+                case "mqtt":
+                    return new PositionForwarderMqtt(config, objectMapper);
                 case "redis":
                     return new PositionForwarderRedis(config, objectMapper);
                 case "url":
