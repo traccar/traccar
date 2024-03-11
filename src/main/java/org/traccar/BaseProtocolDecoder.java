@@ -50,6 +50,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     private final StatisticsManager statisticsManager;
     private final Protocol protocol;
     private MediaManager mediaManager = Context.getMediaManager();
+    private String modelOverride;
 
     public BaseProtocolDecoder(Protocol protocol) {
         this.protocol = protocol;
@@ -279,4 +280,10 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
 
+    public void setModelOverride(String modelOverride) {
+        this.modelOverride = modelOverride;
+    }
+    public String getDeviceModel(DeviceSession deviceSession) {
+        return modelOverride != null ? modelOverride : deviceSession.getModel();
+    }
 }
