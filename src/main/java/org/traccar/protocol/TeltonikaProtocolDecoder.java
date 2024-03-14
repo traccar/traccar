@@ -232,8 +232,17 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 28:
                 position.set(Position.PREFIX_TEMP + (id - 24), readValue(buf, length, true));
                 break;
+            case 31:
+                position.set(Position.KEY_ENGINE_LOAD, readValue(buf, length, false));
+                break;
             case 36:
                 position.set(Position.KEY_RPM, readValue(buf, length, false));
+                break;
+            case 42:
+                position.set(Position.KEY_TRIP_TIME, readValue(buf, length, false)*1000);
+                break;
+            case 43:
+                position.set("distanceMilOn", readValue(buf, length, false)*1000);
                 break;
             case 66:
                 position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
