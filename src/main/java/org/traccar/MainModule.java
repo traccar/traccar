@@ -69,7 +69,6 @@ import org.traccar.geocoder.TestGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
-import org.traccar.geolocation.MozillaGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.GeocoderHandler;
@@ -276,18 +275,16 @@ public class MainModule extends AbstractModule {
     @Provides
     public static GeolocationProvider provideGeolocationProvider(Config config, Client client) {
         if (config.getBoolean(Keys.GEOLOCATION_ENABLE)) {
-            String type = config.getString(Keys.GEOLOCATION_TYPE, "mozilla");
+            String type = config.getString(Keys.GEOLOCATION_TYPE, "google");
             String url = config.getString(Keys.GEOLOCATION_URL);
             String key = config.getString(Keys.GEOLOCATION_KEY);
             switch (type) {
-                case "google":
-                    return new GoogleGeolocationProvider(client, key);
                 case "opencellid":
                     return new OpenCellIdGeolocationProvider(client, url, key);
                 case "unwired":
                     return new UnwiredGeolocationProvider(client, url, key);
                 default:
-                    return new MozillaGeolocationProvider(client, key);
+                    return new GoogleGeolocationProvider(client, key);
             }
         }
         return null;

@@ -1656,7 +1656,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Provider to use for LBS location. Available options: google, mozilla and opencellid. By default opencellid is
+     * Provider to use for LBS location. Available options: google, unwired and opencellid. By default, google is
      * used. You have to supply a key that you get from corresponding provider. For more information see LBS geolocation
      * documentation.
      */
