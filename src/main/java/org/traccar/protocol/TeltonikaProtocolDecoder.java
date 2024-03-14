@@ -265,7 +265,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_FUEL_USED, readValue(buf, length, false) * 0.1);
                 break;
             case 84:
-                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false) * 0.1);
+                long level = readValue(buf, length, false);
+                if (level > 0) {
+                    position.set(Position.KEY_FUEL_LEVEL, level * 0.1);
+                }
                 break;
             case 85:
                 position.set(Position.KEY_RPM, readValue(buf, length, false));
