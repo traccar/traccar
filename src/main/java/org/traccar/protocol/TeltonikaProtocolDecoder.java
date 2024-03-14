@@ -232,6 +232,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 28:
                 position.set(Position.PREFIX_TEMP + (id - 24), readValue(buf, length, true));
                 break;
+            case 36:
+                position.set(Position.KEY_RPM, readValue(buf, length, false));
+                break;
             case 66:
                 position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
                 break;
@@ -255,6 +258,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 80:
                 position.set("workMode", readValue(buf, length, false));
                 break;
+            case 37:
             case 81:
                 position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false));
                 break;
@@ -264,6 +268,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 83:
                 position.set(Position.KEY_FUEL_USED, readValue(buf, length, false) * 0.1);
                 break;
+            case 390:
             case 84:
                 long level = readValue(buf, length, false);
                 if (level > 0) {
