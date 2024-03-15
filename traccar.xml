@@ -18,7 +18,16 @@
   <entry key='web.requestLog.retainDays'>3</entry>
 
   <entry key='logger.console'>true</entry>
-  <entry key='logger.level'>error</entry>
+  <!--
+  SEVERE (the highest value)
+  WARNING
+  INFO
+  CONFIG
+  FINE
+  FINER
+  FINEST (the lowest value)
+  -->
+  <entry key='logger.level'>severe</entry>
   <entry key='logger.fullStackTraces'>true</entry>
 
   <entry key='database.driver'>com.mysql.cj.jdbc.Driver</entry>
