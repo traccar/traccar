@@ -23,30 +23,33 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hivemq.client.mqtt.mqtt3.Mqtt3AsyncClient;
 
-public class EventForwarderMqtt implements EventForwarder {
+public class PositionForwarderMqtt implements PositionForwarder {
 
     private final Mqtt3AsyncClient client;
     private final ObjectMapper objectMapper;
+    protected final String topic;
 
-    private final String topic;
 
-    public EventForwarderMqtt(Config config, ObjectMapper objectMapper) {
-        this.topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
-        client = MqttUtil.createClient(config.getString(Keys.EVENT_FORWARD_URL), topic + "/state");
+    public PositionForwarderMqtt(final Config config, final ObjectMapper objectMapper) {
+        this.topic = config.getString(Keys.FORWARD_TOPIC);
+        this.client = MqttUtil.createClient(config.getString(Keys.FORWARD_URL), topic + "/state");
         this.objectMapper = objectMapper;
     }
 
     @Override
-    public void forward(EventData eventData, ResultHandler resultHandler) {
-        String payload;
+    public void forward(final PositionData positionData, final ResultHandler resultHandler) {
+        publish(topic, positionData, resultHandler);
+    }
+
+    protected void publish(final String pubTopic, final Object object, final ResultHandler resultHandler) {
+        final String payload;
         try {
-            payload = objectMapper.writeValueAsString(eventData);
+            payload = objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);
             return;
         }
-
-        MqttUtil.publish(client, topic, payload, (message, e) -> resultHandler.onResult(e == null, e));
+        MqttUtil.publish(client, pubTopic, payload, (message, e) -> resultHandler.onResult(e == null, e));
     }
 
 }
