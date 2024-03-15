@@ -20,7 +20,6 @@ import java.util.TimeZone;
 public class DeviceSession {
 
     private final long deviceId;
-    private final String model = "";
 
     public DeviceSession(long deviceId) {
         this.deviceId = deviceId;
@@ -38,10 +37,6 @@ public class DeviceSession {
 
     public TimeZone getTimeZone() {
         return timeZone;
-    }
-
-    public String getModel() {
-        return model;
     }
 
 }
