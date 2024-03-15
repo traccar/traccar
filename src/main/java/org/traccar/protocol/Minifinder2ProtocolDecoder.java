@@ -299,7 +299,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedIntLE(); // timestamp
                         int spO2 = buf.readUnsignedByte();
                         if (spO2 > 1) {
-                            position.set(Position.KEY_SP02, spO2);
+                            position.set("spO2", spO2);
                         }
                         break;
                     default:
