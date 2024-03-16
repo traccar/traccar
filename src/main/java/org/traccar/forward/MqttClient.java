@@ -28,7 +28,9 @@ import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PublishResult;
 
 public class MqttClient {
+
     private final Mqtt5AsyncClient client;
+
     MqttClient(String url) {
         URI uri;
         try {
@@ -50,8 +52,7 @@ public class MqttClient {
         });
     }
 
-
-    private Mqtt5SimpleAuth getSimpleAuth(final URI uri) {
+    private Mqtt5SimpleAuth getSimpleAuth(URI uri) {
         String userInfo = uri.getUserInfo();
         Mqtt5SimpleAuth simpleAuth = null;
         if (userInfo != null) {
@@ -66,9 +67,8 @@ public class MqttClient {
         return simpleAuth;
     }
 
-    public void publish(final String pubTopic, final String payload,
-                               final BiConsumer<? super Mqtt5PublishResult,
-                                       ? super Throwable> whenComplete) {
+    public void publish(
+            String pubTopic, String payload, BiConsumer<? super Mqtt5PublishResult, ? super Throwable> whenComplete) {
         client.publishWith().topic(pubTopic).qos(MqttQos.AT_LEAST_ONCE).payload(payload.getBytes()).send()
                 .whenComplete(whenComplete);
     }

@@ -22,16 +22,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class PositionForwarderMqtt implements PositionForwarder {
-    private final MqttClient mqttClient;
 
-    @Override
-    public void forward(final PositionData positionData, final ResultHandler resultHandler) {
-        publish(topic, positionData, resultHandler);
-    }
+    private final MqttClient mqttClient;
     private final ObjectMapper objectMapper;
 
-    protected final String topic;
-
+    private final String topic;
 
     public PositionForwarderMqtt(final Config config, final ObjectMapper objectMapper) {
         this.topic = config.getString(Keys.FORWARD_TOPIC);
@@ -39,11 +34,11 @@ public class PositionForwarderMqtt implements PositionForwarder {
         this.objectMapper = objectMapper;
     }
 
-    protected void publish(final String pubTopic, final Object object, final ResultHandler resultHandler) {
-        final String payload;
+    @Override
+    public void forward(PositionData positionData, ResultHandler resultHandler) {
         try {
-            payload = objectMapper.writeValueAsString(object);
-            mqttClient.publish(pubTopic, payload, (message, e) -> resultHandler.onResult(e == null, e));
+            String payload = objectMapper.writeValueAsString(topic);
+            mqttClient.publish(topic, payload, (message, e) -> resultHandler.onResult(e == null, e));
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);
         }
