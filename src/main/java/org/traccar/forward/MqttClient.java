@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.helper;
+package org.traccar.forward;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,13 +27,9 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5ClientBuilder;
 import com.hivemq.client.mqtt.mqtt5.message.auth.Mqtt5SimpleAuth;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5PublishResult;
 
-public final class MqttUtil {
-
-    private MqttUtil() {
-
-    }
-
-    public static Mqtt5AsyncClient createClient(final String url) {
+public class MqttClient {
+    private final Mqtt5AsyncClient client;
+    MqttClient(String url) {
         URI uri;
         try {
             uri = new URI(url);
@@ -41,22 +37,21 @@ public final class MqttUtil {
             throw new RuntimeException(e);
         }
 
-        Mqtt5SimpleAuth simpleAuth = getSimpleAuth(uri);
+        Mqtt5SimpleAuth simpleAuth = this.getSimpleAuth(uri);
 
         String host = uri.getHost();
         int port = uri.getPort();
         Mqtt5ClientBuilder builder = Mqtt5Client.builder().identifier("traccar-" + UUID.randomUUID())
                 .serverHost(host).serverPort(port).simpleAuth(simpleAuth).automaticReconnectWithDefaultConfig();
-        Mqtt5AsyncClient client;
+
         client = builder.buildAsync();
         client.connectWith().send().whenComplete((message, e) -> {
             throw new RuntimeException(e);
         });
-
-        return client;
     }
 
-    private static Mqtt5SimpleAuth getSimpleAuth(final URI uri) {
+
+    private Mqtt5SimpleAuth getSimpleAuth(final URI uri) {
         String userInfo = uri.getUserInfo();
         Mqtt5SimpleAuth simpleAuth = null;
         if (userInfo != null) {
@@ -71,9 +66,9 @@ public final class MqttUtil {
         return simpleAuth;
     }
 
-    public static void publish(final Mqtt5AsyncClient client, final String pubTopic, final String payload,
-            final BiConsumer<? super Mqtt5PublishResult,
-                    ? super Throwable> whenComplete) {
+    public void publish(final String pubTopic, final String payload,
+                               final BiConsumer<? super Mqtt5PublishResult,
+                                       ? super Throwable> whenComplete) {
         client.publishWith().topic(pubTopic).qos(MqttQos.AT_LEAST_ONCE).payload(payload.getBytes()).send()
                 .whenComplete(whenComplete);
     }

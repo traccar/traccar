@@ -17,14 +17,12 @@ package org.traccar.forward;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.helper.MqttUtil;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hivemq.client.mqtt.mqtt5.Mqtt5AsyncClient;
 
 public class PositionForwarderMqtt implements PositionForwarder {
-    private final Mqtt5AsyncClient client;
+    private final MqttClient mqttClient;
 
     @Override
     public void forward(final PositionData positionData, final ResultHandler resultHandler) {
@@ -37,7 +35,7 @@ public class PositionForwarderMqtt implements PositionForwarder {
 
     public PositionForwarderMqtt(final Config config, final ObjectMapper objectMapper) {
         this.topic = config.getString(Keys.FORWARD_TOPIC);
-        this.client = MqttUtil.createClient(config.getString(Keys.FORWARD_URL));
+        mqttClient = new MqttClient(config.getString(Keys.FORWARD_URL));
         this.objectMapper = objectMapper;
     }
 
@@ -45,11 +43,10 @@ public class PositionForwarderMqtt implements PositionForwarder {
         final String payload;
         try {
             payload = objectMapper.writeValueAsString(object);
+            mqttClient.publish(pubTopic, payload, (message, e) -> resultHandler.onResult(e == null, e));
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);
-            return;
         }
-        MqttUtil.publish(client, pubTopic, payload, (message, e) -> resultHandler.onResult(e == null, e));
     }
 
 }
