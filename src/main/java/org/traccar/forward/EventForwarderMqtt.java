@@ -30,7 +30,7 @@ public class EventForwarderMqtt implements EventForwarder {
 
     public EventForwarderMqtt(Config config, ObjectMapper objectMapper) {
         this.topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
-        mqttClient = new MqttClient(config.getString(Keys.FORWARD_URL));
+        mqttClient = new MqttClient(config.getString(Keys.EVENT_FORWARD_URL));
         this.objectMapper = objectMapper;
     }
 
