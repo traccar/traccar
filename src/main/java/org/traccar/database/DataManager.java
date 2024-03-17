@@ -188,9 +188,7 @@ public class DataManager {
                 }
                 return result.toString();
             case ACTION_SELECT_ALL:
-                String query = "SELECT * FROM " + getObjectsTableName(clazz);
-                LOGGER.warn(query);
-                return query;
+                return "SELECT * FROM " + getObjectsTableName(clazz);
             case ACTION_SELECT:
                 return "SELECT * FROM " + getObjectsTableName(clazz) + " WHERE id = :id";
             case ACTION_DELETE:
@@ -381,8 +379,12 @@ public class DataManager {
     }
 
     public Collection<Position> getLatestPositions() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery("database.selectLatestPositions"))
-                .executeQuery(Position.class);
+        LOGGER.warn("refreshLatestPositions");
+        String q = getQuery("database.selectLatestPositions");
+        LOGGER.warn(q);
+        Collection<Position> result = QueryBuilder.create(dataSource, q).executeQuery(Position.class);
+        LOGGER.warn("got {}", result.size());
+        return result;
     }
 
     public void clearHistory() throws SQLException {
@@ -400,8 +402,12 @@ public class DataManager {
     }
 
     public Server getServer() throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, Server.class))
-                .executeQuerySingle(Server.class);
+        LOGGER.warn("refreshServer {}", Server.class);
+        String q = getQuery(ACTION_SELECT_ALL, Server.class);
+        LOGGER.warn(q);
+        Server result = QueryBuilder.create(dataSource, q).executeQuerySingle(Server.class);
+        LOGGER.warn("got {} from {}", (result != null ? 1 : 0), Server.class);
+        return result;
     }
 
     public Collection<Event> getEvents(long deviceId, Date from, Date to) throws SQLException {
@@ -455,8 +461,12 @@ public class DataManager {
 
     public Collection<Permission> getPermissions(Class<? extends BaseModel> owner, Class<? extends BaseModel> property)
             throws SQLException, ClassNotFoundException {
-        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, owner, property))
-                .executePermissionsQuery();
+        LOGGER.warn("refreshPermissions {} {}", owner, property);
+        String q = getQuery(ACTION_SELECT_ALL, owner, property);
+        LOGGER.warn(q);
+        Collection<Permission> result = QueryBuilder.create(dataSource, q).executePermissionsQuery();
+        LOGGER.warn("got {} from {} {}", result.size(), owner, property);
+        return result;
     }
 
     public void linkObject(Class<?> owner, long ownerId, Class<?> property, long propertyId, boolean link)
@@ -474,8 +484,12 @@ public class DataManager {
     }
 
     public <T extends BaseModel> Collection<T> getObjects(Class<T> clazz) throws SQLException {
-        return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT_ALL, clazz))
-                .executeQuery(clazz);
+        LOGGER.warn("refreshItems {}", clazz);
+        String q = getQuery(ACTION_SELECT_ALL, clazz);
+        LOGGER.warn(q);
+        Collection<T> result = QueryBuilder.create(dataSource, q).executeQuery(clazz);
+        LOGGER.warn("got {} from {}", result.size(), clazz);
+        return result;
     }
 
     public void addObject(BaseModel entity) throws SQLException {
