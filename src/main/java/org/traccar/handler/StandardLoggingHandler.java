@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@ import org.traccar.helper.NetworkUtil;
 import org.traccar.model.LogRecord;
 import org.traccar.session.ConnectionManager;
 
-import java.net.InetSocketAddress;
-
 public class StandardLoggingHandler extends ChannelDuplexHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoggingHandler.class);
@@ -48,7 +46,7 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        LogRecord record = createLogRecord(msg);
+        LogRecord record = createLogRecord(ctx, msg);
         log(ctx, false, record);
         super.channelRead(ctx, msg);
         if (record != null) {
@@ -58,16 +56,15 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        log(ctx, true, createLogRecord(msg));
+        log(ctx, true, createLogRecord(ctx, msg));
         super.write(ctx, msg, promise);
     }
 
-    private LogRecord createLogRecord(Object msg) {
+    private LogRecord createLogRecord(ChannelHandlerContext ctx, Object msg) {
         if (msg instanceof NetworkMessage) {
             NetworkMessage networkMessage = (NetworkMessage) msg;
             if (networkMessage.getMessage() instanceof ByteBuf) {
-                LogRecord record = new LogRecord();
-                record.setAddress((InetSocketAddress) networkMessage.getRemoteAddress());
+                LogRecord record = new LogRecord(ctx.channel().localAddress(), networkMessage.getRemoteAddress());
                 record.setProtocol(protocol);
                 record.setData(ByteBufUtil.hexDump((ByteBuf) networkMessage.getMessage()));
                 return record;
