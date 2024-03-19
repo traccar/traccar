@@ -33,6 +33,7 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Pagination;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
@@ -72,7 +73,8 @@ public class SummaryReportProvider {
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("fixTime", "from", from, "to", to)),
-                new Order("fixTime", end, 1)));
+                new Order("fixTime", end),
+                new Pagination(0, 1)));
     }
 
     private Collection<SummaryReportItem> calculateDeviceResult(
