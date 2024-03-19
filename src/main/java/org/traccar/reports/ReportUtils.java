@@ -106,11 +106,6 @@ public final class ReportUtils {
 
         if (useOdometer && (firstOdometer != 0.0 || lastOdometer != 0.0)) {
             distance = lastOdometer - firstOdometer;
-        } else if (firstPosition.getAttributes().containsKey("source")
-                || (firstPosition.getProtocol() != null && firstPosition.getProtocol().equals("osmand"))) {
-            distance = DistanceCalculator.distance(
-                    firstPosition.getLatitude(), firstPosition.getLongitude(),
-                    lastPosition.getLatitude(), lastPosition.getLongitude());
         } else if (firstPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)
                 && lastPosition.getAttributes().containsKey(Position.KEY_TOTAL_DISTANCE)) {
             distance = lastPosition.getDouble(Position.KEY_TOTAL_DISTANCE)
