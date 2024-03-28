@@ -160,6 +160,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
+        LOGGER.error(sentence);
         Parser parser = new Parser(PATTERN_INF, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
         if (position == null) {
