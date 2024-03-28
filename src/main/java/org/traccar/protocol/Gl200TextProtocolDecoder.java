@@ -1752,7 +1752,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
             } else {
-                LOGGER.error("igoring: " + sentence);
+                LOGGER.warn("igoring: " + sentence);
             }
         }
 
