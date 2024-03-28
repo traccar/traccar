@@ -871,7 +871,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
     private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence) {
         String deviceName = sentence.split(",")[3];
-        if ("GV310LAU".equals(deviceName)) {
+        if ("GV310LAU".equals(deviceName.toUpperCase())) {
             return decodeFriGV310LAU(channel, remoteAddress, sentence);
         }
         Parser parser = new Parser(PATTERN_FRI, sentence);
