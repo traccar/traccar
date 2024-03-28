@@ -783,38 +783,40 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
+    private static final Pattern PATTERN_FRI_GV310LAU = new PatternBuilder()
+            .text("+").expression("(?:RESP|BUFF):GT...,")
+            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .number("(d{15}|x{14}),")            // imei
+            .expression("([0-9A-Za-z]*),")       // deviceName
+            .number("(d+)?,")                    // power
+            .number("(d{1,2}),")                 // report type
+            .number("d{1,2},")                   // count
+            .expression("((?:")
+            .expression(PATTERN_LOCATION.pattern())
+            .expression(")+)")
+            .groupBegin()
+            .number("(d{1,9}.d)?,")              // odometer
+            .number("(d{5}:dd:dd)?,")            // hour meter
+            .number("(x+)?,")                    // analog 1
+            .number("(x+)?,")                    // analog 2
+            .number("(x+)?,")                    // analog 3
+            .number("(d{1,3})?,")                // battery
+            .number("(x{6})?,")                  // device status
+            .number("(d+)?,")                    // reserved
+            .number("(d+)?,")                    // reserved
+            .number("(d+)?,")                    // reserved
+            .groupEnd()
+            .any()
+            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+            .text(",")
+            .number("(xxxx)")                    // count number
+            .text("$").optional()
+            .compile();
+
     private Object decodeFriGV310LAU(Channel channel, SocketAddress remoteAddress, String sentence) {
-        Pattern pattern = new PatternBuilder()
-                .text("+").expression("(?:RESP|BUFF):GT...,")
-                .expression("(?:.{6}|.{10})?,")      // protocol version
-                .number("(d{15}|x{14}),")            // imei
-                .expression("([0-9A-Za-z]*),")       // deviceName
-                .number("(d+)?,")                    // power
-                .number("(d{1,2}),")                 // report type
-                .number("d{1,2},")                   // count
-                .expression("((?:")
-                .expression(PATTERN_LOCATION.pattern())
-                .expression(")+)")
-                .groupBegin()
-                .number("(d{1,9}.d)?,")              // odometer
-                .number("(d{5}:dd:dd)?,")            // hour meter
-                .number("(x+)?,")                    // analog 1
-                .number("(x+)?,")                    // analog 2
-                .number("(x+)?,")                    // analog 3
-                .number("(d{1,3})?,")                // battery
-                .number("(x{6})?,")                  // device status
-                .number("(d+)?,")                    // reserved
-                .number("(d+)?,")                    // reserved
-                .number("(d+)?,")                    // reserved
-                .groupEnd()
-                .any()
-                .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-                .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-                .text(",")
-                .number("(xxxx)")                    // count number
-                .text("$").optional()
-                .compile();
-        Parser parser = new Parser(pattern, sentence);
+
+        Parser parser = new Parser(PATTERN_FRI_GV310LAU, sentence);
         if (!parser.matches()) {
             LOGGER.error("unmatched: " + sentence);
             return null;
@@ -876,7 +878,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         Parser parser = new Parser(PATTERN_FRI, sentence);
         if (!parser.matches()) {
-            return null;
+            LOGGER.error("ignoring");
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
