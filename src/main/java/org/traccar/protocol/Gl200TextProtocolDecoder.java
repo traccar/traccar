@@ -18,6 +18,8 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.*;
 import org.traccar.config.Keys;
 import org.traccar.helper.BitUtil;
@@ -47,6 +49,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     private boolean ignoreFixTime;
 
     private final DateFormat dateFormat;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Gl200TextProtocolDecoder.class);
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -779,7 +783,97 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
+    private Object decodeFriGV310LAU(Channel channel, SocketAddress remoteAddress, String sentence) {
+        Pattern pattern = new PatternBuilder()
+                .text("+").expression("(?:RESP|BUFF):GT...,")
+                .expression("(?:.{6}|.{10})?,")      // protocol version
+                .number("(d{15}|x{14}),")            // imei
+                .expression("([0-9A-Za-z]*),")       // deviceName
+                .number("(d+)?,")                    // power
+                .number("(d{1,2}),")                 // report type
+                .number("d{1,2},")                   // count
+                .expression("((?:")
+                .expression(PATTERN_LOCATION.pattern())
+                .expression(")+)")
+                .groupBegin()
+                .number("(d{1,9}.d)?,")              // odometer
+                .number("(d{5}:dd:dd)?,")            // hour meter
+                .number("(x+)?,")                    // analog 1
+                .number("(x+)?,")                    // analog 2
+                .number("(x+)?,")                    // analog 3
+                .number("(d{1,3})?,")                // battery
+                .number("(x{6})?,")                  // device status
+                .number("(d+)?,")                    // reserved
+                .number("(d+)?,")                    // reserved
+                .number("(d+)?,")                    // reserved
+                .groupEnd()
+                .any()
+                .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
+                .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
+                .text(",")
+                .number("(xxxx)")                    // count number
+                .text("$").optional()
+                .compile();
+        Parser parser = new Parser(pattern, sentence);
+        if (!parser.matches()) {
+            LOGGER.error("unmatched: " + sentence);
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        LinkedList<Position> positions = new LinkedList<>();
+
+        String deviceName = parser.next();
+        Integer power = parser.nextInt();
+        Integer reportType = parser.nextInt();
+
+        Parser itemParser = new Parser(PATTERN_LOCATION, parser.next());
+        while (itemParser.find()) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            decodeLocation(position, itemParser);
+
+            positions.add(position);
+        }
+
+        Position position = positions.getLast();
+
+        skipLocation(parser);
+
+        if (power != null && power > 10) {
+            position.set(Position.KEY_POWER, power * 0.001); // only on some devices
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+            position.set(Position.KEY_HOURS, parseHours(parser.next()));
+            position.set(Position.PREFIX_ADC + 1, parser.next());
+            position.set(Position.PREFIX_ADC + 2, parser.next());
+            position.set(Position.PREFIX_ADC + 3, parser.next());
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        }
+        if (parser.hasNext()) {
+            decodeStatus(position, parser.nextHexLong());
+        }
+
+        decodeDeviceTime(position, parser);
+        if (ignoreFixTime) {
+            positions.clear();
+            positions.add(position);
+        }
+
+        return positions;
+    }
     private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence) {
+        String deviceName = sentence.split(",")[3];
+        if ("GV310LAU".equals(deviceName)) {
+            return decodeFriGV310LAU(channel, remoteAddress, sentence);
+        }
         Parser parser = new Parser(PATTERN_FRI, sentence);
         if (!parser.matches()) {
             return null;
