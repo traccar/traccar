@@ -878,7 +878,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         Parser parser = new Parser(PATTERN_FRI, sentence);
         if (!parser.matches()) {
-            LOGGER.error("ignoring");
+            LOGGER.error("ignoring: " + sentence);
             return null;
         }
 
