@@ -872,7 +872,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence) {
         LOGGER.error(sentence);
         String protocolVersion = sentence.split(",")[1];
-        if ("6E0202".equals(protocolVersion)) {
+        if (protocolVersion.startsWith("6E")) {
             return decodeFriGV310LAU(channel, remoteAddress, sentence);
         }
         Parser parser = new Parser(PATTERN_FRI, sentence);
