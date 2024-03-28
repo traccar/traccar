@@ -1751,6 +1751,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                         p.set(Position.KEY_TYPE, type);
                     }
                 }
+            } else {
+                LOGGER.error("igoring: " + sentence);
             }
         }
 
