@@ -870,6 +870,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
     private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence) {
+        LOGGER.error(sentence);
         String deviceName = sentence.split(",")[3];
         if ("gv310lau".equals(deviceName)) {
             return decodeFriGV310LAU(channel, remoteAddress, sentence);
