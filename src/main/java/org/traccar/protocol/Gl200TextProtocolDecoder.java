@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,6 +51,37 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     private boolean ignoreFixTime;
 
     private final DateFormat dateFormat;
+
+    private static final HashMap<String, String> devices = new HashMap<String, String>() {{
+        put("52", "GL50");
+        put("55", "GL50B");
+        put("02", "GL200");
+        put("04", "GV200");
+        put("06", "GV300");
+        put("08", "GMT100");
+        put("09", "GV50P"); // GV50 Plus
+        put("0F", "GV55");
+        put("50", "GV55W");
+        put("10", "GV55 LITE");
+        put("11", "GL500");
+        put("1A", "GL300");
+        put("1F", "GV500");
+        put("5E", "GV500MAP");
+        put("25", "GV300"); // New Version
+        put("35", "GV200"); // New Version
+        put("27", "GV300W");
+        put("2F", "GV55"); // New Version
+        put("30", "GL300"); // New Version
+        put("36", "GV500"); // New Version
+        put("2C", "GL300W"); // New version
+        put("3F", "GMT100"); // New version
+        put("F8", "GV800W");
+        put("41", "GV75W");
+        put("FC", "GV600W");
+        put("6E", "GV310LAU");
+        put("802004", "GV58LAU");
+        put("802005", "GV355CEU");
+    }};
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -62,9 +94,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         ignoreFixTime = getConfig().getBoolean(Keys.PROTOCOL_IGNORE_FIX_TIME.withPrefix(getProtocolName()));
     }
 
-    private String getDeviceModel(DeviceSession deviceSession, String value) {
-        String model = value.isEmpty() ? getDeviceModel(deviceSession) : value;
-        return model != null ? model.toUpperCase() : "";
+    private String getDeviceModel(String protocolVersion) {
+        if (devices.containsKey(protocolVersion.substring(0, 2))) {
+            return devices.get(protocolVersion.substring(0, 2));
+        }
+        if (devices.containsKey(protocolVersion.substring(0, 6))) {
+            return devices.get(protocolVersion.substring(0, 6));
+        }
+        return "";
     }
 
     private Position initPosition(Parser parser, Channel channel, SocketAddress remoteAddress) {
@@ -471,7 +508,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     private Object decodeCan(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
         int index = 0;
         index += 1; // header
-        index += 1; // protocol version
+        String protocolVersion = v[index++]; // protocol version
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
         if (deviceSession == null) {
             return null;
@@ -480,7 +517,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        String model = getDeviceModel(deviceSession, v[index++]);
+        String model = getDeviceModel(protocolVersion);
+        index += 1; // device name
         index += 1; // report type
         index += 1; // can bus state
         long reportMask = Long.parseLong(v[index++], 16);
@@ -888,13 +926,13 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     private Object decodeEri(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
         int index = 0;
         index += 1; // header
-        index += 1; // protocol version
+        String protocolVersion = v[index++]; // protocol version
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
         if (deviceSession == null) {
             return null;
         }
 
-        String model = getDeviceModel(deviceSession, v[index++]);
+        String model = getDeviceModel(protocolVersion);
         long mask = Long.parseLong(v[index++], 16);
         Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001;
         index += 1; // report type
