@@ -47,7 +47,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
-    
+
     private static final HashMap<String, String> DEVICE_MODELS = new HashMap<String, String>() {{
         put("02", "GL200");
         put("04", "GV200");
