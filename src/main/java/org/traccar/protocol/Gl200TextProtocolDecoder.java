@@ -83,7 +83,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private boolean ignoreFixTime;
 
-    private final DateFormat dateFormat;    
+    private final DateFormat dateFormat;
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
