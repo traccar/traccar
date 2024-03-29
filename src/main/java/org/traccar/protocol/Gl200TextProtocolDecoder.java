@@ -834,7 +834,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN_FRI_GV310LAU, sentence);
         if (!parser.matches()) {
-            LOGGER.error("unmatched: " + sentence);
             return null;
         }
 
@@ -1767,7 +1766,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
             } else {
-                LOGGER.warn("igoring: " + sentence);
+                LOGGER.warn("ignoring: " + sentence);
             }
         }
 
