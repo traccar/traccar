@@ -108,13 +108,13 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Position initPosition(Parser parser, Channel channel, SocketAddress remoteAddress) {
-if (parser.matches()) {
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession != null) {
-            Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-            return position;
-}
+        if (parser.matches()) {
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+            if (deviceSession != null) {
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                return position;
+            }
         }
         return null;
     }
