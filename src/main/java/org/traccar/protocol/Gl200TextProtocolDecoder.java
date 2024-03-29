@@ -207,7 +207,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_ICCID, parser.next());
         position.set(Position.KEY_RSSI, parser.nextInt());
-        
+
         if (protocolVersion.startsWith("6E")) { // GV310LAU
             position.set(Position.KEY_POWER, parser.nextDouble() / 1000); // odometer or external power
         } else {
