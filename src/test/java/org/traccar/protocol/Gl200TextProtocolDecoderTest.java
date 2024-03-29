@@ -495,7 +495,8 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, buffer(
                 "+ACK:GTGEO,1A0102,135790246811220,,0,0008,20100310172830,11F0"));
 
-
+        verifyAttributes(decoder, buffer(
+                "+RESP:GTINF,6E0202,868589060187625,RA82,11,89883030000091225018,41,0,1,12349,,4.15,0,1,0,0,20240328231013,0,0,0,0,00,00,+0000,0,20240328231015,7D4F"));
     }
 
 }

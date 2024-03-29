@@ -120,12 +120,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_INF = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GTINF,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")      // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:[0-9A-Z]{17},)?")    // vin
             .expression("(?:[^,]+)?,")           // device name
             .number("(xx),")                     // state
-            .expression("(?:[0-9Ff]{20})?,")     // iccid
+            .expression("([0-9Ff]{20})?,")       // iccid
             .number("(d{1,2}),")                 // rssi
             .number("d{1,2},")
             .expression("[01]{1,2},")            // external power
@@ -146,6 +146,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .expression("(?:[01])?,").optional() // pin15 mode
             .number("(d+)?,")                    // adc1
             .number("(d+)?,").optional()         // adc2
+            .number("(d+)?,").optional()         // adc3
             .number("(xx)?,")                    // digital input
             .number("(xx)?,")                    // digital output
             .number("[-+]dddd,")                 // timezone
@@ -160,12 +161,18 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
-        LOGGER.error(sentence);
         Parser parser = new Parser(PATTERN_INF, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        if (!parser.matches()) {
             return null;
         }
+        String protocolVersion = parser.next();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+        Position position = new Position();
+        position.setProtocol(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         switch (parser.nextHexInt()) {
             case 0x16:
@@ -196,9 +203,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 break;
         }
 
+        position.set(Position.KEY_ICCID, parser.next());
         position.set(Position.KEY_RSSI, parser.nextInt());
 
-        parser.next(); // odometer or external power
+        if (protocolVersion.startsWith("6E")) { // GV310LAU
+            position.set(Position.KEY_POWER, parser.nextDouble() / 1000); // odometer or external power
+        } else {
+            parser.next(); // odometer or external power
+        }
 
         position.set(Position.KEY_BATTERY, parser.nextDouble());
         position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
@@ -209,6 +221,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
+        if (protocolVersion.startsWith("6E")) {
+            position.set(Position.PREFIX_ADC + 3, parser.next());
+        }
 
         position.set(Position.KEY_INPUT, parser.next());
         position.set(Position.KEY_OUTPUT, parser.next());
