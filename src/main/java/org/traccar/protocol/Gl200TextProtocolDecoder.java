@@ -52,35 +52,35 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private final DateFormat dateFormat;
 
-    private static final HashMap<String, String> devices = new HashMap<String, String>() {{
-        put("52", "GL50");
-        put("55", "GL50B");
+    private static final HashMap<String, String> devices = new HashMap<String, String>() {{        
         put("02", "GL200");
         put("04", "GV200");
         put("06", "GV300");
         put("08", "GMT100");
         put("09", "GV50P"); // GV50 Plus
         put("0F", "GV55");
-        put("50", "GV55W");
         put("10", "GV55 LITE");
         put("11", "GL500");
         put("1A", "GL300");
         put("1F", "GV500");
-        put("5E", "GV500MAP");
         put("25", "GV300"); // New Version
-        put("35", "GV200"); // New Version
         put("27", "GV300W");
+        put("2C", "GL300W"); // New version
         put("2F", "GV55"); // New Version
         put("30", "GL300"); // New Version
+        put("35", "GV200"); // New Version
         put("36", "GV500"); // New Version
-        put("2C", "GL300W"); // New version
         put("3F", "GMT100"); // New version
-        put("F8", "GV800W");
         put("41", "GV75W");
-        put("FC", "GV600W");
+        put("50", "GV55W");
+        put("52", "GL50");
+        put("55", "GL50B");
+        put("5E", "GV500MAP");
         put("6E", "GV310LAU");
         put("C2", "GV600M");
         put("F1", "GV350M");
+        put("F8", "GV800W");
+        put("FC", "GV600W");
         put("802004", "GV58LAU");
         put("802005", "GV355CEU");
     }};
@@ -248,7 +248,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ICCID, parser.next());
         position.set(Position.KEY_RSSI, parser.nextInt());
 
-        if (protocolVersion.startsWith("6E")) { // GV310LAU
+        String model = getDeviceModel(deviceSession, "", protocolVersion);
+        if (model.equals("GV310LAU")) {
             position.set(Position.KEY_POWER, parser.nextDouble() / 1000); // odometer or external power
         } else {
             parser.next(); // odometer or external power
@@ -263,7 +264,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
-        if (protocolVersion.startsWith("6E")) {
+        if (model.equals("GV310LAU")) {
             position.set(Position.PREFIX_ADC + 3, parser.next());
         }
 
