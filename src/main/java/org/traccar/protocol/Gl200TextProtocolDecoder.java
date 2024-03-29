@@ -52,7 +52,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private final DateFormat dateFormat;
 
-    private static final HashMap<String, String> devices = new HashMap<String, String>() {{        
+    private static final HashMap<String, String> DEVICE_MODELS = new HashMap<String, String>() {{
         put("02", "GL200");
         put("04", "GV200");
         put("06", "GV300");
@@ -97,11 +97,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String getDeviceModel(DeviceSession deviceSession, String value, String protocolVersion) {
-        if (devices.containsKey(protocolVersion.substring(0, 2))) {
-            return devices.get(protocolVersion.substring(0, 2));
+        if (DEVICE_MODELS.containsKey(protocolVersion.substring(0, 2))) {
+            return DEVICE_MODELS.get(protocolVersion.substring(0, 2));
         }
-        if (devices.containsKey(protocolVersion.substring(0, 6))) {
-            return devices.get(protocolVersion.substring(0, 6));
+        if (DEVICE_MODELS.containsKey(protocolVersion.substring(0, 6))) {
+            return DEVICE_MODELS.get(protocolVersion.substring(0, 6));
         }
         String model = value.isEmpty() ? getDeviceModel(deviceSession) : value;
         return model != null ? model.toUpperCase() : "";
