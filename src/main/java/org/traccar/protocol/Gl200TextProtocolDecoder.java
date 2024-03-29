@@ -294,7 +294,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeVer(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_VER, sentence);
-                Position position = initPosition(parser, channel, remoteAddress);
+        Position position = initPosition(parser, channel, remoteAddress);
         if (position == null) {
             return null;
         }
