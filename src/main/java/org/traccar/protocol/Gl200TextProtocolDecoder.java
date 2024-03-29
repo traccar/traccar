@@ -47,30 +47,26 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
-
-    private boolean ignoreFixTime;
-
-    private final DateFormat dateFormat;
-
+    
     private static final HashMap<String, String> DEVICE_MODELS = new HashMap<String, String>() {{
         put("02", "GL200");
         put("04", "GV200");
         put("06", "GV300");
         put("08", "GMT100");
-        put("09", "GV50P"); // GV50 Plus
+        put("09", "GV50P");
         put("0F", "GV55");
         put("10", "GV55 LITE");
         put("11", "GL500");
         put("1A", "GL300");
         put("1F", "GV500");
-        put("25", "GV300"); // New Version
+        put("25", "GV300");
         put("27", "GV300W");
-        put("2C", "GL300W"); // New version
-        put("2F", "GV55"); // New Version
-        put("30", "GL300"); // New Version
-        put("35", "GV200"); // New Version
-        put("36", "GV500"); // New Version
-        put("3F", "GMT100"); // New version
+        put("2C", "GL300W");
+        put("2F", "GV55");
+        put("30", "GL300");
+        put("35", "GV200");
+        put("36", "GV500");
+        put("3F", "GMT100");
         put("41", "GV75W");
         put("50", "GV55W");
         put("52", "GL50");
@@ -84,6 +80,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         put("802004", "GV58LAU");
         put("802005", "GV355CEU");
     }};
+
+    private boolean ignoreFixTime;
+
+    private final DateFormat dateFormat;    
 
     public Gl200TextProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -108,13 +108,13 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Position initPosition(Parser parser, Channel channel, SocketAddress remoteAddress) {
-        if (parser.matches()) {
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-            if (deviceSession != null) {
-                Position position = new Position(getProtocolName());
-                position.setDeviceId(deviceSession.getDeviceId());
-                return position;
-            }
+if (parser.matches()) {
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession != null) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            return position;
+}
         }
         return null;
     }
@@ -294,7 +294,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeVer(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_VER, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
+                Position position = initPosition(parser, channel, remoteAddress);
         if (position == null) {
             return null;
         }
