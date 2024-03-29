@@ -79,6 +79,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         put("41", "GV75W");
         put("FC", "GV600W");
         put("6E", "GV310LAU");
+        put("C2", "GV600M");
+        put("F1", "GV350M");
         put("802004", "GV58LAU");
         put("802005", "GV355CEU");
     }};
@@ -94,14 +96,15 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         ignoreFixTime = getConfig().getBoolean(Keys.PROTOCOL_IGNORE_FIX_TIME.withPrefix(getProtocolName()));
     }
 
-    private String getDeviceModel(String protocolVersion) {
+    private String getDeviceModel(DeviceSession deviceSession, String value, String protocolVersion) {
         if (devices.containsKey(protocolVersion.substring(0, 2))) {
             return devices.get(protocolVersion.substring(0, 2));
         }
         if (devices.containsKey(protocolVersion.substring(0, 6))) {
             return devices.get(protocolVersion.substring(0, 6));
         }
-        return "";
+        String model = value.isEmpty() ? getDeviceModel(deviceSession) : value;
+        return model != null ? model.toUpperCase() : "";
     }
 
     private Position initPosition(Parser parser, Channel channel, SocketAddress remoteAddress) {
@@ -517,8 +520,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        String model = getDeviceModel(protocolVersion);
-        index += 1; // device name
+        String model = getDeviceModel(deviceSession, v[index++], protocolVersion);
         index += 1; // report type
         index += 1; // can bus state
         long reportMask = Long.parseLong(v[index++], 16);
@@ -932,7 +934,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String model = getDeviceModel(protocolVersion);
+        String model = getDeviceModel(deviceSession, v[index++], protocolVersion);
         long mask = Long.parseLong(v[index++], 16);
         Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001;
         index += 1; // report type
