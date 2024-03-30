@@ -79,6 +79,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("55", "GL50B"),
             Map.entry("5E", "GV500MAP"),
             Map.entry("6E", "GV310LAU"),
+            Map.entry("BD", "CV200"),
             Map.entry("C2", "GV600M"),
             Map.entry("DC", "GV600MG"),
             Map.entry("DE", "GL500M"),
@@ -108,13 +109,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (declaredModel != null) {
             return declaredModel.toUpperCase();
         }
-        if (PROTOCOL_MODELS.containsKey(protocolVersion.substring(0, 2))) {
-            return PROTOCOL_MODELS.get(protocolVersion.substring(0, 2));
+        String versionPrefix;
+        if (protocolVersion.length() > 6) {
+            versionPrefix = protocolVersion.substring(0, 6);
+        } else {
+            versionPrefix = protocolVersion.substring(0, 2);
         }
-        if (PROTOCOL_MODELS.containsKey(protocolVersion.substring(0, 6))) {
-            return PROTOCOL_MODELS.get(protocolVersion.substring(0, 6));
-        }
-        return "";
+        String model = PROTOCOL_MODELS.get(versionPrefix);
+        return model != null ? model : "";
     }
 
     private Position initPosition(Parser parser, Channel channel, SocketAddress remoteAddress) {
