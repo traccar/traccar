@@ -1031,7 +1031,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_IGN = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GTIG[NF],")
+            .text("+").expression("(?:RESP|BUFF):GT[IV]G[NF],")
             .expression("(?:.{6}|.{10})?,")      // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
@@ -1055,7 +1055,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         decodeLocation(position, parser);
 
-        position.set(Position.KEY_IGNITION, sentence.contains("IGN"));
+        position.set(Position.KEY_IGNITION, sentence.contains("GN"));
         position.set(Position.KEY_HOURS, parseHours(parser.next()));
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
 
@@ -1677,6 +1677,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case "IGN":
                 case "IGF":
+                case "VGN":
+                case "VGF":
                     result = decodeIgn(channel, remoteAddress, sentence);
                     break;
                 case "LSW":
