@@ -1574,7 +1574,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-    
+
         if (parser.hasNext()) {
             int hdop = parser.nextInt();
             position.setValid(hdop > 0);
