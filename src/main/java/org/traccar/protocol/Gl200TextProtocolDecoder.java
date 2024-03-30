@@ -119,13 +119,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return model != null ? model : "";
     }
 
-    private Position initPosition(Parser parser, Channel channel, SocketAddress remoteAddress) {
+    private String initPosition(Parser parser, Channel channel, SocketAddress remoteAddress, Position position) {
         if (parser.matches()) {
+            String protocolVersion = parser.next();
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
             if (deviceSession != null) {
-                Position position = new Position(getProtocolName());
+                position.setProtocol(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
-                return position;
+                return getDeviceModel(deviceSession, protocolVersion);
             }
         }
         return null;
@@ -216,18 +217,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_INF, sentence);
-        if (!parser.matches()) {
-            return null;
-        }
-        String protocolVersion = parser.next();
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
         Position position = new Position();
-        position.setProtocol(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
-
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
+            return null;
+        }
         switch (parser.nextHexInt()) {
             case 0x16:
             case 0x1A:
@@ -260,7 +254,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ICCID, parser.next());
         position.set(Position.KEY_RSSI, parser.nextInt());
 
-        String model = getDeviceModel(deviceSession, protocolVersion);
         if (model.equals("GV310LAU")) {
             position.set(Position.KEY_POWER, parser.nextDouble() / 1000);
         } else {
@@ -292,7 +285,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_VER = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GTVER,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .expression("([^,]*),")              // device type
@@ -306,8 +299,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeVer(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_VER, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -454,7 +448,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_OBD = new PatternBuilder()
             .text("+RESP:GTOBD,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:[0-9A-Z]{17})?,")    // vin
             .expression("[^,]{0,20},")           // device name
@@ -489,8 +483,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_OBD, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1032,7 +1027,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_IGN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT[IV]G[NF],")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("d+,")                       // ignition off duration
@@ -1048,8 +1043,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeIgn(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_IGN, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1066,7 +1062,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_LSW = new PatternBuilder()
             .text("+RESP:").expression("GT[LT]SW,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("[01],")                     // type
@@ -1081,8 +1077,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeLsw(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_LSW, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1097,7 +1094,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_IDA = new PatternBuilder()
             .text("+RESP:GTIDA,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,,")               // device name
             .number("([^,]+),")                  // rfid
@@ -1115,8 +1112,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeIda(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_IDA, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1133,7 +1131,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_WIF = new PatternBuilder()
             .text("+RESP:GTWIF,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("(d+),")                     // count
@@ -1148,8 +1146,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeWif(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_WIF, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1174,7 +1173,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_GSM = new PatternBuilder()
             .text("+RESP:GTGSM,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:STR|CTN|NMR|RTL),")  // fix type
             .expression("(.*)")                  // cells
@@ -1187,8 +1186,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeGsm(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_GSM, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1213,7 +1213,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_PNA = new PatternBuilder()
             .text("+RESP:GT").expression("P[NF]A,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
@@ -1225,8 +1225,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodePna(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_PNA, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1239,7 +1240,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_DAR = new PatternBuilder()
             .text("+RESP:GTDAR,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("(d),")                      // warning type
@@ -1255,8 +1256,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeDar(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_DAR, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1278,7 +1280,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_DTT = new PatternBuilder()
             .text("+RESP:GTDTT,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,,,")              // device name
             .number("d,")                        // data type
@@ -1293,8 +1295,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeDtt(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_DTT, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1315,7 +1318,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_BAA = new PatternBuilder()
             .text("+RESP:GTBAA,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("x+,")                       // index
@@ -1335,8 +1338,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeBaa(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_BAA, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1371,7 +1375,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_BID = new PatternBuilder()
             .text("+RESP:GTBID,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("d,")                        // count
@@ -1389,8 +1393,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeBid(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_BID, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1413,7 +1418,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_LSA = new PatternBuilder()
             .text("+RESP:GTLSA,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("d,")                        // event state 1
@@ -1435,8 +1440,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeLsa(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_LSA, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1453,7 +1459,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("[^,]*,")                // device name
             .number("d*,")
@@ -1476,8 +1482,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
@@ -1558,8 +1565,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeBasic(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN_BASIC, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+        Position position = new Position();
+        String model = initPosition(parser, channel, remoteAddress, position);
+        if (model == null) {
             return null;
         }
 
