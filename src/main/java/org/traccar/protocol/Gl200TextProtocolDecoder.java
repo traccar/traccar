@@ -41,45 +41,52 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
-import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
-    private static final HashMap<String, String> DEVICE_MODELS = new HashMap<String, String>() {{
-        put("02", "GL200");
-        put("04", "GV200");
-        put("06", "GV300");
-        put("08", "GMT100");
-        put("09", "GV50P");
-        put("0F", "GV55");
-        put("10", "GV55 LITE");
-        put("11", "GL500");
-        put("1A", "GL300");
-        put("1F", "GV500");
-        put("25", "GV300");
-        put("27", "GV300W");
-        put("2C", "GL300W");
-        put("2F", "GV55");
-        put("30", "GL300");
-        put("35", "GV200");
-        put("36", "GV500");
-        put("3F", "GMT100");
-        put("41", "GV75W");
-        put("50", "GV55W");
-        put("52", "GL50");
-        put("55", "GL50B");
-        put("5E", "GV500MAP");
-        put("6E", "GV310LAU");
-        put("C2", "GV600M");
-        put("F1", "GV350M");
-        put("F8", "GV800W");
-        put("FC", "GV600W");
-        put("802004", "GV58LAU");
-        put("802005", "GV355CEU");
-    }};
+    private static final Map<String, String> PROTOCOL_MODELS = Map.ofEntries(
+            Map.entry("02", "GL200"),
+            Map.entry("04", "GV200"),
+            Map.entry("06", "GV300"),
+            Map.entry("08", "GMT100"),
+            Map.entry("09", "GV50P"),
+            Map.entry("0F", "GV55"),
+            Map.entry("10", "GV55 LITE"),
+            Map.entry("11", "GL500"),
+            Map.entry("1A", "GL300"),
+            Map.entry("1F", "GV500"),
+            Map.entry("25", "GV300"),
+            Map.entry("27", "GV300W"),
+            Map.entry("28", "GL300VC"),
+            Map.entry("2C", "GL300W"),
+            Map.entry("2F", "GV55"),
+            Map.entry("30", "GL300"),
+            Map.entry("31", "GV65"),
+            Map.entry("35", "GV200"),
+            Map.entry("36", "GV500"),
+            Map.entry("3F", "GMT100"),
+            Map.entry("40", "GL500"),
+            Map.entry("41", "GV75W"),
+            Map.entry("42", "GT501"),
+            Map.entry("44", "GL530"),
+            Map.entry("45", "GB100"),
+            Map.entry("50", "GV55W"),
+            Map.entry("52", "GL50"),
+            Map.entry("55", "GL50B"),
+            Map.entry("5E", "GV500MAP"),
+            Map.entry("6E", "GV310LAU"),
+            Map.entry("C2", "GV600M"),
+            Map.entry("DC", "GV600MG"),
+            Map.entry("DE", "GL500M"),
+            Map.entry("F1", "GV350M"),
+            Map.entry("F8", "GV800W"),
+            Map.entry("FC", "GV600W"),
+            Map.entry("802004", "GV58LAU"),
+            Map.entry("802005", "GV355CEU"));
 
     private boolean ignoreFixTime;
 
@@ -96,15 +103,18 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         ignoreFixTime = getConfig().getBoolean(Keys.PROTOCOL_IGNORE_FIX_TIME.withPrefix(getProtocolName()));
     }
 
-    private String getDeviceModel(DeviceSession deviceSession, String value, String protocolVersion) {
-        if (DEVICE_MODELS.containsKey(protocolVersion.substring(0, 2))) {
-            return DEVICE_MODELS.get(protocolVersion.substring(0, 2));
+    private String getDeviceModel(DeviceSession deviceSession, String protocolVersion) {
+        String declaredModel = getDeviceModel(deviceSession);
+        if (declaredModel != null) {
+            return declaredModel.toUpperCase();
         }
-        if (DEVICE_MODELS.containsKey(protocolVersion.substring(0, 6))) {
-            return DEVICE_MODELS.get(protocolVersion.substring(0, 6));
+        if (PROTOCOL_MODELS.containsKey(protocolVersion.substring(0, 2))) {
+            return PROTOCOL_MODELS.get(protocolVersion.substring(0, 2));
         }
-        String model = value.isEmpty() ? getDeviceModel(deviceSession) : value;
-        return model != null ? model.toUpperCase() : "";
+        if (PROTOCOL_MODELS.containsKey(protocolVersion.substring(0, 6))) {
+            return PROTOCOL_MODELS.get(protocolVersion.substring(0, 6));
+        }
+        return "";
     }
 
     private Position initPosition(Parser parser, Channel channel, SocketAddress remoteAddress) {
@@ -162,12 +172,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_INF = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GTINF,")
-            .expression("(.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:[0-9A-Z]{17},)?")    // vin
             .expression("(?:[^,]+)?,")           // device name
             .number("(xx),")                     // state
-            .expression("([0-9Ff]{20})?,")     // iccid
+            .expression("([0-9Ff]{20})?,")       // iccid
             .number("(d{1,2}),")                 // rssi
             .number("d{1,2},")
             .expression("[01]{1,2},")            // external power
@@ -248,9 +258,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ICCID, parser.next());
         position.set(Position.KEY_RSSI, parser.nextInt());
 
-        String model = getDeviceModel(deviceSession, "", protocolVersion);
+        String model = getDeviceModel(deviceSession, protocolVersion);
         if (model.equals("GV310LAU")) {
-            position.set(Position.KEY_POWER, parser.nextDouble() / 1000); // odometer or external power
+            position.set(Position.KEY_POWER, parser.nextDouble() / 1000);
         } else {
             parser.next(); // odometer or external power
         }
@@ -521,7 +531,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        String model = getDeviceModel(deviceSession, v[index++], protocolVersion);
+        String model = getDeviceModel(deviceSession, protocolVersion);
+        index += 1; // device name
         index += 1; // report type
         index += 1; // can bus state
         long reportMask = Long.parseLong(v[index++], 16);
@@ -935,7 +946,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        String model = getDeviceModel(deviceSession, v[index++], protocolVersion);
+        String model = getDeviceModel(deviceSession, protocolVersion);
+        index += 1; // device name
         long mask = Long.parseLong(v[index++], 16);
         Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001;
         index += 1; // report type
