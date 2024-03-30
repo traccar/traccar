@@ -1534,7 +1534,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN_BASIC = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF)").text(":")
             .expression("GT...,")
-            .expression("(.{6}|.{10})?,")        // protocol version
+            .expression("[^,]+,").optional()     // protocol version
             .number("(d{15}|x{14}),")            // imei
             .any()
             .text(",")
@@ -1565,12 +1565,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeBasic(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
         Parser parser = new Parser(PATTERN_BASIC, sentence);
-        Position position = new Position();
-        String model = initPosition(parser, channel, remoteAddress, position);
-        if (model == null) {
+        if (!parser.matches()) {
             return null;
         }
-
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+    
         if (parser.hasNext()) {
             int hdop = parser.nextInt();
             position.setValid(hdop > 0);
