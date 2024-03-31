@@ -39,7 +39,7 @@ public class BufferingManager {
         void onReleased(ChannelHandlerContext context, Position position);
     }
 
-    private static class Holder implements Comparable<Holder> {
+    private static final class Holder implements Comparable<Holder> {
 
         private static final Comparator<Position> COMPARATOR = Comparator
                 .comparing(Position::getFixTime)
