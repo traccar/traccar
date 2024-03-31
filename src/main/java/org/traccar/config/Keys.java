@@ -293,6 +293,14 @@ public final class Keys {
             false);
 
     /**
+     * If not zero, enable buffering of incoming data to handle ordering locations. The value is threshold for
+     * buffering in milliseconds.
+     */
+    public static final ConfigKey<Long> SERVER_BUFFERING_THRESHOLD = new LongConfigKey(
+            "server.buffering.threshold",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Server wide connection timeout value in seconds. See protocol timeout for more information.
      */
     public static final ConfigKey<Integer> SERVER_TIMEOUT = new IntegerConfigKey(

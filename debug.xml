@@ -25,6 +25,9 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 
+    <!--<entry key='server.instantAcknowledgement'>true</entry>
+    <entry key='server.buffering.threshold'>5000</entry>-->
+
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
 
