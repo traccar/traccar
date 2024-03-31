@@ -30,16 +30,11 @@ import org.traccar.BasePipelineFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.helper.DateUtil;
 import org.traccar.helper.NetworkUtil;
-import org.traccar.model.Device;
-import org.traccar.model.Position;
 import org.traccar.session.ConnectionManager;
-import org.traccar.session.cache.CacheManager;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Singleton
@@ -48,75 +43,15 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MainEventHandler.class);
 
-    private final Set<String> connectionlessProtocols = new HashSet<>();
-    private final Set<String> logAttributes = new LinkedHashSet<>();
-
-    private final CacheManager cacheManager;
     private final ConnectionManager connectionManager;
+    private final Set<String> connectionlessProtocols = new HashSet<>();
 
     @Inject
-    public MainEventHandler(
-            Config config, CacheManager cacheManager, ConnectionManager connectionManager) {
-        this.cacheManager = cacheManager;
+    public MainEventHandler(Config config, ConnectionManager connectionManager) {
         this.connectionManager = connectionManager;
         String connectionlessProtocolList = config.getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split("[, ]")));
-        }
-        logAttributes.addAll(Arrays.asList(config.getString(Keys.LOGGER_ATTRIBUTES).split("[, ]")));
-    }
-
-    @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
-        if (msg instanceof Position) {
-
-            Position position = (Position) msg;
-            Device device = cacheManager.getObject(Device.class, position.getDeviceId());
-
-            StringBuilder builder = new StringBuilder();
-            builder.append("[").append(NetworkUtil.session(ctx.channel())).append("] ");
-            builder.append("id: ").append(device.getUniqueId());
-            for (String attribute : logAttributes) {
-                switch (attribute) {
-                    case "time":
-                        builder.append(", time: ").append(DateUtil.formatDate(position.getFixTime(), false));
-                        break;
-                    case "position":
-                        builder.append(", lat: ").append(String.format("%.5f", position.getLatitude()));
-                        builder.append(", lon: ").append(String.format("%.5f", position.getLongitude()));
-                        break;
-                    case "speed":
-                        if (position.getSpeed() > 0) {
-                            builder.append(", speed: ").append(String.format("%.1f", position.getSpeed()));
-                        }
-                        break;
-                    case "course":
-                        builder.append(", course: ").append(String.format("%.1f", position.getCourse()));
-                        break;
-                    case "accuracy":
-                        if (position.getAccuracy() > 0) {
-                            builder.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));
-                        }
-                        break;
-                    case "outdated":
-                        if (position.getOutdated()) {
-                            builder.append(", outdated");
-                        }
-                        break;
-                    case "invalid":
-                        if (!position.getValid()) {
-                            builder.append(", invalid");
-                        }
-                        break;
-                    default:
-                        Object value = position.getAttributes().get(attribute);
-                        if (value != null) {
-                            builder.append(", ").append(attribute).append(": ").append(value);
-                        }
-                        break;
-                }
-            }
-            LOGGER.info(builder.toString());
         }
     }
 

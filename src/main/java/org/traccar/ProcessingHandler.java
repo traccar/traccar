@@ -51,6 +51,7 @@ import org.traccar.handler.events.MediaEventHandler;
 import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.handler.network.AcknowledgementHandler;
+import org.traccar.helper.PositionLogger;
 import org.traccar.model.Position;
 
 import java.util.List;
@@ -64,13 +65,16 @@ import java.util.stream.Stream;
 public class ProcessingHandler extends ChannelInboundHandlerAdapter {
 
     private final NotificationManager notificationManager;
+    private final PositionLogger positionLogger;
     private final List<BasePositionHandler> positionHandlers;
     private final List<BaseEventHandler> eventHandlers;
     private final PostProcessHandler postProcessHandler;
 
     @Inject
-    public ProcessingHandler(Injector injector, NotificationManager notificationManager) {
+    public ProcessingHandler(
+            Injector injector, NotificationManager notificationManager, PositionLogger positionLogger) {
         this.notificationManager = notificationManager;
+        this.positionLogger = positionLogger;
 
         positionHandlers = Stream.of(
                 TimeHandler.class,
@@ -145,7 +149,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
 
     private void finishedProcessing(ChannelHandlerContext ctx, Position position) {
         postProcessHandler.handlePosition(position, p -> {
-            ctx.fireChannelRead(p);
+            positionLogger.log(ctx, p);
             ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(p));
         });
     }
