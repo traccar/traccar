@@ -96,7 +96,6 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             pipeline.addLast(injectMembers(new NetworkForwarderHandler(port)));
         }
         pipeline.addLast(new NetworkMessageHandler());
-        pipeline.addLast(new RemoteAddressHandler(config));
         pipeline.addLast(injectMembers(new StandardLoggingHandler(protocol)));
 
         if (!connector.isDatagram() && !config.getBoolean(Keys.SERVER_INSTANT_ACKNOWLEDGEMENT)) {
@@ -116,6 +115,7 @@ public abstract class BasePipelineFactory extends ChannelInitializer<Channel> {
             pipeline.addLast(handler);
         });
 
+        pipeline.addLast(injector.getInstance(RemoteAddressHandler.class));
         pipeline.addLast(injector.getInstance(ProcessingHandler.class));
         pipeline.addLast(injector.getInstance(MainEventHandler.class));
     }

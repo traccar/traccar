@@ -19,12 +19,14 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Position;
 
 import java.net.InetSocketAddress;
 
+@Singleton
 @ChannelHandler.Sharable
 public class RemoteAddressHandler extends ChannelInboundHandlerAdapter {
 
