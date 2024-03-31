@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,28 +22,21 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramChannel;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BasePipelineFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.StatisticsManager;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.NetworkUtil;
-import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
-import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -59,18 +52,13 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
     private final Set<String> logAttributes = new LinkedHashSet<>();
 
     private final CacheManager cacheManager;
-    private final Storage storage;
     private final ConnectionManager connectionManager;
-    private final StatisticsManager statisticsManager;
 
     @Inject
     public MainEventHandler(
-            Config config, CacheManager cacheManager, Storage storage, ConnectionManager connectionManager,
-            StatisticsManager statisticsManager) {
+            Config config, CacheManager cacheManager, ConnectionManager connectionManager) {
         this.cacheManager = cacheManager;
-        this.storage = storage;
         this.connectionManager = connectionManager;
-        this.statisticsManager = statisticsManager;
         String connectionlessProtocolList = config.getString(Keys.STATUS_IGNORE_OFFLINE);
         if (connectionlessProtocolList != null) {
             connectionlessProtocols.addAll(Arrays.asList(connectionlessProtocolList.split("[, ]")));
@@ -84,22 +72,6 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
 
             Position position = (Position) msg;
             Device device = cacheManager.getObject(Device.class, position.getDeviceId());
-
-            try {
-                if (PositionUtil.isLatest(cacheManager, position)) {
-                    Device updatedDevice = new Device();
-                    updatedDevice.setId(position.getDeviceId());
-                    updatedDevice.setPositionId(position.getId());
-                    storage.updateObject(updatedDevice, new Request(
-                            new Columns.Include("positionId"),
-                            new Condition.Equals("id", updatedDevice.getId())));
-
-                    cacheManager.updatePosition(position);
-                    connectionManager.updatePosition(true, position);
-                }
-            } catch (StorageException error) {
-                LOGGER.warn("Failed to update device", error);
-            }
 
             StringBuilder builder = new StringBuilder();
             builder.append("[").append(NetworkUtil.session(ctx.channel())).append("] ");
@@ -145,10 +117,6 @@ public class MainEventHandler extends ChannelInboundHandlerAdapter {
                 }
             }
             LOGGER.info(builder.toString());
-
-            statisticsManager.registerMessageStored(position.getDeviceId(), position.getProtocol());
-
-            ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
         }
     }
 

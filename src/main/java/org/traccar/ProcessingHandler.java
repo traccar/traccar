@@ -26,6 +26,7 @@ import org.traccar.handler.BasePositionHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DatabaseHandler;
+import org.traccar.handler.PostProcessHandler;
 import org.traccar.handler.DistanceHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
@@ -65,6 +66,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
     private final NotificationManager notificationManager;
     private final List<BasePositionHandler> positionHandlers;
     private final List<BaseEventHandler> eventHandlers;
+    private final PostProcessHandler postProcessHandler;
 
     @Inject
     public ProcessingHandler(Injector injector, NotificationManager notificationManager) {
@@ -104,14 +106,17 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
                 .map((clazz) -> (BaseEventHandler) injector.getInstance(clazz))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toUnmodifiableList());
+
+        postProcessHandler = injector.getInstance(PostProcessHandler.class);
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Position) {
             processPositionHandlers(ctx, (Position) msg);
+        } else {
+            super.channelRead(ctx, msg);
         }
-        super.channelRead(ctx, msg);
     }
 
     private void processPositionHandlers(ChannelHandlerContext ctx, Position position) {
@@ -139,7 +144,10 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter {
     }
 
     private void finishedProcessing(ChannelHandlerContext ctx, Position position) {
-        ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
+        postProcessHandler.handlePosition(position, p -> {
+            ctx.fireChannelRead(p);
+            ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(p));
+        });
     }
 
 }
