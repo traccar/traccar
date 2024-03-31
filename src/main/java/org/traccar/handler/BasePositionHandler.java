@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,19 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.handler.events;
+package org.traccar.handler;
 
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-public abstract class BaseEventHandler {
+public abstract class BasePositionHandler {
 
     public interface Callback {
-        void eventDetected(Event event);
+        void processed(Position position);
     }
 
-    /**
-     * Event handlers should be processed synchronously.
-     */
-    public abstract void analyzePosition(Position position, Callback callback);
+    public abstract void handlePosition(Position position, Callback callback);
 }

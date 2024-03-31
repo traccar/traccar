@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,21 +16,13 @@
  */
 package org.traccar.handler.events;
 
-import java.util.Collections;
-import java.util.Map;
-
-import io.netty.channel.ChannelHandler;
+import jakarta.inject.Inject;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-
-@Singleton
-@ChannelHandler.Sharable
 public class IgnitionEventHandler extends BaseEventHandler {
 
     private final CacheManager cacheManager;
@@ -41,13 +33,11 @@ public class IgnitionEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Map<Event, Position> analyzePosition(Position position) {
+    public void analyzePosition(Position position, Callback callback) {
         Device device = cacheManager.getObject(Device.class, position.getDeviceId());
         if (device == null || !PositionUtil.isLatest(cacheManager, position)) {
-            return null;
+            return;
         }
-
-        Map<Event, Position> result = null;
 
         if (position.hasAttribute(Position.KEY_IGNITION)) {
             boolean ignition = position.getBoolean(Position.KEY_IGNITION);
@@ -57,15 +47,12 @@ public class IgnitionEventHandler extends BaseEventHandler {
                 boolean oldIgnition = lastPosition.getBoolean(Position.KEY_IGNITION);
 
                 if (ignition && !oldIgnition) {
-                    result = Collections.singletonMap(
-                            new Event(Event.TYPE_IGNITION_ON, position), position);
+                    callback.eventDetected(new Event(Event.TYPE_IGNITION_ON, position));
                 } else if (!ignition && oldIgnition) {
-                    result = Collections.singletonMap(
-                            new Event(Event.TYPE_IGNITION_OFF, position), position);
+                    callback.eventDetected(new Event(Event.TYPE_IGNITION_OFF, position));
                 }
             }
         }
-        return result;
     }
 
 }

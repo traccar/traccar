@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.handler.network;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
@@ -24,10 +24,11 @@ import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.BasePipelineFactory;
+import org.traccar.BaseProtocolDecoder;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
-import org.traccar.handler.AcknowledgementHandler;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.NetworkUtil;
 import org.traccar.helper.model.PositionUtil;

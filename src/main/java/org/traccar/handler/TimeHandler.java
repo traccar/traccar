@@ -15,11 +15,7 @@
  */
 package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Position;
@@ -28,9 +24,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-@Singleton
-@ChannelHandler.Sharable
-public class TimeHandler extends ChannelInboundHandlerAdapter {
+public class TimeHandler extends BasePositionHandler {
 
     private final boolean enabled;
     private final boolean useServerTime;
@@ -53,10 +47,9 @@ public class TimeHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void handlePosition(Position position, Callback callback) {
 
-        if (enabled && msg instanceof Position) {
-            Position position = (Position) msg;
+        if (enabled) {
             if (protocols == null || protocols.contains(position.getProtocol())) {
                 if (useServerTime) {
                     position.setDeviceTime(position.getServerTime());
@@ -66,7 +59,7 @@ public class TimeHandler extends ChannelInboundHandlerAdapter {
                 }
             }
         }
-        ctx.fireChannelRead(msg);
+        callback.processed(position);
     }
 
 }

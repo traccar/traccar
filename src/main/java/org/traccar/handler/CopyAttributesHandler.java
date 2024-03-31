@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,20 +16,14 @@
  */
 package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
-import org.traccar.BaseDataHandler;
+import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-
-@Singleton
-@ChannelHandler.Sharable
-public class CopyAttributesHandler extends BaseDataHandler {
+public class CopyAttributesHandler extends BasePositionHandler {
 
     private final boolean enabled;
     private final CacheManager cacheManager;
@@ -41,7 +35,7 @@ public class CopyAttributesHandler extends BaseDataHandler {
     }
 
     @Override
-    protected Position handlePosition(Position position) {
+    public void handlePosition(Position position, Callback callback) {
         if (enabled) {
             String attributesString = AttributeUtil.lookup(
                     cacheManager, Keys.PROCESSING_COPY_ATTRIBUTES, position.getDeviceId());
@@ -54,7 +48,7 @@ public class CopyAttributesHandler extends BaseDataHandler {
                 }
             }
         }
-        return position;
+        callback.processed(position);
     }
 
 }
