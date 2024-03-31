@@ -56,9 +56,12 @@ import org.traccar.handler.network.AcknowledgementHandler;
 import org.traccar.helper.PositionLogger;
 import org.traccar.model.Position;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -72,6 +75,12 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
     private final List<BasePositionHandler> positionHandlers;
     private final List<BaseEventHandler> eventHandlers;
     private final PostProcessHandler postProcessHandler;
+
+    private final Map<Long, Queue<Position>> queues = new HashMap<>();
+
+    private synchronized Queue<Position> getQueue(long deviceId) {
+        return queues.computeIfAbsent(deviceId, k -> new LinkedList<>());
+    }
 
     @Inject
     public ProcessingHandler(
@@ -129,7 +138,15 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
 
     @Override
     public void onReleased(ChannelHandlerContext context, Position position) {
-        processPositionHandlers(context, position);
+        Queue<Position> queue = getQueue(position.getDeviceId());
+        boolean queued;
+        synchronized (queue) {
+            queued = !queue.isEmpty();
+            queue.offer(position);
+        }
+        if (!queued) {
+            processPositionHandlers(context, position);
+        }
     }
 
     private void processPositionHandlers(ChannelHandlerContext ctx, Position position) {
@@ -160,6 +177,16 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
         postProcessHandler.handlePosition(position, p -> {
             positionLogger.log(ctx, p);
             ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(p));
+
+            Queue<Position> queue = getQueue(position.getDeviceId());
+            Position nextPosition;
+            synchronized (queue) {
+                queue.poll(); // remove current position
+                nextPosition = queue.peek();
+            }
+            if (nextPosition != null) {
+                processPositionHandlers(ctx, nextPosition);
+            }
         });
     }
 
