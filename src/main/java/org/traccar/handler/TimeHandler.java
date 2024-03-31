@@ -26,18 +26,12 @@ import java.util.Set;
 
 public class TimeHandler extends BasePositionHandler {
 
-    private final boolean enabled;
     private final boolean useServerTime;
     private final Set<String> protocols;
 
     @Inject
     public TimeHandler(Config config) {
-        enabled = config.hasKey(Keys.TIME_OVERRIDE);
-        if (enabled) {
-            useServerTime = config.getString(Keys.TIME_OVERRIDE).equalsIgnoreCase("serverTime");
-        } else {
-            useServerTime = false;
-        }
+        useServerTime = config.getString(Keys.TIME_OVERRIDE).equalsIgnoreCase("serverTime");
         String protocolList = config.getString(Keys.TIME_PROTOCOLS);
         if (protocolList != null) {
             protocols = new HashSet<>(Arrays.asList(protocolList.split("[, ]")));
@@ -49,14 +43,12 @@ public class TimeHandler extends BasePositionHandler {
     @Override
     public void handlePosition(Position position, Callback callback) {
 
-        if (enabled) {
-            if (protocols == null || protocols.contains(position.getProtocol())) {
-                if (useServerTime) {
-                    position.setDeviceTime(position.getServerTime());
-                    position.setFixTime(position.getServerTime());
-                } else {
-                    position.setFixTime(position.getDeviceTime());
-                }
+        if (protocols == null || protocols.contains(position.getProtocol())) {
+            if (useServerTime) {
+                position.setDeviceTime(position.getServerTime());
+                position.setFixTime(position.getServerTime());
+            } else {
+                position.setFixTime(position.getDeviceTime());
             }
         }
         callback.processed(position);

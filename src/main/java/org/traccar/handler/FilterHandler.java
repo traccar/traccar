@@ -40,7 +40,6 @@ public class FilterHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterHandler.class);
 
-    private final boolean enabled;
     private final boolean filterInvalid;
     private final boolean filterZero;
     private final boolean filterDuplicate;
@@ -65,7 +64,6 @@ public class FilterHandler extends BasePositionHandler {
     @Inject
     public FilterHandler(
             Config config, CacheManager cacheManager, Storage storage, StatisticsManager statisticsManager) {
-        enabled = config.getBoolean(Keys.FILTER_ENABLE);
         filterInvalid = config.getBoolean(Keys.FILTER_INVALID);
         filterZero = config.getBoolean(Keys.FILTER_ZERO);
         filterDuplicate = config.getBoolean(Keys.FILTER_DUPLICATE);
@@ -272,7 +270,7 @@ public class FilterHandler extends BasePositionHandler {
 
     @Override
     public void handlePosition(Position position, Callback callback) {
-        if (enabled && filter(position)) {
+        if (filter(position)) {
             callback.processed(null);
         } else {
             callback.processed(position);

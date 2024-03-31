@@ -25,26 +25,22 @@ import org.traccar.session.cache.CacheManager;
 
 public class CopyAttributesHandler extends BasePositionHandler {
 
-    private final boolean enabled;
     private final CacheManager cacheManager;
 
     @Inject
     public CopyAttributesHandler(Config config, CacheManager cacheManager) {
-        enabled = config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE);
         this.cacheManager = cacheManager;
     }
 
     @Override
     public void handlePosition(Position position, Callback callback) {
-        if (enabled) {
-            String attributesString = AttributeUtil.lookup(
-                    cacheManager, Keys.PROCESSING_COPY_ATTRIBUTES, position.getDeviceId());
-            Position last = cacheManager.getPosition(position.getDeviceId());
-            if (last != null && attributesString != null) {
-                for (String attribute : attributesString.split("[ ,]")) {
-                    if (last.hasAttribute(attribute) && !position.hasAttribute(attribute)) {
-                        position.getAttributes().put(attribute, last.getAttributes().get(attribute));
-                    }
+        String attributesString = AttributeUtil.lookup(
+                cacheManager, Keys.PROCESSING_COPY_ATTRIBUTES, position.getDeviceId());
+        Position last = cacheManager.getPosition(position.getDeviceId());
+        if (last != null && attributesString != null) {
+            for (String attribute : attributesString.split("[ ,]")) {
+                if (last.hasAttribute(attribute) && !position.hasAttribute(attribute)) {
+                    position.getAttributes().put(attribute, last.getAttributes().get(attribute));
                 }
             }
         }

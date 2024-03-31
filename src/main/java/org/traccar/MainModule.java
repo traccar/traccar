@@ -72,9 +72,12 @@ import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
+import org.traccar.handler.CopyAttributesHandler;
+import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
+import org.traccar.handler.TimeHandler;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.SanitizerModule;
 import org.traccar.helper.WebHelper;
@@ -332,6 +335,34 @@ public class MainModule extends AbstractModule {
     public static SpeedLimitHandler provideSpeedLimitHandler(@Nullable SpeedLimitProvider speedLimitProvider) {
         if (speedLimitProvider != null) {
             return new SpeedLimitHandler(speedLimitProvider);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static CopyAttributesHandler provideCopyAttributesHandler(Config config, CacheManager cacheManager) {
+        if (config.getBoolean(Keys.PROCESSING_COPY_ATTRIBUTES_ENABLE)) {
+            return new CopyAttributesHandler(config, cacheManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static FilterHandler provideFilterHandler(
+            Config config, CacheManager cacheManager, Storage storage, StatisticsManager statisticsManager) {
+        if (config.getBoolean(Keys.FILTER_ENABLE)) {
+            return new FilterHandler(config, cacheManager, storage, statisticsManager);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static TimeHandler provideTimeHandler(Config config) {
+        if (config.hasKey(Keys.TIME_OVERRIDE)) {
+            return new TimeHandler(config);
         }
         return null;
     }
