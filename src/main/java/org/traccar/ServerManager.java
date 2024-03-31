@@ -82,12 +82,8 @@ public class ServerManager implements LifecycleObject {
 
     @Override
     public void stop() throws Exception {
-        try {
-            for (TrackerConnector connector : connectorList) {
-                connector.stop();
-            }
-        } finally {
-            GlobalTimer.release();
+        for (TrackerConnector connector : connectorList) {
+            connector.stop();
         }
     }
 
