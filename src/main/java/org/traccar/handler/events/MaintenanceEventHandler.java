@@ -16,20 +16,12 @@
  */
 package org.traccar.handler.events;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import io.netty.channel.ChannelHandler;
+import jakarta.inject.Inject;
 import org.traccar.model.Event;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-
-@Singleton
-@ChannelHandler.Sharable
 public class MaintenanceEventHandler extends BaseEventHandler {
 
     private final CacheManager cacheManager;
@@ -40,13 +32,12 @@ public class MaintenanceEventHandler extends BaseEventHandler {
     }
 
     @Override
-    protected Map<Event, Position> analyzePosition(Position position) {
+    public void analyzePosition(Position position, Callback callback) {
         Position lastPosition = cacheManager.getPosition(position.getDeviceId());
         if (lastPosition == null || position.getFixTime().compareTo(lastPosition.getFixTime()) < 0) {
-            return null;
+            return;
         }
 
-        Map<Event, Position> events = new HashMap<>();
         for (Maintenance maintenance : cacheManager.getDeviceObjects(position.getDeviceId(), Maintenance.class)) {
             if (maintenance.getPeriod() != 0) {
                 double oldValue = getValue(lastPosition, maintenance.getType());
@@ -58,13 +49,11 @@ public class MaintenanceEventHandler extends BaseEventHandler {
                         Event event = new Event(Event.TYPE_MAINTENANCE, position);
                         event.setMaintenanceId(maintenance.getId());
                         event.set(maintenance.getType(), newValue);
-                        events.put(event, position);
+                        callback.eventDetected(event);
                     }
                 }
             }
         }
-
-        return events;
     }
 
     private double getValue(Position position, String type) {

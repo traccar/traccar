@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,26 +16,15 @@
  */
 package org.traccar.handler;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.List;
-
-import io.netty.channel.ChannelHandler;
-import org.apache.commons.jexl3.JexlFeatures;
-import org.apache.commons.jexl3.JexlEngine;
+import jakarta.inject.Inject;
 import org.apache.commons.jexl3.JexlBuilder;
-import org.apache.commons.jexl3.introspection.JexlSandbox;
+import org.apache.commons.jexl3.JexlEngine;
 import org.apache.commons.jexl3.JexlException;
+import org.apache.commons.jexl3.JexlFeatures;
 import org.apache.commons.jexl3.MapContext;
+import org.apache.commons.jexl3.introspection.JexlSandbox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.BaseDataHandler;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Attribute;
@@ -43,12 +32,17 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-@Singleton
-@ChannelHandler.Sharable
-public class ComputedAttributesHandler extends BaseDataHandler {
+public class ComputedAttributesHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputedAttributesHandler.class);
 
@@ -144,7 +138,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
     }
 
     @Override
-    protected Position handlePosition(Position position) {
+    public void handlePosition(Position position, Callback callback) {
         Collection<Attribute> attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class);
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
@@ -202,7 +196,7 @@ public class ComputedAttributesHandler extends BaseDataHandler {
                 }
             }
         }
-        return position;
+        callback.processed(position);
     }
 
 }

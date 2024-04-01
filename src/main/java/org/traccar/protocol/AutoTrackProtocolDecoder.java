@@ -101,10 +101,11 @@ public class AutoTrackProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
         buf.readUnsignedShortLE(); // length
 
+        DeviceSession deviceSession;
         switch (type) {
             case MSG_LOGIN_REQUEST:
                 String imei = ByteBufUtil.hexDump(buf.readSlice(8));
-                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+                deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 if (deviceSession == null) {
                     return null;
                 }

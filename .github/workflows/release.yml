@@ -34,7 +34,7 @@ jobs:
             traccar-web/package-lock.json
             traccar-web/modern/package-lock.json
       - run: |
-          wget -q https://trials.sencha.com/cmd/7.6.0/SenchaCmd-7.6.0.87-linux-amd64.sh.zip
+          wget -q https://traccar.nyc3.digitaloceanspaces.com/download/SenchaCmd-7.6.0.87-linux-amd64.sh.zip
           unzip SenchaCmd-*.zip
           ./SenchaCmd-*.sh -q
           echo "$HOME/bin/Sencha/Cmd/" >> $GITHUB_PATH

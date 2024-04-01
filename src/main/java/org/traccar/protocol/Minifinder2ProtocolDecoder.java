@@ -295,6 +295,13 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             position.set(Position.KEY_HEART_RATE, heartRate);
                         }
                         break;
+                    case 0x41:
+                        buf.readUnsignedIntLE(); // timestamp
+                        int spO2 = buf.readUnsignedByte();
+                        if (spO2 > 1) {
+                            position.set("spO2", spO2);
+                        }
+                        break;
                     default:
                         break;
                 }
