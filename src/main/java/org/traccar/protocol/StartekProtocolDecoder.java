@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,12 +41,13 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .expression(".")                     // index
             .number("d+,")                       // length
             .number("(d+),")                     // imei
+            .number("(xxx),")                    // type
             .expression("(.+)")                  // content
             .number("xx")                        // checksum
+            .text("\r\n")
             .compile();
 
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
-            .number("xxx,")                      // command
             .number("(d+),")                     // event
             .expression("([^,]+)?,")             // event data
             .number("(dd)(dd)(dd)")              // date (yyymmdd)
@@ -103,6 +104,12 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             case 5:
             case 6:
                 return Position.ALARM_DOOR;
+            case 17:
+                return Position.ALARM_LOW_POWER;
+            case 18:
+                return Position.ALARM_POWER_CUT;
+            case 19:
+                return Position.ALARM_POWER_RESTORED;
             case 39:
                 return Position.ALARM_ACCELERATION;
             case 40:
@@ -128,26 +135,24 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        String type = parser.next();
         String content = parser.next();
-        if (content.length() < 100) {
-
-            Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            getLastLocation(position, null);
-
-            position.set(Position.KEY_RESULT, content);
-
-            return position;
-
-        } else {
-
-            return decodePosition(deviceSession, content);
-
+        switch (type) {
+            case "000":
+                return decodePosition(deviceSession, content);
+            case "710":
+                return decodeSerial(deviceSession, content);
+            default:
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                getLastLocation(position, null);
+                position.set(Position.KEY_TYPE, type);
+                position.set(Position.KEY_RESULT, content);
+                return position;
         }
     }
 
-    protected Object decodePosition(DeviceSession deviceSession, String content) throws Exception {
+    private Object decodePosition(DeviceSession deviceSession, String content) {
 
         Parser parser = new Parser(PATTERN_POSITION, content);
         if (!parser.matches()) {
@@ -244,6 +249,83 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             position.set(Position.KEY_HOURS, parser.nextInt() * 1000L);
+        }
+
+        return position;
+    }
+
+    private Object decodeSerial(DeviceSession deviceSession, String content) {
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        String[] frames = content.split("\r\n");
+
+        for (String frame : frames) {
+            String[] values = frame.split(",");
+            int index = 0;
+            String type = values[index++];
+            switch (type) {
+                case "T1":
+                    index += 1; // speed
+                    position.set(Position.KEY_RPM, Double.parseDouble(values[index++]));
+                    index += 1; // fuel consumption
+                    position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(values[index++]));
+                    index += 4; // axel weights
+                    index += 1; // turbo pressure
+                    position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index++]));
+                    index += 1; // accelerator pedal
+                    position.set("torque", Integer.parseInt(values[index++]));
+                    index += 1; // firmware version
+                    position.set(Position.KEY_POWER, Double.parseDouble(values[index++]));
+                    index += 1; // coolant level
+                    position.set("oilTemp", Double.parseDouble(values[index++]));
+                    index += 1; // oil level
+                    position.set(Position.KEY_THROTTLE, Double.parseDouble(values[index++]));
+                    index += 1; // air inlet pressure
+                    index += 1; // fuel tank secondary
+                    index += 1; // current gear
+                    index += 1; // seatbelt
+                    position.set("oilPressure", Integer.parseInt(values[index++]));
+                    index += 1; // wet tank air pressure
+                    index += 1; // pto state
+                    int ignition = Integer.parseInt(values[index++]);
+                    if (ignition < 2) {
+                        position.set(Position.KEY_IGNITION, ignition > 0);
+                    }
+                    index += 1; // brake pedal
+                    position.set("catalystLevel", Double.parseDouble(values[index++]));
+                    index += 1; // fuel type
+                    break;
+                case "T2":
+                    position.set(Position.KEY_ODOMETER, Double.parseDouble(values[index++]) * 1000);
+                    index += 1; // total fuel
+                    index += 1; // fuel used cruise
+                    index += 1; // fuel used drive
+                    index += 1;
+                    index += 1;
+                    index += 1; // total idle time
+                    index += 1; // total time pto
+                    index += 1; // time cruise
+                    index += 1;
+                    index += 1;
+                    index += 1;
+                    index += 1;
+                    index += 1;
+                    index += 1; // brake apps
+                    index += 1; // clutch apps
+                    position.set(Position.KEY_HOURS, Integer.parseInt(values[index++]));
+                    index += 1; // time torque
+                    position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index++]));
+                    index += 1; // total cruise control distance
+                    position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index++]));
+                    index += 1; // total drive time
+                    break;
+                default:
+                    break;
+            }
         }
 
         return position;

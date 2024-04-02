@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.model.ObjectOperation;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.OpenIdProvider;
@@ -99,21 +100,18 @@ public class ServerResource extends BaseResource {
         } else {
             server.setNewServer(UserUtil.isEmpty(storage));
         }
-        if (user != null && user.getAdministrator()) {
-            server.setStorageSpace(Log.getStorageSpace());
-        }
         return server;
     }
 
     @PUT
-    public Response update(Server entity) throws StorageException {
+    public Response update(Server server) throws Exception {
         permissionsService.checkAdmin(getUserId());
-        storage.updateObject(entity, new Request(
+        storage.updateObject(server, new Request(
                 new Columns.Exclude("id"),
-                new Condition.Equals("id", entity.getId())));
-        cacheManager.updateOrInvalidate(true, entity);
-        LogAction.edit(getUserId(), entity);
-        return Response.ok(entity).build();
+                new Condition.Equals("id", server.getId())));
+        cacheManager.invalidateObject(true, Server.class, server.getId(), ObjectOperation.UPDATE);
+        LogAction.edit(getUserId(), server);
+        return Response.ok(server).build();
     }
 
     @Path("geocode")
@@ -135,11 +133,16 @@ public class ServerResource extends BaseResource {
     @Path("file/{path}")
     @POST
     @Consumes("*/*")
-    public Response uploadImage(@PathParam("path") String path, File inputFile) throws IOException, StorageException {
+    public Response uploadFile(@PathParam("path") String path, File inputFile) throws IOException, StorageException {
         permissionsService.checkAdmin(getUserId());
         String root = config.getString(Keys.WEB_OVERRIDE, config.getString(Keys.WEB_PATH));
 
-        var outputPath = Paths.get(root, path);
+        var rootPath = Paths.get(root).normalize();
+        var outputPath = rootPath.resolve(path).normalize();
+        if (!outputPath.startsWith(rootPath)) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+
         var directoryPath = outputPath.getParent();
         if (directoryPath != null) {
             Files.createDirectories(directoryPath);
@@ -149,6 +152,13 @@ public class ServerResource extends BaseResource {
             input.transferTo(output);
         }
         return Response.ok().build();
+    }
+
+    @Path("cache")
+    @GET
+    public String cache() throws StorageException {
+        permissionsService.checkAdmin(getUserId());
+        return cacheManager.toString();
     }
 
 }

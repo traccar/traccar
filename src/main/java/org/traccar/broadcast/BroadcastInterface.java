@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.traccar.broadcast;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
 
 public interface BroadcastInterface {
@@ -34,12 +35,12 @@ public interface BroadcastInterface {
     default void updateCommand(boolean local, long deviceId) {
     }
 
-    default void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
+    default <T extends BaseModel> void invalidateObject(
+            boolean local, Class<T> clazz, long id, ObjectOperation operation) throws Exception {
     }
 
-    default void invalidatePermission(
-            boolean local,
-            Class<? extends BaseModel> clazz1, long id1,
-            Class<? extends BaseModel> clazz2, long id2) {
+    default <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
+            boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) throws Exception {
     }
+
 }

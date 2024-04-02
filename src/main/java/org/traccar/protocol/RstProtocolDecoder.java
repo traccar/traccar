@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             .expression("(.{5});")               // firmware
             .number("(d{9});")                   // serial number
             .number("(d+);")                     // index
-            .number("d+;")                       // type
+            .number("(d+);")                     // type
             .groupBegin()
             .number("(dd)-(dd)-(dddd) ")         // event date
             .number("(dd):(dd):(dd);")           // event time
@@ -69,8 +69,10 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             .number("x{4};")                     // sensors
             .number("(xx);")                     // status 1
             .number("(xx);")                     // status 2
+            .expression("(.*)")                  // additional data
             .groupEnd("?")
             .any()
+            .text("FIM;")
             .compile();
 
     @Override
@@ -87,6 +89,7 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
         String firmware = parser.next();
         String serial = parser.next();
         int index = parser.nextInt();
+        int type = parser.nextInt();
 
         if (channel != null) {
             String response = "RST;A;" + model + ";" + firmware + ";" + serial + ";" + index + ";6;FIM;";
@@ -132,6 +135,22 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.PREFIX_TEMP + 1, (int) parser.nextHexInt().byteValue());
             position.set(Position.KEY_STATUS, (parser.nextHexInt() << 8) + parser.nextHexInt());
+
+            String[] values = parser.next().split(";");
+            if (type == 55) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, values[0]);
+            }
+
+            return position;
+
+        } else if (type == 134) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RESULT, String.valueOf(type));
 
             return position;
 

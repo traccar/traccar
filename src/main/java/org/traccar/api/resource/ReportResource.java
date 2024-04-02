@@ -23,6 +23,7 @@ import org.traccar.model.Position;
 import org.traccar.model.Report;
 import org.traccar.model.UserRestrictions;
 import org.traccar.reports.CombinedReportProvider;
+import org.traccar.reports.DevicesReportProvider;
 import org.traccar.reports.EventsReportProvider;
 import org.traccar.reports.RouteReportProvider;
 import org.traccar.reports.StopsReportProvider;
@@ -76,6 +77,9 @@ public class ReportResource extends SimpleObjectResource<Report> {
 
     @Inject
     private TripsReportProvider tripsReportProvider;
+
+    @Inject
+    private DevicesReportProvider devicesReportProvider;
 
     @Inject
     private ReportMailer reportMailer;
@@ -317,6 +321,17 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("to") Date to,
             @PathParam("type") String type) throws StorageException {
         return getStopsExcel(deviceIds, groupIds, from, to, type.equals("mail"));
+    }
+
+    @Path("devices/{type:xlsx|mail}")
+    @GET
+    @Produces(EXCEL)
+    public Response geDevicesExcel(
+            @PathParam("type") String type) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        return executeReport(getUserId(), type.equals("mail"), stream -> {
+            devicesReportProvider.getExcel(stream, getUserId());
+        });
     }
 
 }

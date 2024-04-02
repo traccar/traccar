@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,39 +16,36 @@
  */
 package org.traccar.notificators;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Event;
-import org.traccar.model.Notification;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
+import org.traccar.notification.NotificationMessage;
 import org.traccar.sms.SmsManager;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-
 @Singleton
-public class NotificatorSms implements Notificator {
+public class NotificatorSms extends Notificator {
 
     private final SmsManager smsManager;
-    private final NotificationFormatter notificationFormatter;
     private final StatisticsManager statisticsManager;
 
     @Inject
     public NotificatorSms(
             SmsManager smsManager, NotificationFormatter notificationFormatter, StatisticsManager statisticsManager) {
+        super(notificationFormatter, "short");
         this.smsManager = smsManager;
-        this.notificationFormatter = notificationFormatter;
         this.statisticsManager = statisticsManager;
     }
 
     @Override
-    public void send(Notification notification, User user, Event event, Position position) throws MessageException {
+    public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
         if (user.getPhone() != null) {
-            var shortMessage = notificationFormatter.formatMessage(user, event, position, "short");
             statisticsManager.registerSms();
-            smsManager.sendMessage(user.getPhone(), shortMessage.getBody(), false);
+            smsManager.sendMessage(user.getPhone(), message.getBody(), false);
         }
     }
 

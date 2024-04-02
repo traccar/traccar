@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,18 +156,30 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
             ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(json.getString("data")));
             try {
-                int event = buf.readUnsignedByte();
-                if (event == 0x0f || event == 0x1f) {
+                int header = buf.readUnsignedByte();
+                if ("Amber".equals(getDeviceModel(deviceSession))) {
 
-                    position.setValid(event >> 4 > 0);
+                    int flags = buf.readUnsignedByte();
+                    position.set(Position.KEY_MOTION, BitUtil.check(flags, 1));
+
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.02);
+                    position.set(Position.PREFIX_TEMP + 1, (int) buf.readByte());
+
+                    position.setValid(true);
+                    position.setLatitude(buf.readInt() / 60000.0);
+                    position.setLongitude(buf.readInt() / 60000.0);
+
+                } else if (header == 0x0f || header == 0x1f) {
+
+                    position.setValid(header >> 4 > 0);
                     position.setLatitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.000001);
                     position.setLongitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.000001);
 
                     position.set(Position.KEY_BATTERY, (int) buf.readUnsignedByte());
 
-                } else if (event >> 4 <= 3 && buf.writerIndex() == 12) {
+                } else if (header >> 4 <= 3 && buf.writerIndex() == 12) {
 
-                    if (BitUtil.to(event, 4) == 0) {
+                    if (BitUtil.to(header, 4) == 0) {
                         position.setValid(true);
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);

@@ -33,7 +33,8 @@ public class BaseTest {
         var connectionManager = mock(ConnectionManager.class);
         var uniqueIdsProvided = new HashSet<Boolean>();
         when(connectionManager.getDeviceSession(any(), any(), any(), any(String[].class))).thenAnswer(invocation -> {
-            var mock = new DeviceSession(1L, "", mock(Protocol.class), mock(Channel.class), mock(SocketAddress.class));
+            var mock = new DeviceSession(
+                    1L, "", null, mock(Protocol.class), mock(Channel.class), mock(SocketAddress.class));
             if (uniqueIdsProvided.isEmpty()) {
                 if (invocation.getArguments().length > 3) {
                     uniqueIdsProvided.add(true);

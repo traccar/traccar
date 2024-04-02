@@ -33,6 +33,10 @@ class CacheKey {
         this.id = id;
     }
 
+    public Class<? extends BaseModel> getClazz() {
+        return clazz;
+    }
+
     public boolean classIs(Class<? extends BaseModel> clazz) {
         return clazz.equals(this.clazz);
     }

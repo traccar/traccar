@@ -95,6 +95,17 @@ public class PositrexProtocolDecoder extends BaseProtocolDecoder {
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
             position.setCourse(buf.readUnsignedByte() * 2);
 
+            position.set(Position.PREFIX_IO, buf.readUnsignedByte());
+            position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+            buf.readUnsignedInt(); // report begin
+            buf.readUnsignedInt(); // report end
+            buf.readUnsignedInt(); // number of records
+
+            if (buf.isReadable()) {
+                position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+            }
+
             return position;
 
         }

@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.model.Device;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -38,6 +37,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
@@ -206,11 +206,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + i, parser.nextHexInt());
             }
 
-            String model = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
-            if (model == null) {
-                model = "";
-            }
-            switch (model.toUpperCase()) {
+            switch (Objects.requireNonNullElse(getDeviceModel(deviceSession), "").toUpperCase()) {
                 case "MVT340":
                 case "MVT380":
                     position.set(Position.KEY_BATTERY, parser.nextHexInt() * 3.0 * 2.0 / 1024.0);
@@ -465,6 +461,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x16:
                         position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE() * 0.01);
                         break;
+                    case 0x17:
+                        position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE() * 0.01);
+                        break;
                     case 0x19:
                         position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
                         break;
@@ -533,6 +532,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0xA2:
                         position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE() * 0.01);
+                        break;
+                    case 0xFEF4:
+                        position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 60000);
                         break;
                     default:
                         buf.readUnsignedIntLE();

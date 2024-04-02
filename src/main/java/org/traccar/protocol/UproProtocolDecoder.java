@@ -310,6 +310,10 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                         position.set("serial", data.toString(StandardCharsets.US_ASCII).substring(3));
                     }
                     break;
+                case 'd':
+                    position.set(Position.PREFIX_ADC + 1,
+                            Integer.parseInt(data.toString(StandardCharsets.US_ASCII)) / 100.0);
+                    break;
                 default:
                     break;
             }

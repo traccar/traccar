@@ -15,8 +15,8 @@
  */
 package org.traccar.session.cache;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
@@ -30,6 +30,8 @@ import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
+import org.traccar.model.ObjectOperation;
+import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.Schedulable;
 import org.traccar.model.Server;
@@ -40,19 +42,10 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -60,10 +53,8 @@ import java.util.stream.Collectors;
 @Singleton
 public class CacheManager implements BroadcastInterface {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CacheManager.class);
-    private static final int GROUP_DEPTH_LIMIT = 3;
-    private static final Collection<Class<? extends BaseModel>> CLASSES = Arrays.asList(
-            Attribute.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
+    private static final Set<Class<? extends BaseModel>> GROUPED_CLASSES =
+            Set.of(Attribute.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
 
     private final Config config;
     private final Storage storage;
@@ -71,22 +62,24 @@ public class CacheManager implements BroadcastInterface {
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
-    private final Map<CacheKey, CacheValue> deviceCache = new HashMap<>();
-    private final Map<Long, Integer> deviceReferences = new HashMap<>();
-    private final Map<Long, Map<Class<? extends BaseModel>, Set<Long>>> deviceLinks = new HashMap<>();
-    private final Map<Long, Position> devicePositions = new HashMap<>();
+    private final CacheGraph graph = new CacheGraph();
 
     private Server server;
-    private final Map<Long, List<User>> notificationUsers = new HashMap<>();
+    private final Map<Long, Position> devicePositions = new HashMap<>();
+    private final Map<Long, AtomicInteger> deviceReferences = new HashMap<>();
 
     @Inject
     public CacheManager(Config config, Storage storage, BroadcastService broadcastService) throws StorageException {
         this.config = config;
         this.storage = storage;
         this.broadcastService = broadcastService;
-        invalidateServer();
-        invalidateUsers();
+        server = storage.getObject(Server.class, new Request(new Columns.All()));
         broadcastService.registerListener(this);
+    }
+
+    @Override
+    public String toString() {
+        return graph.toString();
     }
 
     public Config getConfig() {
@@ -96,29 +89,17 @@ public class CacheManager implements BroadcastInterface {
     public <T extends BaseModel> T getObject(Class<T> clazz, long id) {
         try {
             lock.readLock().lock();
-            var cacheValue = deviceCache.get(new CacheKey(clazz, id));
-            return cacheValue != null ? cacheValue.getValue() : null;
+            return graph.getObject(clazz, id);
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    public <T extends BaseModel> List<T> getDeviceObjects(long deviceId, Class<T> clazz) {
+    public <T extends BaseModel> Set<T> getDeviceObjects(long deviceId, Class<T> clazz) {
         try {
             lock.readLock().lock();
-            var links = deviceLinks.get(deviceId);
-            if (links != null) {
-                return links.getOrDefault(clazz, new LinkedHashSet<>()).stream()
-                        .map(id -> {
-                            var cacheValue = deviceCache.get(new CacheKey(clazz, id));
-                            return cacheValue != null ? cacheValue.<T>getValue() : null;
-                        })
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toList());
-            } else {
-                LOGGER.warn("Device {} cache missing", deviceId);
-                return Collections.emptyList();
-            }
+            return graph.getObjects(Device.class, deviceId, clazz, Set.of(Group.class), true)
+                    .collect(Collectors.toUnmodifiableSet());
         } finally {
             lock.readLock().unlock();
         }
@@ -142,37 +123,45 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
-    public List<User> getNotificationUsers(long notificationId, long deviceId) {
+    public Set<User> getNotificationUsers(long notificationId, long deviceId) {
         try {
             lock.readLock().lock();
-            var users = deviceLinks.get(deviceId).get(User.class).stream()
+            Set<User> deviceUsers = getDeviceObjects(deviceId, User.class);
+            return graph.getObjects(Notification.class, notificationId, User.class, Set.of(), false)
+                    .filter(deviceUsers::contains)
                     .collect(Collectors.toUnmodifiableSet());
-            return notificationUsers.getOrDefault(notificationId, new LinkedList<>()).stream()
-                    .filter(user -> users.contains(user.getId()))
-                    .collect(Collectors.toUnmodifiableList());
         } finally {
             lock.readLock().unlock();
         }
     }
 
-    public Driver findDriverByUniqueId(long deviceId, String driverUniqueId) {
-        return getDeviceObjects(deviceId, Driver.class).stream()
-                .filter(driver -> driver.getUniqueId().equals(driverUniqueId))
-                .findFirst()
-                .orElse(null);
+    public Set<Notification> getDeviceNotifications(long deviceId) {
+        try {
+            lock.readLock().lock();
+            var direct = graph.getObjects(Device.class, deviceId, Notification.class, Set.of(Group.class), true)
+                    .map(BaseModel::getId)
+                    .collect(Collectors.toUnmodifiableSet());
+            return graph.getObjects(Device.class, deviceId, Notification.class, Set.of(Group.class, User.class), true)
+                    .filter(notification -> notification.getAlways() || direct.contains(notification.getId()))
+                    .collect(Collectors.toUnmodifiableSet());
+        } finally {
+            lock.readLock().unlock();
+        }
     }
 
-    public void addDevice(long deviceId) throws StorageException {
+    public void addDevice(long deviceId) throws Exception {
         try {
             lock.writeLock().lock();
-            Integer references = deviceReferences.get(deviceId);
-            if (references != null) {
-                references += 1;
-            } else {
-                unsafeAddDevice(deviceId);
-                references = 1;
+            if (deviceReferences.computeIfAbsent(deviceId, k -> new AtomicInteger()).getAndIncrement() <= 0) {
+                Device device = storage.getObject(Device.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", deviceId)));
+                graph.addObject(device);
+                initializeCache(device);
+                if (device.getPositionId() > 0) {
+                    devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
+                            new Columns.All(), new Condition.Equals("id", device.getPositionId()))));
+                }
             }
-            deviceReferences.put(deviceId, references);
         } finally {
             lock.writeLock().unlock();
         }
@@ -181,15 +170,10 @@ public class CacheManager implements BroadcastInterface {
     public void removeDevice(long deviceId) {
         try {
             lock.writeLock().lock();
-            Integer references = deviceReferences.get(deviceId);
-            if (references != null) {
-                references -= 1;
-                if (references <= 0) {
-                    unsafeRemoveDevice(deviceId);
-                    deviceReferences.remove(deviceId);
-                } else {
-                    deviceReferences.put(deviceId, references);
-                }
+            if (deviceReferences.computeIfAbsent(deviceId, k -> new AtomicInteger()).incrementAndGet() <= 0) {
+                graph.removeObject(Device.class, deviceId);
+                devicePositions.remove(deviceId);
+                deviceReferences.remove(deviceId);
             }
         } finally {
             lock.writeLock().unlock();
@@ -199,7 +183,7 @@ public class CacheManager implements BroadcastInterface {
     public void updatePosition(Position position) {
         try {
             lock.writeLock().lock();
-            if (deviceLinks.containsKey(position.getDeviceId())) {
+            if (deviceReferences.containsKey(position.getDeviceId())) {
                 devicePositions.put(position.getDeviceId(), position);
             }
         } finally {
@@ -208,220 +192,139 @@ public class CacheManager implements BroadcastInterface {
     }
 
     @Override
-    public void invalidateObject(boolean local, Class<? extends BaseModel> clazz, long id) {
-        try {
-            var object = storage.getObject(clazz, new Request(
-                    new Columns.All(), new Condition.Equals("id", id)));
-            if (object != null) {
-                updateOrInvalidate(local, object);
-            } else {
-                invalidate(clazz, id);
-            }
-        } catch (StorageException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public <T extends BaseModel> void updateOrInvalidate(boolean local, T object) throws StorageException {
+    public <T extends BaseModel> void invalidateObject(
+            boolean local, Class<T> clazz, long id, ObjectOperation operation) throws Exception {
         if (local) {
-            broadcastService.invalidateObject(true, object.getClass(), object.getId());
+            broadcastService.invalidateObject(true, clazz, id, operation);
         }
 
-        if (object instanceof Server) {
-            invalidateServer();
-            return;
+        if (operation == ObjectOperation.DELETE) {
+            graph.removeObject(clazz, id);
         }
-        if (object instanceof User) {
-            invalidateUsers();
+        if (operation != ObjectOperation.UPDATE) {
             return;
         }
 
-        boolean invalidate = false;
-        var before = getObject(object.getClass(), object.getId());
+        if (clazz.equals(Server.class)) {
+            server = storage.getObject(Server.class, new Request(new Columns.All()));
+            return;
+        }
+
+        var after = storage.getObject(clazz, new Request(new Columns.All(), new Condition.Equals("id", id)));
+        if (after == null) {
+            return;
+        }
+        var before = getObject(after.getClass(), after.getId());
         if (before == null) {
             return;
-        } else if (object instanceof GroupedModel) {
-            if (((GroupedModel) before).getGroupId() != ((GroupedModel) object).getGroupId()) {
-                invalidate = true;
-            }
-        } else if (object instanceof Schedulable) {
-            if (((Schedulable) before).getCalendarId() != ((Schedulable) object).getCalendarId()) {
-                invalidate = true;
-            }
         }
-        if (invalidate) {
-            invalidate(object.getClass(), object.getId());
-        } else {
-            try {
-                lock.writeLock().lock();
-                deviceCache.get(new CacheKey(object.getClass(), object.getId())).setValue(object);
-            } finally {
-                lock.writeLock().unlock();
-            }
-        }
-    }
 
-    public <T extends BaseModel> void invalidate(Class<T> clazz, long id) throws StorageException {
-        invalidate(new CacheKey(clazz, id));
+        if (after instanceof GroupedModel) {
+            long beforeGroupId = ((GroupedModel) before).getGroupId();
+            long afterGroupId = ((GroupedModel) after).getGroupId();
+            if (beforeGroupId != afterGroupId) {
+                if (beforeGroupId > 0) {
+                    invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
+                }
+                if (afterGroupId > 0) {
+                    invalidatePermission(clazz, id, Group.class, afterGroupId, true);
+                }
+            }
+        } else if (after instanceof Schedulable) {
+            long beforeCalendarId = ((Schedulable) before).getCalendarId();
+            long afterCalendarId = ((Schedulable) after).getCalendarId();
+            if (beforeCalendarId != afterCalendarId) {
+                if (beforeCalendarId > 0) {
+                    invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
+                }
+                if (afterCalendarId > 0) {
+                    invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
+                }
+            }
+            // TODO handle notification always change
+        }
+
+        graph.updateObject(after);
     }
 
     @Override
-    public void invalidatePermission(
-            boolean local,
-            Class<? extends BaseModel> clazz1, long id1,
-            Class<? extends BaseModel> clazz2, long id2) {
+    public <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
+            boolean local, Class<T1> clazz1, long id1, Class<T2> clazz2, long id2, boolean link) throws Exception {
         if (local) {
-            broadcastService.invalidatePermission(true, clazz1, id1, clazz2, id2);
+            broadcastService.invalidatePermission(true, clazz1, id1, clazz2, id2, link);
         }
 
-        try {
-            invalidate(new CacheKey(clazz1, id1), new CacheKey(clazz2, id2));
-        } catch (StorageException e) {
-            throw new RuntimeException(e);
+        if (clazz1.equals(User.class) && GroupedModel.class.isAssignableFrom(clazz2)) {
+            invalidatePermission(clazz2, id2, clazz1, id1, link);
+        } else {
+            invalidatePermission(clazz1, id1, clazz2, id2, link);
         }
     }
 
-    private void invalidateServer() throws StorageException {
-        server = storage.getObject(Server.class, new Request(new Columns.All()));
-    }
+    private <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
+            Class<T1> fromClass, long fromId, Class<T2> toClass, long toId, boolean link) throws Exception {
 
-    private void invalidateUsers() throws StorageException {
-        notificationUsers.clear();
-        Map<Long, User> users = new HashMap<>();
-        storage.getObjects(User.class, new Request(new Columns.All()))
-                .forEach(user -> users.put(user.getId(), user));
-        storage.getPermissions(User.class, Notification.class).forEach(permission -> {
-            long notificationId = permission.getPropertyId();
-            var user = users.get(permission.getOwnerId());
-            notificationUsers.computeIfAbsent(notificationId, k -> new LinkedList<>()).add(user);
-        });
-    }
+        boolean groupLink = GroupedModel.class.isAssignableFrom(fromClass) && toClass.equals(Group.class);
+        boolean calendarLink = Schedulable.class.isAssignableFrom(fromClass) && toClass.equals(Calendar.class);
+        boolean userLink = fromClass.equals(User.class) && toClass.equals(Notification.class);
 
-    private void addObject(long deviceId, BaseModel object) {
-        deviceCache.computeIfAbsent(new CacheKey(object), k -> new CacheValue(object)).retain(deviceId);
-    }
+        boolean groupedLinks = GroupedModel.class.isAssignableFrom(fromClass)
+                && (GROUPED_CLASSES.contains(toClass) || toClass.equals(User.class));
 
-    private void unsafeAddDevice(long deviceId) throws StorageException {
-        Map<Class<? extends BaseModel>, Set<Long>> links = new HashMap<>();
+        if (!groupLink && !calendarLink && !userLink && !groupedLinks) {
+            return;
+        }
 
-        Device device = storage.getObject(Device.class, new Request(
-                new Columns.All(), new Condition.Equals("id", deviceId)));
-        if (device != null) {
-            addObject(deviceId, device);
-            if (device.getCalendarId() > 0) {
-                var calendar = storage.getObject(Calendar.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", device.getCalendarId())));
-                links.computeIfAbsent(Calendar.class, k -> new LinkedHashSet<>()).add(calendar.getId());
-                addObject(deviceId, calendar);
+        if (link) {
+            BaseModel object = storage.getObject(toClass, new Request(
+                    new Columns.All(), new Condition.Equals("id", toId)));
+            if (!graph.addLink(fromClass, fromId, object)) {
+                initializeCache(object);
             }
+        } else {
+            graph.removeLink(fromClass, fromId, toClass, toId);
+        }
+    }
 
-            int groupDepth = 0;
-            long groupId = device.getGroupId();
-            while (groupDepth < GROUP_DEPTH_LIMIT && groupId > 0) {
-                Group group = storage.getObject(Group.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", groupId)));
-                links.computeIfAbsent(Group.class, k -> new LinkedHashSet<>()).add(group.getId());
-                addObject(deviceId, group);
-                groupId = group.getGroupId();
-                groupDepth += 1;
+    private void initializeCache(BaseModel object) throws Exception {
+        if (object instanceof User) {
+            for (Permission permission : storage.getPermissions(User.class, Notification.class)) {
+                if (permission.getOwnerId() == object.getId()) {
+                    invalidatePermission(
+                            permission.getOwnerClass(), permission.getOwnerId(),
+                            permission.getPropertyClass(), permission.getPropertyId(), true);
+                }
             }
+        } else {
+            if (object instanceof GroupedModel) {
+                long groupId = ((GroupedModel) object).getGroupId();
+                if (groupId > 0) {
+                    invalidatePermission(object.getClass(), object.getId(), Group.class, groupId, true);
+                }
 
-            for (Class<? extends BaseModel> clazz : CLASSES) {
-                var objects = storage.getObjects(clazz, new Request(
-                        new Columns.All(), new Condition.Permission(Device.class, deviceId, clazz)));
-                links.put(clazz, objects.stream().map(BaseModel::getId).collect(Collectors.toSet()));
-                for (var object : objects) {
-                    addObject(deviceId, object);
-                    if (object instanceof Schedulable) {
-                        var scheduled = (Schedulable) object;
-                        if (scheduled.getCalendarId() > 0) {
-                            var calendar = storage.getObject(Calendar.class, new Request(
-                                    new Columns.All(), new Condition.Equals("id", scheduled.getCalendarId())));
-                            links.computeIfAbsent(Calendar.class, k -> new LinkedHashSet<>()).add(calendar.getId());
-                            addObject(deviceId, calendar);
+                for (Permission permission : storage.getPermissions(User.class, object.getClass())) {
+                    if (permission.getPropertyId() == object.getId()) {
+                        invalidatePermission(
+                                object.getClass(), object.getId(), User.class, permission.getOwnerId(), true);
+                    }
+                }
+
+                for (Class<? extends BaseModel> clazz : GROUPED_CLASSES) {
+                    for (Permission permission : storage.getPermissions(object.getClass(), clazz)) {
+                        if (permission.getOwnerId() == object.getId()) {
+                            invalidatePermission(
+                                    object.getClass(), object.getId(), clazz, permission.getPropertyId(), true);
                         }
                     }
                 }
             }
 
-            var users = storage.getObjects(User.class, new Request(
-                    new Columns.All(), new Condition.Permission(User.class, Device.class, deviceId)));
-            links.put(User.class, users.stream().map(BaseModel::getId).collect(Collectors.toSet()));
-            for (var user : users) {
-                addObject(deviceId, user);
-                var notifications = storage.getObjects(Notification.class, new Request(
-                        new Columns.All(),
-                        new Condition.Permission(User.class, user.getId(), Notification.class))).stream()
-                        .filter(Notification::getAlways)
-                        .collect(Collectors.toList());
-                for (var notification : notifications) {
-                    links.computeIfAbsent(Notification.class, k -> new LinkedHashSet<>()).add(notification.getId());
-                    addObject(deviceId, notification);
-                    if (notification.getCalendarId() > 0) {
-                        var calendar = storage.getObject(Calendar.class, new Request(
-                                new Columns.All(), new Condition.Equals("id", notification.getCalendarId())));
-                        links.computeIfAbsent(Calendar.class, k -> new LinkedHashSet<>()).add(calendar.getId());
-                        addObject(deviceId, calendar);
-                    }
+            if (object instanceof Schedulable) {
+                long calendarId = ((Schedulable) object).getCalendarId();
+                if (calendarId > 0) {
+                    invalidatePermission(object.getClass(), object.getId(), Calendar.class, calendarId, true);
                 }
             }
-
-            deviceLinks.put(deviceId, links);
-
-            if (device.getPositionId() > 0) {
-                devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", device.getPositionId()))));
-            }
-        }
-    }
-
-    private void unsafeRemoveDevice(long deviceId) {
-        deviceCache.remove(new CacheKey(Device.class, deviceId));
-        deviceLinks.remove(deviceId).forEach((clazz, ids) -> ids.forEach(id -> {
-            var key = new CacheKey(clazz, id);
-            deviceCache.computeIfPresent(key, (k, value) -> {
-                value.release(deviceId);
-                return value.getReferences().size() > 0 ? value : null;
-            });
-        }));
-        devicePositions.remove(deviceId);
-    }
-
-    private void invalidate(CacheKey... keys) throws StorageException {
-        try {
-            lock.writeLock().lock();
-            unsafeInvalidate(keys);
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
-    private void unsafeInvalidate(CacheKey[] keys) throws StorageException {
-        boolean invalidateServer = false;
-        boolean invalidateUsers = false;
-        Set<Long> linkedDevices = new HashSet<>();
-        for (var key : keys) {
-            if (key.classIs(Server.class)) {
-                invalidateServer = true;
-            } else {
-                if (key.classIs(User.class) || key.classIs(Notification.class)) {
-                    invalidateUsers = true;
-                }
-                deviceCache.computeIfPresent(key, (k, value) -> {
-                    linkedDevices.addAll(value.getReferences());
-                    return value;
-                });
-            }
-        }
-        for (long deviceId : linkedDevices) {
-            unsafeRemoveDevice(deviceId);
-            unsafeAddDevice(deviceId);
-        }
-        if (invalidateServer) {
-            invalidateServer();
-        }
-        if (invalidateUsers) {
-            invalidateUsers();
         }
     }
 

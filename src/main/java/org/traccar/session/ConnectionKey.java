@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,22 +20,18 @@ import io.netty.channel.Channel;
 import java.net.SocketAddress;
 import java.util.Objects;
 
-public class Endpoint {
+public class ConnectionKey {
 
-    private final Channel channel;
+    private final SocketAddress localAddress;
     private final SocketAddress remoteAddress;
 
-    public Endpoint(Channel channel, SocketAddress remoteAddress) {
-        this.channel = channel;
+    public ConnectionKey(Channel channel, SocketAddress remoteAddress) {
+        this(channel.localAddress(), remoteAddress);
+    }
+
+    public ConnectionKey(SocketAddress localAddress, SocketAddress remoteAddress) {
+        this.localAddress = localAddress;
         this.remoteAddress = remoteAddress;
-    }
-
-    public Channel getChannel() {
-        return channel;
-    }
-
-    public SocketAddress getRemoteAddress() {
-        return remoteAddress;
     }
 
     @Override
@@ -46,13 +42,13 @@ public class Endpoint {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Endpoint endpoint = (Endpoint) o;
-        return channel.equals(endpoint.channel) && remoteAddress.equals(endpoint.remoteAddress);
+        ConnectionKey that = (ConnectionKey) o;
+        return Objects.equals(localAddress, that.localAddress) && Objects.equals(remoteAddress, that.remoteAddress);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(channel, remoteAddress);
+        return Objects.hash(localAddress, remoteAddress);
     }
 
 }
