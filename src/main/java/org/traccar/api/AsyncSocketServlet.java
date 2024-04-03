@@ -36,6 +36,14 @@ public class AsyncSocketServlet extends WebSocketServlet {
         factory.setCreator(new WebSocketCreator() {
             @Override
             public Object createWebSocket(ServletUpgradeRequest req, ServletUpgradeResponse resp) {
+                if (req.getSession() != null) {
+                    Object userId = req.getSession().getAttribute(SessionResource.USER_ID_KEY);
+                    if (userId != null) {
+                        return new AsyncSocket((Long) userId);
+                    } else {
+                        LOGGER.warn("no userId: {}", req.getHeaders());
+                    }
+                }
                 return new AsyncSocket(-1);
             }
         });
