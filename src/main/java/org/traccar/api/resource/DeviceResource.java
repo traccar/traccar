@@ -172,6 +172,23 @@ public class DeviceResource extends BaseObjectResource<Device> {
         return Response.noContent().build();
     }
 
+    private String imageExtension(String type) {
+        switch (type) {
+            case "image/jpeg":
+                return ".jpg";
+            case "image/png":
+                return ".png";
+            case "image/gif":
+                return ".gif";
+            case "image/webp":
+                return ".webp";
+            case "image/svg+xml":
+                return ".svg";
+            default:
+                throw new IllegalArgumentException("Unsupported image type");
+        }
+    }
+
     @Path("{id}/image")
     @POST
     @Consumes("image/*")
@@ -186,7 +203,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
                         new Condition.Permission(User.class, getUserId(), Device.class))));
         if (device != null) {
             String name = "device";
-            String extension = type.substring("image/".length());
+            String extension = imageExtension(type);
             try (var input = new FileInputStream(file);
                     var output = mediaManager.createFileStream(device.getUniqueId(), name, extension)) {
                 input.transferTo(output);
