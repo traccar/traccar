@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -154,25 +154,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     public void getLastLocation(Position position, Date deviceTime) {
         if (position.getDeviceId() != 0) {
             position.setOutdated(true);
-
-            Position last = cacheManager.getPosition(position.getDeviceId());
-            if (last != null) {
-                position.setFixTime(last.getFixTime());
-                position.setValid(last.getValid());
-                position.setLatitude(last.getLatitude());
-                position.setLongitude(last.getLongitude());
-                position.setAltitude(last.getAltitude());
-                position.setSpeed(last.getSpeed());
-                position.setCourse(last.getCourse());
-                position.setAccuracy(last.getAccuracy());
-            } else {
-                position.setFixTime(new Date(0));
-            }
-
             if (deviceTime != null) {
                 position.setDeviceTime(deviceTime);
-            } else {
-                position.setDeviceTime(new Date());
             }
         }
     }

@@ -25,7 +25,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Position;
 
-import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
@@ -41,11 +41,6 @@ public class BufferingManager {
 
     private static final class Holder implements Comparable<Holder> {
 
-        private static final Comparator<Position> COMPARATOR = Comparator
-                .comparing(Position::getFixTime)
-                .thenComparing(Position::getDeviceTime)
-                .thenComparing(Position::getServerTime);
-
         private final ChannelHandlerContext context;
         private final Position position;
         private Timeout timeout;
@@ -55,9 +50,26 @@ public class BufferingManager {
             this.position = position;
         }
 
+        private int compareTime(Date left, Date right) {
+            if (left != null && right != null) {
+                return left.compareTo(right);
+            }
+            return 0;
+        }
+
         @Override
         public int compareTo(Holder other) {
-            return COMPARATOR.compare(position, other.position);
+            int fixTimeResult = compareTime(position.getFixTime(), other.position.getFixTime());
+            if (fixTimeResult != 0) {
+                return fixTimeResult;
+            }
+
+            int deviceTimeResult = compareTime(position.getDeviceTime(), other.position.getDeviceTime());
+            if (deviceTimeResult != 0) {
+                return deviceTimeResult;
+            }
+
+            return position.getServerTime().compareTo(other.position.getServerTime());
         }
     }
 
