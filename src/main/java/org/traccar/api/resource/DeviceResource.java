@@ -62,6 +62,9 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class DeviceResource extends BaseObjectResource<Device> {
 
+    private static final int DEFAULT_BUFFER_SIZE = 8192;
+    private static final int IMAGE_SIZE_LIMIT = 500000;
+
     @Inject
     private Config config;
 
@@ -206,7 +209,17 @@ public class DeviceResource extends BaseObjectResource<Device> {
             String extension = imageExtension(type);
             try (var input = new FileInputStream(file);
                     var output = mediaManager.createFileStream(device.getUniqueId(), name, extension)) {
-                input.transferTo(output);
+
+                long transferred = 0;
+                byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+                int read;
+                while ((read = input.read(buffer, 0, buffer.length)) >= 0) {
+                    output.write(buffer, 0, read);
+                    transferred += read;
+                    if (transferred > IMAGE_SIZE_LIMIT) {
+                        throw new IllegalArgumentException("Image size limit exceeded");
+                    }
+                }
             }
             return Response.ok(name + "." + extension).build();
         }
