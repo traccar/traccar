@@ -335,7 +335,7 @@
       <column name="id" type="INT" autoIncrement="true">
         <constraints primaryKey="true" />
       </column>
-      <column name="registration" type="BOOLEAN" defaultValueBoolean="true">
+      <column name="registration" type="BOOLEAN" defaultValueBoolean="false">
         <constraints nullable="false" />
       </column>
       <column name="latitude" type="DOUBLE" defaultValueNumeric="0">
@@ -614,7 +614,7 @@
     <addForeignKeyConstraint baseTableName="tc_user_user" baseColumnNames="userid" constraintName="fk_user_user_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
     
     <insert tableName="tc_servers">
-      <column name="registration" valueBoolean="true" />
+      <column name="registration" valueBoolean="false" />
       <column name="latitude" valueNumeric="0" />
       <column name="longitude" valueNumeric="0" />
       <column name="zoom" valueNumeric="0" />
