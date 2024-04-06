@@ -1,5 +1,3 @@
-import enforcer.rules.EnforceBytecodeVersion
-
 plugins {
     id "java"
     id "checkstyle"
@@ -22,7 +20,7 @@ checkstyle {
 }
 
 enforce {
-    rule(EnforceBytecodeVersion) { r ->
+    rule(enforcer.rules.EnforceBytecodeVersion) { r ->
         r.maxJdkVersion = "11"
     }
 }
