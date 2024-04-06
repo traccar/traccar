@@ -85,14 +85,13 @@ else
 fi
 
 prepare () {
-  mkdir -p out/{conf,data,lib,logs,legacy,modern,schema,templates}
+  mkdir -p out/{conf,data,lib,logs,web,schema,templates}
 
   cp ../target/tracker-server.jar out
   cp ../target/lib/* out/lib
   cp ../schema/* out/schema
   cp -r ../templates/* out/templates
-  cp -r ../traccar-web/web/* out/legacy
-  cp -r ../traccar-web/modern/build/* out/modern
+  cp -r ../traccar-web/build/* out/web
   cp default.xml out/conf
   cp traccar.xml out/conf
 
