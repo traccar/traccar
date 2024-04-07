@@ -120,7 +120,9 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
             }
         }
         for (User user : users) {
-            notificatorManager.getNotificator(notificator).send(user, message, null, null);
+            if (!user.getTemporary()) {
+                notificatorManager.getNotificator(notificator).send(user, message, null, null);
+            }
         }
         return Response.noContent().build();
     }
