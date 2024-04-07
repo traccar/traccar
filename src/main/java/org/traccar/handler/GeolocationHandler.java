@@ -57,7 +57,7 @@ public class GeolocationHandler extends BasePositionHandler {
                     updatePosition(
                             position, lastPosition.getLatitude(), lastPosition.getLongitude(),
                             lastPosition.getAccuracy());
-                    callback.processed(position);
+                    callback.processed(false);
                     return;
                 }
             }
@@ -71,17 +71,17 @@ public class GeolocationHandler extends BasePositionHandler {
                 @Override
                 public void onSuccess(double latitude, double longitude, double accuracy) {
                     updatePosition(position, latitude, longitude, accuracy);
-                    callback.processed(position);
+                    callback.processed(false);
                 }
 
                 @Override
                 public void onFailure(Throwable e) {
                     LOGGER.warn("Geolocation network error", e);
-                    callback.processed(position);
+                    callback.processed(false);
                 }
             });
         } else {
-            callback.processed(position);
+            callback.processed(false);
         }
     }
 

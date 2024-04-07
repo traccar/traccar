@@ -50,7 +50,7 @@ public class OutdatedHandler extends BasePositionHandler {
                 position.setDeviceTime(position.getServerTime());
             }
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

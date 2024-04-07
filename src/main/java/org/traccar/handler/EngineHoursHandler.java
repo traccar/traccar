@@ -43,7 +43,7 @@ public class EngineHoursHandler extends BasePositionHandler {
                 }
             }
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

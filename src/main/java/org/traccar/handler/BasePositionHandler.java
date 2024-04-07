@@ -20,7 +20,7 @@ import org.traccar.model.Position;
 public abstract class BasePositionHandler {
 
     public interface Callback {
-        void processed(Position position);
+        void processed(boolean filtered);
     }
 
     public abstract void handlePosition(Position position, Callback callback);

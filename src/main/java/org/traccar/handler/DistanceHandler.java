@@ -71,7 +71,7 @@ public class DistanceHandler extends BasePositionHandler {
         position.set(Position.KEY_DISTANCE, distance);
         position.set(Position.KEY_TOTAL_DISTANCE, totalDistance + distance);
 
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

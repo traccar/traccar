@@ -47,7 +47,7 @@ public class PostProcessHandler extends BasePositionHandler {
     @Override
     public void handlePosition(Position position, Callback callback) {
         try {
-            if (position != null && PositionUtil.isLatest(cacheManager, position)) {
+            if (PositionUtil.isLatest(cacheManager, position)) {
                 Device updatedDevice = new Device();
                 updatedDevice.setId(position.getDeviceId());
                 updatedDevice.setPositionId(position.getId());
@@ -61,7 +61,7 @@ public class PostProcessHandler extends BasePositionHandler {
         } catch (StorageException error) {
             LOGGER.warn("Failed to update device", error);
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }
