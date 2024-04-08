@@ -62,6 +62,9 @@ import java.util.List;
 @Consumes(MediaType.APPLICATION_JSON)
 public class DeviceResource extends BaseObjectResource<Device> {
 
+    private static final int DEFAULT_BUFFER_SIZE = 8192;
+    private static final int IMAGE_SIZE_LIMIT = 500000;
+
     @Inject
     private Config config;
 
@@ -172,6 +175,23 @@ public class DeviceResource extends BaseObjectResource<Device> {
         return Response.noContent().build();
     }
 
+    private String imageExtension(String type) {
+        switch (type) {
+            case "image/jpeg":
+                return "jpg";
+            case "image/png":
+                return "png";
+            case "image/gif":
+                return "gif";
+            case "image/webp":
+                return "webp";
+            case "image/svg+xml":
+                return "svg";
+            default:
+                throw new IllegalArgumentException("Unsupported image type");
+        }
+    }
+
     @Path("{id}/image")
     @POST
     @Consumes("image/*")
@@ -186,10 +206,20 @@ public class DeviceResource extends BaseObjectResource<Device> {
                         new Condition.Permission(User.class, getUserId(), Device.class))));
         if (device != null) {
             String name = "device";
-            String extension = type.substring("image/".length());
+            String extension = imageExtension(type);
             try (var input = new FileInputStream(file);
                     var output = mediaManager.createFileStream(device.getUniqueId(), name, extension)) {
-                input.transferTo(output);
+
+                long transferred = 0;
+                byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+                int read;
+                while ((read = input.read(buffer, 0, buffer.length)) >= 0) {
+                    output.write(buffer, 0, read);
+                    transferred += read;
+                    if (transferred > IMAGE_SIZE_LIMIT) {
+                        throw new IllegalArgumentException("Image size limit exceeded");
+                    }
+                }
             }
             return Response.ok(name + "." + extension).build();
         }

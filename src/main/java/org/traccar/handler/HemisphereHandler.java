@@ -53,7 +53,7 @@ public class HemisphereHandler extends BasePositionHandler {
         if (longitudeFactor != 0) {
             position.setLongitude(Math.abs(position.getLongitude()) * longitudeFactor);
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

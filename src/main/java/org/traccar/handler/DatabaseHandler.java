@@ -47,7 +47,7 @@ public class DatabaseHandler extends BasePositionHandler {
             LOGGER.warn("Failed to store position", error);
         }
 
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

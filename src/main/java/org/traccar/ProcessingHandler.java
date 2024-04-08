@@ -36,6 +36,7 @@ import org.traccar.handler.GeofenceHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.HemisphereHandler;
 import org.traccar.handler.MotionHandler;
+import org.traccar.handler.OutdatedHandler;
 import org.traccar.handler.PositionForwardingHandler;
 import org.traccar.handler.PostProcessHandler;
 import org.traccar.handler.SpeedLimitHandler;
@@ -90,6 +91,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
         bufferingManager = new BufferingManager(config, this);
 
         positionHandlers = Stream.of(
+                OutdatedHandler.class,
                 TimeHandler.class,
                 GeolocationHandler.class,
                 HemisphereHandler.class,
@@ -153,15 +155,15 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
         var iterator = positionHandlers.iterator();
         iterator.next().handlePosition(position, new BasePositionHandler.Callback() {
             @Override
-            public void processed(Position position) {
-                if (position != null) {
+            public void processed(boolean filtered) {
+                if (!filtered) {
                     if (iterator.hasNext()) {
                         iterator.next().handlePosition(position, this);
                     } else {
                         processEventHandlers(ctx, position);
                     }
                 } else {
-                    finishedProcessing(ctx, null);
+                    finishedProcessing(ctx, position, true);
                 }
             }
         });
@@ -170,24 +172,32 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
     private void processEventHandlers(ChannelHandlerContext ctx, Position position) {
         eventHandlers.forEach(handler -> handler.analyzePosition(
                 position, (event) -> notificationManager.updateEvents(Map.of(event, position))));
-        finishedProcessing(ctx, position);
+        finishedProcessing(ctx, position, false);
     }
 
-    private void finishedProcessing(ChannelHandlerContext ctx, Position position) {
-        postProcessHandler.handlePosition(position, p -> {
-            positionLogger.log(ctx, p);
-            ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(p));
+    private void finishedProcessing(ChannelHandlerContext ctx, Position position, boolean filtered) {
+        if (!filtered) {
+            postProcessHandler.handlePosition(position, ignore -> {
+                positionLogger.log(ctx, position);
+                ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
+                processNextPosition(ctx, position.getDeviceId());
+            });
+        } else {
+            ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
+            processNextPosition(ctx, position.getDeviceId());
+        }
+    }
 
-            Queue<Position> queue = getQueue(position.getDeviceId());
-            Position nextPosition;
-            synchronized (queue) {
-                queue.poll(); // remove current position
-                nextPosition = queue.peek();
-            }
-            if (nextPosition != null) {
-                processPositionHandlers(ctx, nextPosition);
-            }
-        });
+    private void processNextPosition(ChannelHandlerContext ctx, long deviceId) {
+        Queue<Position> queue = getQueue(deviceId);
+        Position nextPosition;
+        synchronized (queue) {
+            queue.poll(); // remove current position
+            nextPosition = queue.peek();
+        }
+        if (nextPosition != null) {
+            processPositionHandlers(ctx, nextPosition);
+        }
     }
 
 }

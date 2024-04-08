@@ -1,6 +1,5 @@
 /*
- * Copyright 2018 - 2024 Anton Tananaev (anton@traccar.org)
- * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,27 +19,35 @@ import jakarta.inject.Inject;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-public class EngineHoursHandler extends BasePositionHandler {
+import java.util.Date;
+
+public class OutdatedHandler extends BasePositionHandler {
 
     private final CacheManager cacheManager;
 
     @Inject
-    public EngineHoursHandler(CacheManager cacheManager) {
+    public OutdatedHandler(CacheManager cacheManager) {
         this.cacheManager = cacheManager;
     }
 
     @Override
     public void handlePosition(Position position, Callback callback) {
-        if (!position.hasAttribute(Position.KEY_HOURS)) {
+        if (position.getOutdated()) {
             Position last = cacheManager.getPosition(position.getDeviceId());
             if (last != null) {
-                long hours = last.getLong(Position.KEY_HOURS);
-                if (last.getBoolean(Position.KEY_IGNITION) && position.getBoolean(Position.KEY_IGNITION)) {
-                    hours += position.getFixTime().getTime() - last.getFixTime().getTime();
-                }
-                if (hours != 0) {
-                    position.set(Position.KEY_HOURS, hours);
-                }
+                position.setFixTime(last.getFixTime());
+                position.setValid(last.getValid());
+                position.setLatitude(last.getLatitude());
+                position.setLongitude(last.getLongitude());
+                position.setAltitude(last.getAltitude());
+                position.setSpeed(last.getSpeed());
+                position.setCourse(last.getCourse());
+                position.setAccuracy(last.getAccuracy());
+            } else {
+                position.setFixTime(new Date(315964819000L)); // gps epoch 1980-01-06
+            }
+            if (position.getDeviceTime() == null) {
+                position.setDeviceTime(position.getServerTime());
             }
         }
         callback.processed(false);

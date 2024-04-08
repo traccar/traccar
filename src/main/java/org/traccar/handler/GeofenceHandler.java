@@ -41,7 +41,7 @@ public class GeofenceHandler extends BasePositionHandler {
         if (!geofenceIds.isEmpty()) {
             position.setGeofenceIds(geofenceIds);
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

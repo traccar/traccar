@@ -979,6 +979,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 0x0103:
                                 position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedInt() * 0.01);
                                 break;
+                            case 0x0111:
+                                position.set("fuelTemp", buf.readUnsignedByte() - 40);
+                                break;
+                            case 0x012E:
+                                position.set("oilLevel", buf.readUnsignedShort() * 0.1);
+                                break;
                             case 0x052A:
                                 position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShort() * 0.01);
                                 break;
@@ -1110,6 +1116,30 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x0B:
                     if (buf.readUnsignedByte() > 0) {
                         position.set(Position.KEY_VIN, buf.readCharSequence(17, StandardCharsets.US_ASCII).toString());
+                    }
+                    getLastLocation(position, time);
+                    break;
+                case 0x15:
+                    int event = buf.readInt();
+                    switch (event) {
+                        case 51:
+                            position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                            break;
+                        case 52:
+                            position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                            break;
+                        case 53:
+                            position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                            break;
+                        case 54:
+                            position.set(Position.KEY_ALARM, Position.ALARM_LANE_CHANGE);
+                            break;
+                        case 56:
+                            position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                            break;
+                        default:
+                            position.set(Position.KEY_EVENT, event);
+                            break;
                     }
                     getLastLocation(position, time);
                     break;

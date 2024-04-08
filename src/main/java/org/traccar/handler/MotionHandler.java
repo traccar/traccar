@@ -38,7 +38,7 @@ public class MotionHandler extends BasePositionHandler {
                     cacheManager, Keys.EVENT_MOTION_SPEED_THRESHOLD, position.getDeviceId());
             position.set(Position.KEY_MOTION, position.getSpeed() > threshold);
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

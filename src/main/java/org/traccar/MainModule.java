@@ -66,7 +66,7 @@ import org.traccar.geocoder.MapmyIndiaGeocoder;
 import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.PositionStackGeocoder;
-import org.traccar.geocoder.TestGeocoder;
+import org.traccar.geocoder.PlusCodesGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
@@ -211,8 +211,8 @@ public class MainModule extends AbstractModule {
             int cacheSize = config.getInteger(Keys.GEOCODER_CACHE_SIZE);
             Geocoder geocoder;
             switch (type) {
-                case "test":
-                    geocoder = new TestGeocoder();
+                case "pluscodes":
+                    geocoder = new PlusCodesGeocoder();
                     break;
                 case "nominatim":
                     geocoder = new NominatimGeocoder(client, url, key, language, cacheSize, addressFormat);

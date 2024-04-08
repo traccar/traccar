@@ -6,11 +6,11 @@
 
     <entry key='config.default'>./setup/default.xml</entry>
 
-    <entry key='web.path'>./traccar-web/web</entry>
+    <entry key='web.path'>./traccar-web/simple</entry>
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
 
-    <entry key='geocoder.type'>test</entry>
+    <entry key='geocoder.type'>pluscodes</entry>
 
     <entry key='media.path'>./target/media</entry>
 

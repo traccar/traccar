@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,7 +95,9 @@ public class UserResource extends BaseObjectResource<User> {
                     }
                 }
             } else {
-                if (!permissionsService.getServer().getRegistration()) {
+                if (UserUtil.isEmpty(storage)) {
+                    entity.setAdministrator(true);
+                } else if (!permissionsService.getServer().getRegistration()) {
                     throw new SecurityException("Registration disabled");
                 }
                 if (permissionsService.getServer().getBoolean(Keys.WEB_TOTP_FORCE.getKey())
@@ -104,10 +106,6 @@ public class UserResource extends BaseObjectResource<User> {
                 }
                 UserUtil.setUserDefaults(entity, config);
             }
-        }
-
-        if (UserUtil.isEmpty(storage)) {
-            entity.setAdministrator(true);
         }
 
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));

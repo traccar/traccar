@@ -44,7 +44,7 @@ public class GeocoderHandler extends BasePositionHandler {
     @Override
     public void handlePosition(Position position, Callback callback) {
         if (!ignorePositions) {
-            callback.processed(position);
+            callback.processed(false);
         }
 
         if (processInvalidPositions || position.getValid()) {
@@ -53,7 +53,7 @@ public class GeocoderHandler extends BasePositionHandler {
                 if (lastPosition != null && lastPosition.getAddress() != null
                         && position.getDouble(Position.KEY_DISTANCE) <= reuseDistance) {
                     position.setAddress(lastPosition.getAddress());
-                    callback.processed(position);
+                    callback.processed(false);
                     return;
                 }
             }
@@ -63,17 +63,17 @@ public class GeocoderHandler extends BasePositionHandler {
                 @Override
                 public void onSuccess(String address) {
                     position.setAddress(address);
-                    callback.processed(position);
+                    callback.processed(false);
                 }
 
                 @Override
                 public void onFailure(Throwable e) {
                     LOGGER.warn("Geocoding failed", e);
-                    callback.processed(position);
+                    callback.processed(false);
                 }
             });
         } else {
-            callback.processed(position);
+            callback.processed(false);
         }
     }
 

@@ -44,7 +44,7 @@ public class CopyAttributesHandler extends BasePositionHandler {
                 }
             }
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

@@ -196,7 +196,7 @@ public class ComputedAttributesHandler extends BasePositionHandler {
                 }
             }
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

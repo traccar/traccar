@@ -51,7 +51,7 @@ public class TimeHandler extends BasePositionHandler {
                 position.setFixTime(position.getDeviceTime());
             }
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

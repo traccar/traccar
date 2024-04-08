@@ -15,7 +15,6 @@ usage () {
   echo "Available platforms:"
   echo " * linux-64"
   echo " * linux-arm"
-  echo " * linux-arm64"
   echo " * windows-64"
   echo " * other"
   exit 1
@@ -65,17 +64,14 @@ if [ $PLATFORM = "all" -o $PLATFORM = "windows-64" ]; then
   check_requirement "Windows 64 Java" "ls OpenJDK*64_windows*.zip" "Missing Windows 64 JDK (https://adoptium.net/)"
   check_requirement "Wine" "which wine" "Missing wine binary"
 fi
-if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" -o $PLATFORM = "linux-arm" -o $PLATFORM = "linux-arm64" ]; then
+if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" -o $PLATFORM = "linux-arm" ]; then
   check_requirement "Makeself" "which makeself" "Missing makeself binary"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-64" ]; then
   check_requirement "Linux 64 Java" "ls OpenJDK*x64_linux*.tar.gz" "Missing Linux 64 JDK (https://adoptium.net/)"
 fi
 if [ $PLATFORM = "all" -o $PLATFORM = "linux-arm" ]; then
-  check_requirement "Linux ARM Java" "ls OpenJDK*arm_linux*.tar.gz" "Missing Linux ARM JDK (https://adoptium.net/)"
-fi
-if [ $PLATFORM = "all" -o $PLATFORM = "linux-arm64" ]; then
-  check_requirement "Linux ARM 64 Java" "ls OpenJDK*aarch64_linux*.tar.gz" "Missing Linux ARM 64 JDK (https://adoptium.net/)"
+  check_requirement "Linux ARM Java" "ls OpenJDK*aarch64_linux*.tar.gz" "Missing Linux ARM JDK (https://adoptium.net/)"
 fi
 if [ $PREREQ = false ]; then
   info "Missing build requirements, aborting..."
@@ -85,14 +81,13 @@ else
 fi
 
 prepare () {
-  mkdir -p out/{conf,data,lib,logs,legacy,modern,schema,templates}
+  mkdir -p out/{conf,data,lib,logs,web,schema,templates}
 
   cp ../target/tracker-server.jar out
   cp ../target/lib/* out/lib
   cp ../schema/* out/schema
   cp -r ../templates/* out/templates
-  cp -r ../traccar-web/web/* out/legacy
-  cp -r ../traccar-web/modern/build/* out/modern
+  cp -r ../traccar-web/build/* out/web
   cp default.xml out/conf
   cp traccar.xml out/conf
 
@@ -158,14 +153,8 @@ package_linux_64 () {
 
 package_linux_arm () {
   info "Building Linux ARM installer"
-  package_linux arm arm
+  package_linux arm aarch64
   ok "Created Linux ARM installer"
-}
-
-package_linux_arm64 () {
-  info "Building Linux ARM 64 installer"
-  package_linux arm64 aarch64
-  ok "Created Linux ARM 64 installer"
 }
 
 prepare
@@ -174,7 +163,6 @@ case $PLATFORM in
   all)
 	package_linux_64
 	package_linux_arm
-	package_linux_arm64
 	package_windows
 	package_other
 	;;
@@ -185,10 +173,6 @@ case $PLATFORM in
 
   linux-arm)
 	package_linux_arm
-	;;
-
-  linux-arm64)
-	package_linux_arm64
 	;;
 
   windows-64)

@@ -61,7 +61,7 @@ public class PostProcessHandler extends BasePositionHandler {
         } catch (StorageException error) {
             LOGGER.warn("Failed to update device", error);
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }

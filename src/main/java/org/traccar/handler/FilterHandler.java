@@ -270,11 +270,7 @@ public class FilterHandler extends BasePositionHandler {
 
     @Override
     public void handlePosition(Position position, Callback callback) {
-        if (filter(position)) {
-            callback.processed(null);
-        } else {
-            callback.processed(position);
-        }
+        callback.processed(filter(position));
     }
 
 }

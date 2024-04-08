@@ -131,7 +131,7 @@ public class PositionForwardingHandler extends BasePositionHandler {
             positionData.setDevice(cacheManager.getObject(Device.class, position.getDeviceId()));
             new AsyncRequestAndCallback(positionData).send();
         }
-        callback.processed(position);
+        callback.processed(false);
     }
 
 }
