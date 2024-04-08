@@ -50,7 +50,7 @@ public final class LogAction {
     private static final String PATTERN_LOGIN = "user: %d, action: %s, from: %s";
     private static final String PATTERN_LOGIN_FAILED = "login failed from: %s";
     private static final String PATTERN_DEVICE_ACCUMULATORS = "user: %d, action: %s, deviceId: %d";
-    private static final String PATTERN_REPORT = "user: %d, report: %s, from: %s, to: %s, devices: %s, groups: %s";
+    private static final String PATTERN_REPORT = "user: %d, %s: %s, from: %s, to: %s, devices: %s, groups: %s";
 
     public static void create(long userId, BaseModel object) {
         logObjectAction(ACTION_CREATE, userId, object.getClass(), object.getId());
@@ -113,10 +113,11 @@ public final class LogAction {
     }
 
     public static void logReport(
-            long userId, String report, Date from, Date to, List<Long> deviceIds, List<Long> groupIds) {
+            long userId, boolean scheduled, String report,
+            Date from, Date to, List<Long> deviceIds, List<Long> groupIds) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         LOGGER.info(String.format(
-                PATTERN_REPORT, userId, report,
+                PATTERN_REPORT, userId, scheduled ? "scheduled" : "report", report,
                 dateFormat.format(from), dateFormat.format(to),
                 deviceIds.toString(), groupIds.toString()));
     }
