@@ -26,9 +26,13 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.LogRecord;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,9 +68,12 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
 
         try {
             Map<String, Collection<?>> data = new HashMap<>();
-            data.put(KEY_POSITIONS, PositionUtil.getLatestPositions(storage, userId));
+            var devices = storage.getObjects(Device.class, new Request(
+                    new Columns.Include("id"),
+                    new Condition.Permission(User.class, userId, Device.class)));
+            data.put(KEY_POSITIONS, PositionUtil.getLatestPositions(storage, userId, devices));
             sendData(data);
-            connectionManager.addListener(userId, this);
+            connectionManager.addListener(userId, this, devices);
         } catch (StorageException e) {
             throw new RuntimeException(e);
         }
