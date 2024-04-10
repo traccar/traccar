@@ -122,13 +122,15 @@ public final class ReportUtils {
 
         long t = end.getFixTime().getTime() - start.getFixTime().getTime();
         if (0 == t) {
+            // can data can vary 100 meters in the same second
             return (100 >= distance);
         }
 
         double kms = distance / 1000.0;
         double hours = t / 3600000.0;
         double averageSpeed = kms / hours;
-        return (averageSpeed < 200);
+        // can data can vary 100 meters in one second
+        return averageSpeed < (t > 5 * 1000 ? 200 : 400);
     }
 
     public static double calculateDistance(
