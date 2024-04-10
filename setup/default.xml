@@ -12,6 +12,7 @@
 
     <entry key='web.port'>8082</entry>
     <entry key='web.path'>./web</entry>
+    <entry key='web.override'>./override</entry>
     <entry key='web.sanitize'>false</entry>
     <entry key='web.persistSession'>false</entry>
     <entry key='web.showUnknownDevices'>true</entry>
