@@ -122,7 +122,7 @@ public final class ReportUtils {
 
         long t = end.getFixTime().getTime() - start.getFixTime().getTime();
         if (0 == t) {
-            return (0 == distance);
+            return (100 >= distance);
         }
 
         double kms = distance / 1000.0;
