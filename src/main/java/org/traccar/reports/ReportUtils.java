@@ -129,8 +129,10 @@ public final class ReportUtils {
         double kms = distance / 1000.0;
         double hours = t / 3600000.0;
         double averageSpeed = kms / hours;
-        // can data can vary 100 meters in one second
-        return averageSpeed < (t > 5 * 1000 ? 200 : 400);
+
+        // can data can vary 200 meters in one second
+        int maxSpeed = start.getAttributes().containsKey(Position.KEY_ODOMETER) && t < 5000 ? 1000 : 200;
+        return averageSpeed < maxSpeed;
     }
 
     public static double calculateDistance(
