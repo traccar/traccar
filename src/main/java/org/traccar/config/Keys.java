@@ -1261,6 +1261,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Block notifications for specific users. The value should be a comma-separated list of internal user ids.
+     */
+    public static final ConfigKey<String> NOTIFICATION_BLOCK_USERS = new StringConfigKey(
+            "notification.block.users",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
      * By default, there is no limit.
      */
