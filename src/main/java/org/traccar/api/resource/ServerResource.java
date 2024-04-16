@@ -16,6 +16,7 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.model.Device;
 import org.traccar.model.ObjectOperation;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -102,6 +103,23 @@ public class ServerResource extends BaseResource {
         }
         return server;
     }
+
+    @PermitAll
+    @Path("devices")
+    @GET
+    public Collection<Device> getAllDevices() throws StorageException {
+        Collection<Device> devices = storage.getObjects(Device.class, new Request(new Columns.All()));
+        return devices;
+    }
+
+    @PermitAll
+    @Path("users")
+    @GET
+    public Collection<User> getAllUsers() throws StorageException {
+        Collection<User> users = storage.getObjects(User.class, new Request(new Columns.All()));
+        return users;
+    }
+
 
     @PUT
     public Response update(Server server) throws Exception {
