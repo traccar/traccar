@@ -260,9 +260,10 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
 
     // Constructor para inicializar el campo createdAt
     public Device() {
-        this.createdAt = Date.from(
-            LocalDateTime.of(LocalDate.now(), LocalTime.of(1, 2, 3)).atZone(ZoneOffset.systemDefault()).toInstant());
-;
+        if(this.createdAt == null){
+            this.createdAt = Date.from(
+                LocalDateTime.of(LocalDate.now(), LocalTime.of(1, 2, 3)).atZone(ZoneOffset.systemDefault()).toInstant());
+        }
     }
 
     // Métodos getter y setter para el nuevo campo createdAt

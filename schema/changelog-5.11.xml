@@ -10,7 +10,9 @@
     </addColumn>
 
     <addColumn tableName="tc_devices">
-      <column name="createdAt" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+      <column name="createdAt" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
     </addColumn>
 
   </changeSet>
