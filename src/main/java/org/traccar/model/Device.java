@@ -262,7 +262,7 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
     public Device() {
         if(this.createdAt == null){
             this.createdAt = Date.from(
-                LocalDateTime.of(LocalDate.now(), LocalTime.of(1, 2, 3)).atZone(ZoneOffset.systemDefault()).toInstant());
+                LocalDateTime.of(LocalDate.now(), LocalTime.now()).atZone(ZoneOffset.systemDefault()).toInstant());
         }
     }
 
