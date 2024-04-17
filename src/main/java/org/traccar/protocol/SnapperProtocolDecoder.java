@@ -33,6 +33,7 @@ import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
@@ -77,6 +78,68 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeEvents(Position position, ByteBuf buf) {
+
+        position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+        buf.readUnsignedByte(); // info 1
+        buf.readUnsignedByte(); // info 2
+        buf.readUnsignedIntLE(); // timestamp
+        buf.readUnsignedByte(); // timezone
+    }
+
+    private void decodeTechInfo(Position position, ByteBuf buf) {
+
+        for (int i = 0; i < 5; i++) {
+            buf.readUnsignedByte(); // index
+            int type = buf.readUnsignedByte();
+            switch (type) {
+                case 0x00:
+                    position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
+                    position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    break;
+                case 0x01:
+                    position.set("interiorTemp", buf.readByte());
+                    position.set("engineTemp", buf.readByte());
+                    buf.readUnsignedByte(); // reserved
+                    break;
+                default:
+                    buf.skipBytes(3);
+                    break;
+            }
+        }
+    }
+
+    private void decodeGpsData(Position position, ByteBuf buf) throws ParseException {
+
+        String content = buf.readCharSequence(buf.readableBytes(), StandardCharsets.US_ASCII).toString();
+        JsonObject json = Json.createReader(new StringReader(content)).readObject();
+
+        DateFormat dateFormat = new SimpleDateFormat("ddMMyyHHmmss");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        position.setTime(dateFormat.parse(json.getString("d") + json.getString("t").split("\\.")[0]));
+
+        String lat = json.getString("la");
+        position.setLatitude(Integer.parseInt(lat.substring(0, 2)) + Double.parseDouble(lat.substring(2)) / 60);
+        String lon = json.getString("lo");
+        position.setLongitude(Integer.parseInt(lon.substring(0, 3)) + Double.parseDouble(lon.substring(3)) / 60);
+
+        int flags = Integer.parseInt(json.getString("f"), 16);
+        position.setValid(BitUtil.check(flags, 1));
+        if (!BitUtil.check(flags, 6)) {
+            position.setLatitude(-position.getLatitude());
+        }
+        if (!BitUtil.check(flags, 7)) {
+            position.setLongitude(-position.getLongitude());
+        }
+
+        position.setAltitude(Double.parseDouble(json.getString("a")));
+        position.setSpeed(Double.parseDouble(json.getString("s")));
+        position.setCourse(Double.parseDouble(json.getString("c")));
+
+        position.set(Position.KEY_SATELLITES, Integer.parseInt(json.getString("sv")));
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -94,7 +157,7 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
         }
 
         buf.readUnsignedShortLE(); // encryption
-        buf.readUnsignedIntLE(); // length
+        int length = buf.readIntLE();
         buf.readUnsignedByte(); // flags
         buf.readUnsignedMediumLE(); // reserved
         int index = buf.readUnsignedShortLE();
@@ -110,71 +173,42 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        if (type == MSG_SEND_EVENTS) {
-
-            position.set(Position.KEY_EVENT, buf.readUnsignedByte());
-            buf.readUnsignedByte(); // info 1
-            buf.readUnsignedByte(); // info 2
-            getLastLocation(position, null); // TODO read timestamp
-            return position;
-
-        } else if (type == MSG_SEND_TECH_INFO) {
-
-            buf.readUnsignedByte(); // index
-            int subtype = buf.readUnsignedByte();
-            switch (subtype) {
-                case 0x00:
-                    position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
-                    position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
-                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    break;
-                case 0x01:
-                    position.set("interiorTemp", buf.readByte());
-                    position.set("engineTemp", buf.readByte());
-                default:
-                    break;
-            }
-            getLastLocation(position, null);
-            return position;
-
-        } else if (type == MSG_SEND_GPS_DATA) {
-
-            String content = buf.readCharSequence(buf.readableBytes(), StandardCharsets.US_ASCII).toString();
-            JsonObject json = Json.createReader(new StringReader(content)).readObject();
-
-            //{"f":"DE","t":"092304.01","d":"110813","la":"5117.6370",
-            // "lo":"01655.3959","a":"00166.6","s":"","c":"","sv":"08","p":"01.6"}
-
-            DateFormat dateFormat = new SimpleDateFormat("ddMMyyHHmmss.SS");
-            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-            position.setTime(dateFormat.parse(json.getString("d") + json.getString("t")));
-
-            String lat = json.getString("la");
-            position.setLatitude(Integer.parseInt(lat.substring(0, 2)) + Double.parseDouble(lat.substring(2)) / 60);
-            String lon = json.getString("lo");
-            position.setLongitude(Integer.parseInt(lon.substring(0, 3)) + Double.parseDouble(lon.substring(3)) / 60);
-
-            int flags = Integer.parseInt(json.getString("f"));
-            position.setValid(BitUtil.check(flags, 1));
-            if (!BitUtil.check(flags, 6)) {
-                position.setLatitude(-position.getLatitude());
-            }
-            if (!BitUtil.check(flags, 7)) {
-                position.setLongitude(-position.getLongitude());
-            }
-
-            position.setAltitude(Double.parseDouble(json.getString("a")));
-            position.setSpeed(Double.parseDouble(json.getString("s")));
-            position.setCourse(Double.parseDouble(json.getString("c")));
-
-            position.set(Position.KEY_SATELLITES, Integer.parseInt(json.getString("sv")));
-
-            return position;
-
+        switch (type) {
+            case MSG_SEND_EVENTS:
+                decodeEvents(position, buf);
+                getLastLocation(position, null); // TODO read timestamp
+                return position;
+            case MSG_SEND_TECH_INFO:
+                decodeTechInfo(position, buf);
+                getLastLocation(position, null);
+                return position;
+            case MSG_SEND_GPS_DATA:
+                decodeGpsData(position, buf.readSlice(length));
+                return position;
+            case MSG_SEND_CONCATENATED_PACKET:
+                int count = buf.readUnsignedShortLE();
+                for (int i = 0; i < count; i++) {
+                    int partType = buf.readUnsignedShortLE();
+                    int partLength = buf.readUnsignedShortLE();
+                    switch (partType) {
+                        case MSG_SEND_EVENTS:
+                            decodeEvents(position, buf);
+                            break;
+                        case MSG_SEND_TECH_INFO:
+                            decodeTechInfo(position, buf);
+                            break;
+                        case MSG_SEND_GPS_DATA:
+                            decodeGpsData(position, buf.readSlice(partLength));
+                            break;
+                        default:
+                            buf.skipBytes(partLength);
+                            break;
+                    }
+                }
+                return position;
+            default:
+                return null;
         }
-
-
-        return null;
     }
 
 }
