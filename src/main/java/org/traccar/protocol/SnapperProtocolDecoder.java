@@ -205,6 +205,7 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
                             break;
                     }
                 }
+                return position;
             default:
                 return null;
         }
