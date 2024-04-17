@@ -191,7 +191,7 @@ public class MainModule extends AbstractModule {
 
     @Provides
     public static WebServer provideWebServer(Injector injector, Config config) {
-        if (config.hasKey(Keys.WEB_PORT)) {
+        if (config.getInteger(Keys.WEB_PORT) > 0) {
             return new WebServer(injector, config);
         }
         return null;
@@ -201,7 +201,7 @@ public class MainModule extends AbstractModule {
     @Provides
     public static Geocoder provideGeocoder(Config config, Client client, StatisticsManager statisticsManager) {
         if (config.getBoolean(Keys.GEOCODER_ENABLE)) {
-            String type = config.getString(Keys.GEOCODER_TYPE, "google");
+            String type = config.getString(Keys.GEOCODER_TYPE);
             String url = config.getString(Keys.GEOCODER_URL);
             String key = config.getString(Keys.GEOCODER_KEY);
             String language = config.getString(Keys.GEOCODER_LANGUAGE);

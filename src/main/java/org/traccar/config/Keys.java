@@ -320,7 +320,8 @@ public final class Keys {
      */
     public static final ConfigKey<String> SERVER_STATISTICS = new StringConfigKey(
             "server.statistics",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "https://www.traccar.org/analytics/");
 
     /**
      * Fuel drop threshold value. When fuel level drops from one position to another for more the value, an event is
@@ -397,7 +398,8 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> EVENT_IGNORE_DUPLICATE_ALERTS = new BooleanConfigKey(
             "event.ignoreDuplicateAlerts",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            true);
 
     /**
      * If set to true, invalid positions will be considered for motion logic.
@@ -472,7 +474,8 @@ public final class Keys {
      */
     public static final ConfigKey<String> DATABASE_CHANGELOG = new StringConfigKey(
             "database.changelog",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "./schema/changelog-master.xml");
 
     /**
      * Database connection pool size. Default value is defined by the HikariCP library.
@@ -736,7 +739,8 @@ public final class Keys {
      */
     public static final ConfigKey<String> MEDIA_PATH = new StringConfigKey(
             "media.path",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "./media");
 
     /**
      * Optional parameter to specify network interface for web interface to bind to. By default server will bind to all
@@ -747,12 +751,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Web interface TCP port number. By default Traccar uses port 8082. To avoid specifying port in the browser you
+     * Web interface TCP port number. By default, Traccar uses port 8082. To avoid specifying port in the browser you
      * can set it to 80 (default HTTP port).
      */
     public static final ConfigKey<Integer> WEB_PORT = new IntegerConfigKey(
             "web.port",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            8082);
 
     /**
      * Maximum API requests per second. Above this limit requests and delayed and throttled.
@@ -782,14 +787,16 @@ public final class Keys {
      */
     public static final ConfigKey<String> WEB_PATH = new StringConfigKey(
             "web.path",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "./web");
 
     /**
      * Path to a folder with overrides. It can be used for branding to keep custom logos in a separate place.
      */
     public static final ConfigKey<String> WEB_OVERRIDE = new StringConfigKey(
             "web.override",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "./override");
 
     /**
      * WebSocket connection timeout in milliseconds. Default timeout is 5 minutes.
@@ -1172,7 +1179,8 @@ public final class Keys {
      */
     public static final ConfigKey<String> NOTIFICATOR_TYPES = new StringConfigKey(
             "notificator.types",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "web,mail,command");
 
     /**
      * If the event time is too old, we should not send notifications. This parameter is the threshold value in
@@ -1338,7 +1346,8 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> FILTER_ENABLE = new BooleanConfigKey(
             "filter.enable",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            true);
 
     /**
      * Filter invalid (valid field is set to false) positions.
@@ -1376,7 +1385,8 @@ public final class Keys {
      */
     public static final ConfigKey<Long> FILTER_FUTURE = new LongConfigKey(
             "filter.future",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            86400L);
 
     /**
      * Filter records with fix time in the past. The value is specified in seconds. Records that have fix time more
@@ -1587,15 +1597,16 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> GEOCODER_ENABLE = new BooleanConfigKey(
             "geocoder.enable",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            true);
 
     /**
-     * Reverse geocoder type. Check reverse geocoding documentation for more info. By default (if the value is not
-     * specified) server uses Google API.
+     * Reverse geocoder type. Check reverse geocoding documentation for more info.
      */
     public static final ConfigKey<String> GEOCODER_TYPE = new StringConfigKey(
             "geocoder.type",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "locationiq");
 
     /**
      * Geocoder server URL. Applicable only to Nominatim and Gisgraphy providers.
@@ -1609,7 +1620,8 @@ public final class Keys {
      */
     public static final ConfigKey<String> GEOCODER_KEY = new StringConfigKey(
             "geocoder.key",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "pk.689d849289c8c63708068b2ff1f63b2d");
 
     /**
      * Language parameter for providers that support localization (e.g. Google and Nominatim).
@@ -1637,7 +1649,8 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> GEOCODER_IGNORE_POSITIONS = new BooleanConfigKey(
             "geocoder.ignorePositions",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            true);
 
     /**
      * Boolean flag to apply reverse geocoding to invalid positions.
@@ -1659,7 +1672,8 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> GEOCODER_ON_REQUEST = new BooleanConfigKey(
             "geocoder.onRequest",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            true);
 
     /**
      * Boolean flag to enable LBS location resolution. Some devices send cell towers information and WiFi point when GPS
@@ -1860,7 +1874,8 @@ public final class Keys {
      */
     public static final ConfigKey<String> LOGGER_FILE = new StringConfigKey(
             "logger.file",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "./logs/tracker-server.log");
 
     /**
      * Logging level. Default value is 'info'.
@@ -1868,7 +1883,8 @@ public final class Keys {
      */
     public static final ConfigKey<String> LOGGER_LEVEL = new StringConfigKey(
             "logger.level",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "info");
 
     /**
      * Print full exception traces. Useful for debugging. By default shortened traces are logged.
@@ -1883,7 +1899,8 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> LOGGER_ROTATE = new BooleanConfigKey(
             "logger.rotate",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            true);
 
     /**
      * Log file rotation interval, the default rotation interval is once a day.

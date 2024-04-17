@@ -10,39 +10,6 @@
 
     -->
 
-    <entry key='web.port'>8082</entry>
-    <entry key='web.path'>./web</entry>
-    <entry key='web.override'>./override</entry>
-    <entry key='web.sanitize'>false</entry>
-    <entry key='web.persistSession'>false</entry>
-    <entry key='web.showUnknownDevices'>true</entry>
-
-    <entry key='geocoder.enable'>true</entry>
-    <entry key='geocoder.type'>locationiq</entry>
-    <entry key='geocoder.key'>pk.689d849289c8c63708068b2ff1f63b2d</entry>
-    <entry key='geocoder.onRequest'>true</entry>
-    <entry key='geocoder.ignorePositions'>true</entry>
-
-    <entry key='logger.level'>info</entry>
-    <entry key='logger.file'>./logs/tracker-server.log</entry>
-    <entry key='logger.rotate'>true</entry>
-
-    <entry key='filter.enable'>true</entry>
-    <entry key='filter.future'>86400</entry>
-
-    <entry key='event.ignoreDuplicateAlerts'>true</entry>
-
-    <entry key='media.path'>./media</entry>
-
-    <entry key='notificator.types'>web,mail,command</entry>
-
-    <entry key='server.statistics'>https://www.traccar.org/analytics/</entry>
-
-    <entry key='commands.queueing'>true</entry>
-
-    <entry key='database.ignoreUnknown'>true</entry>
-    <entry key='database.changelog'>./schema/changelog-master.xml</entry>
-
     <entry key='gps103.port'>5001</entry>
     <entry key='tk103.port'>5002</entry>
     <entry key='gl100.port'>5003</entry>
