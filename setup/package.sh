@@ -88,7 +88,6 @@ prepare () {
   cp ../schema/* out/schema
   cp -r ../templates/* out/templates
   cp -r ../traccar-web/build/* out/web
-  cp default.xml out/conf
   cp traccar.xml out/conf
 
   if [ $PLATFORM = "all" -o $PLATFORM = "windows-64" ]; then
