@@ -23,7 +23,7 @@ public final class Keys {
     }
 
     /**
-     * Network interface for a the protocol. If not specified, server will bind all interfaces.
+     * Network interface for the protocol. If not specified, server will bind all interfaces.
      */
     public static final ConfigSuffix<String> PROTOCOL_ADDRESS = new StringConfigSuffix(
             ".address",
@@ -674,7 +674,7 @@ public final class Keys {
     /**
      * OpenID Connect Authorization URL.
      * This can usually be found in the documentation of your identity provider or by using the well-known
-     * configuration endpoint, e.g. https://auth.example.com//.well-known/openid-configuration
+     * configuration endpoint, e.g. https://auth.example.com/.well-known/openid-configuration
      * Required to enable SSO if openid.issuerUrl is not set.
      */
     public static final ConfigKey<String> OPENID_AUTH_URL = new StringConfigKey(
