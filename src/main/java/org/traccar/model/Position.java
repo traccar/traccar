@@ -96,6 +96,7 @@ public class Position extends Message {
 
     public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
     public static final String KEY_IDLE_TIME = "idleTime";
+    public static final String KEY_STOP_TIME = "stopTime";
     public static final String KEY_TRIP_TIME = "tripTime";
     public static final String KEY_DRIVING_TIME = "drivingTime";
 
