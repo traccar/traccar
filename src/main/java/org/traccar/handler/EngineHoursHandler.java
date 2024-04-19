@@ -58,6 +58,7 @@ public class EngineHoursHandler extends BaseDataHandler {
                     tripTime = 0;
                     if (diff > 0) {
                         stopTime += diff;
+                        position.set(Position.KEY_STOP_TIME, stopTime);
                     }
                 }
                 if (hours != 0) {
@@ -65,7 +66,6 @@ public class EngineHoursHandler extends BaseDataHandler {
                 }
                 position.set(Position.KEY_IDLE_TIME, idleTime);
                 position.set(Position.KEY_TRIP_TIME, tripTime);
-                position.set(Position.KEY_STOP_TIME, stopTime);
             }
         }
         return position;
