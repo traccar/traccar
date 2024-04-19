@@ -482,6 +482,7 @@ public class DataManager {
             List<String> s = permissions.stream().map(p -> String.format("({},{})", p.getOwnerId(),
                     p.getPropertyId())).collect(Collectors.toList());
             query.append(String.join(",", s));
+            LOGGER.error(query.toString());
             QueryBuilder.create(dataSource, query.toString()).executeUpdate();
         }
     }
