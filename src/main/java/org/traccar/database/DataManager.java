@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -478,15 +479,9 @@ public class DataManager {
         if (link) {
             StringBuilder query = new StringBuilder("INSERT INTO " + getPermissionsTableName(owner, property)
                     + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES ");
-            for (Permission permission : permissions) {
-                query.append("(")
-                .append(permission.getOwnerId())
-                .append(",")
-                .append(permission.getPropertyId())
-                .append("),");
-            }
-            // remove last ","
-            query.deleteCharAt(query.length() - 1);
+            List<String> s = permissions.stream().map(p -> String.format("({},{})", p.getOwnerId(),
+                    p.getPropertyId())).collect(Collectors.toList());
+            query.append(String.join(",", s));
             QueryBuilder.create(dataSource, query.toString()).executeUpdate();
         }
     }
