@@ -479,7 +479,7 @@ public class DataManager {
         if (link) {
             StringBuilder query = new StringBuilder("INSERT INTO " + getPermissionsTableName(owner, property)
                     + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES ");
-            List<String> s = permissions.stream().map(p -> String.format("({},{})", p.getOwnerId(),
+            List<String> s = permissions.stream().map(p -> String.format("(%d,%d)", p.getOwnerId(),
                     p.getPropertyId())).collect(Collectors.toList());
             query.append(String.join(",", s));
             LOGGER.error(query.toString());
