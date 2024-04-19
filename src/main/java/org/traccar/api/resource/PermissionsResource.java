@@ -17,10 +17,9 @@
 package org.traccar.api.resource;
 
 import java.sql.SQLException;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -74,13 +73,34 @@ public class PermissionsResource  extends BaseResource {
     public Response add(List<LinkedHashMap<String, Long>> entities) throws SQLException, ClassNotFoundException {
         Context.getPermissionsManager().checkReadonly(getUserId());
         checkPermissionTypes(entities);
+        HashSet permissionTypes = new HashSet();
         for (LinkedHashMap<String, Long> entity: entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission, true);
-            Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
-                    permission.getPropertyClass(), permission.getPropertyId(), true);
-            LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
-                    permission.getPropertyClass(), permission.getPropertyId());
+            permissionTypes.add(permission.getOwnerClass().getSimpleName() + permission.getPropertyClass().getSimpleName());
+        }
+        // permissions are not of same type, let's do one by one
+        if (permissionTypes.size() != 1) {
+            for (LinkedHashMap<String, Long> entity : entities) {
+                Permission permission = new Permission(entity);
+                Context.getDataManager().linkObject(permission.getOwnerClass(), permission.getOwnerId(),
+                        permission.getPropertyClass(), permission.getPropertyId(), true);
+                LogAction.link(getUserId(), permission.getOwnerClass(), permission.getOwnerId(),
+                        permission.getPropertyClass(), permission.getPropertyId());
+            }
+        }
+        // all permissions are of same type, we can use a bulk insert
+        else {
+            Permission permission = new Permission(entities.get(0));
+            Stream<Permission> permissions = entities.stream().map(e -> {
+                try {
+                    return new Permission(e);
+                } catch (ClassNotFoundException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
+            Context.getDataManager().linkObjects(permission.getOwnerClass(), permission.getPropertyClass(),
+                    permissions.collect(Collectors.toList()), true);
         }
         if (!entities.isEmpty()) {
             Context.getPermissionsManager().refreshPermissions(new Permission(entities.get(0)));

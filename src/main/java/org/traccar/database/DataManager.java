@@ -20,11 +20,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
@@ -476,6 +472,25 @@ public class DataManager {
                 .setLong(makeNameId(property), propertyId)
                 .executeUpdate();
     }
+
+    public void linkObjects(Class<?> owner, Class<?> property, List<Permission> permissions, boolean link)
+            throws SQLException {
+        if (link) {
+            StringBuilder query = new StringBuilder("INSERT INTO " + getPermissionsTableName(owner, property)
+                    + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES ");
+            for (Permission permission : permissions) {
+                query.append("(")
+                .append(permission.getOwnerId())
+                .append(",")
+                .append(permission.getPropertyId())
+                .append("),");
+            }
+            // remove last ","
+            query.deleteCharAt(query.length() - 1);
+            QueryBuilder.create(dataSource, query.toString()).executeUpdate();
+        }
+    }
+
 
     public <T extends BaseModel> T getObject(Class<T> clazz, long entityId) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT, clazz))
