@@ -60,6 +60,26 @@ public class Geofence extends ExtendedModel implements Schedulable {
         this.description = description;
     }
 
+    private boolean stopOut;
+
+    public boolean getStopOut() {
+        return stopOut;
+    }
+
+    public void setStopOut(Boolean valueStopOut) {
+        this.stopOut = valueStopOut;
+    }
+
+    private boolean stopIn;
+
+    public boolean getStopIn() {
+        return stopIn;
+    }
+
+    public void setStopIn(Boolean valueStopIn) {
+        this.stopIn = valueStopIn;
+    }
+
     private String area;
 
     public String getArea() {
