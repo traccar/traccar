@@ -34,6 +34,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @StorageName("tc_calendars")
@@ -78,7 +79,7 @@ public class Calendar extends ExtendedModel {
         }
     }
 
-    public Collection<Period> findPeriods(Date date) {
+    public Set<Period> findPeriods(Date date) {
         return findEvents(date).stream()
                 .flatMap((e) -> e.calculateRecurrenceSet(new Period(new DateTime(date), Duration.ZERO)).stream())
                 .collect(Collectors.toSet());
