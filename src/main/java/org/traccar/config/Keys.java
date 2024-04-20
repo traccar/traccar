@@ -601,7 +601,7 @@ public final class Keys {
             "uid");
 
     /**
-     * LDAP attribute used as user name. Default value is 'cn'.
+     * LDAP attribute used as username. Default value is 'cn'.
      */
     public static final ConfigKey<String> LDAP_NAME_ATTRIBUTE = new StringConfigKey(
             "ldap.nameAttribute",
