@@ -81,7 +81,7 @@ public class TaskReports implements ScheduleTask {
                 var lastEvents = calendar.findPeriods(lastCheck);
                 var currentEvents = calendar.findPeriods(currentCheck);
 
-                if (!lastEvents.isEmpty() && currentEvents.isEmpty()) {
+                if (!lastEvents.isEmpty() && !currentEvents.equals(lastEvents)) {
                     Period period = lastEvents.iterator().next();
                     RequestScoper scope = ServletScopes.scopeRequest(Collections.emptyMap());
                     try (RequestScoper.CloseableScope ignored = scope.open()) {
