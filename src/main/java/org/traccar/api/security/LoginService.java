@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package org.traccar.api.security;
 
+import com.warrenstrange.googleauth.GoogleAuthenticator;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -57,20 +58,20 @@ public class LoginService {
         forceOpenId = config.getBoolean(Keys.OPENID_FORCE);
     }
 
-    public User login(String token) throws StorageException, GeneralSecurityException, IOException {
+    public LoginResult login(String token) throws StorageException, GeneralSecurityException, IOException {
         if (serviceAccountToken != null && serviceAccountToken.equals(token)) {
-            return new ServiceAccountUser();
+            return new LoginResult(new ServiceAccountUser());
         }
-        long userId = tokenManager.verifyToken(token);
+        TokenManager.TokenData tokenData = tokenManager.verifyToken(token);
         User user = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("id", userId)));
+                new Columns.All(), new Condition.Equals("id", tokenData.getUserId())));
         if (user != null) {
             checkUserEnabled(user);
         }
-        return user;
+        return new LoginResult(user, tokenData.getExpiration());
     }
 
-    public User login(String email, String password) throws StorageException {
+    public LoginResult login(String email, String password, Integer code) throws StorageException {
         if (forceOpenId) {
             return null;
         }
@@ -84,29 +85,27 @@ public class LoginService {
         if (user != null) {
             if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
                     || !forceLdap && user.isPasswordValid(password)) {
+                checkUserCode(user, code);
                 checkUserEnabled(user);
-                return user;
+                return new LoginResult(user);
             }
         } else {
             if (ldapProvider != null && ldapProvider.login(email, password)) {
                 user = ldapProvider.getUser(email);
                 user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
                 checkUserEnabled(user);
-                return user;
+                return new LoginResult(user);
             }
         }
         return null;
     }
 
-    public User login(String email, String name, Boolean administrator) throws StorageException {
+    public LoginResult login(String email, String name, boolean administrator) throws StorageException {
         User user = storage.getObject(User.class, new Request(
             new Columns.All(),
             new Condition.Equals("email", email)));
 
-        if (user != null) {
-            checkUserEnabled(user);
-            return user;
-        } else {
+        if (user == null) {
             user = new User();
             UserUtil.setUserDefaults(user, config);
             user.setName(name);
@@ -114,9 +113,9 @@ public class LoginService {
             user.setFixedEmail(true);
             user.setAdministrator(administrator);
             user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
-            checkUserEnabled(user);
-            return user;
         }
+        checkUserEnabled(user);
+        return new LoginResult(user);
     }
 
     private void checkUserEnabled(User user) throws SecurityException {
@@ -124,6 +123,19 @@ public class LoginService {
             throw new SecurityException("Unknown account");
         }
         user.checkDisabled();
+    }
+
+    private void checkUserCode(User user, Integer code) throws SecurityException {
+        String key = user.getTotpKey();
+        if (key != null && !key.isEmpty()) {
+            if (code == null) {
+                throw new CodeRequiredException();
+            }
+            GoogleAuthenticator authenticator = new GoogleAuthenticator();
+            if (!authenticator.authorize(key, code)) {
+                throw new SecurityException("User authorization failed");
+            }
+        }
     }
 
 }

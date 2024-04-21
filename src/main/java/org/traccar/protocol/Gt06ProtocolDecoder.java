@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,6 +124,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         WETRUST,
         JC400,
         SL4X,
+        SEEWORLD,
     }
 
     private Variant variant;
@@ -343,7 +344,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         int mcc = buf.readUnsignedShort();
         int mnc;
-        if (BitUtil.check(mcc, 15) || type == MSG_GPS_LBS_6) {
+        if (BitUtil.check(mcc, 15) || type == MSG_GPS_LBS_6 || variant == Variant.SL4X) {
             mnc = buf.readUnsignedShort();
         } else {
             mnc = buf.readUnsignedByte();
@@ -357,7 +358,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         long cid;
         if (type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7) {
             cid = buf.readLong();
-        } else if (type == MSG_GPS_LBS_6) {
+        } else if (type == MSG_GPS_LBS_6 || variant == Variant.SEEWORLD) {
             cid = buf.readUnsignedInt();
         } else {
             cid = buf.readUnsignedMedium();
@@ -440,15 +441,18 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_REMOVING;
             case 0x23:
                 return Position.ALARM_FALL_DOWN;
+            case 0x28:
+                return Position.ALARM_BRAKING;
             case 0x29:
                 return Position.ALARM_ACCELERATION;
-            case 0x30:
-                return Position.ALARM_BRAKING;
             case 0x2A:
             case 0x2B:
+            case 0x2E:
                 return Position.ALARM_CORNERING;
             case 0x2C:
                 return Position.ALARM_ACCIDENT;
+            case 0x30:
+                return Position.ALARM_JAMMING;
             default:
                 return null;
         }
@@ -479,28 +483,21 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShort(); // type
 
             deviceSession = getDeviceSession(channel, remoteAddress, imei);
-            if (deviceSession != null && !deviceSession.contains(DeviceSession.KEY_TIMEZONE)) {
-                deviceSession.set(DeviceSession.KEY_TIMEZONE, getTimeZone(deviceSession.getDeviceId()));
-            }
-
-            if (dataLength > 10) {
-                int extensionBits = buf.readUnsignedShort();
-                int hours = (extensionBits >> 4) / 100;
-                int minutes = (extensionBits >> 4) % 100;
-                int offset = (hours * 60 + minutes) * 60;
-                if ((extensionBits & 0x8) != 0) {
-                    offset = -offset;
-                }
-                if (deviceSession != null) {
-                    TimeZone timeZone = deviceSession.get(DeviceSession.KEY_TIMEZONE);
-                    if (timeZone.getRawOffset() == 0) {
-                        timeZone.setRawOffset(offset * 1000);
-                        deviceSession.set(DeviceSession.KEY_TIMEZONE, timeZone);
-                    }
-                }
-            }
-
             if (deviceSession != null) {
+                TimeZone timeZone = getTimeZone(deviceSession.getDeviceId(), null);
+                if (timeZone == null && dataLength > 10) {
+                    int extensionBits = buf.readUnsignedShort();
+                    int hours = (extensionBits >> 4) / 100;
+                    int minutes = (extensionBits >> 4) % 100;
+                    int offset = (hours * 60 + minutes) * 60;
+                    if ((extensionBits & 0x8) != 0) {
+                        offset = -offset;
+                    }
+                    timeZone = TimeZone.getTimeZone("UTC");
+                    timeZone.setRawOffset(offset * 1000);
+                }
+                deviceSession.set(DeviceSession.KEY_TIMEZONE, timeZone);
+
                 sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
             }
 
@@ -840,7 +837,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // working mode
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
                 } else {
-                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 100 / 6);
+                    int battery = buf.readUnsignedByte();
+                    position.set(Position.KEY_BATTERY_LEVEL, battery <= 6 ? battery * 100 / 6 : battery);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     short alarmExtension = buf.readUnsignedByte();
                     if (variant != Variant.VXT01) {
@@ -899,6 +897,20 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set("cardStatus", buf.readUnsignedByte());
                     position.set(Position.KEY_DRIVING_TIME, buf.readUnsignedShort());
                 }
+            }
+
+            if (type == MSG_GPS_LBS_2 && variant == Variant.SEEWORLD) {
+                position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
+                buf.readUnsignedByte(); // reporting mode
+                buf.readUnsignedByte(); // supplementary transmission
+                position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                buf.readUnsignedInt(); // travel time
+                int temperature = buf.readUnsignedShort();
+                if (BitUtil.check(temperature, 15)) {
+                    temperature = -BitUtil.to(temperature, 15);
+                }
+                position.set(Position.PREFIX_TEMP + 1, temperature * 0.01);
+                position.set("humidity", buf.readUnsignedShort() * 0.01);
             }
 
             if ((type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_3 || type == MSG_GPS_LBS_4)
@@ -1468,6 +1480,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.JC400;
         } else if (header == 0x7878 && type == MSG_LBS_3 && length == 0x37) {
             variant = Variant.SL4X;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_4 && length == 0x27) {
+            variant = Variant.SL4X;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_2 && length == 0x2f) {
+            variant = Variant.SEEWORLD;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x26) {
+            variant = Variant.SEEWORLD;
         } else {
             variant = Variant.STANDARD;
         }

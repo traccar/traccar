@@ -77,9 +77,9 @@ public class GeocoderTest {
     @Disabled
     @Test
     public void testHere() {
-        Geocoder geocoder = new HereGeocoder(client, null, "", "", null, 0, new AddressFormat());
+        Geocoder geocoder = new HereGeocoder(client, null, "aDc9qgsCpRbO9ioJIIAXzF6JYU7w8H5O260e9hsGrms", null, 0, new AddressFormat());
         String address = geocoder.getAddress(48.8575, 2.2944, null);
-        assertEquals("6 Avenue Gustave Eiffel, Paris, Île-de-France, FRA", address);
+        assertEquals("1 Tour Eiffel, Paris, Île-de-France, FRA", address);
     }
 
     @Disabled

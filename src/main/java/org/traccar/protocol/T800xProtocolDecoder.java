@@ -163,7 +163,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         boolean positionType = type == MSG_GPS || type == MSG_GPS_2 || type == MSG_ALARM || type == MSG_ALARM_2;
         if (!positionType) {
-            sendResponse(channel, header, type, index, imei, 0);
+            sendResponse(channel, header, type, header == 0x2323 ? 1 : index, imei, 0);
         }
 
         if (positionType) {
@@ -391,7 +391,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                 for (int i = 1; i <= adcCount; i++) {
                     String value = ByteBufUtil.hexDump(buf.readSlice(2));
                     if (!value.equals("ffff")) {
-                        position.set(Position.PREFIX_ADC + i, Integer.parseInt(value) * 0.01);
+                        position.set(Position.PREFIX_ADC + i, Integer.parseInt(value, 16) * 0.01);
                     }
                 }
             }
@@ -518,7 +518,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         boolean acknowledgement = AttributeUtil.lookup(
                 getCacheManager(), Keys.PROTOCOL_ACK.withPrefix(getProtocolName()), deviceSession.getDeviceId());
         if (acknowledgement || type == MSG_ALARM || type == MSG_ALARM_2) {
-            sendResponse(channel, header, type, index, imei, alarm);
+            sendResponse(channel, header, type, header == 0x2323 ? 1 : index, imei, alarm);
         }
 
         return position;

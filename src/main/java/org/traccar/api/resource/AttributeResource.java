@@ -78,21 +78,21 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
     }
 
     @POST
-    public Response add(Attribute entity) throws StorageException {
+    public Response add(Attribute entity) throws Exception {
         permissionsService.checkAdmin(getUserId());
         return super.add(entity);
     }
 
     @Path("{id}")
     @PUT
-    public Response update(Attribute entity) throws StorageException {
+    public Response update(Attribute entity) throws Exception {
         permissionsService.checkAdmin(getUserId());
         return super.update(entity);
     }
 
     @Path("{id}")
     @DELETE
-    public Response remove(@PathParam("id") long id) throws StorageException {
+    public Response remove(@PathParam("id") long id) throws Exception {
         permissionsService.checkAdmin(getUserId());
         return super.remove(id);
     }

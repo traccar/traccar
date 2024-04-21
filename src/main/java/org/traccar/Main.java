@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,8 @@ import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastService;
-import org.traccar.helper.model.DeviceUtil;
 import org.traccar.schedule.ScheduleManager;
 import org.traccar.storage.DatabaseModule;
-import org.traccar.storage.Storage;
 import org.traccar.web.WebModule;
 import org.traccar.web.WebServer;
 
@@ -33,10 +31,9 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.management.RuntimeMXBean;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class Main {
 
@@ -70,8 +67,7 @@ public final class Main {
                     + " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb"
                     + " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
 
-            LOGGER.info("Character encoding: "
-                    + System.getProperty("file.encoding") + " charset: " + Charset.defaultCharset());
+            LOGGER.info("Character encoding: " + Charset.defaultCharset().displayName());
 
         } catch (Exception error) {
             LOGGER.warn("Failed to get system info");
@@ -122,18 +118,14 @@ public final class Main {
             LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");
 
-            if (injector.getInstance(BroadcastService.class).singleInstance()) {
-                DeviceUtil.resetStatus(injector.getInstance(Storage.class));
-            }
-
-            var services = Stream.of(
-                    ServerManager.class, WebServer.class, ScheduleManager.class, BroadcastService.class)
-                    .map(injector::getInstance)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            for (var service : services) {
-                service.start();
+            var services = new ArrayList<LifecycleObject>();
+            for (var clazz : List.of(
+                    ScheduleManager.class, ServerManager.class, WebServer.class, BroadcastService.class)) {
+                var service = injector.getInstance(clazz);
+                if (service != null) {
+                    service.start();
+                    services.add(service);
+                }
             }
 
             Thread.setDefaultUncaughtExceptionHandler((t, e) -> LOGGER.error("Thread exception", e));

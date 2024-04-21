@@ -75,8 +75,9 @@ public class OverrideFilter implements Filter {
                         .replace("${description}", description)
                         .replace("${colorPrimary}", colorPrimary);
 
-                response.setContentLength(alteredContent.length());
-                response.getOutputStream().write(alteredContent.getBytes());
+                byte[] data = alteredContent.getBytes();
+                response.setContentLength(data.length);
+                response.getOutputStream().write(data);
 
             } else {
                 response.getOutputStream().write(bytes);

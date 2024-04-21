@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,8 @@ package org.traccar.broadcast;
 
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
-
-import java.util.Map;
 
 public class BroadcastMessage {
 
@@ -73,13 +72,112 @@ public class BroadcastMessage {
         this.commandDeviceId = commandDeviceId;
     }
 
-    private Map<String, Long> changes;
+    public static class InvalidateObject {
 
-    public Map<String, Long> getChanges() {
-        return changes;
+        private String clazz;
+
+        public String getClazz() {
+            return clazz;
+        }
+
+        public void setClazz(String clazz) {
+            this.clazz = clazz;
+        }
+
+        private long id;
+
+        public long getId() {
+            return id;
+        }
+
+        public void setId(long id) {
+            this.id = id;
+        }
+
+        private ObjectOperation operation;
+
+        public ObjectOperation getOperation() {
+            return operation;
+        }
+
+        public void setOperation(ObjectOperation operation) {
+            this.operation = operation;
+        }
+
     }
 
-    public void setChanges(Map<String, Long> changes) {
-        this.changes = changes;
+    private InvalidateObject invalidateObject;
+
+    public InvalidateObject getInvalidateObject() {
+        return invalidateObject;
     }
+
+    public void setInvalidateObject(InvalidateObject invalidateObject) {
+        this.invalidateObject = invalidateObject;
+    }
+
+    public static class InvalidatePermission {
+
+        private String clazz1;
+
+        public String getClazz1() {
+            return clazz1;
+        }
+
+        public void setClazz1(String clazz1) {
+            this.clazz1 = clazz1;
+        }
+
+        private long id1;
+
+        public long getId1() {
+            return id1;
+        }
+
+        public void setId1(long id1) {
+            this.id1 = id1;
+        }
+
+        private String clazz2;
+
+        public String getClazz2() {
+            return clazz2;
+        }
+
+        public void setClazz2(String clazz2) {
+            this.clazz2 = clazz2;
+        }
+
+        private long id2;
+
+        public long getId2() {
+            return id2;
+        }
+
+        public void setId2(long id2) {
+            this.id2 = id2;
+        }
+
+        private boolean link;
+
+        public boolean getLink() {
+            return link;
+        }
+
+        public void setLink(boolean link) {
+            this.link = link;
+        }
+
+    }
+
+    private InvalidatePermission invalidatePermission;
+
+    public InvalidatePermission getInvalidatePermission() {
+        return invalidatePermission;
+    }
+
+    public void setInvalidatePermission(InvalidatePermission invalidatePermission) {
+        this.invalidatePermission = invalidatePermission;
+    }
+
 }

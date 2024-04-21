@@ -46,6 +46,7 @@ public class Event extends Message {
     public static final String TYPE_DEVICE_UNKNOWN = "deviceUnknown";
     public static final String TYPE_DEVICE_OFFLINE = "deviceOffline";
     public static final String TYPE_DEVICE_INACTIVE = "deviceInactive";
+    public static final String TYPE_QUEUED_COMMAND_SENT = "queuedCommandSent";
 
     public static final String TYPE_DEVICE_MOVING = "deviceMoving";
     public static final String TYPE_DEVICE_STOPPED = "deviceStopped";

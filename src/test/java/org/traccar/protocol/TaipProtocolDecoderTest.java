@@ -11,6 +11,18 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new TaipProtocolDecoder(null));
 
+        verifyAttributes(decoder, text(
+                ">RUS00,010170000000+0000000+000000000000001009999000011060074755268EF,0001139503871486,01,ZZZZZZZZZZ;ID=11817;#LOG:6AE4;*2C<"));
+
+        verifyPosition(decoder, text(
+                ">RPI041220132203-2683525-065204060150001050000101511140022118857EF27;ID=0000;#LOG:DECB;*07<"));
+
+        verifyPosition(decoder, text(
+                ">RCQ00151123235718-2782354-06407582055121FF0013501CDCC6313011100001514;#0805;ID=SIA056;*15<"));
+
+        verifyNull(decoder, text(
+                ">RTT151123153149-4330468-06503640000009300DF2101 04101203 000 00000000130000040414;ID=8803;#1ABD;*2B<"));
+
         verifyAttribute(decoder, text(
                 ">RUS00,111220124402-3138067-06417623000012200FF,000000000000000000000000000,0000000111,15640422,00000,+25.5,00000,51;ID=CST3G0443;#IP1:089F;*34<"),
                 Position.PREFIX_TEMP + 1, 25.5);

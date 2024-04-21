@@ -14,31 +14,25 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: true
       - run: git checkout ${{ github.ref_name }}
         working-directory: ./traccar-web
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
           cache: gradle
       - run: ./gradlew build
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 21
           cache: npm
-          cache-dependency-path: |
-            traccar-web/package-lock.json
-            traccar-web/modern/package-lock.json
-      - run: |
-          wget -q https://trials.sencha.com/cmd/7.6.0/SenchaCmd-7.6.0.87-linux-amd64.sh.zip
-          unzip SenchaCmd-*.zip
-          ./SenchaCmd-*.sh -q
-          echo "$HOME/bin/Sencha/Cmd/" >> $GITHUB_PATH
-      - run: ./traccar-web/tools/package.sh
+          cache-dependency-path: traccar-web/package-lock.json
+      - run: npm ci && npm run build
+        working-directory: ./traccar-web
       - run: |
           sudo dpkg --add-architecture i386
           sudo apt-get update
@@ -48,10 +42,9 @@ jobs:
         working-directory: ./setup
         run: |
           wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
-          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_x64_windows_hotspot_17.0.6_10.zip
-          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.6_10.tar.gz
-          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_arm_linux_hotspot_17.0.6_10.tar.gz
-          wget -q https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.6+10/OpenJDK17U-jdk_aarch64_linux_hotspot_17.0.6_10.tar.gz
+          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2+13/OpenJDK21U-jdk_x64_windows_hotspot_21.0.2_13.zip
+          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2+13/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz
+          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2+13/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.2_13.tar.gz
           ./package.sh ${{ github.event.inputs.version }}
       - name: Upload installers
         working-directory: ./setup

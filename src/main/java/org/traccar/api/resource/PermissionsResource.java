@@ -64,7 +64,7 @@ public class PermissionsResource  extends BaseResource {
 
     @Path("bulk")
     @POST
-    public Response add(List<LinkedHashMap<String, Long>> entities) throws StorageException, ClassNotFoundException {
+    public Response add(List<LinkedHashMap<String, Long>> entities) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
@@ -74,7 +74,8 @@ public class PermissionsResource  extends BaseResource {
             cacheManager.invalidatePermission(
                     true,
                     permission.getOwnerClass(), permission.getOwnerId(),
-                    permission.getPropertyClass(), permission.getPropertyId());
+                    permission.getPropertyClass(), permission.getPropertyId(),
+                    true);
             LogAction.link(getUserId(),
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
@@ -83,13 +84,13 @@ public class PermissionsResource  extends BaseResource {
     }
 
     @POST
-    public Response add(LinkedHashMap<String, Long> entity) throws StorageException, ClassNotFoundException {
+    public Response add(LinkedHashMap<String, Long> entity) throws Exception {
         return add(Collections.singletonList(entity));
     }
 
     @DELETE
     @Path("bulk")
-    public Response remove(List<LinkedHashMap<String, Long>> entities) throws StorageException, ClassNotFoundException {
+    public Response remove(List<LinkedHashMap<String, Long>> entities) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
         for (LinkedHashMap<String, Long> entity: entities) {
@@ -99,7 +100,8 @@ public class PermissionsResource  extends BaseResource {
             cacheManager.invalidatePermission(
                     true,
                     permission.getOwnerClass(), permission.getOwnerId(),
-                    permission.getPropertyClass(), permission.getPropertyId());
+                    permission.getPropertyClass(), permission.getPropertyId(),
+                    false);
             LogAction.unlink(getUserId(),
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
@@ -108,7 +110,7 @@ public class PermissionsResource  extends BaseResource {
     }
 
     @DELETE
-    public Response remove(LinkedHashMap<String, Long> entity) throws StorageException, ClassNotFoundException {
+    public Response remove(LinkedHashMap<String, Long> entity) throws Exception {
         return remove(Collections.singletonList(entity));
     }
 

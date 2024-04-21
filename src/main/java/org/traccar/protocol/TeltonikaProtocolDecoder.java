@@ -21,7 +21,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.helper.BufferUtil;
-import org.traccar.model.Device;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -34,6 +33,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
@@ -230,7 +230,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(74, fmbXXX, (p, b) -> p.set(Position.PREFIX_TEMP + 3, b.readInt() * 0.1));
         register(75, fmbXXX, (p, b) -> p.set(Position.PREFIX_TEMP + 4, b.readInt() * 0.1));
         register(78, null, (p, b) -> {
-            long driverUniqueId = b.readLong();
+            long driverUniqueId = b.readLongLE();
             if (driverUniqueId > 0) {
                 p.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
             }
@@ -588,6 +588,38 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         }
                         index += 1;
                     }
+                } else if (id == 548 || id == 10829 || id == 10831) {
+                    ByteBuf data = buf.readSlice(length);
+                    data.readUnsignedByte(); // header
+                    for (int i = 1; data.isReadable(); i++) {
+                        ByteBuf beacon = data.readSlice(data.readUnsignedByte());
+                        while (beacon.isReadable()) {
+                            int parameterId = beacon.readUnsignedByte();
+                            int parameterLength = beacon.readUnsignedByte();
+                            switch (parameterId) {
+                                case 0:
+                                    position.set("tag" + i + "Rssi", (int) beacon.readByte());
+                                    break;
+                                case 1:
+                                    String beaconId = ByteBufUtil.hexDump(beacon.readSlice(parameterLength));
+                                    position.set("tag" + i + "Id", beaconId);
+                                    break;
+                                case 2:
+                                    String beaconData = ByteBufUtil.hexDump(beacon.readSlice(parameterLength));
+                                    position.set("tag" + i + "Data", beaconData);
+                                    break;
+                                case 13:
+                                    position.set("tag" + i + "LowBattery", beacon.readUnsignedByte());
+                                    break;
+                                case 14:
+                                    position.set("tag" + i + "Battery", beacon.readUnsignedShort());
+                                    break;
+                                default:
+                                    beacon.skipBytes(parameterLength);
+                                    break;
+                            }
+                        }
+                    }
                 } else {
                     position.set(Position.PREFIX_IO + id, ByteBufUtil.hexDump(buf.readSlice(length)));
                 }
@@ -596,6 +628,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
         decodeNetwork(position, model);
 
+        if (model != null && model.matches("FM.6..")) {
+            Long driverMsb = (Long) position.getAttributes().get("io195");
+            Long driverLsb = (Long) position.getAttributes().get("io196");
+            if (driverMsb != null && driverLsb != null) {
+                String driver = new String(ByteBuffer.allocate(16).putLong(driverMsb).putLong(driverLsb).array());
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, driver);
+            }
+        }
     }
 
     private List<Position> parseData(
@@ -613,7 +653,6 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
-        String model = getCacheManager().getObject(Device.class, deviceSession.getDeviceId()).getModel();
 
         for (int i = 0; i < count; i++) {
             Position position = new Position(getProtocolName());
@@ -639,7 +678,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             } else if (codec == CODEC_12) {
                 decodeSerial(channel, remoteAddress, deviceSession, position, buf);
             } else {
-                decodeLocation(position, buf, codec, model);
+                decodeLocation(position, buf, codec, getDeviceModel(deviceSession));
             }
 
             if (!position.getOutdated() || !position.getAttributes().isEmpty()) {

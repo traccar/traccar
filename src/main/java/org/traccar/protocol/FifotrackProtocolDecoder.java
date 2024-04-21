@@ -183,6 +183,8 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 case 30:
                 case 32:
                     return Position.ALARM_JAMMING;
+                case 31:
+                    return Position.ALARM_FALL_DOWN;
                 case 33:
                     return Position.ALARM_GEOFENCE_EXIT;
                 case 34:
@@ -192,6 +194,10 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
                 case 40:
                 case 41:
                     return Position.ALARM_TEMPERATURE;
+                case 53:
+                    return Position.ALARM_POWER_ON;
+                case 54:
+                    return Position.ALARM_POWER_OFF;
                 default:
                     return null;
             }

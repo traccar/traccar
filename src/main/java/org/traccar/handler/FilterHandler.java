@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,7 @@
  */
 package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -36,17 +34,12 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.util.Date;
 
-@Singleton
-@ChannelHandler.Sharable
-public class FilterHandler extends ChannelInboundHandlerAdapter {
+public class FilterHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterHandler.class);
 
-    private final boolean enabled;
     private final boolean filterInvalid;
     private final boolean filterZero;
     private final boolean filterDuplicate;
@@ -71,7 +64,6 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
     @Inject
     public FilterHandler(
             Config config, CacheManager cacheManager, Storage storage, StatisticsManager statisticsManager) {
-        enabled = config.getBoolean(Keys.FILTER_ENABLE);
         filterInvalid = config.getBoolean(Keys.FILTER_INVALID);
         filterZero = config.getBoolean(Keys.FILTER_ZERO);
         filterDuplicate = config.getBoolean(Keys.FILTER_DUPLICATE);
@@ -277,17 +269,8 @@ public class FilterHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof Position) {
-            Position position = (Position) msg;
-            if (enabled && filter(position)) {
-                ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
-            } else {
-                ctx.fireChannelRead(position);
-            }
-        } else {
-            super.channelRead(ctx, msg);
-        }
+    public void handlePosition(Position position, Callback callback) {
+        callback.processed(filter(position));
     }
 
 }

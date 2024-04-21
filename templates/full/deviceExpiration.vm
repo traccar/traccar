@@ -1,0 +1,7 @@
+#set($subject = "Device expiration")
+<!DOCTYPE html>
+<html>
+<body>
+Your device $device.name has expired.
+</body>
+</html>

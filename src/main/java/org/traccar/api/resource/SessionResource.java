@@ -16,10 +16,11 @@
 package org.traccar.api.resource;
 
 import org.traccar.api.BaseResource;
+import org.traccar.api.security.CodeRequiredException;
+import org.traccar.api.security.LoginResult;
 import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.database.OpenIdProvider;
-import org.traccar.helper.DataConverter;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.WebHelper;
 import org.traccar.model.User;
@@ -32,7 +33,6 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
@@ -48,8 +48,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Date;
 import java.net.URI;
@@ -60,8 +58,7 @@ import java.net.URI;
 public class SessionResource extends BaseResource {
 
     public static final String USER_ID_KEY = "userId";
-    public static final String USER_COOKIE_KEY = "user";
-    public static final String PASS_COOKIE_KEY = "password";
+    public static final String EXPIRATION_KEY = "expiration";
 
     @Inject
     private LoginService loginService;
@@ -81,48 +78,22 @@ public class SessionResource extends BaseResource {
     public User get(@QueryParam("token") String token) throws StorageException, IOException, GeneralSecurityException {
 
         if (token != null) {
-            User user = loginService.login(token);
-            if (user != null) {
+            LoginResult loginResult = loginService.login(token);
+            if (loginResult != null) {
+                User user = loginResult.getUser();
                 request.getSession().setAttribute(USER_ID_KEY, user.getId());
+                request.getSession().setAttribute(EXPIRATION_KEY, loginResult.getExpiration());
                 LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
                 return user;
             }
         }
 
         Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
-        if (userId == null) {
-
-            Cookie[] cookies = request.getCookies();
-            String email = null, password = null;
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-                    if (cookie.getName().equals(USER_COOKIE_KEY)) {
-                        byte[] emailBytes = DataConverter.parseBase64(
-                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII));
-                        email = new String(emailBytes, StandardCharsets.UTF_8);
-                    } else if (cookie.getName().equals(PASS_COOKIE_KEY)) {
-                        byte[] passwordBytes = DataConverter.parseBase64(
-                                URLDecoder.decode(cookie.getValue(), StandardCharsets.US_ASCII));
-                        password = new String(passwordBytes, StandardCharsets.UTF_8);
-                    }
-                }
-            }
-            if (email != null && password != null) {
-                User user = loginService.login(email, password);
-                if (user != null) {
-                    request.getSession().setAttribute(USER_ID_KEY, user.getId());
-                    LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
-                    return user;
-                }
-            }
-
-        } else {
-
+        if (userId != null) {
             User user = permissionsService.getUser(userId);
             if (user != null) {
                 return user;
             }
-
         }
 
         throw new WebApplicationException(Response.status(Response.Status.NOT_FOUND).build());
@@ -142,9 +113,21 @@ public class SessionResource extends BaseResource {
     @PermitAll
     @POST
     public User add(
-            @FormParam("email") String email, @FormParam("password") String password) throws StorageException {
-        User user = loginService.login(email, password);
-        if (user != null) {
+            @FormParam("email") String email,
+            @FormParam("password") String password,
+            @FormParam("code") Integer code) throws StorageException {
+        LoginResult loginResult;
+        try {
+            loginResult = loginService.login(email, password, code);
+        } catch (CodeRequiredException e) {
+            Response response = Response
+                    .status(Response.Status.UNAUTHORIZED)
+                    .header("WWW-Authenticate", "TOTP")
+                    .build();
+            throw new WebApplicationException(response);
+        }
+        if (loginResult != null) {
+            User user = loginResult.getUser();
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
             LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
             return user;
@@ -165,13 +148,17 @@ public class SessionResource extends BaseResource {
     @POST
     public String requestToken(
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
+        Date currentExpiration = (Date) request.getSession().getAttribute(EXPIRATION_KEY);
+        if (currentExpiration != null && currentExpiration.before(expiration)) {
+            expiration = currentExpiration;
+        }
         return tokenManager.generateToken(getUserId(), expiration);
     }
 
     @PermitAll
     @Path("openid/auth")
     @GET
-    public Response openIdAuth() throws IOException {
+    public Response openIdAuth() {
         return Response.seeOther(openIdProvider.createAuthUri()).build();
     }
 

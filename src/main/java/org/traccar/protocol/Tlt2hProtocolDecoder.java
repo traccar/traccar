@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,16 +55,20 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
             .text("#")
-            .number("(?:(dd)|x*)")               // cell or voltage
+            .number("(?:(dd|dddd)|x*)")          // cell or voltage
             .groupBegin()
-            .number("#(d+),")                    // mcc
+            .text("#")
+            .groupBegin()
+            .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(x+),")                     // lac
             .number("(x+)")                      // cell id
             .groupEnd("?")
+            .groupEnd("?")
             .text("$GPRMC,")
-            .number("(dd)(dd)(dd).d+,")          // time (hhmmss.sss)
+            .number("(?:(dd)(dd)(dd).d+)?,")     // time (hhmmss.sss)
             .expression("([AVL]),")              // validity
+            .groupBegin()
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(d+)(dd.d+),")              // longitude
@@ -72,14 +76,16 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*)?,")                // speed
             .number("(d+.?d*)?,")                // course
             .number("(dd)(dd)(dd)")              // date (ddmmyy)
+            .groupEnd("?")
             .any()
             .compile();
 
     private static final Pattern PATTERN_WIFI = new PatternBuilder()
             .text("#")
-            .number("(?:(dd)|x+)")               // cell or voltage
+            .number("(?:(dd|dddd)|x+)")          // cell or voltage
+            .expression("#?")
             .groupBegin()
-            .number("#(d+),")                    // mcc
+            .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(x+),")                     // lac
             .number("(x+)")                      // cell id
@@ -178,7 +184,8 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 if (parser.matches()) {
 
                     if (parser.hasNext()) {
-                        position.set(Position.KEY_BATTERY, parser.nextInt() * 0.1);
+                        int voltage = parser.nextInt();
+                        position.set(Position.KEY_BATTERY, voltage > 100 ? voltage * 0.001 : voltage * 0.1);
                     }
 
                     if (parser.hasNext(4)) {
@@ -188,17 +195,26 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                         position.setNetwork(network);
                     }
 
-                    DateBuilder dateBuilder = new DateBuilder()
-                            .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                    DateBuilder dateBuilder = new DateBuilder();
+                    if (parser.hasNext(3)) {
+                        dateBuilder.setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                    }
 
                     position.setValid(parser.next().equals("A"));
-                    position.setLatitude(parser.nextCoordinate());
-                    position.setLongitude(parser.nextCoordinate());
-                    position.setSpeed(parser.nextDouble(0));
-                    position.setCourse(parser.nextDouble(0));
 
-                    dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
-                    position.setTime(dateBuilder.getDate());
+                    if (parser.hasNext()) {
+
+                        position.setLatitude(parser.nextCoordinate());
+                        position.setLongitude(parser.nextCoordinate());
+                        position.setSpeed(parser.nextDouble(0));
+                        position.setCourse(parser.nextDouble(0));
+
+                        dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
+                        position.setTime(dateBuilder.getDate());
+
+                    } else {
+                        getLastLocation(position, null);
+                    }
 
                 } else {
                     continue;
@@ -209,7 +225,10 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                 parser = new Parser(PATTERN_WIFI, message);
                 if (parser.matches()) {
 
-                    position.set(Position.KEY_BATTERY, parser.nextInt() * 0.1);
+                    if (parser.hasNext()) {
+                        int voltage = parser.nextInt();
+                        position.set(Position.KEY_BATTERY, voltage > 100 ? voltage * 0.001 : voltage * 0.1);
+                    }
 
                     Network network = new Network();
                     if (parser.hasNext(4)) {
@@ -230,6 +249,8 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
                     dateBuilder.setDateReverse(parser.nextInt(), parser.nextInt(), parser.nextInt());
 
                     getLastLocation(position, dateBuilder.getDate());
+                } else {
+                    continue;
                 }
 
             } else {

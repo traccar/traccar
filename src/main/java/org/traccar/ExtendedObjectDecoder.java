@@ -23,7 +23,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.ReferenceCountUtil;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.handler.AcknowledgementHandler;
+import org.traccar.handler.network.AcknowledgementHandler;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.Position;
 

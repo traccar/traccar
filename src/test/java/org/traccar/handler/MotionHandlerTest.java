@@ -26,7 +26,8 @@ public class MotionHandlerTest {
 
         MotionHandler motionHandler = new MotionHandler(cacheManager);
 
-        Position position = motionHandler.handlePosition(new Position());
+        Position position = new Position();
+        motionHandler.handlePosition(position, p -> {});
 
         assertEquals(false, position.getAttributes().get(Position.KEY_MOTION));
 

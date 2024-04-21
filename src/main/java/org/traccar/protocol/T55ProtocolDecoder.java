@@ -41,7 +41,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_GPRMC = new PatternBuilder()
-            .text("$GPRMC,")
+            .text("$")
+            .expression("G[PLN]RMC,")
             .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
@@ -64,7 +65,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN_GPGGA = new PatternBuilder()
-            .text("$GPGGA,")
+            .text("$")
+            .expression("G[PLN]GGA,")
             .number("(dd)(dd)(dd).?d*,")         // time (hhmmss)
             .number("(d+)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -444,9 +446,9 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             }
         } else if (sentence.matches("^[0-9A-F]+$")) {
             getDeviceSession(channel, remoteAddress, sentence);
-        } else if (sentence.startsWith("$GPRMC")) {
+        } else if (sentence.startsWith("RMC", 3)) {
             return decodeGprmc(deviceSession, sentence, remoteAddress, channel);
-        } else if (sentence.startsWith("$GPGGA") && deviceSession != null) {
+        } else if (sentence.startsWith("GGA", 3) && deviceSession != null) {
             return decodeGpgga(deviceSession, sentence);
         } else if (sentence.startsWith("$GPRMA") && deviceSession != null) {
             return decodeGprma(deviceSession, sentence);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,8 +69,10 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             .number("x{4};")                     // sensors
             .number("(xx);")                     // status 1
             .number("(xx);")                     // status 2
+            .expression("(.*)")                  // additional data
             .groupEnd("?")
             .any()
+            .text("FIM;")
             .compile();
 
     @Override
@@ -115,9 +117,16 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_SATELLITES, parser.nextInt());
             position.set(Position.KEY_HDOP, parser.nextInt());
-            position.set(Position.PREFIX_IN + 1, parser.nextHexInt());
-            position.set(Position.PREFIX_IN + 2, parser.nextHexInt());
-            position.set(Position.PREFIX_IN + 3, parser.nextHexInt());
+
+            int inputs1 = parser.nextHexInt();
+            int inputs2 = parser.nextHexInt();
+            int inputs3 = parser.nextHexInt();
+            position.set(Position.PREFIX_IN + 1, inputs1);
+            position.set(Position.PREFIX_IN + 2, inputs2);
+            position.set(Position.PREFIX_IN + 3, inputs3);
+
+            position.set(Position.KEY_IGNITION, BitUtil.check(inputs2, 7));
+
             position.set(Position.PREFIX_OUT + 1, parser.nextHexInt());
             position.set(Position.PREFIX_OUT + 2, parser.nextHexInt());
             position.set(Position.KEY_POWER, parser.nextDouble());
@@ -125,10 +134,23 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ODOMETER, parser.nextInt());
             position.set(Position.KEY_RSSI, parser.nextInt());
             position.set(Position.PREFIX_TEMP + 1, (int) parser.nextHexInt().byteValue());
+            position.set(Position.KEY_STATUS, (parser.nextHexInt() << 8) + parser.nextHexInt());
 
-            int status = (parser.nextHexInt() << 8) + parser.nextHexInt();
-            position.set(Position.KEY_IGNITION, BitUtil.check(status, 7));
-            position.set(Position.KEY_STATUS, status);
+            String[] values = parser.next().split(";");
+            if (type == 55) {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, values[0]);
+            }
+
+            return position;
+
+        } else if (type == 134) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RESULT, String.valueOf(type));
 
             return position;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2015 Amila Silva
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,46 +16,37 @@
  */
 package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
-import org.traccar.BaseDataHandler;
+import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-
-@Singleton
-@ChannelHandler.Sharable
-public class DistanceHandler extends BaseDataHandler {
+public class DistanceHandler extends BasePositionHandler {
 
     private final CacheManager cacheManager;
 
     private final boolean filter;
-    private final int coordinatesMinError;
-    private final int coordinatesMaxError;
+    private final int minError;
+    private final int maxError;
 
     @Inject
     public DistanceHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
         this.filter = config.getBoolean(Keys.COORDINATES_FILTER);
-        this.coordinatesMinError = config.getInteger(Keys.COORDINATES_MIN_ERROR);
-        this.coordinatesMaxError = config.getInteger(Keys.COORDINATES_MAX_ERROR);
+        this.minError = config.getInteger(Keys.COORDINATES_MIN_ERROR);
+        this.maxError = config.getInteger(Keys.COORDINATES_MAX_ERROR);
     }
 
     @Override
-    protected Position handlePosition(Position position) {
+    public void handlePosition(Position position, Callback callback) {
 
         double distance = 0.0;
         if (position.hasAttribute(Position.KEY_DISTANCE)) {
             distance = position.getDouble(Position.KEY_DISTANCE);
         }
-        double totalDistance = 0.0;
-
+        double totalDistance;
         Position last = cacheManager.getPosition(position.getDeviceId());
         if (last != null) {
             totalDistance = last.getDouble(Position.KEY_TOTAL_DISTANCE);
@@ -63,11 +54,10 @@ public class DistanceHandler extends BaseDataHandler {
                 distance = DistanceCalculator.distance(
                         position.getLatitude(), position.getLongitude(),
                         last.getLatitude(), last.getLongitude());
-                distance = BigDecimal.valueOf(distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
             }
             if (filter && last.getLatitude() != 0 && last.getLongitude() != 0) {
-                boolean satisfiesMin = coordinatesMinError == 0 || distance > coordinatesMinError;
-                boolean satisfiesMax = coordinatesMaxError == 0 || distance < coordinatesMaxError;
+                boolean satisfiesMin = minError == 0 || distance > minError;
+                boolean satisfiesMax = maxError == 0 || distance < maxError || position.getValid();
                 if (!satisfiesMin || !satisfiesMax) {
                     position.setValid(last.getValid());
                     position.setLatitude(last.getLatitude());
@@ -75,12 +65,13 @@ public class DistanceHandler extends BaseDataHandler {
                     distance = 0;
                 }
             }
+        } else {
+            totalDistance = 0.0;
         }
         position.set(Position.KEY_DISTANCE, distance);
-        totalDistance = BigDecimal.valueOf(totalDistance + distance).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
-        position.set(Position.KEY_TOTAL_DISTANCE, totalDistance);
+        position.set(Position.KEY_TOTAL_DISTANCE, totalDistance + distance);
 
-        return position;
+        callback.processed(false);
     }
 
 }

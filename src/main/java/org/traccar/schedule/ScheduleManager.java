@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import org.traccar.LifecycleObject;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Stream;
 
 @Singleton
 public class ScheduleManager implements LifecycleObject {
@@ -38,12 +38,15 @@ public class ScheduleManager implements LifecycleObject {
     @Override
     public void start() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        var tasks = List.of(
+        Stream.of(
+                TaskHealthCheck.class,
+                TaskClearStatus.class,
+                TaskExpirations.class,
+                TaskDeleteTemporary.class,
                 TaskReports.class,
                 TaskDeviceInactivityCheck.class,
-                TaskWebSocketKeepalive.class,
-                TaskHealthCheck.class);
-        tasks.forEach(task -> injector.getInstance(task).schedule(executor));
+                TaskWebSocketKeepalive.class)
+                .forEachOrdered(task -> injector.getInstance(task).schedule(executor));
     }
 
     @Override

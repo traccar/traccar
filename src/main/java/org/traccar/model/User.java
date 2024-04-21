@@ -251,6 +251,26 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         this.poiLayer = poiLayer;
     }
 
+    private String totpKey;
+
+    public String getTotpKey() {
+        return totpKey;
+    }
+
+    public void setTotpKey(String totpKey) {
+        this.totpKey = totpKey;
+    }
+
+    private boolean temporary;
+
+    public boolean getTemporary() {
+        return temporary;
+    }
+
+    public void setTemporary(boolean temporary) {
+        this.temporary = temporary;
+    }
+
     @QueryIgnore
     public String getPassword() {
         return null;
