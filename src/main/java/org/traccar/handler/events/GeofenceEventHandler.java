@@ -86,10 +86,8 @@ public class GeofenceEventHandler extends BaseEventHandler {
                         } catch (Exception e) {
                             LOGGER.warn("FoxGPS - BLOQUEIO SAIU DA CERCA:" + e.getMessage());
                         }
-
                         event.setGeofenceId(geofenceId);
                     }
-
                     event.setGeofenceId(geofenceId);
                     callback.eventDetected(event);
                 }
@@ -113,14 +111,10 @@ public class GeofenceEventHandler extends BaseEventHandler {
                     } catch (Exception e) {
                         LOGGER.warn("FoxGPS - BLOQUEIO ENTROU DA CERCA:" + e.getMessage());
                     }
-
                     event.setGeofenceId(geofenceId);
                 }
-
                 event.setGeofenceId(geofenceId);
-                events.put(event, position);
-
-
+                callback.eventDetected(event);
             }
         }
     }
