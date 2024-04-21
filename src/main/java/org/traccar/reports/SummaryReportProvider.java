@@ -105,15 +105,9 @@ public class SummaryReportProvider {
             result.setDistance(PositionUtil.calculateDistance(first, last, !ignoreOdometer));
             result.setSpentFuel(reportUtils.calculateFuel(first, last));
 
-            long durationMilliseconds;
             if (first.hasAttribute(Position.KEY_HOURS) && last.hasAttribute(Position.KEY_HOURS)) {
-                durationMilliseconds = last.getLong(Position.KEY_HOURS) - first.getLong(Position.KEY_HOURS);
+                long durationMilliseconds = last.getLong(Position.KEY_HOURS) - first.getLong(Position.KEY_HOURS);
                 result.setEngineHours(durationMilliseconds);
-            } else {
-                durationMilliseconds = last.getFixTime().getTime() - first.getFixTime().getTime();
-            }
-
-            if (durationMilliseconds > 0) {
                 result.setAverageSpeed(UnitsConverter.knotsFromMps(result.getDistance() * 1000 / durationMilliseconds));
             }
 
@@ -142,15 +136,13 @@ public class SummaryReportProvider {
         if (daily) {
             while (from.truncatedTo(ChronoUnit.DAYS).isBefore(to.truncatedTo(ChronoUnit.DAYS))) {
                 ZonedDateTime fromDay = from.truncatedTo(ChronoUnit.DAYS);
-                ZonedDateTime nextDay = fromDay.plus(1, ChronoUnit.DAYS);
+                ZonedDateTime nextDay = fromDay.plusDays(1);
                 results.addAll(calculateDeviceResult(
                         device, Date.from(from.toInstant()), Date.from(nextDay.toInstant()), fast));
                 from = nextDay;
             }
-            results.addAll(calculateDeviceResult(device, Date.from(from.toInstant()), Date.from(to.toInstant()), fast));
-        } else {
-            results.addAll(calculateDeviceResult(device, Date.from(from.toInstant()), Date.from(to.toInstant()), fast));
         }
+        results.addAll(calculateDeviceResult(device, Date.from(from.toInstant()), Date.from(to.toInstant()), fast));
         return results;
     }
 
