@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // mnc
             .number("(d+),")                     // lac
             .number("(d+)")                      // cell
+            .number(",(dd)").optional()          // alarm
             .groupBegin()
             .text(",")
             .expression("(")
@@ -77,7 +78,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private static final Pattern PATTERN_HEARTBEAT = new PatternBuilder()
+    private static final Pattern PATTERN_CP01 = new PatternBuilder()
             .expression("[A-Z]{2,3}")
             .text("CP01,")
             .number("(ddd)")                     // gsm
@@ -99,7 +100,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private static final Pattern PATTERN_LBS = new PatternBuilder()
+    private static final Pattern PATTERN_AP02 = new PatternBuilder()
             .expression("[A-Z]{2,3}")
             .text("AP02,")
             .expression("[^,]+,")                // language
@@ -116,6 +117,19 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .expression(")")
             .number("d+,")                       // wifi count
             .expression("(.*)")                  // wifi
+            .compile();
+
+    private static final Pattern PATTERN_AP03 = new PatternBuilder()
+            .expression("[A-Z]{2,3}")
+            .text("AP03,")
+            .number("(ddd)")                     // rssi
+            .number("(ddd)")                     // satellites
+            .number("(ddd)")                     // battery level
+            .number("d")                         // space
+            .number("xx")                        // fortification state
+            .number("dd,")                       // working mode
+            .number("(d+),")                     // steps
+            .number("d+")                        // rolls frequency
             .compile();
 
     private Boolean decodeOptionalValue(Parser parser, int activeValue) {
@@ -183,7 +197,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.equals("CP01")) {
 
-            Parser parser = new Parser(PATTERN_HEARTBEAT, sentence);
+            Parser parser = new Parser(PATTERN_CP01, sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -234,6 +248,20 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
                     parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt()));
 
             if (parser.hasNext()) {
+                switch (parser.nextInt()) {
+                    case 1:
+                        position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                        break;
+                    case 5:
+                    case 6:
+                        position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (parser.hasNext()) {
                 decodeWifi(network, parser.next());
             }
 
@@ -243,7 +271,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type.equals("AP02")) {
 
-            Parser parser = new Parser(PATTERN_LBS, sentence);
+            Parser parser = new Parser(PATTERN_AP02, sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -272,6 +300,61 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             decodeWifi(network, parser.next());
 
             position.setNetwork(network);
+
+            return position;
+
+        } else if (type.equals("AP03")) {
+
+            Parser parser = new Parser(PATTERN_AP03, sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RSSI, parser.nextInt());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+            position.set(Position.KEY_STEPS, parser.nextInt());
+
+            return position;
+
+        } else if (type.equals("AP49") || type.equals("APHT") || type.equals("APHP") || type.equals("AP50")) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            String[] values = sentence.split(",");
+
+            switch (type) {
+                case "AP49":
+                    position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[1]));
+                    break;
+                case "APHT":
+                    position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[1]));
+                    position.set("pressureSystolic", Integer.parseInt(values[2]));
+                    position.set("pressureDiastolic", Integer.parseInt(values[3]));
+                    break;
+                case "APHP":
+                    position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[1]));
+                    position.set("pressureSystolic", Integer.parseInt(values[2]));
+                    position.set("pressureDiastolic", Integer.parseInt(values[3]));
+                    position.set("spo2", Integer.parseInt(values[4]));
+                    position.set("bloodSugar", Integer.parseInt(values[5]));
+                    position.set("temperature", Double.parseDouble(values[6]));
+                    break;
+                case "AP50":
+                    position.set("temperature", Double.parseDouble(values[1]));
+                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[2]));
+                    break;
+                default:
+                    break;
+            }
 
             return position;
 

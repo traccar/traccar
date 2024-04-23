@@ -5,19 +5,19 @@ import org.junit.jupiter.api.Test;
 import org.traccar.model.Calendar;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CalendarTest {
     
     @Test
-    public void testCalendar() throws IOException, ParserException, ParseException, SQLException {
+    public void testCalendar() throws IOException, ParserException, ParseException {
         String calendarString = "BEGIN:VCALENDAR\n" + 
                 "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" + 
                 "VERSION:2.0\n" + 
@@ -53,5 +53,37 @@ public class CalendarTest {
 
         var periods = calendar.findPeriods(format.parse("2016-12-13 06:59:59+05"));
         assertFalse(periods.isEmpty());
+    }
+
+    @Test
+    public void testCalendarOverlap() throws IOException, ParserException, ParseException {
+        String calendarString = "BEGIN:VCALENDAR\n" +
+                "VERSION:2.0\n" +
+                "PRODID:-//Traccar//NONSGML Traccar//EN\n" +
+                "BEGIN:VEVENT\n" +
+                "UID:00000000-0000-0000-0000-000000000000\n" +
+                "DTSTART;TZID=America/Los_Angeles:20240420T060000\n" +
+                "DTEND;TZID=America/Los_Angeles:20240421T060000\n" +
+                "RRULE:FREQ=DAILY\n" +
+                "SUMMARY:Event\n" +
+                "END:VEVENT\n" +
+                "END:VCALENDAR";
+        Calendar calendar = new Calendar();
+        calendar.setData(calendarString.getBytes());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+
+        var periods0 = calendar.findPeriods(format.parse("2014-05-13 07:00:00-07"));
+        var periods1 = calendar.findPeriods(format.parse("2024-05-13 05:00:00-07"));
+        var periods2 = calendar.findPeriods(format.parse("2024-05-13 07:00:00-07"));
+        var periods3 = calendar.findPeriods(format.parse("2024-05-13 08:00:00-07"));
+
+        assertEquals(periods0.size(), 0);
+        assertEquals(periods1.size(), 1);
+        assertEquals(periods2.size(), 1);
+        assertEquals(periods3.size(), 1);
+
+        assertNotEquals(periods0, periods1);
+        assertNotEquals(periods1, periods2);
+        assertEquals(periods2, periods3);
     }
 }

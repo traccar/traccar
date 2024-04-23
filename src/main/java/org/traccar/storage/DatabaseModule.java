@@ -78,7 +78,8 @@ public class DatabaseModule extends AbstractModule {
 
         DataSource dataSource = new HikariDataSource(hikariConfig);
 
-        if (config.hasKey(Keys.DATABASE_CHANGELOG)) {
+        String changelog = config.getString(Keys.DATABASE_CHANGELOG);
+        if (changelog != null && !changelog.isEmpty()) {
 
             ResourceAccessor resourceAccessor = new DirectoryResourceAccessor(new File("."));
 
@@ -88,8 +89,6 @@ public class DatabaseModule extends AbstractModule {
                     config.getString(Keys.DATABASE_PASSWORD),
                     config.getString(Keys.DATABASE_DRIVER),
                     null, null, null, resourceAccessor);
-
-            String changelog = config.getString(Keys.DATABASE_CHANGELOG);
 
             try (Liquibase liquibase = new Liquibase(changelog, resourceAccessor, database)) {
                 liquibase.clearCheckSums();

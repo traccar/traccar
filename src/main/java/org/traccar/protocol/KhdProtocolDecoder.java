@@ -171,7 +171,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 long status = buf.readUnsignedInt();
-                position.set(Position.KEY_IGNITION, BitUtil.check(status, 7 + 3 * 8));
+                position.set(Position.KEY_IGNITION, !BitUtil.check(status, 7 + 3 * 8));
                 position.set(Position.KEY_STATUS, status);
 
                 buf.readUnsignedShort();

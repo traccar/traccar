@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,12 +24,12 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 
-public class ModernDefaultServlet extends DefaultServlet {
+public class DefaultOverrideServlet extends DefaultServlet {
 
     private Resource overrideResource;
 
     @Inject
-    public ModernDefaultServlet(Config config) {
+    public DefaultOverrideServlet(Config config) {
         String override = config.getString(Keys.WEB_OVERRIDE);
         if (override != null) {
             overrideResource = Resource.newResource(new File(override));
