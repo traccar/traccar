@@ -66,13 +66,13 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf response = Unpooled.buffer();
             response.writeByte('K');
             response.writeByte(3); // protocol version
-            response.writeIntLE(0); // reserved
-            response.writeIntLE(0); // reserved
+            response.writeLongLE(0); // reserved
             response.writeShortLE(0); // encryption
+            response.writeIntLE(0); // reserved
             response.writeIntLE(answer.length());
             response.writeShortLE(index);
             response.writeByte(Checksum.sum(ByteBuffer.wrap(answer.getBytes(StandardCharsets.US_ASCII))));
-            response.writeByte(type);
+            response.writeShortLE(type);
             response.writeCharSequence(answer, StandardCharsets.US_ASCII);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
