@@ -139,12 +139,23 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                         Calendar.class, getUserId(), ((ScheduledModel) entity).getCalendarId());
             }
         }
+        int count = 0;
+        Exception ex = null
         BaseObjectManager<T> manager = Context.getManager(baseClass);
+        LinkedHashMap<String, Object> error = null;
         for (T entity: entities){
-            manager.addItem(entity);
-            LogAction.create(getUserId(), entity);
-            Context.getDataManager().linkObject(User.class, getUserId(), baseClass, entity.getId(), true);
-            LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
+            try {
+                manager.addItem(entity);
+                LogAction.create(getUserId(), entity);
+                Context.getDataManager().linkObject(User.class, getUserId(), baseClass, entity.getId(), true);
+                LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
+                count++:
+            } catch (Exception e) {
+                error.put("error", e.getMessage());
+                error.put("entity", entity);
+                error.put("inserted", count)
+                break;
+            }
         }
 
         if (manager instanceof SimpleObjectManager) {
@@ -153,7 +164,9 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
             Context.getPermissionsManager().refreshAllExtendedPermissions();
         }
-
+        if (error != null) {
+            Response.status(Response.Status.BAD_REQUEST).entity(error).build();
+        }
         return Response.ok().build();
     }
 
