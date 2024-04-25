@@ -140,7 +140,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             }
         }
         int count = 0;
-        Exception ex = null
+        Exception ex = null;
         BaseObjectManager<T> manager = Context.getManager(baseClass);
         LinkedHashMap<String, Object> error = null;
         for (T entity: entities){
@@ -149,11 +149,11 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                 LogAction.create(getUserId(), entity);
                 Context.getDataManager().linkObject(User.class, getUserId(), baseClass, entity.getId(), true);
                 LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
-                count++:
+                count++;
             } catch (Exception e) {
                 error.put("error", e.getMessage());
                 error.put("entity", entity);
-                error.put("inserted", count)
+                error.put("inserted", count);
                 break;
             }
         }
