@@ -20,6 +20,7 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -139,33 +140,20 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
                         Calendar.class, getUserId(), ((ScheduledModel) entity).getCalendarId());
             }
         }
-        int count = 0;
-        Exception ex = null;
         BaseObjectManager<T> manager = Context.getManager(baseClass);
-        LinkedHashMap<String, Object> error = null;
         for (T entity: entities){
-            try {
-                manager.addItem(entity);
-                LogAction.create(getUserId(), entity);
-                Context.getDataManager().linkObject(User.class, getUserId(), baseClass, entity.getId(), true);
-                LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
-                count++;
-            } catch (Exception e) {
-                error.put("error", e.getMessage());
-                error.put("entity", entity);
-                error.put("inserted", count);
-                break;
-            }
+            manager.addItem(entity);
+            LogAction.create(getUserId(), entity);
         }
+        Context.getDataManager().linkObjects(User.class, getUserId(), baseClass,
+                entities.stream().map(e -> e.getId()).collect(Collectors.toList()), true);
+
 
         if (manager instanceof SimpleObjectManager) {
             ((SimpleObjectManager<T>) manager).refreshUserItems();
         } else if (baseClass.equals(Group.class) || baseClass.equals(Device.class)) {
             Context.getPermissionsManager().refreshDeviceAndGroupPermissions();
             Context.getPermissionsManager().refreshAllExtendedPermissions();
-        }
-        if (error != null) {
-            Response.status(Response.Status.BAD_REQUEST).entity(error).build();
         }
         return Response.ok().build();
     }

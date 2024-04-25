@@ -487,6 +487,20 @@ public class DataManager {
         }
     }
 
+    public void linkObjects(Class<?> owner, long ownerId, Class<?> property, List<Long> propertyIds, boolean link)
+            throws SQLException {
+        if (link) {
+            StringBuilder query = new StringBuilder("INSERT INTO " + getPermissionsTableName(owner, property)
+                    + " (" + makeNameId(owner) + ", " + makeNameId(property) + ") VALUES "
+                    + " (" + ownerId + ", " + propertyIds.get(0) + ") ");
+            for(int i=1; i<propertyIds.size(); i++) {
+                query.append(String.format(",(%d,%d)", ownerId, propertyIds.get(i)));
+            }
+            LOGGER.error(query.toString());
+            QueryBuilder.create(dataSource, query.toString()).executeUpdate();
+        }
+    }
+
 
     public <T extends BaseModel> T getObject(Class<T> clazz, long entityId) throws SQLException {
         return QueryBuilder.create(dataSource, getQuery(ACTION_SELECT, clazz))
