@@ -68,8 +68,8 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
             response.writeByte(3); // protocol version
             response.writeLongLE(0); // reserved
             response.writeShortLE(0); // encryption
-            response.writeIntLE(0); // reserved
             response.writeIntLE(answer.length());
+            response.writeIntLE(0); // reserved
             response.writeShortLE(index);
             response.writeByte(Checksum.sum(ByteBuffer.wrap(answer.getBytes(StandardCharsets.US_ASCII))));
             response.writeShortLE(type);
