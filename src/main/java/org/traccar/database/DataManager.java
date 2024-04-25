@@ -484,6 +484,16 @@ public class DataManager {
             query.append(String.join(",", s));
             LOGGER.error(query.toString());
             QueryBuilder.create(dataSource, query.toString()).executeUpdate();
+        } else {
+            StringBuilder query = new StringBuilder("DELETE FROM " + getPermissionsTableName(owner, property) + " WHERE ");
+            List<String> s = permissions.stream().map(p -> String.format("(%s=%d AND %s=%d)",
+                    makeNameId(owner),
+                    p.getOwnerId(),
+                    makeNameId(property),
+                    p.getPropertyId())).collect(Collectors.toList());
+            query.append(String.join(" OR ", s));
+            LOGGER.error(query.toString());
+            QueryBuilder.create(dataSource, query.toString()).executeUpdate();
         }
     }
 
