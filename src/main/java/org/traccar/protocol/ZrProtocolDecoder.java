@@ -138,7 +138,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0x2310:
                     long value = valueBuf.readLong();
-                    position.set(Position.KEY_ALARM, decode2310(value));
+                    position.set(Position.KEY_ALARM, decodeAlarmTag(value));
 
                     if (BitUtil.check(value, 12)) {
                         deviceSession.set(Position.KEY_IGNITION, true);
@@ -161,7 +161,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private String decode2310(long value) {
+    private String decodeAlarmTag(long value) {
         if (BitUtil.check(value, 3)) {
             return Position.ALARM_POWER_OFF;
         }
@@ -210,7 +210,6 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         buffer.writeBytes(body);
         buffer.writeByte(Checksum.xor(buffer.nioBuffer(2, buffer.writerIndex() - 2))); // check sum
         buffer.writeBytes(ByteBufUtil.decodeHexDump("ffff"));
-
         return buffer;
     }
 
@@ -252,7 +251,6 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
     private static void addGeneralResponseTag(ByteBuf bodyBuf, int frameType, Integer packageNo) {
         bodyBuf.writeShort(0x23a0);
         bodyBuf.writeShort(7); // len
-
         bodyBuf.writeShort(packageNo);
         bodyBuf.writeByte(0);
         bodyBuf.writeShort(frameType);
