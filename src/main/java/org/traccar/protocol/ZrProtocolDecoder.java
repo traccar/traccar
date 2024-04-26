@@ -198,8 +198,8 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
 
     public static ByteBuf formatMessage(int type, ByteBuf id, short editionNum, byte encryptionType, Integer packageNo, ByteBuf body) {
         ByteBuf buffer = Unpooled.buffer();
-        buffer.writeBytes(ByteBufUtil.decodeHexDump("dddd"));
-        buffer.writeShort(body.readableBytes() + 20); // Message length, please specify one at will
+        buffer.writeShort(0xdddd);
+        buffer.writeShort(body.readableBytes() + 20);
         buffer.writeShort(editionNum);
         buffer.writeByte(encryptionType);
         buffer.writeBytes(id);
@@ -209,7 +209,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
         buffer.writeByte(body.readableBytes());
         buffer.writeBytes(body);
         buffer.writeByte(Checksum.xor(buffer.nioBuffer(2, buffer.writerIndex() - 2))); // check sum
-        buffer.writeBytes(ByteBufUtil.decodeHexDump("ffff"));
+        buffer.writeShort(0xffff);
         return buffer;
     }
 
@@ -245,7 +245,7 @@ public class ZrProtocolDecoder extends BaseProtocolDecoder {
     public static void addAuthTag(ByteBuf bodyBuf) {
         bodyBuf.writeShort(0x2391);
         bodyBuf.writeShort(3);
-        bodyBuf.writeBytes(ByteBufUtil.decodeHexDump("123456"));
+        bodyBuf.writeBytes(new byte[]{0x12, 0x34, 0x56});
     }
 
     private static void addGeneralResponseTag(ByteBuf bodyBuf, int frameType, Integer packageNo) {
