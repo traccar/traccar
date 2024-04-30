@@ -78,9 +78,9 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private static final Pattern PATTERN_CP01 = new PatternBuilder()
+    private static final Pattern PATTERN_AP01 = new PatternBuilder()
             .expression("[A-Z]{2,3}")
-            .text("CP01,")
+            .text("AP01,")
             .number("(ddd)")                     // gsm
             .number("(ddd)")                     // gps
             .number("(ddd)")                     // battery
@@ -195,9 +195,9 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (type.equals("CP01")) {
+        if (type.equals("AP01")) {
 
-            Parser parser = new Parser(PATTERN_CP01, sentence);
+            Parser parser = new Parser(PATTERN_AP01, sentence);
             if (!parser.matches()) {
                 return null;
             }
