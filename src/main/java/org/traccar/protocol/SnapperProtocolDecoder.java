@@ -115,6 +115,19 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
         String content = buf.readCharSequence(buf.readableBytes(), StandardCharsets.US_ASCII).toString();
         JsonObject json = Json.createReader(new StringReader(content)).readObject();
 
+        int flags = Integer.parseInt(json.getString("f"), 16);
+        if (!BitUtil.check(flags, 3)) {
+            return;
+        }
+
+        position.setValid(BitUtil.check(flags, 1));
+        if (!BitUtil.check(flags, 6)) {
+            position.setLatitude(-position.getLatitude());
+        }
+        if (!BitUtil.check(flags, 7)) {
+            position.setLongitude(-position.getLongitude());
+        }
+
         DateFormat dateFormat = new SimpleDateFormat("ddMMyyHHmmss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         position.setTime(dateFormat.parse(json.getString("d") + json.getString("t").split("\\.")[0]));
@@ -123,15 +136,6 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(Integer.parseInt(lat.substring(0, 2)) + Double.parseDouble(lat.substring(2)) / 60);
         String lon = json.getString("lo");
         position.setLongitude(Integer.parseInt(lon.substring(0, 3)) + Double.parseDouble(lon.substring(3)) / 60);
-
-        int flags = Integer.parseInt(json.getString("f"), 16);
-        position.setValid(BitUtil.check(flags, 1));
-        if (!BitUtil.check(flags, 6)) {
-            position.setLatitude(-position.getLatitude());
-        }
-        if (!BitUtil.check(flags, 7)) {
-            position.setLongitude(-position.getLongitude());
-        }
 
         position.setAltitude(Double.parseDouble(json.getString("a")));
         position.setSpeed(Double.parseDouble(json.getString("s")));
@@ -204,6 +208,9 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
                             buf.skipBytes(partLength);
                             break;
                     }
+                }
+                if (position.getFixTime() == null) {
+                    getLastLocation(position, null);
                 }
                 return position;
             default:
