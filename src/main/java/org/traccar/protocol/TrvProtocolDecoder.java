@@ -345,7 +345,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
                     position.set("pressureSystolic", Integer.parseInt(values[2]));
                     position.set("pressureDiastolic", Integer.parseInt(values[3]));
                     position.set("spo2", Integer.parseInt(values[4]));
-                    position.set("bloodSugar", Integer.parseInt(values[5]));
+                    position.set("bloodSugar", Double.parseDouble(values[5]));
                     position.set("temperature", Double.parseDouble(values[6]));
                     break;
                 case "AP50":
