@@ -232,7 +232,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(75, fmbXXX, (p, b) -> p.set(Position.PREFIX_TEMP + 4, b.readInt() * 0.1));
         register(78, null, (p, b) -> {
             long driverUniqueId = b.readLongLE();
-            if (driverUniqueId > 0) {
+            if (driverUniqueId != 0) {
                 p.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
             }
         });
