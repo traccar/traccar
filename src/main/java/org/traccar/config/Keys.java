@@ -1443,10 +1443,17 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Filter position if the daily limit is exceeded for the device.
+     * Throttle positions if the daily limit is exceeded for the device.
      */
     public static final ConfigKey<Integer> FILTER_DAILY_LIMIT = new IntegerConfigKey(
             "filter.dailyLimit",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Throttling interval if the limit exceeded. The value is in seconds.
+     */
+    public static final ConfigKey<Integer> FILTER_DAILY_LIMIT_INTERVAL = new IntegerConfigKey(
+            "filter.dailyLimitInterval",
             List.of(KeyType.CONFIG));
 
     /**
