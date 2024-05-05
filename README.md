@@ -1,55 +1,40 @@
-# [Traccar Custom](https://www.traccar.org)
-
-[![GitHub Release](https://badgen.net/github/assets-dl/mr-wolf-gb/traccar-custom)]()
-[![GitHub Release](https://badgen.net/github/release/mr-wolf-gb/traccar-custom/stable)]()
-[![Licence](https://badgen.net/github/license/mr-wolf-gb/traccar-custom)]()
-[![Open Source](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://opensource.org/)
+# [Traccar](https://www.traccar.org)
 
 ## Overview
 
 Traccar is an open source GPS tracking system. This repository contains Java-based back-end service. It supports more than 200 GPS protocols and more than 2000 models of GPS tracking devices. Traccar can be used with any major SQL database system. It also provides easy to use [REST API](https://www.traccar.org/traccar-api/).
 
-**This version is a fork of the original [TRACCAR](https://github.com/traccar/traccar) repository aimed at adding some useful features**
+Other parts of Traccar solution include:
 
-## Features in this version
+- [Traccar web app](https://github.com/traccar/traccar-web)
+- [Traccar Manager Android app](https://github.com/traccar/traccar-manager-android)
+- [Traccar Manager iOS app](https://github.com/traccar/traccar-manager-ios)
 
-1. **_`Websocket` can be accessed from external Hosts (App):_**
+There is also a set of mobile apps that you can use for tracking mobile devices:
 
-##### Using _Session ID_
+- [Traccar Client Android app](https://github.com/traccar/traccar-client-android)
+- [Traccar Client iOS app](https://github.com/traccar/traccar-client-ios)
 
-The session ID can be retrieved as cookies from the response on these API endpoints :
+## Features
 
-- [api/session](https://www.traccar.org/api-reference/#tag/Session/paths/~1session/post) | _Create a new Session_
-- [api/session?token=](https://www.traccar.org/api-reference/#tag/Session/paths/~1session/get) | _Fetch Session information_
-- [api/devices](https://www.traccar.org/api-reference/#tag/Devices/paths/~1devices/get) | _Fetch a list of Devices_
+Some of the available features include:
 
-```js
-const socket = new WebSocket("./api/socket?session=node01d8bcd8o4su6u1ug70qdrena0i1");
-socket.onerror = (error) => {
-  console.log("socket error: ", error);
-};
-socket.onmessage = function (event) {
-  console.log("socket message : ", data);
-};
-```
+- Real-time GPS tracking
+- Driver behaviour monitoring
+- Detailed and summary reports
+- Geofencing functionality
+- Alarms and notifications
+- Account and device management
+- Email and SMS support
 
-##### Using user _Access Token_
+## Build
 
-```js
-const socket = new WebSocket("./api/socket?token=SDBGAiEA4SC67Qk5lrCsB2I53EDp5gAR1uips64FRn6W0Dt0jrMCIQDnZ.....");
-socket.onerror = (error) => {
-  console.log("socket error: ", error);
-};
-socket.onmessage = function (event) {
-  console.log("socket message : ", data);
-};
-```
+Please read [build from source documentation](https://www.traccar.org/build/) on the official website.
 
-2. **_Add `api/session/check-sid?sid=[SESSION_ID]` to check if the session is still active or not_**
+## Team
 
-## Related projects
-
-- **[Laravel Traccar package](https://github.com/mr-wolf-gb/traccar)**
+- Anton Tananaev ([anton@traccar.org](mailto:anton@traccar.org))
+- Andrey Kunitsyn ([andrey@traccar.org](mailto:andrey@traccar.org))
 
 ## License
 
