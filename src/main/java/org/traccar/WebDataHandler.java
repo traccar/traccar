@@ -223,7 +223,9 @@ public class WebDataHandler extends BaseDataHandler {
         private void send() {
             if (json) {
                 try {
-                    Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(payload), mediaType);
+                    String value = objectMapper.writeValueAsString(payload);
+                    LOGGER.error(value);
+                    Entity<String> entity = Entity.entity(value, mediaType);
                     requestBuilder.async().post(entity, this);
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException("Failed to serialize location to json", e);
