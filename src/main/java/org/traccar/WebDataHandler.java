@@ -223,9 +223,7 @@ public class WebDataHandler extends BaseDataHandler {
         private void send() {
             if (json) {
                 try {
-                    String value = objectMapper.writeValueAsString(payload);
-                    LOGGER.error(value);
-                    Entity<String> entity = Entity.entity(value, mediaType);
+                    Entity<String> entity = Entity.entity(objectMapper.writeValueAsString(payload), mediaType);
                     requestBuilder.async().post(entity, this);
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException("Failed to serialize location to json", e);
@@ -266,7 +264,12 @@ public class WebDataHandler extends BaseDataHandler {
 
         @Override
         public void failed(Throwable throwable) {
-            LOGGER.warn("Position forwarding failed:", throwable);
+            LOGGER.error("Position forwarding failed", throwable);
+            try {
+                LOGGER.error(objectMapper.writeValueAsString(payload));
+            } catch (JsonProcessingException e) {
+                LOGGER.error("json error", e);
+            }
             retry();
         }
 
