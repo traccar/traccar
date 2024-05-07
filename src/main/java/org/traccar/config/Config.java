@@ -92,7 +92,13 @@ public class Config {
     }
 
     public boolean getBoolean(ConfigKey<Boolean> key) {
-        return Boolean.parseBoolean(getString(key.getKey()));
+        String value = getString(key.getKey());
+        if (value != null) {
+            return Boolean.parseBoolean(value);
+        } else {
+            Boolean defaultValue = key.getDefaultValue();
+            return Objects.requireNonNullElse(defaultValue, false);
+        }
     }
 
     public int getInteger(ConfigKey<Integer> key) {
