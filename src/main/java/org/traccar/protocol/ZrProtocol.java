@@ -34,7 +34,6 @@ public class ZrProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(2048, 2, 2, 2, 0));
                 pipeline.addLast(new ZrProtocolDecoder(ZrProtocol.this));
-                pipeline.addLast(new ZrProtocolEncoder(ZrProtocol.this));
             }
         });
     }
