@@ -84,35 +84,35 @@ public final class LogAction {
         if (remoteAddress == null || remoteAddress.isEmpty()) {
             remoteAddress = "unknown";
         }
-        LOGGER.info(String.format(PATTERN_LOGIN_FAILED, remoteAddress));
+        LOGGER.error(String.format(PATTERN_LOGIN_FAILED, remoteAddress));
     }
 
     public static void resetDeviceAccumulators(long userId, long deviceId) {
-        LOGGER.info(String.format(
+        LOGGER.error(String.format(
                 PATTERN_DEVICE_ACCUMULATORS, userId, ACTION_DEVICE_ACCUMULATORS, deviceId));
     }
 
     private static void logObjectAction(String action, long userId, Class<?> clazz, long objectId) {
-        LOGGER.info(String.format(
+        LOGGER.error(String.format(
                 PATTERN_OBJECT, userId, action, Introspector.decapitalize(clazz.getSimpleName()), objectId));
     }
 
     private static void logLinkAction(
             String action, long userId, Class<?> owner, long ownerId, Class<?> property, long propertyId) {
-        LOGGER.info(String.format(
+        LOGGER.error(String.format(
                 PATTERN_LINK, userId, action,
                 Introspector.decapitalize(owner.getSimpleName()), ownerId,
                 Introspector.decapitalize(property.getSimpleName()), propertyId));
     }
 
     private static void logLoginAction(String action, long userId) {
-        LOGGER.info(String.format(PATTERN_LOGIN, userId, action));
+        LOGGER.error(String.format(PATTERN_LOGIN, userId, action));
     }
 
     public static void logReport(
             long userId, String report, Date from, Date to, List<Long> deviceIds, List<Long> groupIds) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        LOGGER.info(String.format(
+        LOGGER.error(String.format(
                 PATTERN_REPORT, userId, report,
                 dateFormat.format(from), dateFormat.format(to),
                 deviceIds.toString(), groupIds.toString()));
