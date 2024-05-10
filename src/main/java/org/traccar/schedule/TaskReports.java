@@ -28,6 +28,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Report;
 import org.traccar.model.User;
+import org.traccar.reports.DeviceGroupQuery;
 import org.traccar.reports.EventsReportProvider;
 import org.traccar.reports.RouteReportProvider;
 import org.traccar.reports.StopsReportProvider;
@@ -100,12 +101,12 @@ public class TaskReports implements ScheduleTask {
     private void executeReport(Report report, Date from, Date to) throws StorageException {
 
         var deviceIds = storage.getObjects(Device.class, new Request(
-                new Columns.Include("id"),
-                new Condition.Permission(Device.class, Report.class, report.getId())))
+                        new Columns.Include("id"),
+                        new Condition.Permission(Device.class, Report.class, report.getId())))
                 .stream().map(BaseModel::getId).collect(Collectors.toList());
         var groupIds = storage.getObjects(Group.class, new Request(
-                new Columns.Include("id"),
-                new Condition.Permission(Group.class, Report.class, report.getId())))
+                        new Columns.Include("id"),
+                        new Condition.Permission(Group.class, Report.class, report.getId())))
                 .stream().map(BaseModel::getId).collect(Collectors.toList());
         var users = storage.getObjects(User.class, new Request(
                 new Columns.Include("id"),
@@ -119,27 +120,52 @@ public class TaskReports implements ScheduleTask {
                 case "events":
                     var eventsReportProvider = injector.getInstance(EventsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, List.of(), from, to));
+                            stream, List.of(), new DeviceGroupQuery(
+                                    user.getId(),
+                                    deviceIds,
+                                    groupIds,
+                                    from,
+                                    to)));
                     break;
                 case "route":
                     var routeReportProvider = injector.getInstance(RouteReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> routeReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
+                            stream, new DeviceGroupQuery(
+                                    user.getId(),
+                                    deviceIds,
+                                    groupIds,
+                                    from,
+                                    to)));
                     break;
                 case "summary":
                     var summaryReportProvider = injector.getInstance(SummaryReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> summaryReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to, false));
+                            stream, false, new DeviceGroupQuery(
+                                    user.getId(),
+                                    deviceIds,
+                                    groupIds,
+                                    from,
+                                    to)));
                     break;
                 case "trips":
                     var tripsReportProvider = injector.getInstance(TripsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> tripsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
+                            stream, new DeviceGroupQuery(
+                                    user.getId(),
+                                    deviceIds,
+                                    groupIds,
+                                    from,
+                                    to)));
                     break;
                 case "stops":
                     var stopsReportProvider = injector.getInstance(StopsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> stopsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
+                            stream, new DeviceGroupQuery(
+                                    user.getId(),
+                                    deviceIds,
+                                    groupIds,
+                                    from,
+                                    to)));
                     break;
                 default:
                     LOGGER.warn("Unsupported report type {}", report.getType());

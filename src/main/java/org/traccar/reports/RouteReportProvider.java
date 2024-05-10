@@ -41,7 +41,6 @@ import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -60,17 +59,17 @@ public class RouteReportProvider {
         this.storage = storage;
     }
 
-    public Collection<Position> getObjects(long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws StorageException {
-        reportUtils.checkPeriodLimit(from, to);
+    public Collection<Position> getObjects(DeviceGroupQuery deviceGroupQuery) throws StorageException {
+        reportUtils.checkPeriodLimit(deviceGroupQuery.getFrom(), deviceGroupQuery.getTo());
 
         ArrayList<Position> result = new ArrayList<>();
-        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            result.addAll(PositionUtil.getPositions(storage, device.getId(), from, to));
+        for (Device device : DeviceUtil.getAccessibleDevices(storage, deviceGroupQuery.getUserId(),
+                deviceGroupQuery.getDeviceIds(), deviceGroupQuery.getGroupIds())) {
+            result.addAll(PositionUtil.getPositions(storage, device.getId(), deviceGroupQuery.getFrom(),
+                    deviceGroupQuery.getTo()));
         }
         return result;
     }
-
 
     private String getUniqueSheetName(String key) {
         namesCount.compute(key, (k, value) -> value == null ? 1 : (value + 1));
@@ -78,14 +77,15 @@ public class RouteReportProvider {
     }
 
     public void getExcel(OutputStream outputStream,
-            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws StorageException, IOException {
-        reportUtils.checkPeriodLimit(from, to);
+            DeviceGroupQuery deviceGroupQuery) throws StorageException, IOException {
+        reportUtils.checkPeriodLimit(deviceGroupQuery.getFrom(), deviceGroupQuery.getTo());
 
         ArrayList<DeviceReportSection> devicesRoutes = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
+        for (Device device : DeviceUtil.getAccessibleDevices(storage, deviceGroupQuery.getUserId(),
+                deviceGroupQuery.getDeviceIds(), deviceGroupQuery.getGroupIds())) {
+            var positions = PositionUtil.getPositions(storage, device.getId(), deviceGroupQuery.getFrom(),
+                    deviceGroupQuery.getTo());
             DeviceReportSection deviceRoutes = new DeviceReportSection();
             deviceRoutes.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(getUniqueSheetName(deviceRoutes.getDeviceName())));
@@ -102,11 +102,11 @@ public class RouteReportProvider {
 
         File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "route.xlsx").toFile();
         try (InputStream inputStream = new FileInputStream(file)) {
-            var context = reportUtils.initializeContext(userId);
+            var context = reportUtils.initializeContext(deviceGroupQuery.getUserId());
             context.putVar("devices", devicesRoutes);
             context.putVar("sheetNames", sheetNames);
-            context.putVar("from", from);
-            context.putVar("to", to);
+            context.putVar("from", deviceGroupQuery.getFrom());
+            context.putVar("to", deviceGroupQuery.getTo());
             reportUtils.processTemplateWithSheets(inputStream, outputStream, context);
         }
     }

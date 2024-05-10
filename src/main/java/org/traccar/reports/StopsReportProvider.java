@@ -32,6 +32,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -40,7 +41,6 @@ import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 
 public class StopsReportProvider {
 
@@ -56,26 +56,29 @@ public class StopsReportProvider {
     }
 
     public Collection<StopReportItem> getObjects(
-            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws StorageException {
-        reportUtils.checkPeriodLimit(from, to);
+            DeviceGroupQuery deviceGroupQuery) throws StorageException {
+        reportUtils.checkPeriodLimit(deviceGroupQuery.getFrom(), deviceGroupQuery.getTo());
 
         ArrayList<StopReportItem> result = new ArrayList<>();
-        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            result.addAll(reportUtils.detectTripsAndStops(device, from, to, StopReportItem.class));
+        for (Device device : DeviceUtil.getAccessibleDevices(storage, deviceGroupQuery.getUserId(),
+                deviceGroupQuery.getDeviceIds(), deviceGroupQuery.getGroupIds())) {
+            result.addAll(reportUtils.detectTripsAndStops(device, deviceGroupQuery.getFrom(), deviceGroupQuery.getTo(),
+                    StopReportItem.class));
         }
         return result;
     }
 
     public void getExcel(
-            OutputStream outputStream, long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws StorageException, IOException {
-        reportUtils.checkPeriodLimit(from, to);
+            OutputStream outputStream,
+            DeviceGroupQuery deviceGroupQuery) throws StorageException, IOException {
+        reportUtils.checkPeriodLimit(deviceGroupQuery.getFrom(), deviceGroupQuery.getTo());
 
         ArrayList<DeviceReportSection> devicesStops = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
-        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(device, from, to, StopReportItem.class);
+        for (Device device : DeviceUtil.getAccessibleDevices(storage, deviceGroupQuery.getUserId(),
+                deviceGroupQuery.getDeviceIds(), deviceGroupQuery.getGroupIds())) {
+            Collection<StopReportItem> stops = reportUtils.detectTripsAndStops(device, deviceGroupQuery.getFrom(),
+                    deviceGroupQuery.getTo(), StopReportItem.class);
             DeviceReportSection deviceStops = new DeviceReportSection();
             deviceStops.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceStops.getDeviceName()));
@@ -92,11 +95,11 @@ public class StopsReportProvider {
 
         File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "stops.xlsx").toFile();
         try (InputStream inputStream = new FileInputStream(file)) {
-            var context = reportUtils.initializeContext(userId);
+            var context = reportUtils.initializeContext(deviceGroupQuery.getUserId());
             context.putVar("devices", devicesStops);
             context.putVar("sheetNames", sheetNames);
-            context.putVar("from", from);
-            context.putVar("to", to);
+            context.putVar("from", deviceGroupQuery.getFrom());
+            context.putVar("to", deviceGroupQuery.getTo());
             reportUtils.processTemplateWithSheets(inputStream, outputStream, context);
         }
     }
