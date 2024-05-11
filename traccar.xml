@@ -74,12 +74,7 @@
 
   <entry key='gl200.ignoreFixTime'>true</entry>
 
-  <entry key='teltonika.timeout'>120</entry>
-  <entry key='osmand.timeout'>120</entry>
-  <entry key='gps103.timeout'>120</entry>
-  <entry key='gl200.timeout'>120</entry>
-  <entry key='falcom.timeout'>120</entry>
-  <entry key='mxt.timeout'>120</entry>
+  <entry key='server.timeout'>120</entry>
 
   <entry key='falcom.port'>5195</entry>
 
