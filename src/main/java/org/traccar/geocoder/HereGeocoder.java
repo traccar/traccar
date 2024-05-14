@@ -24,7 +24,7 @@ public class HereGeocoder extends JsonGeocoder {
             url = "https://reverse.geocoder.ls.hereapi.com/6.2/reversegeocode.json";
         }
         url += "?mode=retrieveAddresses&maxresults=1";
-        url += "&prox=%f,%f,0";
+        url += "&at=%f,%f,0";
         url += "&app_id=" + id;
         url += "&app_code=" + key;
         url += "&apiKey=" + key;
@@ -42,41 +42,37 @@ public class HereGeocoder extends JsonGeocoder {
     @Override
     public Address parseAddress(JsonObject json) {
         JsonObject result = json
-                .getJsonObject("Response")
-                .getJsonArray("View")
+                .getJsonArray("items")
                 .getJsonObject(0)
-                .getJsonArray("Result")
-                .getJsonObject(0)
-                .getJsonObject("Location")
-                .getJsonObject("Address");
+                .getJsonObject("address");
 
         if (result != null) {
             Address address = new Address();
 
-            if (result.containsKey("Label")) {
-                address.setFormattedAddress(result.getString("Label"));
+            if (result.containsKey("label")) {
+                address.setFormattedAddress(result.getString("label"));
             }
 
-            if (result.containsKey("HouseNumber")) {
-                address.setHouse(result.getString("HouseNumber"));
+            if (result.containsKey("houseNumber")) {
+                address.setHouse(result.getString("houseNumber"));
             }
-            if (result.containsKey("Street")) {
-                address.setStreet(result.getString("Street"));
+            if (result.containsKey("street")) {
+                address.setStreet(result.getString("street"));
             }
-            if (result.containsKey("City")) {
-                address.setSettlement(result.getString("City"));
+            if (result.containsKey("city")) {
+                address.setSettlement(result.getString("city"));
             }
-            if (result.containsKey("District")) {
-                address.setDistrict(result.getString("District"));
+            if (result.containsKey("district")) {
+                address.setDistrict(result.getString("district"));
             }
-            if (result.containsKey("State")) {
-                address.setState(result.getString("State"));
+            if (result.containsKey("state")) {
+                address.setState(result.getString("state"));
             }
-            if (result.containsKey("Country")) {
-                address.setCountry(result.getString("Country").toUpperCase());
+            if (result.containsKey("countryCode")) {
+                address.setCountry(result.getString("countryCode").toUpperCase());
             }
-            if (result.containsKey("PostalCode")) {
-                address.setPostcode(result.getString("PostalCode"));
+            if (result.containsKey("postalCode")) {
+                address.setPostcode(result.getString("postalCode"));
             }
 
             return address;
