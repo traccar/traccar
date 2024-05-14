@@ -60,6 +60,7 @@ public  class CustomGeocoder implements Geocoder {
 
         if (json != null) {
             String formattedAddress = json.replace(";;", ";").replace(";", ", ");
+            formattedAddress = formattedAddress.substring(0, formattedAddress.length()-1);
             if (cache != null) {
                 cache.put(new AbstractMap.SimpleImmutableEntry<>(latitude, longitude), formattedAddress);
             }
