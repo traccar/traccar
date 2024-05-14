@@ -48,7 +48,7 @@
   <entry key='geocoder.enable'>true</entry>
   <entry key='geocoder.type'>here</entry>
   <entry key='geocoder.url'>https://revgeocode.search.hereapi.com/v1/revgeocode</entry>
-  <entry key='geocoder.reuseDistance'>10</entry>
+  <entry key='geocoder.reuseDistance'>25</entry>
   <entry key='geocoder.cacheSize'>8000</entry>
   <entry key='geocoder.processInvalidPositions'>true</entry>
   <entry key='geocoder.language'>en</entry>
