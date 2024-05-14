@@ -68,8 +68,8 @@ public class HereGeocoder extends JsonGeocoder {
             if (result.containsKey("state")) {
                 address.setState(result.getString("state"));
             }
-            if (result.containsKey("countryCode")) {
-                address.setCountry(result.getString("countryCode").toUpperCase());
+            if (result.containsKey("countryName")) {
+                address.setCountry(result.getString("countryName").toUpperCase());
             }
             if (result.containsKey("postalCode")) {
                 address.setPostcode(result.getString("postalCode"));
