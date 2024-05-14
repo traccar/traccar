@@ -49,7 +49,7 @@
   <entry key='geocoder.type'>here</entry>
   <entry key='geocoder.url'>https://reverse.geocoder.ls.hereapi.com/6.2/reversegeocode.json</entry>
   <entry key='geocoder.reuseDistance'>10</entry>
-  <entry key='geocoder.cacheSize'>4000</entry>
+  <entry key='geocoder.cacheSize'>8000</entry>
   <entry key='geocoder.processInvalidPositions'>true</entry>
   <entry key='geocoder.language'>en</entry>
   <entry key='geocoder.format'>%f</entry>
