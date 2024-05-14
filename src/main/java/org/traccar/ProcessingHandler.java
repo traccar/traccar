@@ -101,8 +101,8 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
                 GeocoderHandler.class,
                 SpeedLimitHandler.class,
                 MotionHandler.class,
-                EngineHoursHandler.class,
                 ComputedAttributesHandler.class,
+                EngineHoursHandler.class,
                 CopyAttributesHandler.class,
                 PositionForwardingHandler.class,
                 DatabaseHandler.class)
