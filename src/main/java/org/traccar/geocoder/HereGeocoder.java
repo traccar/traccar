@@ -16,6 +16,7 @@
 package org.traccar.geocoder;
 
 import javax.json.JsonObject;
+import java.util.Random;
 
 public class HereGeocoder extends JsonGeocoder {
 
@@ -27,7 +28,8 @@ public class HereGeocoder extends JsonGeocoder {
         url += "&at=%f,%f,0";
         url += "&app_id=" + id;
         url += "&app_code=" + key;
-        url += "&apiKey=" + key;
+        String[] keys = key.split(",");
+        url += "&apiKey=" + keys[new Random().nextInt(keys.length)];
         if (language != null) {
             url += "&lang=" + language;
         }
