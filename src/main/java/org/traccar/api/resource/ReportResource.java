@@ -326,7 +326,7 @@ public class ReportResource extends SimpleObjectResource<Report> {
     @Path("devices/{type:xlsx|mail}")
     @GET
     @Produces(EXCEL)
-    public Response geDevicesExcel(
+    public Response getDevicesExcel(
             @PathParam("type") String type) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), type.equals("mail"), stream -> {

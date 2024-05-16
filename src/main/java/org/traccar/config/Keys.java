@@ -23,7 +23,7 @@ public final class Keys {
     }
 
     /**
-     * Network interface for a the protocol. If not specified, server will bind all interfaces.
+     * Network interface for the protocol. If not specified, server will bind all interfaces.
      */
     public static final ConfigSuffix<String> PROTOCOL_ADDRESS = new StringConfigSuffix(
             ".address",
@@ -33,7 +33,7 @@ public final class Keys {
      * Port number for the protocol. Most protocols use TCP on the transport layer. Some protocols use UDP. Some
      * support both TCP and UDP.
      */
-    public static final ConfigSuffix<Integer> PROTOCOL_PORT = new IntegerConfigSuffix(
+    public static final ConfigSuffix<Integer> PROTOCOL_PORT = new PortConfigSuffix(
             ".port",
             List.of(KeyType.CONFIG));
 
@@ -601,7 +601,7 @@ public final class Keys {
             "uid");
 
     /**
-     * LDAP attribute used as user name. Default value is 'cn'.
+     * LDAP attribute used as username. Default value is 'cn'.
      */
     public static final ConfigKey<String> LDAP_NAME_ATTRIBUTE = new StringConfigKey(
             "ldap.nameAttribute",
@@ -674,7 +674,7 @@ public final class Keys {
     /**
      * OpenID Connect Authorization URL.
      * This can usually be found in the documentation of your identity provider or by using the well-known
-     * configuration endpoint, e.g. https://auth.example.com//.well-known/openid-configuration
+     * configuration endpoint, e.g. https://auth.example.com/.well-known/openid-configuration
      * Required to enable SSO if openid.issuerUrl is not set.
      */
     public static final ConfigKey<String> OPENID_AUTH_URL = new StringConfigKey(
@@ -1443,10 +1443,17 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Filter position if the daily limit is exceeded for the device.
+     * Throttle positions if the daily limit is exceeded for the device.
      */
     public static final ConfigKey<Integer> FILTER_DAILY_LIMIT = new IntegerConfigKey(
             "filter.dailyLimit",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Throttling interval if the limit exceeded. The value is in seconds.
+     */
+    public static final ConfigKey<Integer> FILTER_DAILY_LIMIT_INTERVAL = new IntegerConfigKey(
+            "filter.dailyLimitInterval",
             List.of(KeyType.CONFIG));
 
     /**

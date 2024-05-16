@@ -1,10 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
-
 <!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
-
 <properties>
-
-    <entry key='config.default'>./setup/default.xml</entry>
 
     <entry key='web.path'>./traccar-web/simple</entry>
     <entry key='web.debug'>true</entry>
