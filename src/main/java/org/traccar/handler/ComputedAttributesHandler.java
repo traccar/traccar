@@ -41,6 +41,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Date;
 
 public class ComputedAttributesHandler extends BasePositionHandler {
 
@@ -63,7 +64,7 @@ public class ComputedAttributesHandler extends BasePositionHandler {
         sandbox.allow(Math.class.getName());
         List.of(
             Double.class, Float.class, Integer.class, Long.class, Short.class,
-            Character.class, Boolean.class, String.class, Byte.class)
+            Character.class, Boolean.class, String.class, Byte.class, Date.class)
                 .forEach((type) -> sandbox.allow(type.getName()));
         features = new JexlFeatures()
                 .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
