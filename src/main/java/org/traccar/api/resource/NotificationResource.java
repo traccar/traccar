@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Path("notifications")
 @Produces(MediaType.APPLICATION_JSON)
@@ -80,8 +82,11 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
 
     @GET
     @Path("notificators")
-    public Collection<Typed> getNotificators() {
-        return notificatorManager.getAllNotificatorTypes();
+    public Collection<Typed> getNotificators(@QueryParam("announcement") boolean announcement) {
+        Set<String> announcementsUnsupported = Set.of("command", "web");
+        return notificatorManager.getAllNotificatorTypes().stream()
+                .filter(typed -> !announcement || !announcementsUnsupported.contains(typed.getType()))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     @POST
