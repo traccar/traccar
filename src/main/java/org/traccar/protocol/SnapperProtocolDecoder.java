@@ -150,7 +150,15 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        buf.readUnsignedByte(); // header
+        byte header = buf.readByte();
+        if (header == 'P') {
+            if (channel != null) {
+                ByteBuf response = Unpooled.wrappedBuffer(new byte[] {0x50, 0x4f});
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            }
+            return null;
+        }
+
         buf.readUnsignedByte(); // protocol version
         buf.readUnsignedIntLE(); // system bonus identifier
 

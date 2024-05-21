@@ -15,14 +15,11 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import jakarta.inject.Inject;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
-
-import java.nio.ByteOrder;
 
 public class SnapperProtocol extends BaseProtocol {
 
@@ -31,7 +28,7 @@ public class SnapperProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new LengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, 1024, 12, 4, 9, 0, true));
+                pipeline.addLast(new SnapperFrameDecoder());
                 pipeline.addLast(new SnapperProtocolDecoder(SnapperProtocol.this));
             }
         });
