@@ -25,6 +25,8 @@ import org.jxls.formula.StandardFormulaProcessor;
 import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.database.DeviceManager;
 import org.traccar.database.IdentityManager;
@@ -115,6 +117,8 @@ public final class ReportUtils {
         return distance;
     }
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportUtils.class);
+
     private static boolean isValid(Position start, Position end, double distance) {
         if (distance < 0) {
             return false;
@@ -133,6 +137,9 @@ public final class ReportUtils {
         // can data can vary 200 meters in one second
         int maxSpeed = start.getAttributes().containsKey(Position.KEY_ODOMETER) && t < 5000 ?
                 1000 : (xpertPosition(start) ? 100 : 200);
+        if (averageSpeed >= maxSpeed) {
+            LOGGER.error(String.format("avgSpeed: %d, maxSpeed: %d, deviceId: %d, fixTime: %s", averageSpeed, maxSpeed, start.getDeviceId(), start.getFixTime()));
+        }
         return averageSpeed < maxSpeed;
     }
 
