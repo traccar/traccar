@@ -34,7 +34,7 @@ import java.util.Locale;
 
 public final class Main {
 
-    public static final String version = "1.0";
+    public static final String version = "1.1";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 
