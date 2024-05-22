@@ -138,7 +138,7 @@ public final class ReportUtils {
         int maxSpeed = start.getAttributes().containsKey(Position.KEY_ODOMETER) && t < 5000 ?
                 1000 : (xpertPosition(start) ? 100 : 200);
 
-        LOGGER.error(String.format("avgSpeed: %d, maxSpeed: %d, deviceId: %d, fixTime: %s", averageSpeed, maxSpeed, start.getDeviceId(), start.getFixTime()));
+        LOGGER.error("avgSpeed: " + averageSpeed + " " + maxSpeed + " " +  start.getDeviceId() + " " + start.getFixTime());
         return averageSpeed < maxSpeed;
     }
 
