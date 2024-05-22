@@ -140,12 +140,12 @@ public final class ReportUtils {
 
         LOGGER.error("avgSpeed: " + averageSpeed + " " + maxSpeed + " " +  start.getDeviceId() + " " + start.getFixTime() +
                 " " + start.getAttributes().containsKey(Position.KEY_ODOMETER) + " " + start.getProtocol() + " " +
-                (start.getAttributes().containsKey(Position.KEY_ODOMETER) && start.getProtocol() == "osmand"));
+                xpertPosition(start));
         return averageSpeed < maxSpeed;
     }
 
     private static boolean xpertPosition(Position position) {
-        return position.getAttributes().containsKey(Position.KEY_ODOMETER) && position.getProtocol() == "osmand";
+        return position.getAttributes().containsKey(Position.KEY_ODOMETER) && position.getProtocol().equals("osmand");
     }
 
     public static double calculateDistance(
