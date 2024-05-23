@@ -11,7 +11,7 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new GlobalstarProtocolDecoder(null));
 
-        decoder.setAlternative(true);
+        decoder.setModelOverride("AtlasTrax");
 
         verifyNull(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n",
@@ -24,7 +24,7 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
                 "</stuMessage>\n",
                 "</stuMessages>")));
 
-        decoder.setAlternative(false);
+        decoder.setModelOverride(null);
 
         verifyPositions(decoder, request(HttpMethod.POST, "/", buffer(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
