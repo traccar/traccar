@@ -69,6 +69,13 @@ public class DistanceHandler extends BasePositionHandler {
             totalDistance = 0.0;
         }
         position.set(Position.KEY_DISTANCE, distance);
+        
+        // * CUSTOM CODE START * //
+        
+        position.setDistance(distance);
+        
+        // * CUSTOM CODE END * //
+
         position.set(Position.KEY_TOTAL_DISTANCE, totalDistance + distance);
 
         callback.processed(false);

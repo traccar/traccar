@@ -1327,6 +1327,14 @@ public final class Keys {
             false);
 
     /**
+     * Use distance column value in positions table while calculating distance in any report. Else, by default 
+     * the report uses totalDistance or Odomoter value to calculate distance.
+     */
+    public static final ConfigKey<Boolean> REPORT_USE_DISTANCE_COLUMN = new BooleanConfigKey(
+            "report.useDistanceColumn",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Boolean flag to enable or disable position filtering.
      */
     public static final ConfigKey<Boolean> FILTER_ENABLE = new BooleanConfigKey(

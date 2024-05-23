@@ -12,6 +12,12 @@
       <column name="temporary" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
+    <addColumn tableName="tc_positions">
+      <column name="distance" type="DOUBLE">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+
   </changeSet>
 
 </databaseChangeLog>

@@ -82,6 +82,15 @@ public class SummaryReportProvider {
         result.setDeviceId(device.getId());
         result.setDeviceName(device.getName());
 
+        // * CUSTOM CODE START * //
+        
+        boolean useDistanceColumn = config.getBoolean(Keys.REPORT_USE_DISTANCE_COLUMN);
+
+        var totalDistance = 0.0;
+        var totalDistanceValid = useDistanceColumn;
+
+        // * CUSTOM CODE END * //
+
         Position first = null;
         Position last = null;
         if (fast) {
@@ -96,13 +105,39 @@ public class SummaryReportProvider {
                 if (position.getSpeed() > result.getMaxSpeed()) {
                     result.setMaxSpeed(position.getSpeed());
                 }
+
+                // * CUSTOM CODE START * //
+               
+                if (totalDistanceValid) {
+                    try {
+                        totalDistance += position.getDistance();
+                    } catch (Exception e) {
+                        totalDistanceValid = false;
+                    }
+                }
+               
+                // * CUSTOM CODE END * //
+
                 last = position;
             }
         }
 
         if (first != null && last != null) {
             boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
-            result.setDistance(PositionUtil.calculateDistance(first, last, !ignoreOdometer));
+
+            // * CUSTOM CODE START * //
+          
+            if (totalDistanceValid) {
+                result.setDistance(totalDistance);
+            } else {
+                result.setDistance(PositionUtil.calculateDistance(first, last, !ignoreOdometer));
+            }
+
+            // result.setDistance(PositionUtil.calculateDistance(first, last, !ignoreOdometer));
+
+            // * CUSTOM CODE END * //
+
+
             result.setSpentFuel(reportUtils.calculateFuel(first, last));
 
             long durationMilliseconds;
@@ -162,7 +197,7 @@ public class SummaryReportProvider {
         var tz = UserUtil.getTimezone(permissionsService.getServer(), permissionsService.getUser(userId)).toZoneId();
 
         ArrayList<SummaryReportItem> result = new ArrayList<>();
-        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
+        for (Device device : DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             var deviceResults = calculateDeviceResults(
                     device, from.toInstant().atZone(tz), to.toInstant().atZone(tz), daily);
             for (SummaryReportItem summaryReport : deviceResults) {

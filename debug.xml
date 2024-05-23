@@ -31,4 +31,12 @@
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
 
+    <entry key='filter.enable'>true</entry>
+    <entry key='filter.zero'>true</entry>
+    <entry key='filter.distance'>20</entry>
+    <entry key='filter.maxSpeed'>25000</entry>
+    <entry key='filter.invalid'>true</entry>
+    <entry key='filter.duplicate'>true</entry>
+
+    <entry key='report.ignoreOdometer'>false</entry>
 </properties>

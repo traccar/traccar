@@ -15,18 +15,25 @@
  */
 package org.traccar.schedule;
 
-import com.google.inject.Injector;
-import com.google.inject.servlet.RequestScoper;
-import com.google.inject.servlet.ServletScopes;
-import net.fortuna.ical4j.model.Period;
+import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TimeZone;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.model.UserUtil;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Report;
+import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.reports.EventsReportProvider;
 import org.traccar.reports.RouteReportProvider;
@@ -40,13 +47,12 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import com.google.inject.Injector;
+import com.google.inject.servlet.RequestScoper;
+import com.google.inject.servlet.ServletScopes;
+
 import jakarta.inject.Inject;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import net.fortuna.ical4j.model.Period;
 
 public class TaskReports implements ScheduleTask {
 
@@ -94,6 +100,38 @@ public class TaskReports implements ScheduleTask {
         }
     }
 
+    // * CUSTOM CODE START * //
+    private List<Group> getGroupsList(List<Long> groupIds) throws StorageException {
+        List<Group> result = new LinkedList<>();
+        for (Long groupId : groupIds) {
+            result.addAll(storage.getObjects(Group.class, new Request(
+                    new Columns.All(),
+                    new Condition.Equals("id", groupId))));
+        }
+        return result;
+    }
+
+    private List<Device> getDevicesList(List<Long> deviceIds) throws StorageException {
+        List<Device> result = new LinkedList<>();
+        for (Long deviceId : deviceIds) {
+            result.addAll(storage.getObjects(Device.class, new Request(
+                    new Columns.All(),
+                    new Condition.Equals("id", deviceId))));
+        }
+        return result;
+    }
+
+    private TimeZone getUserPreferredTimeZone(User user) throws StorageException {
+
+        Server server = storage.getObject(
+                Server.class, new Request(new Columns.All()));
+
+        var tz = UserUtil.getTimezone(server, user);
+        return tz;
+    }
+
+    // * CUSTOM CODE END * //
+
     private void executeReport(Report report, Date from, Date to) throws StorageException {
 
         var deviceIds = storage.getObjects(Device.class, new Request(
@@ -111,32 +149,65 @@ public class TaskReports implements ScheduleTask {
         ReportMailer reportMailer = injector.getInstance(ReportMailer.class);
 
         for (User user : users) {
+            // * CUSTOM CODE START * //
+            TimeZone tz = TimeZone.getTimeZone("UTC");
+            try {
+                tz = getUserPreferredTimeZone(user);
+            } catch (StorageException e) {
+                e.printStackTrace();
+            }
+            // * CUSTOM CODE END * //
+
             LogAction.logReport(user.getId(), true, report.getType(), from, to, deviceIds, groupIds);
             switch (report.getType()) {
                 case "events":
                     var eventsReportProvider = injector.getInstance(EventsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, List.of(), from, to));
+                            stream, user.getId(), deviceIds, groupIds, List.of(), from, to),
+                    // * CUSTOM CODE START * //
+                            report.getType(), from,
+                            to, getDevicesList(deviceIds), getGroupsList(groupIds), tz
+                    // * CUSTOM CODE END * //
+                    );
                     break;
                 case "route":
                     var routeReportProvider = injector.getInstance(RouteReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> routeReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
+                            stream, user.getId(), deviceIds, groupIds, from, to),
+                    // * CUSTOM CODE START * //
+                            report.getType(), from, to,
+                            getDevicesList(deviceIds), getGroupsList(groupIds), tz
+                    // * CUSTOM CODE END * //
+                    );
                     break;
                 case "summary":
                     var summaryReportProvider = injector.getInstance(SummaryReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> summaryReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to, false));
+                            stream, user.getId(), deviceIds, groupIds, from, to, false),
+                    // * CUSTOM CODE START * //
+                            report.getType(), from, to, getDevicesList(deviceIds), getGroupsList(groupIds), tz
+                    // * CUSTOM CODE END * //
+                    );
                     break;
                 case "trips":
                     var tripsReportProvider = injector.getInstance(TripsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> tripsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
+                            stream, user.getId(), deviceIds, groupIds, from, to),
+                    // * CUSTOM CODE START * //
+                            report.getType(), from, to,
+                            getDevicesList(deviceIds), getGroupsList(groupIds), tz
+                    // * CUSTOM CODE END * //
+                    );
                     break;
                 case "stops":
                     var stopsReportProvider = injector.getInstance(StopsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> stopsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
+                            stream, user.getId(), deviceIds, groupIds, from, to),
+                    // * CUSTOM CODE START * //
+                            report.getType(), from, to,
+                            getDevicesList(deviceIds), getGroupsList(groupIds), tz
+                    // * CUSTOM CODE END * //
+                    );
                     break;
                 default:
                     LOGGER.warn("Unsupported report type {}", report.getType());

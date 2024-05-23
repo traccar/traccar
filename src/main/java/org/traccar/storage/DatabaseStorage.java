@@ -178,6 +178,50 @@ public class DatabaseStorage extends Storage {
         }
     }
 
+    // * CUSTOM CODE START * //
+
+    @Override
+    public void addPermissions(List<Permission> permissions) throws StorageException {
+        if (permissions.isEmpty()) {
+            return;
+        }
+
+        StringBuilder query = new StringBuilder("INSERT INTO ");
+        query.append(permissions.get(0).getStorageName());
+        query.append(" (");
+        query.append(permissions.get(0).get().keySet().stream().map(key -> key).collect(Collectors.joining(", ")));
+        query.append(") VALUES ");
+
+        for (int i = 0; i < permissions.size(); i++) {
+            var iStr = Integer.toString(i);
+            query.append("(");
+            query.append(permissions.get(i).get().keySet().stream().map(key -> ':' + key + iStr)
+                    .collect(Collectors.joining(", ")));
+            query.append(")");
+            if (i < permissions.size() - 1) {
+                query.append(", ");
+            }
+        }
+
+        try {
+            QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true);
+
+            for (int i = 0; i < permissions.size(); i++) {
+                var iStr = Integer.toString(i);
+                for (var entry : permissions.get(i).get().entrySet()) {
+                    builder.setLong(entry.getKey() + iStr, entry.getValue());
+                }
+            }
+
+            builder.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        }
+    }
+
+    // * CUSTOM CODE END * //
+
     @Override
     public void removePermission(Permission permission) throws StorageException {
         StringBuilder query = new StringBuilder("DELETE FROM ");
@@ -195,6 +239,34 @@ public class DatabaseStorage extends Storage {
             throw new StorageException(e);
         }
     }
+
+    // * CUSTOM CODE START * //
+
+    @Override
+    public void removePermissions(List<Permission> permissions) throws StorageException {
+        if (permissions.isEmpty()) {
+            return;
+        }
+        StringBuilder query = new StringBuilder("DELETE FROM ");
+        query.append(permissions.get(0).getStorageName());
+        query.append(" WHERE ");
+        query.append(permissions.get(0)
+                .get().keySet().stream().map(key -> key + " = :" + key).collect(Collectors.joining(" AND ")));
+        try {
+            QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true);
+            for (Permission permission : permissions) {
+                for (var entry : permission.get().entrySet()) {
+                    builder.setLong(entry.getKey(), entry.getValue());
+                }
+                builder.addBatch();
+            }
+            builder.executeBatch();
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        }
+    }
+
+    // * CUSTOM CODE END * //
 
     private String getStorageName(Class<?> clazz) throws StorageException {
         StorageName storageName = clazz.getAnnotation(StorageName.class);

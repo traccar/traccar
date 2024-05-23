@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class DeviceReportSection {
+public class DeviceReportSection<T> {
 
     private String deviceName;
 
@@ -42,14 +42,22 @@ public class DeviceReportSection {
         this.groupName = groupName;
     }
 
-    private List<?> objects;
+    private List<T> objects;
 
-    public Collection<?> getObjects() {
+    public Collection<T> getObjects() {
         return objects;
     }
 
-    public void setObjects(Collection<?> objects) {
+    public void setObjects(Collection<T> objects) {
         this.objects = new ArrayList<>(objects);
+    }
+
+    public void addObjects(Collection<T> objects) {
+        if (this.objects == null) {
+            this.setObjects(objects);
+            return;
+        }
+        this.objects.addAll(objects);
     }
 
 }

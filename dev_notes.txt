@@ -1,0 +1,58 @@
+Test Server:
+- gradle test
+
+Compile Server:
+- ./gradlew assemble
+
+Compile Web Modern:
+- cd traccar-web/modern
+- npm i && npm run build
+- cd ../../
+
+Deploy Steps:
+- Build Server
+- Build Modern Web App
+- cd setup/
+- sh package.sh 5.6 linux-64
+- On both Prod servers:
+    - rm /home/bunny/build/*
+- Transfer build to server:
+    - rsync -a --progress traccar-linux-64-5.6.zip nconnect_gps:/home/bunny/build/
+    - rsync -a --progress traccar-linux-64-5.6.zip nspira_gps:/home/bunny/build/
+    - Repeat above step for nspira_gps too.
+- ssh into each server:
+    - mkdir ./backup/<date>/
+    - cp /opt/traccar/conf/traccar.xml ./backup/<date>/
+    - sudo service traccar stop && cd build/ && unzip traccar-linux-*.zip && sudo ./traccar.run
+    - Check if all okay:
+        - sudo nano /opt/traccar/conf/traccar.xml
+    - cd /opt/traccar/ && ls -lt
+    - sudo service traccar start && tail -f /opt/traccar/logs/tracker-server.log
+- Check respective URLs, Login + Check console.
+
+Transfer code command example:
+- rsync -a --progress traccar-linux-64-5.6.zip nconnect_gps:/home/bunny/build/
+
+Check server logs:
+- tail -f /opt/traccar/logs/tracker-server.log
+- grep 866897057683700 tracker-server.log
+- For grep, add "-B 10" option to show +10 lines before the grep match line.
+
+Check traccar service logs:
+- sudo journalctl -u traccar.service --since "2022-07-11" --no-pager
+- sudo journalctl -u traccar.service -f --since "1 hour ago"
+- sudo journalctl -u traccar.service -f --since "1 second ago"
+- sudo journalctl -u traccar.service --since "2023-04-15 02:28:00" --until "2023-04-15 02:30:00" --no-pager
+
+Sync Tags from Upstream/master:
+- https://stackoverflow.com/questions/70678073/how-do-i-sync-tags-to-a-forked-github-repo
+    - git fetch --tags upstream
+    - git push --tags
+
+Test protocol message:
+- cd tools/
+- ./hex.sh 5089 2424434c49454e545f314e532c3232303530313036322c312c31372e3435363330362c37382e3338393339372c3232303633303030303030312c412c32332c302c3536333932392c3330322c32302c302e3538303030302c302c302c37322c302c302c302c302c302c302c302c302c302c302c302c312c302c302c302c302c302c302c302c302c302c302c302c302c302c302c302c302c302c302c302c302c31323435312c333934382c2a30380d0a
+
+Run server locally:
+- VSCode: Run with / without debugging
+- Web app: cd traccar-web/modern/ && npm run start

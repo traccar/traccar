@@ -55,7 +55,11 @@ import org.traccar.handler.events.MotionEventHandler;
 import org.traccar.handler.events.OverspeedEventHandler;
 import org.traccar.handler.network.AcknowledgementHandler;
 import org.traccar.helper.PositionLogger;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -76,6 +80,9 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
     private final List<BasePositionHandler> positionHandlers;
     private final List<BaseEventHandler> eventHandlers;
     private final PostProcessHandler postProcessHandler;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProcessingHandler.class);
+
+    private final CacheManager cacheManager;
 
     private final Map<Long, Queue<Position>> queues = new HashMap<>();
 
@@ -85,10 +92,12 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
 
     @Inject
     public ProcessingHandler(
-            Injector injector, Config config, NotificationManager notificationManager, PositionLogger positionLogger) {
+            Injector injector, Config config, NotificationManager notificationManager, PositionLogger positionLogger,
+            CacheManager cacheManager) {
         this.notificationManager = notificationManager;
         this.positionLogger = positionLogger;
         bufferingManager = new BufferingManager(config, this);
+        this.cacheManager = cacheManager;
 
         positionHandlers = Stream.of(
                 OutdatedHandler.class,
@@ -132,6 +141,27 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Position) {
+
+            Position position = (Position) msg;
+            Device device = cacheManager.getObject(Device.class, position.getDeviceId());
+
+            if (!position.hasAttribute(Position.KEY_HOURS)) {
+
+                LOGGER.warn("Position has no hours attribute. Device Id: " + position.getDeviceId()
+                        + ", Newly Inserting Position Id: " + position.getId());
+
+                LOGGER.warn("Device's latest position id: " + device.getPositionId());
+
+                Position cachePresentLatestPosition = cacheManager.getPosition(device.getId());
+
+                if (cachePresentLatestPosition != null) {
+                    LOGGER.warn("Cache present latest position item id for this device: "
+                            + cachePresentLatestPosition.getId());
+                } else {
+                    LOGGER.warn("No cache present latest position item for this device id: " + device.getId());
+                }
+            }
+
             bufferingManager.accept(ctx, (Position) msg);
         } else {
             super.channelRead(ctx, msg);

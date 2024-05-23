@@ -121,6 +121,24 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:[01],){4}")              // reserved
             .number("(d+),")                     // external voltage
             .number("(d+),")                     // internal voltage
+
+            // * CUSTOM CODE START * //
+
+            .or()
+            .number("(d+),")                     // course
+            .number("(d+),")                     // satellites
+            .number("(d+.d+),")                  // hdop
+            .number("(?:d+,){2}")                // reserved
+            .number("(d+),")                     // adc - skip in code
+            .number("(?:d+),")                   // event flag
+            .number("(d+),")                     // external voltage
+            .number("(d+),")                     // internal voltage
+            .number("(?:d+),")                   // trip time
+            .number("(d+),")                     // sensor id
+            .expression("([^,*]+)")              // sensor data
+
+            // * CUSTOM CODE END * //
+
             .groupEnd()
             .or()
             .number("(d+),")                     // sensor id
@@ -206,7 +224,29 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, parser.nextInt(0));
             position.set(Position.KEY_BATTERY, parser.nextInt(0));
 
-        } else if (parser.hasNext(2)) {
+        } 
+       
+        // * CUSTOM CODE START * //
+        
+        else if (parser.hasNext(8)) {
+
+            position.setCourse(parser.nextInt(0));
+
+            position.set(Position.KEY_SATELLITES, parser.nextInt(0));
+            position.set(Position.KEY_HDOP, parser.nextDouble(0));
+            parser.skip(1);
+            position.set(Position.KEY_POWER, parser.nextInt(0));
+            position.set(Position.KEY_BATTERY, parser.nextInt(0));
+            position.set("sensorId", parser.nextInt());
+            var sensorData = parser.next();
+            position.set("sensorData", sensorData);
+            // position.set(Position.KEY_IGNITION, sensorData != "1||");
+
+        }  
+        
+        // * CUSTOM CODE END * //
+        
+        else if (parser.hasNext(2)) {
 
             position.set("sensorId", parser.nextInt());
             position.set("sensorData", parser.next());
