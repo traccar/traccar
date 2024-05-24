@@ -410,7 +410,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(short value) {
+    private String decodeAlarm(short value, String model) {
+        boolean modelLW = model != null && model.startsWith("LW");
         switch (value) {
             case 0x01:
                 return Position.ALARM_SOS;
@@ -427,7 +428,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_OVERSPEED;
             case 0x0E:
             case 0x0F:
-            case 0x19:
                 return Position.ALARM_LOW_BATTERY;
             case 0x11:
                 return Position.ALARM_POWER_OFF;
@@ -438,17 +438,21 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case 0x14:
                 return Position.ALARM_DOOR;
             case 0x18:
-                return Position.ALARM_REMOVING;
-            case 0x23:
-                return Position.ALARM_FALL_DOWN;
+                return modelLW ? Position.ALARM_ACCIDENT : Position.ALARM_REMOVING;
+            case 0x19:
+                return modelLW ? Position.ALARM_ACCELERATION : Position.ALARM_LOW_BATTERY;
+            case 0x1A:
             case 0x28:
                 return Position.ALARM_BRAKING;
-            case 0x29:
-                return Position.ALARM_ACCELERATION;
+            case 0x1B:
             case 0x2A:
             case 0x2B:
             case 0x2E:
                 return Position.ALARM_CORNERING;
+            case 0x23:
+                return Position.ALARM_FALL_DOWN;
+            case 0x29:
+                return Position.ALARM_ACCELERATION;
             case 0x2C:
                 return Position.ALARM_ACCIDENT;
             case 0x30:
@@ -831,7 +835,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     int satellites = BitUtil.between(signal, 10, 15) + BitUtil.between(signal, 5, 10);
                     position.set(Position.KEY_SATELLITES, satellites);
                     position.set(Position.KEY_RSSI, BitUtil.to(signal, 5));
-                    position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                    position.set(Position.KEY_ALARM, decodeAlarm(
+                            buf.readUnsignedByte(), getDeviceModel(deviceSession)));
                     buf.readUnsignedByte(); // language
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     buf.readUnsignedByte(); // working mode
@@ -842,7 +847,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     short alarmExtension = buf.readUnsignedByte();
                     if (variant != Variant.VXT01) {
-                        position.set(Position.KEY_ALARM, decodeAlarm(alarmExtension));
+                        position.set(Position.KEY_ALARM, decodeAlarm(alarmExtension, getDeviceModel(deviceSession)));
                     }
                 }
             }
@@ -881,7 +886,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     decodeStatus(position, buf);
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                    position.set(Position.KEY_ALARM, decodeAlarm(
+                            buf.readUnsignedByte(), getDeviceModel(deviceSession)));
                     position.set("oil", buf.readUnsignedShort());
                     int temperature = buf.readUnsignedByte();
                     if (BitUtil.check(temperature, 7)) {
