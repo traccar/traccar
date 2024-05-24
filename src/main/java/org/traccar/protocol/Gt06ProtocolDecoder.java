@@ -411,7 +411,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(short value, String model) {
-        boolean modelLW = model != null && model.startsWith("LW");
+        boolean modelLW = model != null && model.toUpperCase().startsWith("LW");
         switch (value) {
             case 0x01:
                 return Position.ALARM_SOS;
