@@ -132,45 +132,45 @@ public class DeviceResource extends BaseObjectResource<Device> {
             @QueryParam("uniqueId") List<String> uniqueIds,
             @QueryParam("id") List<Long> deviceIds) throws StorageException {
 
-        if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
+         if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
 
-            List<Device> result = new LinkedList<>();
-            for (String uniqueId : uniqueIds) {
-                result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
-                        new Condition.And(
-                                new Condition.Equals("uniqueId", uniqueId),
-                                new Condition.Permission(User.class, getUserId(), Device.class)))));
-            }
-            for (Long deviceId : deviceIds) {
-                result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
-                        new Condition.And(
-                                new Condition.Equals("id", deviceId),
-                                new Condition.Permission(User.class, getUserId(), Device.class)))));
-            }
-            return result;
+             List<Device> result = new LinkedList<>();
+             for (String uniqueId : uniqueIds) {
+                 result.addAll(storage.getObjects(Device.class, new Request(
+                         new Columns.All(),
+                         new Condition.And(
+                                 new Condition.Equals("uniqueId", uniqueId),
+                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
+             }
+             for (Long deviceId : deviceIds) {
+                 result.addAll(storage.getObjects(Device.class, new Request(
+                         new Columns.All(),
+                         new Condition.And(
+                                 new Condition.Equals("id", deviceId),
+                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
+             }
+             return result;
 
-        } else {
+         } else {
 
-            var conditions = new LinkedList<Condition>();
+             var conditions = new LinkedList<Condition>();
 
-            if (all) {
-                if (permissionsService.notAdmin(getUserId())) {
-                    conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
-                }
-            } else {
-                if (userId == 0) {
-                    conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
-                } else {
-                    permissionsService.checkUser(getUserId(), userId);
-                    conditions.add(new Condition.Permission(User.class, userId, baseClass).excludeGroups());
-                }
-            }
+             if (all) {
+                 if (permissionsService.notAdmin(getUserId())) {
+                     conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
+                 }
+             } else {
+                 if (userId == 0) {
+                     conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
+                 } else {
+                     permissionsService.checkUser(getUserId(), userId);
+                     conditions.add(new Condition.Permission(User.class, userId, baseClass).excludeGroups());
+                 }
+             }
 
-            return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
+             return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
 
-        }
+         }
     }
 
     // * CUSTOM CODE START * //

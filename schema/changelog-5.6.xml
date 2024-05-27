@@ -12,6 +12,12 @@
       <column name="motionstreak" type="BOOLEAN" defaultValueBoolean="false" />
     </addColumn>
 
+    <addColumn tableName="tc_positions">
+      <column name="distance" type="DOUBLE">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+
     <createTable tableName="tc_reports">
       <column name="id" type="INT" autoIncrement="true">
         <constraints primaryKey="true" />

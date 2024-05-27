@@ -20,23 +20,31 @@
 
     <entry key='mail.debug'>true</entry>
 
-    <entry key='database.driver'>org.h2.Driver</entry>
+    <!-- <entry key='database.driver'>org.h2.Driver</entry>
     <entry key='database.url'>jdbc:h2:./target/database</entry>
     <entry key='database.user'>sa</entry>
-    <entry key='database.password'></entry>
+    <entry key='database.password'></entry> -->
 
     <!--<entry key='server.instantAcknowledgement'>true</entry>
     <entry key='server.buffering.threshold'>5000</entry>-->
+
+    <entry key='database.driver'>com.mysql.cj.jdbc.Driver</entry>
+    <entry key='database.url'>jdbc:mysql://localhost/traccar?serverTimezone=UTC&amp;allowPublicKeyRetrieval=true&amp;useSSL=false&amp;allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>
+    <entry key='database.user'>root</entry>
+    <entry key='database.password'>root</entry>
 
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
 
     <entry key='filter.enable'>true</entry>
     <entry key='filter.zero'>true</entry>
-    <entry key='filter.distance'>20</entry>
-    <entry key='filter.maxSpeed'>25000</entry>
-    <entry key='filter.invalid'>true</entry>
-    <entry key='filter.duplicate'>true</entry>
+    <!-- <entry key='filter.distance'>20</entry> -->
+    <!-- <entry key='filter.maxSpeed'>25000</entry> -->
+    <!-- <entry key='filter.invalid'>true</entry> -->
+    <!-- <entry key='filter.duplicate'>true</entry> -->
+    <entry key='geocoder.enable'>false</entry>
+    <entry key='geocoder.onRequest'>false</entry>
+    <entry key='geocoder.ignorePositions'>true</entry>
 
     <entry key='report.ignoreOdometer'>false</entry>
 </properties>
