@@ -11,6 +11,12 @@
     <dropColumn tableName="tc_servers" columnName="twelvehourformat" />
     <dropColumn tableName="tc_users" columnName="twelvehourformat" />
 
+    <addColumn tableName="tc_attributes">
+      <column name="priority" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
   </changeSet>
 
 </databaseChangeLog>
