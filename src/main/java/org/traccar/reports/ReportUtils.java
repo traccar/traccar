@@ -137,10 +137,7 @@ public final class ReportUtils {
         // can data can vary 200 meters in one second
         int maxSpeed = start.getAttributes().containsKey(Position.KEY_ODOMETER) && t < 5000 ?
                 1000 : (xpertPosition(start) ? 80 : 200);
-
-        LOGGER.error("avgSpeed: " + averageSpeed + " " + maxSpeed + " " +  start.getDeviceId() + " " + start.getFixTime() +
-                " " + start.getAttributes().containsKey(Position.KEY_ODOMETER) + " " + start.getProtocol() + " " +
-                xpertPosition(start));
+        
         return averageSpeed < maxSpeed;
     }
 
