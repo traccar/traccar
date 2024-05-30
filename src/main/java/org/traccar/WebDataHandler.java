@@ -257,20 +257,24 @@ public class WebDataHandler extends BaseDataHandler {
                 deliveryPending.decrementAndGet();
             } else {
                 LOGGER.error(response.toString());
-                LOGGER.error(payload.toString());
+                logPosition();
                 retry();
             }
         }
 
         @Override
         public void failed(Throwable throwable) {
-            LOGGER.error("Position forwarding failed", throwable);
+            LOGGER.error("Position forwarding failed: " + throwable.getMessage());
+            logPosition();
+            retry();
+        }
+
+        private void logPosition() {
             try {
                 LOGGER.error(objectMapper.writeValueAsString(payload));
             } catch (JsonProcessingException e) {
                 LOGGER.error("json error", e);
             }
-            retry();
         }
 
         @Override
