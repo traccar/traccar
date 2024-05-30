@@ -256,8 +256,8 @@ public class WebDataHandler extends BaseDataHandler {
             if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
                 deliveryPending.decrementAndGet();
             } else {
-                LOGGER.warn(response.toString());
-                LOGGER.warn(payload.toString());
+                LOGGER.error(response.toString());
+                LOGGER.error(payload.toString());
                 retry();
             }
         }
