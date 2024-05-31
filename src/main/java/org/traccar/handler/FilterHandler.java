@@ -184,11 +184,9 @@ public class FilterHandler extends BaseDataHandler {
         if (filterType.length() > 0) {
             try {
                 StringBuilder message = new StringBuilder();
-                message.append("Position filtered by ");
                 message.append(filterType);
-                message.append("filters from device: ");
+                message.append("filter ");
                 message.append(Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
-
                 LOGGER.error(message.toString());
                 LOGGER.warn("fixTime: {}", position.getFixTime());
                 return true;
