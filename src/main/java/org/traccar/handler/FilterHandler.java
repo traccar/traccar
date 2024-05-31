@@ -189,7 +189,7 @@ public class FilterHandler extends BaseDataHandler {
                 message.append("filters from device: ");
                 message.append(Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
 
-                LOGGER.warn(message.toString());
+                LOGGER.error(message.toString());
                 LOGGER.warn("fixTime: {}", position.getFixTime());
                 return true;
             } catch (Exception e) {
