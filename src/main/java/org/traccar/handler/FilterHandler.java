@@ -30,18 +30,18 @@ public class FilterHandler extends BaseDataHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FilterHandler.class);
 
-    private boolean filterInvalid;
-    private boolean filterZero;
-    private boolean filterDuplicate;
-    private long filterFuture;
-    private boolean filterApproximate;
-    private int filterAccuracy;
-    private boolean filterStatic;
-    private int filterDistance;
-    private int filterMaxSpeed;
-    private long filterMinPeriod;
-    private long skipLimit;
-    private boolean skipAttributes;
+    private final boolean filterInvalid;
+    private final boolean filterZero;
+    private final boolean filterDuplicate;
+    private final long filterFuture;
+    private final boolean filterApproximate;
+    private final int filterAccuracy;
+    private final boolean filterStatic;
+    private final int filterDistance;
+    private final int filterMaxSpeed;
+    private final long filterMinPeriod;
+    private final long skipLimit;
+    private final boolean skipAttributes;
 
     public FilterHandler(Config config) {
         filterInvalid = config.getBoolean(Keys.FILTER_INVALID);
@@ -53,7 +53,7 @@ public class FilterHandler extends BaseDataHandler {
         filterStatic = config.getBoolean(Keys.FILTER_STATIC);
         filterDistance = config.getInteger(Keys.FILTER_DISTANCE);
         filterMaxSpeed = config.getInteger(Keys.FILTER_MAX_SPEED);
-        filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000;
+        filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000L;
         skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
         skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
     }
