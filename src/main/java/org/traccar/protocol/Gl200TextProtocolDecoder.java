@@ -1766,7 +1766,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
             } else {
-                LOGGER.warn("ignoring: " + sentence);
+                LOGGER.error("ignoring: " + sentence);
             }
         }
 
