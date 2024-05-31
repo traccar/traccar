@@ -103,12 +103,15 @@ public class FilterHandler extends BaseDataHandler {
         return false;
     }
 
-    private boolean filterMaxSpeed(Position position, Position last) {
+    private boolean filterMaxSpeed(Position position, Position last, StringBuilder log) {
         if (filterMaxSpeed != 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
             double time = position.getFixTime().getTime() - last.getFixTime().getTime();
-            return UnitsConverter.knotsFromMps(distance / (time / 1000)) > filterMaxSpeed
-                    || position.getSpeed() > filterMaxSpeed;
+            double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
+            if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
+                log.append("Calc speed: ").append(speed).append(" ");
+                return true;
+            }
         }
         return false;
     }
@@ -174,8 +177,8 @@ public class FilterHandler extends BaseDataHandler {
         if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
             filterType.append("Distance ");
         }
-        if (filterMaxSpeed(position, last)) {
-            filterType.append("MaxSpeed ");
+        if (filterMaxSpeed(position, last, filterType)) {
+            filterType.append("Position speed ").append(position.getSpeed());
         }
         if (filterMinPeriod(position, last)) {
             filterType.append("MinPeriod ");
@@ -183,15 +186,14 @@ public class FilterHandler extends BaseDataHandler {
 
         if (filterType.length() > 0) {
             try {
-                StringBuilder message = new StringBuilder();
-                message.append(filterType);
-                message.append("filter ");
-                message.append(Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
-                LOGGER.error(message.toString());
+                String message = filterType +
+                        "filter " +
+                        Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId();
+                LOGGER.error(message);
                 LOGGER.warn("fixTime: {}", position.getFixTime());
                 return true;
             } catch (Exception e) {
-                LOGGER.warn("{} {}", filterType, e);
+                LOGGER.error(filterType.toString(), e);
                 return true;
             }
         }
