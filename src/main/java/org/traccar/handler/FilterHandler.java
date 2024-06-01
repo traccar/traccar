@@ -106,8 +106,8 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterMaxSpeed(Position position, Position last, StringBuilder log) {
         if (filterMaxSpeed != 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
-            if (distance > 0) {
-                double time = position.getFixTime().getTime() - last.getFixTime().getTime();
+            double time = position.getFixTime().getTime() - last.getFixTime().getTime();
+            if (time > 0) {
                 double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
                 if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
                     log.append(String.format("calc speed: %.2f, distance %.2f, time: %.2f ", speed, distance, time));
