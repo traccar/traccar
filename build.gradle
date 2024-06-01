@@ -9,13 +9,17 @@ repositories {
     mavenCentral()
 }
 
-sourceCompatibility = "11"
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 compileJava.options.encoding = "UTF-8"
 jar.destinationDirectory = file("$projectDir/target")
 
 checkstyle {
     toolVersion = "10.17.0"
-    configFile = "gradle/checkstyle.xml" as File
+    configFile = file("gradle/checkstyle.xml")
     checkstyleTest.enabled = false
 }
 
