@@ -924,6 +924,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         skipLocation(parser);
 
+        position.set(Position.KEY_VERSION_FW, protocolVersion);
         if (power != null && power > 10) {
             position.set(Position.KEY_POWER, power * 0.001); // only on some devices
         }
