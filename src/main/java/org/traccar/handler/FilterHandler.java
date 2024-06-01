@@ -120,9 +120,11 @@ public class FilterHandler extends BaseDataHandler {
                 }
             } else {
                 if (time > 0) {
-                    log.append(String.format("%n%d %s %s ",
+                    log.append(String.format("%n%d %d %s %d %s ",
                             position.getDeviceId(),
+                            last.getId(),
                             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(last.getFixTime()),
+                            position.getId(),
                             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(position.getFixTime())));
                 }
                 return position.getSpeed() > filterMaxSpeed;
