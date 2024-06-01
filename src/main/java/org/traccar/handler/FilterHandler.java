@@ -25,7 +25,7 @@ import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import java.text.SimpleDateFormat;
+import static org.traccar.helper.UnitsConverter.kphFromKnots;
 
 @ChannelHandler.Sharable
 public class FilterHandler extends BaseDataHandler {
@@ -112,7 +112,7 @@ public class FilterHandler extends BaseDataHandler {
                 double distance = position.getDouble(Position.KEY_DISTANCE);
                 double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
                 if (speed > filterMaxSpeed) {
-                    LOGGER.error(String.format("speed (knots): %.0f, distance (m): %.0f, time (ms): %.0f", speed, distance, time));
+                    LOGGER.error(String.format("speed (kph): %.0f, distance (km): %.1f, time (s): %.1f", kphFromKnots(speed), distance/1000, time/1000));
                     return true;
                 }
             }
