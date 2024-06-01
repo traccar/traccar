@@ -109,7 +109,10 @@ public class FilterHandler extends BaseDataHandler {
             double time = position.getFixTime().getTime() - last.getFixTime().getTime();
             double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
             if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
-                log.append("Calc speed: ").append(speed).append(" ");
+                log.append("distance: ")
+                        .append(distance)
+                        .append("Calc speed: ")
+                        .append(speed).append(" ");
                 return true;
             }
         }
@@ -124,24 +127,24 @@ public class FilterHandler extends BaseDataHandler {
         return false;
     }
 
-    private boolean skipLimit(Position position, Position last) {
+    private boolean insideLimit(Position position, Position last) {
         if (skipLimit != 0 && last != null) {
-            return (position.getServerTime().getTime() - last.getServerTime().getTime()) > skipLimit;
+            return (position.getServerTime().getTime() - last.getServerTime().getTime()) <= skipLimit;
         }
-        return false;
+        return true;
     }
 
-    private boolean skipAttributes(Position position) {
+    private boolean noSkippedAttributes(Position position) {
         if (skipAttributes) {
             String attributesString = Context.getIdentityManager().lookupAttributeString(
                     position.getDeviceId(), "filter.skipAttributes", "", false, true);
             for (String attribute : attributesString.split("[ ,]")) {
                 if (position.getAttributes().containsKey(attribute)) {
-                    return true;
+                    return false;
                 }
             }
         }
-        return false;
+        return true;
     }
 
     private boolean filter(Position position) {
@@ -159,7 +162,7 @@ public class FilterHandler extends BaseDataHandler {
         if (filterZero(position)) {
             filterType.append("Zero ");
         }
-        if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterDuplicate(position, last) && insideLimit(position, last) && noSkippedAttributes(position)) {
             filterType.append("Duplicate ");
         }
         if (filterFuture(position)) {
@@ -171,10 +174,10 @@ public class FilterHandler extends BaseDataHandler {
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
-        if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterStatic(position) && insideLimit(position, last) && noSkippedAttributes(position)) {
             filterType.append("Static ");
         }
-        if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+        if (filterDistance(position, last) && insideLimit(position, last) && noSkippedAttributes(position)) {
             filterType.append("Distance ");
         }
         if (filterMaxSpeed(position, last, filterType)) {
@@ -185,13 +188,8 @@ public class FilterHandler extends BaseDataHandler {
         }
 
         if (filterType.length() > 0) {
-            try {
-                LOGGER.error("{}filter {}", filterType, Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
-                return true;
-            } catch (Exception e) {
-                LOGGER.error(filterType.toString(), e);
-                return true;
-            }
+            LOGGER.error("{}filter {}", filterType, Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
+            return true;
         }
 
         return false;
