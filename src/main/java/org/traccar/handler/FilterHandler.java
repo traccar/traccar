@@ -106,11 +106,15 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterMaxSpeed(Position position, Position last, StringBuilder log) {
         if (filterMaxSpeed != 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
-            double time = position.getFixTime().getTime() - last.getFixTime().getTime();
-            double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
-            if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
-                log.append(String.format("calc speed: %.2f, distance %.2f, time: %.2f ", speed, distance, time));
-                return true;
+            if (distance > 0) {
+                double time = position.getFixTime().getTime() - last.getFixTime().getTime();
+                double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
+                if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
+                    log.append(String.format("calc speed: %.2f, distance %.2f, time: %.2f ", speed, distance, time));
+                    return true;
+                }
+            } else {
+                return position.getSpeed() > filterMaxSpeed;
             }
         }
         return false;
@@ -185,7 +189,7 @@ public class FilterHandler extends BaseDataHandler {
         }
 
         if (filterType.length() > 0) {
-            LOGGER.error("{}filter {}", filterType, Context.getIdentityManager().getById(position.getDeviceId()).getUniqueId());
+            LOGGER.error("{}filter {}", filterType, position.getDeviceId());
             return true;
         }
 
