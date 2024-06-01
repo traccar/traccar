@@ -116,7 +116,10 @@ public class FilterHandler extends BaseDataHandler {
                     return true;
                 }
             }
-            return position.getSpeed() > filterMaxSpeed;
+            if (position.getSpeed() > filterMaxSpeed) {
+                LOGGER.error(String.format("position speed (knots): %.0f",position.getSpeed()));
+                return true;
+            }
         }
         return false;
     }
