@@ -111,24 +111,12 @@ public class FilterHandler extends BaseDataHandler {
             double time = position.getFixTime().getTime() - last.getFixTime().getTime();
             if (time >= 1000) {
                 double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
-                if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
-                    LOGGER.error(String.format("calc speed: %.0f, distance %.0f, time (ms): %.0f ", speed, distance, time));
-                    LOGGER.error(String.format("%n%s %s ",
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(last.getFixTime()),
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(position.getFixTime())));
+                if (speed > filterMaxSpeed) {
+                    LOGGER.error(String.format("speed (knots): %.0f, distance (m): %.0f, time (ms): %.0f", speed, distance, time));
                     return true;
                 }
-            } else {
-                if (time > 0) {
-                    LOGGER.error(String.format("%n%d %d %s %d %s ",
-                            position.getDeviceId(),
-                            last.getId(),
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(last.getFixTime()),
-                            position.getId(),
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(position.getFixTime())));
-                }
-                return position.getSpeed() > filterMaxSpeed;
             }
+            return position.getSpeed() > filterMaxSpeed;
         }
         return false;
     }
