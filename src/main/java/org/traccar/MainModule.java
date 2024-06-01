@@ -79,7 +79,6 @@ import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
 import org.traccar.helper.ObjectMapperContextResolver;
-import org.traccar.helper.SanitizerModule;
 import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
@@ -132,11 +131,8 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static ObjectMapper provideObjectMapper(Config config) {
+    public static ObjectMapper provideObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
-        if (config.getBoolean(Keys.WEB_SANITIZE)) {
-            objectMapper.registerModule(new SanitizerModule());
-        }
         objectMapper.registerModule(new JSONPModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return objectMapper;
