@@ -105,22 +105,22 @@ public class FilterHandler extends BaseDataHandler {
         return false;
     }
 
-    private boolean filterMaxSpeed(Position position, Position last, StringBuilder log) {
+    private boolean filterMaxSpeed(Position position, Position last) {
         if (filterMaxSpeed != 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
             double time = position.getFixTime().getTime() - last.getFixTime().getTime();
             if (time >= 1000) {
                 double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
                 if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
-                    log.append(String.format("calc speed: %.0f, distance %.0f, time (ms): %.0f ", speed, distance, time));
-                    log.append(String.format("\n%s %s ",
+                    LOGGER.error(String.format("calc speed: %.0f, distance %.0f, time (ms): %.0f ", speed, distance, time));
+                    LOGGER.error(String.format("%n%s %s ",
                             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(last.getFixTime()),
                             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(position.getFixTime())));
                     return true;
                 }
             } else {
                 if (time > 0) {
-                    log.append(String.format("%n%d %d %s %d %s ",
+                    LOGGER.error(String.format("%n%d %d %s %d %s ",
                             position.getDeviceId(),
                             last.getId(),
                             new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(last.getFixTime()),
@@ -194,7 +194,7 @@ public class FilterHandler extends BaseDataHandler {
         if (filterDistance(position, last) && insideLimit(position, last) && noSkippedAttributes(position)) {
             filterType.append("Distance ");
         }
-        if (filterMaxSpeed(position, last, filterType)) {
+        if (filterMaxSpeed(position, last)) {
             filterType.append(String.format("position speed %.0f ", position.getSpeed()));
         }
         if (filterMinPeriod(position, last)) {
