@@ -109,7 +109,7 @@ public class FilterHandler extends BaseDataHandler {
         if (filterMaxSpeed != 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
             double time = position.getFixTime().getTime() - last.getFixTime().getTime();
-            if (time > 0) {
+            if (time >= 1000) {
                 double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
                 if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
                     log.append(String.format("calc speed: %.0f, distance %.0f, time (ms): %.0f ", speed, distance, time));
@@ -119,6 +119,10 @@ public class FilterHandler extends BaseDataHandler {
                     return true;
                 }
             } else {
+                log.append(String.format("%n%d %s %s ",
+                        position.getDeviceId(),
+                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(last.getFixTime()),
+                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(position.getFixTime())));
                 return position.getSpeed() > filterMaxSpeed;
             }
         }
