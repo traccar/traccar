@@ -117,7 +117,7 @@ public class FilterHandler extends BaseDataHandler {
                 }
             }
             if (position.getSpeed() > filterMaxSpeed) {
-                LOGGER.error(String.format("position speed (knots): %.0f",position.getSpeed()));
+                LOGGER.error(String.format("position speed (knots): %.0f", position.getSpeed()));
                 return true;
             }
         }
@@ -186,7 +186,7 @@ public class FilterHandler extends BaseDataHandler {
             filterType.append("Distance ");
         }
         if (filterMaxSpeed(position, last)) {
-            filterType.append(String.format("position speed %.0f ", position.getSpeed()));
+            filterType.append("MaxSpeed ");
         }
         if (filterMinPeriod(position, last)) {
             filterType.append("MinPeriod ");
