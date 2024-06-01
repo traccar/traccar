@@ -25,6 +25,8 @@ import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
+import java.text.SimpleDateFormat;
+
 @ChannelHandler.Sharable
 public class FilterHandler extends BaseDataHandler {
 
@@ -111,7 +113,9 @@ public class FilterHandler extends BaseDataHandler {
                 double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
                 if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
                     log.append(String.format("calc speed: %.0f, distance %.0f, time (ms): %.0f ", speed, distance, time));
-                    log.append(String.format("\n%s %s ", position.getFixTime().toString(),  last.getFixTime().toString()));
+                    log.append(String.format("\n%s %s ",
+                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(last.getFixTime()),
+                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(position.getFixTime())));
                     return true;
                 }
             } else {
