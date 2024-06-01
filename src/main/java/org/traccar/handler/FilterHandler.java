@@ -153,7 +153,7 @@ public class FilterHandler extends BasePositionHandler {
         if (filterMaxSpeed != 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
             double time = position.getFixTime().getTime() - last.getFixTime().getTime();
-            return UnitsConverter.knotsFromMps(distance / (time / 1000)) > filterMaxSpeed;
+            return time > 0 && UnitsConverter.knotsFromMps(distance / (time / 1000)) > filterMaxSpeed;
         }
         return false;
     }
