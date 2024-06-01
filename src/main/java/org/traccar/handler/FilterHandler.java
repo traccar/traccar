@@ -119,10 +119,12 @@ public class FilterHandler extends BaseDataHandler {
                     return true;
                 }
             } else {
-                log.append(String.format("%n%d %s %s ",
-                        position.getDeviceId(),
-                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(last.getFixTime()),
-                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(position.getFixTime())));
+                if (time > 0) {
+                    log.append(String.format("%n%d %s %s ",
+                            position.getDeviceId(),
+                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(last.getFixTime()),
+                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(position.getFixTime())));
+                }
                 return position.getSpeed() > filterMaxSpeed;
             }
         }
