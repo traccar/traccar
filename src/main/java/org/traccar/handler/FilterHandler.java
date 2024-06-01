@@ -110,7 +110,8 @@ public class FilterHandler extends BaseDataHandler {
             if (time > 0) {
                 double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
                 if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
-                    log.append(String.format("calc speed: %.0f, distance %.0f, time: %.0f ", speed, distance, time));
+                    log.append(String.format("calc speed: %.0f, distance %.0f, time (ms): %.0f ", speed, distance, time));
+                    log.append(String.format("\n%s %s ", position.getFixTime().toString(),  last.getFixTime().toString()));
                     return true;
                 }
             } else {
