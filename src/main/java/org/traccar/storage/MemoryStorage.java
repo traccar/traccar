@@ -196,4 +196,22 @@ public class MemoryStorage extends Storage {
                 .remove(new Pair<>(permission.getOwnerId(), permission.getPropertyId()));
     }
 
+    // * CUSTOM CODE START * //
+
+    @Override
+    public void addPermissions(List<Permission> permissions) throws StorageException {
+        for (Permission permission : permissions) {
+            addPermission(permission);
+        }
+    }
+
+    @Override
+    public void removePermissions(List<Permission> permissions) throws StorageException {
+        for (Permission permission : permissions) {
+            removePermission(permission);
+        }
+    }
+
+    // * CUSTOM CODE END * //
+
 }

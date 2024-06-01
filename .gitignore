@@ -11,4 +11,10 @@ nbactions.xml
 out
 build
 .vscode
-bin
+
+# CUSTOM CODE START 
+bin/
+temp_upload/
+setup/OpenJDK*
+setup/traccar-linux*
+# CUSTOM CODE END

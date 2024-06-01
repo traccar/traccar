@@ -16,6 +16,12 @@
  */
 package org.traccar.api.resource;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Permission;
@@ -32,10 +38,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
+
 
 @Path("permissions")
 @Produces(MediaType.APPLICATION_JSON)
@@ -54,7 +57,7 @@ public class PermissionsResource  extends BaseResource {
 
     private void checkPermissionTypes(List<LinkedHashMap<String, Long>> entities) {
         Set<String> keys = null;
-        for (LinkedHashMap<String, Long> entity: entities) {
+        for (LinkedHashMap<String, Long> entity : entities) {
             if (keys != null & !entity.keySet().equals(keys)) {
                 throw new WebApplicationException(Response.status(Response.Status.BAD_REQUEST).build());
             }
@@ -67,7 +70,7 @@ public class PermissionsResource  extends BaseResource {
     public Response add(List<LinkedHashMap<String, Long>> entities) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
-        for (LinkedHashMap<String, Long> entity: entities) {
+        for (LinkedHashMap<String, Long> entity : entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission);
             storage.addPermission(permission);
@@ -83,6 +86,49 @@ public class PermissionsResource  extends BaseResource {
         return Response.noContent().build();
     }
 
+    // * CUSTOM CODE START * //
+
+    @Path("bulk_multiple")
+    @POST
+    public Response addMultiple(List<LinkedHashMap<String, Long>> entities)
+            throws StorageException, ClassNotFoundException, Exception {
+
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
+        checkPermissionTypes(entities);
+        List<Permission> permissions = new ArrayList<Permission>();
+
+        for (LinkedHashMap<String, Long> entity : entities) {
+            Permission permission = new Permission(entity);
+            checkPermission(permission);
+            permissions.add(permission);
+        }
+
+        storage.addPermissions(permissions);
+
+        for (Permission permission : permissions) {
+            boolean isUserGroupPermissionItem = permission.getOwnerClass().equals(org.traccar.model.User.class)
+                    && permission.getPropertyClass().equals(org.traccar.model.Group.class);
+
+            // Skip cache invalidation for user-group permission items.
+            // It is taking a lot of time and does not seem to have issues with cache when
+            // not invalidated.
+            if (!isUserGroupPermissionItem) {
+                cacheManager.invalidatePermission(
+                        true,
+                        permission.getOwnerClass(), permission.getOwnerId(),
+                        permission.getPropertyClass(), permission.getPropertyId(), true);
+            }
+
+            LogAction.link(getUserId(),
+                    permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId());
+        }
+
+        return Response.noContent().build();
+    }
+
+    // * CUSTOM CODE END * //
+
     @POST
     public Response add(LinkedHashMap<String, Long> entity) throws Exception {
         return add(Collections.singletonList(entity));
@@ -93,7 +139,7 @@ public class PermissionsResource  extends BaseResource {
     public Response remove(List<LinkedHashMap<String, Long>> entities) throws Exception {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
         checkPermissionTypes(entities);
-        for (LinkedHashMap<String, Long> entity: entities) {
+        for (LinkedHashMap<String, Long> entity : entities) {
             Permission permission = new Permission(entity);
             checkPermission(permission);
             storage.removePermission(permission);
@@ -108,6 +154,35 @@ public class PermissionsResource  extends BaseResource {
         }
         return Response.noContent().build();
     }
+
+    // * CUSTOM CODE START * //
+
+    @DELETE
+    @Path("bulk_multiple")
+    public Response removeMultiple(List<LinkedHashMap<String, Long>> entities)
+            throws StorageException, ClassNotFoundException, Exception {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
+        checkPermissionTypes(entities);
+        List<Permission> permissions = new ArrayList<Permission>();
+        for (LinkedHashMap<String, Long> entity : entities) {
+            Permission permission = new Permission(entity);
+            checkPermission(permission);
+            permissions.add(permission);
+        }
+        storage.removePermissions(permissions);
+        for (Permission permission : permissions) {
+            cacheManager.invalidatePermission(
+                    true,
+                    permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId(), true);
+            LogAction.unlink(getUserId(),
+                    permission.getOwnerClass(), permission.getOwnerId(),
+                    permission.getPropertyClass(), permission.getPropertyId());
+        }
+        return Response.noContent().build();
+    }
+
+    // * CUSTOM CODE END * //
 
     @DELETE
     public Response remove(LinkedHashMap<String, Long> entity) throws Exception {

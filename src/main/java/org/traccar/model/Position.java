@@ -325,6 +325,20 @@ public class Position extends Message {
         }
     }
 
+    // * CUSTOM CODE START * //
+
+    private Double distance;
+
+    public Double getDistance() {
+        return distance;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
+    }
+
+    // * CUSTOM CODE END * //
+
     @JsonIgnore
     @QueryIgnore
     @Override

@@ -481,6 +481,35 @@ public final class QueryBuilder {
         return 0;
     }
 
+    // * CUSTOM CODE START * //
+    
+    public void addBatch() throws SQLException {
+        if (query != null) {
+            // assuming values are set before this method is called
+            logQuery();
+            statement.addBatch();
+        }
+    }
+
+    public int[] executeBatch() throws SQLException {
+        int[] updateCounts = null;
+        try {
+            if (query != null) {
+                updateCounts = statement.executeBatch();
+            }
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+            if (connection != null) {
+                connection.close();
+            }
+        }
+        return updateCounts;
+    }
+    
+    // * CUSTOM CODE END * //
+
     public List<Permission> executePermissionsQuery() throws SQLException {
         List<Permission> result = new LinkedList<>();
         if (query != null) {

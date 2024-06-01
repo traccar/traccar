@@ -77,7 +77,7 @@ public class EventsReportProvider {
         reportUtils.checkPeriodLimit(from, to);
 
         ArrayList<Event> result = new ArrayList<>();
-        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
+        for (Device device : DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             Collection<Event> events = getEvents(device.getId(), from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Event event : events) {
@@ -86,8 +86,8 @@ public class EventsReportProvider {
                     long maintenanceId = event.getMaintenanceId();
                     if ((geofenceId == 0 || reportUtils.getObject(userId, Geofence.class, geofenceId) != null)
                             && (maintenanceId == 0
-                            || reportUtils.getObject(userId, Maintenance.class, maintenanceId) != null)) {
-                       result.add(event);
+                                    || reportUtils.getObject(userId, Maintenance.class, maintenanceId) != null)) {
+                        result.add(event);
                     }
                 }
             }
@@ -100,16 +100,47 @@ public class EventsReportProvider {
             Collection<String> types, Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
 
-        ArrayList<DeviceReportSection> devicesEvents = new ArrayList<>();
+        // * CUSTOM CODE START * //  commented below line
+        // ArrayList<DeviceReportSection> devicesEvents = new ArrayList<>();
+        // * CUSTOM CODE END * //
+
         ArrayList<String> sheetNames = new ArrayList<>();
         HashMap<Long, String> geofenceNames = new HashMap<>();
         HashMap<Long, String> maintenanceNames = new HashMap<>();
         HashMap<Long, Position> positions = new HashMap<>();
-        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
+
+        // * CUSTOM CODE START * //
+
+        // Have only 1 sheet for all devices data
+        sheetNames.add(WorkbookUtil.createSafeSheetName("Sheet1"));
+
+        DeviceReportSection<Event> allDevicesEvents = new DeviceReportSection<Event>();
+
+        // Group names cache
+        HashMap<Long, String> groupNames = new HashMap<>();
+        
+        // * CUSTOM CODE END * //
+
+        for (Device device : DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             Collection<Event> events = getEvents(device.getId(), from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
             for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
                 Event event = iterator.next();
+
+                // * CUSTOM CODE START * //
+
+                event.setDeviceName(device.getName());
+
+                if (groupNames.get(device.getGroupId()) == null) {
+                    Group group = storage.getObject(Group.class, new Request(
+                            new Columns.All(), new Condition.Equals("id", device.getGroupId())));
+                    groupNames.put(device.getGroupId(), group.getName());
+                }
+
+                event.setGroupName(groupNames.get(device.getGroupId()));
+
+                // * CUSTOM CODE END * //
+
                 if (all || types.contains(event.getType())) {
                     long geofenceId = event.getGeofenceId();
                     long maintenanceId = event.getMaintenanceId();
@@ -140,24 +171,37 @@ public class EventsReportProvider {
                     positions.put(positionId, position);
                 }
             }
-            DeviceReportSection deviceEvents = new DeviceReportSection();
-            deviceEvents.setDeviceName(device.getName());
-            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
-            if (device.getGroupId() > 0) {
-                Group group = storage.getObject(Group.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", device.getGroupId())));
-                if (group != null) {
-                    deviceEvents.setGroupName(group.getName());
-                }
-            }
-            deviceEvents.setObjects(events);
-            devicesEvents.add(deviceEvents);
+
+            // * CUSTOM CODE START * //
+            // DeviceReportSection deviceEvents = new DeviceReportSection();
+            // deviceEvents.setDeviceName(device.getName());
+            // sheetNames.add(WorkbookUtil.createSafeSheetName(deviceEvents.getDeviceName()));
+            // if (device.getGroupId() > 0) {
+            //     Group group = storage.getObject(Group.class, new Request(
+            //             new Columns.All(), new Condition.Equals("id", device.getGroupId())));
+            //     if (group != null) {
+            //         deviceEvents.setGroupName(group.getName());
+            //     }
+            // }
+            // deviceEvents.setObjects(events);
+            // devicesEvents.add(deviceEvents);
+            // * CUSTOM CODE END * //
+
+            allDevicesEvents.addObjects(events);
         }
+
+        // * CUSTOM CODE START * //
+            var singleEventsList = new ArrayList<DeviceReportSection<Event>>();
+            singleEventsList.add(allDevicesEvents); // Only 1 item contains all devices events
+        // * CUSTOM CODE END * //
 
         File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "events.xlsx").toFile();
         try (InputStream inputStream = new FileInputStream(file)) {
             var context = reportUtils.initializeContext(userId);
-            context.putVar("devices", devicesEvents);
+            // * CUSTOM CODE START * //
+            // context.putVar("devices", devicesEvents);
+            context.putVar("devices", singleEventsList);
+            // * CUSTOM CODE END * //
             context.putVar("sheetNames", sheetNames);
             context.putVar("geofenceNames", geofenceNames);
             context.putVar("maintenanceNames", maintenanceNames);

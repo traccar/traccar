@@ -107,6 +107,15 @@ public class FilterHandler extends BasePositionHandler {
     private boolean filterDuplicate(Position position, Position last) {
         if (filterDuplicate && last != null && position.getFixTime().equals(last.getFixTime())) {
             for (String key : position.getAttributes().keySet()) {
+
+                // * CUSTOM CODE START * //
+
+                // ignore "archive" and "hours" attributes
+                if (key.equals(Position.KEY_ARCHIVE) || key.equals(Position.KEY_HOURS))
+                    continue;
+
+                // * CUSTOM CODE END * //
+
                 if (!last.hasAttribute(key)) {
                     return false;
                 }

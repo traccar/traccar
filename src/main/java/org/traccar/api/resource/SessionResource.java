@@ -172,4 +172,14 @@ public class SessionResource extends BaseResource {
 
         return Response.seeOther(openIdProvider.handleCallback(URI.create(requestUri), request)).build();
     }
+
+    @Path("token/{userId}")
+    @POST
+    public String requestTokenForUserId(
+            @FormParam("expiration") Date expiration, @PathParam("userId") long userId)
+            throws StorageException, GeneralSecurityException, IOException {
+        permissionsService.checkAdmin(getUserId());
+        // System.out.println(tokenManager.generateToken(userId, expiration));
+        return tokenManager.generateToken(userId, expiration);
+    }
 }

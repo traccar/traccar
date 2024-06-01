@@ -82,11 +82,15 @@ public class RouteReportProvider {
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
 
-        ArrayList<DeviceReportSection> devicesRoutes = new ArrayList<>();
+        // * CUSTOM CODE START * // <added generic type>
+        ArrayList<DeviceReportSection<Position>> devicesRoutes = new ArrayList<>();
+        // * CUSTOM CODE END * //
         ArrayList<String> sheetNames = new ArrayList<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
-            DeviceReportSection deviceRoutes = new DeviceReportSection();
+            // * CUSTOM CODE START * // <added generic type>
+            DeviceReportSection<Position> deviceRoutes = new DeviceReportSection<Position>();
+            // * CUSTOM CODE END * //
             deviceRoutes.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(getUniqueSheetName(deviceRoutes.getDeviceName())));
             if (device.getGroupId() > 0) {

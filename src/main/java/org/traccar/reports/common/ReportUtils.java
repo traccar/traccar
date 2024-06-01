@@ -29,6 +29,7 @@ import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
 import org.traccar.api.security.PermissionsService;
+import org.traccar.api.security.ServiceAccountUser;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.geocoder.Geocoder;
@@ -41,6 +42,7 @@ import org.traccar.model.Device;
 import org.traccar.model.Driver;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.reports.model.BaseReportItem;
 import org.traccar.reports.model.StopReportItem;
@@ -131,8 +133,23 @@ public class ReportUtils {
     }
 
     public org.jxls.common.Context initializeContext(long userId) throws StorageException {
-        var server = permissionsService.getServer();
-        var user = permissionsService.getUser(userId);
+        // * CUSTOM CODE START * //
+
+        // var server = permissionsService.getServer();
+        // var user = permissionsService.getUser(userId);
+        Server server = storage.getObject(Server.class, new Request(new Columns.All()));
+        User user = null;
+        if (user == null && userId > 0) {
+            if (userId == ServiceAccountUser.ID) {
+                user = new ServiceAccountUser();
+            } else {
+                user = storage.getObject(User.class,
+                        new Request(new Columns.All(), new Condition.Equals("id", userId)));
+            }
+        }
+
+        // * CUSTOM CODE END * //
+
         var context = PoiTransformer.createInitialContext();
         context.putVar("distanceUnit", UserUtil.getDistanceUnit(server, user));
         context.putVar("speedUnit", UserUtil.getSpeedUnit(server, user));
@@ -162,9 +179,12 @@ public class ReportUtils {
 
     private TripReportItem calculateTrip(
             Device device, Position startTrip, Position endTrip, double maxSpeed,
-            boolean ignoreOdometer) throws StorageException {
+            boolean ignoreOdometer, double totalDistance) throws StorageException {
 
         TripReportItem trip = new TripReportItem();
+
+        boolean useDistanceColumn = config.getBoolean(Keys.REPORT_USE_DISTANCE_COLUMN);
+        var totalDistanceValid = useDistanceColumn;
 
         long tripDuration = endTrip.getFixTime().getTime() - startTrip.getFixTime().getTime();
         long deviceId = startTrip.getDeviceId();
@@ -191,7 +211,13 @@ public class ReportUtils {
         }
         trip.setEndAddress(endAddress);
 
-        trip.setDistance(PositionUtil.calculateDistance(startTrip, endTrip, !ignoreOdometer));
+        // trip.setDistance(PositionUtil.calculateDistance(startTrip, endTrip, !ignoreOdometer));
+        if (totalDistanceValid) {
+            trip.setDistance(totalDistance);
+        } else {
+            trip.setDistance(PositionUtil.calculateDistance(startTrip, endTrip, !ignoreOdometer));
+        }
+
         trip.setDuration(tripDuration);
         if (tripDuration > 0) {
             trip.setAverageSpeed(UnitsConverter.knotsFromMps(trip.getDistance() * 1000 / tripDuration));
@@ -261,10 +287,10 @@ public class ReportUtils {
     @SuppressWarnings("unchecked")
     private <T extends BaseReportItem> T calculateTripOrStop(
             Device device, Position startPosition, Position endPosition, double maxSpeed,
-            boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
+            boolean ignoreOdometer, Class<T> reportClass, double totalDistance) throws StorageException {
 
         if (reportClass.equals(TripReportItem.class)) {
-            return (T) calculateTrip(device, startPosition, endPosition, maxSpeed, ignoreOdometer);
+            return (T) calculateTrip(device, startPosition, endPosition, maxSpeed, ignoreOdometer, totalDistance);
         } else {
             return (T) calculateStop(device, startPosition, endPosition, ignoreOdometer);
         }
@@ -317,6 +343,12 @@ public class ReportUtils {
             double maxSpeed = 0;
             int startEventIndex = detected ? 0 : -1;
             int startNoEventIndex = -1;
+
+            boolean useDistanceColumn = config.getBoolean(Keys.REPORT_USE_DISTANCE_COLUMN);
+
+            double totalDistance = 0.0;
+            var totalDistanceValid = useDistanceColumn;
+
             for (int i = 0; i < positions.size(); i++) {
                 boolean motion = isMoving(positions, i, tripsConfig);
                 if (motionState.getMotionState() != motion) {
@@ -333,6 +365,14 @@ public class ReportUtils {
                     maxSpeed = Math.max(maxSpeed, positions.get(i).getSpeed());
                 }
 
+                if (totalDistanceValid) {
+                    try {
+                        totalDistance += positions.get(i).getDistance();
+                    } catch (Exception e) {
+                        totalDistanceValid = false;
+                    }
+                }
+
                 MotionProcessor.updateState(motionState, positions.get(i), motion, tripsConfig);
                 if (motionState.getEvent() != null) {
                     if (motion == trips) {
@@ -341,7 +381,7 @@ public class ReportUtils {
                     } else if (startEventIndex >= 0 && startNoEventIndex >= 0) {
                         result.add(calculateTripOrStop(
                                 device, positions.get(startEventIndex), positions.get(startNoEventIndex),
-                                maxSpeed, ignoreOdometer, reportClass));
+                                maxSpeed, ignoreOdometer, reportClass,totalDistance));
                         detected = false;
                         startEventIndex = -1;
                         startNoEventIndex = -1;
@@ -352,7 +392,7 @@ public class ReportUtils {
                 int endIndex = startNoEventIndex >= 0 ? startNoEventIndex : positions.size() - 1;
                 result.add(calculateTripOrStop(
                         device, positions.get(startEventIndex), positions.get(endIndex),
-                        maxSpeed, ignoreOdometer, reportClass));
+                        maxSpeed, ignoreOdometer, reportClass, totalDistance));
             }
         }
 
@@ -389,7 +429,7 @@ public class ReportUtils {
                         new Columns.All(), new Condition.Equals("id", event.getPositionId())));
                 if (startPosition != null && endPosition != null) {
                     result.add(calculateTripOrStop(
-                            device, startPosition, endPosition, 0, ignoreOdometer, reportClass));
+                            device, startPosition, endPosition, 0, ignoreOdometer, reportClass, 0.0));
                 }
                 startEvent = null;
             }

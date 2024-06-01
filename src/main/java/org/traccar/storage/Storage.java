@@ -37,6 +37,14 @@ public abstract class Storage {
 
     public abstract void addPermission(Permission permission) throws StorageException;
 
+    // * CUSTOM CODE START * //
+
+    public abstract void addPermissions(List<Permission> permissions) throws StorageException;
+
+    public abstract void removePermissions(List<Permission> permissions) throws StorageException;
+
+    // * CUSTOM CODE END * //
+
     public abstract void removePermission(Permission permission) throws StorageException;
 
     public List<Permission> getPermissions(
