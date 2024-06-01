@@ -110,7 +110,7 @@ public class FilterHandler extends BaseDataHandler {
             if (time > 0) {
                 double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
                 if (speed > filterMaxSpeed || position.getSpeed() > filterMaxSpeed) {
-                    log.append(String.format("calc speed: %.2f, distance %.2f, time: %.2f ", speed, distance, time));
+                    log.append(String.format("calc speed: %.0f, distance %.0f, time: %.0f ", speed, distance, time));
                     return true;
                 }
             } else {
@@ -182,14 +182,14 @@ public class FilterHandler extends BaseDataHandler {
             filterType.append("Distance ");
         }
         if (filterMaxSpeed(position, last, filterType)) {
-            filterType.append("Position speed ").append(position.getSpeed()).append(" ");
+            filterType.append(String.format("position speed %.0f ", position.getSpeed()));
         }
         if (filterMinPeriod(position, last)) {
             filterType.append("MinPeriod ");
         }
 
         if (filterType.length() > 0) {
-            LOGGER.error("{}filter {}", filterType, position.getDeviceId());
+            LOGGER.error("deviceId {}, filtered {}", position.getDeviceId(), filterType);
             return true;
         }
 
