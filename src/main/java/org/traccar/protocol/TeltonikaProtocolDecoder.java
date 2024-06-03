@@ -607,8 +607,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                                     position.set("tag" + i + "Id", beaconId);
                                     break;
                                 case 2:
-                                    String beaconData = ByteBufUtil.hexDump(beacon.readSlice(parameterLength));
-                                    position.set("tag" + i + "Data", beaconData);
+                                    ByteBuf beaconData = beacon.readSlice(parameterLength);
+                                    int flag = beaconData.readUnsignedByte();
+                                    if (BitUtil.check(flag, 6)) {
+                                        position.set("tag" + i + "LowBattery", true);
+                                    }
+                                    if (BitUtil.check(flag, 7)) {
+                                        position.set("tag" + i + "Voltage", beaconData.readUnsignedByte() * 10 + 2000);
+                                    }
                                     break;
                                 case 13:
                                     position.set("tag" + i + "LowBattery", beacon.readUnsignedByte());
