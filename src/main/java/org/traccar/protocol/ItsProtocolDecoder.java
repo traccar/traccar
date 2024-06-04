@@ -51,8 +51,8 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .text("$")
             .expression(",?[^,]+,")              // event / Header
             .groupBegin()
-            .expression("[^,]*,")                // vendor / iTriangle
-            .expression("[^,]+,")                // firmware version - "1_37T02B0164MAIS_6" OR "BHARAT101C_0267"
+            .expression("([^,]*),")                // vendor / iTriangle
+            .expression("([^,]+),")                // firmware version - "1_37T02B0164MAIS_6" OR "BHARAT101C_0267"
             .expression("(..),")                 // status / Packet Type
             .number("(d+),").optional()          // event / Message ID
             .expression("([LH]),")               // history / Packet Status
