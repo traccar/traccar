@@ -42,7 +42,7 @@ public class DatabaseHandler extends BasePositionHandler {
 
         try {
             position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
-            statisticsManager.messageStoredCount(position.getDeviceId());
+            statisticsManager.registerMessageStored(position.getDeviceId(), position.getProtocol());
         } catch (Exception error) {
             LOGGER.warn("Failed to store position", error);
         }

@@ -17,8 +17,10 @@ package org.traccar.schedule;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -87,8 +89,9 @@ public class TaskReports implements ScheduleTask {
                 var lastEvents = calendar.findPeriods(lastCheck);
                 var currentEvents = calendar.findPeriods(currentCheck);
 
-                if (!lastEvents.isEmpty() && currentEvents.isEmpty()) {
-                    Period period = lastEvents.iterator().next();
+                Set<Period> finishedEvents = new HashSet<>(lastEvents);
+                finishedEvents.removeAll(currentEvents);
+                for (Period period : finishedEvents) {
                     RequestScoper scope = ServletScopes.scopeRequest(Collections.emptyMap());
                     try (RequestScoper.CloseableScope ignored = scope.open()) {
                         executeReport(report, period.getStart(), period.getEnd());
@@ -158,7 +161,7 @@ public class TaskReports implements ScheduleTask {
             }
             // * CUSTOM CODE END * //
 
-            LogAction.logReport(user.getId(), true, report.getType(), from, to, deviceIds, groupIds);
+            LogAction.report(user.getId(), true, report.getType(), from, to, deviceIds, groupIds);
             switch (report.getType()) {
                 case "events":
                     var eventsReportProvider = injector.getInstance(EventsReportProvider.class);

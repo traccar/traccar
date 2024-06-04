@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -34,6 +34,7 @@ import java.time.Duration;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @StorageName("tc_calendars")
@@ -78,10 +79,9 @@ public class Calendar extends ExtendedModel {
         }
     }
 
-    public Collection<Period> findPeriods(Date date) {
-        var calendarDate = new net.fortuna.ical4j.model.Date(date);
+    public Set<Period> findPeriods(Date date) {
         return findEvents(date).stream()
-                .flatMap((event) -> event.getConsumedTime(calendarDate, calendarDate).stream())
+                .flatMap((e) -> e.calculateRecurrenceSet(new Period(new DateTime(date), Duration.ZERO)).stream())
                 .collect(Collectors.toSet());
     }
 

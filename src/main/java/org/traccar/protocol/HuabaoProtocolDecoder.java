@@ -492,6 +492,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY, Integer.parseInt(lockStatus.substring(2, 5)) * 0.01);
                     }
                     break;
+                case 0x51:
+                    if (length == 16) {
+                        for (int i = 1; i <= 8; i++) {
+                            position.set(Position.PREFIX_TEMP + i, buf.readShort());
+                        }
+                    }
+                    break;
                 case 0x56:
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte() * 10);
                     buf.readUnsignedByte(); // reserved
@@ -667,6 +674,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 case 0x0023:
                                     position.set("fuel2", Double.parseDouble(
                                             buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
+                                    break;
+                                case 0x00B2:
+                                    position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(
+                                            buf.readSlice(10)).replaceAll("f", ""));
                                     break;
                                 case 0x00CE:
                                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);

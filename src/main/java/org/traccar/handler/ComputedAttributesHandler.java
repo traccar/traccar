@@ -35,12 +35,14 @@ import org.traccar.session.cache.CacheManager;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Date;
+import java.util.stream.Collectors;
 
 public class ComputedAttributesHandler extends BasePositionHandler {
 
@@ -63,7 +65,7 @@ public class ComputedAttributesHandler extends BasePositionHandler {
         sandbox.allow(Math.class.getName());
         List.of(
             Double.class, Float.class, Integer.class, Long.class, Short.class,
-            Character.class, Boolean.class, String.class, Byte.class)
+            Character.class, Boolean.class, String.class, Byte.class, Date.class)
                 .forEach((type) -> sandbox.allow(type.getName()));
         features = new JexlFeatures()
                 .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
@@ -139,7 +141,9 @@ public class ComputedAttributesHandler extends BasePositionHandler {
 
     @Override
     public void handlePosition(Position position, Callback callback) {
-        Collection<Attribute> attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class);
+        var attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class).stream()
+                .sorted(Comparator.comparing(Attribute::getPriority).reversed())
+                .collect(Collectors.toUnmodifiableList());
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
                 Object result = null;

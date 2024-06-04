@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class TrvProtocolDecoderTest extends ProtocolTest {
 
@@ -12,6 +13,30 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, text(
                 "TRVAP00352121088015548"));
+
+        verifyAttribute(decoder, text(
+                "IWAP10080524A2232.9806N11404.9355E000.1061830323.8706000908000502,460,0,9520,3671,01,zhcn,00,HOME|74-DE-2B-44-88-8C|97&HOME1|74-DE-2B-44-88-8C|97&HOME2|74-DE-2B-44-88-8C|97&HOME3|74-DE-2B-44-88-8C|97"),
+                Position.KEY_ALARM, Position.ALARM_SOS);
+
+        verifyAttribute(decoder, text(
+                "IWAP49,68"),
+                Position.KEY_HEART_RATE, 68);
+
+        verifyAttribute(decoder, text(
+                "IWAPHT,60,130,85"),
+                "pressureDiastolic", 85);
+
+        verifyAttribute(decoder, text(
+                "IWAPHP,60,130,85,95,90,36.5,,,,,,,"),
+                "temperature", 36.5);
+
+        verifyAttribute(decoder, text(
+                "IWAP50,36.7,90"),
+                Position.KEY_BATTERY_LEVEL, 90);
+
+        verifyAttribute(decoder, text(
+                "IWAP03,06000908000102,5555,30"),
+                Position.KEY_STEPS, 5555);
 
         verifyPosition(decoder, text(
                 "TRVYP14080524A2232.9806N11404.9355E000.1061830323.870600090800010200011,460,0,9520,3671,Home|74-DE-2B-44-88-8C|97&Home1|74-DE-2B-44-88-8C|97&Home2|74-DE-2B-44-88-8C|97& Home3|74-DE-2B-44-88-8C|97"));
@@ -40,7 +65,7 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "IWAP10080524A2232.9806N11404.9355E000.1061830323.8706000908000502,460,0,9520,3671,00,zh-cn,00,HOME|74-DE-2B-44-88-8C|97&HOME1|74-DE-2B-44-88-8C|97&HOME2|74-DE-2B-44-88-8C|97&HOME3|74-DE-2B-44-88-8C|97"));
 
-        verifyNull(decoder, text(
+        verifyAttributes(decoder, text(
                 "IWAP03,06000908000102,5555,30"));
 
         verifyNull(decoder, text(
