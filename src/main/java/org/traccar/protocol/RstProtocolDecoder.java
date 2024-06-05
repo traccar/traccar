@@ -16,6 +16,8 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -30,6 +32,8 @@ import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
 public class RstProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RstProtocolDecoder.class);
 
     public RstProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -81,6 +85,7 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
+            LOGGER.warn("ignoring: " + msg);
             return null;
         }
 
