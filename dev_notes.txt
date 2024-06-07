@@ -5,7 +5,8 @@ Compile Server:
 - ./gradlew assemble
 
 Compile Web Modern:
-- cd traccar-web/modern
+- cd traccar-web
+- nvm use
 - npm i && npm run build
 - cd ../../
 
@@ -13,12 +14,12 @@ Deploy Steps:
 - Build Server
 - Build Modern Web App
 - cd setup/
-- sh package.sh 5.6 linux-64
+- sh package.sh 6.2 linux-64
 - On both Prod servers:
     - rm /home/bunny/build/*
 - Transfer build to server:
-    - rsync -a --progress traccar-linux-64-5.6.zip nconnect_gps:/home/bunny/build/
-    - rsync -a --progress traccar-linux-64-5.6.zip nspira_gps:/home/bunny/build/
+    - rsync -a --progress traccar-linux-64-6.2.zip nconnect_gps:/home/bunny/build/
+    - rsync -a --progress traccar-linux-64-6.2.zip nspira_gps:/home/bunny/build/
     - Repeat above step for nspira_gps too.
 - ssh into each server:
     - mkdir ./backup/<date>/
