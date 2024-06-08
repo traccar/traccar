@@ -56,6 +56,8 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.TimeZone;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @Path("server")
 @Produces(MediaType.APPLICATION_JSON)
@@ -163,9 +165,16 @@ public class ServerResource extends BaseResource {
 
     @Path("reboot")
     @POST
-    public void reboot() throws StorageException {
+    public Response reboot() throws StorageException {
         permissionsService.checkAdmin(getUserId());
-        System.exit(130);
+        TimerTask rebootTask = new TimerTask() {
+            public void run() {
+                System.exit(130);
+            }
+        };
+        Timer rebootTimer = new Timer();
+        rebootTimer.schedule(rebootTask, 3000);
+        return Response.ok().build();
     }
 
 }
