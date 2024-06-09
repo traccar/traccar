@@ -1902,6 +1902,14 @@ public final class Keys {
             true);
 
     /**
+     * If all bytes are printable characters, log network data as text instead of HEX.
+     */
+    public static final ConfigKey<Boolean> LOGGER_TEXT_PROTOCOL = new BooleanConfigKey(
+            "logger.decodeTextData",
+            List.of(KeyType.CONFIG),
+            true);
+
+    /**
      * Log file rotation interval, the default rotation interval is once a day.
      * This option is ignored if 'logger.rotate' = false
      * Available options: day, hour
