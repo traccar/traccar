@@ -137,8 +137,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
     @Path("{id}/accumulators")
     @PUT
     public Response updateAccumulators(DeviceAccumulators entity) throws Exception {
-        permissionsService.checkEdit(getUserId(), Device.class, false);
         permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
+        permissionsService.checkEdit(getUserId(), Device.class, false, false);
 
         Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(), new Condition.LatestPositions(entity.getDeviceId())));

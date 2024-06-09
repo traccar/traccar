@@ -17,11 +17,13 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.helper.Hashing;
 import org.traccar.storage.StorageName;
 
 import java.util.Date;
+import java.util.HashMap;
 
 @StorageName("tc_users")
 public class User extends ExtendedModel implements UserRestrictions, Disableable {
@@ -303,6 +305,19 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
 
     public boolean isPasswordValid(String password) {
         return Hashing.validatePassword(password, hashedPassword, salt);
+    }
+
+    public boolean compare(User other, String... exclusions) {
+        if (!EqualsBuilder.reflectionEquals(this, other, "attributes", "hashedPassword", "salt")) {
+            return false;
+        }
+        var thisAttributes = new HashMap<>(getAttributes());
+        var otherAttributes = new HashMap<>(other.getAttributes());
+        for (String exclusion : exclusions) {
+            thisAttributes.remove(exclusion);
+            otherAttributes.remove(exclusion);
+        }
+        return thisAttributes.equals(otherAttributes);
     }
 
 }
