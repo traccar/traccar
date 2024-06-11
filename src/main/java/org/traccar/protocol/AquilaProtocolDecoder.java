@@ -224,10 +224,10 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, parser.nextInt(0));
             position.set(Position.KEY_BATTERY, parser.nextInt(0));
 
-        } 
-       
+        }
+
         // * CUSTOM CODE START * //
-        
+
         else if (parser.hasNext(8)) {
 
             position.setCourse(parser.nextInt(0));
@@ -242,10 +242,10 @@ public class AquilaProtocolDecoder extends BaseProtocolDecoder {
             position.set("sensorData", sensorData);
             // position.set(Position.KEY_IGNITION, sensorData != "1||");
 
-        }  
-        
+        }
+
         // * CUSTOM CODE END * //
-        
+
         else if (parser.hasNext(2)) {
 
             position.set("sensorId", parser.nextInt());

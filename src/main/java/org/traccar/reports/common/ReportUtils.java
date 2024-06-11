@@ -381,7 +381,7 @@ public class ReportUtils {
                     } else if (startEventIndex >= 0 && startNoEventIndex >= 0) {
                         result.add(calculateTripOrStop(
                                 device, positions.get(startEventIndex), positions.get(startNoEventIndex),
-                                maxSpeed, ignoreOdometer, reportClass,totalDistance));
+                                maxSpeed, ignoreOdometer, reportClass, totalDistance));
                         detected = false;
                         startEventIndex = -1;
                         startNoEventIndex = -1;

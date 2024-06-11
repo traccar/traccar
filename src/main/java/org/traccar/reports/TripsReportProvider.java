@@ -21,15 +21,11 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Device;
-import org.traccar.model.Group;
 import org.traccar.reports.common.ReportUtils;
 import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.reports.model.TripReportItem;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import java.io.File;
@@ -71,7 +67,7 @@ public class TripsReportProvider {
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
-        
+
         // * CUSTOM CODE START * //
 
         // ArrayList<DeviceReportSection> devicesTrips = new ArrayList<>();
@@ -98,10 +94,10 @@ public class TripsReportProvider {
             // deviceTrips.setObjects(trips);
             // devicesTrips.add(deviceTrips);
         }
-        
+
         var singleTripsList = new ArrayList<DeviceReportSection<TripReportItem>>();
         singleTripsList.add(allDevicesTrips); // Only 1 item contains all devices trips
-        
+
         // * CUSTOM CODE END * //
 
         File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "trips.xlsx").toFile();

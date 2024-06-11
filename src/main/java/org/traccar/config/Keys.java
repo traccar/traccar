@@ -1334,7 +1334,7 @@ public final class Keys {
             false);
 
     /**
-     * Use distance column value in positions table while calculating distance in any report. Else, by default 
+     * Use distance column value in positions table while calculating distance in any report. Else, by default
      * the report uses totalDistance or Odomoter value to calculate distance.
      */
     public static final ConfigKey<Boolean> REPORT_USE_DISTANCE_COLUMN = new BooleanConfigKey(

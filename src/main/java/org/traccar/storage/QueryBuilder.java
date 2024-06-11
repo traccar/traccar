@@ -482,7 +482,7 @@ public final class QueryBuilder {
     }
 
     // * CUSTOM CODE START * //
-    
+
     public void addBatch() throws SQLException {
         if (query != null) {
             // assuming values are set before this method is called
@@ -507,7 +507,7 @@ public final class QueryBuilder {
         }
         return updateCounts;
     }
-    
+
     // * CUSTOM CODE END * //
 
     public List<Permission> executePermissionsQuery() throws SQLException {

@@ -83,7 +83,7 @@ public class SummaryReportProvider {
         result.setDeviceName(device.getName());
 
         // * CUSTOM CODE START * //
-        
+
         boolean useDistanceColumn = config.getBoolean(Keys.REPORT_USE_DISTANCE_COLUMN);
 
         var totalDistance = 0.0;
@@ -107,7 +107,7 @@ public class SummaryReportProvider {
                 }
 
                 // * CUSTOM CODE START * //
-               
+
                 if (totalDistanceValid) {
                     try {
                         totalDistance += position.getDistance();
@@ -115,7 +115,7 @@ public class SummaryReportProvider {
                         totalDistanceValid = false;
                     }
                 }
-               
+
                 // * CUSTOM CODE END * //
 
                 last = position;
@@ -126,7 +126,7 @@ public class SummaryReportProvider {
             boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
 
             // * CUSTOM CODE START * //
-          
+
             if (totalDistanceValid) {
                 result.setDistance(totalDistance);
             } else {

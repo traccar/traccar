@@ -203,10 +203,10 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
 
             return null;
         }
-        
+
         // DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceUniqueId);
-       
+
         // * CUSTOM CODE END * //
 
         if (deviceSession == null) {

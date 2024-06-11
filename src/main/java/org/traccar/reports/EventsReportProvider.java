@@ -118,7 +118,7 @@ public class EventsReportProvider {
 
         // Group names cache
         HashMap<Long, String> groupNames = new HashMap<>();
-        
+
         // * CUSTOM CODE END * //
 
         for (Device device : DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {

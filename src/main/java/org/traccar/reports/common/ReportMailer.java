@@ -135,15 +135,15 @@ public class ReportMailer {
                         // --> Body of the email:
                         /*
                          * Report - <type> (<from> to <to>)
-                         * 
+                         *
                          * Devices: (if any)
                          * <device1>
                          * <device2>
-                         * 
+                         *
                          * Groups: (if any)
                          * <group1>
                          * <group2>
-                         * 
+                         *
                          * The report is in the attachment.
                          */
                         bodyString, attachment);
