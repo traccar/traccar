@@ -1033,7 +1033,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private Object decodeIgn(Channel channel, SocketAddress remoteAddress, String[] v, String type) throws ParseException {
+    private Object decodeIgn(
+            Channel channel, SocketAddress remoteAddress, String[] v, String type) throws ParseException {
         int index = 1; // header
         String protocolVersion = v[index++]; // protocol version
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
