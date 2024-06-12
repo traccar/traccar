@@ -42,5 +42,7 @@
     <entry key='geocoder.onRequest'>false</entry>
     <entry key='geocoder.ignorePositions'>true</entry>
 
+    <entry key='filter.ignoreDistanceForTeltonika'>true</entry>
+
     <entry key='report.ignoreOdometer'>false</entry>
 </properties>

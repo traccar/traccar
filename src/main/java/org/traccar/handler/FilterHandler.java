@@ -61,6 +61,9 @@ public class FilterHandler extends BasePositionHandler {
     private final CacheManager cacheManager;
     private final Storage storage;
     private final StatisticsManager statisticsManager;
+    // * CUSTOM CODE START * //
+    private final boolean filterIgnoreDistanceForTeltonika;
+    // * CUSTOM CODE END * //
 
     @Inject
     public FilterHandler(
@@ -82,6 +85,12 @@ public class FilterHandler extends BasePositionHandler {
         filterRelative = config.getBoolean(Keys.FILTER_RELATIVE);
         skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
         skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
+
+        // * CUSTOM CODE START * //
+        // parameter used to ignore distance filter for `Teltonika` model devices
+        filterIgnoreDistanceForTeltonika = config.getBoolean(Keys.FILTER_IGNORE_DISTANCE_FOR_TELTONIKA);
+        // * CUSTOM CODE END * //
+
         this.cacheManager = cacheManager;
         this.storage = storage;
         this.statisticsManager = statisticsManager;
@@ -152,6 +161,20 @@ public class FilterHandler extends BasePositionHandler {
     }
 
     private boolean filterDistance(Position position, Position last) {
+        // * CUSTOM CODE START * //
+        // Check if the ignoreDistanceForTeltonika is enabled
+        if (filterIgnoreDistanceForTeltonika) {
+
+            // Get the device data using the deviceId in the position
+            Device device = cacheManager.getObject(Device.class, position.getDeviceId());
+
+            // Check if the device model is `Teltonika`
+            if (device.getModel().equalsIgnoreCase("teltonika")) {
+                return false;
+            }
+        }
+        // * CUSTOM CODE END * //
+
         if (filterDistance != 0 && last != null) {
             return position.getDouble(Position.KEY_DISTANCE) < filterDistance;
         }

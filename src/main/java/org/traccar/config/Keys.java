@@ -1333,6 +1333,7 @@ public final class Keys {
             List.of(KeyType.CONFIG),
             false);
 
+    // * CUSTOM CODE START * //
     /**
      * Use distance column value in positions table while calculating distance in any report. Else, by default
      * the report uses totalDistance or Odomoter value to calculate distance.
@@ -1340,6 +1341,8 @@ public final class Keys {
     public static final ConfigKey<Boolean> REPORT_USE_DISTANCE_COLUMN = new BooleanConfigKey(
             "report.useDistanceColumn",
             List.of(KeyType.CONFIG));
+
+    // * CUSTOM CODE END * //
 
     /**
      * Boolean flag to enable or disable position filtering.
@@ -1424,6 +1427,17 @@ public final class Keys {
     public static final ConfigKey<Integer> FILTER_DISTANCE = new IntegerConfigKey(
             "filter.distance",
             List.of(KeyType.CONFIG));
+
+    // * CUSTOM CODE START * //
+    /**
+     * Ignores distance filter for Teltonika devices. If set to true, distance filter will be ignored for Teltonika devices.
+     */
+    public static final ConfigKey<Boolean> FILTER_IGNORE_DISTANCE_FOR_TELTONIKA  = new BooleanConfigKey(
+            "filter.ignoreDistanceForTeltonika",
+            List.of(KeyType.CONFIG),
+            false);
+
+    // * CUSTOM CODE END * //
 
     /**
      * Filter records by Maximum Speed value in knots. Can be used to filter jumps to far locations even if Position
