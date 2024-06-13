@@ -283,8 +283,8 @@ public final class Log {
         var stores = new ArrayList<Pair<Long, Long>>();
         for (FileStore store : FileSystems.getDefault().getFileStores()) {
             try {
-                long totalSpace = store.getTotalSpace();
                 long usableSpace = store.getUsableSpace();
+                long totalSpace = store.getTotalSpace();
                 if (totalSpace > 1_000_000_000) {
                     stores.add(new Pair<>(usableSpace, totalSpace));
                 }
@@ -292,7 +292,7 @@ public final class Log {
             }
         }
         return stores.stream()
-                .sorted(Comparator.comparingDouble(o -> 1 - o.getFirst() / (double) o.getSecond()))
+                .sorted(Comparator.comparingDouble(p -> p.getFirst() / (double) p.getSecond()))
                 .flatMap(p -> Stream.of(p.getFirst(), p.getSecond()))
                 .mapToLong(Long::longValue)
                 .toArray();
