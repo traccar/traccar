@@ -112,6 +112,9 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             case "TOWED":
                 position.set(Position.KEY_ALARM, Position.ALARM_TOW);
                 break;
+            case "SHAKE":
+                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                break;
             case "SOS":
                 position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 break;
