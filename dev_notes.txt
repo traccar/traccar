@@ -1,4 +1,5 @@
 Test Server:
+- gradle build
 - gradle test
 
 Compile Server:
@@ -18,7 +19,7 @@ Deploy Steps:
 - On both Prod servers:
     - rm /home/bunny/build/*
 - Transfer build to server:
-    - rsync -a --progress traccar-linux-64-6.2.zip nconnect_gps_new:/home/bunny/build/
+    - rsync -a --progress traccar-linux-64-6.2.zip nconnect_gps:/home/bunny/build/
     - rsync -a --progress traccar-linux-64-6.2.zip nspira_gps:/home/bunny/build/
     - Repeat above step for nspira_gps too.
 - ssh into each server:
