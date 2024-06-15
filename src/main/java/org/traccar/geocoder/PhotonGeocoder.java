@@ -27,6 +27,9 @@ public class PhotonGeocoder extends JsonGeocoder {
             url = "https://photon.komoot.io/reverse";
         }
         url += "?lat=%f&lon=%f";
+        if (key != null) {
+            url += "&key=" + key;
+        }
         if (language != null) {
             url += "&lang=" + language;
         }
