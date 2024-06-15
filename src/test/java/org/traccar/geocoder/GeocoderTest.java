@@ -122,4 +122,11 @@ public class GeocoderTest {
         assertEquals("114 East 13th Street, New York, New York, US", address);
     }
 
+    @Disabled
+    @Test
+    public void testPhoton() {
+        Geocoder geocoder = new PhotonGeocoder(client, null, null, null, 0, new AddressFormat());
+        String address = geocoder.getAddress(40.7337807, -73.9974401, null);
+        assertEquals("35 West 9th Street, New York, New York, US", address);
+    }
 }
