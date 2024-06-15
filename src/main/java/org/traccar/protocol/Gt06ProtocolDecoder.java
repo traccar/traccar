@@ -65,6 +65,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_STRING = 0x15;
     public static final int MSG_GPS_LBS_STATUS_1 = 0x16;
     public static final int MSG_WIFI = 0x17;
+    public static final int MSG_GPS_LBS_RFID = 0x17;
     public static final int MSG_GPS_LBS_STATUS_2 = 0x26;
     public static final int MSG_GPS_LBS_STATUS_3 = 0x27;
     public static final int MSG_LBS_MULTIPLE_1 = 0x28;
@@ -125,6 +126,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         JC400,
         SL4X,
         SEEWORLD,
+        RFID,
     }
 
     private Variant variant;
@@ -175,6 +177,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_PHONE:
             case MSG_GPS_LBS_EXTEND:
             case MSG_GPS_LBS_7:
+            case MSG_GPS_LBS_RFID:
             case MSG_FENCE_SINGLE:
             case MSG_FENCE_MULTI:
                 return true;
@@ -197,6 +200,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_STATUS_3:
             case MSG_GPS_LBS_STATUS_4:
             case MSG_GPS_LBS_7:
+            case MSG_GPS_LBS_RFID:
             case MSG_FENCE_SINGLE:
             case MSG_FENCE_MULTI:
             case MSG_LBS_ALARM:
@@ -602,7 +606,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return null;
 
-        } else if (type == MSG_WIFI || type == MSG_WIFI_2 || type == MSG_WIFI_4) {
+        } else if ((type == MSG_WIFI && variant != Variant.RFID) || type == MSG_WIFI_2 || type == MSG_WIFI_4) {
 
             ByteBuf time = buf.readSlice(6);
             DateBuilder dateBuilder = new DateBuilder()
@@ -943,6 +947,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         buf.skipBytes(subLength);
                         break;
                 }
+            }
+
+            if (type == MSG_GPS_LBS_RFID) {
+                buf.readUnsignedByte(); // validity
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(8)));
             }
 
             if (buf.readableBytes() == 3 + 6 || buf.readableBytes() == 3 + 4 + 6) {
@@ -1492,6 +1501,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.SEEWORLD;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x26) {
             variant = Variant.SEEWORLD;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_RFID && length == 0x28) {
+            variant = Variant.RFID;
         } else {
             variant = Variant.STANDARD;
         }
