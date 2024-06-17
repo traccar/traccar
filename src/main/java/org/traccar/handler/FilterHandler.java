@@ -108,8 +108,8 @@ public class FilterHandler extends BaseDataHandler {
     private boolean filterMaxSpeed(Position position, Position last) {
         if (filterMaxSpeed != 0 && last != null) {
             double time = position.getFixTime().getTime() - last.getFixTime().getTime();
-            if (time >= 1000) {
-                double distance = position.getDouble(Position.KEY_DISTANCE);
+            double distance = position.getDouble(Position.KEY_DISTANCE);
+            if (time >= 1000 && distance > 1000) {
                 double speed = UnitsConverter.knotsFromMps(distance / (time / 1000));
                 if (speed > filterMaxSpeed) {
                     LOGGER.error(String.format("speed (kph): %.0f, distance (km): %.1f, time (s): %.1f", kphFromKnots(speed), distance/1000, time/1000));

@@ -1676,7 +1676,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = ((ByteBuf) msg).toString(StandardCharsets.US_ASCII).replaceAll("\\$$", "");
-
+        LOGGER.error(sentence);
         int typeIndex = sentence.indexOf(":GT");
         if (typeIndex < 0) {
             return null;
