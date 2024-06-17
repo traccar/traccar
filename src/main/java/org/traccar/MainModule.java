@@ -68,7 +68,7 @@ import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.PositionStackGeocoder;
 import org.traccar.geocoder.PlusCodesGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
-import org.traccar.geocoder.PhotonGeocoder;
+import org.traccar.geocoder.GeocodeJSONGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
@@ -262,8 +262,8 @@ public class MainModule extends AbstractModule {
                 case "geoapify":
                     geocoder = new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
                     break;
-                case "photon":
-                    geocoder = new PhotonGeocoder(client, url, key, language, cacheSize, addressFormat);
+                case "geocodejson":
+                    geocoder = new GeocodeJSONGeocoder(client, url, key, language, cacheSize, addressFormat);
                     break;
                 default:
                     geocoder = new GoogleGeocoder(client, key, language, cacheSize, addressFormat);

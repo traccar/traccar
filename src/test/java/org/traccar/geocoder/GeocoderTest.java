@@ -69,9 +69,9 @@ public class GeocoderTest {
     @Disabled
     @Test
     public void testBan() {
-        Geocoder geocoder = new BanGeocoder(client, 0, new AddressFormat("%f [%d], %c"));
+        Geocoder geocoder = new BanGeocoder(client, 0, new AddressFormat());
         String address = geocoder.getAddress(48.8575, 2.2944, null);
-        assertEquals("8 Avenue Gustave Eiffel 75007 Paris [75, Paris, Île-de-France], FR", address);
+        assertEquals("8 Avenue Gustave Eiffel, Paris, FR", address);
     }
 
     @Disabled
@@ -124,8 +124,8 @@ public class GeocoderTest {
 
     @Disabled
     @Test
-    public void testPhoton() {
-        Geocoder geocoder = new PhotonGeocoder(client, null, null, null, 0, new AddressFormat());
+    public void testGeocodeJSON() {
+        Geocoder geocoder = new GeocodeJSONGeocoder(client, null, null, null, 0, new AddressFormat());
         String address = geocoder.getAddress(40.7337807, -73.9974401, null);
         assertEquals("35 West 9th Street, New York, New York, US", address);
     }

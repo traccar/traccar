@@ -20,7 +20,7 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
 
-public class PhotonGeocoder extends JsonGeocoder {
+public class GeocodeJSONGeocoder extends JsonGeocoder {
 
     private static String formatUrl(String url, String key, String language) {
         if (url == null) {
@@ -36,7 +36,7 @@ public class PhotonGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public PhotonGeocoder(
+    public GeocodeJSONGeocoder(
             Client client, String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
         super(client, formatUrl(url, key, language), cacheSize, addressFormat);
     }
@@ -48,6 +48,9 @@ public class PhotonGeocoder extends JsonGeocoder {
             Address address = new Address();
             JsonObject properties = features.getJsonObject(0).getJsonObject("properties");
 
+            if (properties.containsKey("label")) {
+                address.setFormattedAddress(properties.getString("label"));
+            }
             if (properties.containsKey("housenumber")) {
                 address.setHouse(properties.getString("housenumber"));
             }
@@ -58,7 +61,7 @@ public class PhotonGeocoder extends JsonGeocoder {
                 address.setSettlement(properties.getString("city"));
             }
             if (properties.containsKey("district")) {
-                address.setState(properties.getString("district"));
+                address.setDistrict(properties.getString("district"));
             }
             if (properties.containsKey("state")) {
                 address.setState(properties.getString("state"));
