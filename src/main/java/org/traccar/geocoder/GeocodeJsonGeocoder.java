@@ -20,7 +20,7 @@ import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
 
-public class GeocodeJSONGeocoder extends JsonGeocoder {
+public class GeocodeJsonGeocoder extends JsonGeocoder {
 
     private static String formatUrl(String url, String key, String language) {
         if (url == null) {
@@ -36,7 +36,7 @@ public class GeocodeJSONGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public GeocodeJSONGeocoder(
+    public GeocodeJsonGeocoder(
             Client client, String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
         super(client, formatUrl(url, key, language), cacheSize, addressFormat);
     }

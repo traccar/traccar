@@ -125,7 +125,7 @@ public class GeocoderTest {
     @Disabled
     @Test
     public void testGeocodeJSON() {
-        Geocoder geocoder = new GeocodeJSONGeocoder(client, null, null, null, 0, new AddressFormat());
+        Geocoder geocoder = new GeocodeJsonGeocoder(client, null, null, null, 0, new AddressFormat());
         String address = geocoder.getAddress(40.7337807, -73.9974401, null);
         assertEquals("35 West 9th Street, New York, New York, US", address);
     }
