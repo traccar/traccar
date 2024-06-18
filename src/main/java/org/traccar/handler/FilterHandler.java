@@ -176,7 +176,7 @@ public class FilterHandler extends BasePositionHandler {
             }
         }
 
-        if (!position.getBoolean(Position.KEY_IGNITION) && filterDistanceWhenIgnitionOff != 0) {
+        if (!position.getBoolean(Position.KEY_IGNITION) && filterDistanceWhenIgnitionOff != 0 && last != null) {
             return position.getDouble(Position.KEY_DISTANCE) < filterDistanceWhenIgnitionOff;
         }
 
