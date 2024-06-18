@@ -50,6 +50,7 @@ public class FilterHandler extends BasePositionHandler {
     private final int filterAccuracy;
     private final boolean filterStatic;
     private final int filterDistance;
+    private final int filterDistanceWhenIgnitionOff;
     private final int filterMaxSpeed;
     private final long filterMinPeriod;
     private final int filterDailyLimit;
@@ -78,6 +79,7 @@ public class FilterHandler extends BasePositionHandler {
         filterApproximate = config.getBoolean(Keys.FILTER_APPROXIMATE);
         filterStatic = config.getBoolean(Keys.FILTER_STATIC);
         filterDistance = config.getInteger(Keys.FILTER_DISTANCE);
+        filterDistanceWhenIgnitionOff = config.getInteger(Keys.FILTER_DISTANCE_WHEN_IGNITION_OFF);
         filterMaxSpeed = config.getInteger(Keys.FILTER_MAX_SPEED);
         filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000L;
         filterDailyLimit = config.getInteger(Keys.FILTER_DAILY_LIMIT);
@@ -173,8 +175,12 @@ public class FilterHandler extends BasePositionHandler {
                 return false;
             }
         }
-        // * CUSTOM CODE END * //
 
+        if (!position.getBoolean(Position.KEY_IGNITION) && filterDistanceWhenIgnitionOff != 0 && last != null) {
+            return position.getDouble(Position.KEY_DISTANCE) < filterDistanceWhenIgnitionOff;
+        }
+
+        // * CUSTOM CODE END * //
         if (filterDistance != 0 && last != null) {
             return position.getDouble(Position.KEY_DISTANCE) < filterDistance;
         }

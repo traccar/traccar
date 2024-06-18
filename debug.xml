@@ -43,6 +43,7 @@
     <entry key='geocoder.ignorePositions'>true</entry>
 
     <entry key='filter.ignoreDistanceForTeltonika'>true</entry>
+    <entry key='filter.distanceWhenIgnitionOff'>20</entry>
 
     <entry key='report.ignoreOdometer'>false</entry>
 </properties>
