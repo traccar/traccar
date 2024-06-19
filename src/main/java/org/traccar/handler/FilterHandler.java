@@ -292,7 +292,7 @@ public class FilterHandler extends BasePositionHandler {
         // status, let it pass without any filtering
         Position last = cacheManager.getPosition(deviceId);
 
-        if (last != null && last.getBoolean(Position.KEY_IGNITION) != position.getBoolean(Position.KEY_IGNITION)) {
+        if (last != null && filterType.length() == 0 && last.getBoolean(Position.KEY_IGNITION) != position.getBoolean(Position.KEY_IGNITION)) {
             return false;
         }
 
