@@ -51,6 +51,7 @@ public class FilterHandler extends BasePositionHandler {
     private final boolean filterStatic;
     private final int filterDistance;
     private final int filterDistanceWhenIgnitionOff;
+    private final String filterDistanceWhenIgnitionOffDevices;
     private final int filterMaxSpeed;
     private final long filterMinPeriod;
     private final int filterDailyLimit;
@@ -64,6 +65,7 @@ public class FilterHandler extends BasePositionHandler {
     private final StatisticsManager statisticsManager;
     // * CUSTOM CODE START * //
     private final boolean filterIgnoreDistanceForTeltonika;
+    private final int[] deviceIds;
     // * CUSTOM CODE END * //
 
     @Inject
@@ -80,6 +82,7 @@ public class FilterHandler extends BasePositionHandler {
         filterStatic = config.getBoolean(Keys.FILTER_STATIC);
         filterDistance = config.getInteger(Keys.FILTER_DISTANCE);
         filterDistanceWhenIgnitionOff = config.getInteger(Keys.FILTER_DISTANCE_WHEN_IGNITION_OFF);
+        filterDistanceWhenIgnitionOffDevices = config.getString(Keys.FILTER_DISTANCE_WHEN_IGNITION_OFF_DEVICES);
         filterMaxSpeed = config.getInteger(Keys.FILTER_MAX_SPEED);
         filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000L;
         filterDailyLimit = config.getInteger(Keys.FILTER_DAILY_LIMIT);
@@ -91,6 +94,14 @@ public class FilterHandler extends BasePositionHandler {
         // * CUSTOM CODE START * //
         // parameter used to ignore distance filter for `Teltonika` model devices
         filterIgnoreDistanceForTeltonika = config.getBoolean(Keys.FILTER_IGNORE_DISTANCE_FOR_TELTONIKA);
+
+        var devices = filterDistanceWhenIgnitionOffDevices.split(",");
+
+        deviceIds = new int[devices.length];
+        for (int i = 0; i < devices.length; i++) {
+            deviceIds[i] = Integer.parseInt(devices[i]);
+        }
+
         // * CUSTOM CODE END * //
 
         this.cacheManager = cacheManager;
@@ -177,7 +188,15 @@ public class FilterHandler extends BasePositionHandler {
         }
 
         if (!position.getBoolean(Position.KEY_IGNITION) && filterDistanceWhenIgnitionOff != 0 && last != null) {
-            return position.getDouble(Position.KEY_DISTANCE) < filterDistanceWhenIgnitionOff;
+            // Get the device data using the deviceId in the position
+            Device device = cacheManager.getObject(Device.class, position.getDeviceId());
+
+            for (int deviceId : deviceIds) {
+                // Apply special ignition off distance filter if the device is in the list
+                if (deviceId == device.getId()) {
+                    return position.getDouble(Position.KEY_DISTANCE) < filterDistanceWhenIgnitionOff;
+                }
+            }
         }
 
         // * CUSTOM CODE END * //
@@ -237,10 +256,25 @@ public class FilterHandler extends BasePositionHandler {
 
         StringBuilder filterType = new StringBuilder();
 
+        long deviceId = position.getDeviceId();
+        Device device = cacheManager.getObject(Device.class, deviceId);
+
         // filter out invalid data
         if (filterInvalid(position)) {
             filterType.append("Invalid ");
         }
+
+        // * CUSTOM CODE START * //
+
+        // if the new position's ignition status is not same as the last known ignition status, let it pass without any filtering
+        Position last = cacheManager.getPosition(deviceId);
+
+        if (last != null && last.getBoolean(Position.KEY_IGNITION) != position.getBoolean(Position.KEY_IGNITION)) {
+            return false;
+        }
+
+        // * CUSTOM CODE END * //
+
         if (filterZero(position)) {
             filterType.append("Zero ");
         }
@@ -261,7 +295,6 @@ public class FilterHandler extends BasePositionHandler {
         }
 
         // filter out excessive data
-        long deviceId = position.getDeviceId();
         if (filterDuplicate || filterStatic
                 || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0 || filterDailyLimit > 0) {
             Position preceding;
@@ -296,7 +329,6 @@ public class FilterHandler extends BasePositionHandler {
             }
         }
 
-        Device device = cacheManager.getObject(Device.class, deviceId);
         if (device.getCalendarId() > 0) {
             Calendar calendar = cacheManager.getObject(Calendar.class, device.getCalendarId());
             if (!calendar.checkMoment(position.getFixTime())) {

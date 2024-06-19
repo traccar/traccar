@@ -1439,10 +1439,17 @@ public final class Keys {
 
     /**
      * Distance filter when ignition is off. If this is mentioned along with `filter.distance` and ignition is off, then
-     * this distance will be considered for filtering.
+     * this distance will be considered for filtering. Applies only to devices that are not mentioned in `filter.distanceWhenIgnitionOffDevices`.
      */
     public static final ConfigKey<Integer> FILTER_DISTANCE_WHEN_IGNITION_OFF = new IntegerConfigKey(
             "filter.distanceWhenIgnitionOff",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * List of devices (csv) for which distance filter should be ignored when ignition is off.
+     */
+    public static final ConfigKey<String> FILTER_DISTANCE_WHEN_IGNITION_OFF_DEVICES = new StringConfigKey(
+            "filter.distanceWhenIgnitionOffDevices",
             List.of(KeyType.CONFIG));
 
     // * CUSTOM CODE END * //
