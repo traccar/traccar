@@ -267,18 +267,6 @@ public class FilterHandler extends BasePositionHandler {
             filterType.append("Invalid ");
         }
 
-        // * CUSTOM CODE START * //
-
-        // if the new position's ignition status is not same as the last known ignition
-        // status, let it pass without any filtering
-        Position last = cacheManager.getPosition(deviceId);
-
-        if (last != null && last.getBoolean(Position.KEY_IGNITION) != position.getBoolean(Position.KEY_IGNITION)) {
-            return false;
-        }
-
-        // * CUSTOM CODE END * //
-
         if (filterZero(position)) {
             filterType.append("Zero ");
         }
@@ -297,6 +285,18 @@ public class FilterHandler extends BasePositionHandler {
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
+
+        // * CUSTOM CODE START * //
+
+        // if the new position's ignition status is not same as the last known ignition
+        // status, let it pass without any filtering
+        Position last = cacheManager.getPosition(deviceId);
+
+        if (last != null && last.getBoolean(Position.KEY_IGNITION) != position.getBoolean(Position.KEY_IGNITION)) {
+            return false;
+        }
+
+        // * CUSTOM CODE END * //
 
         // filter out excessive data
         if (filterDuplicate || filterStatic
