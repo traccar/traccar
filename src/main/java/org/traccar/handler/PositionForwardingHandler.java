@@ -15,8 +15,11 @@
  */
 package org.traccar.handler;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
+import io.netty.util.TimerTask;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -27,12 +30,9 @@ import org.traccar.forward.ResultHandler;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
-import io.netty.util.Timeout;
-import io.netty.util.Timer;
-import io.netty.util.TimerTask;
 
-import jakarta.annotation.Nullable;
-import jakarta.inject.Inject;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PositionForwardingHandler extends BasePositionHandler {
 
