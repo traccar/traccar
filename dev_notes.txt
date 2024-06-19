@@ -1,6 +1,5 @@
 Test Server:
 - gradle build
-- gradle test
 
 Compile Server:
 - ./gradlew assemble
