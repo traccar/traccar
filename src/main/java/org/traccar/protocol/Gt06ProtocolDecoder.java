@@ -360,7 +360,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             lac = buf.readUnsignedShort();
         }
         long cid;
-        if (type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7) {
+        if (type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7 || variant == Variant.SL4X) {
             cid = buf.readLong();
         } else if (type == MSG_GPS_LBS_6 || variant == Variant.SEEWORLD) {
             cid = buf.readUnsignedInt();
@@ -923,11 +923,21 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set("humidity", buf.readUnsignedShort() * 0.01);
             }
 
-            if ((type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_3 || type == MSG_GPS_LBS_4)
+            if (type == MSG_GPS_LBS_STATUS_4 && variant == Variant.SL4X) {
+                position.setAltitude(buf.readShort());
+            }
+
+            if ((type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_3 || type == MSG_GPS_LBS_4 || type == MSG_GPS_LBS_5)
                     && buf.readableBytes() >= 3 + 6) {
                 position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte()); // reason
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
+                if (variant == Variant.SL4X) {
+                    if (buf.readableBytes() > 2 + 6) {
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                    }
+                    position.setAltitude(buf.readShort());
+                }
             }
 
             if (type == MSG_GPS_LBS_3) {
@@ -1495,7 +1505,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.JC400;
         } else if (header == 0x7878 && type == MSG_LBS_3 && length == 0x37) {
             variant = Variant.SL4X;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_5 && length == 0x2a) {
+            variant = Variant.SL4X;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_4 && length == 0x27) {
+            variant = Variant.SL4X;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_4 && length == 0x29) {
             variant = Variant.SL4X;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_2 && length == 0x2f) {
             variant = Variant.SEEWORLD;

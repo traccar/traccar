@@ -18,6 +18,14 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttribute(decoder, binary(
+                "7878293218061301261ccd0274c4ad050d7c960018000a02d4000ac3c70dbdc40b46f004210202af001784290d0a"),
+                "altitude", -31703.0);
+
+        verifyAttribute(decoder, binary(
+                "78782a31180613012b39cc0274c4dc050d7cd000180002d4000ac3c70dbdc4150100000000000002a6000ea40b0d0a"),
+                "altitude", 678.0);
+
+        verifyAttribute(decoder, binary(
                 "7878281718060e021831c6026e8acc0c361b1000140001cc00286d000f4dbf0000012ca7e001000004b2630d0a"),
                 Position.KEY_DRIVER_UNIQUE_ID, "0000012ca7e00100");
 
