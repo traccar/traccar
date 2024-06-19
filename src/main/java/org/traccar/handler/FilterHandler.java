@@ -95,13 +95,16 @@ public class FilterHandler extends BasePositionHandler {
         // parameter used to ignore distance filter for `Teltonika` model devices
         filterIgnoreDistanceForTeltonika = config.getBoolean(Keys.FILTER_IGNORE_DISTANCE_FOR_TELTONIKA);
 
-        var devices = filterDistanceWhenIgnitionOffDevices.split(",");
+        if (filterDistanceWhenIgnitionOffDevices != null) {
+            var devices = filterDistanceWhenIgnitionOffDevices.split(",");
 
-        deviceIds = new int[devices.length];
-        for (int i = 0; i < devices.length; i++) {
-            deviceIds[i] = Integer.parseInt(devices[i]);
+            deviceIds = new int[devices.length];
+            for (int i = 0; i < devices.length; i++) {
+                deviceIds[i] = Integer.parseInt(devices[i]);
+            }
+        } else {
+            deviceIds = new int[0];
         }
-
         // * CUSTOM CODE END * //
 
         this.cacheManager = cacheManager;
@@ -266,7 +269,8 @@ public class FilterHandler extends BasePositionHandler {
 
         // * CUSTOM CODE START * //
 
-        // if the new position's ignition status is not same as the last known ignition status, let it pass without any filtering
+        // if the new position's ignition status is not same as the last known ignition
+        // status, let it pass without any filtering
         Position last = cacheManager.getPosition(deviceId);
 
         if (last != null && last.getBoolean(Position.KEY_IGNITION) != position.getBoolean(Position.KEY_IGNITION)) {
