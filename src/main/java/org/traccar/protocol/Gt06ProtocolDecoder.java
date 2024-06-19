@@ -1155,6 +1155,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)).replaceAll("f", ""));
                 return position;
 
+            } else if (subType == 0x0b) {
+
+                position.set("networkTechnology", buf.readByte() > 0 ? "4G" : "2G");
+                return position;
+
             } else if (subType == 0x0d) {
 
                 if (buf.getByte(buf.readerIndex()) != '!') {

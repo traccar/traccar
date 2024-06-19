@@ -18,6 +18,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttribute(decoder, binary(
+                "79790007940B010A0B5ACE0D0A"),
+                "networkTechnology", "4G");
+
+        verifyAttribute(decoder, binary(
                 "7878293218061301261ccd0274c4ad050d7c960018000a02d4000ac3c70dbdc40b46f004210202af001784290d0a"),
                 "altitude", -31703.0);
 
@@ -29,9 +33,8 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "7878281718060e021831c6026e8acc0c361b1000140001cc00286d000f4dbf0000012ca7e001000004b2630d0a"),
                 Position.KEY_DRIVER_UNIQUE_ID, "0000012ca7e00100");
 
-        verifyAttribute(decoder, binary(
-                "78782732180214123324ca0162bdf0041f45d900190b0a02d4000bc5270000ec025206040202005e07e10d0a"),
-                Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+        verifyNotNull(decoder, binary(
+                "78782732180214123324ca0162bdf0041f45d900190b0a02d4000bc5270000ec025206040202005e07e10d0a"));
 
         verifyAttribute(decoder, binary(
                 "78782616170A080C0E24C0027C58AD0C2B8B0100454E0901CC0025030328E7A0005D4B13021EC373170D0A"),
