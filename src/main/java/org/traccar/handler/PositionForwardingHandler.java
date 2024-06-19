@@ -15,9 +15,11 @@
  */
 package org.traccar.handler;
 
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
+import io.netty.util.TimerTask;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -29,17 +31,12 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import io.netty.util.Timeout;
-import io.netty.util.Timer;
-import io.netty.util.TimerTask;
-import jakarta.annotation.Nullable;
-import jakarta.inject.Inject;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PositionForwardingHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PositionForwardingHandler.class);
-
-    private static final String ATTRIBUTE_DEVICE_DISABLE_FORWARDING = "deviceDisableForwarding";
 
     private final CacheManager cacheManager;
     private final Timer timer;
@@ -129,19 +126,10 @@ public class PositionForwardingHandler extends BasePositionHandler {
     @Override
     public void handlePosition(Position position, Callback callback) {
         if (positionForwarder != null) {
-
-            Device device = cacheManager.getObject(Device.class, position.getDeviceId());
-
-            Object disableForwarding = device.getAttributes().get(ATTRIBUTE_DEVICE_DISABLE_FORWARDING);
-            if ((disableForwarding == null) || (!(Boolean) disableForwarding)) {
-                PositionData positionData = new PositionData();
-                positionData.setPosition(position);
-                positionData.setDevice(device);
-                new AsyncRequestAndCallback(positionData).send();
-            }
-            else {
-                LOGGER.debug("Not forwarding event for device '{}' as forwarding is disabled for this device.", device.getName());
-            }
+            PositionData positionData = new PositionData();
+            positionData.setPosition(position);
+            positionData.setDevice(cacheManager.getObject(Device.class, position.getDeviceId()));
+            new AsyncRequestAndCallback(positionData).send();
         }
         callback.processed(false);
     }
