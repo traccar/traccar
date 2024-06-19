@@ -65,6 +65,7 @@ public class FilterHandler extends BasePositionHandler {
     private final StatisticsManager statisticsManager;
     // * CUSTOM CODE START * //
     private final boolean filterIgnoreDistanceForTeltonika;
+    private final int[] deviceIds;
     // * CUSTOM CODE END * //
 
     @Inject
@@ -93,6 +94,14 @@ public class FilterHandler extends BasePositionHandler {
         // * CUSTOM CODE START * //
         // parameter used to ignore distance filter for `Teltonika` model devices
         filterIgnoreDistanceForTeltonika = config.getBoolean(Keys.FILTER_IGNORE_DISTANCE_FOR_TELTONIKA);
+
+        var devices = filterDistanceWhenIgnitionOffDevices.split(",");
+
+        deviceIds = new int[devices.length];
+        for (int i = 0; i < devices.length; i++) {
+            deviceIds[i] = Integer.parseInt(devices[i]);
+        }
+
         // * CUSTOM CODE END * //
 
         this.cacheManager = cacheManager;
@@ -181,15 +190,6 @@ public class FilterHandler extends BasePositionHandler {
         if (!position.getBoolean(Position.KEY_IGNITION) && filterDistanceWhenIgnitionOff != 0 && last != null) {
             // Get the device data using the deviceId in the position
             Device device = cacheManager.getObject(Device.class, position.getDeviceId());
-
-            // Get devices we need to ignore.
-            String[] devices = filterDistanceWhenIgnitionOffDevices.split(",");
-
-            int[] deviceIds = new int[devices.length];
-
-            for (int i = 0; i < devices.length; i++) {
-                deviceIds[i] = Integer.parseInt(devices[i]);
-            }
 
             for (int deviceId : deviceIds) {
                 // Apply special ignition off distance filter if the device is in the list
