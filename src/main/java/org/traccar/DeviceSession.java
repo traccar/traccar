@@ -53,4 +53,15 @@ public class DeviceSession {
     }
     private final Map<String, Object> locals = new HashMap<>();
 
+    public boolean contains(String key) {
+        return locals.containsKey(key);
+    }
+
+    public void set(String key, Object value) {
+        if (value != null) {
+            locals.put(key, value);
+        } else {
+            locals.remove(key);
+        }
+    }
 }

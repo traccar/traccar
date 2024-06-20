@@ -842,7 +842,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         long cid = buf.readUnsignedInt();
         int lac = buf.readUnsignedShort();
         if (cid > 0 && lac > 0) {
-            position.setNetwork(new Network(CellTower.fromCidLac(getConfig(), cid, lac)));
+            // position.setNetwork(new Network(CellTower.fromCidLac(getConfig(), cid, lac)));
         }
 
         int product = buf.readUnsignedByte();
