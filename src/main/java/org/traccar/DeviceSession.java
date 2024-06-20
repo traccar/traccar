@@ -15,7 +15,9 @@
  */
 package org.traccar;
 
+import java.util.HashMap;
 import java.util.TimeZone;
+import java.util.Map;
 
 public class DeviceSession {
 
@@ -43,5 +45,12 @@ public class DeviceSession {
     public String getModel() {
         return model;
     }
+
+    public static final String KEY_TIMEZONE = "timezone";
+    @SuppressWarnings("unchecked")
+    public <T> T get(String key) {
+        return (T) locals.get(key);
+    }
+    private final Map<String, Object> locals = new HashMap<>();
 
 }
