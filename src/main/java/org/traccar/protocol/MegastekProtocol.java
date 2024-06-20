@@ -19,15 +19,24 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
-import org.traccar.TrackerServer;
 import org.traccar.config.Config;
+import org.traccar.TrackerServer;
+import org.traccar.model.Command;
 
 import jakarta.inject.Inject;
 
 public class MegastekProtocol extends BaseProtocol {
-
+        
     @Inject
-    public MegastekProtocol(Config config) {
+    public MegastekProtocol(Config config) {        
+            setSupportedDataCommands(
+            Command.TYPE_CUSTOM,
+            Command.TYPE_SET_CONNECTION,
+            Command.TYPE_SET_TIMEZONE,
+            Command.TYPE_GET_DEVICE_STATUS,
+            Command.TYPE_FACTORY_RESET,
+            Command.TYPE_REBOOT_DEVICE,
+            Command.TYPE_POSITION_PERIODIC);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
@@ -35,6 +44,7 @@ public class MegastekProtocol extends BaseProtocol {
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new MegastekProtocolDecoder(MegastekProtocol.this));
+                pipeline.addLast(new MegastekProtocolEncoder(MegastekProtocol.this));
             }
         });
     }
