@@ -19,6 +19,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -303,8 +305,11 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
+        LOGGER.error("huabao ignoring " + type);
         return null;
     }
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(BaseProtocolDecoder.class);
 
     private Position decodeResult(Channel channel, SocketAddress remoteAddress, String sentence) {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
