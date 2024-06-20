@@ -47,28 +47,7 @@ import org.traccar.forward.PositionForwarderKafka;
 import org.traccar.forward.PositionForwarderRedis;
 import org.traccar.forward.PositionForwarderUrl;
 import org.traccar.forward.PositionForwarderMqtt;
-import org.traccar.geocoder.AddressFormat;
-import org.traccar.geocoder.BanGeocoder;
-import org.traccar.geocoder.BingMapsGeocoder;
-import org.traccar.geocoder.FactualGeocoder;
-import org.traccar.geocoder.GeoapifyGeocoder;
-import org.traccar.geocoder.GeocodeFarmGeocoder;
-import org.traccar.geocoder.GeocodeXyzGeocoder;
-import org.traccar.geocoder.Geocoder;
-import org.traccar.geocoder.GisgraphyGeocoder;
-import org.traccar.geocoder.GoogleGeocoder;
-import org.traccar.geocoder.HereGeocoder;
-import org.traccar.geocoder.LocationIqGeocoder;
-import org.traccar.geocoder.MapQuestGeocoder;
-import org.traccar.geocoder.MapTilerGeocoder;
-import org.traccar.geocoder.MapboxGeocoder;
-import org.traccar.geocoder.MapmyIndiaGeocoder;
-import org.traccar.geocoder.NominatimGeocoder;
-import org.traccar.geocoder.OpenCageGeocoder;
-import org.traccar.geocoder.PositionStackGeocoder;
-import org.traccar.geocoder.PlusCodesGeocoder;
-import org.traccar.geocoder.TomTomGeocoder;
-import org.traccar.geocoder.GeocodeJsonGeocoder;
+import org.traccar.geocoder.*;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
@@ -264,6 +243,9 @@ public class MainModule extends AbstractModule {
                     break;
                 case "geocodejson":
                     geocoder = new GeocodeJsonGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    break;
+                case "amap":
+                    geocoder = new AmapGeocoder(client, key, cacheSize, addressFormat);
                     break;
                 default:
                     geocoder = new GoogleGeocoder(client, key, language, cacheSize, addressFormat);

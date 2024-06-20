@@ -129,4 +129,12 @@ public class GeocoderTest {
         String address = geocoder.getAddress(40.7337807, -73.9974401, null);
         assertEquals("35 West 9th Street, New York, New York, US", address);
     }
+
+    @Disabled
+    @Test
+    public void testAmap() {
+        Geocoder geocoder = new AmapGeocoder(client, "7e9763482357f89aa66c65d70385b61d", 0, new AddressFormat());
+        String address = geocoder.getAddress(39.991957, 116.310003, null);
+        assertEquals("北京大学物理学院 中关村北大街, 海淀区, 北京市, 中国", address);
+    }
 }
