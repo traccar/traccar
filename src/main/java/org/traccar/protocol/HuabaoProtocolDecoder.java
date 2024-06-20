@@ -215,7 +215,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (!deviceSession.contains(DeviceSession.KEY_TIMEZONE)) {
-            deviceSession.set(DeviceSession.KEY_TIMEZONE, getTimeZone(deviceSession.getDeviceId(), "GMT+8"));
+            deviceSession.set(DeviceSession.KEY_TIMEZONE, getTimeZone(deviceSession.getDeviceId(), "GMT+0"));
         }
 
         if (type == MSG_TERMINAL_REGISTER) {
