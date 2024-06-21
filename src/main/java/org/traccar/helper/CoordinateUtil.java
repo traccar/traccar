@@ -33,11 +33,6 @@ public final class CoordinateUtil {
     }
 
     /**
-     * Coordinate conversion parameters：π（Pi)
-     */
-    public static final double PI = 3.1415926535897932384626433832795D;
-
-    /**
      * Earth radius（Krasovsky 1940）
      */
     public static final double RADIUS = 6378245.0D;
@@ -93,12 +88,14 @@ public final class CoordinateUtil {
         double latitudeOffset = transformLatitude(latitude - 35.0, longitude - 105.0);
         double longitudeOffset = transformLongitude(latitude - 35.0, longitude - 105.0);
 
-        double magic = Math.sin(latitude / 180.0 * PI);
+        double magic = Math.sin(latitude / 180.0 * Math.PI);
         magic = 1 - CORRECTION_PARAM * magic * magic;
         final double sqrtMagic = Math.sqrt(magic);
 
-        latitudeOffset = (latitudeOffset * 180.0) / ((RADIUS * (1 - CORRECTION_PARAM)) / (magic * sqrtMagic) * PI);
-        longitudeOffset = (longitudeOffset * 180.0) / (RADIUS / sqrtMagic * Math.cos(latitude / 180.0 * PI) * PI);
+        latitudeOffset = (latitudeOffset * 180.0)
+                / ((RADIUS * (1 - CORRECTION_PARAM)) / (magic * sqrtMagic) * Math.PI);
+        longitudeOffset = (longitudeOffset * 180.0)
+                / (RADIUS / sqrtMagic * Math.cos(latitude / 180.0 * Math.PI) * Math.PI);
 
         if (!isPlus) {
             latitudeOffset = -latitudeOffset;
@@ -119,12 +116,12 @@ public final class CoordinateUtil {
         double longitudeOffset = 300.0 + longitude + 2.0 * latitude
                 + 0.1 * longitude * longitude + 0.1 * longitude * latitude
                 + 0.1 * Math.sqrt(Math.abs(longitude));
-        longitudeOffset += (20.0 * Math.sin(6.0 * longitude * PI)
-                + 20.0 * Math.sin(2.0 * longitude * PI)) * 2.0 / 3.0;
-        longitudeOffset += (20.0 * Math.sin(longitude * PI)
-                + 40.0 * Math.sin(longitude / 3.0 * PI)) * 2.0 / 3.0;
-        longitudeOffset += (150.0 * Math.sin(longitude / 12.0 * PI)
-                + 300.0 * Math.sin(longitude / 30.0 * PI)) * 2.0 / 3.0;
+        longitudeOffset += (20.0 * Math.sin(6.0 * longitude * Math.PI)
+                + 20.0 * Math.sin(2.0 * longitude * Math.PI)) * 2.0 / 3.0;
+        longitudeOffset += (20.0 * Math.sin(longitude * Math.PI)
+                + 40.0 * Math.sin(longitude / 3.0 * Math.PI)) * 2.0 / 3.0;
+        longitudeOffset += (150.0 * Math.sin(longitude / 12.0 * Math.PI)
+                + 300.0 * Math.sin(longitude / 30.0 * Math.PI)) * 2.0 / 3.0;
         return longitudeOffset;
     }
 
@@ -139,12 +136,12 @@ public final class CoordinateUtil {
         double longitudeOffset = -100.0 + 2.0 * longitude + 3.0 * latitude
                 + 0.2 * latitude * latitude + 0.1 * longitude * latitude
                 + 0.2 * Math.sqrt(Math.abs(longitude));
-        longitudeOffset += (20.0 * Math.sin(6.0 * longitude * PI)
-                + 20.0 * Math.sin(2.0 * longitude * PI)) * 2.0 / 3.0;
-        longitudeOffset += (20.0 * Math.sin(latitude * PI)
-                + 40.0 * Math.sin(latitude / 3.0 * PI)) * 2.0 / 3.0;
-        longitudeOffset += (160.0 * Math.sin(latitude / 12.0 * PI)
-                + 320 * Math.sin(latitude * PI / 30.0)) * 2.0 / 3.0;
+        longitudeOffset += (20.0 * Math.sin(6.0 * longitude * Math.PI)
+                + 20.0 * Math.sin(2.0 * longitude * Math.PI)) * 2.0 / 3.0;
+        longitudeOffset += (20.0 * Math.sin(latitude * Math.PI)
+                + 40.0 * Math.sin(latitude / 3.0 * Math.PI)) * 2.0 / 3.0;
+        longitudeOffset += (160.0 * Math.sin(latitude / 12.0 * Math.PI)
+                + 320 * Math.sin(latitude * Math.PI / 30.0)) * 2.0 / 3.0;
         return longitudeOffset;
     }
 

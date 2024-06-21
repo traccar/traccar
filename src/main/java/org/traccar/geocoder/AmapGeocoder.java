@@ -55,14 +55,21 @@ public class AmapGeocoder extends JsonGeocoder {
                         houseName = getJsonNode(aoi, "name");
                     }
                 }
+                if (houseName == null) {
+                    JsonArray pois = regeocode.getJsonArray("pois");
+                    if (!pois.isEmpty()) {
+                        JsonObject poi = pois.getJsonObject(0);
+                        houseName = getJsonNode(poi, "name");
+                    }
+                }
                 address.setHouse(houseName);
 
                 JsonObject street = addressComponent.getJsonObject("streetNumber");
                 address.setStreet(getJsonNode(street, "street"));
 
                 address.setSuburb(getJsonNode(addressComponent, "township"));
-                address.setSettlement(getJsonNode(addressComponent, "district"));
-                address.setDistrict(getJsonNode(addressComponent, "city"));
+                address.setDistrict(getJsonNode(addressComponent, "district"));
+                address.setSettlement(getJsonNode(addressComponent, "city"));
                 address.setState(getJsonNode(addressComponent, "province"));
                 address.setCountry(getJsonNode(addressComponent, "country"));
             }

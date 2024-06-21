@@ -134,7 +134,23 @@ public class GeocoderTest {
     @Test
     public void testAmap() {
         Geocoder geocoder = new AmapGeocoder(client, "", 0, new AddressFormat());
-        String address = geocoder.getAddress(39.991957, 116.310003, null);
-        assertEquals("北京大学物理学院 中关村北大街, 海淀区, 北京市, 中国", address);
+        String address = geocoder.getAddress(22.944354, 113.375930, null);
+        assertEquals("沙墟一村 云山大街, 番禺区, 广东省, 中国", address);
+    }
+
+    @Disabled
+    @Test
+    public void testBaidu() {
+        Geocoder geocoder = new BaiduGeocoder(client, "", null, 0, new AddressFormat());
+        String address = geocoder.getAddress(22.944354, 113.375930, null);
+        assertEquals("东荟创新园 云山街, 广州市, 广东省, 中国", address);
+    }
+
+    @Disabled
+    @Test
+    public void testTencent() {
+        Geocoder geocoder = new TencentGeocoder(client, "", 0, new AddressFormat());
+        String address = geocoder.getAddress(22.944354, 113.375930, null);
+        assertEquals("东荟创新园 云山大街, 广州市, 广东省, 中国", address);
     }
 }
