@@ -69,6 +69,7 @@ import org.traccar.geocoder.PositionStackGeocoder;
 import org.traccar.geocoder.PlusCodesGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geocoder.GeocodeJsonGeocoder;
+import org.traccar.geocoder.AmapGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
@@ -264,6 +265,9 @@ public class MainModule extends AbstractModule {
                     break;
                 case "geocodejson":
                     geocoder = new GeocodeJsonGeocoder(client, url, key, language, cacheSize, addressFormat);
+                    break;
+                case "amap":
+                    geocoder = new AmapGeocoder(client, key, cacheSize, addressFormat);
                     break;
                 default:
                     geocoder = new GoogleGeocoder(client, key, language, cacheSize, addressFormat);
