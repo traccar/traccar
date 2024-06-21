@@ -715,6 +715,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
+                case 0xF1:
+                    position.set(Position.KEY_POWER, buf.readUnsignedInt() * 0.001);
                 case 0xF3:
                     while (buf.readerIndex() < endIndex) {
                         int extendedType = buf.readUnsignedShort();
