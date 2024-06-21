@@ -716,7 +716,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
                 case 0xF1:
-                    position.set(Position.KEY_POWER, buf.readUnsignedInt() * 0.001);
+                    position.set(Position.KEY_POWER, buf.readUnsignedInt());
                 case 0xF3:
                     while (buf.readerIndex() < endIndex) {
                         int extendedType = buf.readUnsignedShort();
@@ -819,6 +819,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 default:
+                    LOGGER.error("huabao ignoring subtype " + subtype);
                     break;
             }
             buf.readerIndex(endIndex);
