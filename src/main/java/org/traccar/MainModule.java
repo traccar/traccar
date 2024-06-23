@@ -69,7 +69,7 @@ import org.traccar.geocoder.PositionStackGeocoder;
 import org.traccar.geocoder.PlusCodesGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geocoder.GeocodeJsonGeocoder;
-import org.traccar.geocoder.AmapGeocoder;
+import org.traccar.geocoder.AutoNaviGeocoder;
 import org.traccar.geocoder.BaiduGeocoder;
 import org.traccar.geocoder.TencentGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
@@ -268,8 +268,8 @@ public class MainModule extends AbstractModule {
                 case "geocodejson":
                     geocoder = new GeocodeJsonGeocoder(client, url, key, language, cacheSize, addressFormat);
                     break;
-                case "amap":
-                    geocoder = new AmapGeocoder(client, key, cacheSize, addressFormat);
+                case "autonavi":
+                    geocoder = new AutoNaviGeocoder(client, key, cacheSize, addressFormat);
                     break;
                 case "baidu":
                     geocoder = new BaiduGeocoder(client, key, language, cacheSize, addressFormat);

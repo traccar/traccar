@@ -132,8 +132,8 @@ public class GeocoderTest {
 
     @Disabled
     @Test
-    public void testAmap() {
-        Geocoder geocoder = new AmapGeocoder(client, "", 0, new AddressFormat());
+    public void testAutoNavi() {
+        Geocoder geocoder = new AutoNaviGeocoder(client, "", 0, new AddressFormat());
         String address = geocoder.getAddress(22.944354, 113.375930, null);
         assertEquals("沙墟一村 云山大街, 番禺区, 广东省, 中国", address);
     }

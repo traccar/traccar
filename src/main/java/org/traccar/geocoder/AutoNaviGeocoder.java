@@ -23,7 +23,7 @@ import jakarta.ws.rs.client.Client;
 import org.traccar.helper.CoordinateUtil;
 
 
-public class AmapGeocoder extends JsonGeocoder {
+public class AutoNaviGeocoder extends JsonGeocoder {
 
     private static String formatUrl(String key) {
         String url = "https://restapi.amap.com/v3/geocode/regeo?output=json&location=%2$f,%1$f&extensions=all";
@@ -33,7 +33,7 @@ public class AmapGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public AmapGeocoder(Client client, String key, int cacheSize, AddressFormat addressFormat) {
+    public AutoNaviGeocoder(Client client, String key, int cacheSize, AddressFormat addressFormat) {
         super(client, formatUrl(key), cacheSize, addressFormat);
     }
 
