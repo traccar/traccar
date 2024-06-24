@@ -97,17 +97,17 @@ public class TaskHealthCheck implements ScheduleTask {
                 LOGGER.warn("Web health check failed with status {}", status);
             }
 
-            if (dropThreshold > 0) {
-                int messageCurrentTotal = statisticsManager.messageStoredCount();
-                int messageCurrentPeriod = messageCurrentTotal - messageLastTotal;
+            int messageCurrentTotal = statisticsManager.messageStoredCount();
+            int messageCurrentPeriod = messageCurrentTotal - messageLastTotal;
+            if (dropThreshold > 0 && messageLastPeriod > 0) {
                 double drop = messageCurrentPeriod / (double) messageLastPeriod;
                 if (drop < dropThreshold) {
                     success = false;
                     LOGGER.warn("Message health check failed with drop {}", drop);
                 }
-                messageLastTotal = messageCurrentTotal;
-                messageLastPeriod = messageCurrentPeriod;
             }
+            messageLastTotal = messageCurrentTotal;
+            messageLastPeriod = messageCurrentPeriod;
 
             if (success) {
                 notifyWatchdog();
