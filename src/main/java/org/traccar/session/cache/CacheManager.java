@@ -170,7 +170,7 @@ public class CacheManager implements BroadcastInterface {
     public void removeDevice(long deviceId) {
         try {
             lock.writeLock().lock();
-            if (deviceReferences.computeIfAbsent(deviceId, k -> new AtomicInteger()).incrementAndGet() <= 0) {
+            if (deviceReferences.computeIfAbsent(deviceId, k -> new AtomicInteger()).decrementAndGet() <= 0) {
                 graph.removeObject(Device.class, deviceId);
                 devicePositions.remove(deviceId);
                 deviceReferences.remove(deviceId);
