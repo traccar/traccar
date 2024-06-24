@@ -31,7 +31,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "7878281718060e021831c6026e8acc0c361b1000140001cc00286d000f4dbf0000012ca7e001000004b2630d0a"),
-                Position.KEY_DRIVER_UNIQUE_ID, "0000012ca7e00100");
+                Position.KEY_DRIVER_UNIQUE_ID, "bf0000012ca7e001");
 
         verifyNotNull(decoder, binary(
                 "78782732180214123324ca0162bdf0041f45d900190b0a02d4000bc5270000ec025206040202005e07e10d0a"));
