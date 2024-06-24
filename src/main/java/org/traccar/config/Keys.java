@@ -1811,6 +1811,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * If this parameter is set, Traccar will monitor drops in the number of stored messages. If it drops more than
+     * the threshold, it will mark service as failing for systemd. Threshold is a value from 0.0 to 1.0. For example,
+     * value 0.7 means that the number of messages in the last period is only 70% of what it was in the previous.
+     */
+    public static final ConfigKey<Double> WEB_HEALTH_CHECK_DROP_THRESHOLD = new DoubleConfigKey(
+            "web.healthCheck.dropThreshold",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Sets SameSite cookie attribute value.
      * Supported options: Lax, Strict, None.
      */
