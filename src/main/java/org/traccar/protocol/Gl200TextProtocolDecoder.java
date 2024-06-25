@@ -278,6 +278,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 2, parser.next());
         if (model.equals("GV310LAU")) {
             position.set(Position.PREFIX_ADC + 3, parser.next());
+        } else {
+            parser.next(); // skip for other devices
         }
 
         position.set(Position.KEY_INPUT, parser.next());
