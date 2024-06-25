@@ -1478,6 +1478,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
+        LOGGER.error("gl200 {}", sentence);
         Parser parser = new Parser(PATTERN, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
         if (position == null) {
