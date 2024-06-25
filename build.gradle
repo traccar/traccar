@@ -102,4 +102,3 @@ jar {
                 "Class-Path": configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(" "))
     }
 }
-targetCompatibility = JavaVersion.VERSION_1_9
