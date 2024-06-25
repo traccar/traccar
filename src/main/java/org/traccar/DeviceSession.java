@@ -22,7 +22,7 @@ import java.util.Map;
 public class DeviceSession {
 
     private final long deviceId;
-    private final String model = "";
+    private final String model = null;
 
     public DeviceSession(long deviceId) {
         this.deviceId = deviceId;
