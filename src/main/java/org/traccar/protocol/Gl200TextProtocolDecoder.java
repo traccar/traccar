@@ -280,7 +280,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_INPUT, parser.next());
-        position.set(Position.KEY_OUTPUT, BitUtil.check(parser.nextInt(), 0));
+        String output = parser.next();
+        if (output != null) {
+            position.set(Position.KEY_OUTPUT, BitUtil.check(Integer.parseInt(output), 0));
+        }
 
         getLastLocation(position, parser.nextDateTime());
 
