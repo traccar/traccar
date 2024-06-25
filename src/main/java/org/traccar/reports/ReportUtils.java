@@ -137,7 +137,7 @@ public final class ReportUtils {
         // can data can vary 200 meters in one second
         int maxSpeed = start.getAttributes().containsKey(Position.KEY_ODOMETER) && t < 5000 ?
                 1000 : (xpertPosition(start) ? 80 : 200);
-        
+
         return averageSpeed < maxSpeed;
     }
 
@@ -195,6 +195,14 @@ public final class ReportUtils {
             return value.setScale(1, RoundingMode.HALF_EVEN).doubleValue();
         }
         return 0;
+    }
+
+    private static double calculateFuel(ArrayList<Position> positions, int startIndex, int endIndex) {
+        while (positions.get(startIndex).getAttributes().get(Position.KEY_FUEL_USED) != null &&
+                positions.get(startIndex).getDouble(Position.KEY_FUEL_USED) == 0 && startIndex < endIndex) {
+            startIndex++;
+        }
+        return calculateFuel(positions.get(startIndex), positions.get(endIndex));
     }
 
     public static String findDriver(Position firstPosition, Position lastPosition) {
@@ -306,7 +314,7 @@ public final class ReportUtils {
         trip.setAverageSpeed(speedSum / (endIndex - startIndex));
         trip.setMaxSpeed(speedMax);
         trip.setIdleTime(idleTime);
-        trip.setSpentFuel(calculateFuel(startTrip, endTrip));
+        trip.setSpentFuel(calculateFuel(positions, startIndex, endIndex));
 
         trip.setDriverUniqueId(driverUniqueId);
         trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
