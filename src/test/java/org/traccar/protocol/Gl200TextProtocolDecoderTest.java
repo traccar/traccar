@@ -523,6 +523,12 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, buffer(
                         "+RESP:GTIGF,6E0202,868589060169789,ra79,145,1,0.0,83,532.2,-70.616413,-33.393457,20240610201937,0730,0001,333A,00CFA301,01,12,,0.0,20240610201938,3AE9$"),
                 Position.KEY_IGNITION, false);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTIGL,6E0202,868589060168757,RA76,,01,1,1,0.0,100,364.9,-70.901853,-33.613323,20240625230845,0730,0001,3391,002F7102,00,4495.0,20240625230845,55C4$"),
+                Position.KEY_IGNITION, true);
+
+
     }
 
 }
