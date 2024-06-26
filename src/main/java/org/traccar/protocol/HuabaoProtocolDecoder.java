@@ -819,7 +819,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 default:
-                    LOGGER.error(String.format("huabao ignoring subtype %d %d", subtype, position.getDeviceId()));
+                    // LOGGER.error("huabao ignoring subtype {} {}", subtype, position.getDeviceId());
                     break;
             }
             buf.readerIndex(endIndex);
