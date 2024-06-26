@@ -193,7 +193,7 @@ public class FilterHandler extends BaseDataHandler {
         }
 
         if (filterType.length() > 0) {
-            LOGGER.error("deviceId {}, filtered {}", position.getDeviceId(), filterType);
+            LOGGER.error("deviceId: {}, filter: {}, fixTime: {}", position.getDeviceId(), filterType, position.getFixTime());
             return true;
         }
 
