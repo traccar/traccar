@@ -213,6 +213,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_INF, sentence);
+        LOGGER.error(sentence);
         if (!parser.matches()) {
             return null;
         }
