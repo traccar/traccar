@@ -182,6 +182,9 @@ public final class QueryBuilder {
     }
 
     public QueryBuilder setLong(String name, long value) throws SQLException {
+        if (name.matches("^deviceId\\d+$")) {
+            return setLong(name, value, true);
+        }
         return setLong(name, value, false);
     }
 

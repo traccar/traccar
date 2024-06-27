@@ -55,7 +55,7 @@ public class DevicesReportProvider {
 
     public Collection<DeviceReportItem> getObjects(long userId) throws StorageException {
 
-        var positions = PositionUtil.getLatestPositions(storage, userId).stream()
+        var positions = PositionUtil.getLatestPositions(storage, userId, null).stream()
                 .collect(Collectors.toMap(Message::getDeviceId, p -> p));
 
         return storage.getObjects(Device.class, new Request(
