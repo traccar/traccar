@@ -472,7 +472,7 @@ public class DeviceManager extends BaseObjectManager<Device> implements Identity
             if (deviceAccumulators.getHours() != null) {
                 last.getAttributes().put(Position.KEY_HOURS, deviceAccumulators.getHours());
             }
-            getDataManager().addObject(last);
+            // getDataManager().addObject(last);
             updateLatestPosition(last);
         } else {
             throw new IllegalArgumentException();
