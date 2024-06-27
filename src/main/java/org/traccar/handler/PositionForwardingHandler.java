@@ -38,7 +38,7 @@ public class PositionForwardingHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PositionForwardingHandler.class);
 
-    private static final String ATTRIBUTE_DEVICE_DISABLE_FORWARDING = "deviceDisableForwarding";
+    private static final String ATTRIBUTE_DEVICE_ALLOW_FORWARDING = "deviceAllowPositionForwarding";
 
     private final CacheManager cacheManager;
     private final Timer timer;
@@ -49,6 +49,7 @@ public class PositionForwardingHandler extends BasePositionHandler {
     private final int retryDelay;
     private final int retryCount;
     private final int retryLimit;
+    private final boolean perDevice;
 
     private final AtomicInteger deliveryPending;
 
@@ -64,6 +65,7 @@ public class PositionForwardingHandler extends BasePositionHandler {
         this.retryDelay = config.getInteger(Keys.FORWARD_RETRY_DELAY);
         this.retryCount = config.getInteger(Keys.FORWARD_RETRY_COUNT);
         this.retryLimit = config.getInteger(Keys.FORWARD_RETRY_LIMIT);
+        this.perDevice = config.getBoolean(Keys.FORWARD_ENABLE_PER_DEVICE);
 
         this.deliveryPending = new AtomicInteger();
     }
@@ -130,14 +132,15 @@ public class PositionForwardingHandler extends BasePositionHandler {
         if (positionForwarder != null) {
             Device device = cacheManager.getObject(Device.class, position.getDeviceId());
 
-            Object disableForwarding = device.getAttributes().get(ATTRIBUTE_DEVICE_DISABLE_FORWARDING);
-            if ((disableForwarding == null) || (!(Boolean) disableForwarding)) {
+            Object allowForwarding = device.getAttributes().get(ATTRIBUTE_DEVICE_ALLOW_FORWARDING);
+            if ((!this.perDevice)
+                || ((this.perDevice) && (allowForwarding != null) && ((Boolean) allowForwarding))) {
                 PositionData positionData = new PositionData();
                 positionData.setPosition(position);
                 positionData.setDevice(device);
                 new AsyncRequestAndCallback(positionData).send();
             } else {
-                LOGGER.debug("Not forwarding event for device '{}' as forwarding is disabled for this device.",
+                LOGGER.debug("Not forwarding position for device '{}' as forwarding is disabled for this device.",
                     device.getName());
             }
         }
