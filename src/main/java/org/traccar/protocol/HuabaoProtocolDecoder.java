@@ -783,6 +783,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY, buf.readUnsignedInt() * 0.001);
                     position.set(Position.KEY_CHARGE, buf.readUnsignedByte() >= 2);
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    break;
                 case 0xFE:
                     if (length == 1) {
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
