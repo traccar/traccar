@@ -123,6 +123,9 @@ public class ProtocolTest extends BaseTest {
             case "course":
                 assertEquals(expected, position.getCourse());
                 break;
+            case "altitude":
+                assertEquals(expected, position.getAltitude());
+                break;
             default:
                 assertEquals(expected, position.getAttributes().get(key));
                 break;

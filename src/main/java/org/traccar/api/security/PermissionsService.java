@@ -98,10 +98,12 @@ public class PermissionsService {
         }
     }
 
-    public void checkEdit(long userId, Class<?> clazz, boolean addition) throws StorageException, SecurityException {
+    public void checkEdit(
+            long userId, Class<?> clazz, boolean addition, boolean skipReadonly)
+            throws StorageException, SecurityException {
         if (!getUser(userId).getAdministrator()) {
             boolean denied = false;
-            if (getServer().getReadonly() || getUser(userId).getReadonly()) {
+            if (!skipReadonly && (getServer().getReadonly() || getUser(userId).getReadonly())) {
                 denied = true;
             } else if (clazz.equals(Device.class)) {
                 denied = getServer().getDeviceReadonly() || getUser(userId).getDeviceReadonly()
@@ -121,9 +123,11 @@ public class PermissionsService {
         }
     }
 
-    public void checkEdit(long userId, BaseModel object, boolean addition) throws StorageException, SecurityException {
+    public void checkEdit(
+            long userId, BaseModel object, boolean addition, boolean skipReadonly)
+            throws StorageException, SecurityException {
         if (!getUser(userId).getAdministrator()) {
-            checkEdit(userId, object.getClass(), addition);
+            checkEdit(userId, object.getClass(), addition, skipReadonly);
             if (object instanceof GroupedModel) {
                 GroupedModel after = ((GroupedModel) object);
                 if (after.getGroupId() > 0) {

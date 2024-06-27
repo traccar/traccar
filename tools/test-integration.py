@@ -9,6 +9,7 @@ import json
 import socket
 import time
 import threading
+import re
 
 messages = {
     'gps103' : 'imei:123456789012345,help me,1201011201,,F,120100.000,A,6000.0000,N,13000.0000,E,0.00,;',
@@ -137,11 +138,11 @@ debug = '-v' in sys.argv
 def load_ports():
     ports = {}
     dir = os.path.dirname(os.path.abspath(__file__))
-    root = xml.etree.ElementTree.parse(dir + '/../setup/default.xml').getroot()
-    for entry in root.findall('entry'):
-        key = entry.attrib['key']
-        if key.endswith('.port'):
-            ports[key[:-5]] = int(entry.text)
+    with open(dir + '/../src/main/java/org/traccar/config/PortConfigSuffix.java', 'r') as file:
+        content = file.read()
+    pattern = re.compile(r'PORTS\.put\("([^"]+)",\s*(\d+)\);')
+    matches = pattern.findall(content)
+    ports = {protocol: int(port) for protocol, port in matches}
     if debug:
         print('\nports: {ports!r}\n')
     return ports

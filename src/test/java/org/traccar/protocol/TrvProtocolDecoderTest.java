@@ -14,6 +14,9 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "TRVAP00352121088015548"));
 
+        verifyNull(decoder, text(
+                "IWAPXL,080835"));
+
         verifyAttribute(decoder, text(
                 "IWAP10080524A2232.9806N11404.9355E000.1061830323.8706000908000502,460,0,9520,3671,01,zhcn,00,HOME|74-DE-2B-44-88-8C|97&HOME1|74-DE-2B-44-88-8C|97&HOME2|74-DE-2B-44-88-8C|97&HOME3|74-DE-2B-44-88-8C|97"),
                 Position.KEY_ALARM, Position.ALARM_SOS);

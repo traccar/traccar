@@ -775,14 +775,6 @@ public final class Keys {
             600);
 
     /**
-     * Sanitize all strings returned via API. This is needed to fix XSS issues in the old web interface. New React-based
-     * interface doesn't require this.
-     */
-    public static final ConfigKey<Boolean> WEB_SANITIZE = new BooleanConfigKey(
-            "web.sanitize",
-            List.of(KeyType.CONFIG));
-
-    /**
      * Path to the web app folder.
      */
     public static final ConfigKey<String> WEB_PATH = new StringConfigKey(
@@ -1819,6 +1811,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * If this parameter is set, Traccar will monitor drops in the number of stored messages. If it drops more than
+     * the threshold, it will mark service as failing for systemd. Threshold is a value from 0.0 to 1.0. For example,
+     * value 0.7 means that the number of messages in the last period is only 70% of what it was in the previous.
+     */
+    public static final ConfigKey<Double> WEB_HEALTH_CHECK_DROP_THRESHOLD = new DoubleConfigKey(
+            "web.healthCheck.dropThreshold",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Sets SameSite cookie attribute value.
      * Supported options: Lax, Strict, None.
      */
@@ -1906,6 +1907,14 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> LOGGER_ROTATE = new BooleanConfigKey(
             "logger.rotate",
+            List.of(KeyType.CONFIG),
+            true);
+
+    /**
+     * If all bytes are printable characters, log network data as text instead of HEX.
+     */
+    public static final ConfigKey<Boolean> LOGGER_TEXT_PROTOCOL = new BooleanConfigKey(
+            "logger.decodeTextData",
             List.of(KeyType.CONFIG),
             true);
 

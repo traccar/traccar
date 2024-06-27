@@ -178,6 +178,10 @@ public class StatisticsManager {
         }
     }
 
+    public synchronized int messageStoredCount() {
+        return messagesStored;
+    }
+
     public synchronized int messageStoredCount(long deviceId) {
         return deviceMessages.getOrDefault(deviceId, 0);
     }

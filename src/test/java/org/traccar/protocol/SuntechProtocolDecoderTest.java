@@ -12,6 +12,10 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new SuntechProtocolDecoder(null));
 
+        verifyAttribute(decoder, buffer(
+                "UEX;1610020241;03FFFFFF;161;3.0.9;0;20240506;15:52:55;00006697;724;11;4EDA;33;-5.129240;-42.797868;0.00;0.00;11;1;00000001;00000000;24;GTSL|6|1|0|22574684|1|\r\n;A7;;164;0;11.82"),
+                Position.KEY_DRIVER_UNIQUE_ID, "22574684");
+
         verifyAttributes(decoder, buffer(
                 "ST410STT;109815653;445;03;16531;724;10;-77;6011;7;16273;724;10;7511;0;0;13903;724;10;6011;0;0;7671;724;10;7111;0;0;16533;724;10;6011;0;0;0;0;0;0;0;0;0;0;0;0;0;0;3.86;0;0098;1;003;;;;;;;;;"));
 

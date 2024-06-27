@@ -68,6 +68,7 @@ import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.PositionStackGeocoder;
 import org.traccar.geocoder.PlusCodesGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
+import org.traccar.geocoder.GeocodeJsonGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
@@ -79,7 +80,6 @@ import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
 import org.traccar.helper.ObjectMapperContextResolver;
-import org.traccar.helper.SanitizerModule;
 import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
@@ -132,11 +132,8 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static ObjectMapper provideObjectMapper(Config config) {
+    public static ObjectMapper provideObjectMapper() {
         ObjectMapper objectMapper = new ObjectMapper();
-        if (config.getBoolean(Keys.WEB_SANITIZE)) {
-            objectMapper.registerModule(new SanitizerModule());
-        }
         objectMapper.registerModule(new JSONPModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         return objectMapper;
@@ -264,6 +261,9 @@ public class MainModule extends AbstractModule {
                     break;
                 case "geoapify":
                     geocoder = new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
+                    break;
+                case "geocodejson":
+                    geocoder = new GeocodeJsonGeocoder(client, url, key, language, cacheSize, addressFormat);
                     break;
                 default:
                     geocoder = new GoogleGeocoder(client, key, language, cacheSize, addressFormat);

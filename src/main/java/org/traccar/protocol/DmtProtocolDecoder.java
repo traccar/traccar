@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,9 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
             position.setDeviceTime(new Date(1356998400000L + buf.readUnsignedIntLE() * 1000)); // since 1 Jan 2013
 
-            position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+            int event = buf.readUnsignedByte();
+            position.set(Position.KEY_ALARM, decodeAlarm(event));
+            position.set(Position.KEY_EVENT, event);
 
             while (buf.readerIndex() < recordEnd) {
 
@@ -244,6 +246,31 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return positions;
+    }
+
+    private String decodeAlarm(int value) {
+        switch (value) {
+            case 12:
+                return Position.ALARM_BRAKING;
+            case 13:
+                return Position.ALARM_ACCELERATION;
+            case 14:
+                return Position.ALARM_CORNERING;
+            case 18:
+                return Position.ALARM_OVERSPEED;
+            case 20:
+                return Position.ALARM_TOW;
+            case 23:
+                return Position.ALARM_ACCIDENT;
+            case 29:
+                return Position.ALARM_TAMPERING;
+            case 44:
+                return Position.ALARM_GEOFENCE_ENTER;
+            case 45:
+                return Position.ALARM_GEOFENCE_EXIT;
+            default:
+                return null;
+        }
     }
 
     @Override

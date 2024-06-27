@@ -137,10 +137,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
     @Path("{id}/accumulators")
     @PUT
     public Response updateAccumulators(DeviceAccumulators entity) throws Exception {
-        if (permissionsService.notAdmin(getUserId())) {
-            permissionsService.checkManager(getUserId());
-            permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
-        }
+        permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
+        permissionsService.checkEdit(getUserId(), Device.class, false, false);
 
         Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(), new Condition.LatestPositions(entity.getDeviceId())));
@@ -171,7 +169,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
             throw new IllegalArgumentException();
         }
 
-        LogAction.resetDeviceAccumulators(getUserId(), entity.getDeviceId());
+        LogAction.resetAccumulators(getUserId(), entity.getDeviceId());
         return Response.noContent().build();
     }
 

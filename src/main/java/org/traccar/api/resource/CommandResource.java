@@ -23,6 +23,7 @@ import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.database.CommandsManager;
+import org.traccar.helper.LogAction;
 import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
@@ -140,6 +141,8 @@ public class CommandResource extends ExtendedObjectResource<Command> {
                 return Response.accepted(queuedCommand).build();
             }
         }
+
+        LogAction.command(getUserId(), groupId, entity.getDeviceId(), entity.getType());
         return Response.ok(entity).build();
     }
 
