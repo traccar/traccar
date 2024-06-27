@@ -346,9 +346,6 @@ public class ReportUtils {
 
             boolean useDistanceColumn = config.getBoolean(Keys.REPORT_USE_DISTANCE_COLUMN);
 
-            double totalDistance = 0.0;
-            var totalDistanceValid = useDistanceColumn;
-
             for (int i = 0; i < positions.size(); i++) {
                 boolean motion = isMoving(positions, i, tripsConfig);
                 if (motionState.getMotionState() != motion) {
@@ -365,20 +362,24 @@ public class ReportUtils {
                     maxSpeed = Math.max(maxSpeed, positions.get(i).getSpeed());
                 }
 
-                if (totalDistanceValid) {
-                    try {
-                        totalDistance += positions.get(i).getDistance();
-                    } catch (Exception e) {
-                        totalDistanceValid = false;
-                    }
-                }
-
                 MotionProcessor.updateState(motionState, positions.get(i), motion, tripsConfig);
                 if (motionState.getEvent() != null) {
                     if (motion == trips) {
                         detected = true;
                         startNoEventIndex = -1;
                     } else if (startEventIndex >= 0 && startNoEventIndex >= 0) {
+                        double totalDistance = 0.0;
+                        var totalDistanceValid = useDistanceColumn;
+                        for (int ind = startEventIndex; ind <= startNoEventIndex; ind++) {
+                            if (totalDistanceValid) {
+                                try {
+                                    totalDistance += positions.get(ind).getDistance();
+                                } catch (Exception e) {
+                                    totalDistanceValid = false;
+                                }
+                            }
+                        }
+
                         result.add(calculateTripOrStop(
                                 device, positions.get(startEventIndex), positions.get(startNoEventIndex),
                                 maxSpeed, ignoreOdometer, reportClass, totalDistance));
@@ -390,6 +391,19 @@ public class ReportUtils {
             }
             if (detected & startEventIndex >= 0 && startEventIndex < positions.size() - 1) {
                 int endIndex = startNoEventIndex >= 0 ? startNoEventIndex : positions.size() - 1;
+
+                double totalDistance = 0.0;
+                var totalDistanceValid = useDistanceColumn;
+                for (int ind = startEventIndex; ind <= startNoEventIndex; ind++) {
+                    if (totalDistanceValid) {
+                        try {
+                            totalDistance += positions.get(ind).getDistance();
+                        } catch (Exception e) {
+                            totalDistanceValid = false;
+                        }
+                    }
+                }
+
                 result.add(calculateTripOrStop(
                         device, positions.get(startEventIndex), positions.get(endIndex),
                         maxSpeed, ignoreOdometer, reportClass, totalDistance));
