@@ -35,6 +35,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -98,8 +99,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
     public static ByteBuf escapeMessage(ByteBuf buf) {
         ByteBuf result = Unpooled.buffer();
-        while (buf.readerIndex() < buf.readableBytes()) {
-            int b = buf.readUnsignedByte();
+        ByteBuffer buffer = buf.nioBuffer();
+        while (buffer.hasRemaining()) {
+            int b = buffer.get();
             if (b == 0x7d) {
                 result.writeByte(b);
                 result.writeByte(0x01);
