@@ -53,7 +53,7 @@ public class NotificationManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
 
-    private static final String ATTRIBUTE_DEVICE_ALLOW_FORWARDING = "deviceAllowEventForwarding";
+    private static final String ATTRIBUTE_DEVICE_ALLOW_FORWARDING = "enableEventForwarding";
 
     private final Storage storage;
     private final CacheManager cacheManager;
@@ -65,7 +65,7 @@ public class NotificationManager {
     private final long timeThreshold;
     private final Set<Long> blockedUsers = new HashSet<>();
 
-    private final boolean perDevice;
+    private final boolean enablePerDevice;
 
     @Inject
     public NotificationManager(
@@ -85,7 +85,7 @@ public class NotificationManager {
             }
         }
 
-        this.perDevice = config.getBoolean(Keys.EVENT_FORWARD_ENABLE_PER_DEVICE);
+        enablePerDevice = config.getBoolean(Keys.EVENT_FORWARD_ENABLE_PER_DEVICE);
     }
 
     private void updateEvent(Event event, Position position) {
@@ -157,9 +157,8 @@ public class NotificationManager {
         if (eventForwarder != null) {
             Device device = cacheManager.getObject(Device.class, event.getDeviceId());
 
-            Object allowForwarding = device.getAttributes().get(ATTRIBUTE_DEVICE_ALLOW_FORWARDING);
-            if ((!this.perDevice)
-                || ((this.perDevice) && (allowForwarding != null) && ((Boolean) allowForwarding))) {
+            boolean allowForwarding = (boolean) device.getAttributes().get(ATTRIBUTE_DEVICE_ALLOW_FORWARDING);
+            if (!enablePerDevice || (enablePerDevice && allowForwarding)) {
                 EventData eventData = new EventData();
                 eventData.setEvent(event);
                 eventData.setPosition(position);
@@ -176,8 +175,7 @@ public class NotificationManager {
                     }
                 });
             } else {
-                LOGGER.debug("Not forwarding events for device '{}' as forwarding is disabled for this device.",
-                    device.getName());
+                LOGGER.debug("Forwarding events not enabled for {}", event.getDeviceId());
             }
         }
     }

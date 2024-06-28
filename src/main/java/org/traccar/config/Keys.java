@@ -867,9 +867,9 @@ public final class Keys {
     /**
      * Forwarding attribute to specify if per device position forwarding needs to be done.
      * When true per device the allowForwarding attribute needs to be specified if positions
-     *  for the device need to be forwarded.
+     * for the device need to be forwarded.
      * When false the old behaviour is used and for every device positions are forwarded
-     *  independent of the device attribute
+     * independent of the device attribute
      */
     public static final ConfigKey<Boolean> FORWARD_ENABLE_PER_DEVICE = new BooleanConfigKey(
             "forward.enablePerDevice",
@@ -956,9 +956,9 @@ public final class Keys {
     /**
      * Forwarding attribute to specify if per device event forwarding needs to be done.
      * When true per device the allowForwarding attribute needs to be specified if events
-     *  for the device need to be forwarded.
+     * for the device need to be forwarded.
      * When false the old behaviour is used and for every device events are forwarded
-     *  independent of the device attribute
+     * independent of the device attribute
      */
     public static final ConfigKey<Boolean> EVENT_FORWARD_ENABLE_PER_DEVICE = new BooleanConfigKey(
             "event.forward.enablePerDevice",
