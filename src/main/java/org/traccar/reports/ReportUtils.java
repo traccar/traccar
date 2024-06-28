@@ -135,7 +135,7 @@ public final class ReportUtils {
         double averageSpeed = kms / hours;
 
         // can data can vary 200 meters in one second
-        int maxSpeed = start.getAttributes().containsKey(Position.KEY_ODOMETER) && t < 5000 ?
+        int maxSpeed = start.getAttributes().containsKey(Position.KEY_ODOMETER) && t < 61000 ?
                 1000 : (xpertPosition(start) ? 80 : 200);
 
         return averageSpeed < maxSpeed;
