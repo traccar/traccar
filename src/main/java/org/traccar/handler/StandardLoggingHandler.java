@@ -81,7 +81,7 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
         message.append(" HEX: ");
         message.append(ByteBufUtil.hexDump(buf));
 
-        if (protocol == "huabao") {
+        if (protocol.equals("huabao")) {
             LOGGER.error(message.toString());
         }
 
