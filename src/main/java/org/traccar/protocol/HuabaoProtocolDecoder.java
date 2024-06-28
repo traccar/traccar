@@ -97,7 +97,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static ByteBuf escapeMessage(ByteBuf buf) {
-        ByteBuf result = Unpooled.buffer(buf.readableBytes());
+        ByteBuf result = Unpooled.buffer();
         while (buf.readerIndex() < buf.readableBytes()) {
             int b = buf.readUnsignedByte();
             if (b == 0x7d) {
