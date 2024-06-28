@@ -103,11 +103,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         while (buffer.hasRemaining()) {
             int b = buffer.get();
             if (b == 0x7d) {
-                result.writeByte(b);
-                result.writeByte(0x01);
+                result.writeShort(0x7d01);
             } else if (b == 0x7e) {
-                result.writeByte(0x7d);
-                result.writeByte(0x02);
+                result.writeShort(0x7d02);
             } else {
                 result.writeByte(b);
             }
@@ -251,7 +249,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf response = Unpooled.buffer();
                 response.writeShort(index);
                 response.writeByte(RESULT_SUCCESS);
-                response.writeBytes(decodeId(id).getBytes(StandardCharsets.US_ASCII));
+                response.writeBytes(id);
                 channel.writeAndFlush(new NetworkMessage(
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
