@@ -85,7 +85,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         }
         buf.writeBytes(data);
         data.release();
-        buf.writeByte(Checksum.xor(buf.nioBuffer(0, buf.readableBytes() - 1)));
+        buf.writeByte(Checksum.xor(buf.nioBuffer()));
         return buf;
     }
 
