@@ -72,9 +72,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int RESULT_SUCCESS = 0;
 
-    public static ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
+    public static ByteBuf encodeMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
         ByteBuf buf = Unpooled.buffer();
-        buf.writeByte(0x7e);
         buf.writeShort(type);
         buf.writeShort(data.readableBytes());
         buf.writeBytes(id);
@@ -85,9 +84,33 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         }
         buf.writeBytes(data);
         data.release();
-        buf.writeByte(Checksum.xor(buf.nioBuffer(1, buf.readableBytes() - 1)));
+        buf.writeByte(Checksum.xor(buf.nioBuffer(0, buf.readableBytes() - 1)));
+        return buf;
+    }
+
+    public static ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
+        ByteBuf buf = Unpooled.buffer();
+        buf.writeByte(0x7e);
+        buf.writeBytes(escapeMessage(encodeMessage(type, id, shortIndex, data)));
         buf.writeByte(0x7e);
         return buf;
+    }
+
+    public static ByteBuf escapeMessage(ByteBuf buf) {
+        ByteBuf result = Unpooled.buffer();
+        while (buf.readerIndex() < buf.readableBytes()) {
+            int b = buf.readUnsignedByte();
+            if (b == 0x7d) {
+                result.writeByte(b);
+                result.writeByte(0x01);
+            } else if (b == 0x7e) {
+                result.writeByte(0x7d);
+                result.writeByte(0x02);
+            } else {
+                result.writeByte(b);
+            }
+        }
+        return result;
     }
 
     private void sendGeneralResponse(
