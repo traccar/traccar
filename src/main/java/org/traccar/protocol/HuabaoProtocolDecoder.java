@@ -35,7 +35,6 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -73,7 +72,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int RESULT_SUCCESS = 0;
 
-    public static ByteBuf encodeMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
+    public static ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
         ByteBuf buf = Unpooled.buffer();
         buf.writeShort(type);
         buf.writeShort(data.readableBytes());
@@ -85,32 +84,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         }
         buf.writeBytes(data);
         data.release();
-        buf.writeByte(Checksum.xor(buf.nioBuffer()));
-        return buf;
-    }
-
-    public static ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
-        ByteBuf buf = Unpooled.buffer();
-        buf.writeByte(0x7e);
-        buf.writeBytes(escapeMessage(encodeMessage(type, id, shortIndex, data)));
+        buf.writeByte(Checksum.xor(buf.nioBuffer(1, buf.readableBytes() - 1)));
         buf.writeByte(0x7e);
         return buf;
-    }
-
-    public static ByteBuf escapeMessage(ByteBuf buf) {
-        ByteBuf result = Unpooled.buffer();
-        ByteBuffer buffer = buf.nioBuffer();
-        while (buffer.hasRemaining()) {
-            int b = buffer.get();
-            if (b == 0x7d) {
-                result.writeShort(0x7d01);
-            } else if (b == 0x7e) {
-                result.writeShort(0x7d02);
-            } else {
-                result.writeByte(b);
-            }
-        }
-        return result;
     }
 
     private void sendGeneralResponse(
@@ -249,7 +225,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf response = Unpooled.buffer();
                 response.writeShort(index);
                 response.writeByte(RESULT_SUCCESS);
-                response.writeBytes(decodeId(id).getBytes(StandardCharsets.US_ASCII));
+                response.writeBytes(id);
                 channel.writeAndFlush(new NetworkMessage(
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
@@ -847,7 +823,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 default:
-                    // LOGGER.error("huabao ignoring subtype {} {}", subtype, position.getDeviceId());
                     break;
             }
             buf.readerIndex(endIndex);

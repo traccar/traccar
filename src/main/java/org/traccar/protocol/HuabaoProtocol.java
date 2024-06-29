@@ -29,6 +29,7 @@ public class HuabaoProtocol extends BaseProtocol {
         addServer(new TrackerServer(false, getName()) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
+                pipeline.addLast(new HuabaoFrameEncoder());
                 pipeline.addLast(new HuabaoFrameDecoder());
                 pipeline.addLast(new HuabaoProtocolEncoder(HuabaoProtocol.this));
                 pipeline.addLast(new HuabaoProtocolDecoder(HuabaoProtocol.this));
