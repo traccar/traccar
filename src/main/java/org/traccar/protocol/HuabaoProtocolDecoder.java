@@ -226,7 +226,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 ByteBuf response = Unpooled.buffer();
                 response.writeShort(index);
                 response.writeByte(RESULT_SUCCESS);
-                response.writeBytes(id);
+                response.writeBytes(decodeId(id).getBytes(StandardCharsets.US_ASCII));
                 channel.writeAndFlush(new NetworkMessage(
                         formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
@@ -305,11 +305,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         }
 
-        LOGGER.error(String.format("huabao ignoring %d %d", type, deviceSession.getDeviceId()));
         return null;
     }
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(BaseProtocolDecoder.class);
 
     private Position decodeResult(Channel channel, SocketAddress remoteAddress, String sentence) {
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
@@ -717,6 +715,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xF1:
                     position.set(Position.KEY_POWER, buf.readUnsignedInt() * 0.001);
+                    break;
                 case 0xF3:
                     while (buf.readerIndex() < endIndex) {
                         int extendedType = buf.readUnsignedShort();
