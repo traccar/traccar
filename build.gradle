@@ -3,6 +3,7 @@ plugins {
     id "checkstyle"
     id "com.google.protobuf" version "0.9.4"
     id "org.kordamp.gradle.project-enforcer" version "0.13.0"
+    id "application"
 }
 
 repositories {
@@ -116,4 +117,8 @@ jar {
                 "Implementation-Version": "6.2",
                 "Class-Path": configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(" "))
     }
+}
+
+application {
+    mainClass = 'org.traccar.Main'
 }
