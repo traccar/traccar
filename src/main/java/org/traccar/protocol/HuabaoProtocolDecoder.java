@@ -74,6 +74,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
     public static ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
         ByteBuf buf = Unpooled.buffer();
+        buf.writeByte(0x7e);
         buf.writeShort(type);
         buf.writeShort(data.readableBytes());
         buf.writeBytes(id);
