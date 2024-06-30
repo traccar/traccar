@@ -789,7 +789,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             default:
                         }
                     }
-                    if (length > 5) {
+                    if (length >= 6) {
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     }
                     break;
