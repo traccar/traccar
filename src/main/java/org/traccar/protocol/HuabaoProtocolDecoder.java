@@ -777,7 +777,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xF7:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedInt() * 0.001);
-                    if (length > 4) {
+                    if (length >= 5) {
                         short batteryStatus = buf.readUnsignedByte();
                         switch (batteryStatus) {
                             case 1:
