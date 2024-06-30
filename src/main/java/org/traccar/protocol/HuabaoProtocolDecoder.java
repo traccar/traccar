@@ -710,6 +710,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
+                case 0xF1:
+                    position.set(Position.KEY_POWER, buf.readUnsignedInt() * 0.001);
+                    break;
                 case 0xF3:
                     while (buf.readerIndex() < endIndex) {
                         int extendedType = buf.readUnsignedShort();
@@ -770,6 +773,21 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 buf.skipBytes(extendedLength);
                                 break;
                         }
+                    }
+                    break;
+                case 0xF7:
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedInt() * 0.001);
+                    if (length >= 5) {
+                        short batteryStatus = buf.readUnsignedByte();
+                        switch (batteryStatus) {
+                            case 2:
+                            case 3:
+                                position.set(Position.KEY_CHARGE, true);
+                            default:
+                        }
+                    }
+                    if (length >= 6) {
+                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     }
                     break;
                 case 0xFE:
