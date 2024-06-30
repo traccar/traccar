@@ -786,6 +786,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 2:
                             case 3:
                                 position.set(Position.KEY_CHARGE, true);
+                            default:
                         }
                     }
                     if (length > 5) {
