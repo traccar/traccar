@@ -865,6 +865,18 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Forwarding attribute to specify if per device position forwarding needs to be done.
+     * When true per device the allowForwarding attribute needs to be specified if positions
+     * for the device need to be forwarded.
+     * When false the old behaviour is used and for every device positions are forwarded
+     * independent of the device attribute
+     */
+    public static final ConfigKey<Boolean> FORWARD_ENABLE_PER_DEVICE = new BooleanConfigKey(
+            "forward.enablePerDevice",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
      * Position forwarding format. Available options are "url", "json" and "kafka". Default is "url".
      */
     public static final ConfigKey<String> FORWARD_TYPE = new StringConfigKey(
@@ -940,6 +952,18 @@ public final class Keys {
             "forward.retry.limit",
             List.of(KeyType.CONFIG),
             100);
+
+    /**
+     * Forwarding attribute to specify if per device event forwarding needs to be done.
+     * When true per device the allowForwarding attribute needs to be specified if events
+     * for the device need to be forwarded.
+     * When false the old behaviour is used and for every device events are forwarded
+     * independent of the device attribute
+     */
+    public static final ConfigKey<Boolean> EVENT_FORWARD_ENABLE_PER_DEVICE = new BooleanConfigKey(
+            "event.forward.enablePerDevice",
+            List.of(KeyType.CONFIG),
+            false);
 
     /**
      * Events forwarding format. Available options are "json" and "kafka". Default is "json".
