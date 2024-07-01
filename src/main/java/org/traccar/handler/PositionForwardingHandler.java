@@ -38,7 +38,7 @@ public class PositionForwardingHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PositionForwardingHandler.class);
 
-    private static final String ATTRIBUTE_DEVICE_ALLOW_FORWARDING = "allowPositionForwarding";
+    private static final String ATTRIBUTE_DEVICE_ALLOW_FORWARDING = "enablePositionForwarding";
 
     private final CacheManager cacheManager;
     private final Timer timer;
