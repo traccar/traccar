@@ -146,14 +146,9 @@ public class ComputedAttributesHandler extends BasePositionHandler {
                 .collect(Collectors.toUnmodifiableList());
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
-                Object result = null;
                 try {
-                    result = computeAttribute(attribute, position);
-                } catch (JexlException error) {
-                    LOGGER.warn("Attribute computation error", error);
-                }
-                if (result != null) {
-                    try {
+                    Object result = computeAttribute(attribute, position);
+                    if (result != null) {
                         switch (attribute.getAttribute()) {
                             case "valid":
                                 position.setValid((Boolean) result);
@@ -194,9 +189,13 @@ public class ComputedAttributesHandler extends BasePositionHandler {
                                 }
                                 break;
                         }
-                    } catch (ClassCastException error) {
-                        LOGGER.warn("Attribute cast error", error);
+                    } else {
+                        position.getAttributes().remove(attribute.getAttribute());
                     }
+                } catch (JexlException error) {
+                    LOGGER.warn("Attribute computation error", error);
+                } catch (ClassCastException error) {
+                    LOGGER.warn("Attribute cast error", error);
                 }
             }
         }
