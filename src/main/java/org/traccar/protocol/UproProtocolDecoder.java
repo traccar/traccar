@@ -298,7 +298,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                                     mcc, mnc,
                                     Integer.parseInt(stringValue.substring(offset, offset + 4), 16),
                                     Long.parseLong(stringValue.substring(offset + 4, offset + 12), 16),
-                                    Integer.parseInt(stringValue.substring(offset + 12, offset + 14))));
+                                    Integer.parseInt(stringValue.substring(offset + 12, offset + 14), 16)));
                         }
                     } else {
                         position.set(Position.KEY_POWER,
