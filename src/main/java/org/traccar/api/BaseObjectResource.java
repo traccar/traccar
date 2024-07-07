@@ -89,15 +89,13 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
 
         boolean skipReadonly = false;
-        if (entity instanceof User) {
-            User after = (User) entity;
+        if (entity instanceof User after) {
             User before = storage.getObject(User.class, new Request(
                     new Columns.All(), new Condition.Equals("id", entity.getId())));
             permissionsService.checkUserUpdate(getUserId(), before, (User) entity);
             skipReadonly = permissionsService.getUser(getUserId())
                     .compare(after, "notificationTokens", "termsAccepted");
-        } else if (entity instanceof Group) {
-            Group group = (Group) entity;
+        } else if (entity instanceof Group group) {
             if (group.getId() == group.getGroupId()) {
                 throw new IllegalArgumentException("Cycle in group hierarchy");
             }
@@ -108,8 +106,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         storage.updateObject(entity, new Request(
                 new Columns.Exclude("id"),
                 new Condition.Equals("id", entity.getId())));
-        if (entity instanceof User) {
-            User user = (User) entity;
+        if (entity instanceof User user) {
             if (user.getHashedPassword() != null) {
                 storage.updateObject(entity, new Request(
                         new Columns.Include("hashedPassword", "salt"),

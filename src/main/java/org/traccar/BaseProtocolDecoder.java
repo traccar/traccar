@@ -168,8 +168,8 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
         Set<Long> deviceIds = new HashSet<>();
         if (decodedMessage != null) {
-            if (decodedMessage instanceof Position) {
-                deviceIds.add(((Position) decodedMessage).getDeviceId());
+            if (decodedMessage instanceof Position position) {
+                deviceIds.add(position.getDeviceId());
             } else if (decodedMessage instanceof Collection) {
                 Collection<Position> positions = (Collection) decodedMessage;
                 for (Position position : positions) {

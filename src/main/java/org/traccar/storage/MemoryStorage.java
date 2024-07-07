@@ -60,47 +60,37 @@ public class MemoryStorage extends Storage {
             return true;
         }
 
-        if (genericCondition instanceof Condition.Compare) {
+        if (genericCondition instanceof Condition.Compare condition) {
 
-            var condition = (Condition.Compare) genericCondition;
             Object value = retrieveValue(object, condition.getVariable());
             int result = ((Comparable) value).compareTo(condition.getValue());
-            switch (condition.getOperator()) {
-                case "<":
-                    return result < 0;
-                case "<=":
-                    return result <= 0;
-                case ">":
-                    return result > 0;
-                case ">=":
-                    return result >= 0;
-                case "=":
-                    return result == 0;
-                default:
-                    throw new RuntimeException("Unsupported comparison condition");
-            }
+            return switch (condition.getOperator()) {
+                case "<" -> result < 0;
+                case "<=" -> result <= 0;
+                case ">" -> result > 0;
+                case ">=" -> result >= 0;
+                case "=" -> result == 0;
+                default -> throw new RuntimeException("Unsupported comparison condition");
+            };
 
-        } else if (genericCondition instanceof Condition.Between) {
+        } else if (genericCondition instanceof Condition.Between condition) {
 
-            var condition = (Condition.Between) genericCondition;
             Object fromValue = retrieveValue(object, condition.getFromVariable());
             int fromResult = ((Comparable) fromValue).compareTo(condition.getFromValue());
             Object toValue = retrieveValue(object, condition.getToVariable());
             int toResult = ((Comparable) toValue).compareTo(condition.getToValue());
             return fromResult >= 0 && toResult <= 0;
 
-        } else if (genericCondition instanceof Condition.Binary) {
+        } else if (genericCondition instanceof Condition.Binary condition) {
 
-            var condition = (Condition.Binary) genericCondition;
             if (condition.getOperator().equals("AND")) {
                 return checkCondition(condition.getFirst(), object) && checkCondition(condition.getSecond(), object);
             } else if (condition.getOperator().equals("OR")) {
                 return checkCondition(condition.getFirst(), object) || checkCondition(condition.getSecond(), object);
             }
 
-        } else if (genericCondition instanceof Condition.Permission) {
+        } else if (genericCondition instanceof Condition.Permission condition) {
 
-            var condition = (Condition.Permission) genericCondition;
             long id = (Long) retrieveValue(object, "id");
             return getPermissionsSet(condition.getOwnerClass(), condition.getPropertyClass()).stream()
                     .anyMatch(pair -> {

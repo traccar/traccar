@@ -1729,8 +1729,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (result != null) {
-                if (result instanceof Position) {
-                    ((Position) result).set(Position.KEY_TYPE, type);
+                if (result instanceof Position position) {
+                    position.set(Position.KEY_TYPE, type);
                 } else {
                     for (Position p : (List<Position>) result) {
                         p.set(Position.KEY_TYPE, type);

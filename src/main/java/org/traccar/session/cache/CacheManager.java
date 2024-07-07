@@ -296,8 +296,8 @@ public class CacheManager implements BroadcastInterface {
                 }
             }
         } else {
-            if (object instanceof GroupedModel) {
-                long groupId = ((GroupedModel) object).getGroupId();
+            if (object instanceof GroupedModel groupedModel) {
+                long groupId = groupedModel.getGroupId();
                 if (groupId > 0) {
                     invalidatePermission(object.getClass(), object.getId(), Group.class, groupId, true);
                 }
@@ -319,8 +319,8 @@ public class CacheManager implements BroadcastInterface {
                 }
             }
 
-            if (object instanceof Schedulable) {
-                long calendarId = ((Schedulable) object).getCalendarId();
+            if (object instanceof Schedulable schedulable) {
+                long calendarId = schedulable.getCalendarId();
                 if (calendarId > 0) {
                     invalidatePermission(object.getClass(), object.getId(), Calendar.class, calendarId, true);
                 }

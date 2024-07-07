@@ -420,9 +420,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             sentence = sentence.substring(index);
         } else {
             deviceSession = getDeviceSession(channel, remoteAddress);
-            if (deviceSession == null && remoteAddress instanceof InetSocketAddress) {
-                String host = ((InetSocketAddress) remoteAddress).getHostString();
-                deviceSession = getDeviceSession(channel, remoteAddress, host);
+            if (deviceSession == null && remoteAddress instanceof InetSocketAddress inetSocketAddress) {
+                deviceSession = getDeviceSession(channel, remoteAddress, inetSocketAddress.getHostString());
             }
         }
 

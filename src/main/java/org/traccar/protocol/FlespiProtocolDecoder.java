@@ -247,15 +247,15 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     private void decodeUnknownParam(String name, JsonValue value, Position position) {
-        if (value instanceof JsonNumber) {
-            if (((JsonNumber) value).isIntegral()) {
-                position.set(name, ((JsonNumber) value).longValue());
+        if (value instanceof JsonNumber jsonNumber) {
+            if (jsonNumber.isIntegral()) {
+                position.set(name, jsonNumber.longValue());
             } else {
-                position.set(name, ((JsonNumber) value).doubleValue());
+                position.set(name, jsonNumber.doubleValue());
             }
-            position.set(name, ((JsonNumber) value).doubleValue());
-        } else if (value instanceof JsonString) {
-            position.set(name, ((JsonString) value).getString());
+            position.set(name, jsonNumber.doubleValue());
+        } else if (value instanceof JsonString jsonString) {
+            position.set(name, jsonString.getString());
         } else if (value == JsonValue.TRUE || value == JsonValue.FALSE) {
             position.set(name, value == JsonValue.TRUE);
         }

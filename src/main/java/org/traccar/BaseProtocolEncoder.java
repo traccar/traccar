@@ -82,11 +82,9 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 
-        if (msg instanceof NetworkMessage) {
-            NetworkMessage networkMessage = (NetworkMessage) msg;
-            if (networkMessage.getMessage() instanceof Command) {
+        if (msg instanceof NetworkMessage networkMessage) {
+            if (networkMessage.getMessage() instanceof Command command) {
 
-                Command command = (Command) networkMessage.getMessage();
                 Object encodedCommand = encodeCommand(ctx.channel(), command);
 
                 StringBuilder s = new StringBuilder();

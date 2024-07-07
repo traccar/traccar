@@ -92,12 +92,10 @@ public class AcknowledgementHandler extends ChannelOutboundHandlerAdapter {
                     if (queue == null) {
                         queue = new LinkedList<>();
                     }
-                } else if (msg instanceof EventDecoded) {
-                    EventDecoded event = (EventDecoded) msg;
+                } else if (msg instanceof EventDecoded event) {
                     LOGGER.debug("Event decoded {}", event.getObjects().size());
                     waiting.addAll(event.getObjects());
-                } else if (msg instanceof EventHandled) {
-                    EventHandled event = (EventHandled) msg;
+                } else if (msg instanceof EventHandled event) {
                     LOGGER.debug("Event handled");
                     waiting.remove(event.getObject());
                 }
