@@ -108,17 +108,12 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     protected double convertSpeed(double value, String defaultUnits) {
-        switch (getConfig().getString(getProtocolName() + ".speed", defaultUnits)) {
-            case "kmh":
-                return UnitsConverter.knotsFromKph(value);
-            case "mps":
-                return UnitsConverter.knotsFromMps(value);
-            case "mph":
-                return UnitsConverter.knotsFromMph(value);
-            case "kn":
-            default:
-                return value;
-        }
+        return switch (getConfig().getString(getProtocolName() + ".speed", defaultUnits)) {
+            case "kmh" -> UnitsConverter.knotsFromKph(value);
+            case "mps" -> UnitsConverter.knotsFromMps(value);
+            case "mph" -> UnitsConverter.knotsFromMph(value);
+            default -> value;
+        };
     }
 
     protected TimeZone getTimeZone(long deviceId) {

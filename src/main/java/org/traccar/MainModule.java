@@ -206,69 +206,28 @@ public class MainModule extends AbstractModule {
             AddressFormat addressFormat = formatString != null ? new AddressFormat(formatString) : new AddressFormat();
 
             int cacheSize = config.getInteger(Keys.GEOCODER_CACHE_SIZE);
-            Geocoder geocoder;
-            switch (type) {
-                case "pluscodes":
-                    geocoder = new PlusCodesGeocoder();
-                    break;
-                case "nominatim":
-                    geocoder = new NominatimGeocoder(client, url, key, language, cacheSize, addressFormat);
-                    break;
-                case "locationiq":
-                    geocoder = new LocationIqGeocoder(client, url, key, language, cacheSize, addressFormat);
-                    break;
-                case "gisgraphy":
-                    geocoder = new GisgraphyGeocoder(client, url, cacheSize, addressFormat);
-                    break;
-                case "mapquest":
-                    geocoder = new MapQuestGeocoder(client, url, key, cacheSize, addressFormat);
-                    break;
-                case "opencage":
-                    geocoder = new OpenCageGeocoder(client, url, key, language, cacheSize, addressFormat);
-                    break;
-                case "bingmaps":
-                    geocoder = new BingMapsGeocoder(client, url, key, cacheSize, addressFormat);
-                    break;
-                case "factual":
-                    geocoder = new FactualGeocoder(client, url, key, cacheSize, addressFormat);
-                    break;
-                case "geocodefarm":
-                    geocoder = new GeocodeFarmGeocoder(client, key, language, cacheSize, addressFormat);
-                    break;
-                case "geocodexyz":
-                    geocoder = new GeocodeXyzGeocoder(client, key, cacheSize, addressFormat);
-                    break;
-                case "ban":
-                    geocoder = new BanGeocoder(client, cacheSize, addressFormat);
-                    break;
-                case "here":
-                    geocoder = new HereGeocoder(client, url, key, language, cacheSize, addressFormat);
-                    break;
-                case "mapmyindia":
-                    geocoder = new MapmyIndiaGeocoder(client, url, key, cacheSize, addressFormat);
-                    break;
-                case "tomtom":
-                    geocoder = new TomTomGeocoder(client, url, key, cacheSize, addressFormat);
-                    break;
-                case "positionstack":
-                    geocoder = new PositionStackGeocoder(client, key, cacheSize, addressFormat);
-                    break;
-                case "mapbox":
-                    geocoder = new MapboxGeocoder(client, key, cacheSize, addressFormat);
-                    break;
-                case "maptiler":
-                    geocoder = new MapTilerGeocoder(client, key, cacheSize, addressFormat);
-                    break;
-                case "geoapify":
-                    geocoder = new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
-                    break;
-                case "geocodejson":
-                    geocoder = new GeocodeJsonGeocoder(client, url, key, language, cacheSize, addressFormat);
-                    break;
-                default:
-                    geocoder = new GoogleGeocoder(client, key, language, cacheSize, addressFormat);
-                    break;
-            }
+            Geocoder geocoder = switch (type) {
+                case "pluscodes" -> new PlusCodesGeocoder();
+                case "nominatim" -> new NominatimGeocoder(client, url, key, language, cacheSize, addressFormat);
+                case "locationiq" -> new LocationIqGeocoder(client, url, key, language, cacheSize, addressFormat);
+                case "gisgraphy" -> new GisgraphyGeocoder(client, url, cacheSize, addressFormat);
+                case "mapquest" -> new MapQuestGeocoder(client, url, key, cacheSize, addressFormat);
+                case "opencage" -> new OpenCageGeocoder(client, url, key, language, cacheSize, addressFormat);
+                case "bingmaps" -> new BingMapsGeocoder(client, url, key, cacheSize, addressFormat);
+                case "factual" -> new FactualGeocoder(client, url, key, cacheSize, addressFormat);
+                case "geocodefarm" -> new GeocodeFarmGeocoder(client, key, language, cacheSize, addressFormat);
+                case "geocodexyz" -> new GeocodeXyzGeocoder(client, key, cacheSize, addressFormat);
+                case "ban" -> new BanGeocoder(client, cacheSize, addressFormat);
+                case "here" -> new HereGeocoder(client, url, key, language, cacheSize, addressFormat);
+                case "mapmyindia" -> new MapmyIndiaGeocoder(client, url, key, cacheSize, addressFormat);
+                case "tomtom" -> new TomTomGeocoder(client, url, key, cacheSize, addressFormat);
+                case "positionstack" -> new PositionStackGeocoder(client, key, cacheSize, addressFormat);
+                case "mapbox" -> new MapboxGeocoder(client, key, cacheSize, addressFormat);
+                case "maptiler" -> new MapTilerGeocoder(client, key, cacheSize, addressFormat);
+                case "geoapify" -> new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
+                case "geocodejson" -> new GeocodeJsonGeocoder(client, url, key, language, cacheSize, addressFormat);
+                default -> new GoogleGeocoder(client, key, language, cacheSize, addressFormat);
+            };
             geocoder.setStatisticsManager(statisticsManager);
             return geocoder;
         }
@@ -282,14 +241,11 @@ public class MainModule extends AbstractModule {
             String type = config.getString(Keys.GEOLOCATION_TYPE, "google");
             String url = config.getString(Keys.GEOLOCATION_URL);
             String key = config.getString(Keys.GEOLOCATION_KEY);
-            switch (type) {
-                case "opencellid":
-                    return new OpenCellIdGeolocationProvider(client, url, key);
-                case "unwired":
-                    return new UnwiredGeolocationProvider(client, url, key);
-                default:
-                    return new GoogleGeolocationProvider(client, key);
-            }
+            return switch (type) {
+                case "opencellid" -> new OpenCellIdGeolocationProvider(client, url, key);
+                case "unwired" -> new UnwiredGeolocationProvider(client, url, key);
+                default -> new GoogleGeolocationProvider(client, key);
+            };
         }
         return null;
     }
@@ -300,11 +256,10 @@ public class MainModule extends AbstractModule {
         if (config.getBoolean(Keys.SPEED_LIMIT_ENABLE)) {
             String type = config.getString(Keys.SPEED_LIMIT_TYPE, "overpass");
             String url = config.getString(Keys.SPEED_LIMIT_URL);
-            switch (type) {
-                case "overpass":
-                default:
-                    return new OverpassSpeedLimitProvider(config, client, url);
-            }
+            return switch (type) {
+                case "overpass" -> new OverpassSpeedLimitProvider(config, client, url);
+                default -> throw new IllegalArgumentException("Unknown speed limit provider");
+            };
         }
         return null;
     }
@@ -372,14 +327,11 @@ public class MainModule extends AbstractModule {
     public static BroadcastService provideBroadcastService(
             Config config, ObjectMapper objectMapper) throws IOException {
         if (config.hasKey(Keys.BROADCAST_TYPE)) {
-            switch (config.getString(Keys.BROADCAST_TYPE)) {
-                case "multicast":
-                    return new MulticastBroadcastService(config, objectMapper);
-                case "redis":
-                    return new RedisBroadcastService(config, objectMapper);
-                default:
-                    break;
-            }
+            return switch (config.getString(Keys.BROADCAST_TYPE)) {
+                case "multicast" -> new MulticastBroadcastService(config, objectMapper);
+                case "redis" -> new RedisBroadcastService(config, objectMapper);
+                default -> new NullBroadcastService();
+            };
         }
         return new NullBroadcastService();
     }
@@ -389,17 +341,12 @@ public class MainModule extends AbstractModule {
     public static EventForwarder provideEventForwarder(Config config, Client client, ObjectMapper objectMapper) {
         if (config.hasKey(Keys.EVENT_FORWARD_URL)) {
             String forwardType = config.getString(Keys.EVENT_FORWARD_TYPE);
-            switch (forwardType) {
-                case "amqp":
-                    return new EventForwarderAmqp(config, objectMapper);
-                case "kafka":
-                    return new EventForwarderKafka(config, objectMapper);
-                case "mqtt":
-                    return new EventForwarderMqtt(config, objectMapper);
-                case "json":
-                default:
-                    return new EventForwarderJson(config, client);
-            }
+            return switch (forwardType) {
+                case "amqp" -> new EventForwarderAmqp(config, objectMapper);
+                case "kafka" -> new EventForwarderKafka(config, objectMapper);
+                case "mqtt" -> new EventForwarderMqtt(config, objectMapper);
+                default -> new EventForwarderJson(config, client);
+            };
         }
         return null;
     }
@@ -408,21 +355,14 @@ public class MainModule extends AbstractModule {
     @Provides
     public static PositionForwarder providePositionForwarder(Config config, Client client, ObjectMapper objectMapper) {
         if (config.hasKey(Keys.FORWARD_URL)) {
-            switch (config.getString(Keys.FORWARD_TYPE)) {
-                case "json":
-                    return new PositionForwarderJson(config, client, objectMapper);
-                case "amqp":
-                    return new PositionForwarderAmqp(config, objectMapper);
-                case "kafka":
-                    return new PositionForwarderKafka(config, objectMapper);
-                case "mqtt":
-                    return new PositionForwarderMqtt(config, objectMapper);
-                case "redis":
-                    return new PositionForwarderRedis(config, objectMapper);
-                case "url":
-                default:
-                    return new PositionForwarderUrl(config, client, objectMapper);
-            }
+            return switch (config.getString(Keys.FORWARD_TYPE)) {
+                case "json" -> new PositionForwarderJson(config, client, objectMapper);
+                case "amqp" -> new PositionForwarderAmqp(config, objectMapper);
+                case "kafka" -> new PositionForwarderKafka(config, objectMapper);
+                case "mqtt" -> new PositionForwarderMqtt(config, objectMapper);
+                case "redis" -> new PositionForwarderRedis(config, objectMapper);
+                default -> new PositionForwarderUrl(config, client, objectMapper);
+            };
         }
         return null;
     }

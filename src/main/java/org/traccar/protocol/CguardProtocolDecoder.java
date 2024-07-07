@@ -94,25 +94,17 @@ public class CguardProtocolDecoder extends BaseProtocolDecoder {
             String key = data[i * 2];
             String value = data[i * 2 + 1];
             switch (key) {
-                case "CSQ1":
-                    position.set(Position.KEY_RSSI, Integer.parseInt(value));
-                    break;
-                case "NSQ1":
-                    position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
-                    break;
-                case "BAT1":
+                case "CSQ1" -> position.set(Position.KEY_RSSI, Integer.parseInt(value));
+                case "NSQ1" -> position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
+                case "BAT1" -> {
                     if (value.contains(".")) {
                         position.set(Position.KEY_BATTERY, Double.parseDouble(value));
                     } else {
                         position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(value));
                     }
-                    break;
-                case "PWR1":
-                    position.set(Position.KEY_POWER, Double.parseDouble(value));
-                    break;
-                default:
-                    position.set(key.toLowerCase(), value);
-                    break;
+                }
+                case "PWR1" -> position.set(Position.KEY_POWER, Double.parseDouble(value));
+                default -> position.set(key.toLowerCase(), value);
             }
         }
 

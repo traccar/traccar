@@ -201,24 +201,12 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     while (buf.readerIndex() < fieldEnd) {
                         int number = buf.readUnsignedByte();
                         switch (number) {
-                            case 1:
-                                position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
-                                break;
-                            case 2:
-                                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
-                                break;
-                            case 3:
-                                position.set(Position.KEY_DEVICE_TEMP, buf.readShortLE() * 0.01);
-                                break;
-                            case 4:
-                                position.set(Position.KEY_RSSI, buf.readUnsignedShortLE());
-                                break;
-                            case 5:
-                                position.set("solarPower", buf.readUnsignedShortLE() * 0.001);
-                                break;
-                            default:
-                                position.set(Position.PREFIX_IO + number, buf.readUnsignedShortLE());
-                                break;
+                            case 1 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
+                            case 2 -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
+                            case 3 -> position.set(Position.KEY_DEVICE_TEMP, buf.readShortLE() * 0.01);
+                            case 4 -> position.set(Position.KEY_RSSI, buf.readUnsignedShortLE());
+                            case 5 -> position.set("solarPower", buf.readUnsignedShortLE() * 0.001);
+                            default -> position.set(Position.PREFIX_IO + number, buf.readUnsignedShortLE());
                         }
                     }
 
@@ -249,28 +237,18 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 12:
-                return Position.ALARM_BRAKING;
-            case 13:
-                return Position.ALARM_ACCELERATION;
-            case 14:
-                return Position.ALARM_CORNERING;
-            case 18:
-                return Position.ALARM_OVERSPEED;
-            case 20:
-                return Position.ALARM_TOW;
-            case 23:
-                return Position.ALARM_ACCIDENT;
-            case 29:
-                return Position.ALARM_TAMPERING;
-            case 44:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 45:
-                return Position.ALARM_GEOFENCE_EXIT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 12 -> Position.ALARM_BRAKING;
+            case 13 -> Position.ALARM_ACCELERATION;
+            case 14 -> Position.ALARM_CORNERING;
+            case 18 -> Position.ALARM_OVERSPEED;
+            case 20 -> Position.ALARM_TOW;
+            case 23 -> Position.ALARM_ACCIDENT;
+            case 29 -> Position.ALARM_TAMPERING;
+            case 44 -> Position.ALARM_GEOFENCE_ENTER;
+            case 45 -> Position.ALARM_GEOFENCE_EXIT;
+            default -> null;
+        };
     }
 
     @Override

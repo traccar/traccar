@@ -116,34 +116,32 @@ public class TaskReports implements ScheduleTask {
         for (User user : users) {
             LogAction.report(user.getId(), true, report.getType(), from, to, deviceIds, groupIds);
             switch (report.getType()) {
-                case "events":
+                case "events" -> {
                     var eventsReportProvider = injector.getInstance(EventsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, List.of(), from, to));
-                    break;
-                case "route":
+                }
+                case "route" -> {
                     var routeReportProvider = injector.getInstance(RouteReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> routeReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to));
-                    break;
-                case "summary":
+                }
+                case "summary" -> {
                     var summaryReportProvider = injector.getInstance(SummaryReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> summaryReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to, false));
-                    break;
-                case "trips":
+                }
+                case "trips" -> {
                     var tripsReportProvider = injector.getInstance(TripsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> tripsReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to));
-                    break;
-                case "stops":
+                }
+                case "stops" -> {
                     var stopsReportProvider = injector.getInstance(StopsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> stopsReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to));
-                    break;
-                default:
-                    LOGGER.warn("Unsupported report type {}", report.getType());
-                    break;
+                }
+                default -> LOGGER.warn("Unsupported report type {}", report.getType());
             }
         }
     }

@@ -150,44 +150,29 @@ public class ComputedAttributesHandler extends BasePositionHandler {
                     Object result = computeAttribute(attribute, position);
                     if (result != null) {
                         switch (attribute.getAttribute()) {
-                            case "valid":
-                                position.setValid((Boolean) result);
-                                break;
-                            case "latitude":
-                                position.setLatitude(((Number) result).doubleValue());
-                                break;
-                            case "longitude":
-                                position.setLongitude(((Number) result).doubleValue());
-                                break;
-                            case "altitude":
-                                position.setAltitude(((Number) result).doubleValue());
-                                break;
-                            case "speed":
-                                position.setSpeed(((Number) result).doubleValue());
-                                break;
-                            case "course":
-                                position.setCourse(((Number) result).doubleValue());
-                                break;
-                            case "address":
-                                position.setAddress((String) result);
-                                break;
-                            case "accuracy":
-                                position.setAccuracy(((Number) result).doubleValue());
-                                break;
-                            default:
+                            case "valid" -> position.setValid((Boolean) result);
+                            case "latitude" -> position.setLatitude(((Number) result).doubleValue());
+                            case "longitude" -> position.setLongitude(((Number) result).doubleValue());
+                            case "altitude" -> position.setAltitude(((Number) result).doubleValue());
+                            case "speed" -> position.setSpeed(((Number) result).doubleValue());
+                            case "course" -> position.setCourse(((Number) result).doubleValue());
+                            case "address" -> position.setAddress((String) result);
+                            case "accuracy" -> position.setAccuracy(((Number) result).doubleValue());
+                            default -> {
                                 switch (attribute.getType()) {
-                                    case "number":
+                                    case "number" -> {
                                         Number numberValue = (Number) result;
                                         position.getAttributes().put(attribute.getAttribute(), numberValue);
-                                        break;
-                                    case "boolean":
+                                    }
+                                    case "boolean" -> {
                                         Boolean booleanValue = (Boolean) result;
                                         position.getAttributes().put(attribute.getAttribute(), booleanValue);
-                                        break;
-                                    default:
+                                    }
+                                    default -> {
                                         position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                    }
                                 }
-                                break;
+                            }
                         }
                     } else {
                         position.getAttributes().remove(attribute.getAttribute());

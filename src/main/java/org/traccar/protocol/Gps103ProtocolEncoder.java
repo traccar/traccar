@@ -45,29 +45,27 @@ public class Gps103ProtocolEncoder extends StringProtocolEncoder implements Stri
     @Override
     protected Object encodeCommand(Command command) {
 
-        switch (command.getType()) {
-            case Command.TYPE_CUSTOM:
-                return formatCommand(command, "**,imei:%s,%s", Command.KEY_UNIQUE_ID, Command.KEY_DATA);
-            case Command.TYPE_POSITION_STOP:
-                return formatCommand(command, "**,imei:%s,D", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, "**,imei:%s,B", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_POSITION_PERIODIC:
-                return formatCommand(
-                        command, "**,imei:%s,C,%s", this, Command.KEY_UNIQUE_ID, Command.KEY_FREQUENCY);
-            case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "**,imei:%s,J", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "**,imei:%s,K", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ALARM_ARM:
-                return formatCommand(command, "**,imei:%s,L", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ALARM_DISARM:
-                return formatCommand(command, "**,imei:%s,M", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_REQUEST_PHOTO:
-                return formatCommand(command, "**,imei:%s,160", Command.KEY_UNIQUE_ID);
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_CUSTOM -> formatCommand(
+                    command, "**,imei:%s,%s", Command.KEY_UNIQUE_ID, Command.KEY_DATA);
+            case Command.TYPE_POSITION_STOP -> formatCommand(
+                    command, "**,imei:%s,D", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_POSITION_SINGLE -> formatCommand(
+                    command, "**,imei:%s,B", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_POSITION_PERIODIC -> formatCommand(
+                    command, "**,imei:%s,C,%s", this, Command.KEY_UNIQUE_ID, Command.KEY_FREQUENCY);
+            case Command.TYPE_ENGINE_STOP -> formatCommand(
+                    command, "**,imei:%s,J", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ENGINE_RESUME -> formatCommand(
+                    command, "**,imei:%s,K", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_ARM -> formatCommand(
+                    command, "**,imei:%s,L", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_DISARM -> formatCommand(
+                    command, "**,imei:%s,M", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_REQUEST_PHOTO -> formatCommand(
+                    command, "**,imei:%s,160", Command.KEY_UNIQUE_ID);
+            default -> null;
+        };
     }
 
 }

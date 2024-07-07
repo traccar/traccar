@@ -30,17 +30,13 @@ public final class ObdDecoder {
     private static final int MODE_CODES = 0x03;
 
     public static Map.Entry<String, Object> decode(int mode, String value) {
-        switch (mode) {
-            case MODE_CURRENT:
-            case MODE_FREEZE_FRAME:
-                return decodeData(
-                        Integer.parseInt(value.substring(0, 2), 16),
-                        Long.parseLong(value.substring(2), 16), true);
-            case MODE_CODES:
-                return decodeCodes(value);
-            default:
-                return null;
-        }
+        return switch (mode) {
+            case MODE_CURRENT, MODE_FREEZE_FRAME -> decodeData(
+                    Integer.parseInt(value.substring(0, 2), 16),
+                    Long.parseLong(value.substring(2), 16), true);
+            case MODE_CODES -> decodeCodes(value);
+            default -> null;
+        };
     }
 
     private static Map.Entry<String, Object> createEntry(String key, Object value) {
@@ -53,7 +49,7 @@ public final class ObdDecoder {
             int numValue = Integer.parseInt(value.substring(i * 4, (i + 1) * 4), 16);
             codes.append(' ').append(decodeCode(numValue));
         }
-        if (codes.length() > 0) {
+        if (!codes.isEmpty()) {
             return createEntry(Position.KEY_DTCS, codes.toString().trim());
         } else {
             return null;
@@ -61,49 +57,29 @@ public final class ObdDecoder {
     }
 
     public static String decodeCode(int value) {
-        char prefix;
-        switch (value >> 14) {
-            case 1:
-                prefix = 'C';
-                break;
-            case 2:
-                prefix = 'B';
-                break;
-            case 3:
-                prefix = 'U';
-                break;
-            default:
-                prefix = 'P';
-                break;
-        }
+        char prefix = switch (value >> 14) {
+            case 1 -> 'C';
+            case 2 -> 'B';
+            case 3 -> 'U';
+            default -> 'P';
+        };
         return String.format("%c%04X", prefix, value & 0x3FFF);
     }
 
     public static Map.Entry<String, Object> decodeData(int pid, long value, boolean convert) {
-        switch (pid) {
-            case 0x04:
-                return createEntry(Position.KEY_ENGINE_LOAD, convert ? value * 100 / 255 : value);
-            case 0x05:
-                return createEntry(Position.KEY_COOLANT_TEMP, convert ? value - 40 : value);
-            case 0x0B:
-                return createEntry("mapIntake", value);
-            case 0x0C:
-                return createEntry(Position.KEY_RPM, convert ? value / 4 : value);
-            case 0x0D:
-                return createEntry(Position.KEY_OBD_SPEED, value);
-            case 0x0F:
-                return createEntry("intakeTemp", convert ? value - 40 : value);
-            case 0x11:
-                return createEntry(Position.KEY_THROTTLE, convert ? value * 100 / 255 : value);
-            case 0x21:
-                return createEntry("milDistance", value);
-            case 0x2F:
-                return createEntry(Position.KEY_FUEL_LEVEL, convert ? value * 100 / 255 : value);
-            case 0x31:
-                return createEntry("clearedDistance", value);
-            default:
-                return null;
-        }
+        return switch (pid) {
+            case 0x04 -> createEntry(Position.KEY_ENGINE_LOAD, convert ? value * 100 / 255 : value);
+            case 0x05 -> createEntry(Position.KEY_COOLANT_TEMP, convert ? value - 40 : value);
+            case 0x0B -> createEntry("mapIntake", value);
+            case 0x0C -> createEntry(Position.KEY_RPM, convert ? value / 4 : value);
+            case 0x0D -> createEntry(Position.KEY_OBD_SPEED, value);
+            case 0x0F -> createEntry("intakeTemp", convert ? value - 40 : value);
+            case 0x11 -> createEntry(Position.KEY_THROTTLE, convert ? value * 100 / 255 : value);
+            case 0x21 -> createEntry("milDistance", value);
+            case 0x2F -> createEntry(Position.KEY_FUEL_LEVEL, convert ? value * 100 / 255 : value);
+            case 0x31 -> createEntry("clearedDistance", value);
+            default -> null;
+        };
     }
 
 }

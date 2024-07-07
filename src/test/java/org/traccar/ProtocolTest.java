@@ -118,18 +118,10 @@ public class ProtocolTest extends BaseTest {
             position = (Position) decodedObject;
         }
         switch (key) {
-            case "speed":
-                assertEquals(expected, position.getSpeed());
-                break;
-            case "course":
-                assertEquals(expected, position.getCourse());
-                break;
-            case "altitude":
-                assertEquals(expected, position.getAltitude());
-                break;
-            default:
-                assertEquals(expected, position.getAttributes().get(key));
-                break;
+            case "speed" -> assertEquals(expected, position.getSpeed());
+            case "course" -> assertEquals(expected, position.getCourse());
+            case "altitude" -> assertEquals(expected, position.getAltitude());
+            default -> assertEquals(expected, position.getAttributes().get(key));
         }
     }
 

@@ -421,54 +421,27 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(short value, String model) {
         boolean modelLW = model != null && model.toUpperCase().startsWith("LW");
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x02:
-                return Position.ALARM_POWER_CUT;
-            case 0x03:
-            case 0x09:
-                return Position.ALARM_VIBRATION;
-            case 0x04:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 0x05:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 0x06:
-                return Position.ALARM_OVERSPEED;
-            case 0x0E:
-            case 0x0F:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x11:
-                return Position.ALARM_POWER_OFF;
-            case 0x0C:
-            case 0x13:
-            case 0x25:
-                return Position.ALARM_TAMPERING;
-            case 0x14:
-                return Position.ALARM_DOOR;
-            case 0x18:
-                return modelLW ? Position.ALARM_ACCIDENT : Position.ALARM_REMOVING;
-            case 0x19:
-                return modelLW ? Position.ALARM_ACCELERATION : Position.ALARM_LOW_BATTERY;
-            case 0x1A:
-            case 0x28:
-                return Position.ALARM_BRAKING;
-            case 0x1B:
-            case 0x2A:
-            case 0x2B:
-            case 0x2E:
-                return Position.ALARM_CORNERING;
-            case 0x23:
-                return Position.ALARM_FALL_DOWN;
-            case 0x29:
-                return Position.ALARM_ACCELERATION;
-            case 0x2C:
-                return Position.ALARM_ACCIDENT;
-            case 0x30:
-                return Position.ALARM_JAMMING;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x02 -> Position.ALARM_POWER_CUT;
+            case 0x03, 0x09 -> Position.ALARM_VIBRATION;
+            case 0x04 -> Position.ALARM_GEOFENCE_ENTER;
+            case 0x05 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x06 -> Position.ALARM_OVERSPEED;
+            case 0x0E, 0x0F -> Position.ALARM_LOW_BATTERY;
+            case 0x11 -> Position.ALARM_POWER_OFF;
+            case 0x0C, 0x13, 0x25 -> Position.ALARM_TAMPERING;
+            case 0x14 -> Position.ALARM_DOOR;
+            case 0x18 -> modelLW ? Position.ALARM_ACCIDENT : Position.ALARM_REMOVING;
+            case 0x19 -> modelLW ? Position.ALARM_ACCELERATION : Position.ALARM_LOW_BATTERY;
+            case 0x1A, 0x28 -> Position.ALARM_BRAKING;
+            case 0x1B, 0x2A, 0x2B, 0x2E -> Position.ALARM_CORNERING;
+            case 0x23 -> Position.ALARM_FALL_DOWN;
+            case 0x29 -> Position.ALARM_ACCELERATION;
+            case 0x2C -> Position.ALARM_ACCIDENT;
+            case 0x30 -> Position.ALARM_JAMMING;
+            default -> null;
+        };
     }
 
     private Object decodeBasic(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
@@ -968,18 +941,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 int module = buf.readUnsignedShort();
                 int subLength = buf.readUnsignedByte();
                 switch (module) {
-                    case 0x0027:
-                        position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
-                        break;
-                    case 0x002E:
-                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-                        break;
-                    case 0x003B:
-                        position.setAccuracy(buf.readUnsignedShort() * 0.01);
-                        break;
-                    default:
-                        buf.skipBytes(subLength);
-                        break;
+                    case 0x0027 -> position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                    case 0x002E -> position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                    case 0x003B -> position.setAccuracy(buf.readUnsignedShort() * 0.01);
+                    default -> buf.skipBytes(subLength);
                 }
             }
 
@@ -1022,38 +987,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             short event = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, event);
             switch (event) {
-                case 0x01:
-                    position.set(Position.KEY_ALARM, extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
-                    break;
-                case 0x0E:
-                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
-                    break;
-                case 0x76:
-                    position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
-                    break;
-                case 0x80:
-                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
-                    break;
-                case 0x87:
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                    break;
-                case 0x88:
-                    position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-                    break;
-                case 0x90:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 0x91:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                case 0x92:
-                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                    break;
-                case 0x93:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
-                    break;
-                default:
-                    break;
+                case 0x01 -> position.set(
+                        Position.KEY_ALARM, extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
+                case 0x0E -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                case 0x76 -> position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
+                case 0x80 -> position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                case 0x87 -> position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                case 0x88 -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                case 0x90 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                case 0x91 -> position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                case 0x92 -> position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                case 0x93 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
             }
 
         } else {
@@ -1251,24 +1195,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             if (type == MSG_AZ735_ALARM) {
                 switch (status) {
-                    case 0xA0:
-                        position.set(Position.KEY_ARMED, true);
-                        break;
-                    case 0xA1:
-                        position.set(Position.KEY_ARMED, false);
-                        break;
-                    case 0xA2:
-                    case 0xA3:
-                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                        break;
-                    case 0xA4:
-                        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
-                        break;
-                    case 0xA5:
-                        position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
-                        break;
-                    default:
-                        break;
+                    case 0xA0 -> position.set(Position.KEY_ARMED, true);
+                    case 0xA1 -> position.set(Position.KEY_ARMED, false);
+                    case 0xA2, 0xA3 -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                    case 0xA4 -> position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                    case 0xA5 -> position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
                 }
             }
 
@@ -1293,32 +1224,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 String[] values = pair.split("=");
                 if (values.length >= 2) {
                     switch (Integer.parseInt(values[0].substring(0, 2), 16)) {
-                        case 40:
-                            position.set(Position.KEY_ODOMETER, Integer.parseInt(values[1], 16) * 0.01);
-                            break;
-                        case 43:
-                            position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[1], 16) * 0.01);
-                            break;
-                        case 45:
-                            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[1], 16) * 0.01);
-                            break;
-                        case 53:
-                            position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[1], 16) * 0.01);
-                            break;
-                        case 54:
-                            position.set(Position.KEY_RPM, Integer.parseInt(values[1], 16) * 0.01);
-                            break;
-                        case 71:
-                            position.set(Position.KEY_FUEL_USED, Integer.parseInt(values[1], 16) * 0.01);
-                            break;
-                        case 73:
-                            position.set(Position.KEY_HOURS, Integer.parseInt(values[1], 16) * 0.01);
-                            break;
-                        case 74:
-                            position.set(Position.KEY_VIN, values[1]);
-                            break;
-                        default:
-                            break;
+                        case 40 -> position.set(Position.KEY_ODOMETER, Integer.parseInt(values[1], 16) * 0.01);
+                        case 43 -> position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[1], 16) * 0.01);
+                        case 45 -> position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[1], 16) * 0.01);
+                        case 53 -> position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[1], 16) * 0.01);
+                        case 54 -> position.set(Position.KEY_RPM, Integer.parseInt(values[1], 16) * 0.01);
+                        case 71 -> position.set(Position.KEY_FUEL_USED, Integer.parseInt(values[1], 16) * 0.01);
+                        case 73 -> position.set(Position.KEY_HOURS, Integer.parseInt(values[1], 16) * 0.01);
+                        case 74 -> position.set(Position.KEY_VIN, values[1]);
                     }
                 }
             }
@@ -1332,16 +1245,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 int moduleLength = buf.readUnsignedShort();
 
                 switch (moduleType) {
-                    case 0x03:
-                        position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)));
-                        break;
-                    case 0x09:
-                        position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-                        break;
-                    case 0x0a:
-                        position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
-                        break;
-                    case 0x11:
+                    case 0x03 -> position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(buf.readSlice(10)));
+                    case 0x09 -> position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    case 0x0a -> position.set(Position.KEY_SATELLITES_VISIBLE, buf.readUnsignedByte());
+                    case 0x11 -> {
                         CellTower cellTower = CellTower.from(
                                 buf.readUnsignedShort(),
                                 buf.readUnsignedShort(),
@@ -1351,22 +1258,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         if (cellTower.getCellId() > 0) {
                             position.setNetwork(new Network(cellTower));
                         }
-                        break;
-                    case 0x18:
-                        position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
-                        break;
-                    case 0x28:
-                        position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
-                        break;
-                    case 0x29:
-                        position.set(Position.KEY_INDEX, buf.readUnsignedInt());
-                        break;
-                    case 0x2a:
+                    }
+                    case 0x18 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                    case 0x28 -> position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+                    case 0x29 -> position.set(Position.KEY_INDEX, buf.readUnsignedInt());
+                    case 0x2a -> {
                         int input = buf.readUnsignedByte();
                         position.set(Position.KEY_DOOR, BitUtil.to(input, 4) > 0);
                         position.set("tamper", BitUtil.from(input, 4) > 0);
-                        break;
-                    case 0x2b:
+                    }
+                    case 0x2b -> {
                         int event = buf.readUnsignedByte();
                         switch (event) {
                             case 0x11:
@@ -1385,11 +1286,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                                 break;
                         }
                         position.set(Position.KEY_EVENT, event);
-                        break;
-                    case 0x2e:
-                        position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
-                        break;
-                    case 0x33:
+                    }
+                    case 0x2e -> position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                    case 0x33 -> {
                         position.setTime(new Date(buf.readUnsignedInt() * 1000));
                         position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                         position.setAltitude(buf.readShort());
@@ -1411,15 +1310,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                         position.setLatitude(latitude);
                         position.setLongitude(longitude);
-                        break;
-                    case 0x34:
+                    }
+                    case 0x34 -> {
                         position.set(Position.KEY_EVENT, buf.readUnsignedByte());
                         buf.readUnsignedIntLE(); // time
                         buf.skipBytes(buf.readUnsignedByte()); // content
-                        break;
-                    default:
-                        buf.skipBytes(moduleLength);
-                        break;
+                    }
+                    default -> buf.skipBytes(moduleLength);
                 }
             }
 

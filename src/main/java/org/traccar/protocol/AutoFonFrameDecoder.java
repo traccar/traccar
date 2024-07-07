@@ -32,27 +32,14 @@ public class AutoFonFrameDecoder extends BaseFrameDecoder {
             return null;
         }
 
-        int length;
-        switch (buf.getUnsignedByte(buf.readerIndex())) {
-            case AutoFonProtocolDecoder.MSG_LOGIN:
-                length = 12;
-                break;
-            case AutoFonProtocolDecoder.MSG_LOCATION:
-                length = 78;
-                break;
-            case AutoFonProtocolDecoder.MSG_HISTORY:
-                length = 257;
-                break;
-            case AutoFonProtocolDecoder.MSG_45_LOGIN:
-                length = 19;
-                break;
-            case AutoFonProtocolDecoder.MSG_45_LOCATION:
-                length = 34;
-                break;
-            default:
-                length = 0;
-                break;
-        }
+        int length = switch (buf.getUnsignedByte(buf.readerIndex())) {
+            case AutoFonProtocolDecoder.MSG_LOGIN -> 12;
+            case AutoFonProtocolDecoder.MSG_LOCATION -> 78;
+            case AutoFonProtocolDecoder.MSG_HISTORY -> 257;
+            case AutoFonProtocolDecoder.MSG_45_LOGIN -> 19;
+            case AutoFonProtocolDecoder.MSG_45_LOCATION -> 34;
+            default -> 0;
+        };
 
         // Check length and return buffer
         if (length != 0 && buf.readableBytes() >= length) {

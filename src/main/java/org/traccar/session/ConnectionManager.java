@@ -241,17 +241,11 @@ public class ConnectionManager implements BroadcastInterface {
         if (!status.equals(oldStatus)) {
             String eventType;
             Map<Event, Position> events = new HashMap<>();
-            switch (status) {
-                case Device.STATUS_ONLINE:
-                    eventType = Event.TYPE_DEVICE_ONLINE;
-                    break;
-                case Device.STATUS_UNKNOWN:
-                    eventType = Event.TYPE_DEVICE_UNKNOWN;
-                    break;
-                default:
-                    eventType = Event.TYPE_DEVICE_OFFLINE;
-                    break;
-            }
+            eventType = switch (status) {
+                case Device.STATUS_ONLINE -> Event.TYPE_DEVICE_ONLINE;
+                case Device.STATUS_UNKNOWN -> Event.TYPE_DEVICE_UNKNOWN;
+                default -> Event.TYPE_DEVICE_OFFLINE;
+            };
             events.put(new Event(eventType, deviceId), null);
             notificationManager.updateEvents(events);
         }

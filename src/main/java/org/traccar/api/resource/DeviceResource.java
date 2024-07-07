@@ -174,20 +174,14 @@ public class DeviceResource extends BaseObjectResource<Device> {
     }
 
     private String imageExtension(String type) {
-        switch (type) {
-            case "image/jpeg":
-                return "jpg";
-            case "image/png":
-                return "png";
-            case "image/gif":
-                return "gif";
-            case "image/webp":
-                return "webp";
-            case "image/svg+xml":
-                return "svg";
-            default:
-                throw new IllegalArgumentException("Unsupported image type");
-        }
+        return switch (type) {
+            case "image/jpeg" -> "jpg";
+            case "image/png" -> "png";
+            case "image/gif" -> "gif";
+            case "image/webp" -> "webp";
+            case "image/svg+xml" -> "svg";
+            default -> throw new IllegalArgumentException("Unsupported image type");
+        };
     }
 
     @Path("{id}/image")

@@ -205,17 +205,9 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
                 case 18:
                     int sensorIndex = data.readUnsignedByte();
                     switch (recordLength - 1) {
-                        case 1:
-                            position.set("sensor" + sensorIndex, data.readUnsignedByte());
-                            break;
-                        case 2:
-                            position.set("sensor" + sensorIndex, data.readUnsignedShortLE());
-                            break;
-                        case 4:
-                            position.set("sensor" + sensorIndex, data.readUnsignedIntLE());
-                            break;
-                        default:
-                            break;
+                        case 1 -> position.set("sensor" + sensorIndex, data.readUnsignedByte());
+                        case 2 -> position.set("sensor" + sensorIndex, data.readUnsignedShortLE());
+                        case 4 -> position.set("sensor" + sensorIndex, data.readUnsignedIntLE());
                     }
                     break;
                 default:

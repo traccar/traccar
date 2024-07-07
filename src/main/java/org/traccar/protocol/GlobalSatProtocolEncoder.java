@@ -32,20 +32,12 @@ public class GlobalSatProtocolEncoder extends StringProtocolEncoder {
         String formattedCommand = null;
 
         switch (command.getType()) {
-            case Command.TYPE_CUSTOM:
-                formattedCommand = formatCommand(
-                        command, "GSC,%s,%s", Command.KEY_UNIQUE_ID, Command.KEY_DATA);
-                break;
-            case Command.TYPE_ALARM_DISMISS:
-                formattedCommand = formatCommand(
-                        command, "GSC,%s,Na", Command.KEY_UNIQUE_ID);
-                break;
-            case Command.TYPE_OUTPUT_CONTROL:
-                formattedCommand = formatCommand(
-                        command, "GSC,%s,Lo(%s,%s)", Command.KEY_UNIQUE_ID, Command.KEY_INDEX, Command.KEY_DATA);
-                break;
-            default:
-                break;
+            case Command.TYPE_CUSTOM -> formattedCommand = formatCommand(
+                    command, "GSC,%s,%s", Command.KEY_UNIQUE_ID, Command.KEY_DATA);
+            case Command.TYPE_ALARM_DISMISS -> formattedCommand = formatCommand(
+                    command, "GSC,%s,Na", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_OUTPUT_CONTROL -> formattedCommand = formatCommand(
+                    command, "GSC,%s,Lo(%s,%s)", Command.KEY_UNIQUE_ID, Command.KEY_INDEX, Command.KEY_DATA);
         }
 
         if (formattedCommand != null) {

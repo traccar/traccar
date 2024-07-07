@@ -67,16 +67,11 @@ public class ArknavX8ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        switch (sentence.substring(0, 2)) {
-            case "1G":
-            case "1R":
-            case "1M":
-                return decode1G(channel, remoteAddress, sentence);
-            case "2G":
-                return decode2G(channel, remoteAddress, sentence);
-            default:
-                return null;
-        }
+        return switch (sentence.substring(0, 2)) {
+            case "1G", "1R", "1M" -> decode1G(channel, remoteAddress, sentence);
+            case "2G" -> decode2G(channel, remoteAddress, sentence);
+            default -> null;
+        };
     }
 
     private Position decode1G(Channel channel, SocketAddress remoteAddress, String sentence) {
