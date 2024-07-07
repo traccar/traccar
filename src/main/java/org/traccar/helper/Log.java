@@ -284,8 +284,8 @@ public final class Log {
             }
         }
         return stores.stream()
-                .sorted(Comparator.comparingDouble(p -> p.getFirst() / (double) p.getSecond()))
-                .flatMap(p -> Stream.of(p.getFirst(), p.getSecond()))
+                .sorted(Comparator.comparingDouble(p -> p.first() / (double) p.second()))
+                .flatMap(p -> Stream.of(p.first(), p.second()))
                 .mapToLong(Long::longValue)
                 .toArray();
     }

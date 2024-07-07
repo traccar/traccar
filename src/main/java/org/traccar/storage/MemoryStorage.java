@@ -95,9 +95,9 @@ public class MemoryStorage extends Storage {
             return getPermissionsSet(condition.getOwnerClass(), condition.getPropertyClass()).stream()
                     .anyMatch(pair -> {
                         if (condition.getOwnerId() > 0) {
-                            return pair.getFirst() == condition.getOwnerId() && pair.getSecond() == id;
+                            return pair.first() == condition.getOwnerId() && pair.second() == id;
                         } else {
-                            return pair.getFirst() == id && pair.getSecond() == condition.getPropertyId();
+                            return pair.first() == id && pair.second() == condition.getPropertyId();
                         }
                     });
 
@@ -168,9 +168,9 @@ public class MemoryStorage extends Storage {
             Class<? extends BaseModel> ownerClass, long ownerId,
             Class<? extends BaseModel> propertyClass, long propertyId) {
         return getPermissionsSet(ownerClass, propertyClass).stream()
-                .filter(pair -> ownerId == 0 || pair.getFirst().equals(ownerId))
-                .filter(pair -> propertyId == 0 || pair.getSecond().equals(propertyId))
-                .map(pair -> new Permission(ownerClass, pair.getFirst(), propertyClass, pair.getSecond()))
+                .filter(pair -> ownerId == 0 || pair.first().equals(ownerId))
+                .filter(pair -> propertyId == 0 || pair.second().equals(propertyId))
+                .map(pair -> new Permission(ownerClass, pair.first(), propertyClass, pair.second()))
                 .collect(Collectors.toList());
     }
 
