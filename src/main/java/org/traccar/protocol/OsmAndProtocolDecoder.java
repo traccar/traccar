@@ -151,15 +151,9 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                             position.set(entry.getKey(), Double.parseDouble(value));
                         } catch (NumberFormatException e) {
                             switch (value) {
-                                case "true":
-                                    position.set(entry.getKey(), true);
-                                    break;
-                                case "false":
-                                    position.set(entry.getKey(), false);
-                                    break;
-                                default:
-                                    position.set(entry.getKey(), value);
-                                    break;
+                                case "true" -> position.set(entry.getKey(), true);
+                                case "false" -> position.set(entry.getKey(), false);
+                                default -> position.set(entry.getKey(), value);
                             }
                         }
                         break;

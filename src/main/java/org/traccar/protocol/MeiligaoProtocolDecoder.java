@@ -209,30 +209,19 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(short value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x10:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x11:
-                return Position.ALARM_OVERSPEED;
-            case 0x12:
-                return Position.ALARM_MOVEMENT;
-            case 0x13:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 0x14:
-                return Position.ALARM_ACCIDENT;
-            case 0x50:
-                return Position.ALARM_POWER_OFF;
-            case 0x53:
-                return Position.ALARM_GPS_ANTENNA_CUT;
-            case 0x72:
-                return Position.ALARM_BRAKING;
-            case 0x73:
-                return Position.ALARM_ACCELERATION;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x10 -> Position.ALARM_LOW_BATTERY;
+            case 0x11 -> Position.ALARM_OVERSPEED;
+            case 0x12 -> Position.ALARM_MOVEMENT;
+            case 0x13 -> Position.ALARM_GEOFENCE_ENTER;
+            case 0x14 -> Position.ALARM_ACCIDENT;
+            case 0x50 -> Position.ALARM_POWER_OFF;
+            case 0x53 -> Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x72 -> Position.ALARM_BRAKING;
+            case 0x73 -> Position.ALARM_ACCELERATION;
+            default -> null;
+        };
     }
 
     private Position decodeRegular(Position position, String sentence) {
@@ -478,21 +467,14 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
 
             String sentence = buf.toString(buf.readerIndex(), buf.readableBytes() - 4, StandardCharsets.US_ASCII);
 
-            switch (command) {
-                case MSG_POSITION:
-                case MSG_POSITION_LOGGED:
-                case MSG_ALARM:
-                case MSG_POSITION_IMAGE:
-                    return decodeRegular(position, sentence);
-                case MSG_RFID:
-                    return decodeRfid(position, sentence);
-                case MSG_OBD_RT:
-                    return decodeObd(position, sentence);
-                case MSG_OBD_RTA:
-                    return decodeObdA(position, sentence);
-                default:
-                    return null;
-            }
+            return switch (command) {
+                case MSG_POSITION, MSG_POSITION_LOGGED, MSG_ALARM, MSG_POSITION_IMAGE ->
+                        decodeRegular(position, sentence);
+                case MSG_RFID -> decodeRfid(position, sentence);
+                case MSG_OBD_RT -> decodeObd(position, sentence);
+                case MSG_OBD_RTA -> decodeObdA(position, sentence);
+                default -> null;
+            };
 
         }
     }

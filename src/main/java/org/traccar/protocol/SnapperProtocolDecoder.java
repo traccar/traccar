@@ -93,19 +93,17 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // index
             int type = buf.readUnsignedByte();
             switch (type) {
-                case 0x00:
+                case 0x00 -> {
                     position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
                     position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    break;
-                case 0x01:
+                }
+                case 0x01 -> {
                     position.set("interiorTemp", buf.readByte());
                     position.set("engineTemp", buf.readByte());
                     buf.readUnsignedByte(); // reserved
-                    break;
-                default:
-                    buf.skipBytes(3);
-                    break;
+                }
+                default -> buf.skipBytes(3);
             }
         }
     }
@@ -185,19 +183,22 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        switch (type) {
-            case MSG_SEND_EVENTS:
+        return switch (type) {
+            case MSG_SEND_EVENTS -> {
                 decodeEvents(position, buf);
                 getLastLocation(position, null); // TODO read timestamp
-                return position;
-            case MSG_SEND_TECH_INFO:
+                yield position;
+            }
+            case MSG_SEND_TECH_INFO -> {
                 decodeTechInfo(position, buf);
                 getLastLocation(position, null);
-                return position;
-            case MSG_SEND_GPS_DATA:
+                yield position;
+            }
+            case MSG_SEND_GPS_DATA -> {
                 decodeGpsData(position, buf.readSlice(length));
-                return position;
-            case MSG_SEND_CONCATENATED_PACKET:
+                yield position;
+            }
+            case MSG_SEND_CONCATENATED_PACKET -> {
                 int count = buf.readUnsignedShortLE();
                 for (int i = 0; i < count; i++) {
                     int partType = buf.readUnsignedShortLE();
@@ -220,10 +221,10 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
                 if (position.getFixTime() == null) {
                     getLastLocation(position, null);
                 }
-                return position;
-            default:
-                return null;
-        }
+                yield position;
+            }
+            default -> null;
+        };
     }
 
 }

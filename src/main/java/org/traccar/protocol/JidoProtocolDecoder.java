@@ -66,14 +66,11 @@ public class JidoProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(int type) {
-        switch (type) {
-            case 3:
-                return Position.ALARM_LOW_BATTERY;
-            case 4:
-                return Position.ALARM_TAMPERING;
-            default:
-                return null;
-        }
+        return switch (type) {
+            case 3 -> Position.ALARM_LOW_BATTERY;
+            case 4 -> Position.ALARM_TAMPERING;
+            default -> null;
+        };
     }
 
     @Override

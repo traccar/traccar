@@ -387,54 +387,28 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_GEOFENCE_EXIT;
             }
         }
-        switch (value) {
-            case "pw on":
-            case "poweron":
-                return Position.ALARM_POWER_ON;
-            case "poweroff":
-                return Position.ALARM_POWER_OFF;
-            case "sos":
-            case "help":
-                return Position.ALARM_SOS;
-            case "over speed":
-            case "overspeed":
-                return Position.ALARM_OVERSPEED;
-            case "lowspeed":
-                return Position.ALARM_LOW_SPEED;
-            case "low battery":
-            case "lowbattery":
-                return Position.ALARM_LOW_BATTERY;
-            case "low extern voltage":
-                return Position.ALARM_LOW_POWER;
-            case "gps cut":
-                return Position.ALARM_GPS_ANTENNA_CUT;
-            case "vib":
-                return Position.ALARM_VIBRATION;
-            case "move in":
-                return Position.ALARM_GEOFENCE_ENTER;
-            case "move out":
-                return Position.ALARM_GEOFENCE_EXIT;
-            case "corner":
-                return Position.ALARM_CORNERING;
-            case "fatigue":
-                return Position.ALARM_FATIGUE_DRIVING;
-            case "psd":
-                return Position.ALARM_POWER_CUT;
-            case "psr":
-                return Position.ALARM_POWER_RESTORED;
-            case "hit":
-                return Position.ALARM_VIBRATION;
-            case "belt on":
-            case "belton":
-                return Position.ALARM_LOCK;
-            case "belt off":
-            case "beltoff":
-                return Position.ALARM_UNLOCK;
-            case "error":
-                return Position.ALARM_FAULT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case "pw on", "poweron" -> Position.ALARM_POWER_ON;
+            case "poweroff" -> Position.ALARM_POWER_OFF;
+            case "sos", "help" -> Position.ALARM_SOS;
+            case "over speed", "overspeed" -> Position.ALARM_OVERSPEED;
+            case "lowspeed" -> Position.ALARM_LOW_SPEED;
+            case "low battery", "lowbattery" -> Position.ALARM_LOW_BATTERY;
+            case "low extern voltage" -> Position.ALARM_LOW_POWER;
+            case "gps cut" -> Position.ALARM_GPS_ANTENNA_CUT;
+            case "vib" -> Position.ALARM_VIBRATION;
+            case "move in" -> Position.ALARM_GEOFENCE_ENTER;
+            case "move out" -> Position.ALARM_GEOFENCE_EXIT;
+            case "corner" -> Position.ALARM_CORNERING;
+            case "fatigue" -> Position.ALARM_FATIGUE_DRIVING;
+            case "psd" -> Position.ALARM_POWER_CUT;
+            case "psr" -> Position.ALARM_POWER_RESTORED;
+            case "hit" -> Position.ALARM_VIBRATION;
+            case "belt on", "belton" -> Position.ALARM_LOCK;
+            case "belt off", "beltoff" -> Position.ALARM_UNLOCK;
+            case "error" -> Position.ALARM_FAULT;
+            default -> null;
+        };
     }
 
     @Override

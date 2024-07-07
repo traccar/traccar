@@ -98,27 +98,17 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 1:
-                return Position.ALARM_SOS;
-            case 5:
-            case 6:
-                return Position.ALARM_DOOR;
-            case 17:
-                return Position.ALARM_LOW_POWER;
-            case 18:
-                return Position.ALARM_POWER_CUT;
-            case 19:
-                return Position.ALARM_POWER_RESTORED;
-            case 39:
-                return Position.ALARM_ACCELERATION;
-            case 40:
-                return Position.ALARM_BRAKING;
-            case 41:
-                return Position.ALARM_CORNERING;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 1 -> Position.ALARM_SOS;
+            case 5, 6 -> Position.ALARM_DOOR;
+            case 17 -> Position.ALARM_LOW_POWER;
+            case 18 -> Position.ALARM_POWER_CUT;
+            case 19 -> Position.ALARM_POWER_RESTORED;
+            case 39 -> Position.ALARM_ACCELERATION;
+            case 40 -> Position.ALARM_BRAKING;
+            case 41 -> Position.ALARM_CORNERING;
+            default -> null;
+        };
     }
 
     @Override
@@ -137,19 +127,18 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
 
         String type = parser.next();
         String content = parser.next();
-        switch (type) {
-            case "000":
-                return decodePosition(deviceSession, content);
-            case "710":
-                return decodeSerial(deviceSession, content);
-            default:
+        return switch (type) {
+            case "000" -> decodePosition(deviceSession, content);
+            case "710" -> decodeSerial(deviceSession, content);
+            default -> {
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
                 getLastLocation(position, null);
                 position.set(Position.KEY_TYPE, type);
                 position.set(Position.KEY_RESULT, content);
-                return position;
-        }
+                yield position;
+            }
+        };
     }
 
     private Object decodePosition(DeviceSession deviceSession, String content) {
@@ -268,7 +257,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             int index = 0;
             String type = values[index++];
             switch (type) {
-                case "T1":
+                case "T1" -> {
                     index += 1; // speed
                     position.set(Position.KEY_RPM, Double.parseDouble(values[index++]));
                     index += 1; // fuel consumption
@@ -298,8 +287,8 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
                     index += 1; // brake pedal
                     position.set("catalystLevel", Double.parseDouble(values[index++]));
                     index += 1; // fuel type
-                    break;
-                case "T2":
+                }
+                case "T2" -> {
                     position.set(Position.KEY_ODOMETER, Double.parseDouble(values[index++]) * 1000);
                     index += 1; // total fuel
                     index += 1; // fuel used cruise
@@ -322,9 +311,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
                     index += 1; // total cruise control distance
                     position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index++]));
                     index += 1; // total drive time
-                    break;
-                default:
-                    break;
+                }
             }
         }
 

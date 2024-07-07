@@ -119,56 +119,33 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             switch (type) {
-                case "Q0":
+                case "Q0" -> {
                     position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) * 0.01);
                     position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[index++]));
                     position.set(Position.KEY_RSSI, Integer.parseInt(values[index++]));
-                    break;
-                case "H0":
+                }
+                case "H0" -> {
                     position.set(Position.KEY_BLOCKED, Integer.parseInt(values[index++]) > 0);
                     position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) * 0.01);
                     position.set(Position.KEY_RSSI, Integer.parseInt(values[index++]));
                     position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[index++]));
-                    break;
-                case "W0":
+                }
+                case "W0" -> {
                     switch (Integer.parseInt(values[index++])) {
-                        case 1:
-                            position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
-                            break;
-                        case 2:
-                            position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
-                            break;
-                        case 3:
-                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                            break;
-                        default:
-                            break;
+                        case 1 -> position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+                        case 2 -> position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
+                        case 3 -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
                     }
-                    break;
-                case "E0":
+                }
+                case "E0" -> {
                     position.set(Position.KEY_ALARM, Position.ALARM_FAULT);
                     position.set("error", Integer.parseInt(values[index++]));
-                    break;
-                case "S1":
-                    position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
-                    break;
-                case "R0":
-                case "L0":
-                case "L1":
-                case "S4":
-                case "S5":
-                case "S6":
-                case "S7":
-                case "V0":
-                case "G0":
-                case "K0":
-                case "I0":
-                case "M0":
+                }
+                case "S1" -> position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
+                case "R0", "L0", "L1", "S4", "S5", "S6", "S7", "V0", "G0", "K0", "I0", "M0" -> {
                     String[] remaining = Arrays.copyOfRange(values, index, values.length);
                     position.set(Position.KEY_RESULT, String.join(",", remaining));
-                    break;
-                default:
-                    break;
+                }
             }
 
             return !position.getAttributes().isEmpty() ? position : null;

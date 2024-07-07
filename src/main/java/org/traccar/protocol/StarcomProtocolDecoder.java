@@ -45,74 +45,32 @@ public class StarcomProtocolDecoder extends BaseProtocolDecoder {
             String key = entry.substring(0, delimiter);
             String value = entry.substring(delimiter + 1);
             switch (key) {
-                case "unit":
+                case "unit" -> {
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
                     if (deviceSession != null) {
                         position.setDeviceId(deviceSession.getDeviceId());
                     }
-                    break;
-                case "gps_valid":
-                    position.setValid(Integer.parseInt(value) != 0);
-                    break;
-                case "datetime_actual":
-                    position.setTime(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(value));
-                    break;
-                case "latitude":
-                    position.setLatitude(Double.parseDouble(value));
-                    break;
-                case "longitude":
-                    position.setLongitude(Double.parseDouble(value));
-                    break;
-                case "altitude":
-                    position.setAltitude(Double.parseDouble(value));
-                    break;
-                case "velocity":
-                    position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(value)));
-                    break;
-                case "heading":
-                    position.setCourse(Integer.parseInt(value));
-                    break;
-                case "eventid":
-                    position.set(Position.KEY_EVENT, Integer.parseInt(value));
-                    break;
-                case "odometer":
-                    position.set(Position.KEY_ODOMETER, (long) (Double.parseDouble(value) * 1000));
-                    break;
-                case "satellites":
-                    position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
-                    break;
-                case "ignition":
-                    position.set(Position.KEY_IGNITION, Integer.parseInt(value) != 0);
-                    break;
-                case "door":
-                    position.set(Position.KEY_DOOR, Integer.parseInt(value) != 0);
-                    break;
-                case "arm":
-                    position.set(Position.KEY_ARMED, Integer.parseInt(value) != 0);
-                    break;
-                case "fuel":
-                    position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(value));
-                    break;
-                case "rpm":
-                    position.set(Position.KEY_RPM, Integer.parseInt(value));
-                    break;
-                case "main_voltage":
-                    position.set(Position.KEY_POWER, Double.parseDouble(value));
-                    break;
-                case "backup_voltage":
-                    position.set(Position.KEY_BATTERY, Double.parseDouble(value));
-                    break;
-                case "analog1":
-                case "analog2":
-                case "analog3":
-                    position.set(Position.PREFIX_ADC + (key.charAt(key.length() - 1) - '0'), Double.parseDouble(value));
-                    break;
-                case "extra1":
-                case "extra2":
-                case "extra3":
-                default:
-                    position.set(key, value);
-                    break;
+                }
+                case "gps_valid" -> position.setValid(Integer.parseInt(value) != 0);
+                case "datetime_actual" -> position.setTime(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse(value));
+                case "latitude" -> position.setLatitude(Double.parseDouble(value));
+                case "longitude" -> position.setLongitude(Double.parseDouble(value));
+                case "altitude" -> position.setAltitude(Double.parseDouble(value));
+                case "velocity" -> position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(value)));
+                case "heading" -> position.setCourse(Integer.parseInt(value));
+                case "eventid" -> position.set(Position.KEY_EVENT, Integer.parseInt(value));
+                case "odometer" -> position.set(Position.KEY_ODOMETER, (long) (Double.parseDouble(value) * 1000));
+                case "satellites" -> position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
+                case "ignition" -> position.set(Position.KEY_IGNITION, Integer.parseInt(value) != 0);
+                case "door" -> position.set(Position.KEY_DOOR, Integer.parseInt(value) != 0);
+                case "arm" -> position.set(Position.KEY_ARMED, Integer.parseInt(value) != 0);
+                case "fuel" -> position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(value));
+                case "rpm" -> position.set(Position.KEY_RPM, Integer.parseInt(value));
+                case "main_voltage" -> position.set(Position.KEY_POWER, Double.parseDouble(value));
+                case "backup_voltage" -> position.set(Position.KEY_BATTERY, Double.parseDouble(value));
+                case "analog1", "analog2", "analog3" -> position.set(
+                        Position.PREFIX_ADC + (key.charAt(key.length() - 1) - '0'), Double.parseDouble(value));
+                default -> position.set(key, value);
             }
         }
 

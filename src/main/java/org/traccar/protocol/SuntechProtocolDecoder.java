@@ -167,56 +167,34 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeEmergency(int value) {
-        switch (value) {
-            case 1:
-                return Position.ALARM_SOS;
-            case 2:
-                return Position.ALARM_PARKING;
-            case 3:
-                return Position.ALARM_POWER_CUT;
-            case 5:
-            case 6:
-                return Position.ALARM_DOOR;
-            case 7:
-                return Position.ALARM_MOVEMENT;
-            case 8:
-                return Position.ALARM_VIBRATION;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 1 -> Position.ALARM_SOS;
+            case 2 -> Position.ALARM_PARKING;
+            case 3 -> Position.ALARM_POWER_CUT;
+            case 5, 6 -> Position.ALARM_DOOR;
+            case 7 -> Position.ALARM_MOVEMENT;
+            case 8 -> Position.ALARM_VIBRATION;
+            default -> null;
+        };
     }
 
     private String decodeAlert(int value) {
-        switch (value) {
-            case 1:
-                return Position.ALARM_OVERSPEED;
-            case 5:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 6:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 14:
-                return Position.ALARM_LOW_BATTERY;
-            case 15:
-                return Position.ALARM_VIBRATION;
-            case 16:
-                return Position.ALARM_ACCIDENT;
-            case 40:
-                return Position.ALARM_POWER_RESTORED;
-            case 41:
-                return Position.ALARM_POWER_CUT;
-            case 42:
-                return Position.ALARM_SOS;
-            case 46:
-                return Position.ALARM_ACCELERATION;
-            case 47:
-                return Position.ALARM_BRAKING;
-            case 50:
-                return Position.ALARM_JAMMING;
-            case 132:
-                return Position.ALARM_DOOR;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 1 -> Position.ALARM_OVERSPEED;
+            case 5 -> Position.ALARM_GEOFENCE_EXIT;
+            case 6 -> Position.ALARM_GEOFENCE_ENTER;
+            case 14 -> Position.ALARM_LOW_BATTERY;
+            case 15 -> Position.ALARM_VIBRATION;
+            case 16 -> Position.ALARM_ACCIDENT;
+            case 40 -> Position.ALARM_POWER_RESTORED;
+            case 41 -> Position.ALARM_POWER_CUT;
+            case 42 -> Position.ALARM_SOS;
+            case 46 -> Position.ALARM_ACCELERATION;
+            case 47 -> Position.ALARM_BRAKING;
+            case 50 -> Position.ALARM_JAMMING;
+            case 132 -> Position.ALARM_DOOR;
+            default -> null;
+        };
     }
     private Position decode4(
             Channel channel, SocketAddress remoteAddress, String[] values) throws ParseException {
@@ -323,19 +301,13 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                         value = value.substring(0, value.indexOf('.'));
                     }
                     switch (pair[0].charAt(0)) {
-                        case 't':
-                            position.set(Position.PREFIX_TEMP + pair[0].charAt(2), Integer.parseInt(value, 16));
-                            break;
-                        case 'N':
+                        case 't' -> position.set(Position.PREFIX_TEMP + pair[0].charAt(2), Integer.parseInt(value, 16));
+                        case 'N' -> {
                             int fuel = Integer.parseInt(value, 16);
                             totalFuel += fuel;
                             position.set("fuel" + pair[0].charAt(2), fuel);
-                            break;
-                        case 'Q':
-                            position.set("drivingQuality", Integer.parseInt(value, 16));
-                            break;
-                        default:
-                            break;
+                        }
+                        case 'Q' -> position.set("drivingQuality", Integer.parseInt(value, 16));
                     }
                 }
             } else {
@@ -411,24 +383,14 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         }
 
         switch (type) {
-            case "STT":
+            case "STT" -> {
                 position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
                 position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
-                break;
-            case "EMG":
-                position.set(Position.KEY_ALARM, decodeEmergency(Integer.parseInt(values[index++])));
-                break;
-            case "EVT":
-                position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
-                break;
-            case "ALT":
-                position.set(Position.KEY_ALARM, decodeAlert(Integer.parseInt(values[index++])));
-                break;
-            case "UEX":
-                index = decodeSerialData(position, values, index);
-                break;
-            default:
-                break;
+            }
+            case "EMG" -> position.set(Position.KEY_ALARM, decodeEmergency(Integer.parseInt(values[index++])));
+            case "EVT" -> position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
+            case "ALT" -> position.set(Position.KEY_ALARM, decodeAlert(Integer.parseInt(values[index++])));
+            case "UEX" -> index = decodeSerialData(position, values, index);
         }
 
         if (isHbm(deviceSession.getDeviceId())) {
@@ -608,7 +570,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             }
 
             switch (type) {
-                case "ALT":
+                case "ALT" -> {
                     if (BitUtil.check(mask, 19)) {
                         int alertId = Integer.parseInt(values[index++]);
                         position.set(Position.KEY_ALARM, decodeAlert(alertId));
@@ -619,11 +581,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                     if (BitUtil.check(mask, 21)) {
                         position.set("alertData", values[index++]);
                     }
-                    break;
-                case "UEX":
-                    index = decodeSerialData(position, values, index);
-                    break;
-                default:
+                }
+                case "UEX" -> index = decodeSerialData(position, values, index);
+                default -> {
                     if (BitUtil.check(mask, 19)) {
                         position.set("mode", Integer.parseInt(values[index++]));
                     }
@@ -633,7 +593,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                     if (BitUtil.check(mask, 21)) {
                         position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
                     }
-                    break;
+                }
             }
 
             if (BitUtil.check(mask, 22)) {

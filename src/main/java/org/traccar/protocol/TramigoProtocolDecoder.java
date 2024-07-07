@@ -167,7 +167,7 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
         while (buf.isReadable()) {
             int type = buf.readUnsignedByte();
             switch (type) {
-                case 0:
+                case 0 -> {
                     position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
                     buf.readUnsignedIntLE(); // event data
 
@@ -193,34 +193,19 @@ public class TramigoProtocolDecoder extends BaseProtocolDecoder {
                     position.setFixTime(new Date(buf.readUnsignedIntLE() * 1000));
 
                     buf.readUnsignedByte(); // reserved
-                    break;
-                case 1:
-                    buf.skipBytes(buf.readUnsignedShortLE() - 3); // landmark
-                    break;
-                case 4:
-                    buf.skipBytes(53); // trip
-                    break;
-                case 20:
-                    buf.skipBytes(32); // extended
-                    break;
-                case 22:
+                }
+                case 1 -> buf.skipBytes(buf.readUnsignedShortLE() - 3); // landmark
+                case 4 -> buf.skipBytes(53); // trip
+                case 20 -> buf.skipBytes(32); // extended
+                case 22 -> {
                     buf.readUnsignedByte(); // zone flag
                     buf.skipBytes(buf.readUnsignedShortLE()); // zone name
-                    break;
-                case 30:
-                    buf.skipBytes(79); // system status
-                    break;
-                case 40:
-                    buf.skipBytes(40); // analog
-                    break;
-                case 50:
-                    buf.skipBytes(buf.readUnsignedShortLE() - 3); // console
-                    break;
-                case 255:
-                    buf.skipBytes(4); // acknowledgement
-                    break;
-                default:
-                    throw new IllegalArgumentException(String.format("Unknown type %d", type));
+                }
+                case 30 -> buf.skipBytes(79); // system status
+                case 40 -> buf.skipBytes(40); // analog
+                case 50 -> buf.skipBytes(buf.readUnsignedShortLE() - 3); // console
+                case 255 -> buf.skipBytes(4); // acknowledgement
+                default -> throw new IllegalArgumentException(String.format("Unknown type %d", type));
             }
         }
 

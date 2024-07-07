@@ -46,26 +46,20 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
         boolean alternative = AttributeUtil.lookup(
                 getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()), command.getDeviceId());
 
-        switch (command.getType()) {
-            case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, 'Q', "A10");
-            case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, 'M', "C01,0,12222");
-            case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, 'M', "C01,0,02222");
-            case Command.TYPE_ALARM_ARM:
-                return formatCommand(command, 'M', alternative ? "B21,1" : "C01,0,22122");
-            case Command.TYPE_ALARM_DISARM:
-                return formatCommand(command, 'M', alternative ? "B21,0" : "C01,0,22022");
-            case Command.TYPE_REQUEST_PHOTO:
+        return switch (command.getType()) {
+            case Command.TYPE_POSITION_SINGLE -> formatCommand(command, 'Q', "A10");
+            case Command.TYPE_ENGINE_STOP -> formatCommand(command, 'M', "C01,0,12222");
+            case Command.TYPE_ENGINE_RESUME -> formatCommand(command, 'M', "C01,0,02222");
+            case Command.TYPE_ALARM_ARM -> formatCommand(command, 'M', alternative ? "B21,1" : "C01,0,22122");
+            case Command.TYPE_ALARM_DISARM -> formatCommand(command, 'M', alternative ? "B21,0" : "C01,0,22022");
+            case Command.TYPE_REQUEST_PHOTO -> {
                 int index = command.getInteger(Command.KEY_INDEX);
-                return formatCommand(command, 'D', "D03," + (index > 0 ? index : 1) + ",camera_picture.jpg");
-            case Command.TYPE_SEND_SMS:
-                return formatCommand(command, 'f', "C02,0,"
-                        + attributes.get(Command.KEY_PHONE) + "," + attributes.get(Command.KEY_MESSAGE));
-            default:
-                return null;
-        }
+                yield formatCommand(command, 'D', "D03," + (index > 0 ? index : 1) + ",camera_picture.jpg");
+            }
+            case Command.TYPE_SEND_SMS -> formatCommand(command, 'f', "C02,0,"
+                    + attributes.get(Command.KEY_PHONE) + "," + attributes.get(Command.KEY_MESSAGE));
+            default -> null;
+        };
     }
 
 }

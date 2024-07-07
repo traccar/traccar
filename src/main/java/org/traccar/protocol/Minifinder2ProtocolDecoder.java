@@ -85,22 +85,18 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     int endIndex = buf.readUnsignedByte() + buf.readerIndex();
                     int key = buf.readUnsignedByte();
                     switch (key) {
-                        case 0x11:
-                        case 0x21:
-                        case 0x22:
+                        case 0x11, 0x21, 0x22 -> {
                             body.writeByte(9 + 1); // length
                             body.writeByte(key);
                             body.writeIntLE(0); // latitude
                             body.writeIntLE(0); // longitude
                             body.writeByte(0); // address
-                            break;
-                        case 0x12:
+                        }
+                        case 0x12 -> {
                             body.writeByte(5); // length
                             body.writeByte(key);
                             body.writeIntLE((int) (System.currentTimeMillis() / 1000));
-                            break;
-                        default:
-                            break;
+                        }
                     }
                     buf.readerIndex(endIndex);
                 }
@@ -401,145 +397,89 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
             int key = buf.readUnsignedByte();
 
             switch (key) {
-                case 0x01:
-                    position.set("moduleNumber", buf.readUnsignedInt());
-                    break;
-                case 0x02:
-                    position.set(Position.KEY_VERSION_FW, String.valueOf(buf.readUnsignedInt()));
-                    break;
-                case 0x03:
-                    position.set("imei", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
-                    break;
-                case 0x04:
-                    position.set(Position.KEY_ICCID, BufferUtil.readString(buf, length));
-                    break;
-                case 0x05:
-                    position.set("bleMac", ByteBufUtil.hexDump(buf.readSlice(length)));
-                    break;
-                case 0x06:
-                    position.set("settingTime", buf.readUnsignedInt());
-                    break;
-                case 0x07:
-                    position.set("runTimes", buf.readUnsignedInt());
-                    break;
-                case 0x0A:
+                case 0x01 -> position.set("moduleNumber", buf.readUnsignedInt());
+                case 0x02 -> position.set(Position.KEY_VERSION_FW, String.valueOf(buf.readUnsignedInt()));
+                case 0x03 -> position.set("imei", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                case 0x04 -> position.set(Position.KEY_ICCID, BufferUtil.readString(buf, length));
+                case 0x05 -> position.set("bleMac", ByteBufUtil.hexDump(buf.readSlice(length)));
+                case 0x06 -> position.set("settingTime", buf.readUnsignedInt());
+                case 0x07 -> position.set("runTimes", buf.readUnsignedInt());
+                case 0x0A -> {
                     position.set("interval", buf.readUnsignedMedium());
                     position.set("petMode", buf.readUnsignedByte());
-                    break;
-                case 0x0D:
-                    position.set("passwordProtect", buf.readUnsignedInt());
-                    break;
-                case 0x0E:
-                    position.set("timeZone", (int) buf.readByte());
-                    break;
-                case 0x0F:
-                    position.set("enableControl", buf.readUnsignedInt());
-                    break;
-                case 0x13:
-                    position.set("deviceName", BufferUtil.readString(buf, length));
-                    break;
-                case 0x14:
+                }
+                case 0x0D -> position.set("passwordProtect", buf.readUnsignedInt());
+                case 0x0E -> position.set("timeZone", (int) buf.readByte());
+                case 0x0F -> position.set("enableControl", buf.readUnsignedInt());
+                case 0x13 -> position.set("deviceName", BufferUtil.readString(buf, length));
+                case 0x14 -> {
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.001);
-                    break;
-                case 0x15:
+                }
+                case 0x15 -> {
                     position.set("bleLatitude", buf.readIntLE() * 0.0000001);
                     position.set("bleLongitude", buf.readIntLE() * 0.0000001);
                     position.set("bleLocation", BufferUtil.readString(buf, length - 8));
-                    break;
-                case 0x17:
-                    position.set("gpsUrl", BufferUtil.readString(buf, length));
-                    break;
-                case 0x18:
-                    position.set("lbsUrl", BufferUtil.readString(buf, length));
-                    break;
-                case 0x1A:
-                    position.set("firmware", BufferUtil.readString(buf, length));
-                    break;
-                case 0x1B:
-                    position.set("gsmModule", BufferUtil.readString(buf, length));
-                    break;
-                case 0x1D:
+                }
+                case 0x17 -> position.set("gpsUrl", BufferUtil.readString(buf, length));
+                case 0x18 -> position.set("lbsUrl", BufferUtil.readString(buf, length));
+                case 0x1A -> position.set("firmware", BufferUtil.readString(buf, length));
+                case 0x1B -> position.set("gsmModule", BufferUtil.readString(buf, length));
+                case 0x1D -> {
                     position.set("agpsUpdate", buf.readUnsignedByte());
                     position.set("agpsLatitude", buf.readIntLE() * 0.0000001);
                     position.set("agpsLongitude", buf.readIntLE() * 0.0000001);
-                    break;
-                case 0x30:
+                }
+                case 0x30 -> {
                     position.set("numberFlag", buf.readUnsignedByte());
                     position.set("number", BufferUtil.readString(buf, length - 1));
-                    break;
-                case 0x31:
+                }
+                case 0x31 -> {
                     position.set("prefixFlag", buf.readUnsignedByte());
                     position.set("prefix", BufferUtil.readString(buf, length - 1));
-                    break;
-                case 0x33:
-                    position.set("phoneSwitches", buf.readUnsignedByte());
-                    break;
-                case 0x40:
-                    position.set("apn", BufferUtil.readString(buf, length));
-                    break;
-                case 0x41:
-                    position.set("apnUser", BufferUtil.readString(buf, length));
-                    break;
-                case 0x42:
-                    position.set("apnPassword", BufferUtil.readString(buf, length));
-                    break;
-                case 0x43:
+                }
+                case 0x33 -> position.set("phoneSwitches", buf.readUnsignedByte());
+                case 0x40 -> position.set("apn", BufferUtil.readString(buf, length));
+                case 0x41 -> position.set("apnUser", BufferUtil.readString(buf, length));
+                case 0x42 -> position.set("apnPassword", BufferUtil.readString(buf, length));
+                case 0x43 -> {
                     buf.readUnsignedByte(); // flag
                     position.set("port", buf.readUnsignedShort());
                     position.set("server", BufferUtil.readString(buf, length - 3));
-                    break;
-                case 0x44:
+                }
+                case 0x44 -> {
                     position.set("heartbeatInterval", buf.readUnsignedInt());
                     position.set("uploadInterval", buf.readUnsignedInt());
                     position.set("uploadLazyInterval", buf.readUnsignedInt());
-                    break;
-                case 0x47:
-                    position.set("deviceId", BufferUtil.readString(buf, length));
-                    break;
-                case 0x4E:
-                    position.set("gsmBand", buf.readUnsignedByte());
-                    break;
-                case 0x50:
-                    position.set("powerAlert", buf.readUnsignedInt());
-                    break;
-                case 0x51:
-                    position.set("geoAlert", buf.readUnsignedInt());
-                    break;
-                case 0x53:
-                    position.set("motionAlert", buf.readUnsignedInt());
-                    break;
-                case 0x5C:
+                }
+                case 0x47 -> position.set("deviceId", BufferUtil.readString(buf, length));
+                case 0x4E -> position.set("gsmBand", buf.readUnsignedByte());
+                case 0x50 -> position.set("powerAlert", buf.readUnsignedInt());
+                case 0x51 -> position.set("geoAlert", buf.readUnsignedInt());
+                case 0x53 -> position.set("motionAlert", buf.readUnsignedInt());
+                case 0x5C -> {
                     position.set("barkLevel", buf.readUnsignedByte());
                     position.set("barkInterval", buf.readUnsignedInt());
-                    break;
-                case 0x61:
-                    position.set("msisdn", BufferUtil.readString(buf, length));
-                    break;
-                case 0x62:
+                }
+                case 0x61 -> position.set("msisdn", BufferUtil.readString(buf, length));
+                case 0x62 -> {
                     position.set("wifiWhitelist", buf.readUnsignedByte());
                     position.set("wifiWhitelistMac", ByteBufUtil.hexDump(buf.readSlice(6)));
-                    break;
-                case 0x64:
+                }
+                case 0x64 -> {
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     position.set("networkBand", buf.readUnsignedInt());
                     position.set(Position.KEY_OPERATOR, BufferUtil.readString(buf, length - 5));
-                    break;
-                case 0x65:
+                }
+                case 0x65 -> {
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     position.set("networkStatus", buf.readUnsignedByte());
                     position.set("serverStatus", buf.readUnsignedByte());
                     position.set("networkPlmn", ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("homePlmn", ByteBufUtil.hexDump(buf.readSlice(6)));
-                    break;
-                case 0x66:
-                    position.set("imsi", BufferUtil.readString(buf, length));
-                    break;
-                case 0x75:
-                    position.set("extraEnableControl", buf.readUnsignedInt());
-                    break;
-                default:
-                    break;
+                }
+                case 0x66 -> position.set("imsi", BufferUtil.readString(buf, length));
+                case 0x75 -> position.set("extraEnableControl", buf.readUnsignedInt());
             }
 
             buf.readerIndex(endIndex);

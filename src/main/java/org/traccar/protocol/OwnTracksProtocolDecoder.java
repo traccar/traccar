@@ -167,31 +167,15 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
 
     private void setEventOrAlarm(Position position, String trigger, Integer reportType) {
         switch (trigger) {
-            case "9":
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                break;
-            case "1":
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
-                break;
-            case "i":
-                position.set(Position.KEY_IGNITION, true);
-                break;
-            case "I":
-                position.set(Position.KEY_IGNITION, false);
-                break;
-            case "E":
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
-                break;
-            case "e":
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-                break;
-            case "!":
-                position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-                break;
-            case "s":
-                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                break;
-            case "h":
+            case "9" -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+            case "1" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
+            case "i" -> position.set(Position.KEY_IGNITION, true);
+            case "I" -> position.set(Position.KEY_IGNITION, false);
+            case "E" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+            case "e" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+            case "!" -> position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+            case "s" -> position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            case "h" -> {
                 switch (reportType) {
                     case 0:
                     case 3:
@@ -207,9 +191,7 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
                         position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
                         break;
                 }
-                break;
-            default:
-                break;
+            }
         }
     }
 }

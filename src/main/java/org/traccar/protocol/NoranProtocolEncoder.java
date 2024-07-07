@@ -49,21 +49,17 @@ public class NoranProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        switch (command.getType()) {
-            case Command.TYPE_POSITION_SINGLE:
-                return encodeContent("*KW,000,000,000000#");
-            case Command.TYPE_POSITION_PERIODIC:
+        return switch (command.getType()) {
+            case Command.TYPE_POSITION_SINGLE -> encodeContent("*KW,000,000,000000#");
+            case Command.TYPE_POSITION_PERIODIC -> {
                 int interval = command.getInteger(Command.KEY_FREQUENCY);
-                return encodeContent("*KW,000,002,000000," + interval + "#");
-            case Command.TYPE_POSITION_STOP:
-                return encodeContent("*KW,000,002,000000,0#");
-            case Command.TYPE_ENGINE_STOP:
-                return encodeContent("*KW,000,007,000000,0#");
-            case Command.TYPE_ENGINE_RESUME:
-                return encodeContent("*KW,000,007,000000,1#");
-            default:
-                return null;
-        }
+                yield encodeContent("*KW,000,002,000000," + interval + "#");
+            }
+            case Command.TYPE_POSITION_STOP -> encodeContent("*KW,000,002,000000,0#");
+            case Command.TYPE_ENGINE_STOP -> encodeContent("*KW,000,007,000000,0#");
+            case Command.TYPE_ENGINE_RESUME -> encodeContent("*KW,000,007,000000,1#");
+            default -> null;
+        };
     }
 
 }

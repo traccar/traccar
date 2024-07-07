@@ -52,73 +52,59 @@ public class SuntechProtocolEncoder extends StringProtocolEncoder {
     }
 
     protected Object encodeUniversalCommand(Command command) {
-        switch (command.getType()) {
-            case Command.TYPE_REBOOT_DEVICE:
-                return formatCommand(command, "CMD;%s;03;03\r", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, "CMD;%s;03;01\r", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_OUTPUT_CONTROL:
+        return switch (command.getType()) {
+            case Command.TYPE_REBOOT_DEVICE -> formatCommand(command, "CMD;%s;03;03\r", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_POSITION_SINGLE -> formatCommand(command, "CMD;%s;03;01\r", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_OUTPUT_CONTROL -> {
                 if (command.getAttributes().get(Command.KEY_DATA).equals("1")) {
-                    switch (command.getInteger(Command.KEY_INDEX)) {
-                        case 1:
-                            return formatCommand(command, "CMD;%s;04;01\r", Command.KEY_UNIQUE_ID);
-                        case 2:
-                            return formatCommand(command, "CMD;%s;04;03\r", Command.KEY_UNIQUE_ID);
-                        case 3:
-                            return formatCommand(command, "CMD;%s;04;09\r", Command.KEY_UNIQUE_ID);
-                        default:
-                            return null;
-                    }
+                    yield switch (command.getInteger(Command.KEY_INDEX)) {
+                        case 1 -> formatCommand(command, "CMD;%s;04;01\r", Command.KEY_UNIQUE_ID);
+                        case 2 -> formatCommand(command, "CMD;%s;04;03\r", Command.KEY_UNIQUE_ID);
+                        case 3 -> formatCommand(command, "CMD;%s;04;09\r", Command.KEY_UNIQUE_ID);
+                        default -> null;
+                    };
                 } else {
-                    switch (command.getInteger(Command.KEY_INDEX)) {
-                        case 1:
-                            return formatCommand(command, "CMD;%s;04;02\r", Command.KEY_UNIQUE_ID);
-                        case 2:
-                            return formatCommand(command, "CMD;%s;04;04\r", Command.KEY_UNIQUE_ID);
-                        case 3:
-                            return formatCommand(command, "CMD;%s;04;10\r", Command.KEY_UNIQUE_ID);
-                        default:
-                            return null;
-                    }
+                    yield switch (command.getInteger(Command.KEY_INDEX)) {
+                        case 1 -> formatCommand(command, "CMD;%s;04;02\r", Command.KEY_UNIQUE_ID);
+                        case 2 -> formatCommand(command, "CMD;%s;04;04\r", Command.KEY_UNIQUE_ID);
+                        case 3 -> formatCommand(command, "CMD;%s;04;10\r", Command.KEY_UNIQUE_ID);
+                        default -> null;
+                    };
                 }
-            case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "CMD;%s;04;01\r", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "CMD;%s;04;02\r", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ALARM_ARM:
-                return formatCommand(command, "CMD;%s;04;03\r", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ALARM_DISARM:
-                return formatCommand(command, "CMD;%s;04;04\r", Command.KEY_UNIQUE_ID);
-            default:
-                return null;
-        }
+            }
+            case Command.TYPE_ENGINE_STOP -> formatCommand(command, "CMD;%s;04;01\r", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ENGINE_RESUME -> formatCommand(command, "CMD;%s;04;02\r", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_ARM -> formatCommand(command, "CMD;%s;04;03\r", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_DISARM -> formatCommand(command, "CMD;%s;04;04\r", Command.KEY_UNIQUE_ID);
+            default -> null;
+        };
     }
 
     protected Object encodeLegacyCommand(String prefix, Command command) {
-        switch (command.getType()) {
-            case Command.TYPE_REBOOT_DEVICE:
-                return formatCommand(command, prefix + "CMD;%s;02;Reboot\r", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, prefix + "CMD;%s;02;StatusReq\r", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_OUTPUT_CONTROL:
+        return switch (command.getType()) {
+            case Command.TYPE_REBOOT_DEVICE ->
+                    formatCommand(command, prefix + "CMD;%s;02;Reboot\r", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_POSITION_SINGLE ->
+                    formatCommand(command, prefix + "CMD;%s;02;StatusReq\r", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_OUTPUT_CONTROL -> {
                 if (command.getAttributes().get(Command.KEY_DATA).equals("1")) {
-                    return formatCommand(command, prefix + "CMD;%s;02;Enable%s\r",
+                    yield formatCommand(command, prefix + "CMD;%s;02;Enable%s\r",
                             Command.KEY_UNIQUE_ID, Command.KEY_INDEX);
                 } else {
-                    return formatCommand(command, prefix + "CMD;%s;02;Disable%s\r",
+                    yield formatCommand(command, prefix + "CMD;%s;02;Disable%s\r",
                             Command.KEY_UNIQUE_ID, Command.KEY_INDEX);
                 }
-            case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, prefix + "CMD;%s;02;Enable1\r", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, prefix + "CMD;%s;02;Disable1\r", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ALARM_ARM:
-                return formatCommand(command, prefix + "CMD;%s;02;Enable2\r", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ALARM_DISARM:
-                return formatCommand(command, prefix + "CMD;%s;02;Disable2\r", Command.KEY_UNIQUE_ID);
-            default:
-                return null;
-        }
+            }
+            case Command.TYPE_ENGINE_STOP ->
+                    formatCommand(command, prefix + "CMD;%s;02;Enable1\r", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ENGINE_RESUME ->
+                    formatCommand(command, prefix + "CMD;%s;02;Disable1\r", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_ARM ->
+                    formatCommand(command, prefix + "CMD;%s;02;Enable2\r", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_DISARM ->
+                    formatCommand(command, prefix + "CMD;%s;02;Disable2\r", Command.KEY_UNIQUE_ID);
+            default -> null;
+        };
     }
 
 }

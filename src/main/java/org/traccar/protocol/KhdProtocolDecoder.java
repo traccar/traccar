@@ -191,15 +191,11 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                     int dataLength = buf.readUnsignedByte();
 
                     switch (dataType) {
-                        case 0x01:
-                            position.set(Position.KEY_FUEL_LEVEL,
-                                    buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
-                            break;
-                        case 0x02:
-                            position.set(Position.PREFIX_TEMP + 1,
-                                    buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
-                            break;
-                        case 0x05:
+                        case 0x01 -> position.set(Position.KEY_FUEL_LEVEL,
+                                buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
+                        case 0x02 -> position.set(Position.PREFIX_TEMP + 1,
+                                buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
+                        case 0x05 -> {
                             int sign = buf.readUnsignedByte();
                             switch (sign) {
                                 case 1:
@@ -212,19 +208,17 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                             }
                             position.set(Position.KEY_DRIVER_UNIQUE_ID, BufferUtil.readString(buf, dataLength - 1));
-                            break;
-                        case 0x18:
+                        }
+                        case 0x18 -> {
                             for (int i = 1; i <= 4; i++) {
                                 double value = buf.readUnsignedShort();
                                 if (value > 0x0000 && value < 0xFFFF) {
                                     position.set("fuel" + i, value / 0xFFFE);
                                 }
                             }
-                            break;
-                        case 0x20:
-                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                            break;
-                        case 0x23:
+                        }
+                        case 0x20 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        case 0x23 -> {
                             Network network = new Network();
                             int count = buf.readUnsignedByte();
                             for (int i = 0; i < count; i++) {
@@ -235,9 +229,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                             if (count > 0) {
                                 position.setNetwork(network);
                             }
-                            break;
-                        default:
-                            break;
+                        }
                     }
 
                 }

@@ -33,25 +33,22 @@ public class Xrb28ProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Channel channel, Command command) {
 
-        switch (command.getType()) {
-            case Command.TYPE_CUSTOM:
-                return formatCommand(command, command.getString(Command.KEY_DATA));
-            case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, "D0");
-            case Command.TYPE_POSITION_PERIODIC:
-                return formatCommand(command, "D1," + command.getInteger(Command.KEY_FREQUENCY));
-            case Command.TYPE_ENGINE_STOP:
-            case Command.TYPE_ALARM_DISARM:
+        return switch (command.getType()) {
+            case Command.TYPE_CUSTOM -> formatCommand(command, command.getString(Command.KEY_DATA));
+            case Command.TYPE_POSITION_SINGLE -> formatCommand(command, "D0");
+            case Command.TYPE_POSITION_PERIODIC ->
+                    formatCommand(command, "D1," + command.getInteger(Command.KEY_FREQUENCY));
+            case Command.TYPE_ENGINE_STOP, Command.TYPE_ALARM_DISARM -> {
                 if (channel != null) {
                     Xrb28ProtocolDecoder decoder = channel.pipeline().get(Xrb28ProtocolDecoder.class);
                     if (decoder != null) {
                         decoder.setPendingCommand(command.getType());
                     }
                 }
-                return formatCommand(command, "R0,0,20,1234," + System.currentTimeMillis() / 1000);
-            default:
-                return null;
-        }
+                yield formatCommand(command, "R0,0,20,1234," + System.currentTimeMillis() / 1000);
+            }
+            default -> null;
+        };
     }
 
 }
