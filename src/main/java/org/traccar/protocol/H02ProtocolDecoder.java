@@ -350,32 +350,24 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(true);
         }
 
-        double latitude = 0;
         if (parser.hasNext(3)) {
-            latitude = parser.nextCoordinate();
+            position.setLatitude(parser.nextCoordinate());
         }
         if (parser.hasNext(3)) {
-            latitude = parser.nextCoordinate();
+            position.setLatitude(parser.nextCoordinate());
         }
         if (parser.hasNext(4)) {
-            latitude = parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM);
-        }
-        if (latitude != 99 + 99.9999 / 60) {
-            position.setLatitude(latitude);
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
         }
 
-        double longitude = 0;
         if (parser.hasNext(3)) {
-            longitude = parser.nextCoordinate();
+            position.setLongitude(parser.nextCoordinate());
         }
         if (parser.hasNext(3)) {
-            longitude = parser.nextCoordinate();
+            position.setLongitude(parser.nextCoordinate());
         }
         if (parser.hasNext(4)) {
-            longitude = parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM);
-        }
-        if (longitude != 999 + 99.9999 / 60) {
-            position.setLongitude(longitude);
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
         }
 
         position.setSpeed(parser.nextDouble(0));
