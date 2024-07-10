@@ -99,6 +99,9 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "TRVYP14220217A5235.7885N00724.1840E000.0130919177.561000050660000200004,262,01,14635,52789,FritzBox7|DC-39-8F-7E-94-73|-89&FritzBox7|24-4E-5D-71-C3-9C|-90&MY_IOT|80-B4-F7-77-9C-7C|-81&MYAP|44-D4-F7-77-9C-7C|-80#"));
 
+        verifyNull(decoder, text(
+                "IWAP12,080835,+491773329827,+491773329826,+49306618438"));
+
     }
 
 }
