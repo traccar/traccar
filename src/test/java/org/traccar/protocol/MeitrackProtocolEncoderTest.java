@@ -17,19 +17,19 @@ public class MeitrackProtocolEncoderTest extends ProtocolTest {
         command.setDeviceId(1);
         command.setType(Command.TYPE_POSITION_SINGLE);
 
-        assertEquals("@@Q25,123456789012345,A10*68\r\n", encoder.encodeCommand(command));
+        assertEquals("@@A25,123456789012345,A10*58\r\n", encoder.encodeCommand(command));
 
         command.setDeviceId(1);
         command.setType(Command.TYPE_REQUEST_PHOTO);
 
-        assertEquals("@@D46,123456789012345,D03,1,camera_picture.jpg*1F\r\n", encoder.encodeCommand(command));
+        assertEquals("@@A46,123456789012345,D03,1,camera_picture.jpg*1C\r\n", encoder.encodeCommand(command));
 
         command.setDeviceId(1);
         command.setType(Command.TYPE_SEND_SMS);
         command.set(Command.KEY_PHONE, "15360853789");
         command.set(Command.KEY_MESSAGE, "Meitrack");
 
-        assertEquals("@@f48,123456789012345,C02,0,15360853789,Meitrack*B0\r\n", encoder.encodeCommand(command));
+        assertEquals("@@A48,123456789012345,C02,0,15360853789,Meitrack*8B\r\n", encoder.encodeCommand(command));
 
     }
 
