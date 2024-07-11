@@ -73,7 +73,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 result = deviceManager.getAllUserItems(userId);
             } else {
                 result = deviceManager.getUserItems(userId);
-                int i = 10;
+                int i = 20;
                 while (result.isEmpty() && i-- > 0) {
                     LOGGER.error("0 devices on user {} try again {} after 100ms", userId, i);
                     Thread.sleep(100);
