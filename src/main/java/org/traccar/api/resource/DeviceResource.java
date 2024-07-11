@@ -15,6 +15,8 @@
  */
 package org.traccar.api.resource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.api.BaseObjectResource;
 import org.traccar.database.DeviceManager;
@@ -41,6 +43,8 @@ import java.util.Set;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class DeviceResource extends BaseObjectResource<Device> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeviceResource.class);
+
 
     public DeviceResource() {
         super(Device.class);
@@ -81,6 +85,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 Context.getPermissionsManager().checkDevice(getUserId(), deviceId);
                 result.add(deviceId);
             }
+        }
+        if (result.isEmpty()) {
+            LOGGER.error("0 devices on {}", userId);
         }
         return deviceManager.getItems(result);
     }
