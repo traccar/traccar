@@ -54,7 +54,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds) throws SQLException {
+            @QueryParam("id") List<Long> deviceIds) throws SQLException, InterruptedException {
         DeviceManager deviceManager = Context.getDeviceManager();
         Set<Long> result = null;
         if (all) {
@@ -73,8 +73,11 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 result = deviceManager.getAllUserItems(userId);
             } else {
                 result = deviceManager.getUserItems(userId);
-                if (result.isEmpty()) {
-                    LOGGER.error("0 devices on {}", userId);
+                int i = 10;
+                while (result.isEmpty() && i-- > 0) {
+                    LOGGER.error("0 devices on user {} try again {} after 100ms", userId, i);
+                    Thread.sleep(100);
+                    result = deviceManager.getUserItems(userId);
                 }
             }
         } else {
