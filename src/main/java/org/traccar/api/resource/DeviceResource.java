@@ -73,6 +73,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 result = deviceManager.getAllUserItems(userId);
             } else {
                 result = deviceManager.getUserItems(userId);
+                if (result.isEmpty()) {
+                    LOGGER.error("0 devices on {}", userId);
+                }
             }
         } else {
             result = new HashSet<>();
@@ -86,9 +89,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 result.add(deviceId);
             }
         }
-        if (result.isEmpty()) {
-            LOGGER.error("0 devices on {}", userId);
-        }
+
         return deviceManager.getItems(result);
     }
 
