@@ -151,6 +151,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                 case 1 -> position.set(Position.PREFIX_TEMP + 1, value * (125 + 55) / 4096.0 - 55);
                 case 2 -> position.set(Position.KEY_BATTERY, value * (100 + 10) / 4096.0 - 10);
                 case 3 -> position.set(Position.PREFIX_ADC + 1, value * (100 + 10) / 4096.0 - 10);
+                case 5, 6, 7, 8, 9 -> position.set("fuel" + (id - 4), value * 2000 / 4096.0);
                 default -> position.set(Position.PREFIX_IO + id, value);
             }
         }
