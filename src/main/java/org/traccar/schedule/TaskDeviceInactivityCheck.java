@@ -34,7 +34,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class TaskDeviceInactivityCheck implements ScheduleTask {
+public class TaskDeviceInactivityCheck extends SingleScheduleTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskDeviceInactivityCheck.class);
 

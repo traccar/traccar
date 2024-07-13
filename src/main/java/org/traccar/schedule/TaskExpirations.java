@@ -36,7 +36,7 @@ import org.traccar.storage.query.Request;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class TaskExpirations implements ScheduleTask {
+public class TaskExpirations extends SingleScheduleTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskExpirations.class);
 

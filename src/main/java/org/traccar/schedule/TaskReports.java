@@ -50,7 +50,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class TaskReports implements ScheduleTask {
+public class TaskReports extends SingleScheduleTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskReports.class);
 

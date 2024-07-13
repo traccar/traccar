@@ -1937,8 +1937,8 @@ public final class Keys {
             "time,position,speed,course,accuracy,result");
 
     /**
-     * Broadcast method. Available options are "multicast" and "redis". By default (if the value is not
-     * specified or does not matches available options) server disables broadcast.
+     * Broadcast method. Available options are "multicast" and "redis". By default, (if the value is not
+     * specified or does not match available options) server disables broadcast.
      */
     public static final ConfigKey<String> BROADCAST_TYPE = new StringConfigKey(
             "broadcast.type",
@@ -1963,6 +1963,13 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> BROADCAST_PORT = new IntegerConfigKey(
             "broadcast.port",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Flag to mark secondary servers. Some tasks, like scheduled reports, will be executed on the main server only.
+     */
+    public static final ConfigKey<Boolean> BROADCAST_SECONDARY = new BooleanConfigKey(
+            "broadcast.secondary",
             List.of(KeyType.CONFIG));
 
 }
