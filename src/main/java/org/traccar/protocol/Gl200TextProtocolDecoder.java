@@ -799,7 +799,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         long ignition = BitUtil.between(value, 2 * 8, 3 * 8);
         if (BitUtil.check(ignition, 4)) {
             position.set(Position.KEY_IGNITION, false);
-        } else if (BitUtil.check(ignition, 5)) {
+        } else if (BitUtil.check(ignition, 5) || BitUtil.check(ignition, 7)) {
             position.set(Position.KEY_IGNITION, true);
         }
         long input = BitUtil.between(value, 8, 2 * 8);
