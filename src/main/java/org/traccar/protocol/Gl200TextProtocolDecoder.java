@@ -863,6 +863,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (!parser.matches()) {
             return null;
         }
+        LOGGER.error(sentence);
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
