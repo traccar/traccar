@@ -16,25 +16,25 @@
 package org.traccar.helper;
 
 public class StringParser {
-    int index;
-    String[] values;
+    private int index;
+    private final String[] values;
     public StringParser(String[] values) {
         this.values = values;
     }
     public Integer nextInt() {
-        return index++ < values.length && !values[index -1].isEmpty() ? Integer.parseInt(values[index - 1]) : null;
+        return index++ < values.length && !values[index - 1].isEmpty() ? Integer.parseInt(values[index - 1]) : null;
     }
 
     public Double nextDouble() {
-        return index++ < values.length && !values[index -1].isEmpty() ? Double.parseDouble(values[index - 1]) : null;
+        return index++ < values.length && !values[index - 1].isEmpty() ? Double.parseDouble(values[index - 1]) : null;
     }
 
     public String next() {
-        return index++ < values.length && !values[index -1].isEmpty() ? values[index - 1] : null;
+        return index++ < values.length && !values[index - 1].isEmpty() ? values[index - 1] : null;
     }
 
     public Long nextHexLong() {
-        return index++ < values.length && !values[index -1].isEmpty() ? Long.parseLong(values[index - 1], 16) : null;
+        return index++ < values.length && !values[index - 1].isEmpty() ? Long.parseLong(values[index - 1], 16) : null;
     }
 
     public int getIndex() {

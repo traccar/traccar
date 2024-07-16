@@ -898,7 +898,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence, String[] v) throws ParseException {
+    private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence, String[] v)
+            throws ParseException {
         Parser parser = new Parser(PATTERN_FRI, sentence);
         if (!parser.matches()) {
             return null;
