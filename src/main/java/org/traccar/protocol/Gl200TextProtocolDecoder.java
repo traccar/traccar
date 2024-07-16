@@ -1667,6 +1667,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     result = decodeObd(channel, remoteAddress, sentence);
                     break;
                 case "CAN":
+                    LOGGER.error(sentence);
                     result = decodeCan(channel, remoteAddress, values);
                     break;
                 case "CTN":
