@@ -26,6 +26,7 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.StringParser;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
@@ -805,7 +806,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_FRI = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")      // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:([0-9A-Z]{17}),)?")  // vin
             .expression("[^,]*,")                // device name
@@ -849,15 +850,69 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
-    private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Object decodeFri(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
+        StringParser parser = new StringParser(v);
+        parser.next(); // header
+        String protocolVersion = parser.next(); // protocol version
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        String model = getDeviceModel(deviceSession, protocolVersion);
+        parser.next(); //device name
+        Integer power = parser.nextInt();
+        parser.next(); //report type
+
+        LinkedList<Position> positions = new LinkedList<>();
+        int count = parser.nextInt();
+        for (int i = 0; i < count; i++) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            position.set(Position.KEY_POWER, power != null ? power * 0.001 : null);
+            parser.setIndex(decodeLocation(position, model, v, parser.getIndex()));
+            positions.add(position);
+        }
+
+        Position position = positions.getLast();
+        Double odometer = parser.nextDouble();
+        position.set(Position.KEY_ODOMETER, odometer != null ? odometer * 1000 : null);
+        String hours = parser.next();
+        position.set(Position.KEY_HOURS, hours != null ? parseHours(hours) : null);
+        position.set(Position.PREFIX_ADC + 1, parser.next());
+        position.set(Position.PREFIX_ADC + 2, parser.next());
+        position.set(Position.PREFIX_ADC + 3, parser.next());
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+
+        decodeStatus(position, parser.nextHexLong());
+
+        Date time = dateFormat.parse(v[v.length - 2]);
+        if (ignoreFixTime) {
+            position.setTime(time);
+            positions.clear();
+            positions.add(position);
+        } else {
+            position.setDeviceTime(time);
+        }
+
+        return positions;
+    }
+
+    private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence, String[] v) throws ParseException {
         Parser parser = new Parser(PATTERN_FRI, sentence);
         if (!parser.matches()) {
             return null;
         }
 
+        String protocolVersion = parser.next();
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
+        }
+
+        String model = getDeviceModel(deviceSession, protocolVersion);
+        if (model.equals("GV310LAU")) {
+            return decodeFri(channel, remoteAddress, v);
         }
 
         LinkedList<Position> positions = new LinkedList<>();
@@ -1615,7 +1670,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "INF" -> decodeInf(channel, remoteAddress, sentence);
                 case "OBD" -> decodeObd(channel, remoteAddress, sentence);
                 case "CAN" -> decodeCan(channel, remoteAddress, values);
-                case "CTN", "FRI", "GEO", "RTL", "DOG", "STR" -> decodeFri(channel, remoteAddress, sentence);
+                case "CTN", "FRI", "GEO", "RTL", "DOG", "STR" -> decodeFri(channel, remoteAddress, sentence, values);
                 case "ERI" -> decodeEri(channel, remoteAddress, values);
                 case "IGN", "IGF", "VGN", "VGF" -> decodeIgn(channel, remoteAddress, values, type);
                 case "LSW", "TSW" -> decodeLsw(channel, remoteAddress, sentence);
