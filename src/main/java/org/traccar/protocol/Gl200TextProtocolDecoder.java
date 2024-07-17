@@ -805,7 +805,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_FRI = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
-            .expression("(.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")        // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:([0-9A-Z]{17}),)?")  // vin
             .expression("[^,]*,")                // device name
