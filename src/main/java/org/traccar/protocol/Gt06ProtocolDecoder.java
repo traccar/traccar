@@ -88,6 +88,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_X1_GPS = 0x34;
     public static final int MSG_X1_PHOTO_INFO = 0x35;
     public static final int MSG_X1_PHOTO_DATA = 0x36;
+    public static final int MSG_STATUS_2 = 0x36;           // Jimi IoT 4G
     public static final int MSG_WIFI_2 = 0x69;
     public static final int MSG_GPS_MODULAR = 0x70;
     public static final int MSG_WIFI_4 = 0xF3;
@@ -218,6 +219,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     private static boolean hasStatus(int type) {
         switch (type) {
             case MSG_STATUS:
+            case MSG_STATUS_2:
             case MSG_LBS_STATUS:
             case MSG_GPS_LBS_STATUS_1:
             case MSG_GPS_LBS_STATUS_2:
@@ -841,6 +843,20 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     short alarmExtension = buf.readUnsignedByte();
                     if (variant != Variant.VXT01) {
                         position.set(Position.KEY_ALARM, decodeAlarm(alarmExtension, getDeviceModel(deviceSession)));
+                    }
+                }
+            }
+
+            if (type == MSG_STATUS_2) {
+                buf.readUnsignedByte(); // language
+                while (buf.readableBytes() > 6) {
+                    int moduleType = buf.readUnsignedShort();
+                    int moduleLength = buf.readUnsignedByte();
+                    switch (moduleType) {
+                        case 0x0018 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
+                        case 0x0032 -> position.set("startupStatus", buf.readUnsignedByte());
+                        case 0x006A -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        default -> buf.skipBytes(moduleLength);
                     }
                 }
             }
