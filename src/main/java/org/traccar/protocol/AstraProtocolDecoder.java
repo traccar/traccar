@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,12 +51,20 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
+        byte protocol = buf.readByte();
+        buf.readUnsignedShort(); // length
+
+        return switch (protocol) {
+            case 'K' -> decodeK(channel, remoteAddress, buf);
+            default -> null;
+        };
+    }
+
+    private Object decodeK(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(new byte[] {0x06}), remoteAddress));
         }
-
-        buf.readUnsignedByte(); // protocol
-        buf.readUnsignedShort(); // length
 
         String imei = String.format("%08d", buf.readUnsignedInt()) + String.format("%07d", buf.readUnsignedMedium());
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
