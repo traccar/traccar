@@ -226,7 +226,7 @@ public class MainModule extends AbstractModule {
                 case "maptiler" -> new MapTilerGeocoder(client, key, cacheSize, addressFormat);
                 case "geoapify" -> new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
                 case "geocodejson" -> new GeocodeJsonGeocoder(client, url, key, language, cacheSize, addressFormat);
-                default -> new GoogleGeocoder(client, key, language, cacheSize, addressFormat);
+                default -> new GoogleGeocoder(client, url, key, language, cacheSize, addressFormat);
             };
             geocoder.setStatisticsManager(statisticsManager);
             return geocoder;
