@@ -20,7 +20,7 @@ public class GeocoderTest {
     @Disabled
     @Test
     public void testGoogle() {
-        Geocoder geocoder = new GoogleGeocoder(client, null, null, 0, new AddressFormat());
+        Geocoder geocoder = new GoogleGeocoder(client, null, null, null, 0, new AddressFormat());
         String address = geocoder.getAddress(31.776797, 35.211489, null);
         assertEquals("1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL", address);
     }
