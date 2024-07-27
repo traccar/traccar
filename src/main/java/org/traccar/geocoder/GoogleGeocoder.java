@@ -35,7 +35,8 @@ public class GoogleGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public GoogleGeocoder(Client client, String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
+    public GoogleGeocoder(
+            Client client, String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
         super(client, formatUrl(url, key, language), cacheSize, addressFormat);
     }
 
