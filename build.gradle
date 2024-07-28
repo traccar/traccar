@@ -80,7 +80,7 @@ dependencies {
     implementation "org.apache.velocity:velocity-engine-core:2.3"
     implementation "org.apache.velocity.tools:velocity-tools-generic:3.1"
     implementation "org.apache.commons:commons-collections4:4.4"
-    implementation "org.mnode.ical4j:ical4j:3.2.18"
+    implementation "org.mnode.ical4j:ical4j:4.0.2"
     implementation "org.locationtech.spatial4j:spatial4j:0.8"
     implementation "org.locationtech.jts:jts-core:1.19.0"
     implementation "net.java.dev.jna:jna-platform:5.14.0"

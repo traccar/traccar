@@ -41,6 +41,8 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
+
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -83,12 +85,12 @@ public class TaskReports extends SingleScheduleTask {
                 var lastEvents = calendar.findPeriods(lastCheck);
                 var currentEvents = calendar.findPeriods(currentCheck);
 
-                Set<Period> finishedEvents = new HashSet<>(lastEvents);
+                Set<Period<Instant>> finishedEvents = new HashSet<>(lastEvents);
                 finishedEvents.removeAll(currentEvents);
-                for (Period period : finishedEvents) {
+                for (Period<Instant> period : finishedEvents) {
                     RequestScoper scope = ServletScopes.scopeRequest(Collections.emptyMap());
                     try (RequestScoper.CloseableScope ignored = scope.open()) {
-                        executeReport(report, period.getStart(), period.getEnd());
+                        executeReport(report, Date.from(period.getStart()), Date.from(period.getEnd()));
                     }
                 }
             }
