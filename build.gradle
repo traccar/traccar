@@ -36,7 +36,7 @@ ext {
     jerseyVersion = "3.1.7"
     jacksonVersion = "2.17.2" // same version as jersey-media-json-jackson dependency
     protobufVersion = "4.27.2"
-    jxlsVersion = "2.14.0" // version 3 requires java 17
+    jxlsVersion = "2.14.0" // version 3 has breaking changes
     junitVersion = "5.10.3"
 }
 
