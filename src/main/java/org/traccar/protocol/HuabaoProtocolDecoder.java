@@ -595,6 +595,11 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0xE2:
                     position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedInt() * 0.1);
                     break;
+                case 0xE3:
+                    buf.readUnsignedByte(); // reserved
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
+                    break;
                 case 0xE6:
                     while (buf.readerIndex() < endIndex) {
                         int sensorIndex = buf.readUnsignedByte();
