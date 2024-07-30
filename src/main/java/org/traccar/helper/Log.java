@@ -49,7 +49,7 @@ public final class Log {
     }
 
     private static final String STACK_PACKAGE = "org.traccar";
-    private static final int STACK_LIMIT = 3;
+    private static final int STACK_LIMIT = 4;
 
     private static class RollingFileHandler extends Handler {
 
