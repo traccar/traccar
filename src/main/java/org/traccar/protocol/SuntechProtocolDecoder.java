@@ -216,7 +216,10 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_TYPE, type);
 
         position.set(Position.KEY_VERSION_FW, values[index++]);
-        index += 1; // model
+        int model = Integer.parseInt(values[index++]);
+        if (model == 41) {
+            index += 1; // variant
+        }
 
         Network network = new Network();
 
@@ -247,6 +250,12 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         if (values[index].length() == 3) {
             index += 1; // collaborative network
+        }
+
+        if (model == 41) {
+            index += 1; // collaborative network
+            index += 1; // temperature
+            position.set(Position.KEY_MOTION, Integer.parseInt(values[index++]) == 2);
         }
 
         if (values[index].isEmpty()) {
