@@ -158,7 +158,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             position.set(Position.KEY_INDEX, buf.readUnsignedByte());
-            long mask = (long) buf.readUnsignedShort() << 32 + buf.readUnsignedInt();
+            long mask = ((long) buf.readUnsignedShort() << 32) + buf.readUnsignedInt();
             position.setDeviceTime(readTime(buf));
             position.set(Position.KEY_EVENT, buf.readUnsignedInt());
             position.set(Position.KEY_STATUS, buf.readUnsignedShort());
