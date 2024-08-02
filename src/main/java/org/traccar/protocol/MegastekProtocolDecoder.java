@@ -257,6 +257,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)?,")                    // cid
             .number("(d+)?,")                    // gsm
             .groupBegin()
+            .number("(ddd),").optional()         // heart rate
             .number("([01]{4})?,")               // input
             .number("([01]{4})?,")               // output
             .number("(d+)?,")                    // adc1
@@ -277,11 +278,13 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.?d*)")                // temperature 2
             .or().text(" ")
             .groupEnd("?").text(",")
+            .groupBegin()
             .number("(d+)?,")                    // rfid
             .number("([01])(d)?").optional()     // charge and belt status
             .expression("[^,]*,")
             .number("(d+)?,")                    // battery
             .expression("([^,]*)[,;]")           // alert
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -336,7 +339,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (parser.hasNext(5)) {
+        if (parser.hasNext(6)) {
+            position.set(Position.KEY_HEART_RATE, parser.nextInt());
             position.set(Position.KEY_INPUT, parser.nextBinInt(0));
             position.set(Position.KEY_OUTPUT, parser.nextBinInt(0));
             for (int i = 1; i <= 3; i++) {
@@ -373,7 +377,9 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, Integer.parseInt(battery));
         }
 
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+        }
 
         return position;
     }
