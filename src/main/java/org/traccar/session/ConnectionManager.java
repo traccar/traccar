@@ -152,7 +152,10 @@ public class ConnectionManager implements BroadcastInterface {
             endpointSessions.put(device.getUniqueId(), deviceSession);
             sessionsByEndpoint.put(connectionKey, endpointSessions);
             sessionsByDeviceId.put(device.getId(), deviceSession);
-            cacheManager.addDevice(device.getId());
+
+            if (oldSession == null) {
+                cacheManager.addDevice(device.getId());
+            }
 
             return deviceSession;
         } else {
