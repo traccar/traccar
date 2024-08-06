@@ -54,7 +54,7 @@ dependencies {
     implementation "org.postgresql:postgresql:42.7.3"
     implementation "com.microsoft.sqlserver:mssql-jdbc:12.6.3.jre11"
     implementation "com.zaxxer:HikariCP:5.1.0"
-    implementation "io.netty:netty-all:4.1.110.Final"
+    implementation "io.netty:netty-all:4.1.112.Final"
     implementation "org.slf4j:slf4j-jdk14:2.0.13"
     implementation "com.google.inject:guice:$guiceVersion"
     implementation "com.google.inject.extensions:guice-servlet:$guiceVersion"
