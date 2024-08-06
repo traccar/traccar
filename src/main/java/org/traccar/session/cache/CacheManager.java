@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package org.traccar.session.cache;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
@@ -52,6 +54,8 @@ import java.util.stream.Collectors;
 
 @Singleton
 public class CacheManager implements BroadcastInterface {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CacheManager.class);
 
     private static final Set<Class<? extends BaseModel>> GROUPED_CLASSES =
             Set.of(Attribute.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
@@ -152,7 +156,9 @@ public class CacheManager implements BroadcastInterface {
     public void addDevice(long deviceId) throws Exception {
         try {
             lock.writeLock().lock();
-            if (deviceReferences.computeIfAbsent(deviceId, k -> new AtomicInteger()).getAndIncrement() <= 0) {
+            int references = deviceReferences.computeIfAbsent(deviceId, k -> new AtomicInteger()).getAndIncrement();
+            LOGGER.info("Cache add device {} references {}", deviceId, references, new Exception());
+            if (references <= 0) {
                 Device device = storage.getObject(Device.class, new Request(
                         new Columns.All(), new Condition.Equals("id", deviceId)));
                 graph.addObject(device);
@@ -170,7 +176,9 @@ public class CacheManager implements BroadcastInterface {
     public void removeDevice(long deviceId) {
         try {
             lock.writeLock().lock();
-            if (deviceReferences.computeIfAbsent(deviceId, k -> new AtomicInteger()).decrementAndGet() <= 0) {
+            int references = deviceReferences.computeIfAbsent(deviceId, k -> new AtomicInteger()).decrementAndGet();
+            LOGGER.info("Cache remove device {} references {}", deviceId, references, new Exception());
+            if (references <= 0) {
                 graph.removeObject(Device.class, deviceId);
                 devicePositions.remove(deviceId);
                 deviceReferences.remove(deviceId);
