@@ -45,9 +45,9 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -70,7 +70,7 @@ public class CacheManager implements BroadcastInterface {
 
     private Server server;
     private final Map<Long, Position> devicePositions = new HashMap<>();
-    private final Map<Long, AtomicInteger> deviceReferences = new HashMap<>();
+    private final Map<Long, HashSet<Object>> deviceReferences = new HashMap<>();
 
     @Inject
     public CacheManager(Config config, Storage storage, BroadcastService broadcastService) throws StorageException {
@@ -153,12 +153,11 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
-    public void addDevice(long deviceId) throws Exception {
+    public void addDevice(long deviceId, Object key) throws Exception {
         try {
             lock.writeLock().lock();
-            int references = deviceReferences.computeIfAbsent(deviceId, k -> new AtomicInteger()).getAndIncrement();
-            LOGGER.info("Cache add device {} references {}", deviceId, references, new Exception());
-            if (references <= 0) {
+            var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
+            if (references.isEmpty()) {
                 Device device = storage.getObject(Device.class, new Request(
                         new Columns.All(), new Condition.Equals("id", deviceId)));
                 graph.addObject(device);
@@ -168,21 +167,24 @@ public class CacheManager implements BroadcastInterface {
                             new Columns.All(), new Condition.Equals("id", device.getPositionId()))));
                 }
             }
+            references.add(key);
+            LOGGER.info("Cache add device {} references {} key {}", deviceId, references.size(), key);
         } finally {
             lock.writeLock().unlock();
         }
     }
 
-    public void removeDevice(long deviceId) {
+    public void removeDevice(long deviceId, Object key) {
         try {
             lock.writeLock().lock();
-            int references = deviceReferences.computeIfAbsent(deviceId, k -> new AtomicInteger()).decrementAndGet();
-            LOGGER.info("Cache remove device {} references {}", deviceId, references, new Exception());
-            if (references <= 0) {
+            var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
+            references.remove(key);
+            if (references.isEmpty()) {
                 graph.removeObject(Device.class, deviceId);
                 devicePositions.remove(deviceId);
                 deviceReferences.remove(deviceId);
             }
+            LOGGER.info("Cache remove device {} references {} key {}", deviceId, references.size(), key);
         } finally {
             lock.writeLock().unlock();
         }
