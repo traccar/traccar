@@ -38,6 +38,8 @@ public class PositionForwardingHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PositionForwardingHandler.class);
 
+    private static final String ATTRIBUTE_DEVICE_ALLOW_FORWARDING = "enablePositionForwarding";
+
     private final CacheManager cacheManager;
     private final Timer timer;
 
@@ -47,6 +49,7 @@ public class PositionForwardingHandler extends BasePositionHandler {
     private final int retryDelay;
     private final int retryCount;
     private final int retryLimit;
+    private final boolean enablePerDevice;
 
     private final AtomicInteger deliveryPending;
 
@@ -58,10 +61,11 @@ public class PositionForwardingHandler extends BasePositionHandler {
         this.timer = timer;
         this.positionForwarder = positionForwarder;
 
-        this.retryEnabled = config.getBoolean(Keys.FORWARD_RETRY_ENABLE);
-        this.retryDelay = config.getInteger(Keys.FORWARD_RETRY_DELAY);
-        this.retryCount = config.getInteger(Keys.FORWARD_RETRY_COUNT);
-        this.retryLimit = config.getInteger(Keys.FORWARD_RETRY_LIMIT);
+        retryEnabled = config.getBoolean(Keys.FORWARD_RETRY_ENABLE);
+        retryDelay = config.getInteger(Keys.FORWARD_RETRY_DELAY);
+        retryCount = config.getInteger(Keys.FORWARD_RETRY_COUNT);
+        retryLimit = config.getInteger(Keys.FORWARD_RETRY_LIMIT);
+        enablePerDevice = config.getBoolean(Keys.FORWARD_ENABLE_PER_DEVICE);
 
         this.deliveryPending = new AtomicInteger();
     }
@@ -126,10 +130,17 @@ public class PositionForwardingHandler extends BasePositionHandler {
     @Override
     public void handlePosition(Position position, Callback callback) {
         if (positionForwarder != null) {
-            PositionData positionData = new PositionData();
-            positionData.setPosition(position);
-            positionData.setDevice(cacheManager.getObject(Device.class, position.getDeviceId()));
-            new AsyncRequestAndCallback(positionData).send();
+            Device device = cacheManager.getObject(Device.class, position.getDeviceId());
+
+            boolean allowForwarding = (boolean) device.getAttributes().get(ATTRIBUTE_DEVICE_ALLOW_FORWARDING);
+            if (!enablePerDevice || (enablePerDevice && allowForwarding)) {
+                PositionData positionData = new PositionData();
+                positionData.setPosition(position);
+                positionData.setDevice(device);
+                new AsyncRequestAndCallback(positionData).send();
+            } else {
+                LOGGER.debug("Forwarding position not enabled for {}.", position.getDeviceId());
+            }
         }
         callback.processed(false);
     }
