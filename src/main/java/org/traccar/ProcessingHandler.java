@@ -156,10 +156,10 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
         if (!queued) {
             try {
                 cacheManager.addDevice(position.getDeviceId(), position.getDeviceId());
-                processPositionHandlers(context, position);
             } catch (Exception e) {
-                LOGGER.warn("Failed to add device cache", e);
+                throw new RuntimeException(e);
             }
+            processPositionHandlers(context, position);
         }
     }
 
