@@ -148,7 +148,10 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
         String status = parser.next();
 
-        String[] messages = sentence.substring(sentence.indexOf('\n') + 1).split("\r\n");
+        String[] messages = sentence.substring(
+                sentence.indexOf('\n') + 1,
+                sentence.endsWith("##") ? sentence.length() - 4 : sentence.length())
+                .split("\r\n");
         List<Position> positions = new LinkedList<>();
 
         for (String message : messages) {
