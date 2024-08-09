@@ -810,6 +810,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_OUTPUT, output);
         position.set(Position.PREFIX_OUT + 1, BitUtil.check(output, 0));
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(output, 1));
+        position.set(Position.KEY_STATUS, value);
     }
 
     private static final Pattern PATTERN_FRI = new PatternBuilder()
