@@ -168,7 +168,7 @@ public class CacheManager implements BroadcastInterface {
                 }
             }
             references.add(key);
-            LOGGER.info("Cache add device {} references {} key {}", deviceId, references.size(), key);
+            LOGGER.debug("Cache add device {} references {} key {}", deviceId, references.size(), key);
         } finally {
             lock.writeLock().unlock();
         }
@@ -184,7 +184,7 @@ public class CacheManager implements BroadcastInterface {
                 devicePositions.remove(deviceId);
                 deviceReferences.remove(deviceId);
             }
-            LOGGER.info("Cache remove device {} references {} key {}", deviceId, references.size(), key);
+            LOGGER.debug("Cache remove device {} references {} key {}", deviceId, references.size(), key);
         } finally {
             lock.writeLock().unlock();
         }
