@@ -814,7 +814,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_FRI = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
+            .expression("(.{6}|.{10})?,")      // protocol version
             .number("(d{15}|x{14}),")            // imei
             .expression("(?:([0-9A-Z]{17}),)?")  // vin
             .expression("[^,]*,")                // device name
@@ -858,16 +858,23 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .text("$").optional()
             .compile();
 
-    private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Object decodeFri(Channel channel, SocketAddress remoteAddress, String sentence, String[] v)
+            throws ParseException {
         Parser parser = new Parser(PATTERN_FRI, sentence);
         if (!parser.matches()) {
             return null;
         }
         LOGGER.error(sentence);
 
+        String protocolVersion = parser.next();
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
+        }
+
+        String model = getDeviceModel(deviceSession, protocolVersion);
+        if (model.equals("GV310LAU")) {
+            return decodeFri(channel, remoteAddress, v);
         }
 
         LinkedList<Position> positions = new LinkedList<>();
@@ -938,6 +945,52 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (ignoreFixTime) {
             positions.clear();
             positions.add(position);
+        }
+
+        return positions;
+    }
+
+    private Object decodeFri(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
+        int index = 0;
+        index += 1; // header
+        String protocolVersion = v[index++]; // protocol version
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        String model = getDeviceModel(deviceSession, protocolVersion);
+        index += 1; // device name
+        Double power = v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001;
+        index += 1; // report type
+
+        int count = Integer.parseInt(v[index++]);
+        LinkedList<Position> positions = new LinkedList<>();
+        for (int i = 0; i < count; i++) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+            index = decodeLocation(position, model, v, index);
+            positions.add(position);
+        }
+
+        Position position = positions.getLast();
+        position.set(Position.KEY_POWER, power);
+        position.set(Position.KEY_ODOMETER, v[index++].isEmpty() ? null : Double.parseDouble(v[index - 1]) * 1000);
+        position.set(Position.KEY_HOURS, parseHours(v[index++]));
+        position.set(Position.PREFIX_ADC + 1, v[index++]);
+        position.set(Position.PREFIX_ADC + 2, v[index++]);
+        position.set(Position.PREFIX_ADC + 3, v[index++]);
+        position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+
+        decodeStatus(position, Long.parseLong(v[index++]));
+
+        Date time = dateFormat.parse(v[v.length - 2]);
+        if (ignoreFixTime) {
+            position.setTime(time);
+            positions.clear();
+            positions.add(position);
+        } else {
+            position.setDeviceTime(time);
         }
 
         return positions;
@@ -1677,7 +1730,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "RTL":
                 case "DOG":
                 case "STR":
-                    result = decodeFri(channel, remoteAddress, sentence);
+                    result = decodeFri(channel, remoteAddress, sentence, values);
                     break;
                 case "ERI":
                     result = decodeEri(channel, remoteAddress, values);
