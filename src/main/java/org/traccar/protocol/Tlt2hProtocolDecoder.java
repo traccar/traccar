@@ -155,6 +155,11 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
+            // End of datagram.
+            if (message.equals("##")) {
+                continue;
+            }
+
             if (message.contains("$GPRMC")) {
 
                 parser = new Parser(PATTERN_POSITION, message);
