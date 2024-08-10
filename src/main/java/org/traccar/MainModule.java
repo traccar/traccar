@@ -104,6 +104,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainModule extends AbstractModule {
 
@@ -118,6 +120,12 @@ public class MainModule extends AbstractModule {
         bindConstant().annotatedWith(Names.named("configFile")).to(configFile);
         bind(Config.class).asEagerSingleton();
         bind(Timer.class).to(HashedWheelTimer.class).in(Scopes.SINGLETON);
+    }
+
+    @Singleton
+    @Provides
+    public static ExecutorService provideExecutorService() {
+        return Executors.newCachedThreadPool();
     }
 
     @Singleton
@@ -325,11 +333,11 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static BroadcastService provideBroadcastService(
-            Config config, ObjectMapper objectMapper) throws IOException {
+            Config config, ExecutorService executorService, ObjectMapper objectMapper) throws IOException {
         if (config.hasKey(Keys.BROADCAST_TYPE)) {
             return switch (config.getString(Keys.BROADCAST_TYPE)) {
-                case "multicast" -> new MulticastBroadcastService(config, objectMapper);
-                case "redis" -> new RedisBroadcastService(config, objectMapper);
+                case "multicast" -> new MulticastBroadcastService(config, executorService, objectMapper);
+                case "redis" -> new RedisBroadcastService(config, executorService, objectMapper);
                 default -> new NullBroadcastService();
             };
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import org.traccar.config.Keys;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.exceptions.JedisConnectionException;
@@ -36,7 +36,7 @@ public class RedisBroadcastService extends BaseBroadcastService {
 
     private final ObjectMapper objectMapper;
 
-    private final ExecutorService service = Executors.newSingleThreadExecutor();
+    private final ExecutorService executorService;
 
     private final String channel = "traccar";
 
@@ -45,7 +45,9 @@ public class RedisBroadcastService extends BaseBroadcastService {
 
     private final String id = UUID.randomUUID().toString();
 
-    public RedisBroadcastService(Config config, ObjectMapper objectMapper) throws IOException {
+    public RedisBroadcastService(
+            Config config, ExecutorService executorService, ObjectMapper objectMapper) throws IOException {
+        this.executorService = executorService;
         this.objectMapper = objectMapper;
         String url = config.getString(Keys.BROADCAST_ADDRESS);
 
@@ -75,7 +77,7 @@ public class RedisBroadcastService extends BaseBroadcastService {
 
     @Override
     public void start() throws IOException {
-        service.submit(receiver);
+        executorService.submit(receiver);
     }
 
     @Override
@@ -96,7 +98,6 @@ public class RedisBroadcastService extends BaseBroadcastService {
         } catch (JedisException e) {
             LOGGER.warn("Publisher close failed", e);
         }
-        service.shutdown();
     }
 
     private final Runnable receiver = new Runnable() {
