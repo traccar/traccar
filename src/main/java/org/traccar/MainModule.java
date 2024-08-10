@@ -47,6 +47,7 @@ import org.traccar.forward.PositionForwarderKafka;
 import org.traccar.forward.PositionForwarderRedis;
 import org.traccar.forward.PositionForwarderUrl;
 import org.traccar.forward.PositionForwarderMqtt;
+import org.traccar.forward.PositionForwarderWialon;
 import org.traccar.geocoder.AddressFormat;
 import org.traccar.geocoder.BanGeocoder;
 import org.traccar.geocoder.BingMapsGeocoder;
@@ -361,7 +362,8 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static PositionForwarder providePositionForwarder(Config config, Client client, ObjectMapper objectMapper) {
+    public static PositionForwarder providePositionForwarder(
+            Config config, Client client, ExecutorService executorService, ObjectMapper objectMapper) {
         if (config.hasKey(Keys.FORWARD_URL)) {
             return switch (config.getString(Keys.FORWARD_TYPE)) {
                 case "json" -> new PositionForwarderJson(config, client, objectMapper);
@@ -369,6 +371,7 @@ public class MainModule extends AbstractModule {
                 case "kafka" -> new PositionForwarderKafka(config, objectMapper);
                 case "mqtt" -> new PositionForwarderMqtt(config, objectMapper);
                 case "redis" -> new PositionForwarderRedis(config, objectMapper);
+                case "wialon" -> new PositionForwarderWialon(config, executorService, "1.0");
                 default -> new PositionForwarderUrl(config, client, objectMapper);
             };
         }
