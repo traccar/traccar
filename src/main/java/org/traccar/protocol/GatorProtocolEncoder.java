@@ -73,21 +73,22 @@ public class GatorProtocolEncoder extends BaseProtocolEncoder {
 
         ByteBuf content = Unpooled.buffer();
 
-        switch (command.getType()) {
-            case Command.TYPE_POSITION_SINGLE:
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_REQUEST, null);
-            case Command.TYPE_ENGINE_STOP:
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_CLOSE_OIL_DUCT, null);
-            case Command.TYPE_ENGINE_RESUME:
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESTORE_OIL_DUCT, null);
-            case Command.TYPE_SET_SPEED_LIMIT:
+        return switch (command.getType()) {
+            case Command.TYPE_POSITION_SINGLE ->
+                    encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_POSITION_REQUEST, null);
+            case Command.TYPE_ENGINE_STOP ->
+                    encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_CLOSE_OIL_DUCT, null);
+            case Command.TYPE_ENGINE_RESUME ->
+                    encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESTORE_OIL_DUCT, null);
+            case Command.TYPE_SET_SPEED_LIMIT -> {
                 content.writeByte(command.getInteger(Command.KEY_DATA));
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESET_MILEAGE, content);
-            case Command.TYPE_SET_ODOMETER:
+                yield encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_RESET_MILEAGE, content);
+            }
+            case Command.TYPE_SET_ODOMETER -> {
                 content.writeShort(command.getInteger(Command.KEY_DATA));
-                return encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_OVERSPEED_ALARM, content);
-            default:
-                return null;
-        }
+                yield encodeContent(command.getDeviceId(), GatorProtocolDecoder.MSG_OVERSPEED_ALARM, content);
+            }
+            default -> null;
+        };
     }
 }

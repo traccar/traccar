@@ -42,8 +42,10 @@ import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -59,6 +61,7 @@ public class NotificationManager {
 
     private final boolean geocodeOnRequest;
     private final long timeThreshold;
+    private final Set<Long> blockedUsers = new HashSet<>();
 
     @Inject
     public NotificationManager(
@@ -71,6 +74,12 @@ public class NotificationManager {
         this.geocoder = geocoder;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
         timeThreshold = config.getLong(Keys.NOTIFICATOR_TIME_THRESHOLD);
+        String blockedUsersString = config.getString(Keys.NOTIFICATION_BLOCK_USERS);
+        if (blockedUsersString != null) {
+            for (String userIdString : blockedUsersString.split(",")) {
+                blockedUsers.add(Long.parseLong(userIdString));
+            }
+        }
     }
 
     private void updateEvent(Event event, Position position) {
@@ -122,6 +131,10 @@ public class NotificationManager {
 
             notifications.forEach(notification -> {
                 cacheManager.getNotificationUsers(notification.getId(), event.getDeviceId()).forEach(user -> {
+                    if (blockedUsers.contains(user.getId())) {
+                        LOGGER.info("User {} notification blocked", user.getId());
+                        return;
+                    }
                     for (String notificator : notification.getNotificatorsTypes()) {
                         try {
                             notificatorManager.getNotificator(notificator).send(notification, user, event, position);
@@ -158,13 +171,14 @@ public class NotificationManager {
         for (Entry<Event, Position> entry : events.entrySet()) {
             Event event = entry.getKey();
             Position position = entry.getValue();
+            var key = new Object();
             try {
-                cacheManager.addDevice(event.getDeviceId());
+                cacheManager.addDevice(event.getDeviceId(), key);
                 updateEvent(event, position);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
-                cacheManager.removeDevice(event.getDeviceId());
+                cacheManager.removeDevice(event.getDeviceId(), key);
             }
         }
     }

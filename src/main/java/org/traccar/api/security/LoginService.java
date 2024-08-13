@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import org.traccar.api.signature.TokenManager;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.User;
 import org.traccar.storage.Storage;
@@ -32,6 +33,7 @@ import jakarta.annotation.Nullable;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 
 @Singleton
@@ -56,6 +58,20 @@ public class LoginService {
         serviceAccountToken = config.getString(Keys.WEB_SERVICE_ACCOUNT_TOKEN);
         forceLdap = config.getBoolean(Keys.LDAP_FORCE);
         forceOpenId = config.getBoolean(Keys.OPENID_FORCE);
+    }
+
+    public LoginResult login(
+            String scheme, String credentials) throws StorageException, GeneralSecurityException, IOException {
+        switch (scheme.toLowerCase()) {
+            case "bearer":
+                return login(credentials);
+            case "basic":
+                byte[] decodedBytes = DataConverter.parseBase64(credentials);
+                String[] auth = new String(decodedBytes, StandardCharsets.US_ASCII).split(":", 2);
+                return login(auth[0], auth[1], null);
+            default:
+                throw new SecurityException("Unsupported authorization scheme");
+        }
     }
 
     public LoginResult login(String token) throws StorageException, GeneralSecurityException, IOException {

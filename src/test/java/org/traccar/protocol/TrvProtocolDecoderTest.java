@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class TrvProtocolDecoderTest extends ProtocolTest {
 
@@ -12,6 +13,33 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, text(
                 "TRVAP00352121088015548"));
+
+        verifyNull(decoder, text(
+                "IWAPXL,080835"));
+
+        verifyAttribute(decoder, text(
+                "IWAP10080524A2232.9806N11404.9355E000.1061830323.8706000908000502,460,0,9520,3671,01,zhcn,00,HOME|74-DE-2B-44-88-8C|97&HOME1|74-DE-2B-44-88-8C|97&HOME2|74-DE-2B-44-88-8C|97&HOME3|74-DE-2B-44-88-8C|97"),
+                Position.KEY_ALARM, Position.ALARM_SOS);
+
+        verifyAttribute(decoder, text(
+                "IWAP49,68"),
+                Position.KEY_HEART_RATE, 68);
+
+        verifyAttribute(decoder, text(
+                "IWAPHT,60,130,85"),
+                "pressureDiastolic", 85);
+
+        verifyAttribute(decoder, text(
+                "IWAPHP,60,130,85,95,90,36.5,,,,,,,"),
+                "temperature", 36.5);
+
+        verifyAttribute(decoder, text(
+                "IWAP50,36.7,90"),
+                Position.KEY_BATTERY_LEVEL, 90);
+
+        verifyAttribute(decoder, text(
+                "IWAP03,06000908000102,5555,30"),
+                Position.KEY_STEPS, 5555);
 
         verifyPosition(decoder, text(
                 "TRVYP14080524A2232.9806N11404.9355E000.1061830323.870600090800010200011,460,0,9520,3671,Home|74-DE-2B-44-88-8C|97&Home1|74-DE-2B-44-88-8C|97&Home2|74-DE-2B-44-88-8C|97& Home3|74-DE-2B-44-88-8C|97"));
@@ -40,7 +68,7 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "IWAP10080524A2232.9806N11404.9355E000.1061830323.8706000908000502,460,0,9520,3671,00,zh-cn,00,HOME|74-DE-2B-44-88-8C|97&HOME1|74-DE-2B-44-88-8C|97&HOME2|74-DE-2B-44-88-8C|97&HOME3|74-DE-2B-44-88-8C|97"));
 
-        verifyNull(decoder, text(
+        verifyAttributes(decoder, text(
                 "IWAP03,06000908000102,5555,30"));
 
         verifyNull(decoder, text(
@@ -70,6 +98,9 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "TRVYP14220217A5235.7885N00724.1840E000.0130919177.561000050660000200004,262,01,14635,52789,FritzBox7|DC-39-8F-7E-94-73|-89&FritzBox7|24-4E-5D-71-C3-9C|-90&MY_IOT|80-B4-F7-77-9C-7C|-81&MYAP|44-D4-F7-77-9C-7C|-80#"));
+
+        verifyNull(decoder, text(
+                "IWAP12,080835,+491773329827,+491773329826,+49306618438"));
 
     }
 

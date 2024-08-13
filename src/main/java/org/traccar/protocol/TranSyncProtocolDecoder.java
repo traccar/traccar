@@ -37,24 +37,16 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 4:
-                return Position.ALARM_LOW_BATTERY;
-            case 6:
-                return Position.ALARM_POWER_RESTORED;
-            case 10:
-                return Position.ALARM_SOS;
-            case 13:
-                return Position.ALARM_BRAKING;
-            case 14:
-                return Position.ALARM_ACCELERATION;
-            case 17:
-                return Position.ALARM_OVERSPEED;
-            case 23:
-                return Position.ALARM_ACCIDENT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 4 -> Position.ALARM_LOW_BATTERY;
+            case 6 -> Position.ALARM_POWER_RESTORED;
+            case 10 -> Position.ALARM_SOS;
+            case 13 -> Position.ALARM_BRAKING;
+            case 14 -> Position.ALARM_ACCELERATION;
+            case 17 -> Position.ALARM_OVERSPEED;
+            case 23 -> Position.ALARM_ACCIDENT;
+            default -> null;
+        };
     }
 
     @Override

@@ -2,11 +2,14 @@ package org.traccar.handler.events;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.BaseTest;
+import org.traccar.model.Event;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,24 +41,30 @@ public class MaintenanceEventHandlerTest extends BaseTest {
         MaintenanceEventHandler eventHandler = new MaintenanceEventHandler(cacheManager);        
 
         when(maintenance.getStart()).thenReturn(10000.0);
-        when(maintenance.getPeriod()).thenReturn(2000.0);                
+        when(maintenance.getPeriod()).thenReturn(2000.0);
+
+        List<Event> events = new ArrayList<>();
  
         lastPosition.set(Position.KEY_TOTAL_DISTANCE, 1999);
-        position.set(Position.KEY_TOTAL_DISTANCE, 2001);        
-        assertTrue(eventHandler.analyzePosition(position).isEmpty());
+        position.set(Position.KEY_TOTAL_DISTANCE, 2001);
+        eventHandler.analyzePosition(position, events::add);
+        assertTrue(events.isEmpty());
 
         lastPosition.set(Position.KEY_TOTAL_DISTANCE, 3999);
-        position.set(Position.KEY_TOTAL_DISTANCE, 4001);        
-        assertTrue(eventHandler.analyzePosition(position).isEmpty());
+        position.set(Position.KEY_TOTAL_DISTANCE, 4001);
+        eventHandler.analyzePosition(position, events::add);
+        assertTrue(events.isEmpty());
 
         lastPosition.set(Position.KEY_TOTAL_DISTANCE, 9999);
         position.set(Position.KEY_TOTAL_DISTANCE, 10001);
-        assertEquals(1, eventHandler.analyzePosition(position).size());
+        eventHandler.analyzePosition(position, events::add);
+        assertEquals(1, events.size());
 
         lastPosition.set(Position.KEY_TOTAL_DISTANCE, 11999);
         position.set(Position.KEY_TOTAL_DISTANCE, 12001);
-        assertEquals(1, eventHandler.analyzePosition(position).size());
-        
+        eventHandler.analyzePosition(position, events::add);
+        assertEquals(2, events.size());
+
     }
 
 }

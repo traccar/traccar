@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -151,7 +151,9 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
 
             position.setDeviceTime(new Date(1356998400000L + buf.readUnsignedIntLE() * 1000)); // since 1 Jan 2013
 
-            position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+            int event = buf.readUnsignedByte();
+            position.set(Position.KEY_ALARM, decodeAlarm(event));
+            position.set(Position.KEY_EVENT, event);
 
             while (buf.readerIndex() < recordEnd) {
 
@@ -199,24 +201,12 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     while (buf.readerIndex() < fieldEnd) {
                         int number = buf.readUnsignedByte();
                         switch (number) {
-                            case 1:
-                                position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
-                                break;
-                            case 2:
-                                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
-                                break;
-                            case 3:
-                                position.set(Position.KEY_DEVICE_TEMP, buf.readShortLE() * 0.01);
-                                break;
-                            case 4:
-                                position.set(Position.KEY_RSSI, buf.readUnsignedShortLE());
-                                break;
-                            case 5:
-                                position.set("solarPower", buf.readUnsignedShortLE() * 0.001);
-                                break;
-                            default:
-                                position.set(Position.PREFIX_IO + number, buf.readUnsignedShortLE());
-                                break;
+                            case 1 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
+                            case 2 -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
+                            case 3 -> position.set(Position.KEY_DEVICE_TEMP, buf.readShortLE() * 0.01);
+                            case 4 -> position.set(Position.KEY_RSSI, buf.readUnsignedShortLE());
+                            case 5 -> position.set("solarPower", buf.readUnsignedShortLE() * 0.001);
+                            default -> position.set(Position.PREFIX_IO + number, buf.readUnsignedShortLE());
                         }
                     }
 
@@ -244,6 +234,21 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return positions;
+    }
+
+    private String decodeAlarm(int value) {
+        return switch (value) {
+            case 12 -> Position.ALARM_BRAKING;
+            case 13 -> Position.ALARM_ACCELERATION;
+            case 14 -> Position.ALARM_CORNERING;
+            case 18 -> Position.ALARM_OVERSPEED;
+            case 20 -> Position.ALARM_TOW;
+            case 23 -> Position.ALARM_ACCIDENT;
+            case 29 -> Position.ALARM_TAMPERING;
+            case 44 -> Position.ALARM_GEOFENCE_ENTER;
+            case 45 -> Position.ALARM_GEOFENCE_EXIT;
+            default -> null;
+        };
     }
 
     @Override

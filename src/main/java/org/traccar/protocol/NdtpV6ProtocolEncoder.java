@@ -27,16 +27,12 @@ public class NdtpV6ProtocolEncoder extends BaseProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-        switch (command.getType()) {
-            case Command.TYPE_IDENTIFICATION:
-                return "BB+IDNT";
-            case Command.TYPE_REBOOT_DEVICE:
-                return "BB+RESET";
-            case Command.TYPE_POSITION_SINGLE:
-                return "BB+RRCD";
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_IDENTIFICATION -> "BB+IDNT";
+            case Command.TYPE_REBOOT_DEVICE -> "BB+RESET";
+            case Command.TYPE_POSITION_SINGLE -> "BB+RRCD";
+            default -> null;
+        };
     }
 
 }

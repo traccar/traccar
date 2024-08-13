@@ -38,6 +38,14 @@ public class Tlt2hProtocol extends BaseProtocol {
                 pipeline.addLast(new Tlt2hProtocolDecoder(Tlt2hProtocol.this));
             }
         });
+        addServer(new TrackerServer(config, getName(), true) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new StringDecoder());
+                pipeline.addLast(new StringEncoder());
+                pipeline.addLast(new Tlt2hProtocolDecoder(Tlt2hProtocol.this));
+            }
+        });
     }
 
 }

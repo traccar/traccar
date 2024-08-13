@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,30 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.session;
 
-import io.netty.util.HashedWheelTimer;
-import io.netty.util.Timer;
+import io.netty.channel.Channel;
 
-public final class GlobalTimer {
+import java.net.SocketAddress;
 
-    private static Timer instance = null;
-
-    private GlobalTimer() {
+public record ConnectionKey(SocketAddress localAddress, SocketAddress remoteAddress) {
+    public ConnectionKey(Channel channel, SocketAddress remoteAddress) {
+        this(channel.localAddress(), remoteAddress);
     }
-
-    public static void release() {
-        if (instance != null) {
-            instance.stop();
-        }
-        instance = null;
-    }
-
-    public static Timer getTimer() {
-        if (instance == null) {
-            instance = new HashedWheelTimer();
-        }
-        return instance;
-    }
-
 }

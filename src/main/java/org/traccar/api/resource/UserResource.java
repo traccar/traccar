@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.model.UserUtil;
+import org.traccar.model.Device;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
@@ -61,12 +62,18 @@ public class UserResource extends BaseObjectResource<User> {
     }
 
     @GET
-    public Collection<User> get(@QueryParam("userId") long userId) throws StorageException {
+    public Collection<User> get(
+            @QueryParam("userId") long userId, @QueryParam("deviceId") long deviceId) throws StorageException {
         if (userId > 0) {
             permissionsService.checkUser(getUserId(), userId);
             return storage.getObjects(baseClass, new Request(
                     new Columns.All(),
                     new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups()));
+        } else if (deviceId > 0) {
+            permissionsService.checkAdmin(getUserId());
+            return storage.getObjects(baseClass, new Request(
+                    new Columns.All(),
+                    new Condition.Permission(User.class, Device.class, deviceId).excludeGroups()));
         } else if (permissionsService.notAdmin(getUserId())) {
             return storage.getObjects(baseClass, new Request(
                     new Columns.All(),
@@ -95,7 +102,9 @@ public class UserResource extends BaseObjectResource<User> {
                     }
                 }
             } else {
-                if (!permissionsService.getServer().getRegistration()) {
+                if (UserUtil.isEmpty(storage)) {
+                    entity.setAdministrator(true);
+                } else if (!permissionsService.getServer().getRegistration()) {
                     throw new SecurityException("Registration disabled");
                 }
                 if (permissionsService.getServer().getBoolean(Keys.WEB_TOTP_FORCE.getKey())
@@ -104,10 +113,6 @@ public class UserResource extends BaseObjectResource<User> {
                 }
                 UserUtil.setUserDefaults(entity, config);
             }
-        }
-
-        if (UserUtil.isEmpty(storage)) {
-            entity.setAdministrator(true);
         }
 
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));

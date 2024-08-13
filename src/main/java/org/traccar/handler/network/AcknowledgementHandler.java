@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.handler;
+package org.traccar.handler.network;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelOutboundHandlerAdapter;
@@ -92,12 +92,10 @@ public class AcknowledgementHandler extends ChannelOutboundHandlerAdapter {
                     if (queue == null) {
                         queue = new LinkedList<>();
                     }
-                } else if (msg instanceof EventDecoded) {
-                    EventDecoded event = (EventDecoded) msg;
+                } else if (msg instanceof EventDecoded event) {
                     LOGGER.debug("Event decoded {}", event.getObjects().size());
                     waiting.addAll(event.getObjects());
-                } else if (msg instanceof EventHandled) {
-                    EventHandled event = (EventHandled) msg;
+                } else if (msg instanceof EventHandled event) {
                     LOGGER.debug("Event handled");
                     waiting.remove(event.getObject());
                 }

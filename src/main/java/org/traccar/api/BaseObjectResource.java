@@ -68,7 +68,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
     @POST
     public Response add(T entity) throws Exception {
-        permissionsService.checkEdit(getUserId(), entity, true);
+        permissionsService.checkEdit(getUserId(), entity, true, false);
 
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
         LogAction.create(getUserId(), entity);
@@ -86,25 +86,27 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     @Path("{id}")
     @PUT
     public Response update(T entity) throws Exception {
-        permissionsService.checkEdit(getUserId(), entity, false);
         permissionsService.checkPermission(baseClass, getUserId(), entity.getId());
 
-        if (entity instanceof User) {
+        boolean skipReadonly = false;
+        if (entity instanceof User after) {
             User before = storage.getObject(User.class, new Request(
                     new Columns.All(), new Condition.Equals("id", entity.getId())));
             permissionsService.checkUserUpdate(getUserId(), before, (User) entity);
-        } else if (entity instanceof Group) {
-            Group group = (Group) entity;
+            skipReadonly = permissionsService.getUser(getUserId())
+                    .compare(after, "notificationTokens", "termsAccepted");
+        } else if (entity instanceof Group group) {
             if (group.getId() == group.getGroupId()) {
                 throw new IllegalArgumentException("Cycle in group hierarchy");
             }
         }
 
+        permissionsService.checkEdit(getUserId(), entity, false, skipReadonly);
+
         storage.updateObject(entity, new Request(
                 new Columns.Exclude("id"),
                 new Condition.Equals("id", entity.getId())));
-        if (entity instanceof User) {
-            User user = (User) entity;
+        if (entity instanceof User user) {
             if (user.getHashedPassword() != null) {
                 storage.updateObject(entity, new Request(
                         new Columns.Include("hashedPassword", "salt"),
@@ -120,8 +122,8 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     @Path("{id}")
     @DELETE
     public Response remove(@PathParam("id") long id) throws Exception {
-        permissionsService.checkEdit(getUserId(), baseClass, false);
         permissionsService.checkPermission(baseClass, getUserId(), id);
+        permissionsService.checkEdit(getUserId(), baseClass, false, false);
 
         storage.removeObject(baseClass, new Request(new Condition.Equals("id", id)));
         cacheManager.invalidateObject(true, baseClass, id, ObjectOperation.DELETE);

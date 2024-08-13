@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar;
+package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
 import io.netty.util.TimerTask;
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -30,15 +31,10 @@ import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-import jakarta.annotation.Nullable;
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Singleton
-@ChannelHandler.Sharable
-public class PositionForwardingHandler extends BaseDataHandler {
+public class PositionForwardingHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PositionForwardingHandler.class);
 
@@ -128,14 +124,14 @@ public class PositionForwardingHandler extends BaseDataHandler {
     }
 
     @Override
-    protected Position handlePosition(Position position) {
+    public void handlePosition(Position position, Callback callback) {
         if (positionForwarder != null) {
             PositionData positionData = new PositionData();
             positionData.setPosition(position);
             positionData.setDevice(cacheManager.getObject(Device.class, position.getDeviceId()));
             new AsyncRequestAndCallback(positionData).send();
         }
-        return position;
+        callback.processed(false);
     }
 
 }

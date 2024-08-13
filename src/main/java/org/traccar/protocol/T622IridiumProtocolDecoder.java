@@ -84,62 +84,24 @@ public class T622IridiumProtocolDecoder extends BaseProtocolDecoder {
 
         for (int parameter : parameters) {
             switch (parameter) {
-                case 0x01:
-                    position.set(Position.KEY_EVENT, buf.readUnsignedByte());
-                    break;
-                case 0x02:
-                    position.setLatitude(buf.readIntLE() / 1000000.0);
-                    break;
-                case 0x03:
-                    position.setLongitude(buf.readIntLE() / 1000000.0);
-                    break;
-                case 0x04:
-                    position.setTime(new Date((buf.readUnsignedIntLE() + 946684800) * 1000));
-                    break;
-                case 0x05:
-                    position.setValid(buf.readUnsignedByte() > 0);
-                    break;
-                case 0x06:
-                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-                    break;
-                case 0x07:
-                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    break;
-                case 0x08:
-                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
-                    break;
-                case 0x09:
-                    position.setCourse(buf.readUnsignedShortLE());
-                    break;
-                case 0x0A:
-                    position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
-                    break;
-                case 0x0B:
-                    position.setAltitude(buf.readShortLE());
-                    break;
-                case 0x0C:
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
-                    break;
-                case 0x0D:
-                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 1000);
-                    break;
-                case 0x14:
-                    position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
-                    break;
-                case 0x15:
-                    position.set(Position.KEY_INPUT, buf.readUnsignedByte());
-                    break;
-                case 0x19:
-                    position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
-                    break;
-                case 0x1A:
-                    position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
-                    break;
-                case 0x1B:
-                    buf.readUnsignedByte(); // geofence
-                    break;
-                default:
-                    break;
+                case 0x01 -> position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+                case 0x02 -> position.setLatitude(buf.readIntLE() / 1000000.0);
+                case 0x03 -> position.setLongitude(buf.readIntLE() / 1000000.0);
+                case 0x04 -> position.setTime(new Date((buf.readUnsignedIntLE() + 946684800) * 1000));
+                case 0x05 -> position.setValid(buf.readUnsignedByte() > 0);
+                case 0x06 -> position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                case 0x07 -> position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                case 0x08 -> position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
+                case 0x09 -> position.setCourse(buf.readUnsignedShortLE());
+                case 0x0A -> position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+                case 0x0B -> position.setAltitude(buf.readShortLE());
+                case 0x0C -> position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+                case 0x0D -> position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 1000);
+                case 0x14 -> position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
+                case 0x15 -> position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+                case 0x19 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
+                case 0x1A -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
+                case 0x1B -> buf.readUnsignedByte(); // geofence
             }
         }
 

@@ -15,10 +15,11 @@
  */
 package org.traccar.notification;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
@@ -29,8 +30,6 @@ import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -75,19 +74,8 @@ public class TextTemplateFormatter {
     }
 
     public Template getTemplate(String name, String path) {
-
-        String templateFilePath;
-        Template template;
-
-        try {
-            templateFilePath = Paths.get(path, name + ".vm").toString();
-            template = velocityEngine.getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
-        } catch (ResourceNotFoundException error) {
-            LOGGER.warn("Notification template error", error);
-            templateFilePath = Paths.get(path, "unknown.vm").toString();
-            template = velocityEngine.getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
-        }
-        return template;
+        String templateFilePath = Paths.get(path, name + ".vm").toString();
+        return velocityEngine.getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
     }
 
     public NotificationMessage formatMessage(VelocityContext velocityContext, String name, String templatePath) {

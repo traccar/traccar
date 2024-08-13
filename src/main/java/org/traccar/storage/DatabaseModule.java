@@ -24,6 +24,7 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.LockException;
 import liquibase.resource.DirectoryResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.traccar.config.Config;
@@ -78,26 +79,40 @@ public class DatabaseModule extends AbstractModule {
 
         DataSource dataSource = new HikariDataSource(hikariConfig);
 
-        if (config.hasKey(Keys.DATABASE_CHANGELOG)) {
+        String changelog = config.getString(Keys.DATABASE_CHANGELOG);
+        if (changelog != null && !changelog.isEmpty()) {
 
             ResourceAccessor resourceAccessor = new DirectoryResourceAccessor(new File("."));
 
-            Database database = DatabaseFactory.getInstance().openDatabase(
-                    config.getString(Keys.DATABASE_URL),
-                    config.getString(Keys.DATABASE_USER),
-                    config.getString(Keys.DATABASE_PASSWORD),
-                    config.getString(Keys.DATABASE_DRIVER),
-                    null, null, null, resourceAccessor);
+            System.setProperty("liquibase.changelogLockWaitTimeInMinutes", "1");
 
-            String changelog = config.getString(Keys.DATABASE_CHANGELOG);
+            try {
+                Database database = DatabaseFactory.getInstance().openDatabase(
+                        config.getString(Keys.DATABASE_URL),
+                        config.getString(Keys.DATABASE_USER),
+                        config.getString(Keys.DATABASE_PASSWORD),
+                        config.getString(Keys.DATABASE_DRIVER),
+                        null, null, null, resourceAccessor);
 
-            try (Liquibase liquibase = new Liquibase(changelog, resourceAccessor, database)) {
-                liquibase.clearCheckSums();
-                liquibase.update(new Contexts());
+                try (Liquibase liquibase = new Liquibase(changelog, resourceAccessor, database)) {
+                    liquibase.clearCheckSums();
+                    liquibase.update(new Contexts());
+                }
+            } catch (LockException e) {
+                throw new DatabaseLockException();
             }
         }
 
         return dataSource;
     }
 
+}
+
+class DatabaseLockException extends RuntimeException {
+    DatabaseLockException() {
+        super("Database is in a locked state. "
+                + "It could be due to early service termination on a previous launch. "
+                + "To unlock you can run this query: 'UPDATE DATABASECHANGELOGLOCK SET locked = 0'. "
+                + "Make sure the schema is up to date before unlocking the database.");
+    }
 }

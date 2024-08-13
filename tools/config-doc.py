@@ -19,40 +19,32 @@ def get_config_keys():
             'key': A dot separated name of the config key
             'description': A list of str
     """
-    desc_re = re.compile(r"(/\*\*\n|\s+\*/|\s+\*)")
-    key_match_re = re.compile(r"\(\n(.+)\);", re.DOTALL)
-    key_split_re = re.compile(r",\s+", re.DOTALL)
     types_match_re = re.compile(r"List\.of\(([^)]+)\)", re.DOTALL)
     keys = []
 
     with open(_KEYS_FILE, "r") as f:
-        config = re.findall(
-            r"(/\*\*.*?\*/)\n\s+(public static final Config.*?;)", f.read(), re.DOTALL
-        )
+        config = re.findall(r"/\*\*\s.*?\);", f.read(), re.DOTALL)
         for i in config:
-            try:
-                key_match = key_match_re.search(i[1])
-                if key_match:
-                    terms = [x.strip() for x in key_split_re.split(key_match.group(1))]
-                    key = terms[0].replace('"', "")
-                    key = "[protocol]" + key if key.startswith('.') else key
-                    description = [
-                        x.strip().replace("\n", "")
-                        for x in desc_re.sub("\n", i[0]).strip().split("\n\n")
-                    ]
-                    types_match = types_match_re.search(i[1])
-                    types = map(lambda x: x[8:].lower(), types_match[1].split(", "))
-                    keys.append(
-                        {
-                            "key": key,
-                            "description": description,
-                            "types": types,
-                        }
-                    )
-            except IndexError:
-                # will continue if key_match.group(1) or terms[0] does not exist
-                # for some reason
-                pass
+            lines = i.splitlines()
+            index = -1
+            default = None
+            if "List.of" not in lines[index]:
+                default = lines[index].strip()[:-2]
+                index -= 1
+            types_match = types_match_re.search(lines[index])
+            types = map(lambda x: x[8:].lower(), types_match[1].split(", "))
+            index -= 1
+            key = lines[index].strip()[1:-2]
+            key = "[protocol]" + key if key.startswith('.') else key
+            description = " ".join([l.strip()[2:] for l in lines if l.startswith("     * ")])
+            keys.append(
+                {
+                    "key": key,
+                    "description": description,
+                    "types": types,
+                    "default": default,
+                }
+            )
 
     return keys
 
@@ -66,7 +58,7 @@ def get_html():
                 {x["key"]}
               </h5>
               <p class="card-text">
-                {"<br /> ".join(x["description"])}
+                {x["description"]}
               </p>
           </div>
         </div>"""
@@ -81,7 +73,7 @@ def get_pug():
             f"""  div(class='card mt-3')
     div(class='card-body')
       h5(class='card-title') {x["key"]} {" ".join(map("#[span(class='badge badge-dark') {:}]".format, x["types"]))}
-      p(class='card-text') {"#[br] ".join(x["description"])}"""
+      p(class='card-text') {x["description"]}{f"\n      p(class='card-text') Default value: {x["default"]}" if x["default"] is not None else ""}"""
             for x in get_config_keys()
         ]
     )

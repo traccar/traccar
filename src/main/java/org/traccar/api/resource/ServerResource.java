@@ -100,9 +100,6 @@ public class ServerResource extends BaseResource {
         } else {
             server.setNewServer(UserUtil.isEmpty(storage));
         }
-        if (user != null && user.getAdministrator()) {
-            server.setStorageSpace(Log.getStorageSpace());
-        }
         return server;
     }
 
@@ -162,6 +159,13 @@ public class ServerResource extends BaseResource {
     public String cache() throws StorageException {
         permissionsService.checkAdmin(getUserId());
         return cacheManager.toString();
+    }
+
+    @Path("reboot")
+    @POST
+    public void reboot() throws StorageException {
+        permissionsService.checkAdmin(getUserId());
+        System.exit(130);
     }
 
 }

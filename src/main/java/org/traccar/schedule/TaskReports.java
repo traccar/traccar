@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.google.inject.servlet.ServletScopes;
 import net.fortuna.ical4j.model.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
 import org.traccar.model.Device;
@@ -40,14 +41,18 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
+
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-public class TaskReports implements ScheduleTask {
+public class TaskReports extends SingleScheduleTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskReports.class);
 
@@ -80,11 +85,12 @@ public class TaskReports implements ScheduleTask {
                 var lastEvents = calendar.findPeriods(lastCheck);
                 var currentEvents = calendar.findPeriods(currentCheck);
 
-                if (!lastEvents.isEmpty() && currentEvents.isEmpty()) {
-                    Period period = lastEvents.iterator().next();
+                Set<Period<Instant>> finishedEvents = new HashSet<>(lastEvents);
+                finishedEvents.removeAll(currentEvents);
+                for (Period<Instant> period : finishedEvents) {
                     RequestScoper scope = ServletScopes.scopeRequest(Collections.emptyMap());
                     try (RequestScoper.CloseableScope ignored = scope.open()) {
-                        executeReport(report, period.getStart(), period.getEnd());
+                        executeReport(report, Date.from(period.getStart()), Date.from(period.getEnd()));
                     }
                 }
             }
@@ -110,35 +116,34 @@ public class TaskReports implements ScheduleTask {
         ReportMailer reportMailer = injector.getInstance(ReportMailer.class);
 
         for (User user : users) {
+            LogAction.report(user.getId(), true, report.getType(), from, to, deviceIds, groupIds);
             switch (report.getType()) {
-                case "events":
+                case "events" -> {
                     var eventsReportProvider = injector.getInstance(EventsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, List.of(), from, to));
-                    break;
-                case "route":
+                }
+                case "route" -> {
                     var routeReportProvider = injector.getInstance(RouteReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> routeReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to));
-                    break;
-                case "summary":
+                }
+                case "summary" -> {
                     var summaryReportProvider = injector.getInstance(SummaryReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> summaryReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to, false));
-                    break;
-                case "trips":
+                }
+                case "trips" -> {
                     var tripsReportProvider = injector.getInstance(TripsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> tripsReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to));
-                    break;
-                case "stops":
+                }
+                case "stops" -> {
                     var stopsReportProvider = injector.getInstance(StopsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> stopsReportProvider.getExcel(
                             stream, user.getId(), deviceIds, groupIds, from, to));
-                    break;
-                default:
-                    LOGGER.warn("Unsupported report type {}", report.getType());
-                    break;
+                }
+                default -> LOGGER.warn("Unsupported report type {}", report.getType());
             }
         }
     }

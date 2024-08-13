@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,36 +15,23 @@
  */
 package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
-import org.traccar.BaseProtocolDecoder;
+import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Position;
 
-import jakarta.inject.Inject;
-import jakarta.inject.Singleton;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-@Singleton
-@ChannelHandler.Sharable
-public class TimeHandler extends ChannelInboundHandlerAdapter {
+public class TimeHandler extends BasePositionHandler {
 
-    private final boolean enabled;
     private final boolean useServerTime;
     private final Set<String> protocols;
 
     @Inject
     public TimeHandler(Config config) {
-        enabled = config.hasKey(Keys.TIME_OVERRIDE);
-        if (enabled) {
-            useServerTime = config.getString(Keys.TIME_OVERRIDE).equalsIgnoreCase("serverTime");
-        } else {
-            useServerTime = false;
-        }
+        useServerTime = config.getString(Keys.TIME_OVERRIDE).equalsIgnoreCase("serverTime");
         String protocolList = config.getString(Keys.TIME_PROTOCOLS);
         if (protocolList != null) {
             protocols = new HashSet<>(Arrays.asList(protocolList.split("[, ]")));
@@ -54,21 +41,17 @@ public class TimeHandler extends ChannelInboundHandlerAdapter {
     }
 
     @Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    public void handlePosition(Position position, Callback callback) {
 
-        if (enabled && msg instanceof Position && (protocols == null
-                || protocols.contains(ctx.pipeline().get(BaseProtocolDecoder.class).getProtocolName()))) {
-
-            Position position = (Position) msg;
+        if (protocols == null || protocols.contains(position.getProtocol())) {
             if (useServerTime) {
                 position.setDeviceTime(position.getServerTime());
                 position.setFixTime(position.getServerTime());
             } else {
                 position.setFixTime(position.getDeviceTime());
             }
-
         }
-        ctx.fireChannelRead(msg);
+        callback.processed(false);
     }
 
 }

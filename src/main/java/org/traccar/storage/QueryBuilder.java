@@ -267,18 +267,18 @@ public final class QueryBuilder {
     }
 
     public QueryBuilder setValue(String name, Object value) throws SQLException {
-        if (value instanceof Boolean) {
-            setBoolean(name, (Boolean) value);
-        } else if (value instanceof Integer) {
-            setInteger(name, (Integer) value);
-        } else if (value instanceof Long) {
-            setLong(name, (Long) value);
-        } else if (value instanceof Double) {
-            setDouble(name, (Double) value);
-        } else if (value instanceof String) {
-            setString(name, (String) value);
-        } else if (value instanceof Date) {
-            setDate(name, (Date) value);
+        if (value instanceof Boolean booleanValue) {
+            setBoolean(name, booleanValue);
+        } else if (value instanceof Integer integerValue) {
+            setInteger(name, integerValue);
+        } else if (value instanceof Long longValue) {
+            setLong(name, longValue);
+        } else if (value instanceof Double doubleValue) {
+            setDouble(name, doubleValue);
+        } else if (value instanceof String stringValue) {
+            setString(name, stringValue);
+        } else if (value instanceof Date dateValue) {
+            setDate(name, dateValue);
         }
         return this;
     }

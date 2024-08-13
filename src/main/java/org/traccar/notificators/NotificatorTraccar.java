@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
+import org.traccar.notification.NotificationMessage;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.query.Columns;
@@ -43,11 +44,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Singleton
-public class NotificatorTraccar implements Notificator {
+public class NotificatorTraccar extends Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorTraccar.class);
 
-    private final NotificationFormatter notificationFormatter;
     private final Client client;
     private final Storage storage;
     private final CacheManager cacheManager;
@@ -75,7 +75,7 @@ public class NotificatorTraccar implements Notificator {
     public NotificatorTraccar(
             Config config, NotificationFormatter notificationFormatter, Client client,
             Storage storage, CacheManager cacheManager) {
-        this.notificationFormatter = notificationFormatter;
+        super(notificationFormatter, "short");
         this.client = client;
         this.storage = storage;
         this.cacheManager = cacheManager;
@@ -84,10 +84,8 @@ public class NotificatorTraccar implements Notificator {
     }
 
     @Override
-    public void send(org.traccar.model.Notification notification, User user, Event event, Position position) {
+    public void send(User user, NotificationMessage shortMessage, Event event, Position position) {
         if (user.hasAttribute("notificationTokens")) {
-
-            var shortMessage = notificationFormatter.formatMessage(notification, user, event, position, "short");
 
             NotificationObject item = new NotificationObject();
             item.title = shortMessage.getSubject();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,9 +19,6 @@ package org.traccar.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.ParserException;
-import net.fortuna.ical4j.filter.Filter;
-import net.fortuna.ical4j.filter.predicate.PeriodRule;
-import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Period;
 import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VEvent;
@@ -31,9 +28,9 @@ import org.traccar.storage.StorageName;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Collection;
+import java.time.Instant;
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @StorageName("tc_calendars")
@@ -69,24 +66,19 @@ public class Calendar extends ExtendedModel {
         return calendar;
     }
 
-    private Collection<VEvent> findEvents(Date date) {
+    public Set<Period<Instant>> findPeriods(Date date) {
         if (calendar != null) {
-            var filter = new Filter<VEvent>(new PeriodRule<>(new Period(new DateTime(date), Duration.ZERO)));
-            return filter.filter(calendar.getComponents(CalendarComponent.VEVENT));
+            var period = new Period<>(date.toInstant(), Duration.ZERO);
+            return calendar.<VEvent>getComponents(CalendarComponent.VEVENT).stream()
+                    .flatMap(c -> c.<Instant>calculateRecurrenceSet(period).stream())
+                    .collect(Collectors.toUnmodifiableSet());
         } else {
-            return List.of();
+            return Set.of();
         }
     }
 
-    public Collection<Period> findPeriods(Date date) {
-        var calendarDate = new net.fortuna.ical4j.model.Date(date);
-        return findEvents(date).stream()
-                .flatMap((event) -> event.getConsumedTime(calendarDate, calendarDate).stream())
-                .collect(Collectors.toSet());
-    }
-
     public boolean checkMoment(Date date) {
-        return !findEvents(date).isEmpty();
+        return !findPeriods(date).isEmpty();
     }
 
 }

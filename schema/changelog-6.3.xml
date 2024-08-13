@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-6.3">
+
+  <changeSet author="author" id="changelog-6.3-old">
+
+    <preConditions onFail="MARK_RAN">
+      <foreignKeyConstraintExists foreignKeyTableName="tc_events" foreignKeyName="fk_event_deviceid" />
+    </preConditions>
+
+    <dropForeignKeyConstraint baseTableName="tc_events" constraintName="fk_event_deviceid" />
+    <dropForeignKeyConstraint baseTableName="tc_positions" constraintName="fk_position_deviceid" />
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-6.3-new">
+
+    <preConditions onFail="MARK_RAN">
+      <foreignKeyConstraintExists foreignKeyTableName="tc_events" foreignKeyName="fk_events_deviceid" />
+    </preConditions>
+
+    <dropForeignKeyConstraint baseTableName="tc_events" constraintName="fk_events_deviceid" />
+    <dropForeignKeyConstraint baseTableName="tc_positions" constraintName="fk_positions_deviceid" />
+
+  </changeSet>
+
+</databaseChangeLog>

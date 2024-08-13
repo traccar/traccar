@@ -39,6 +39,8 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
 
     private CacheManager cacheManager;
 
+    private String modelOverride;
+
     public BaseProtocolEncoder(Protocol protocol) {
         this.protocol = protocol;
     }
@@ -68,14 +70,21 @@ public abstract class BaseProtocolEncoder extends ChannelOutboundHandlerAdapter 
         }
     }
 
+    public void setModelOverride(String modelOverride) {
+        this.modelOverride = modelOverride;
+    }
+
+    public String getDeviceModel(long deviceId) {
+        String model = getCacheManager().getObject(Device.class, deviceId).getModel();
+        return modelOverride != null ? modelOverride : model;
+    }
+
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 
-        if (msg instanceof NetworkMessage) {
-            NetworkMessage networkMessage = (NetworkMessage) msg;
-            if (networkMessage.getMessage() instanceof Command) {
+        if (msg instanceof NetworkMessage networkMessage) {
+            if (networkMessage.getMessage() instanceof Command command) {
 
-                Command command = (Command) networkMessage.getMessage();
                 Object encodedCommand = encodeCommand(ctx.channel(), command);
 
                 StringBuilder s = new StringBuilder();

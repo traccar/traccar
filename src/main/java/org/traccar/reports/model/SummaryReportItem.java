@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,13 +18,28 @@ package org.traccar.reports.model;
 
 public class SummaryReportItem extends BaseReportItem {
 
-    private long engineHours; // milliseconds
-
     public long getEngineHours() {
-        return engineHours;
+        return endHours - startHours;
     }
 
-    public void setEngineHours(long engineHours) {
-        this.engineHours = engineHours;
+    private long startHours; // milliseconds
+
+    public long getStartHours() {
+        return startHours;
     }
+
+    public void setStartHours(long startHours) {
+        this.startHours = startHours;
+    }
+
+    private long endHours; // milliseconds
+
+    public long getEndHours() {
+        return endHours;
+    }
+
+    public void setEndHours(long endHours) {
+        this.endHours = endHours;
+    }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,12 +16,16 @@
  */
 package org.traccar.notification;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class NotificationMessage {
 
-    private String subject;
-    private String body;
+    private final String subject;
+    private final String body;
 
-    public NotificationMessage(String subject, String body) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public NotificationMessage(@JsonProperty("subject") String subject, @JsonProperty("body") String body) {
         this.subject = subject;
         this.body = body;
     }

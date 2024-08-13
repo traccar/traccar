@@ -75,21 +75,11 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
 
         public float readFloat(ByteBuf buf) {
             switch (buf.getUnsignedByte(buf.readerIndex()) >> 6) {
-                case 0:
-                    previousFloat = buf.readInt() << 2;
-                    break;
-                case 1:
-                    previousFloat = (previousFloat & 0xffffff00) + ((buf.readUnsignedByte() & 0x3f) << 2);
-                    break;
-                case 2:
-                    previousFloat = (previousFloat & 0xffff0000) + ((buf.readUnsignedShort() & 0x3fff) << 2);
-                    break;
-                case 3:
-                    previousFloat = (previousFloat & 0xff000000) + ((buf.readUnsignedMedium() & 0x3fffff) << 2);
-                    break;
-                default:
-                    LOGGER.warn("MTA6 float decoding error", new IllegalArgumentException());
-                    break;
+                case 0 -> previousFloat = buf.readInt() << 2;
+                case 1 -> previousFloat = (previousFloat & 0xffffff00) + ((buf.readUnsignedByte() & 0x3f) << 2);
+                case 2 -> previousFloat = (previousFloat & 0xffff0000) + ((buf.readUnsignedShort() & 0x3fff) << 2);
+                case 3 -> previousFloat = (previousFloat & 0xff000000) + ((buf.readUnsignedMedium() & 0x3fffff) << 2);
+                default -> LOGGER.warn("MTA6 float decoding error");
             }
             return Float.intBitsToFloat(previousFloat);
         }

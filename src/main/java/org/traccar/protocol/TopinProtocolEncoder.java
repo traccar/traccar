@@ -54,13 +54,13 @@ public class TopinProtocolEncoder extends BaseProtocolEncoder {
 
         ByteBuf content = Unpooled.buffer();
 
-        switch (command.getType()) {
-            case Command.TYPE_SOS_NUMBER:
+        return switch (command.getType()) {
+            case Command.TYPE_SOS_NUMBER -> {
                 content.writeCharSequence(command.getString(Command.KEY_PHONE), StandardCharsets.US_ASCII);
-                return encodeContent(TopinProtocolDecoder.MSG_SOS_NUMBER, content);
-            default:
-                return null;
-        }
+                yield encodeContent(TopinProtocolDecoder.MSG_SOS_NUMBER, content);
+            }
+            default -> null;
+        };
     }
 
 }

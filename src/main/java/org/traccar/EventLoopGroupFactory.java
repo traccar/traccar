@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,18 +20,18 @@ import io.netty.channel.nio.NioEventLoopGroup;
 
 public final class EventLoopGroupFactory {
 
-    private static EventLoopGroup bossGroup = new NioEventLoopGroup();
-    private static EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private static final EventLoopGroup BOSS_GROUP = new NioEventLoopGroup();
+    private static final EventLoopGroup WORKER_GROUP = new NioEventLoopGroup();
 
     private EventLoopGroupFactory() {
     }
 
     public static EventLoopGroup getBossGroup() {
-        return bossGroup;
+        return BOSS_GROUP;
     }
 
     public static EventLoopGroup getWorkerGroup() {
-        return workerGroup;
+        return WORKER_GROUP;
     }
 
 }

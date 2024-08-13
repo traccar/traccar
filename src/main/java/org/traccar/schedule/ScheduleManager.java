@@ -20,32 +20,43 @@ import org.traccar.LifecycleObject;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import java.util.List;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.stream.Stream;
 
 @Singleton
 public class ScheduleManager implements LifecycleObject {
 
     private final Injector injector;
+    private final boolean secondary;
     private ScheduledExecutorService executor;
 
     @Inject
-    public ScheduleManager(Injector injector) {
+    public ScheduleManager(Injector injector, Config config) {
         this.injector = injector;
+        secondary = config.getBoolean(Keys.BROADCAST_SECONDARY);
     }
 
     @Override
     public void start() {
         executor = Executors.newSingleThreadScheduledExecutor();
-        var tasks = List.of(
+        Stream.of(
+                TaskHealthCheck.class,
+                TaskClearStatus.class,
                 TaskExpirations.class,
                 TaskDeleteTemporary.class,
                 TaskReports.class,
                 TaskDeviceInactivityCheck.class,
-                TaskWebSocketKeepalive.class,
-                TaskHealthCheck.class);
-        tasks.forEach(task -> injector.getInstance(task).schedule(executor));
+                TaskWebSocketKeepalive.class)
+                .forEachOrdered(taskClass -> {
+                    var task = injector.getInstance(taskClass);
+                    if (task.multipleInstances() || !secondary) {
+                        task.schedule(executor);
+                    }
+                });
     }
 
     @Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
  */
 package org.traccar.geocoder;
 
+import com.google.openlocationcode.OpenLocationCode;
 import org.traccar.database.StatisticsManager;
 
-public class TestGeocoder implements Geocoder {
+public class PlusCodesGeocoder implements Geocoder {
 
     @Override
     public void setStatisticsManager(StatisticsManager statisticsManager) {
@@ -25,7 +26,7 @@ public class TestGeocoder implements Geocoder {
 
     @Override
     public String getAddress(double latitude, double longitude, ReverseGeocoderCallback callback) {
-        String address = String.format("Location %f, %f", latitude, longitude);
+        String address = new OpenLocationCode(latitude, longitude).getCode();
         if (callback != null) {
             callback.onSuccess(address);
             return null;

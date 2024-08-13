@@ -1,7 +1,0 @@
-#set($subject = "Unknown type")
-<!DOCTYPE html>
-<html>
-<body>
-Unknown type
-</body>
-</html> 

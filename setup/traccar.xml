@@ -1,22 +1,8 @@
-<?xml version='1.0' encoding='UTF-8'?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
-
 <properties>
 
-    <entry key='config.default'>./conf/default.xml</entry>
-
-    <!--
-
-    This is the main configuration file. All your configuration parameters should be placed in this file.
-
-    Default configuration parameters are located in the "default.xml" file. You should not modify it to avoid issues
-    with upgrading to a new version. Parameters in the main config file override values in the default file. Do not
-    remove "config.default" parameter from this file unless you know what you are doing.
-
-    For list of available parameters see following page: https://www.traccar.org/configuration-file/
-
-    -->
+    <!-- Documentation: https://www.traccar.org/configuration-file/ -->
 
     <entry key='database.driver'>org.h2.Driver</entry>
     <entry key='database.url'>jdbc:h2:./data/database</entry>

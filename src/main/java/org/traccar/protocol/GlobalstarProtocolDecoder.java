@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.config.Keys;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -65,12 +64,6 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
     private final XPath xPath;
     private final XPathExpression messageExpression;
 
-    private boolean alternative;
-
-    public void setAlternative(boolean alternative) {
-        this.alternative = alternative;
-    }
-
     public GlobalstarProtocolDecoder(Protocol protocol) {
         super(protocol);
         try {
@@ -87,11 +80,6 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
         } catch (ParserConfigurationException | XPathExpressionException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    protected void init() {
-        this.alternative = getConfig().getBoolean(Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()));
     }
 
     private void sendResponse(Channel channel, String messageId) throws TransformerException {
@@ -144,6 +132,7 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, xPath.evaluate("esn", node));
             if (deviceSession != null) {
 
+                boolean atlas = "AtlasTrax".equalsIgnoreCase(getDeviceModel(deviceSession));
                 Position position = new Position(getProtocolName());
                 position.setDeviceId(deviceSession.getDeviceId());
 
@@ -154,7 +143,7 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
 
                 int flags = buf.readUnsignedByte();
                 int type;
-                if (alternative) {
+                if (atlas) {
                     type = BitUtil.to(flags, 1);
                     position.setValid(true);
                     position.set(Position.PREFIX_IN + 1, !BitUtil.check(flags, 1));
@@ -179,7 +168,7 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.setLongitude(longitude > 180 ? longitude - 360 : longitude);
 
                 int speed = 0;
-                if (alternative) {
+                if (atlas) {
                     speed = buf.readUnsignedByte();
                     position.setSpeed(UnitsConverter.knotsFromKph(speed));
                     position.set("batteryReplace", BitUtil.check(buf.readUnsignedByte(), 7));

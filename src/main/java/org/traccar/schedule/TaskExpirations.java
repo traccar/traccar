@@ -36,7 +36,7 @@ import org.traccar.storage.query.Request;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class TaskExpirations implements ScheduleTask {
+public class TaskExpirations extends SingleScheduleTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskExpirations.class);
 
@@ -111,7 +111,7 @@ public class TaskExpirations implements ScheduleTask {
             }
 
             if (config.getBoolean(Keys.NOTIFICATION_EXPIRATION_DEVICE)) {
-                long reminder = config.getLong(Keys.NOTIFICATION_EXPIRATION_USER_REMINDER);
+                long reminder = config.getLong(Keys.NOTIFICATION_EXPIRATION_DEVICE_REMINDER);
                 var devices = storage.getObjects(Device.class, new Request(new Columns.All()));
                 for (Device device : devices) {
                     if (checkTimeTrigger(device, currentTime, 0)) {

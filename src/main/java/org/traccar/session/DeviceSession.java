@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,14 +29,17 @@ public class DeviceSession {
 
     private final long deviceId;
     private final String uniqueId;
+    private final String model;
     private final Protocol protocol;
     private final Channel channel;
     private final SocketAddress remoteAddress;
 
     public DeviceSession(
-            long deviceId, String uniqueId, Protocol protocol, Channel channel, SocketAddress remoteAddress) {
+            long deviceId, String uniqueId, String model,
+            Protocol protocol, Channel channel, SocketAddress remoteAddress) {
         this.deviceId = deviceId;
         this.uniqueId = uniqueId;
+        this.model = model;
         this.protocol = protocol;
         this.channel = channel;
         this.remoteAddress = remoteAddress;
@@ -50,12 +53,16 @@ public class DeviceSession {
         return uniqueId;
     }
 
+    public String getModel() {
+        return model;
+    }
+
     public Channel getChannel() {
         return channel;
     }
 
-    public SocketAddress getRemoteAddress() {
-        return remoteAddress;
+    public ConnectionKey getConnectionKey() {
+        return new ConnectionKey(channel, remoteAddress);
     }
 
     public boolean supportsLiveCommands() {

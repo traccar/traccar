@@ -55,56 +55,36 @@ public class LeafSpyProtocolDecoder extends BaseHttpProtocolDecoder {
         for (Map.Entry<String, List<String>> entry : params.entrySet()) {
             for (String value : entry.getValue()) {
                 switch (entry.getKey()) {
-                    case "pass":
+                    case "pass" -> {
                         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, value);
                         if (deviceSession == null) {
                             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
                             return null;
                         }
                         position.setDeviceId(deviceSession.getDeviceId());
-                        break;
-                    case "Lat":
-                        position.setLatitude(Double.parseDouble(value));
-                        break;
-                    case "Long":
-                        position.setLongitude(Double.parseDouble(value));
-                        break;
-                    case "RPM":
+                    }
+                    case "Lat" -> position.setLatitude(Double.parseDouble(value));
+                    case "Long" -> position.setLongitude(Double.parseDouble(value));
+                    case "RPM" -> {
                         position.set(Position.KEY_RPM, Integer.parseInt(value));
                         position.setSpeed(convertSpeed(Double.parseDouble(value) / 63, "kmh"));
-                        break;
-                    case "Elv":
-                        position.setAltitude(Double.parseDouble(value));
-                        break;
-                    case "SOC":
-                        position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
-                        break;
-                    case "user":
-                        position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
-                        break;
-                    case "ChrgMode":
-                        position.set(Position.KEY_CHARGE, Integer.parseInt(value) != 0);
-                        break;
-                    case "Odo":
-                        position.set(Position.KEY_OBD_ODOMETER, Integer.parseInt(value) * 1000);
-                        break;
-                    default:
+                    }
+                    case "Elv" -> position.setAltitude(Double.parseDouble(value));
+                    case "SOC" -> position.set(Position.KEY_BATTERY_LEVEL, Double.parseDouble(value));
+                    case "user" -> position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
+                    case "ChrgMode" -> position.set(Position.KEY_CHARGE, Integer.parseInt(value) != 0);
+                    case "Odo" -> position.set(Position.KEY_OBD_ODOMETER, Integer.parseInt(value) * 1000);
+                    default -> {
                         try {
                             position.set(entry.getKey(), Double.parseDouble(value));
                         } catch (NumberFormatException e) {
                             switch (value) {
-                                case "true":
-                                    position.set(entry.getKey(), true);
-                                    break;
-                                case "false":
-                                    position.set(entry.getKey(), false);
-                                    break;
-                                default:
-                                    position.set(entry.getKey(), value);
-                                    break;
+                                case "true" -> position.set(entry.getKey(), true);
+                                case "false" -> position.set(entry.getKey(), false);
+                                default -> position.set(entry.getKey(), value);
                             }
                         }
-                        break;
+                    }
                 }
             }
         }

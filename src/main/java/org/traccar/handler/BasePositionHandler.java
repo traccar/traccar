@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,16 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.geolocation;
+package org.traccar.handler;
 
-import jakarta.ws.rs.client.Client;
+import org.traccar.model.Position;
 
-public class MozillaGeolocationProvider extends UniversalGeolocationProvider {
+public abstract class BasePositionHandler {
 
-    private static final String URL = "https://location.services.mozilla.com/v1/geolocate";
-
-    public MozillaGeolocationProvider(Client client, String key) {
-        super(client, URL, key != null ? key : "test");
+    public interface Callback {
+        void processed(boolean filtered);
     }
 
+    public abstract void handlePosition(Position position, Callback callback);
 }

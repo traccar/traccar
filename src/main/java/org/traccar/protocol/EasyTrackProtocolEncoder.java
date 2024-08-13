@@ -28,18 +28,13 @@ public class EasyTrackProtocolEncoder extends StringProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        switch (command.getType()) {
-            case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "*ET,%s,FD,Y1#", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "*ET,%s,FD,Y2#", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ALARM_ARM:
-                return formatCommand(command, "*ET,%s,FD,F1#", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ALARM_DISARM:
-                return formatCommand(command, "*ET,%s,FD,F2#", Command.KEY_UNIQUE_ID);
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_ENGINE_STOP -> formatCommand(command, "*ET,%s,FD,Y1#", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ENGINE_RESUME -> formatCommand(command, "*ET,%s,FD,Y2#", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_ARM -> formatCommand(command, "*ET,%s,FD,F1#", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_DISARM -> formatCommand(command, "*ET,%s,FD,F2#", Command.KEY_UNIQUE_ID);
+            default -> null;
+        };
     }
 
 }
