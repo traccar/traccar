@@ -699,6 +699,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * OpenID Connect group scope claim name.
+     * If this is not provided, Traccar will use name "groups" scope.
+     */
+    public static final ConfigKey<String> OPENID_GROUPS_CLAIM_NAME = new StringConfigKey(
+            "openid.groupsClaimName",
+            List.of(KeyType.CONFIG));
+
+    /**
      * OpenID Connect group to restrict access to.
      * If this is not provided, all OpenID users will have access to Traccar.
      * This option will only work if your OpenID provider supports the groups scope.
