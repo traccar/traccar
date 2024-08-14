@@ -46,8 +46,14 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
             .expression("LO[NT]:").optional()
             .number("(d+.d+)([EW]),")            // longitude
             .text("Speed:").number("(d+.d+),")   // speed
-            .expression("([^,]+),")              // status
-            .number("(d+)?")                     // course
+            .groupBegin()
+            .number("(d+)-")                     // battery
+            .number("(d+),")                     // rssi
+            .groupBegin()
+            .number("(d+.d),")                   // altitude
+            .number("(d+.dd)")                   // hdop
+            .groupEnd("?")
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -85,11 +91,12 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
-        position.set(Position.KEY_STATUS, parser.next());
-
-        position.setCourse(parser.nextDouble(0));
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.setAltitude(parser.nextDouble(0));
+        position.set(Position.KEY_HDOP, parser.nextDouble());
 
         return position;
     }
