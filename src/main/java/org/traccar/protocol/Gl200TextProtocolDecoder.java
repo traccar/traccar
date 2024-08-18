@@ -983,7 +983,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_INPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
             position.set(Position.KEY_OUTPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
             index += 1; // uart device type
-        } else {
+        }
+         else if (model.equals("GV350M")) {
+            position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+            if (!v[index++].isEmpty()) {
+                decodeStatus(position, Long.parseLong(v[index - 1]));
+            }
+        }
+        else {
             position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             if (!v[index++].isEmpty()) {
                 decodeStatus(position, Long.parseLong(v[index - 1]));
