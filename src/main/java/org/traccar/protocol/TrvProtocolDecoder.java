@@ -178,9 +178,10 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             if (type.equals("AP00") && id.equals("IW")) {
                 String time = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
                 channel.writeAndFlush(new NetworkMessage(responseHeader + "," + time + ",0#", remoteAddress));
-            } else if (type.equals("AP14")) {
+            } else if (type.equals("AP14") && !id.equals("IW")) {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + ",0.000,0.000#", remoteAddress));
-            } else if (!type.equals("AP12") && !sentence.substring(responseHeader.length() + 1).matches("^\\d{6}$")) {
+            } else if (!type.equals("AP12") && !type.equals("AP14")
+                    && !sentence.substring(responseHeader.length() + 1).matches("^\\d{6}$")) {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + "#", remoteAddress));
             }
         }
