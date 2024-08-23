@@ -1540,6 +1540,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Use linked driver id for positions if a device does not send driver id.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_USE_LINKED_DRIVER = new BooleanConfigKey(
+            "processing.useLinkedDriver",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Enable copying of missing attributes from last position to the current one. Might be useful if device doesn't
      * send some values in every message.
      */

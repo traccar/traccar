@@ -31,6 +31,7 @@ import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.DatabaseHandler;
 import org.traccar.handler.DistanceHandler;
+import org.traccar.handler.DriverHandler;
 import org.traccar.handler.EngineHoursHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
@@ -110,6 +111,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
                 MotionHandler.class,
                 ComputedAttributesHandler.class,
                 EngineHoursHandler.class,
+                DriverHandler.class,
                 CopyAttributesHandler.class,
                 PositionForwardingHandler.class,
                 DatabaseHandler.class)
