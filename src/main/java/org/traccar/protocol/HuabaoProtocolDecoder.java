@@ -462,7 +462,14 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x51:
                     if (length == 2 || length == 16) {
                         for (int i = 1; i <= length / 2; i++) {
-                            position.set(Position.PREFIX_TEMP + i, buf.readShort() / 10.0);
+                            int value = buf.readUnsignedShort();
+                            if (value != 0xffff) {
+                                if (BitUtil.check(value, 15)) {
+                                    position.set(Position.PREFIX_TEMP + i, -BitUtil.to(value, 15) / 10.0);
+                                } else {
+                                    position.set(Position.PREFIX_TEMP + i, value / 10.0);
+                                }
+                            }
                         }
                     }
                     break;
