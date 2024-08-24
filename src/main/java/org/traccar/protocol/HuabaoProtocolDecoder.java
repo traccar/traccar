@@ -706,7 +706,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedShort(); // light
                     }
                     if (BitUtil.check(fieldMask, 1)) {
-                        position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() * 0.1);
+                        position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
                     }
                     break;
                 case 0xF7:
