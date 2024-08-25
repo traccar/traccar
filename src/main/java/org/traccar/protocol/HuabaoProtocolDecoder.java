@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -698,6 +699,18 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             default -> buf.skipBytes(extendedLength);
                         }
                     }
+                    break;
+                case 0xF4:
+                    Network network = new Network();
+                    while (buf.readerIndex() < endIndex) {
+                        WifiAccessPoint wifiAccessPoint = new WifiAccessPoint();
+                        wifiAccessPoint.setMacAddress(String.format("%02x:%02x:%02x:%02x:%02x:%02x",
+                                buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte(),
+                                buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()));
+                        wifiAccessPoint.setSignalStrength((int) buf.readByte());
+                        network.addWifiAccessPoint(wifiAccessPoint);
+                    }
+                    position.setNetwork(network);
                     break;
                 case 0xF6:
                     buf.readUnsignedByte(); // data type
