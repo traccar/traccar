@@ -425,6 +425,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             return position;
 
         }
+        Network network = new Network();
 
         while (buf.readableBytes() > 2) {
 
@@ -612,7 +613,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xEB:
                     if (buf.getUnsignedShort(buf.readerIndex()) > 200) {
-                        Network network = new Network();
                         int mcc = buf.readUnsignedShort();
                         int mnc = buf.readUnsignedByte();
                         while (buf.readerIndex() < endIndex) {
@@ -642,7 +642,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                                     break;
                                 case 0x00D8:
-                                    Network network = new Network();
                                     network.addCellTower(CellTower.from(
                                             buf.readUnsignedShort(), buf.readUnsignedByte(),
                                             buf.readUnsignedShort(), buf.readUnsignedInt()));
@@ -701,7 +700,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xF4:
-                    Network network = new Network();
                     while (buf.readerIndex() < endIndex) {
                         WifiAccessPoint wifiAccessPoint = new WifiAccessPoint();
                         wifiAccessPoint.setMacAddress(String.format("%02x:%02x:%02x:%02x:%02x:%02x",
