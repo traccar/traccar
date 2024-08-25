@@ -706,6 +706,16 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
                     break;
+                case 0xF6:
+                    buf.readUnsignedByte(); // data type
+                    int fieldMask = buf.readUnsignedByte();
+                    if (BitUtil.check(fieldMask, 0)) {
+                        buf.readUnsignedShort(); // light
+                    }
+                    if (BitUtil.check(fieldMask, 1)) {
+                        position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
+                    }
+                    break;
                 case 0xF7:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedInt() * 0.001);
                     if (length >= 5) {
