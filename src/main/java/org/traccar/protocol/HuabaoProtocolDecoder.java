@@ -699,12 +699,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xF4:
                     while (buf.readerIndex() < endIndex) {
-                        WifiAccessPoint wifiAccessPoint = new WifiAccessPoint();
-                        wifiAccessPoint.setMacAddress(String.format("%02x:%02x:%02x:%02x:%02x:%02x",
-                                buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte(),
-                                buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte()));
-                        wifiAccessPoint.setSignalStrength((int) buf.readByte());
-                        network.addWifiAccessPoint(wifiAccessPoint);
+                        String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+                        network.addWifiAccessPoint(WifiAccessPoint.from(
+                                mac.substring(0, mac.length() - 1), buf.readByte()));
                     }
                     break;
                 case 0xF6:
