@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -424,6 +425,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             return position;
 
         }
+        Network network = new Network();
 
         while (buf.readableBytes() > 2) {
 
@@ -618,7 +620,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xEB:
                     if (buf.getUnsignedShort(buf.readerIndex()) > 200) {
-                        Network network = new Network();
                         int mcc = buf.readUnsignedShort();
                         int mnc = buf.readUnsignedByte();
                         while (buf.readerIndex() < endIndex) {
@@ -626,7 +627,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                     mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort(),
                                     buf.readUnsignedByte()));
                         }
-                        position.setNetwork(network);
                     } else {
                         while (buf.readerIndex() < endIndex) {
                             int extendedLength = buf.readUnsignedShort();
@@ -648,11 +648,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                                     break;
                                 case 0x00D8:
-                                    Network network = new Network();
                                     network.addCellTower(CellTower.from(
                                             buf.readUnsignedShort(), buf.readUnsignedByte(),
                                             buf.readUnsignedShort(), buf.readUnsignedInt()));
-                                    position.setNetwork(network);
                                     break;
                                 case 0x00A8:
                                 case 0x00E1:
@@ -704,6 +702,13 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 0x0114 -> position.set("hardCorneringCount", buf.readUnsignedShort());
                             default -> buf.skipBytes(extendedLength);
                         }
+                    }
+                    break;
+                case 0xF4:
+                    while (buf.readerIndex() < endIndex) {
+                        String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
+                        network.addWifiAccessPoint(WifiAccessPoint.from(
+                                mac.substring(0, mac.length() - 1), buf.readByte()));
                     }
                     break;
                 case 0xF6:
@@ -770,6 +775,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             buf.readerIndex(endIndex);
         }
 
+        if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+            position.setNetwork(network);
+        }
         return position;
     }
 
