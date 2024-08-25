@@ -620,7 +620,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                     mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort(),
                                     buf.readUnsignedByte()));
                         }
-                        position.setNetwork(network);
                     } else {
                         while (buf.readerIndex() < endIndex) {
                             int extendedLength = buf.readUnsignedShort();
@@ -645,7 +644,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                     network.addCellTower(CellTower.from(
                                             buf.readUnsignedShort(), buf.readUnsignedByte(),
                                             buf.readUnsignedShort(), buf.readUnsignedInt()));
-                                    position.setNetwork(network);
                                     break;
                                 case 0x00A8:
                                 case 0x00E1:
@@ -708,7 +706,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         wifiAccessPoint.setSignalStrength((int) buf.readByte());
                         network.addWifiAccessPoint(wifiAccessPoint);
                     }
-                    position.setNetwork(network);
                     break;
                 case 0xF6:
                     buf.readUnsignedByte(); // data type
@@ -774,6 +771,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             buf.readerIndex(endIndex);
         }
 
+        if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
+            position.setNetwork(network);
+        }
         return position;
     }
 
