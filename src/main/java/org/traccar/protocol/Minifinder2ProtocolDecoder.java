@@ -214,7 +214,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             int lac = buf.readUnsignedShortLE();
                             long cid;
                             if (key == 0x29) {
-                                cid = buf.readLongLE();
+                                cid = buf.readIntLE();
                             } else {
                                 cid = buf.readUnsignedShortLE();
                             }
