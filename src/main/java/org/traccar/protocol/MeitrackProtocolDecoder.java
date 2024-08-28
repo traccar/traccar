@@ -464,8 +464,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                                 buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString());
                         buf.skipBytes(6); // mac
                         position.set("tagBattery", buf.readUnsignedByte());
-                        position.set("tagTemp", buf.readUnsignedShortLE() / 256.0);
-                        position.set("tagHumidity", buf.readUnsignedShortLE() / 256.0);
+                        position.set("tagTemp", buf.readShortLE() / 256.0);
+                        position.set("tagHumidity", buf.readShortLE() / 256.0);
                         buf.readUnsignedShortLE(); // high temperature threshold
                         buf.readUnsignedShortLE(); // low temperature threshold
                         buf.readUnsignedShortLE(); // high humidity threshold
