@@ -67,16 +67,12 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 1:
-                return Position.ALARM_SOS;
-            case 8:
-                return Position.ALARM_OVERSPEED;
-            case 19:
-                return Position.ALARM_LOW_POWER;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 1 -> Position.ALARM_SOS;
+            case 8 -> Position.ALARM_OVERSPEED;
+            case 19 -> Position.ALARM_LOW_POWER;
+            default -> null;
+        };
     }
 
     @Override

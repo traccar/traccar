@@ -24,9 +24,14 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.NetworkMessage;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.helper.BufferUtil;
 import org.traccar.helper.NetworkUtil;
 import org.traccar.model.LogRecord;
 import org.traccar.session.ConnectionManager;
+
+import java.nio.charset.StandardCharsets;
 
 public class StandardLoggingHandler extends ChannelDuplexHandler {
 
@@ -34,9 +39,15 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
 
     private final String protocol;
     private ConnectionManager connectionManager;
+    private boolean decodeTextData;
 
     public StandardLoggingHandler(String protocol) {
         this.protocol = protocol;
+    }
+
+    @Inject
+    public void setConfig(Config config) {
+        decodeTextData = config.getBoolean(Keys.LOGGER_TEXT_PROTOCOL);
     }
 
     @Inject
@@ -61,12 +72,17 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
     }
 
     private LogRecord createLogRecord(ChannelHandlerContext ctx, Object msg) {
-        if (msg instanceof NetworkMessage) {
-            NetworkMessage networkMessage = (NetworkMessage) msg;
-            if (networkMessage.getMessage() instanceof ByteBuf) {
+        if (msg instanceof NetworkMessage networkMessage) {
+            if (networkMessage.getMessage() instanceof ByteBuf data) {
                 LogRecord record = new LogRecord(ctx.channel().localAddress(), networkMessage.getRemoteAddress());
                 record.setProtocol(protocol);
-                record.setData(ByteBufUtil.hexDump((ByteBuf) networkMessage.getMessage()));
+                if (decodeTextData && BufferUtil.isPrintable(data, data.readableBytes())) {
+                    record.setData(data.getCharSequence(
+                            data.readerIndex(), data.readableBytes(), StandardCharsets.US_ASCII).toString()
+                            .replace("\r", "\\r").replace("\n", "\\n"));
+                } else {
+                    record.setData(ByteBufUtil.hexDump(data));
+                }
                 return record;
             }
         }

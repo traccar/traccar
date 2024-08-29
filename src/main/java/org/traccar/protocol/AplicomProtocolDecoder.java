@@ -88,40 +88,19 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeEventData(Position position, ByteBuf buf, int event) {
         switch (event) {
-            case 2:
-            case 40:
-                buf.readUnsignedByte();
-                break;
-            case 9:
-                buf.readUnsignedMedium();
-                break;
-            case 31:
-            case 32:
-                buf.readUnsignedShort();
-                break;
-            case 38:
-                buf.skipBytes(4 * 9);
-                break;
-            case 113:
+            case 2, 40 -> buf.readUnsignedByte();
+            case 9 -> buf.readUnsignedMedium();
+            case 31, 32 -> buf.readUnsignedShort();
+            case 38 -> buf.skipBytes(4 * 9);
+            case 113 -> {
                 buf.readUnsignedInt();
                 buf.readUnsignedByte();
-                break;
-            case 119:
-                position.set("eventData", ByteBufUtil.hexDump(
-                        buf, buf.readerIndex(), Math.min(buf.readableBytes(), 1024)));
-                break;
-            case 121:
-            case 142:
-                buf.readLong();
-                break;
-            case 130:
-                buf.readUnsignedInt(); // incorrect
-                break;
-            case 188:
-                decodeEB(position, buf);
-                break;
-            default:
-                break;
+            }
+            case 119 -> position.set("eventData", ByteBufUtil.hexDump(
+                    buf, buf.readerIndex(), Math.min(buf.readableBytes(), 1024)));
+            case 121, 142 -> buf.readLong();
+            case 130 -> buf.readUnsignedInt(); // incorrect
+            case 188 -> decodeEB(position, buf);
         }
     }
 
@@ -145,62 +124,42 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         for (int i = 0; i < count; i++) {
             ByteBuf value = values.get(i);
             switch (buf.readInt()) {
-                case 0x20D:
+                case 0x20D -> {
                     position.set(Position.KEY_RPM, value.readShortLE());
                     position.set("dieselTemperature", value.readShortLE() * 0.1);
                     position.set("batteryVoltage", value.readShortLE() * 0.01);
                     position.set("supplyAirTempDep1", value.readShortLE() * 0.1);
-                    break;
-                case 0x30D:
-                    position.set("activeAlarm", ByteBufUtil.hexDump(value));
-                    break;
-                case 0x40C:
+                }
+                case 0x30D -> position.set("activeAlarm", ByteBufUtil.hexDump(value));
+                case 0x40C -> {
                     position.set("airTempDep1", value.readShortLE() * 0.1);
                     position.set("airTempDep2", value.readShortLE() * 0.1);
-                    break;
-                case 0x40D:
-                    position.set("coldUnitState", ByteBufUtil.hexDump(value));
-                    break;
-                case 0x50C:
+                }
+                case 0x40D -> position.set("coldUnitState", ByteBufUtil.hexDump(value));
+                case 0x50C -> {
                     position.set("defrostTempDep1", value.readShortLE() * 0.1);
                     position.set("defrostTempDep2", value.readShortLE() * 0.1);
-                    break;
-                case 0x50D:
+                }
+                case 0x50D -> {
                     position.set("condenserPressure", value.readShortLE() * 0.1);
                     position.set("suctionPressure", value.readShortLE() * 0.1);
-                    break;
-                case 0x58C:
+                }
+                case 0x58C -> {
                     value.readByte();
                     value.readShort(); // index
                     switch (value.readByte()) {
-                        case 0x01:
-                            position.set("setpointZone1", value.readIntLE() * 0.1);
-                            break;
-                        case 0x02:
-                            position.set("setpointZone2", value.readIntLE() * 0.1);
-                            break;
-                        case 0x05:
-                            position.set("unitType", value.readIntLE());
-                            break;
-                        case 0x13:
-                            position.set("dieselHours", value.readIntLE() / 60 / 60);
-                            break;
-                        case 0x14:
-                            position.set("electricHours", value.readIntLE() / 60 / 60);
-                            break;
-                        case 0x17:
-                            position.set("serviceIndicator", value.readIntLE());
-                            break;
-                        case 0x18:
-                            position.set("softwareVersion", value.readIntLE() * 0.01);
-                            break;
-                        default:
-                            break;
+                        case 0x01 -> position.set("setpointZone1", value.readIntLE() * 0.1);
+                        case 0x02 -> position.set("setpointZone2", value.readIntLE() * 0.1);
+                        case 0x05 -> position.set("unitType", value.readIntLE());
+                        case 0x13 -> position.set("dieselHours", value.readIntLE() / 60 / 60);
+                        case 0x14 -> position.set("electricHours", value.readIntLE() / 60 / 60);
+                        case 0x17 -> position.set("serviceIndicator", value.readIntLE());
+                        case 0x18 -> position.set("softwareVersion", value.readIntLE() * 0.01);
+                        default -> {
+                        }
                     }
-                    break;
-                default:
-                    LOGGER.warn("Aplicom CAN decoding error", new UnsupportedOperationException());
-                    break;
+                }
+                default -> LOGGER.warn("Aplicom CAN decoding error", new UnsupportedOperationException());
             }
         }
     }
@@ -487,50 +446,39 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             int end = buf.readerIndex() + length;
 
             switch (type) {
-                case 0x01:
-                    position.set("brakeFlags", ByteBufUtil.hexDump(buf.readSlice(length)));
-                    break;
-                case 0x02:
+                case 0x01 -> position.set("brakeFlags", ByteBufUtil.hexDump(buf.readSlice(length)));
+                case 0x02 -> {
                     position.set("wheelSpeed", buf.readUnsignedShort() / 256.0);
                     position.set("wheelSpeedDifference", buf.readUnsignedShort() / 256.0 - 125.0);
                     position.set("lateralAcceleration", buf.readUnsignedByte() / 10.0 - 12.5);
                     position.set("vehicleSpeed", buf.readUnsignedShort() / 256.0);
-                    break;
-                case 0x03:
-                    position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedShort() * 2);
-                    break;
-                case 0x04:
+                }
+                case 0x03 -> position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedShort() * 2);
+                case 0x04 -> {
                     position.set("tirePressure", buf.readUnsignedByte() * 10);
                     position.set("pneumaticPressure", buf.readUnsignedByte() * 5);
-                    break;
-                case 0x05:
+                }
+                case 0x05 -> {
                     position.set("brakeLining", buf.readUnsignedByte() * 0.4);
                     position.set("brakeTemperature", buf.readUnsignedByte() * 10);
-                    break;
-                case 0x06:
+                }
+                case 0x06 -> {
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 5L);
                     position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt() * 5L);
                     position.set(Position.KEY_ODOMETER_SERVICE, (buf.readUnsignedInt() - 2105540607) * 5L);
-                    break;
-                case 0x0A:
+                }
+                case 0x0A -> {
                     position.set("absStatusCounter", buf.readUnsignedShort());
                     position.set("atvbStatusCounter", buf.readUnsignedShort());
                     position.set("vdcActiveCounter", buf.readUnsignedShort());
-                    break;
-                case 0x0B:
-                    position.set("brakeMinMaxData", ByteBufUtil.hexDump(buf.readSlice(length)));
-                    break;
-                case 0x0C:
-                    position.set("missingPgn", ByteBufUtil.hexDump(buf.readSlice(length)));
-                    break;
-                case 0x0D:
+                }
+                case 0x0B -> position.set("brakeMinMaxData", ByteBufUtil.hexDump(buf.readSlice(length)));
+                case 0x0C -> position.set("missingPgn", ByteBufUtil.hexDump(buf.readSlice(length)));
+                case 0x0D -> {
                     buf.readUnsignedByte();
                     position.set("towedDetectionStatus", buf.readUnsignedInt());
                     buf.skipBytes(17); // vin
-                    break;
-                case 0x0E:
-                default:
-                    break;
+                }
             }
 
             buf.readerIndex(end);

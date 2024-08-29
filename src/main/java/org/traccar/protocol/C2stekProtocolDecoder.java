@@ -60,24 +60,16 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(int alarm) {
-        switch (alarm) {
-            case 0x2:
-                return Position.ALARM_VIBRATION;
-            case 0x3:
-                return Position.ALARM_POWER_CUT;
-            case 0x4:
-                return Position.ALARM_OVERSPEED;
-            case 0x5:
-                return Position.ALARM_SOS;
-            case 0x6:
-                return Position.ALARM_DOOR;
-            case 0xA:
-                return Position.ALARM_LOW_BATTERY;
-            case 0xB:
-                return Position.ALARM_FAULT;
-            default:
-                return null;
-        }
+        return switch (alarm) {
+            case 0x2 -> Position.ALARM_VIBRATION;
+            case 0x3 -> Position.ALARM_POWER_CUT;
+            case 0x4 -> Position.ALARM_OVERSPEED;
+            case 0x5 -> Position.ALARM_SOS;
+            case 0x6 -> Position.ALARM_DOOR;
+            case 0xA -> Position.ALARM_LOW_BATTERY;
+            case 0xB -> Position.ALARM_FAULT;
+            default -> null;
+        };
     }
 
     @Override

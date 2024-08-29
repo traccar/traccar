@@ -161,4 +161,11 @@ public class ServerResource extends BaseResource {
         return cacheManager.toString();
     }
 
+    @Path("reboot")
+    @POST
+    public void reboot() throws StorageException {
+        permissionsService.checkAdmin(getUserId());
+        System.exit(130);
+    }
+
 }

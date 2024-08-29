@@ -2,18 +2,18 @@ package org.traccar.session.cache;
 
 import org.traccar.model.BaseModel;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class CacheNode {
 
     private BaseModel value;
 
-    private final Map<Class<? extends BaseModel>, Set<CacheNode>> links = new HashMap<>();
-    private final Map<Class<? extends BaseModel>, Set<CacheNode>> backlinks = new HashMap<>();
+    private final Map<Class<? extends BaseModel>, Set<CacheNode>> links = new ConcurrentHashMap<>();
+    private final Map<Class<? extends BaseModel>, Set<CacheNode>> backlinks = new ConcurrentHashMap<>();
 
     public CacheNode(BaseModel value) {
         this.value = value;

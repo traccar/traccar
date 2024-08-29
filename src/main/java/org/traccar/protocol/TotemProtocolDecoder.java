@@ -218,57 +218,35 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm123(int value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x10:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x11:
-                return Position.ALARM_OVERSPEED;
-            case 0x30:
-                return Position.ALARM_PARKING;
-            case 0x42:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 0x43:
-                return Position.ALARM_GEOFENCE_ENTER;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x10 -> Position.ALARM_LOW_BATTERY;
+            case 0x11 -> Position.ALARM_OVERSPEED;
+            case 0x30 -> Position.ALARM_PARKING;
+            case 0x42 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x43 -> Position.ALARM_GEOFENCE_ENTER;
+            default -> null;
+        };
     }
 
     private String decodeAlarm4(int value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x02:
-                return Position.ALARM_OVERSPEED;
-            case 0x04:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 0x05:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 0x06:
-                return Position.ALARM_TOW;
-            case 0x07:
-                return Position.ALARM_GPS_ANTENNA_CUT;
-            case 0x10:
-                return Position.ALARM_POWER_CUT;
-            case 0x11:
-                return Position.ALARM_POWER_RESTORED;
-            case 0x12:
-                return Position.ALARM_LOW_POWER;
-            case 0x13:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x40:
-                return Position.ALARM_VIBRATION;
-            case 0x41:
-                return Position.ALARM_IDLE;
-            case 0x42:
-                return Position.ALARM_ACCELERATION;
-            case 0x43:
-                return Position.ALARM_BRAKING;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x02 -> Position.ALARM_OVERSPEED;
+            case 0x04 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x05 -> Position.ALARM_GEOFENCE_ENTER;
+            case 0x06 -> Position.ALARM_TOW;
+            case 0x07 -> Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x10 -> Position.ALARM_POWER_CUT;
+            case 0x11 -> Position.ALARM_POWER_RESTORED;
+            case 0x12 -> Position.ALARM_LOW_POWER;
+            case 0x13 -> Position.ALARM_LOW_BATTERY;
+            case 0x40 -> Position.ALARM_VIBRATION;
+            case 0x41 -> Position.ALARM_IDLE;
+            case 0x42 -> Position.ALARM_ACCELERATION;
+            case 0x43 -> Position.ALARM_BRAKING;
+            default -> null;
+        };
     }
 
     private Position decode12(Channel channel, SocketAddress remoteAddress, String sentence, Pattern pattern) {

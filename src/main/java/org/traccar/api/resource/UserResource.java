@@ -25,6 +25,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.model.UserUtil;
+import org.traccar.model.Device;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Permission;
 import org.traccar.model.User;
@@ -61,12 +62,18 @@ public class UserResource extends BaseObjectResource<User> {
     }
 
     @GET
-    public Collection<User> get(@QueryParam("userId") long userId) throws StorageException {
+    public Collection<User> get(
+            @QueryParam("userId") long userId, @QueryParam("deviceId") long deviceId) throws StorageException {
         if (userId > 0) {
             permissionsService.checkUser(getUserId(), userId);
             return storage.getObjects(baseClass, new Request(
                     new Columns.All(),
                     new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups()));
+        } else if (deviceId > 0) {
+            permissionsService.checkAdmin(getUserId());
+            return storage.getObjects(baseClass, new Request(
+                    new Columns.All(),
+                    new Condition.Permission(User.class, Device.class, deviceId).excludeGroups()));
         } else if (permissionsService.notAdmin(getUserId())) {
             return storage.getObjects(baseClass, new Request(
                     new Columns.All(),

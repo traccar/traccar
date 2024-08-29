@@ -22,8 +22,10 @@ import jakarta.ws.rs.client.Client;
 
 public class GoogleGeocoder extends JsonGeocoder {
 
-    private static String formatUrl(String key, String language) {
-        String url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f";
+    private static String formatUrl(String url, String key, String language) {
+        if (url == null) {
+            url = "https://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f";
+        }
         if (key != null) {
             url += "&key=" + key;
         }
@@ -33,8 +35,9 @@ public class GoogleGeocoder extends JsonGeocoder {
         return url;
     }
 
-    public GoogleGeocoder(Client client, String key, String language, int cacheSize, AddressFormat addressFormat) {
-        super(client, formatUrl(key, language), cacheSize, addressFormat);
+    public GoogleGeocoder(
+            Client client, String url, String key, String language, int cacheSize, AddressFormat addressFormat) {
+        super(client, formatUrl(url, key, language), cacheSize, addressFormat);
     }
 
     @Override

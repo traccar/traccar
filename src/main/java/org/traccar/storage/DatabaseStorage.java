@@ -206,28 +206,23 @@ public class DatabaseStorage extends Storage {
 
     private Map<String, Object> getConditionVariables(Condition genericCondition) {
         Map<String, Object> results = new HashMap<>();
-        if (genericCondition instanceof Condition.Compare) {
-            var condition = (Condition.Compare) genericCondition;
+        if (genericCondition instanceof Condition.Compare condition) {
             if (condition.getValue() != null) {
                 results.put(condition.getVariable(), condition.getValue());
             }
-        } else if (genericCondition instanceof Condition.Between) {
-            var condition = (Condition.Between) genericCondition;
+        } else if (genericCondition instanceof Condition.Between condition) {
             results.put(condition.getFromVariable(), condition.getFromValue());
             results.put(condition.getToVariable(), condition.getToValue());
-        } else if (genericCondition instanceof Condition.Binary) {
-            var condition = (Condition.Binary) genericCondition;
+        } else if (genericCondition instanceof Condition.Binary condition) {
             results.putAll(getConditionVariables(condition.getFirst()));
             results.putAll(getConditionVariables(condition.getSecond()));
-        } else if (genericCondition instanceof Condition.Permission) {
-            var condition = (Condition.Permission) genericCondition;
+        } else if (genericCondition instanceof Condition.Permission condition) {
             if (condition.getOwnerId() > 0) {
                 results.put(Permission.getKey(condition.getOwnerClass()), condition.getOwnerId());
             } else {
                 results.put(Permission.getKey(condition.getPropertyClass()), condition.getPropertyId());
             }
-        } else if (genericCondition instanceof Condition.LatestPositions) {
-            var condition = (Condition.LatestPositions) genericCondition;
+        } else if (genericCondition instanceof Condition.LatestPositions condition) {
             if (condition.getDeviceId() > 0) {
                 results.put("deviceId", condition.getDeviceId());
             }
@@ -249,43 +244,38 @@ public class DatabaseStorage extends Storage {
             if (appendWhere) {
                 result.append(" WHERE ");
             }
-            if (genericCondition instanceof Condition.Compare) {
+            if (genericCondition instanceof Condition.Compare condition) {
 
-                var condition = (Condition.Compare) genericCondition;
                 result.append(condition.getColumn());
                 result.append(" ");
                 result.append(condition.getOperator());
                 result.append(" :");
                 result.append(condition.getVariable());
 
-            } else if (genericCondition instanceof Condition.Between) {
+            } else if (genericCondition instanceof Condition.Between condition) {
 
-                var condition = (Condition.Between) genericCondition;
                 result.append(condition.getColumn());
                 result.append(" BETWEEN :");
                 result.append(condition.getFromVariable());
                 result.append(" AND :");
                 result.append(condition.getToVariable());
 
-            } else if (genericCondition instanceof Condition.Binary) {
+            } else if (genericCondition instanceof Condition.Binary condition) {
 
-                var condition = (Condition.Binary) genericCondition;
                 result.append(formatCondition(condition.getFirst(), false));
                 result.append(" ");
                 result.append(condition.getOperator());
                 result.append(" ");
                 result.append(formatCondition(condition.getSecond(), false));
 
-            } else if (genericCondition instanceof Condition.Permission) {
+            } else if (genericCondition instanceof Condition.Permission condition) {
 
-                var condition = (Condition.Permission) genericCondition;
                 result.append("id IN (");
                 result.append(formatPermissionQuery(condition));
                 result.append(")");
 
-            } else if (genericCondition instanceof Condition.LatestPositions) {
+            } else if (genericCondition instanceof Condition.LatestPositions condition) {
 
-                var condition = (Condition.LatestPositions) genericCondition;
                 result.append("id IN (");
                 result.append("SELECT positionId FROM ");
                 result.append(getStorageName(Device.class));

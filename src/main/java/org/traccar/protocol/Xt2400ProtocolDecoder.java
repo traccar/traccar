@@ -126,76 +126,41 @@ public class Xt2400ProtocolDecoder extends BaseProtocolDecoder {
         for (byte b : format) {
             int tag = b & 0xFF;
             switch (tag) {
-                case 0x03:
+                case 0x03 -> {
                     DeviceSession deviceSession = getDeviceSession(
                             channel, remoteAddress, String.valueOf(buf.readUnsignedInt()));
                     if (deviceSession == null) {
                         return null;
                     }
                     position.setDeviceId(deviceSession.getDeviceId());
-                    break;
-                case 0x04:
-                    position.set(Position.KEY_EVENT, buf.readUnsignedByte());
-                    break;
-                case 0x05:
-                    position.set(Position.KEY_INDEX, buf.readUnsignedShort());
-                    break;
-                case 0x06:
-                    position.setTime(new Date(buf.readUnsignedInt() * 1000));
-                    break;
-                case 0x07:
-                    position.setLatitude(buf.readInt() * 0.000001);
-                    break;
-                case 0x08:
-                    position.setLongitude(buf.readInt() * 0.000001);
-                    break;
-                case 0x09:
-                    position.setAltitude(buf.readShort() * 0.1);
-                    break;
-                case 0x0a:
-                    position.setCourse(buf.readShort() * 0.1);
-                    break;
-                case 0x0b:
-                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-                    break;
-                case 0x10:
-                    position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());
-                    break;
-                case 0x12:
-                    position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
-                    break;
-                case 0x13:
-                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-                    break;
-                case 0x14:
-                    position.set(Position.KEY_RSSI, buf.readShort());
-                    break;
-                case 0x16:
-                    position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
-                    break;
-                case 0x17:
-                    position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
-                    break;
-                case 0x57:
-                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort());
-                    break;
-                case 0x65:
-                    position.set(Position.KEY_VIN, buf.readSlice(17).toString(StandardCharsets.US_ASCII));
-                    break;
-                case 0x6C:
+                }
+                case 0x04 -> position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+                case 0x05 -> position.set(Position.KEY_INDEX, buf.readUnsignedShort());
+                case 0x06 -> position.setTime(new Date(buf.readUnsignedInt() * 1000));
+                case 0x07 -> position.setLatitude(buf.readInt() * 0.000001);
+                case 0x08 -> position.setLongitude(buf.readInt() * 0.000001);
+                case 0x09 -> position.setAltitude(buf.readShort() * 0.1);
+                case 0x0a -> position.setCourse(buf.readShort() * 0.1);
+                case 0x0b -> position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                case 0x10 -> position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());
+                case 0x12 -> position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+                case 0x13 -> position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                case 0x14 -> position.set(Position.KEY_RSSI, buf.readShort());
+                case 0x16 -> position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
+                case 0x17 -> position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
+                case 0x57 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort());
+                case 0x65 -> position.set(Position.KEY_VIN, buf.readSlice(17).toString(StandardCharsets.US_ASCII));
+                case 0x6C -> {
                     buf.readUnsignedByte(); // mil
                     int ecuCount = buf.readUnsignedByte();
                     for (int i = 0; i < ecuCount; i++) {
                         buf.readUnsignedByte(); // ecu id
                         buf.skipBytes(buf.readUnsignedByte() * 6);
                     }
-                    break;
-                case 0x73:
-                    position.set(Position.KEY_VERSION_FW, buf.readSlice(16).toString(StandardCharsets.US_ASCII).trim());
-                    break;
-                default:
-                    buf.skipBytes(getTagLength(tag));
-                    break;
+                }
+                case 0x73 -> position.set(
+                        Position.KEY_VERSION_FW, buf.readSlice(16).toString(StandardCharsets.US_ASCII).trim());
+                default -> buf.skipBytes(getTagLength(tag));
             }
         }
 

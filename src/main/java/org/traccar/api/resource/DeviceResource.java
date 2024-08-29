@@ -137,10 +137,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
     @Path("{id}/accumulators")
     @PUT
     public Response updateAccumulators(DeviceAccumulators entity) throws Exception {
-        if (permissionsService.notAdmin(getUserId())) {
-            permissionsService.checkManager(getUserId());
-            permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
-        }
+        permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
+        permissionsService.checkEdit(getUserId(), Device.class, false, false);
 
         Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(), new Condition.LatestPositions(entity.getDeviceId())));
@@ -160,36 +158,31 @@ public class DeviceResource extends BaseObjectResource<Device> {
                     new Columns.Include("positionId"),
                     new Condition.Equals("id", device.getId())));
 
+            var key = new Object();
             try {
-                cacheManager.addDevice(position.getDeviceId());
+                cacheManager.addDevice(position.getDeviceId(), key);
                 cacheManager.updatePosition(position);
                 connectionManager.updatePosition(true, position);
             } finally {
-                cacheManager.removeDevice(position.getDeviceId());
+                cacheManager.removeDevice(position.getDeviceId(), key);
             }
         } else {
             throw new IllegalArgumentException();
         }
 
-        LogAction.resetDeviceAccumulators(getUserId(), entity.getDeviceId());
+        LogAction.resetAccumulators(getUserId(), entity.getDeviceId());
         return Response.noContent().build();
     }
 
     private String imageExtension(String type) {
-        switch (type) {
-            case "image/jpeg":
-                return "jpg";
-            case "image/png":
-                return "png";
-            case "image/gif":
-                return "gif";
-            case "image/webp":
-                return "webp";
-            case "image/svg+xml":
-                return "svg";
-            default:
-                throw new IllegalArgumentException("Unsupported image type");
-        }
+        return switch (type) {
+            case "image/jpeg" -> "jpg";
+            case "image/png" -> "png";
+            case "image/gif" -> "gif";
+            case "image/webp" -> "webp";
+            case "image/svg+xml" -> "svg";
+            default -> throw new IllegalArgumentException("Unsupported image type");
+        };
     }
 
     @Path("{id}/image")

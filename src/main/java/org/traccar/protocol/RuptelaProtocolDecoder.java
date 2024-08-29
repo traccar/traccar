@@ -64,34 +64,28 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_TYPE, type);
 
-        switch (type) {
-            case MSG_DEVICE_CONFIGURATION:
-            case MSG_DEVICE_VERSION:
-            case MSG_FIRMWARE_UPDATE:
-            case MSG_SMS_VIA_GPRS_RESPONSE:
+        return switch (type) {
+            case MSG_DEVICE_CONFIGURATION, MSG_DEVICE_VERSION, MSG_FIRMWARE_UPDATE, MSG_SMS_VIA_GPRS_RESPONSE -> {
                 position.set(Position.KEY_RESULT,
                         buf.toString(buf.readerIndex(), buf.readableBytes() - 2, StandardCharsets.US_ASCII).trim());
-                return position;
-            case MSG_SET_IO:
+                yield position;
+            }
+            case MSG_SET_IO -> {
                 position.set(Position.KEY_RESULT,
                         String.valueOf(buf.readUnsignedByte()));
-                return position;
-            default:
-                return null;
-        }
+                yield position;
+            }
+            default -> null;
+        };
     }
 
     private long readValue(ByteBuf buf, int length, boolean signed) {
-        switch (length) {
-            case 1:
-                return signed ? buf.readByte() : buf.readUnsignedByte();
-            case 2:
-                return signed ? buf.readShort() : buf.readUnsignedShort();
-            case 4:
-                return signed ? buf.readInt() : buf.readUnsignedInt();
-            default:
-                return buf.readLong();
-        }
+        return switch (length) {
+            case 1 -> signed ? buf.readByte() : buf.readUnsignedByte();
+            case 2 -> signed ? buf.readShort() : buf.readUnsignedShort();
+            case 4 -> signed ? buf.readInt() : buf.readUnsignedInt();
+            default -> buf.readLong();
+        };
     }
 
     private void decodeDriver(Position position, String part1, String part2) {
@@ -106,136 +100,70 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeParameter(Position position, int id, ByteBuf buf, int length) {
         switch (id) {
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-                position.set(Position.PREFIX_IN + (id - 1), readValue(buf, length, false));
-                break;
-            case 13:
-            case 173:
-                position.set(Position.KEY_MOTION, readValue(buf, length, false) > 0);
-                break;
-            case 20:
-                position.set(Position.PREFIX_ADC + 3, readValue(buf, length, false));
-                break;
-            case 21:
-                position.set(Position.PREFIX_ADC + 4, readValue(buf, length, false));
-                break;
-            case 22:
-                position.set(Position.PREFIX_ADC + 1, readValue(buf, length, false));
-                break;
-            case 23:
-                position.set(Position.PREFIX_ADC + 2, readValue(buf, length, false));
-                break;
-            case 29:
-                position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
-                break;
-            case 30:
-                position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
-                break;
-            case 32:
-                position.set(Position.KEY_DEVICE_TEMP, readValue(buf, length, true));
-                break;
-            case 39:
-                position.set(Position.KEY_ENGINE_LOAD, readValue(buf, length, false));
-                break;
-            case 65:
-                position.set(Position.KEY_ODOMETER, readValue(buf, length, false));
-                break;
-            case 74:
-                position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
-                break;
-            case 78:
-            case 79:
-            case 80:
-                position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
-                break;
-            case 88:
+            case 2, 3, 4, 5 -> position.set(Position.PREFIX_IN + (id - 1), readValue(buf, length, false));
+            case 13, 173 -> position.set(Position.KEY_MOTION, readValue(buf, length, false) > 0);
+            case 20 -> position.set(Position.PREFIX_ADC + 3, readValue(buf, length, false));
+            case 21 -> position.set(Position.PREFIX_ADC + 4, readValue(buf, length, false));
+            case 22 -> position.set(Position.PREFIX_ADC + 1, readValue(buf, length, false));
+            case 23 -> position.set(Position.PREFIX_ADC + 2, readValue(buf, length, false));
+            case 29 -> position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
+            case 30 -> position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
+            case 32 -> position.set(Position.KEY_DEVICE_TEMP, readValue(buf, length, true));
+            case 39 -> position.set(Position.KEY_ENGINE_LOAD, readValue(buf, length, false));
+            case 65 -> position.set(Position.KEY_ODOMETER, readValue(buf, length, false));
+            case 74 -> position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);
+            case 78, 79, 80 -> position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
+            case 88 -> {
                 if (readValue(buf, length, false) > 0) {
                     position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
                 }
-                break;
-            case 94:
-                position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.25);
-                break;
-            case 95:
-                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false));
-                break;
-            case 98:
-                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false) * 100 / 255.0);
-                break;
-            case 100:
-                position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, false) / 20.0);
-                break;
-            case 134:
+            }
+            case 94 -> position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.25);
+            case 95 -> position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false));
+            case 98 -> position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false) * 100 / 255.0);
+            case 100 -> position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, false) / 20.0);
+            case 134 -> {
                 if (readValue(buf, length, false) > 0) {
                     position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
                 }
-                break;
-            case 136:
+            }
+            case 136 -> {
                 if (readValue(buf, length, false) > 0) {
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
                 }
-                break;
-            case 150:
-                position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
-                break;
-            case 163:
-                position.set(Position.KEY_ODOMETER, readValue(buf, length, false) * 5);
-                break;
-            case 164:
-                position.set(Position.KEY_ODOMETER_TRIP, readValue(buf, length, false) * 5);
-                break;
-            case 165:
-                position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false) / 256.0);
-                break;
-            case 166:
-            case 197:
-                position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
-                break;
-            case 170:
-                position.set(Position.KEY_CHARGE, readValue(buf, length, false) > 0);
-                break;
-            case 205:
-                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false));
-                break;
-            case 207:
-                position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false) * 0.4);
-                break;
-            case 208:
-                position.set(Position.KEY_FUEL_USED, readValue(buf, length, false) * 0.5);
-                break;
-            case 251:
-            case 409:
-                position.set(Position.KEY_IGNITION, readValue(buf, length, false) > 0);
-                break;
-            case 410:
+            }
+            case 150 -> position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
+            case 163 -> position.set(Position.KEY_ODOMETER, readValue(buf, length, false) * 5);
+            case 164 -> position.set(Position.KEY_ODOMETER_TRIP, readValue(buf, length, false) * 5);
+            case 165 -> position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false) / 256.0);
+            case 166, 197 -> position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
+            case 170 -> position.set(Position.KEY_CHARGE, readValue(buf, length, false) > 0);
+            case 205 -> position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false));
+            case 207 -> position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false) * 0.4);
+            case 208 -> position.set(Position.KEY_FUEL_USED, readValue(buf, length, false) * 0.5);
+            case 251, 409 -> position.set(Position.KEY_IGNITION, readValue(buf, length, false) > 0);
+            case 410 -> {
                 if (readValue(buf, length, false) > 0) {
                     position.set(Position.KEY_ALARM, Position.ALARM_TOW);
                 }
-                break;
-            case 411:
+            }
+            case 411 -> {
                 if (readValue(buf, length, false) > 0) {
                     position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
                 }
-                break;
-            case 415:
+            }
+            case 415 -> {
                 if (readValue(buf, length, false) == 0) {
                     position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
                 }
-                break;
-            case 645:
-                position.set(Position.KEY_OBD_ODOMETER, readValue(buf, length, false) * 1000);
-                break;
-            case 758:
+            }
+            case 645 -> position.set(Position.KEY_OBD_ODOMETER, readValue(buf, length, false) * 1000);
+            case 758 -> {
                 if (readValue(buf, length, false) == 1) {
                     position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
                 }
-                break;
-            default:
-                position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
-                break;
+            }
+            default -> position.set(Position.PREFIX_IO + id, readValue(buf, length, false));
         }
     }
 

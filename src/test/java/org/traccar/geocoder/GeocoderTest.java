@@ -20,7 +20,7 @@ public class GeocoderTest {
     @Disabled
     @Test
     public void testGoogle() {
-        Geocoder geocoder = new GoogleGeocoder(client, null, null, 0, new AddressFormat());
+        Geocoder geocoder = new GoogleGeocoder(client, null, null, null, 0, new AddressFormat());
         String address = geocoder.getAddress(31.776797, 35.211489, null);
         assertEquals("1 Ibn Shaprut St, Jerusalem, Jerusalem District, IL", address);
     }
@@ -69,9 +69,9 @@ public class GeocoderTest {
     @Disabled
     @Test
     public void testBan() {
-        Geocoder geocoder = new BanGeocoder(client, 0, new AddressFormat("%f [%d], %c"));
+        Geocoder geocoder = new BanGeocoder(client, 0, new AddressFormat());
         String address = geocoder.getAddress(48.8575, 2.2944, null);
-        assertEquals("8 Avenue Gustave Eiffel 75007 Paris [75, Paris, Île-de-France], FR", address);
+        assertEquals("8 Avenue Gustave Eiffel, Paris, FR", address);
     }
 
     @Disabled
@@ -122,4 +122,11 @@ public class GeocoderTest {
         assertEquals("114 East 13th Street, New York, New York, US", address);
     }
 
+    @Disabled
+    @Test
+    public void testGeocodeJSON() {
+        Geocoder geocoder = new GeocodeJsonGeocoder(client, null, null, null, 0, new AddressFormat());
+        String address = geocoder.getAddress(40.7337807, -73.9974401, null);
+        assertEquals("35 West 9th Street, New York, New York, US", address);
+    }
 }

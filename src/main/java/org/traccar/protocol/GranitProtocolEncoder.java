@@ -38,16 +38,12 @@ public class GranitProtocolEncoder extends BaseProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-        switch (command.getType()) {
-            case Command.TYPE_IDENTIFICATION:
-                return encodeCommand("BB+IDNT");
-            case Command.TYPE_REBOOT_DEVICE:
-                return encodeCommand("BB+RESET");
-            case Command.TYPE_POSITION_SINGLE:
-                return encodeCommand("BB+RRCD");
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_IDENTIFICATION -> encodeCommand("BB+IDNT");
+            case Command.TYPE_REBOOT_DEVICE -> encodeCommand("BB+RESET");
+            case Command.TYPE_POSITION_SINGLE -> encodeCommand("BB+RRCD");
+            default -> null;
+        };
     }
 
 }

@@ -57,16 +57,12 @@ public class MaintenanceEventHandler extends BaseEventHandler {
     }
 
     private double getValue(Position position, String type) {
-        switch (type) {
-            case "serverTime":
-                return position.getServerTime().getTime();
-            case "deviceTime":
-                return position.getDeviceTime().getTime();
-            case "fixTime":
-                return position.getFixTime().getTime();
-            default:
-                return position.getDouble(type);
-        }
+        return switch (type) {
+            case "serverTime" -> position.getServerTime().getTime();
+            case "deviceTime" -> position.getDeviceTime().getTime();
+            case "fixTime" -> position.getFixTime().getTime();
+            default -> position.getDouble(type);
+        };
     }
 
 }

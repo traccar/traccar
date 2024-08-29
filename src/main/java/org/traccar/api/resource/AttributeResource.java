@@ -62,16 +62,10 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
 
         Object result = computedAttributesHandler.computeAttribute(entity, position);
         if (result != null) {
-            switch (entity.getType()) {
-                case "number":
-                    Number numberValue = (Number) result;
-                    return Response.ok(numberValue).build();
-                case "boolean":
-                    Boolean booleanValue = (Boolean) result;
-                    return Response.ok(booleanValue).build();
-                default:
-                    return Response.ok(result.toString()).build();
-            }
+            return switch (entity.getType()) {
+                case "number", "boolean" -> Response.ok(result).build();
+                default -> Response.ok(result.toString()).build();
+            };
         } else {
             return Response.noContent().build();
         }

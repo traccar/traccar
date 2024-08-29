@@ -92,7 +92,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .number("C(d+);")                    // coolant temperature
             .number("L(d+.d);")                  // fuel level
             .number("[XY][MH]d+.d+;")
-            .number("M(d+);")                    // mileage
+            .number("Md+.?d*;")                  // mileage
             .number("F(d+.d+);")                 // fuel consumption
             .number("T(d+);")                    // engine time
             .any()
@@ -264,7 +264,6 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ENGINE_LOAD, parser.nextDouble());
         position.set(Position.KEY_COOLANT_TEMP, parser.nextInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble());
-        position.set(Position.KEY_ODOMETER, parser.nextInt());
         position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble());
         position.set(Position.KEY_HOURS, parser.nextInt());
 

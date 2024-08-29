@@ -42,9 +42,9 @@ jobs:
         working-directory: ./setup
         run: |
           wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
-          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2+13/OpenJDK21U-jdk_x64_windows_hotspot_21.0.2_13.zip
-          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2+13/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz
-          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2+13/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.2_13.tar.gz
+          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_x64_windows_hotspot_21.0.4_7.zip
+          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.4_7.tar.gz
+          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.4_7.tar.gz
           ./package.sh ${{ github.event.inputs.version }}
       - name: Upload installers
         working-directory: ./setup

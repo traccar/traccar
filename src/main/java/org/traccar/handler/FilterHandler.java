@@ -53,6 +53,7 @@ public class FilterHandler extends BasePositionHandler {
     private final int filterMaxSpeed;
     private final long filterMinPeriod;
     private final int filterDailyLimit;
+    private final long filterDailyLimitInterval;
     private final boolean filterRelative;
     private final long skipLimit;
     private final boolean skipAttributes;
@@ -77,6 +78,7 @@ public class FilterHandler extends BasePositionHandler {
         filterMaxSpeed = config.getInteger(Keys.FILTER_MAX_SPEED);
         filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000L;
         filterDailyLimit = config.getInteger(Keys.FILTER_DAILY_LIMIT);
+        filterDailyLimitInterval = config.getInteger(Keys.FILTER_DAILY_LIMIT_INTERVAL) * 1000L;
         filterRelative = config.getBoolean(Keys.FILTER_RELATIVE);
         skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
         skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
@@ -151,7 +153,7 @@ public class FilterHandler extends BasePositionHandler {
         if (filterMaxSpeed != 0 && last != null) {
             double distance = position.getDouble(Position.KEY_DISTANCE);
             double time = position.getFixTime().getTime() - last.getFixTime().getTime();
-            return UnitsConverter.knotsFromMps(distance / (time / 1000)) > filterMaxSpeed;
+            return time > 0 && UnitsConverter.knotsFromMps(distance / (time / 1000)) > filterMaxSpeed;
         }
         return false;
     }
@@ -164,9 +166,12 @@ public class FilterHandler extends BasePositionHandler {
         return false;
     }
 
-    private boolean filterDailyLimit(Position position) {
-        if (filterDailyLimit != 0) {
-            return statisticsManager.messageStoredCount(position.getDeviceId()) >= filterDailyLimit;
+    private boolean filterDailyLimit(Position position, Position last) {
+        if (filterDailyLimit != 0
+                && statisticsManager.messageStoredCount(position.getDeviceId()) >= filterDailyLimit) {
+            long lastTime = last != null ? last.getFixTime().getTime() : 0;
+            long interval = position.getFixTime().getTime() - lastTime;
+            return filterDailyLimitInterval <= 0 || interval < filterDailyLimitInterval;
         }
         return false;
     }
@@ -216,20 +221,18 @@ public class FilterHandler extends BasePositionHandler {
         if (filterApproximate(position)) {
             filterType.append("Approximate ");
         }
-        if (filterDailyLimit(position)) {
-            filterType.append("DailyLimit ");
-        }
 
         // filter out excessive data
         long deviceId = position.getDeviceId();
-        if (filterDuplicate || filterStatic || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0) {
-            Position preceding = null;
+        if (filterDuplicate || filterStatic
+                || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0 || filterDailyLimit > 0) {
+            Position preceding;
             if (filterRelative) {
                 try {
                     Date newFixTime = position.getFixTime();
                     preceding = getPrecedingPosition(deviceId, newFixTime);
                 } catch (StorageException e) {
-                    LOGGER.warn("Error retrieving preceding position; fallbacking to last received position.", e);
+                    LOGGER.warn("Error retrieving preceding position; fall backing to last received position.", e);
                     preceding = cacheManager.getPosition(deviceId);
                 }
             } else {
@@ -249,6 +252,9 @@ public class FilterHandler extends BasePositionHandler {
             }
             if (filterMinPeriod(position, preceding)) {
                 filterType.append("MinPeriod ");
+            }
+            if (filterDailyLimit(position, preceding)) {
+                filterType.append("DailyLimit ");
             }
         }
 

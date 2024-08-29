@@ -48,7 +48,7 @@ public class PropertiesProvider {
         } else {
             Object result = extendedModel.getAttributes().get(key.getKey());
             if (result != null) {
-                return result instanceof String ? Integer.parseInt((String) result) : (Integer) result;
+                return result instanceof String stringResult ? Integer.parseInt(stringResult) : (Integer) result;
             } else {
                 return key.getDefaultValue();
             }
@@ -65,7 +65,7 @@ public class PropertiesProvider {
         } else {
             Object result = extendedModel.getAttributes().get(key.getKey());
             if (result != null) {
-                return result instanceof String ? Boolean.valueOf((String) result) : (Boolean) result;
+                return result instanceof String stringResult ? Boolean.valueOf(stringResult) : (Boolean) result;
             } else {
                 return null;
             }

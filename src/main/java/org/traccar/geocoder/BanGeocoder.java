@@ -20,45 +20,22 @@ package org.traccar.geocoder;
  * API documentation: https://adresse.data.gouv.fr/api
  */
 
-import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
 
-public class BanGeocoder extends JsonGeocoder {
+public class BanGeocoder extends GeocodeJsonGeocoder {
 
     public BanGeocoder(Client client, int cacheSize, AddressFormat addressFormat) {
-        super(client, "https://api-adresse.data.gouv.fr/reverse/?lat=%f&lon=%f", cacheSize, addressFormat);
+        super(client, "https://api-adresse.data.gouv.fr/reverse/", null, null, cacheSize, addressFormat);
     }
 
     @Override
     public Address parseAddress(JsonObject json) {
-        JsonArray result = json.getJsonArray("features");
+        Address geodecoded = super.parseAddress(json);
+        if (geodecoded != null) {
+            geodecoded.setCountry("FR");
 
-        if (result != null && !result.isEmpty()) {
-            JsonObject location = result.getJsonObject(0).getJsonObject("properties");
-            Address address = new Address();
-
-            address.setCountry("FR");
-            if (location.containsKey("postcode")) {
-                address.setPostcode(location.getString("postcode"));
-            }
-            if (location.containsKey("context")) {
-                address.setDistrict(location.getString("context"));
-            }
-            if (location.containsKey("name")) {
-                address.setStreet(location.getString("name"));
-            }
-            if (location.containsKey("city")) {
-                address.setSettlement(location.getString("city"));
-            }
-            if (location.containsKey("housenumber")) {
-                address.setHouse(location.getString("housenumber"));
-            }
-            if (location.containsKey("label")) {
-                address.setFormattedAddress(location.getString("label"));
-            }
-
-            return address;
+            return geodecoded;
         }
 
         return null;

@@ -28,14 +28,11 @@ public class GranitProtocolSmsEncoder extends StringProtocolEncoder {
 
     @Override
     protected String encodeCommand(Command command) {
-        switch (command.getType()) {
-        case Command.TYPE_REBOOT_DEVICE:
-            return "BB+RESET";
-        case Command.TYPE_POSITION_PERIODIC:
-            return formatCommand(command, "BB+BBMD=%s", Command.KEY_FREQUENCY);
-        default:
-            return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_REBOOT_DEVICE -> "BB+RESET";
+            case Command.TYPE_POSITION_PERIODIC -> formatCommand(command, "BB+BBMD=%s", Command.KEY_FREQUENCY);
+            default -> null;
+        };
     }
 
 }

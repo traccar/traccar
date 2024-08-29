@@ -17,6 +17,7 @@ package org.traccar;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.ProvisionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastService;
@@ -34,6 +35,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 
 public final class Main {
 
@@ -51,23 +53,22 @@ public final class Main {
     public static void logSystemInfo() {
         try {
             OperatingSystemMXBean operatingSystemBean = ManagementFactory.getOperatingSystemMXBean();
-            LOGGER.info("Operating system"
-                    + " name: " + operatingSystemBean.getName()
-                    + " version: " + operatingSystemBean.getVersion()
-                    + " architecture: " + operatingSystemBean.getArch());
+            LOGGER.info(
+                    "Operating system name: {} version: {} architecture: {}",
+                    operatingSystemBean.getName(), operatingSystemBean.getVersion(), operatingSystemBean.getArch());
 
             RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
-            LOGGER.info("Java runtime"
-                    + " name: " + runtimeBean.getVmName()
-                    + " vendor: " + runtimeBean.getVmVendor()
-                    + " version: " + runtimeBean.getVmVersion());
+            LOGGER.info(
+                    "Java runtime name: {} vendor: {} version: {}",
+                    runtimeBean.getVmName(), runtimeBean.getVmVendor(), runtimeBean.getVmVersion());
 
             MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
-            LOGGER.info("Memory limit"
-                    + " heap: " + memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024) + "mb"
-                    + " non-heap: " + memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024) + "mb");
+            LOGGER.info(
+                    "Memory limit heap: {}mb non-heap: {}mb",
+                    memoryBean.getHeapMemoryUsage().getMax() / (1024 * 1024),
+                    memoryBean.getNonHeapMemoryUsage().getMax() / (1024 * 1024));
 
-            LOGGER.info("Character encoding: " + Charset.defaultCharset().displayName());
+            LOGGER.info("Character encoding: {}", Charset.defaultCharset().displayName());
 
         } catch (Exception error) {
             LOGGER.warn("Failed to get system info");
@@ -115,7 +116,7 @@ public final class Main {
         try {
             injector = Guice.createInjector(new MainModule(configFile), new DatabaseModule(), new WebModule());
             logSystemInfo();
-            LOGGER.info("Version: " + Main.class.getPackage().getImplementationVersion());
+            LOGGER.info("Version: {}", Main.class.getPackage().getImplementationVersion());
             LOGGER.info("Starting server...");
 
             var services = new ArrayList<LifecycleObject>();
@@ -140,10 +141,17 @@ public final class Main {
                         throw new RuntimeException(e);
                     }
                 }
+                injector.getInstance(ExecutorService.class).shutdown();
             }));
         } catch (Exception e) {
-            LOGGER.error("Main method error", e);
-            throw new RuntimeException(e);
+            Throwable unwrapped;
+            if (e instanceof ProvisionException) {
+                unwrapped = e.getCause();
+            } else {
+                unwrapped = e;
+            }
+            LOGGER.error("Main method error", unwrapped);
+            System.exit(1);
         }
     }
 

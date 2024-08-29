@@ -61,20 +61,14 @@ public class BstplProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 4:
-                return Position.ALARM_LOW_BATTERY;
-            case 5:
-                return Position.ALARM_ACCELERATION;
-            case 6:
-                return Position.ALARM_BRAKING;
-            case 7:
-                return Position.ALARM_OVERSPEED;
-            case 9:
-                return Position.ALARM_SOS;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 4 -> Position.ALARM_LOW_BATTERY;
+            case 5 -> Position.ALARM_ACCELERATION;
+            case 6 -> Position.ALARM_BRAKING;
+            case 7 -> Position.ALARM_OVERSPEED;
+            case 9 -> Position.ALARM_SOS;
+            default -> null;
+        };
     }
     @Override
     protected Object decode(

@@ -179,16 +179,12 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private long readValue(ByteBuf buf, int length) {
-        switch (length) {
-            case 1:
-                return buf.readUnsignedByte();
-            case 2:
-                return buf.readUnsignedShort();
-            case 4:
-                return buf.readUnsignedInt();
-            default:
-                return buf.readLong();
-        }
+        return switch (length) {
+            case 1 -> buf.readUnsignedByte();
+            case 2 -> buf.readUnsignedShort();
+            case 4 -> buf.readUnsignedInt();
+            default -> buf.readLong();
+        };
     }
 
     private static void register(int id, Set<String> models, BiConsumer<Position, ByteBuf> handler) {
@@ -199,7 +195,8 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         var fmbXXX = Set.of(
                 "FMB001", "FMB010", "FMB002", "FMB020", "FMB003", "FMB110", "FMB120", "FMB122", "FMB125", "FMB130",
                 "FMB140", "FMU125", "FMB900", "FMB920", "FMB962", "FMB964", "FM3001", "FMB202", "FMB204", "FMB206",
-                "FMT100", "MTB100", "FMP100", "MSP500");
+                "FMT100", "MTB100", "FMP100", "MSP500", "FMC125", "FMM125", "FMU130", "FMC130", "FMM130", "FMB150",
+                "FMC150", "FMM150", "FMC920");
 
         register(1, null, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
         register(2, null, (p, b) -> p.set(Position.PREFIX_IN + 2, b.readUnsignedByte() > 0));
@@ -231,7 +228,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(75, fmbXXX, (p, b) -> p.set(Position.PREFIX_TEMP + 4, b.readInt() * 0.1));
         register(78, null, (p, b) -> {
             long driverUniqueId = b.readLongLE();
-            if (driverUniqueId > 0) {
+            if (driverUniqueId != 0) {
                 p.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
             }
         });
@@ -243,9 +240,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(85, fmbXXX, (p, b) -> p.set(Position.KEY_RPM, b.readUnsignedShort()));
         register(87, fmbXXX, (p, b) -> p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt()));
         register(89, fmbXXX, (p, b) -> p.set("fuelLevelPercentage", b.readUnsignedByte()));
-        register(90, null, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedShort()));
         register(110, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_CONSUMPTION, b.readUnsignedShort() * 0.1));
         register(113, fmbXXX, (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));
+        register(115, fmbXXX, (p, b) -> p.set("engineTemp", b.readShort() * 0.1));
         register(179, null, (p, b) -> p.set(Position.PREFIX_OUT + 1, b.readUnsignedByte() > 0));
         register(180, null, (p, b) -> p.set(Position.PREFIX_OUT + 2, b.readUnsignedByte() > 0));
         register(181, null, (p, b) -> p.set(Position.KEY_PDOP, b.readUnsignedShort() * 0.1));
@@ -273,67 +270,41 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(249, fmbXXX, (p, b) -> {
             p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null);
         });
+        register(251, fmbXXX, (p, b) -> {
+            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_IDLE : null);
+        });
         register(252, fmbXXX, (p, b) -> {
             p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null);
         });
         register(253, null, (p, b) -> {
             switch (b.readUnsignedByte()) {
-                case 1:
-                    p.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 2:
-                    p.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                case 3:
-                    p.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                    break;
-                default:
-                    break;
+                case 1 -> p.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                case 2 -> p.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                case 3 -> p.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
             }
         });
         register(636, fmbXXX, (p, b) -> p.set("cid4g", b.readUnsignedInt()));
+        register(662, fmbXXX, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedByte() > 0));
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
         switch (id) {
-            case 1:
-                position.set(Position.KEY_BATTERY_LEVEL, readValue(buf, length));
-                break;
-            case 2:
-                position.set("usbConnected", readValue(buf, length) == 1);
-                break;
-            case 5:
-                position.set("uptime", readValue(buf, length));
-                break;
-            case 20:
-                position.set(Position.KEY_HDOP, readValue(buf, length) * 0.1);
-                break;
-            case 21:
-                position.set(Position.KEY_VDOP, readValue(buf, length) * 0.1);
-                break;
-            case 22:
-                position.set(Position.KEY_PDOP, readValue(buf, length) * 0.1);
-                break;
-            case 67:
-                position.set(Position.KEY_BATTERY, readValue(buf, length) * 0.001);
-                break;
-            case 221:
-                position.set("button", readValue(buf, length));
-                break;
-            case 222:
+            case 1 -> position.set(Position.KEY_BATTERY_LEVEL, readValue(buf, length));
+            case 2 -> position.set("usbConnected", readValue(buf, length) == 1);
+            case 5 -> position.set("uptime", readValue(buf, length));
+            case 20 -> position.set(Position.KEY_HDOP, readValue(buf, length) * 0.1);
+            case 21 -> position.set(Position.KEY_VDOP, readValue(buf, length) * 0.1);
+            case 22 -> position.set(Position.KEY_PDOP, readValue(buf, length) * 0.1);
+            case 67 -> position.set(Position.KEY_BATTERY, readValue(buf, length) * 0.001);
+            case 221 -> position.set("button", readValue(buf, length));
+            case 222 -> {
                 if (readValue(buf, length) == 1) {
                     position.set(Position.KEY_ALARM, Position.ALARM_SOS);
                 }
-                break;
-            case 240:
-                position.set(Position.KEY_MOTION, readValue(buf, length) == 1);
-                break;
-            case 244:
-                position.set(Position.KEY_ROAMING, readValue(buf, length) == 1);
-                break;
-            default:
-                position.set(Position.PREFIX_IO + id, readValue(buf, length));
-                break;
+            }
+            case 240 -> position.set(Position.KEY_MOTION, readValue(buf, length) == 1);
+            case 244 -> position.set(Position.KEY_ROAMING, readValue(buf, length) == 1);
+            default -> position.set(Position.PREFIX_IO + id, readValue(buf, length));
         }
     }
 
@@ -597,26 +568,24 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                             int parameterId = beacon.readUnsignedByte();
                             int parameterLength = beacon.readUnsignedByte();
                             switch (parameterId) {
-                                case 0:
-                                    position.set("tag" + i + "Rssi", (int) beacon.readByte());
-                                    break;
-                                case 1:
+                                case 0 -> position.set("tag" + i + "Rssi", (int) beacon.readByte());
+                                case 1 -> {
                                     String beaconId = ByteBufUtil.hexDump(beacon.readSlice(parameterLength));
                                     position.set("tag" + i + "Id", beaconId);
-                                    break;
-                                case 2:
-                                    String beaconData = ByteBufUtil.hexDump(beacon.readSlice(parameterLength));
-                                    position.set("tag" + i + "Data", beaconData);
-                                    break;
-                                case 13:
-                                    position.set("tag" + i + "LowBattery", beacon.readUnsignedByte());
-                                    break;
-                                case 14:
-                                    position.set("tag" + i + "Battery", beacon.readUnsignedShort());
-                                    break;
-                                default:
-                                    beacon.skipBytes(parameterLength);
-                                    break;
+                                }
+                                case 2 -> {
+                                    ByteBuf beaconData = beacon.readSlice(parameterLength);
+                                    int flag = beaconData.readUnsignedByte();
+                                    if (BitUtil.check(flag, 6)) {
+                                        position.set("tag" + i + "LowBattery", true);
+                                    }
+                                    if (BitUtil.check(flag, 7)) {
+                                        position.set("tag" + i + "Voltage", beaconData.readUnsignedByte() * 10 + 2000);
+                                    }
+                                }
+                                case 13 -> position.set("tag" + i + "LowBattery", beacon.readUnsignedByte());
+                                case 14 -> position.set("tag" + i + "Battery", beacon.readUnsignedShort());
+                                default -> beacon.skipBytes(parameterLength);
                             }
                         }
                     }

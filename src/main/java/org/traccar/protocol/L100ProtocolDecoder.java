@@ -242,17 +242,9 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
         parser.next(); // reserved
 
         switch (parser.nextInt()) {
-            case 0:
-                position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                break;
-            case 2:
-                position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                break;
-            case 1:
-                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
-                break;
-            default:
-                break;
+            case 0 -> position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+            case 2 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+            case 1 -> position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
         }
 
         position.set(Position.KEY_CHARGE, parser.nextInt() == 1);
@@ -314,14 +306,8 @@ public class L100ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         switch (parser.next()) {
-            case "P":
-                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                break;
-            case "T":
-                position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
-                break;
-            default:
-                break;
+            case "P" -> position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            case "T" -> position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
         }
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));

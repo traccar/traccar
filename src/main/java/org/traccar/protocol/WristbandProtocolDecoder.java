@@ -155,31 +155,22 @@ public class WristbandProtocolDecoder extends BaseProtocolDecoder {
         String data = parser.next();
 
         switch (type) {
-            case 90:
-                sendResponse(channel, imei, version, type, getServer(channel, ','));
-                break;
-            case 91:
+            case 90 -> sendResponse(channel, imei, version, type, getServer(channel, ','));
+            case 91 -> {
                 String time = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss").format(new Date());
                 sendResponse(channel, imei, version, type, time + "|" + getServer(channel, ','));
-                break;
-            case 1:
+            }
+            case 1 -> {
                 positions.add(decodeStatus(deviceSession, data));
                 sendResponse(channel, imei, version, type, data.split(",")[1]);
-                break;
-            case 2:
+            }
+            case 2 -> {
                 for (String fragment : data.split("\\|")) {
                     positions.add(decodePosition(deviceSession, fragment));
                 }
-                break;
-            case 3:
-            case 4:
-                positions.add(decodeNetwork(deviceSession, data, type == 3));
-                break;
-            case 64:
-                sendResponse(channel, imei, version, type, data);
-                break;
-            default:
-                break;
+            }
+            case 3, 4 -> positions.add(decodeNetwork(deviceSession, data, type == 3));
+            case 64 -> sendResponse(channel, imei, version, type, data);
         }
 
         return positions.isEmpty() ? null : positions;

@@ -60,26 +60,17 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(Short value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x10:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x11:
-                return Position.ALARM_OVERSPEED;
-            case 0x14:
-                return Position.ALARM_BRAKING;
-            case 0x15:
-                return Position.ALARM_ACCELERATION;
-            case 0x30:
-                return Position.ALARM_PARKING;
-            case 0x42:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 0x43:
-                return Position.ALARM_GEOFENCE_ENTER;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x10 -> Position.ALARM_LOW_BATTERY;
+            case 0x11 -> Position.ALARM_OVERSPEED;
+            case 0x14 -> Position.ALARM_BRAKING;
+            case 0x15 -> Position.ALARM_ACCELERATION;
+            case 0x30 -> Position.ALARM_PARKING;
+            case 0x42 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x43 -> Position.ALARM_GEOFENCE_ENTER;
+            default -> null;
+        };
     }
 
     private boolean decodeGps(Position position, ByteBuf buf, int hardware) {

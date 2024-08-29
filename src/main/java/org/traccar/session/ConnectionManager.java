@@ -154,7 +154,7 @@ public class ConnectionManager implements BroadcastInterface {
             sessionsByDeviceId.put(device.getId(), deviceSession);
 
             if (oldSession == null) {
-                cacheManager.addDevice(device.getId());
+                cacheManager.addDevice(device.getId(), connectionKey);
             }
 
             return deviceSession;
@@ -198,7 +198,7 @@ public class ConnectionManager implements BroadcastInterface {
                         updateDevice(deviceSession.getDeviceId(), Device.STATUS_OFFLINE, null);
                     }
                     sessionsByDeviceId.remove(deviceSession.getDeviceId());
-                    cacheManager.removeDevice(deviceSession.getDeviceId());
+                    cacheManager.removeDevice(deviceSession.getDeviceId(), connectionKey);
                 }
             }
             unknownByEndpoint.remove(connectionKey);
@@ -213,8 +213,9 @@ public class ConnectionManager implements BroadcastInterface {
     private void removeDeviceSession(long deviceId) {
         DeviceSession deviceSession = sessionsByDeviceId.remove(deviceId);
         if (deviceSession != null) {
-            cacheManager.removeDevice(deviceId);
-            sessionsByEndpoint.computeIfPresent(deviceSession.getConnectionKey(), (e, sessions) -> {
+            ConnectionKey connectionKey = deviceSession.getConnectionKey();
+            cacheManager.removeDevice(deviceId, connectionKey);
+            sessionsByEndpoint.computeIfPresent(connectionKey, (e, sessions) -> {
                 sessions.remove(deviceSession.getUniqueId());
                 return sessions.isEmpty() ? null : sessions;
             });
@@ -241,17 +242,11 @@ public class ConnectionManager implements BroadcastInterface {
         if (!status.equals(oldStatus)) {
             String eventType;
             Map<Event, Position> events = new HashMap<>();
-            switch (status) {
-                case Device.STATUS_ONLINE:
-                    eventType = Event.TYPE_DEVICE_ONLINE;
-                    break;
-                case Device.STATUS_UNKNOWN:
-                    eventType = Event.TYPE_DEVICE_UNKNOWN;
-                    break;
-                default:
-                    eventType = Event.TYPE_DEVICE_OFFLINE;
-                    break;
-            }
+            eventType = switch (status) {
+                case Device.STATUS_ONLINE -> Event.TYPE_DEVICE_ONLINE;
+                case Device.STATUS_UNKNOWN -> Event.TYPE_DEVICE_UNKNOWN;
+                default -> Event.TYPE_DEVICE_OFFLINE;
+            };
             events.put(new Event(eventType, deviceId), null);
             notificationManager.updateEvents(events);
         }

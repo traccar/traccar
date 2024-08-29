@@ -206,16 +206,11 @@ public abstract class WindowsService {
     private final class ServiceControl implements HandlerEx {
 
         public int callback(int dwControl, int dwEventType, Pointer lpEventData, Pointer lpContext) {
-            switch (dwControl) {
-                case Winsvc.SERVICE_CONTROL_STOP:
-                case Winsvc.SERVICE_CONTROL_SHUTDOWN:
-                    reportStatus(Winsvc.SERVICE_STOP_PENDING, WinError.NO_ERROR, 5000);
-                    synchronized (waitObject) {
-                        waitObject.notifyAll();
-                    }
-                    break;
-                default:
-                    break;
+            if (dwControl == Winsvc.SERVICE_CONTROL_STOP || dwControl == Winsvc.SERVICE_CONTROL_SHUTDOWN) {
+                reportStatus(Winsvc.SERVICE_STOP_PENDING, WinError.NO_ERROR, 5000);
+                synchronized (waitObject) {
+                    waitObject.notifyAll();
+                }
             }
             return WinError.NO_ERROR;
         }

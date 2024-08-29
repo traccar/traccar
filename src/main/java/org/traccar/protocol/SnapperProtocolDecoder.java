@@ -66,13 +66,13 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf response = Unpooled.buffer();
             response.writeByte('K');
             response.writeByte(3); // protocol version
-            response.writeIntLE(0); // reserved
-            response.writeIntLE(0); // reserved
+            response.writeLongLE(0); // reserved
             response.writeShortLE(0); // encryption
             response.writeIntLE(answer.length());
+            response.writeIntLE(0); // reserved
             response.writeShortLE(index);
             response.writeByte(Checksum.sum(ByteBuffer.wrap(answer.getBytes(StandardCharsets.US_ASCII))));
-            response.writeByte(type);
+            response.writeShortLE(type);
             response.writeCharSequence(answer, StandardCharsets.US_ASCII);
             channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
@@ -93,19 +93,17 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // index
             int type = buf.readUnsignedByte();
             switch (type) {
-                case 0x00:
+                case 0x00 -> {
                     position.set(Position.KEY_POWER, buf.readUnsignedByte() * 0.1);
                     position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    break;
-                case 0x01:
+                }
+                case 0x01 -> {
                     position.set("interiorTemp", buf.readByte());
                     position.set("engineTemp", buf.readByte());
                     buf.readUnsignedByte(); // reserved
-                    break;
-                default:
-                    buf.skipBytes(3);
-                    break;
+                }
+                default -> buf.skipBytes(3);
             }
         }
     }
@@ -115,6 +113,19 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
         String content = buf.readCharSequence(buf.readableBytes(), StandardCharsets.US_ASCII).toString();
         JsonObject json = Json.createReader(new StringReader(content)).readObject();
 
+        int flags = Integer.parseInt(json.getString("f"), 16);
+        if (!BitUtil.check(flags, 3)) {
+            return;
+        }
+
+        position.setValid(BitUtil.check(flags, 1));
+        if (!BitUtil.check(flags, 6)) {
+            position.setLatitude(-position.getLatitude());
+        }
+        if (!BitUtil.check(flags, 7)) {
+            position.setLongitude(-position.getLongitude());
+        }
+
         DateFormat dateFormat = new SimpleDateFormat("ddMMyyHHmmss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         position.setTime(dateFormat.parse(json.getString("d") + json.getString("t").split("\\.")[0]));
@@ -123,15 +134,6 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(Integer.parseInt(lat.substring(0, 2)) + Double.parseDouble(lat.substring(2)) / 60);
         String lon = json.getString("lo");
         position.setLongitude(Integer.parseInt(lon.substring(0, 3)) + Double.parseDouble(lon.substring(3)) / 60);
-
-        int flags = Integer.parseInt(json.getString("f"), 16);
-        position.setValid(BitUtil.check(flags, 1));
-        if (!BitUtil.check(flags, 6)) {
-            position.setLatitude(-position.getLatitude());
-        }
-        if (!BitUtil.check(flags, 7)) {
-            position.setLongitude(-position.getLongitude());
-        }
 
         position.setAltitude(Double.parseDouble(json.getString("a")));
         position.setSpeed(Double.parseDouble(json.getString("s")));
@@ -146,7 +148,15 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        buf.readUnsignedByte(); // header
+        byte header = buf.readByte();
+        if (header == 'P') {
+            if (channel != null) {
+                ByteBuf response = Unpooled.wrappedBuffer(new byte[] {0x50, 0x4f});
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            }
+            return null;
+        }
+
         buf.readUnsignedByte(); // protocol version
         buf.readUnsignedIntLE(); // system bonus identifier
 
@@ -173,19 +183,22 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        switch (type) {
-            case MSG_SEND_EVENTS:
+        return switch (type) {
+            case MSG_SEND_EVENTS -> {
                 decodeEvents(position, buf);
                 getLastLocation(position, null); // TODO read timestamp
-                return position;
-            case MSG_SEND_TECH_INFO:
+                yield position;
+            }
+            case MSG_SEND_TECH_INFO -> {
                 decodeTechInfo(position, buf);
                 getLastLocation(position, null);
-                return position;
-            case MSG_SEND_GPS_DATA:
+                yield position;
+            }
+            case MSG_SEND_GPS_DATA -> {
                 decodeGpsData(position, buf.readSlice(length));
-                return position;
-            case MSG_SEND_CONCATENATED_PACKET:
+                yield position;
+            }
+            case MSG_SEND_CONCATENATED_PACKET -> {
                 int count = buf.readUnsignedShortLE();
                 for (int i = 0; i < count; i++) {
                     int partType = buf.readUnsignedShortLE();
@@ -205,10 +218,13 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
                             break;
                     }
                 }
-                return position;
-            default:
-                return null;
-        }
+                if (position.getFixTime() == null) {
+                    getLastLocation(position, null);
+                }
+                yield position;
+            }
+            default -> null;
+        };
     }
 
 }

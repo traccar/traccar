@@ -229,32 +229,24 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         switch (parser.nextHexInt()) {
-            case 0x16:
-            case 0x1A:
-            case 0x12:
+            case 0x16, 0x1A, 0x12 -> {
                 position.set(Position.KEY_IGNITION, false);
                 position.set(Position.KEY_MOTION, true);
-                break;
-            case 0x11:
+            }
+            case 0x11 -> {
                 position.set(Position.KEY_IGNITION, false);
                 position.set(Position.KEY_MOTION, false);
-                break;
-            case 0x21:
+            }
+            case 0x21 -> {
                 position.set(Position.KEY_IGNITION, true);
                 position.set(Position.KEY_MOTION, false);
-                break;
-            case 0x22:
+            }
+            case 0x22 -> {
                 position.set(Position.KEY_IGNITION, true);
                 position.set(Position.KEY_MOTION, true);
-                break;
-            case 0x41:
-                position.set(Position.KEY_MOTION, false);
-                break;
-            case 0x42:
-                position.set(Position.KEY_MOTION, true);
-                break;
-            default:
-                break;
+            }
+            case 0x41 -> position.set(Position.KEY_MOTION, false);
+            case 0x42 -> position.set(Position.KEY_MOTION, true);
         }
 
         position.set(Position.KEY_ICCID, parser.next());
@@ -278,6 +270,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 2, parser.next());
         if (model.equals("GV310LAU")) {
             position.set(Position.PREFIX_ADC + 3, parser.next());
+        } else {
+            parser.next(); // skip for other devices
         }
 
         position.set(Position.KEY_INPUT, parser.next());
@@ -974,15 +968,23 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (model.startsWith("GV") && !model.startsWith("GV6")) {
             position.set(Position.PREFIX_ADC + 2, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001);
         }
+        if (model.equals("GV200")) {
+            position.set(Position.PREFIX_ADC + 3, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001);
+        }
         if (model.startsWith("GV355CEU")) {
             index += 1; // reserved
         }
 
-        position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
         if (model.startsWith("GL5")) {
+            position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             index += 1; // mode selection
             position.set(Position.KEY_MOTION, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) > 0);
+        } else if (model.equals("GV200")) {
+            position.set(Position.KEY_INPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
+            position.set(Position.KEY_OUTPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
+            index += 1; // uart device type
         } else {
+            position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             if (!v[index++].isEmpty()) {
                 decodeStatus(position, Long.parseLong(v[index - 1]));
             }
@@ -990,7 +992,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 0)) {
-            position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(v[index++], 16));
+            position.set(Position.KEY_FUEL_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
         }
 
         if (BitUtil.check(mask, 1)) {
@@ -1033,36 +1035,34 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return positions;
     }
 
-    private static final Pattern PATTERN_IGN = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GT[IV]G[NF],")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
-            .number("d+,")                       // ignition off duration
-            .expression(PATTERN_LOCATION.pattern())
-            .number("(d{5}:dd:dd)?,")            // hour meter
-            .number("(d{1,7}.d)?,")              // odometer
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private Object decodeIgn(Channel channel, SocketAddress remoteAddress, String sentence) {
-        Parser parser = new Parser(PATTERN_IGN, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
+    private Object decodeIgn(
+            Channel channel, SocketAddress remoteAddress, String[] v, String type) throws ParseException {
+        int index = 0;
+        index += 1; // header
+        String protocolVersion = v[index++]; // protocol version
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
+        if (deviceSession == null) {
             return null;
         }
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
 
-        decodeLocation(position, parser);
+        String model = getDeviceModel(deviceSession, protocolVersion);
+        index += 1; // device name
+        index += 1; // duration of ignition on/off
 
-        position.set(Position.KEY_IGNITION, sentence.contains("GN"));
-        position.set(Position.KEY_HOURS, parseHours(parser.next()));
-        position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+        decodeLocation(position, model, v, index);
 
-        decodeDeviceTime(position, parser);
+        position.set(Position.KEY_IGNITION, type.contains("GN"));
+        position.set(Position.KEY_HOURS, parseHours(v[index++]));
+        position.set(Position.KEY_ODOMETER, Double.parseDouble(v[index]) * 1000);
+
+        Date time = dateFormat.parse(v[v.length - 2]);
+        if (ignoreFixTime) {
+            position.setTime(time);
+        } else {
+            position.setDeviceTime(time);
+        }
 
         return position;
     }
@@ -1495,19 +1495,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, reportType % 0x10 == 1);
         } else if (type.equals("HBM")) {
             switch (reportType % 0x10) {
-                case 0:
-                case 3:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                case 1:
-                case 4:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 2:
-                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                    break;
-                default:
-                    break;
+                case 0, 3 -> position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                case 1, 4 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                case 2 -> position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
             }
         }
 
@@ -1595,45 +1585,17 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         decodeDeviceTime(position, parser);
 
         switch (type) {
-            case "TOW":
-                position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-                break;
-            case "IDL":
-                position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
-                break;
-            case "PNA":
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
-                break;
-            case "PFA":
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
-                break;
-            case "EPN":
-            case "MPN":
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
-                break;
-            case "EPF":
-            case "MPF":
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-                break;
-            case "BPL":
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                break;
-            case "STT":
-                position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
-                break;
-            case "SWG":
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
-                break;
-            case "TMP":
-            case "TEM":
-                position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
-                break;
-            case "JDR":
-            case "JDS":
-                position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
-                break;
-            default:
-                break;
+            case "TOW" -> position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+            case "IDL" -> position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
+            case "PNA" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
+            case "PFA" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+            case "EPN", "MPN" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+            case "EPF", "MPF" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+            case "BPL" -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+            case "STT" -> position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+            case "SWG" -> position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
+            case "TMP", "TEM" -> position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
+            case "JDR", "JDS" -> position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
         }
 
         return position;
@@ -1657,80 +1619,34 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (sentence.startsWith("+ACK")) {
             result = decodeAck(channel, remoteAddress, values);
         } else {
-            switch (type) {
-                case "INF":
-                    result = decodeInf(channel, remoteAddress, sentence);
-                    break;
-                case "OBD":
-                    result = decodeObd(channel, remoteAddress, sentence);
-                    break;
-                case "CAN":
-                    result = decodeCan(channel, remoteAddress, values);
-                    break;
-                case "CTN":
-                case "FRI":
-                case "GEO":
-                case "RTL":
-                case "DOG":
-                case "STR":
-                    result = decodeFri(channel, remoteAddress, sentence);
-                    break;
-                case "ERI":
-                    result = decodeEri(channel, remoteAddress, values);
-                    break;
-                case "IGN":
-                case "IGF":
-                case "VGN":
-                case "VGF":
-                    result = decodeIgn(channel, remoteAddress, sentence);
-                    break;
-                case "LSW":
-                case "TSW":
-                    result = decodeLsw(channel, remoteAddress, sentence);
-                    break;
-                case "IDA":
-                    result = decodeIda(channel, remoteAddress, sentence);
-                    break;
-                case "WIF":
-                    result = decodeWif(channel, remoteAddress, sentence);
-                    break;
-                case "GSM":
-                    result = decodeGsm(channel, remoteAddress, sentence);
-                    break;
-                case "VER":
-                    result = decodeVer(channel, remoteAddress, sentence);
-                    break;
-                case "PNA":
-                case "PFA":
-                    result = decodePna(channel, remoteAddress, sentence);
-                    break;
-                case "DAR":
-                    result = decodeDar(channel, remoteAddress, sentence);
-                    break;
-                case "DTT":
-                    result = decodeDtt(channel, remoteAddress, sentence);
-                    break;
-                case "BAA":
-                    result = decodeBaa(channel, remoteAddress, sentence);
-                    break;
-                case "BID":
-                    result = decodeBid(channel, remoteAddress, sentence);
-                    break;
-                case "LSA":
-                    result = decodeLsa(channel, remoteAddress, sentence);
-                    break;
-                default:
-                    result = decodeOther(channel, remoteAddress, sentence, type);
-                    break;
-            }
+            result = switch (type) {
+                case "INF" -> decodeInf(channel, remoteAddress, sentence);
+                case "OBD" -> decodeObd(channel, remoteAddress, sentence);
+                case "CAN" -> decodeCan(channel, remoteAddress, values);
+                case "CTN", "FRI", "GEO", "RTL", "DOG", "STR" -> decodeFri(channel, remoteAddress, sentence);
+                case "ERI" -> decodeEri(channel, remoteAddress, values);
+                case "IGN", "IGF", "VGN", "VGF" -> decodeIgn(channel, remoteAddress, values, type);
+                case "LSW", "TSW" -> decodeLsw(channel, remoteAddress, sentence);
+                case "IDA" -> decodeIda(channel, remoteAddress, sentence);
+                case "WIF" -> decodeWif(channel, remoteAddress, sentence);
+                case "GSM" -> decodeGsm(channel, remoteAddress, sentence);
+                case "VER" -> decodeVer(channel, remoteAddress, sentence);
+                case "PNA", "PFA" -> decodePna(channel, remoteAddress, sentence);
+                case "DAR" -> decodeDar(channel, remoteAddress, sentence);
+                case "DTT" -> decodeDtt(channel, remoteAddress, sentence);
+                case "BAA" -> decodeBaa(channel, remoteAddress, sentence);
+                case "BID" -> decodeBid(channel, remoteAddress, sentence);
+                case "LSA" -> decodeLsa(channel, remoteAddress, sentence);
+                default -> decodeOther(channel, remoteAddress, sentence, type);
+            };
 
             if (result == null) {
                 result = decodeBasic(channel, remoteAddress, sentence, type);
             }
 
             if (result != null) {
-                if (result instanceof Position) {
-                    ((Position) result).set(Position.KEY_TYPE, type);
+                if (result instanceof Position position) {
+                    position.set(Position.KEY_TYPE, type);
                 } else {
                     for (Position p : (List<Position>) result) {
                         p.set(Position.KEY_TYPE, type);

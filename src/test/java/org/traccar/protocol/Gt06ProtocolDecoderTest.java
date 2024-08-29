@@ -18,8 +18,30 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttribute(decoder, binary(
-                "78782732180214123324ca0162bdf0041f45d900190b0a02d4000bc5270000ec025206040202005e07e10d0a"),
-                Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                "787817360005040002003201010018020192006a015f0324aeaf0d0a"),
+                Position.KEY_BATTERY, 4.02);
+
+        verifyPosition(decoder, binary(
+                "787840a218061b0e0f05cf021d22430aa2660b005c00014e140000026500000000024d4e02114504df06031c010007d00000000000086973105524576500c802a86fda0d0a"));
+
+        verifyAttribute(decoder, binary(
+                "79790007940B010A0B5ACE0D0A"),
+                "networkTechnology", "4G");
+
+        verifyAttribute(decoder, binary(
+                "7878293218061301261ccd0274c4ad050d7c960018000a02d4000ac3c70dbdc40b46f004210202af001784290d0a"),
+                "altitude", -31703.0);
+
+        verifyAttribute(decoder, binary(
+                "78782a31180613012b39cc0274c4dc050d7cd000180002d4000ac3c70dbdc4150100000000000002a6000ea40b0d0a"),
+                "altitude", 678.0);
+
+        verifyAttribute(decoder, binary(
+                "7878281718060e021831c6026e8acc0c361b1000140001cc00286d000f4dbf0000012ca7e001000004b2630d0a"),
+                Position.KEY_DRIVER_UNIQUE_ID, "bf0000012ca7e001");
+
+        verifyNotNull(decoder, binary(
+                "78782732180214123324ca0162bdf0041f45d900190b0a02d4000bc5270000ec025206040202005e07e10d0a"));
 
         verifyAttribute(decoder, binary(
                 "78782616170A080C0E24C0027C58AD0C2B8B0100454E0901CC0025030328E7A0005D4B13021EC373170D0A"),
@@ -493,6 +515,12 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, binary(
                 "78785195140a020c2914055D4A800209D9C014009300004556454e545f3335333337363131303032333139365f30303030303030305f323032305f31305f30325f31345f34315f32305f30352e6d70340004e3a60d0a"),
                 Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+
+        decoder.setModelOverride("LW4G-4B");
+
+        verifyAttribute(decoder, binary(
+                "78782516180516150812c804b50ee80880e40805dcf909012e000000986633460604190106c393490d0a"),
+                Position.KEY_ALARM, Position.ALARM_ACCELERATION);
 
     }
 

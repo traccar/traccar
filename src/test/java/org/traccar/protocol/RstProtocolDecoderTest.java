@@ -11,6 +11,9 @@ public class RstProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new RstProtocolDecoder(null));
 
+        verifyPosition(decoder, text(
+                "RST;L;RST-MINI-4Gv3;V10.02;004544344;177;1;09-08-2024 11:35:19;09-08-2024 11:35:21;-19.976116;-47.835190;0;89;218;1;12;0;00;B0;00;1A;02;12.24;4.00;16;23;FE;0000;01;C0;00800061;0;167;2;4;4;0;434.0000;6;0;-66;703;16662;724;255;63;00000000;FIM;"));
+
         verifyAttribute(decoder, text(
                 "RST;A;RST-MINI-4Gv3;V9.10;009521405;1;134;FIM;"),
                 Position.KEY_RESULT, "134");
