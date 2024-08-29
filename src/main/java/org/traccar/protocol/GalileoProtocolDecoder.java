@@ -227,7 +227,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(360 * bits.readUnsigned(22) / 4194304.0 - 180);
         position.setLatitude(180 * bits.readUnsigned(21) / 2097152.0 - 90);
         if (bits.readUnsigned(1) > 0) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            position.addAlarm(Position.ALARM_GENERAL);
         }
     }
 

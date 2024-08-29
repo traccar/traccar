@@ -137,7 +137,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_ALARM) {
 
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
 
         } else if (type == MSG_STATE) {
 
@@ -244,7 +244,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_WARNING) {
 
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
 
         } else if (type == MSG_REPORT) {
 

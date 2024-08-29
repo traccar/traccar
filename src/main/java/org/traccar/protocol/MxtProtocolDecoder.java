@@ -116,7 +116,7 @@ public class MxtProtocolDecoder extends BaseProtocolDecoder {
             long flags = buf.readUnsignedIntLE();
             position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
             if (BitUtil.check(flags, 1)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                position.addAlarm(Position.ALARM_GENERAL);
             }
             position.set(Position.KEY_INPUT, BitUtil.between(flags, 2, 7));
             position.set(Position.KEY_OUTPUT, BitUtil.between(flags, 7, 10));

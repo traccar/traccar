@@ -22,7 +22,7 @@ public class AlertEventHandlerTest extends BaseTest {
         AlertEventHandler alertEventHandler = new AlertEventHandler(new Config(), mock(CacheManager.class));
         
         Position position = new Position();
-        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+        position.addAlarm(Position.ALARM_GENERAL);
         List<Event> events = new ArrayList<>();
         alertEventHandler.analyzePosition(position, events::add);
         assertFalse(events.isEmpty());

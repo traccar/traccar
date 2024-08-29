@@ -256,31 +256,31 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(234, fmbXXX, (p, b) -> p.set("cngLevel", b.readUnsignedShort()));
         register(235, fmbXXX, (p, b) -> p.set("oilLevel", b.readUnsignedByte()));
         register(236, null, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
         });
         register(239, null, (p, b) -> p.set(Position.KEY_IGNITION, b.readUnsignedByte() > 0));
         register(240, null, (p, b) -> p.set(Position.KEY_MOTION, b.readUnsignedByte() > 0));
         register(241, null, (p, b) -> p.set(Position.KEY_OPERATOR, b.readUnsignedInt()));
         register(246, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_TOW : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_TOW : null);
         });
         register(247, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_ACCIDENT : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_ACCIDENT : null);
         });
         register(249, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null);
         });
         register(251, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_IDLE : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_IDLE : null);
         });
         register(252, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null);
         });
         register(253, null, (p, b) -> {
             switch (b.readUnsignedByte()) {
-                case 1 -> p.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                case 2 -> p.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                case 3 -> p.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                case 1 -> p.addAlarm(Position.ALARM_ACCELERATION);
+                case 2 -> p.addAlarm(Position.ALARM_BRAKING);
+                case 3 -> p.addAlarm(Position.ALARM_CORNERING);
             }
         });
         register(636, fmbXXX, (p, b) -> p.set("cid4g", b.readUnsignedInt()));
@@ -299,7 +299,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 221 -> position.set("button", readValue(buf, length));
             case 222 -> {
                 if (readValue(buf, length) == 1) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    position.addAlarm(Position.ALARM_SOS);
                 }
             }
             case 240 -> position.set(Position.KEY_MOTION, readValue(buf, length) == 1);

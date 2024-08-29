@@ -245,7 +245,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case 'V' -> position.set(Position.KEY_POWER,
                         Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
-                case 'W' -> position.set(Position.KEY_ALARM,
+                case 'W' -> position.addAlarm(
                         decodeAlarm(Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII))));
                 case 'X' -> {
                     String[] cells = data.toString(StandardCharsets.US_ASCII).split(";");

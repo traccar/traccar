@@ -77,13 +77,13 @@ public class ThinkPowerProtocolDecoder extends BaseProtocolDecoder {
             case 0x0A -> buf.readUnsignedByte(); // drop alarm
             case 0x10 -> {
                 if (buf.readUnsignedByte() > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    position.addAlarm(Position.ALARM_SOS);
                 }
             }
             case 0x12 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
             case 0x13 -> {
                 if (buf.readUnsignedByte() > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                    position.addAlarm(Position.ALARM_LOW_BATTERY);
                 }
             }
             case 0x16 -> buf.readUnsignedShort(); // temperature
@@ -92,12 +92,12 @@ public class ThinkPowerProtocolDecoder extends BaseProtocolDecoder {
             case 0x19 -> buf.readUnsignedByte(); // high humidity
             case 0x50 -> {
                 if (buf.readUnsignedByte() > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                    position.addAlarm(Position.ALARM_REMOVING);
                 }
             }
             case 0x51 -> {
                 if (buf.readUnsignedByte() > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                    position.addAlarm(Position.ALARM_TAMPERING);
                 }
             }
         }

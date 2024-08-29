@@ -70,9 +70,9 @@ public class XexunProtocolDecoder extends BaseProtocolDecoder {
             switch (value.toLowerCase()) {
                 case "acc on", "accstart" -> position.set(Position.KEY_IGNITION, true);
                 case "acc off", "accstop" -> position.set(Position.KEY_IGNITION, false);
-                case "help me!", "help me" -> position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                case "low battery" -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                case "move!", "moved!" -> position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+                case "help me!", "help me" -> position.addAlarm(Position.ALARM_SOS);
+                case "low battery" -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+                case "move!", "moved!" -> position.addAlarm(Position.ALARM_MOVEMENT);
             }
         }
     }

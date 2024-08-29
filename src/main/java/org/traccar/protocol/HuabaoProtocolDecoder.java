@@ -404,7 +404,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedInt()));
+        position.addAlarm(decodeAlarm(buf.readUnsignedInt()));
 
         decodeCoordinates(position, deviceSession, buf);
 
@@ -481,9 +481,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0x57:
                     int alarm = buf.readUnsignedShort();
-                    position.set(Position.KEY_ALARM, BitUtil.check(alarm, 8) ? Position.ALARM_ACCELERATION : null);
-                    position.set(Position.KEY_ALARM, BitUtil.check(alarm, 9) ? Position.ALARM_BRAKING : null);
-                    position.set(Position.KEY_ALARM, BitUtil.check(alarm, 10) ? Position.ALARM_CORNERING : null);
+                    position.addAlarm(BitUtil.check(alarm, 8) ? Position.ALARM_ACCELERATION : null);
+                    position.addAlarm(BitUtil.check(alarm, 9) ? Position.ALARM_BRAKING : null);
+                    position.addAlarm(BitUtil.check(alarm, 10) ? Position.ALARM_CORNERING : null);
                     buf.readUnsignedShort(); // external switch state
                     buf.skipBytes(4); // reserved
                     break;
@@ -519,10 +519,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedInt(); // alarm serial number
                     buf.readUnsignedByte(); // alarm status
                     switch (buf.readUnsignedByte()) {
-                        case 0x01 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                        case 0x02 -> position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                        case 0x03 -> position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                        case 0x16 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                        case 0x01 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                        case 0x02 -> position.addAlarm(Position.ALARM_BRAKING);
+                        case 0x03 -> position.addAlarm(Position.ALARM_CORNERING);
+                        case 0x16 -> position.addAlarm(Position.ALARM_ACCIDENT);
                     }
                     break;
                 case 0x69:
@@ -567,7 +567,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0xD0:
                     long userStatus = buf.readUnsignedInt();
                     if (BitUtil.check(userStatus, 3)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                        position.addAlarm(Position.ALARM_VIBRATION);
                     }
                     break;
                 case 0xD3:
@@ -747,19 +747,19 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 if (extendedType == 0x01) {
                                     long alarms = buf.readUnsignedInt();
                                     if (BitUtil.check(alarms, 0)) {
-                                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                                        position.addAlarm(Position.ALARM_ACCELERATION);
                                     }
                                     if (BitUtil.check(alarms, 1)) {
-                                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                                        position.addAlarm(Position.ALARM_BRAKING);
                                     }
                                     if (BitUtil.check(alarms, 2)) {
-                                        position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                                        position.addAlarm(Position.ALARM_CORNERING);
                                     }
                                     if (BitUtil.check(alarms, 3)) {
-                                        position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                                        position.addAlarm(Position.ALARM_ACCIDENT);
                                     }
                                     if (BitUtil.check(alarms, 4)) {
-                                        position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                                        position.addAlarm(Position.ALARM_TAMPERING);
                                     }
                                 } else {
                                     buf.skipBytes(extendedLength);
@@ -812,27 +812,27 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         if (product == 1 || product == 2) {
             if (BitUtil.check(alarm, 0)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                position.addAlarm(Position.ALARM_LOW_POWER);
             }
         } else if (product == 3) {
             position.set(Position.KEY_BLOCKED, BitUtil.check(status, 5));
             if (BitUtil.check(alarm, 0)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                position.addAlarm(Position.ALARM_OVERSPEED);
             }
             if (BitUtil.check(alarm, 1)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                position.addAlarm(Position.ALARM_LOW_POWER);
             }
             if (BitUtil.check(alarm, 2)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                position.addAlarm(Position.ALARM_VIBRATION);
             }
             if (BitUtil.check(alarm, 3)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                position.addAlarm(Position.ALARM_LOW_BATTERY);
             }
             if (BitUtil.check(alarm, 5)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+                position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
             }
             if (BitUtil.check(alarm, 6)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+                position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
             }
         }
 
@@ -1002,36 +1002,36 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         int length = buf.readUnsignedByte();
                         switch (id) {
                             case 0x01:
-                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+                                position.addAlarm(Position.ALARM_POWER_RESTORED);
                                 break;
                             case 0x02:
-                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                                position.addAlarm(Position.ALARM_POWER_CUT);
                                 break;
                             case 0x1A:
-                                position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                                position.addAlarm(Position.ALARM_ACCELERATION);
                                 break;
                             case 0x1B:
-                                position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                                position.addAlarm(Position.ALARM_BRAKING);
                                 break;
                             case 0x1C:
-                                position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                                position.addAlarm(Position.ALARM_CORNERING);
                                 break;
                             case 0x1D:
                             case 0x1E:
                             case 0x1F:
-                                position.set(Position.KEY_ALARM, Position.ALARM_LANE_CHANGE);
+                                position.addAlarm(Position.ALARM_LANE_CHANGE);
                                 break;
                             case 0x23:
-                                position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+                                position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
                                 break;
                             case 0x26:
                             case 0x27:
                             case 0x28:
-                                position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                                position.addAlarm(Position.ALARM_ACCIDENT);
                                 break;
                             case 0x31:
                             case 0x32:
-                                position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
+                                position.addAlarm(Position.ALARM_DOOR);
                                 break;
                             default:
                                 break;
@@ -1051,11 +1051,11 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x15:
                     int event = buf.readInt();
                     switch (event) {
-                        case 51 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                        case 52 -> position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                        case 53 -> position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                        case 54 -> position.set(Position.KEY_ALARM, Position.ALARM_LANE_CHANGE);
-                        case 56 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                        case 51 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                        case 52 -> position.addAlarm(Position.ALARM_BRAKING);
+                        case 53 -> position.addAlarm(Position.ALARM_CORNERING);
+                        case 54 -> position.addAlarm(Position.ALARM_LANE_CHANGE);
+                        case 56 -> position.addAlarm(Position.ALARM_ACCIDENT);
                         default -> position.set(Position.KEY_EVENT, event);
                     }
                     getLastLocation(position, time);

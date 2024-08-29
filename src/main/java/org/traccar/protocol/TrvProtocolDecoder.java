@@ -250,8 +250,8 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             if (parser.hasNext()) {
                 switch (parser.nextInt()) {
-                    case 1 -> position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                    case 5, 6 -> position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
+                    case 1 -> position.addAlarm(Position.ALARM_SOS);
+                    case 5, 6 -> position.addAlarm(Position.ALARM_FALL_DOWN);
                 }
             }
 

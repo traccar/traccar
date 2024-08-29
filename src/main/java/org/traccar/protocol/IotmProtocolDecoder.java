@@ -63,7 +63,7 @@ public class IotmProtocolDecoder extends BaseMqttProtocolDecoder {
             case 0x0002 -> position.set(Position.KEY_MOTION, sensorType > 0);
             case 0x0008, 0x009B -> {
                 if (sensorType > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                    position.addAlarm(Position.ALARM_JAMMING);
                 }
             }
             case 0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015 -> {

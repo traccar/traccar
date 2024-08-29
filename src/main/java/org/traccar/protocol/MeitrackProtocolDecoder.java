@@ -145,7 +145,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         int event = parser.nextInt();
         position.set(Position.KEY_EVENT, event);
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
 
         position.setLatitude(parser.nextDouble());
         position.setLongitude(parser.nextDouble());

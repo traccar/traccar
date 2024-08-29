@@ -155,7 +155,7 @@ public class ThurayaProtocolDecoder extends BaseProtocolDecoder {
             decodeLocation(buf, position);
 
             int event = buf.readUnsignedByte();
-            position.set(Position.KEY_ALARM, decodeAlarm(event));
+            position.addAlarm(decodeAlarm(event));
             position.set(Position.KEY_EVENT, event);
             position.set("eventData", readString(buf));
 

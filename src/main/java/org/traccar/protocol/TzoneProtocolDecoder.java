@@ -311,7 +311,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         blockEnd = buf.readerIndex() + blockLength;
 
         if (hardware == 0x407 || blockLength >= 13) {
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
             position.set("terminalInfo", buf.readUnsignedByte());
 
             if (hardware != 0x407) {
@@ -321,7 +321,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                 status = buf.readUnsignedByte();
                 position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 4));
                 if (BitUtil.check(status, 0)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    position.addAlarm(Position.ALARM_SOS);
                 }
             }
 

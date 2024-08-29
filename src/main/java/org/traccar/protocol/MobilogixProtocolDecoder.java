@@ -108,7 +108,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_TYPE, type);
-        position.set(Position.KEY_ALARM, decodeAlarm(type));
+        position.addAlarm(decodeAlarm(type));
 
         int status = parser.nextHexInt();
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));

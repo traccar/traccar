@@ -68,7 +68,7 @@ public class DraginoProtocolDecoder extends BaseHttpProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, decoded.getJsonNumber("Tem").doubleValue());
 
         if (Boolean.parseBoolean(decoded.getString("ALARM_status"))) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         }
 
         sendResponse(channel, HttpResponseStatus.OK);

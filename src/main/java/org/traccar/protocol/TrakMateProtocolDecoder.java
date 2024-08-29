@@ -141,7 +141,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         parser.next(); // seq
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
+        position.addAlarm(decodeAlarm(parser.nextInt()));
         parser.next(); // alert status or data
 
         position.setLatitude(parser.nextDouble());

@@ -90,10 +90,10 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             short alarm = buf.readUnsignedByte();
             switch (alarm) {
-                case 1 -> position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                case 2 -> position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                case 3 -> position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
-                case 9 -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+                case 1 -> position.addAlarm(Position.ALARM_SOS);
+                case 2 -> position.addAlarm(Position.ALARM_OVERSPEED);
+                case 3 -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                case 9 -> position.addAlarm(Position.ALARM_POWER_OFF);
             }
 
             if (newFormat) {

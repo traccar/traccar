@@ -88,7 +88,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Position position = new Position(getProtocolName());
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+        position.addAlarm(decodeAlarm(parser.next()));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {

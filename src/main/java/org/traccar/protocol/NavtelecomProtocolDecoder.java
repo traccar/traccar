@@ -210,9 +210,7 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                     break;
                                 case 4:
                                     value = buf.readUnsignedByte();
-                                    position.set(
-                                            Position.KEY_ALARM,
-                                            BitUtil.check(value, 2) ? Position.ALARM_GENERAL : null);
+                                    position.addAlarm(BitUtil.check(value, 2) ? Position.ALARM_GENERAL : null);
                                     int guardMode = BitUtil.between(value, 3, 4);
                                     position.set(Position.KEY_ARMED, (0 < guardMode) && (guardMode < 3));
                                     break;

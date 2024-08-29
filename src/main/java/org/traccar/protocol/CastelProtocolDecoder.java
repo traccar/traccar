@@ -182,9 +182,9 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShortLE(); // current fuel consumption
 
         long state = buf.readUnsignedIntLE();
-        position.set(Position.KEY_ALARM, BitUtil.check(state, 4) ? Position.ALARM_ACCELERATION : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(state, 5) ? Position.ALARM_BRAKING : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(state, 6) ? Position.ALARM_IDLE : null);
+        position.addAlarm(BitUtil.check(state, 4) ? Position.ALARM_ACCELERATION : null);
+        position.addAlarm(BitUtil.check(state, 5) ? Position.ALARM_BRAKING : null);
+        position.addAlarm(BitUtil.check(state, 6) ? Position.ALARM_IDLE : null);
         position.set(Position.KEY_IGNITION, BitUtil.check(state, 2 * 8 + 2));
         position.set(Position.KEY_STATUS, state);
 
@@ -242,24 +242,24 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeAlarm(Position position, int alarm) {
         switch (alarm) {
-            case 0x01 -> position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-            case 0x02 -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
-            case 0x03 -> position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
-            case 0x04 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-            case 0x05 -> position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-            case 0x06 -> position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
-            case 0x07 -> position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-            case 0x08 -> position.set(Position.KEY_ALARM, Position.ALARM_HIGH_RPM);
-            case 0x09 -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
-            case 0x0B -> position.set(Position.KEY_ALARM, Position.ALARM_LANE_CHANGE);
-            case 0x0C -> position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-            case 0x0D -> position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
-            case 0x0E -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
-            case 0x11 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
-            case 0x12 -> position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+            case 0x01 -> position.addAlarm(Position.ALARM_OVERSPEED);
+            case 0x02 -> position.addAlarm(Position.ALARM_LOW_POWER);
+            case 0x03 -> position.addAlarm(Position.ALARM_TEMPERATURE);
+            case 0x04 -> position.addAlarm(Position.ALARM_ACCELERATION);
+            case 0x05 -> position.addAlarm(Position.ALARM_BRAKING);
+            case 0x06 -> position.addAlarm(Position.ALARM_IDLE);
+            case 0x07 -> position.addAlarm(Position.ALARM_TOW);
+            case 0x08 -> position.addAlarm(Position.ALARM_HIGH_RPM);
+            case 0x09 -> position.addAlarm(Position.ALARM_POWER_ON);
+            case 0x0B -> position.addAlarm(Position.ALARM_LANE_CHANGE);
+            case 0x0C -> position.addAlarm(Position.ALARM_CORNERING);
+            case 0x0D -> position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
+            case 0x0E -> position.addAlarm(Position.ALARM_POWER_OFF);
+            case 0x11 -> position.addAlarm(Position.ALARM_ACCIDENT);
+            case 0x12 -> position.addAlarm(Position.ALARM_TAMPERING);
             case 0x16 -> position.set(Position.KEY_IGNITION, true);
             case 0x17 -> position.set(Position.KEY_IGNITION, false);
-            case 0x1C -> position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+            case 0x1C -> position.addAlarm(Position.ALARM_VIBRATION);
         }
     }
 

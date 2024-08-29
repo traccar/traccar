@@ -255,7 +255,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     int status = buf.readUnsignedShort();
                     position.set(Position.KEY_IGNITION, BitUtil.check(status, 9));
                     position.set(Position.KEY_STATUS, status);
-                    position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedShort()));
+                    position.addAlarm(decodeAlarm(buf.readUnsignedShort()));
                 }
                 case DATA_ODOMETER -> position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                 case DATA_ADC -> decodeAdc(position, buf, length);

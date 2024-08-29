@@ -112,7 +112,7 @@ public class B2316ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (item.containsKey("wn")) {
-                position.set(Position.KEY_ALARM, decodeAlarm(item.getInt("wn")));
+                position.addAlarm(decodeAlarm(item.getInt("wn")));
             }
             if (item.containsKey("ic")) {
                 position.set(Position.KEY_ICCID, item.getString("ic"));

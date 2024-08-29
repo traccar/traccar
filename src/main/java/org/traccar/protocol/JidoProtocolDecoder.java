@@ -90,7 +90,7 @@ public class JidoProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
+        position.addAlarm(decodeAlarm(parser.nextInt()));
 
         if (parser.hasNext()) {
             position.setValid(parser.next().equals("A"));

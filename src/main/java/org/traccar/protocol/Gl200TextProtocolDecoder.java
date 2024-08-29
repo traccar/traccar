@@ -1235,7 +1235,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        position.set(Position.KEY_ALARM, sentence.contains("PNA") ? Position.ALARM_POWER_ON : Position.ALARM_POWER_OFF);
+        position.addAlarm(sentence.contains("PNA") ? Position.ALARM_POWER_ON : Position.ALARM_POWER_OFF);
 
         return position;
     }
@@ -1266,7 +1266,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         int warningType = parser.nextInt();
         int fatigueDegree = parser.nextInt();
         if (warningType == 1) {
-            position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+            position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
             position.set("fatigueDegree", fatigueDegree);
         } else {
             position.set("warningType", warningType);
@@ -1529,16 +1529,16 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (type.equals("NMR")) {
             position.set(Position.KEY_MOTION, reportType == 1);
         } else if (type.equals("SOS")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         } else if (type.equals("DIS")) {
             position.set(Position.PREFIX_IN + reportType / 0x10, reportType % 0x10 == 1);
         } else if (type.equals("IGL")) {
             position.set(Position.KEY_IGNITION, reportType % 0x10 == 1);
         } else if (type.equals("HBM")) {
             switch (reportType % 0x10) {
-                case 0, 3 -> position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                case 1, 4 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                case 2 -> position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                case 0, 3 -> position.addAlarm(Position.ALARM_BRAKING);
+                case 1, 4 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                case 2 -> position.addAlarm(Position.ALARM_CORNERING);
             }
         }
 
@@ -1626,17 +1626,17 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         decodeDeviceTime(position, parser);
 
         switch (type) {
-            case "TOW" -> position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-            case "IDL" -> position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
-            case "PNA" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
-            case "PFA" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
-            case "EPN", "MPN" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
-            case "EPF", "MPF" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-            case "BPL" -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-            case "STT" -> position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
-            case "SWG" -> position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
-            case "TMP", "TEM" -> position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
-            case "JDR", "JDS" -> position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+            case "TOW" -> position.addAlarm(Position.ALARM_TOW);
+            case "IDL" -> position.addAlarm(Position.ALARM_IDLE);
+            case "PNA" -> position.addAlarm(Position.ALARM_POWER_ON);
+            case "PFA" -> position.addAlarm(Position.ALARM_POWER_OFF);
+            case "EPN", "MPN" -> position.addAlarm(Position.ALARM_POWER_RESTORED);
+            case "EPF", "MPF" -> position.addAlarm(Position.ALARM_POWER_CUT);
+            case "BPL" -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+            case "STT" -> position.addAlarm(Position.ALARM_MOVEMENT);
+            case "SWG" -> position.addAlarm(Position.ALARM_GEOFENCE);
+            case "TMP", "TEM" -> position.addAlarm(Position.ALARM_TEMPERATURE);
+            case "JDR", "JDS" -> position.addAlarm(Position.ALARM_JAMMING);
         }
 
         return position;

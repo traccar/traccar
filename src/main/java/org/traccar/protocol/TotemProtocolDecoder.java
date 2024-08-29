@@ -265,7 +265,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm123(Short.parseShort(parser.next(), 16)));
+            position.addAlarm(decodeAlarm123(Short.parseShort(parser.next(), 16)));
         }
         DateBuilder dateBuilder = new DateBuilder();
         int year = 0, month = 0, day = 0;
@@ -304,7 +304,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         int io = parser.nextBinInt();
         position.set(Position.KEY_STATUS, io);
         if (pattern == PATTERN1) {
-            position.set(Position.KEY_ALARM, BitUtil.check(io, 0) ? Position.ALARM_SOS : null);
+            position.addAlarm(BitUtil.check(io, 0) ? Position.ALARM_SOS : null);
             position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 4));
             position.set(Position.PREFIX_IN + 4, BitUtil.check(io, 5));
             position.set(Position.PREFIX_IN + 1, BitUtil.check(io, 6));
@@ -355,7 +355,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm123(Short.parseShort(parser.next(), 16)));
+            position.addAlarm(decodeAlarm123(Short.parseShort(parser.next(), 16)));
         }
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
@@ -410,17 +410,17 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, decodeAlarm4(type));
+        position.addAlarm(decodeAlarm4(type));
 
         long status = parser.nextHexLong();
 
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 1) ? Position.ALARM_SOS : null);
+        position.addAlarm(BitUtil.check(status, 32 - 1) ? Position.ALARM_SOS : null);
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 32 - 2));
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 3) ? Position.ALARM_OVERSPEED : null);
+        position.addAlarm(BitUtil.check(status, 32 - 3) ? Position.ALARM_OVERSPEED : null);
         position.set(Position.KEY_CHARGE, BitUtil.check(status, 32 - 4));
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 7) ? Position.ALARM_GPS_ANTENNA_CUT : null);
+        position.addAlarm(BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
+        position.addAlarm(BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
+        position.addAlarm(BitUtil.check(status, 32 - 7) ? Position.ALARM_GPS_ANTENNA_CUT : null);
         position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 32 - 9));
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 32 - 10));
         position.set(Position.PREFIX_OUT + 3, BitUtil.check(status, 32 - 11));

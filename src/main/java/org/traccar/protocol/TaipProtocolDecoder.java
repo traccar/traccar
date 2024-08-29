@@ -230,9 +230,9 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         if (event != null) {
             position.set(Position.KEY_EVENT, event);
             if (sentence.charAt(5) == ',') {
-                position.set(Position.KEY_ALARM, decodeAlarm2(event));
+                position.addAlarm(decodeAlarm2(event));
             } else {
-                position.set(Position.KEY_ALARM, decodeAlarm(event));
+                position.addAlarm(decodeAlarm(event));
             }
         }
 

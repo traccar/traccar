@@ -117,7 +117,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // operator / configuration flags
         buf.readUnsignedByte(); // reason data
         short event = buf.readUnsignedByte();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
 
         position.set("mode", buf.readUnsignedByte());

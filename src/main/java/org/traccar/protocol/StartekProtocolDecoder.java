@@ -157,7 +157,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
         if (event == 53) {
             position.set(Position.KEY_DRIVER_UNIQUE_ID, eventData);
         } else {
-            position.set(Position.KEY_ALARM, decodeAlarm(event));
+            position.addAlarm(decodeAlarm(event));
         }
 
         position.setTime(parser.nextDateTime());

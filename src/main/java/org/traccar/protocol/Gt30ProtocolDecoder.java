@@ -82,7 +82,7 @@ public class Gt30ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm(parser.next().charAt(0)));
+            position.addAlarm(decodeAlarm(parser.next().charAt(0)));
         }
 
         DateBuilder dateBuilder = new DateBuilder()

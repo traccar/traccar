@@ -395,25 +395,25 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         switch (BitUtil.between(status, 3, 6)) {
             case 1:
-                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                position.addAlarm(Position.ALARM_VIBRATION);
                 break;
             case 2:
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                position.addAlarm(Position.ALARM_POWER_CUT);
                 break;
             case 3:
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                position.addAlarm(Position.ALARM_LOW_BATTERY);
                 break;
             case 4:
-                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                position.addAlarm(Position.ALARM_SOS);
                 break;
             case 6:
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
+                position.addAlarm(Position.ALARM_GEOFENCE);
                 break;
             case 7:
                 if (variant == Variant.VXT01) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                    position.addAlarm(Position.ALARM_OVERSPEED);
                 } else {
-                    position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                    position.addAlarm(Position.ALARM_REMOVING);
                 }
                 break;
             default:
@@ -823,7 +823,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     int satellites = BitUtil.between(signal, 10, 15) + BitUtil.between(signal, 5, 10);
                     position.set(Position.KEY_SATELLITES, satellites);
                     position.set(Position.KEY_RSSI, BitUtil.to(signal, 5));
-                    position.set(Position.KEY_ALARM, decodeAlarm(
+                    position.addAlarm(decodeAlarm(
                             buf.readUnsignedByte(), getDeviceModel(deviceSession)));
                     buf.readUnsignedByte(); // language
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
@@ -842,7 +842,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     short alarmExtension = buf.readUnsignedByte();
                     if (variant != Variant.VXT01) {
-                        position.set(Position.KEY_ALARM, decodeAlarm(alarmExtension, getDeviceModel(deviceSession)));
+                        position.addAlarm(decodeAlarm(alarmExtension, getDeviceModel(deviceSession)));
                     }
                 }
             }
@@ -903,7 +903,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     decodeStatus(position, buf);
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    position.set(Position.KEY_ALARM, decodeAlarm(
+                    position.addAlarm(decodeAlarm(
                             buf.readUnsignedByte(), getDeviceModel(deviceSession)));
                     position.set("oil", buf.readUnsignedShort());
                     int temperature = buf.readUnsignedByte();
@@ -916,7 +916,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     position.set(Position.KEY_CARD, buf.readCharSequence(
                             buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString());
-                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
+                    position.addAlarm(buf.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
                     position.set("cardStatus", buf.readUnsignedByte());
                     position.set(Position.KEY_DRIVING_TIME, buf.readUnsignedShort());
                 }
@@ -1003,17 +1003,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             short event = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, event);
             switch (event) {
-                case 0x01 -> position.set(
-                        Position.KEY_ALARM, extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
-                case 0x0E -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
-                case 0x76 -> position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
-                case 0x80 -> position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
-                case 0x87 -> position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                case 0x88 -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-                case 0x90 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                case 0x91 -> position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                case 0x92 -> position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                case 0x93 -> position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                case 0x01 -> position.addAlarm(extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
+                case 0x0E -> position.addAlarm(Position.ALARM_LOW_POWER);
+                case 0x76 -> position.addAlarm(Position.ALARM_TEMPERATURE);
+                case 0x80 -> position.addAlarm(Position.ALARM_VIBRATION);
+                case 0x87 -> position.addAlarm(Position.ALARM_OVERSPEED);
+                case 0x88 -> position.addAlarm(Position.ALARM_POWER_CUT);
+                case 0x90 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                case 0x91 -> position.addAlarm(Position.ALARM_BRAKING);
+                case 0x92 -> position.addAlarm(Position.ALARM_CORNERING);
+                case 0x93 -> position.addAlarm(Position.ALARM_ACCIDENT);
             }
 
         } else {
@@ -1213,9 +1212,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 switch (status) {
                     case 0xA0 -> position.set(Position.KEY_ARMED, true);
                     case 0xA1 -> position.set(Position.KEY_ARMED, false);
-                    case 0xA2, 0xA3 -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                    case 0xA4 -> position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
-                    case 0xA5 -> position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
+                    case 0xA2, 0xA3 -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+                    case 0xA4 -> position.addAlarm(Position.ALARM_GENERAL);
+                    case 0xA5 -> position.addAlarm(Position.ALARM_DOOR);
                 }
             }
 
@@ -1287,16 +1286,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         int event = buf.readUnsignedByte();
                         switch (event) {
                             case 0x11:
-                                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                                position.addAlarm(Position.ALARM_LOW_BATTERY);
                                 break;
                             case 0x12:
-                                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                                position.addAlarm(Position.ALARM_LOW_POWER);
                                 break;
                             case 0x13:
-                                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                                position.addAlarm(Position.ALARM_POWER_CUT);
                                 break;
                             case 0x14:
-                                position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                                position.addAlarm(Position.ALARM_REMOVING);
                                 break;
                             default:
                                 break;

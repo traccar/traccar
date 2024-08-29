@@ -76,12 +76,12 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
 
         String type = parser.next();
         if (type.equals("CMD-KEY")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         } else if (type.startsWith("ALM-B")) {
             if (Character.getNumericValue(type.charAt(5)) % 2 > 0) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+                position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
             } else {
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+                position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
             }
         }
 

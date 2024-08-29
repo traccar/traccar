@@ -178,7 +178,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x02:
                         long alarm = buf.readUnsignedIntLE();
-                        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
+                        position.addAlarm(decodeAlarm(alarm));
                         if (BitUtil.check(alarm, 31)) {
                             position.set("bark", true);
                         }

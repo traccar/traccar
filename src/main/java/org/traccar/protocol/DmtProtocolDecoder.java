@@ -152,7 +152,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceTime(new Date(1356998400000L + buf.readUnsignedIntLE() * 1000)); // since 1 Jan 2013
 
             int event = buf.readUnsignedByte();
-            position.set(Position.KEY_ALARM, decodeAlarm(event));
+            position.addAlarm(decodeAlarm(event));
             position.set(Position.KEY_EVENT, event);
 
             while (buf.readerIndex() < recordEnd) {
@@ -187,9 +187,9 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
 
                     if (!BitUtil.check(status, 1)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                        position.addAlarm(Position.ALARM_LOW_BATTERY);
                     } else if (BitUtil.check(status, 6)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                        position.addAlarm(Position.ALARM_TAMPERING);
                     }
 
                     position.set(Position.KEY_INPUT, input);

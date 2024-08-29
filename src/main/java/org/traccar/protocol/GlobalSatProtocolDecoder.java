@@ -206,7 +206,7 @@ public class GlobalSatProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 'P':
                     if (value.length() == 4) {
-                        position.set(Position.KEY_ALARM, decodeAlarm(Integer.parseInt(value, 16)));
+                        position.addAlarm(decodeAlarm(Integer.parseInt(value, 16)));
                     }
                     break;
                 case 'Z':

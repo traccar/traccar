@@ -99,8 +99,8 @@ public class NiotProtocolDecoder extends BaseProtocolDecoder {
             int statusX = buf.readUnsignedByte();
             position.setValid(BitUtil.check(statusX, 7));
             switch (BitUtil.between(statusX, 3, 5)) {
-                case 0b10 -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-                case 0b01 -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                case 0b10 -> position.addAlarm(Position.ALARM_POWER_CUT);
+                case 0b01 -> position.addAlarm(Position.ALARM_LOW_POWER);
             }
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
@@ -108,7 +108,7 @@ public class NiotProtocolDecoder extends BaseProtocolDecoder {
             int statusA = buf.readUnsignedByte();
             position.set(Position.KEY_IGNITION, !BitUtil.check(statusA, 7));
             if (!BitUtil.check(statusA, 6)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                position.addAlarm(Position.ALARM_OVERSPEED);
             }
 
             buf.readUnsignedByte(); // statusB
@@ -132,8 +132,8 @@ public class NiotProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x0002:
                         int statusD = buf.readUnsignedByte();
-                        position.set(Position.KEY_ALARM, BitUtil.check(statusD, 5) ? Position.ALARM_REMOVING : null);
-                        position.set(Position.KEY_ALARM, BitUtil.check(statusD, 4) ? Position.ALARM_TAMPERING : null);
+                        position.addAlarm(BitUtil.check(statusD, 5) ? Position.ALARM_REMOVING : null);
+                        position.addAlarm(BitUtil.check(statusD, 4) ? Position.ALARM_TAMPERING : null);
                         buf.readUnsignedByte(); // run mode
                         buf.readUnsignedByte(); // reserved
                         break;

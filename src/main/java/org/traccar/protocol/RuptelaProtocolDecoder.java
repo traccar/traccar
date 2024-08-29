@@ -115,7 +115,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 78, 79, 80 -> position.set(Position.PREFIX_TEMP + (id - 78), readValue(buf, length, true) * 0.1);
             case 88 -> {
                 if (readValue(buf, length, false) > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                    position.addAlarm(Position.ALARM_JAMMING);
                 }
             }
             case 94 -> position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.25);
@@ -124,12 +124,12 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 100 -> position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, false) / 20.0);
             case 134 -> {
                 if (readValue(buf, length, false) > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    position.addAlarm(Position.ALARM_BRAKING);
                 }
             }
             case 136 -> {
                 if (readValue(buf, length, false) > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    position.addAlarm(Position.ALARM_ACCELERATION);
                 }
             }
             case 150 -> position.set(Position.KEY_OPERATOR, readValue(buf, length, false));
@@ -144,23 +144,23 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 251, 409 -> position.set(Position.KEY_IGNITION, readValue(buf, length, false) > 0);
             case 410 -> {
                 if (readValue(buf, length, false) > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+                    position.addAlarm(Position.ALARM_TOW);
                 }
             }
             case 411 -> {
                 if (readValue(buf, length, false) > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                    position.addAlarm(Position.ALARM_ACCIDENT);
                 }
             }
             case 415 -> {
                 if (readValue(buf, length, false) == 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
+                    position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
                 }
             }
             case 645 -> position.set(Position.KEY_OBD_ODOMETER, readValue(buf, length, false) * 1000);
             case 758 -> {
                 if (readValue(buf, length, false) == 1) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                    position.addAlarm(Position.ALARM_TAMPERING);
                 }
             }
             default -> position.set(Position.PREFIX_IO + id, readValue(buf, length, false));

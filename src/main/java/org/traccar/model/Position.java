@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -322,6 +322,16 @@ public class Position extends Message {
             this.geofenceIds = geofenceIds.stream().map(Number::longValue).collect(Collectors.toList());
         } else {
             this.geofenceIds = null;
+        }
+    }
+
+    public void addAlarm(String alarm) {
+        if (alarm != null) {
+            if (hasAttribute(KEY_ALARM)) {
+                set(KEY_ALARM, getAttributes().get(KEY_ALARM) + "," + alarm);
+            } else {
+                set(KEY_ALARM, alarm);
+            }
         }
     }
 
