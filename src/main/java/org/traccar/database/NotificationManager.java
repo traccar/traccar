@@ -114,7 +114,7 @@ public class NotificationManager {
                     Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
                     return calendar == null || calendar.checkMoment(event.getEventTime());
                 })
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
 
         Device device = cacheManager.getObject(Device.class, event.getDeviceId());
         LOGGER.info(

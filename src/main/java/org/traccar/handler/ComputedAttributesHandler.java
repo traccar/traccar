@@ -143,7 +143,7 @@ public class ComputedAttributesHandler extends BasePositionHandler {
     public void handlePosition(Position position, Callback callback) {
         var attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class).stream()
                 .sorted(Comparator.comparing(Attribute::getPriority).reversed())
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
                 try {
