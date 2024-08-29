@@ -11,6 +11,9 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
+        verifyAttributes(decoder, buffer(
+                "+RESP:GTLBS,660400,863574046265138,GL50BLITE,0,0,92,,2,,,0000,0204,0008,0cee,b951,18,,0204,0008,0cee,cd83,15,,0204,0008,0cee,3994,13,,,,,,,,,,,,,,,,,,,,0204,0008,0cee,d071,11,,20240826085102,00C6$"));
+
         /*verifyAttributes(decoder, buffer(
                 "+BUFF:GTERI,358803,862364030181926,gv200,00000011,,51,1,1,21.0,98,30.2,38.249517,24.008269,20240817131401,0420,0004,75A0,412C,00,84795.4,,,,,01,00,0,,20240817131358,F127$"));*/
 

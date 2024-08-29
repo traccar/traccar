@@ -1454,6 +1454,47 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Object decodeLbs(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
+        int index = 0;
+        index += 1; // header
+        index += 1; // protocol version
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
+        if (deviceSession == null) {
+            return null;
+        }
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        index += 1; // device name
+        index += 1; // trigger type
+        index += 1; // report type
+        position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index++]));
+        index += 1; // reserved
+        index += 1; // motion status
+        index += 1; // reserved
+        index += 1; // reserved
+        index += 1; // component expansion mask
+
+        Network network = new Network();
+        for (int i = 0; i <= 6; i++) {
+            if (!v[index + 1].isEmpty()) {
+                network.addCellTower(CellTower.from(
+                        Integer.parseInt(v[index++]), Integer.parseInt(v[index++]),
+                        Integer.parseInt(v[index++], 16), Integer.parseInt(v[index++], 16),
+                        Integer.parseInt(v[index++])));
+            } else {
+                index += 5; // empty
+            }
+            index += 1; // reserved
+        }
+        position.setNetwork(network);
+
+        Date time = dateFormat.parse(v[v.length - 2]);
+        getLastLocation(position, time);
+
+        return position;
+    }
+
     private static final Pattern PATTERN = new PatternBuilder()
             .text("+").expression("(?:RESP|BUFF):GT...,")
             .expression("(?:.{6}|.{10})?,")      // protocol version
@@ -1637,6 +1678,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "BAA" -> decodeBaa(channel, remoteAddress, sentence);
                 case "BID" -> decodeBid(channel, remoteAddress, sentence);
                 case "LSA" -> decodeLsa(channel, remoteAddress, sentence);
+                case "LBS" -> decodeLbs(channel, remoteAddress, values);
                 default -> decodeOther(channel, remoteAddress, sentence, type);
             };
 
