@@ -22,31 +22,39 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
-public class AlertEventHandler extends BaseEventHandler {
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+public class AlarmEventHandler extends BaseEventHandler {
 
     private final CacheManager cacheManager;
-    private final boolean ignoreDuplicateAlerts;
+    private final boolean ignoreDuplicates;
 
     @Inject
-    public AlertEventHandler(Config config, CacheManager cacheManager) {
+    public AlarmEventHandler(Config config, CacheManager cacheManager) {
         this.cacheManager = cacheManager;
-        ignoreDuplicateAlerts = config.getBoolean(Keys.EVENT_IGNORE_DUPLICATE_ALERTS);
+        ignoreDuplicates = config.getBoolean(Keys.EVENT_IGNORE_DUPLICATE_ALERTS);
     }
 
     @Override
     public void analyzePosition(Position position, Callback callback) {
-        Object alarm = position.getAttributes().get(Position.KEY_ALARM);
-        if (alarm != null) {
-            boolean ignoreAlert = false;
-            if (ignoreDuplicateAlerts) {
+        String alarmString = position.getString(Position.KEY_ALARM);
+        if (alarmString != null) {
+            Set<String> alarms = new HashSet<>(Arrays.asList(alarmString.split(",")));
+            if (ignoreDuplicates) {
                 Position lastPosition = cacheManager.getPosition(position.getDeviceId());
-                if (lastPosition != null && alarm.equals(lastPosition.getAttributes().get(Position.KEY_ALARM))) {
-                    ignoreAlert = true;
+                if (lastPosition != null) {
+                    String lastAlarmString = lastPosition.getString(Position.KEY_ALARM);
+                    if (lastAlarmString != null) {
+                        Set<String> lastAlarms = new HashSet<>(Arrays.asList(lastAlarmString.split(",")));
+                        alarms.removeAll(lastAlarms);
+                    }
                 }
             }
-            if (!ignoreAlert) {
+            for (String alarm : alarms) {
                 Event event = new Event(Event.TYPE_ALARM, position);
-                event.set(Position.KEY_ALARM, (String) alarm);
+                event.set(Position.KEY_ALARM, alarm);
                 callback.eventDetected(event);
             }
         }
