@@ -29,6 +29,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,7 +72,8 @@ public class Calendar extends ExtendedModel {
         if (calendar != null) {
             var period = new Period<>(date.toInstant(), Duration.ZERO);
             return calendar.<VEvent>getComponents(CalendarComponent.VEVENT).stream()
-                    .flatMap(c -> c.<Instant>calculateRecurrenceSet(period).stream())
+                    .flatMap(c -> c.calculateRecurrenceSet(period).stream())
+                    .map(p -> new Period<>(temporalToInstant(p.getStart()), temporalToInstant(p.getEnd())))
                     .collect(Collectors.toUnmodifiableSet());
         } else {
             return Set.of();
@@ -79,6 +82,16 @@ public class Calendar extends ExtendedModel {
 
     public boolean checkMoment(Date date) {
         return !findPeriods(date).isEmpty();
+    }
+
+    private static Instant temporalToInstant(Temporal temporal) {
+        if (temporal instanceof ZonedDateTime) {
+            return ((ZonedDateTime) temporal).toInstant();
+        } else if (temporal instanceof Instant) {
+            return (Instant) temporal;
+        } else {
+            throw new IllegalArgumentException("Unsupported Temporal type");
+        }
     }
 
 }
