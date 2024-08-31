@@ -421,8 +421,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(short value, String model) {
-        boolean modelLW = model != null && model.toUpperCase().startsWith("LW");
+    private String decodeAlarm(short value, boolean modelLW) {
         return switch (value) {
             case 0x01 -> Position.ALARM_SOS;
             case 0x02 -> Position.ALARM_POWER_CUT;
@@ -464,6 +463,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 deviceSession.set(DeviceSession.KEY_TIMEZONE, getTimeZone(deviceSession.getDeviceId()));
             }
         }
+
+        String model = deviceSession != null ? getDeviceModel(deviceSession) : null;
+        boolean modelLW = model != null && model.toUpperCase().startsWith("LW");
 
         if (type == MSG_LOGIN) {
 
@@ -823,8 +825,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     int satellites = BitUtil.between(signal, 10, 15) + BitUtil.between(signal, 5, 10);
                     position.set(Position.KEY_SATELLITES, satellites);
                     position.set(Position.KEY_RSSI, BitUtil.to(signal, 5));
-                    position.addAlarm(decodeAlarm(
-                            buf.readUnsignedByte(), getDeviceModel(deviceSession)));
+                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW));
                     buf.readUnsignedByte(); // language
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     buf.readUnsignedByte(); // working mode
@@ -840,9 +841,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY_LEVEL, battery);
                     }
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    short alarmExtension = buf.readUnsignedByte();
-                    if (variant != Variant.VXT01) {
-                        position.addAlarm(decodeAlarm(alarmExtension, getDeviceModel(deviceSession)));
+                    if (modelLW && type == MSG_STATUS) {
+                        position.set(Position.KEY_POWER, BitUtil.to(buf.readUnsignedShort(), 12) / 10.0);
+                    } else {
+                        short alarmExtension = buf.readUnsignedByte();
+                        if (variant != Variant.VXT01) {
+                            position.addAlarm(decodeAlarm(alarmExtension, modelLW));
+                        }
                     }
                 }
             }
@@ -903,8 +908,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     decodeStatus(position, buf);
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    position.addAlarm(decodeAlarm(
-                            buf.readUnsignedByte(), getDeviceModel(deviceSession)));
+                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW));
                     position.set("oil", buf.readUnsignedShort());
                     int temperature = buf.readUnsignedByte();
                     if (BitUtil.check(temperature, 7)) {
@@ -1028,7 +1032,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (hasLanguage(type)) {
-            buf.readUnsignedShort();
+            if (modelLW && type == MSG_STATUS) {
+                position.set(Position.KEY_POWER, BitUtil.to(buf.readUnsignedShort(), 12) * 0.1);
+            } else {
+                buf.readUnsignedShort(); // language
+            }
         }
 
         if (type == MSG_GPS_LBS_STATUS_3 || type == MSG_FENCE_MULTI) {

@@ -519,6 +519,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         decoder.setModelOverride("LW4G-4B");
 
         verifyAttribute(decoder, binary(
+                "78780a13560604f0830ccf986f0d0a"),
+                Position.KEY_POWER, 13.1);
+
+        verifyAttribute(decoder, binary(
                 "78782516180516150812c804b50ee80880e40805dcf909012e000000986633460604190106c393490d0a"),
                 Position.KEY_ALARM, Position.ALARM_ACCELERATION);
 
