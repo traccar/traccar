@@ -7,9 +7,8 @@
 
     <module name="SuppressWarningsFilter"/>
 
-    <module name="SuppressionSingleFilter">
-        <property name="files" value="[/\\]protobuf[/\\]"/>
-        <property name="checks" value=".*"/>
+    <module name="BeforeExecutionExclusionFileFilter">
+        <property name="protobuf" value="^.*[\\/]protobuf[\\/].*$"/>
     </module>
 
     <!--<property name="fileExtensions" value="java, properties, xml"/>-->
