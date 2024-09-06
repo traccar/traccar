@@ -18,4 +18,4 @@ jobs:
         distribution: temurin
         java-version: 17
         cache: gradle
-    - run: ./gradlew build --no-daemon --stacktrace
+    - run: ./gradlew build --no-daemon --stacktrace -Dorg.gradle.jvmargs=-Xmx8g
