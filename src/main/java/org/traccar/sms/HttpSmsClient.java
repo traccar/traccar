@@ -77,7 +77,7 @@ public class HttpSmsClient implements SmsManager {
         try {
             return template
                     .replace("{phone}", prepareValue(destAddress))
-                    .replace("{message}", prepareValue(message.trim()));
+                    .replace("{message}", prepareValue(message));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
