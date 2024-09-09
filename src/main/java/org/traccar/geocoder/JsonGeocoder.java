@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,9 @@ import org.slf4j.LoggerFactory;
 import org.traccar.database.StatisticsManager;
 
 import jakarta.json.JsonObject;
-import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.InvocationCallback;
+
 import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -124,7 +124,7 @@ public abstract class JsonGeocoder implements Geocoder {
         } else {
             try {
                 return handleResponse(latitude, longitude, request.get(JsonObject.class), null);
-            } catch (WebApplicationException e) {
+            } catch (Exception e) {
                 LOGGER.warn("Geocoder network error", e);
             }
         }
