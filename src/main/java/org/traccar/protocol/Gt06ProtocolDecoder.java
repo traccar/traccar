@@ -800,6 +800,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return null; // multi-lbs message
             }
 
+            position.set(Position.KEY_TYPE, type);
+
             if (hasGps(type)) {
                 decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
             } else {
