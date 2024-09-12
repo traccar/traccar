@@ -194,6 +194,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeOtherParameter(Position position, int id, ByteBuf buf, int length) {
+        long value;
         switch (id) {
             case 1:
             case 2:
@@ -230,7 +231,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 26:
             case 27:
             case 28:
-                position.set(Position.PREFIX_TEMP + (id - 24), readValue(buf, length, true));
+                value = readValue(buf, length, true);
+                if (value != 0) {
+                    position.set(Position.PREFIX_TEMP + (id - 24), value);
+                }
                 break;
             case 31:
                 position.set(Position.KEY_ENGINE_LOAD, readValue(buf, length, false));
@@ -256,7 +260,12 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 72:
             case 73:
             case 74:
-                position.set(Position.PREFIX_TEMP + (id - 71), readValue(buf, length, true) * 0.1);
+            case 75:
+            case 76:
+                value = readValue(buf, length, true);
+                if (value != 0) {
+                    position.set(Position.PREFIX_TEMP + (id - 71), value * 0.1);
+                }
                 break;
             case 78:
                 long driverUniqueId = buf.readLong();
