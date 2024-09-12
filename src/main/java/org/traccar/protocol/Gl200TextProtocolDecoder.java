@@ -968,7 +968,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (model.startsWith("GV") && !model.startsWith("GV6")) {
             position.set(Position.PREFIX_ADC + 2, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001);
         }
-        if (model.equals("GV200")) {
+        if (model.equals("GV200") || model.equals("GV310LAU")) {
             position.set(Position.PREFIX_ADC + 3, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001);
         }
         if (model.startsWith("GV355CEU")) {
