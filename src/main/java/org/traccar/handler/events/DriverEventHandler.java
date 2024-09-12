@@ -32,7 +32,7 @@ public class DriverEventHandler extends BaseEventHandler {
     }
 
     @Override
-    public void analyzePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         if (!PositionUtil.isLatest(cacheManager, position)) {
             return;
         }

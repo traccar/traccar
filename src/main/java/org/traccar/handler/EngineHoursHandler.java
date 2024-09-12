@@ -30,7 +30,7 @@ public class EngineHoursHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         if (!position.hasAttribute(Position.KEY_HOURS)) {
             Position last = cacheManager.getPosition(position.getDeviceId());
             if (last != null) {

@@ -34,7 +34,7 @@ public class DriverHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         if (useLinkedDriver && !position.hasAttribute(Position.KEY_DRIVER_UNIQUE_ID)) {
             var drivers = cacheManager.getDeviceObjects(position.getDeviceId(), Driver.class);
             if (!drivers.isEmpty()) {

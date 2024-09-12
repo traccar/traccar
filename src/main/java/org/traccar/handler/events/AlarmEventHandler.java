@@ -38,7 +38,7 @@ public class AlarmEventHandler extends BaseEventHandler {
     }
 
     @Override
-    public void analyzePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         String alarmString = position.getString(Position.KEY_ALARM);
         if (alarmString != null) {
             Set<String> alarms = new HashSet<>(Arrays.asList(alarmString.split(",")));
