@@ -57,3 +57,9 @@ Test protocol message:
 Run server locally:
 - VSCode: Run with / without debugging
 - Web app: cd traccar-web/modern/ && npm run start
+
+Download Java JDK:
+- for Linux deployment from:
+    - https://adoptium.net/temurin/releases/?os=linux&arch=x64&package=jdk
+- for MacOS use from:
+    - https://adoptium.net/temurin/releases/?os=mac&arch=aarch64&package=any
