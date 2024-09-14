@@ -47,8 +47,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // hdop
             .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
             .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
-            .number("(d+.?d*),")                 // Unit Version number
-            .number("(dd)")                      // Battery level
+            .number("d+.?d*,")                   // Unit Version number
+            .number("(d+)")                      // Battery level
             .any()
             .compile();
 
@@ -78,6 +78,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
+		
+		position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
 
         return position;
     }
