@@ -35,9 +35,9 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(d+),")                     // imei
             .expression(".{6},")                 // id code
-            .number("ddd,")                      // status
-            .number("Lddd,")                     // version
-            .expression("([AV]),")               // validity
+            .number("ddd,")                      // status code
+            .expression(".{4},")                 // model
+            .expression("([AV]),")               // Status
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(ddd)(dd.d+),")             // longitude
@@ -47,6 +47,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // hdop
             .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
             .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
+            .expression(".{4},")                 // Unit Version number
+            .number("(dd)?")                     // Battery level
             .any()
             .compile();
 
@@ -76,7 +78,9 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
-
+        if (parser.hasNext(0)) {
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());  // register battery level if model is PT33
+        }
         return position;
     }
 
