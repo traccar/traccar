@@ -2773,9 +2773,6 @@
           "password": {
             "type": "string"
           },
-          "twelveHourFormat": {
-            "type": "boolean"
-          },
           "coordinateFormat": {
             "type": "string"
           },
@@ -2849,9 +2846,6 @@
           },
           "zoom": {
             "type": "integer"
-          },
-          "twelveHourFormat": {
-            "type": "boolean"
           },
           "version": {
             "type": "string"
