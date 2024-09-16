@@ -48,7 +48,7 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
             .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
             .number("d+.?d*,")                   // Unit Version number
-            .number("(d+)")                      // Battery level
+            .number("(.{2})")                      // Battery level
             .any()
             .compile();
 
@@ -69,6 +69,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
+	String model = parse.next();
+
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
@@ -78,8 +80,12 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
-		
-		position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+	
+	int battery = 0;
+	if (model = "PT33") {
+		battery = parser.nextInt();
+	}
+	position.set(Position.KEY_BATTERY_LEVEL, battery);
 
         return position;
     }
