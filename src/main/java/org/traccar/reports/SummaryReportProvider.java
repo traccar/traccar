@@ -50,20 +50,26 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.traccar.model.Group;
+import org.traccar.session.cache.CacheManager;
+
 public class SummaryReportProvider {
 
     private final Config config;
     private final ReportUtils reportUtils;
     private final PermissionsService permissionsService;
     private final Storage storage;
+    private final CacheManager cacheManager;
 
     @Inject
     public SummaryReportProvider(
-            Config config, ReportUtils reportUtils, PermissionsService permissionsService, Storage storage) {
+            Config config, ReportUtils reportUtils, PermissionsService permissionsService,
+            Storage storage, CacheManager cacheManager) {
         this.config = config;
         this.reportUtils = reportUtils;
         this.permissionsService = permissionsService;
         this.storage = storage;
+        this.cacheManager = cacheManager;
     }
 
     private Position getEdgePosition(long deviceId, Date from, Date to, boolean end) throws StorageException {
@@ -81,6 +87,28 @@ public class SummaryReportProvider {
         SummaryReportItem result = new SummaryReportItem();
         result.setDeviceId(device.getId());
         result.setDeviceName(device.getName());
+
+        // Add new fields
+        result.setPhone(device.getPhone());
+        result.setModel(device.getModel());
+        result.setImei(device.getImei());
+
+        if (device.getGroupName() != null) {
+            result.setGroupName(device.getGroupName());
+        } else {
+            // Get group name from cache or DB
+            if (device.getGroupId() > 0) {
+                Group group = cacheManager.getObject(Group.class, device.getGroupId());
+                if (group == null) {
+                    group = storage.getObject(Group.class, new Request(
+                            new Columns.All(), new Condition.Equals("id", device.getGroupId())));
+                }
+                if (group != null) {
+                    device.setGroupName(group.getName());
+                    result.setGroupName(group.getName());
+                }
+            }
+        }
 
         // * CUSTOM CODE START * //
 
