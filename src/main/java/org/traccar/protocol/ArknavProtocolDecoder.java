@@ -21,6 +21,7 @@ import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -35,8 +36,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(d+),")                     // imei
             .expression(".{6},")                 // id code
-            .number("ddd,")                      // status
-            .number("Lddd,")                     // version
+            .number("(x{3}),")                   // status
+            .expression("(.{4}),")               // version
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -47,98 +48,56 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // hdop
             .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
             .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
+            .expression(".{4},")                 // Unit Version number
+            .expression("(..)")                  // Battery level
             .any()
             .compile();
-
-    private static final Pattern PATTERN_R33 = new PatternBuilder()
-            .number("(d+),")                     // imei
-            .expression(".{6},")                 // id code
-            .number("ddd,")                      // status code
-            .text("PT33,")                       // model
-            .expression("([AV]),")               // Status
-            .number("(dd)(dd.d+),")              // latitude (ddmm.mmmm)
-            .expression("([NS]),")
-            .number("(ddd)(dd.d+),")             // longitude (dddmm.mmmm)
-            .expression("([EW]),")
-            .number("(d+.?d*),")                 // speed
-            .number("(d+.?d*),")                 // course
-            .number("(d+.?d*),")                 // hdop
-            .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
-            .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
-            .number("(d+.?d*),")                 // Unit Version number
-            .number("(d+)")                      // Battery level
-            .any()
-            .compile();
-
-    private Position decodeR9(Channel channel, SocketAddress remoteAddress, Object msg) {
+    
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
             return null;
         }
 
-        Position position = new Position(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
-        position.setDeviceId(deviceSession.getDeviceId());
-
-        position.setValid(parser.next().equals("A"));
-        position.setLatitude(parser.nextCoordinate());
-        position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble(0));
-        position.setCourse(parser.nextDouble(0));
-
-        position.set(Position.KEY_HDOP, parser.nextDouble(0));
-
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
-
-        return position;
-    }
-    private Position decodeR33(Channel channel, SocketAddress remoteAddress, Object msg) {
-
-        Parser parser = new Parser(PATTERN_R33, (String) msg);
-        if (!parser.matches()) {
-            return null;
-        }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
+        
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-
+        long status = parser.nextHexLong();
+        String model = parser.next();
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.kphFromKnots(parser.nextDouble(0)));
         position.setCourse(parser.nextDouble(0));
-
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
-
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
-        parser.next();
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
-
-        return position;
-    }
-
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-
-        String sentence = (String) msg;
-
-        if (sentence.indexOf("PT33", 20) > 0) {
-            return decodeR33(channel, remoteAddress, sentence);
-        } else {
-            return decodeR9(channel, remoteAddress, sentence);
+        if (model.contains("PT33")) {
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+            if ((status & 0x100L) != 0) {
+                position.addAlarm(Position.ALARM_LOW_BATTERY);
+            }
+            if ((status & 0x200L) != 0) {
+                position.addAlarm(Position.ALARM_MOVEMENT);
+            }
+            if ((status & 0x400L) != 0) {
+                position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+            }
+            if ((status & 0x010L) != 0) {
+                position.addAlarm(Position.ALARM_SOS);
+            }
+            if ((status & 0x001L) != 0) {
+                position.addAlarm(Position.ALARM_OVERSPEED);
+            }
         }
 
+        return position;
     }
 
 }
