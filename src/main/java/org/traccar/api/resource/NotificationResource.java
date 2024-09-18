@@ -28,7 +28,11 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.api.ExtendedObjectResource;
-import org.traccar.model.*;
+import org.traccar.model.Event;
+import org.traccar.model.ManagedUser;
+import org.traccar.model.Notification;
+import org.traccar.model.Typed;
+import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationMessage;
 import org.traccar.notification.NotificatorManager;
@@ -39,7 +43,11 @@ import org.traccar.storage.query.Request;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Path("notifications")
