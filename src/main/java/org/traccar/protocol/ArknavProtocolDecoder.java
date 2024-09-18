@@ -71,9 +71,14 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
         long status = parser.nextHexLong();
         String model = parser.next();
-        position.setValid(parser.next().equals("A"));
-        position.setLatitude(parser.nextCoordinate());
-        position.setLongitude(parser.nextCoordinate());
+        Boolean valid_geo = parser.next().equals("A");
+        position.setValid(valid_geo);            
+        double latitude = parser.nextCoordinate();
+        double longitude = parser.nextCoordinate();
+        if (valid_geo || (latitude != 0 && longitude != 0)) {
+            position.setLatitude(latitude);
+            position.setLongitude(longitude);
+        }
         position.setSpeed(UnitsConverter.kphFromKnots(parser.nextDouble(0)));
         position.setCourse(parser.nextDouble(0));
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
