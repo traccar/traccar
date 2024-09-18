@@ -35,9 +35,9 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(d+),")                     // imei
             .expression(".{6},")                 // id code
-            .number("ddd,")                      // status code
-            .expression(".{4},")                 // model
-            .expression("([AV]),")               // Status
+            .number("ddd,")                      // status
+            .number("Lddd,")                     // version
+            .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
             .number("(ddd)(dd.d+),")             // longitude
@@ -47,14 +47,30 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // hdop
             .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
             .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
-            .expression(".{4},")                 // Unit Version number
-            .number("(dd)?")                     // Battery level
             .any()
             .compile();
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private static final Pattern PATTERN_R33 = new PatternBuilder()
+            .number("(d+),")                     // imei
+            .expression(".{6},")                 // id code
+            .number("ddd,")                      // status code
+            .text("PT33,")                       // model
+            .expression("([AV]),")               // Status
+            .number("(dd)(dd.d+),")              // latitude (ddmm.mmmm)
+            .expression("([NS]),")
+            .number("(ddd)(dd.d+),")             // longitude (dddmm.mmmm)
+            .expression("([EW]),")
+            .number("(d+.?d*),")                 // speed
+            .number("(d+.?d*),")                 // course
+            .number("(d+.?d*),")                 // hdop
+            .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
+            .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
+            .number("(d+.?d*),")                 // Unit Version number
+            .number("(d+)")                      // Battery level
+            .any()
+            .compile();
+
+    private Position decodeR9(Channel channel, SocketAddress remoteAddress, Object msg) {
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
@@ -78,10 +94,51 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
-        if (parser.hasNext(0)) {
-            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());  // set battery level
-        }
+
         return position;
+    }
+    private Position decodeR33(Channel channel, SocketAddress remoteAddress, Object msg) {
+
+        Parser parser = new Parser(PATTERN_R33, (String) msg);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setValid(parser.next().equals("A"));
+        position.setLatitude(parser.nextCoordinate());
+        position.setLongitude(parser.nextCoordinate());
+        position.setSpeed(parser.nextDouble(0));
+        position.setCourse(parser.nextDouble(0));
+
+        position.set(Position.KEY_HDOP, parser.nextDouble(0));
+
+        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
+        parser.next();
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+
+        return position;
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        String sentence = (String) msg;
+
+        if (sentence.indexOf("PT33", 20) > 0) {
+            return decodeR33(channel, remoteAddress, sentence);
+        } else {
+            return decodeR9(channel, remoteAddress, sentence);
+        }
+
     }
 
 }
