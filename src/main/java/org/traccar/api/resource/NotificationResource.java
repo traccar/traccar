@@ -130,12 +130,9 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
                 conditions.add(new Condition.Equals("id", userId));
                 if (permissionsService.notAdmin(getUserId())) {
                     conditions.add(new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups());
-                    users.add(storage.getObject(
-                            User.class, new Request(new Columns.All(), Condition.merge(conditions))));
-                } else {
-                    users.add(storage.getObject(
-                            User.class, new Request(new Columns.All(), Condition.merge(conditions))));
                 }
+                users.add(storage.getObject(
+                        User.class, new Request(new Columns.All(), Condition.merge(conditions))));
             }
         }
         for (User user : users) {
