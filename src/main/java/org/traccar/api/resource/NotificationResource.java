@@ -113,7 +113,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     public Response sendMessage(
             @PathParam("notificator") String notificator, @QueryParam("userId") List<Long> userIds,
             NotificationMessage message) throws MessageException, StorageException {
-        permissionsService.checkAdmin(getUserId());
+        permissionsService.checkManager(getUserId());
         List<User> users;
         if (userIds.isEmpty()) {
             users = storage.getObjects(User.class, new Request(new Columns.All()));
