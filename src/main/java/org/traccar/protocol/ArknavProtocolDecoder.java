@@ -52,7 +52,7 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .expression("(..)")                  // Battery level
             .any()
             .compile();
-    
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -66,7 +66,7 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
-        
+
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
         long status = parser.nextHexLong();
@@ -78,7 +78,7 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextDouble(0));
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
-        if (model.contains("PT33")) {
+        if (model.equals("PT33")) {
             position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
             if ((status & 0x100L) != 0) {
                 position.addAlarm(Position.ALARM_LOW_BATTERY);
