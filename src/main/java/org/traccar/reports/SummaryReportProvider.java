@@ -91,7 +91,7 @@ public class SummaryReportProvider {
         // Add new fields
         result.setPhone(device.getPhone());
         result.setModel(device.getModel());
-        result.setImei(device.getImei());
+        result.setImei(device.getUniqueId());
 
         if (device.getGroupName() != null) {
             result.setGroupName(device.getGroupName());
