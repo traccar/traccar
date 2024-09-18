@@ -117,23 +117,24 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
         permissionsService.checkManager(getUserId());
         List<User> users;
         if (userIds.isEmpty()) {
-            users = permissionsService.notAdmin(getUserId()) ?
-                    storage.getObjects(User.class, new Request(new Columns.All(),
-                            new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups())) :
-                    storage.getObjects(User.class, new Request(new Columns.All()));
-
+            if (permissionsService.notAdmin(getUserId())) {
+                users = storage.getObjects(User.class, new Request(new Columns.All(),
+                        new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()));
+            } else {
+                users = storage.getObjects(User.class, new Request(new Columns.All()));
+            }
         } else {
             users = new ArrayList<>();
             for (long userId : userIds) {
+                var conditions = new LinkedList<Condition>();
+                conditions.add(new Condition.Equals("id", userId));
                 if (permissionsService.notAdmin(getUserId())) {
-                    var conditions = new LinkedList<Condition>();
-                    conditions.add(new Condition.Equals("id", userId));
                     conditions.add(new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups());
                     users.add(storage.getObject(
                             User.class, new Request(new Columns.All(), Condition.merge(conditions))));
                 } else {
                     users.add(storage.getObject(
-                            User.class, new Request(new Columns.All(), new Condition.Equals("id", userId))));
+                            User.class, new Request(new Columns.All(), Condition.merge(conditions))));
                 }
             }
         }
