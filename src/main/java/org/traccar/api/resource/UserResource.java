@@ -45,6 +45,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.Collection;
+import java.util.LinkedList;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -70,10 +71,13 @@ public class UserResource extends BaseObjectResource<User> {
                     new Columns.All(),
                     new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups()));
         } else if (deviceId > 0) {
-            permissionsService.checkAdmin(getUserId());
-            return storage.getObjects(baseClass, new Request(
-                    new Columns.All(),
-                    new Condition.Permission(User.class, Device.class, deviceId).excludeGroups()));
+            permissionsService.checkManager(getUserId());
+            var conditions = new LinkedList<Condition>();
+            conditions.add(new Condition.Permission(User.class, Device.class, deviceId).excludeGroups());
+            if (permissionsService.notAdmin(getUserId())) {
+                conditions.add(new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups());
+            }
+            return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
         } else if (permissionsService.notAdmin(getUserId())) {
             return storage.getObjects(baseClass, new Request(
                     new Columns.All(),
