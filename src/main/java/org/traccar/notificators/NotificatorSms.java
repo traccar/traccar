@@ -43,9 +43,9 @@ public class NotificatorSms extends Notificator {
 
     @Override
     public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
-        if (user.getPhone() != null) {
+        if (user.getPhone() != null && message.getBody() != null) {
             statisticsManager.registerSms();
-            smsManager.sendMessage(user.getPhone(), message.getBody(), false);
+            smsManager.sendMessage(user.getPhone(), message.getBody().trim(), false);
         }
     }
 
