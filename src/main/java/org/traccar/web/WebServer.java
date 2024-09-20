@@ -165,6 +165,7 @@ public class WebServer implements LifecycleObject {
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
+        resourceConfig.property("jersey.config.server.wadl.disableWadl", true);
         resourceConfig.registerClasses(
                 JacksonFeature.class,
                 ObjectMapperContextResolver.class,
