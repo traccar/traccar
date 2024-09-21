@@ -1107,7 +1107,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         index += 1; // device name
         index += 1; // duration of ignition on/off
 
-        decodeLocation(position, model, v, index);
+        index = decodeLocation(position, model, v, index);
 
         position.set(Position.KEY_IGNITION, type.contains("GN"));
         position.set(Position.KEY_HOURS, parseHours(v[index++]));
