@@ -48,6 +48,7 @@ public class ComputedAttributesHandler extends BasePositionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputedAttributesHandler.class);
 
     private final CacheManager cacheManager;
+    private boolean early;
 
     private final JexlEngine engine;
 
@@ -56,9 +57,23 @@ public class ComputedAttributesHandler extends BasePositionHandler {
     private final boolean includeDeviceAttributes;
     private final boolean includeLastAttributes;
 
-    @Inject
-    public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
+    public static class Early extends ComputedAttributesHandler {
+        @Inject
+        public Early(Config config, CacheManager cacheManager) {
+            super(config, cacheManager, true);
+        }
+    }
+
+    public static class Late extends ComputedAttributesHandler {
+        @Inject
+        public Late(Config config, CacheManager cacheManager) {
+            super(config, cacheManager, false);
+        }
+    }
+
+    public ComputedAttributesHandler(Config config, CacheManager cacheManager, boolean early) {
         this.cacheManager = cacheManager;
+        this.early = early;
         JexlSandbox sandbox = new JexlSandbox(false);
         sandbox.allow("com.safe.Functions");
         sandbox.allow(Math.class.getName());
@@ -141,6 +156,7 @@ public class ComputedAttributesHandler extends BasePositionHandler {
     @Override
     public void onPosition(Position position, Callback callback) {
         var attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class).stream()
+                .filter(attribute -> attribute.getPriority() < 0 == early)
                 .sorted(Comparator.comparing(Attribute::getPriority).reversed())
                 .toList();
         for (Attribute attribute : attributes) {

@@ -44,7 +44,7 @@ import org.traccar.storage.query.Request;
 public class AttributeResource extends ExtendedObjectResource<Attribute> {
 
     @Inject
-    private ComputedAttributesHandler computedAttributesHandler;
+    private ComputedAttributesHandler.Late computedAttributesHandler;
 
     public AttributeResource() {
         super(Attribute.class);
