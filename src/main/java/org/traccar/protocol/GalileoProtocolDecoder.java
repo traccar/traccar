@@ -103,7 +103,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         TAG_LENGTH_MAP.put(0x5b, 7); // variable length
         TAG_LENGTH_MAP.put(0x5c, 68);
         TAG_LENGTH_MAP.put(0xfd, 8);
-        TAG_LENGTH_MAP.put(0xfe, 8);
+        TAG_LENGTH_MAP.put(0xfe, 8); // TODO this is probably incorrect
     }
 
     private static int getTagLength(int tag) {
