@@ -846,9 +846,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     if (modelLW && type == MSG_STATUS) {
                         position.set(Position.KEY_POWER, BitUtil.to(buf.readUnsignedShort(), 12) / 10.0);
                     } else {
-                        short alarmExtension = buf.readUnsignedByte();
-                        if (variant != Variant.VXT01) {
-                            position.addAlarm(decodeAlarm(alarmExtension, modelLW));
+                        short extension = buf.readUnsignedByte();
+                        if (type == MSG_STATUS) {
+                            position.set(Position.KEY_POWER, (double) extension);
+                        } else if (variant != Variant.VXT01) {
+                            position.addAlarm(decodeAlarm(extension, modelLW));
                         }
                     }
                 }

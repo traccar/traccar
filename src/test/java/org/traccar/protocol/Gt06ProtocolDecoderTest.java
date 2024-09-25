@@ -18,6 +18,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttribute(decoder, binary(
+                "78780a134506560b0102242b850d0a"),
+                Position.KEY_POWER, 11.0);
+
+        verifyAttribute(decoder, binary(
                 "787817360005040002003201010018020192006a015f0324aeaf0d0a"),
                 Position.KEY_BATTERY, 4.02);
 
@@ -76,7 +80,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "78780a130604ea04000006bc8a0d0a"),
-                Position.KEY_POWER, null);
+                Position.KEY_POWER, 4.0);
 
         verifyAttributes(decoder, binary(
                 "797900849404414c4d313d43353b414c4d323d43433b414c4d333d35433b535441313d43303b4459443d30313b534f533d303133323838333730302c2c3b43454e5445523d303133323838333730303b46454e43453d46656e63652c4f46462c302c302e3030303030302c302e3030303030302c3330302c494e206f72204f55542c313b00b79d120d0a"));
