@@ -29,6 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
 import java.util.Date;
@@ -87,6 +88,8 @@ public class Calendar extends ExtendedModel {
     private static Instant temporalToInstant(Temporal temporal) {
         if (temporal instanceof ZonedDateTime) {
             return ((ZonedDateTime) temporal).toInstant();
+        } else if (temporal instanceof OffsetDateTime) {
+            return ((OffsetDateTime) temporal).toInstant();
         } else if (temporal instanceof Instant) {
             return (Instant) temporal;
         } else {

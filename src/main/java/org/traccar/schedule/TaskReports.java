@@ -94,7 +94,7 @@ public class TaskReports extends SingleScheduleTask {
                     }
                 }
             }
-        } catch (StorageException e) {
+        } catch (Exception e) {
             LOGGER.warn("Scheduled reports error", e);
         }
     }
