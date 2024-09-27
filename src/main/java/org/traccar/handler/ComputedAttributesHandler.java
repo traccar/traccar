@@ -37,7 +37,9 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -79,7 +81,8 @@ public class ComputedAttributesHandler extends BasePositionHandler {
         sandbox.allow(Math.class.getName());
         List.of(
             Double.class, Float.class, Integer.class, Long.class, Short.class,
-            Character.class, Boolean.class, String.class, Byte.class, Date.class)
+            Character.class, Boolean.class, String.class, Byte.class, Date.class,
+            HashMap.class, LinkedHashMap.class, double[].class, int[].class, boolean[].class, String[].class)
                 .forEach((type) -> sandbox.allow(type.getName()));
         features = new JexlFeatures()
                 .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
