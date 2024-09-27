@@ -406,6 +406,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         position.addAlarm(decodeAlarm(buf.readUnsignedInt()));
 
+        String model = getDeviceModel(deviceSession);
+
         decodeCoordinates(position, deviceSession, buf);
 
         position.setAltitude(buf.readShort());
@@ -603,7 +605,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set("cover", BitUtil.check(deviceStatus, 3));
                     break;
                 case 0xE2:
-                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedInt() * 0.1);
+                    if (!"DT800".equals(model)) {
+                        position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedInt() * 0.1);
+                    }
                     break;
                 case 0xE3:
                     buf.readUnsignedByte(); // reserved
