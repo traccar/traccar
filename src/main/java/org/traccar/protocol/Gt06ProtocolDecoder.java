@@ -234,21 +234,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private static boolean hasLanguage(int type) {
-        switch (type) {
-            case MSG_GPS_PHONE:
-            case MSG_HEARTBEAT:
-            case MSG_GPS_LBS_STATUS_3:
-            case MSG_LBS_MULTIPLE_1:
-            case MSG_LBS_MULTIPLE_2:
-            case MSG_LBS_2:
-            case MSG_FENCE_MULTI:
-                return true;
-            default:
-                return false;
-        }
-    }
-
     private void sendResponse(Channel channel, boolean extended, int type, int index, ByteBuf content) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
@@ -836,18 +821,22 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     if (type == MSG_GPS_LBS_STATUS_5) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     }
-                    int battery = buf.readUnsignedByte();
-                    if (battery <= 6) {
-                        position.set(Position.KEY_BATTERY_LEVEL, battery * 100 / 6);
-                    } else if (battery <= 100) {
-                        position.set(Position.KEY_BATTERY_LEVEL, battery);
+                    if (type == MSG_STATUS && "R11".equals(model)) {
+                        position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                    } else {
+                        int battery = buf.readUnsignedByte();
+                        if (battery <= 6) {
+                            position.set(Position.KEY_BATTERY_LEVEL, battery * 100 / 6);
+                        } else if (battery <= 100) {
+                            position.set(Position.KEY_BATTERY_LEVEL, battery);
+                        }
                     }
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    if (modelLW && type == MSG_STATUS) {
+                    if (type == MSG_STATUS && modelLW) {
                         position.set(Position.KEY_POWER, BitUtil.to(buf.readUnsignedShort(), 12) / 10.0);
                     } else {
                         short extension = buf.readUnsignedByte();
-                        if (type == MSG_STATUS) {
+                        if (type == MSG_STATUS && "SEEWORLD".equals(model)) {
                             position.set(Position.KEY_POWER, (double) extension);
                         } else if (variant != Variant.VXT01) {
                             position.addAlarm(decodeAlarm(extension, modelLW));
@@ -987,6 +976,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
             }
 
+            if (type == MSG_GPS_LBS_STATUS_3 || type == MSG_FENCE_MULTI) {
+                position.set(Position.KEY_GEOFENCE, buf.readUnsignedByte());
+            }
+
         } else if (type == MSG_ALARM) {
 
             boolean extendedAlarm = dataLength > 7;
@@ -1033,18 +1026,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
             return null;
 
-        }
-
-        if (hasLanguage(type)) {
-            if (modelLW && type == MSG_STATUS) {
-                position.set(Position.KEY_POWER, BitUtil.to(buf.readUnsignedShort(), 12) * 0.1);
-            } else {
-                buf.readUnsignedShort(); // language
-            }
-        }
-
-        if (type == MSG_GPS_LBS_STATUS_3 || type == MSG_FENCE_MULTI) {
-            position.set(Position.KEY_GEOFENCE, buf.readUnsignedByte());
         }
 
         sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
