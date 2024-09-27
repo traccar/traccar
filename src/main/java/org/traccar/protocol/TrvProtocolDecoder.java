@@ -183,6 +183,12 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             } else if (!type.equals("AP12") && !type.equals("AP14")
                     && !sentence.substring(responseHeader.length() + 1).matches("^\\d{6}$")) {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + "#", remoteAddress));
+            } else if (!type.equals("AP33") && !type.equals("AP34")
+                    && !sentence.substring(responseHeader.length() + 1).matches("^\\d{6}$")) {
+                channel.writeAndFlush(new NetworkMessage(responseHeader + "#", remoteAddress));
+            } else if (!type.equals("AP84") && !type.equals("AP85")
+                    && !sentence.substring(responseHeader.length() + 1).matches("^\\d{6}$")) {
+                channel.writeAndFlush(new NetworkMessage(responseHeader + "#", remoteAddress));
             }
         }
 
