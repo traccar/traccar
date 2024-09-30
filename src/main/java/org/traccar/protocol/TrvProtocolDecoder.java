@@ -173,18 +173,22 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
         String id = sentence.startsWith("TRV") ? sentence.substring(0, 3) : sentence.substring(0, 2);
         String type = sentence.substring(id.length(), id.length() + 4);
 
-        if (channel != null) {
-            String responseHeader = id + (char) (type.charAt(0) + 1) + type.substring(1);
-            if (type.equals("AP00") && id.equals("IW")) {
-                String time = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-                channel.writeAndFlush(new NetworkMessage(responseHeader + "," + time + ",0#", remoteAddress));
-            } else if (type.equals("AP14") && !id.equals("IW")) {
-                channel.writeAndFlush(new NetworkMessage(responseHeader + ",0.000,0.000#", remoteAddress));
-            } else if (!Set.of("AP12", "AP14", "AP33", "AP34", "AP84", "AP85").contains(type)
-                    && !sentence.substring(responseHeader.length() + 1).matches("^\\d{6}$")) {
-                channel.writeAndFlush(new NetworkMessage(responseHeader + "#", remoteAddress));
-            }
+    if (channel != null) {
+    String responseHeader = id + (char) (type.charAt(0) + 1) + type.substring(1);
+
+        if (type.equals("AP00") && id.equals("IW")) {
+            String time = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            channel.writeAndFlush(new NetworkMessage(responseHeader + "," + time + ",0#", remoteAddress));
+
+        } else if (type.equals("AP14") && !id.equals("IW")) {
+            channel.writeAndFlush(new NetworkMessage(responseHeader + ",0.000,0.000#", remoteAddress));
+
+        } else if (!Set.of("AP12", "AP14", "AP33", "AP34", "AP84", "AP85").contains(type)
+                && !sentence.substring(responseHeader.length() + 1).matches("^\\d{6}$")) {
+            channel.writeAndFlush(new NetworkMessage(responseHeader + "#", remoteAddress));
         }
+    }
+
 
         if (type.equals("AP00")) {
             getDeviceSession(channel, remoteAddress, sentence.substring(id.length() + type.length()));
