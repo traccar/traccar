@@ -50,9 +50,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(?:NA|(dd)(dd)(dd));")      // date (ddmmyy)
             .number("(?:NA|(dd)(dd)(dd));")      // time (hhmmss)
-            .number("(?:NA|(dd)(dd.d+));")       // latitude
+            .number("(?:NA|(d+)(dd.d+));")       // latitude
             .expression("(?:NA|([NS]));")
-            .number("(?:NA|(ddd)(dd.d+));")      // longitude
+            .number("(?:NA|(d+)(dd.d+));")       // longitude
             .expression("(?:NA|([EW]));")
             .number("(?:NA|(d+.?d*))?;")         // speed
             .number("(?:NA|(d+.?d*))?;")         // course

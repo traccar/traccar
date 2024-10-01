@@ -13,6 +13,9 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "#L#2.0;42001300083;;CE45"));
 
+        verifyPosition(decoder, text(
+                "#SD#300924;154245;5554.350052;N;3644.670410;E;2.92;NA;NA;NA;7A01"));
+
         verifyAttribute(decoder, text(
                 "#D#220323;114150;2234.80479;N;11354.87786;E;0;NA;59;11;NA;NA;NA;;NA;d_battr:1:94,d_csq:1:21,di_light:1:1;E7C9"),
                 "di_light", 1.0);
