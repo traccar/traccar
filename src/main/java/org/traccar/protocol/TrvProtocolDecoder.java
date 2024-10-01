@@ -33,6 +33,7 @@ import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
+import java.util.Set;
 
 public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
@@ -180,7 +181,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + "," + time + ",0#", remoteAddress));
             } else if (type.equals("AP14") && !id.equals("IW")) {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + ",0.000,0.000#", remoteAddress));
-            } else if (!type.equals("AP12") && !type.equals("AP14")
+            } else if (!Set.of("AP12", "AP14", "AP33", "AP34", "AP84", "AP85").contains(type)
                     && !sentence.substring(responseHeader.length() + 1).matches("^\\d{6}$")) {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + "#", remoteAddress));
             }
