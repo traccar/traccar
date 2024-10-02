@@ -1776,6 +1776,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "LSA":
                     result = decodeLsa(channel, remoteAddress, sentence);
                     break;
+                case "TTR":
+                    result = decodeTtr(channel, remoteAddress, values);
+                    break;
                 default:
                     result = decodeOther(channel, remoteAddress, sentence, type);
                     break;
@@ -1803,6 +1806,30 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return result;
+    }
+
+    private Object decodeTtr(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
+        int index = 0;
+        index += 1; // header
+        index++; // protocol version
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
+        if (deviceSession == null) {
+            return null;
+        }
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        index += 1; // device name
+        position.set("requestId", Integer.parseInt(v[index++], 16));
+        position.set(Position.KEY_TYPE, Integer.parseInt(v[index], 16));
+
+        Date time = dateFormat.parse(v[v.length - 2]);
+        if (ignoreFixTime) {
+            position.setTime(time);
+        } else {
+            position.setDeviceTime(time);
+        }
+        return position;
     }
 
 }
