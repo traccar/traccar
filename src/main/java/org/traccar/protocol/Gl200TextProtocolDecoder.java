@@ -87,7 +87,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("802004", "GV58LAU"),
             Map.entry("802005", "GV355CEU"));
 
-    private boolean ignoreFixTime;
+    private final boolean ignoreFixTime;
 
     private final DateFormat dateFormat;
 
@@ -782,7 +782,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(reportMask, 31)) {
             index += 4; // cell
-            index += 1; // reserved
+            // reserved
         }
 
         index = v.length - 2;
@@ -982,8 +982,12 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 3, v[index++]);
         position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
 
-        decodeStatus(position, Long.parseLong(v[index++]));
+        decodeStatus(position, Long.parseLong(v[index]));
 
+        return setPositionTime(v, positions, position);
+    }
+
+    private Object setPositionTime(String[] v, LinkedList<Position> positions, Position position) throws ParseException {
         Date time = dateFormat.parse(v[v.length - 2]);
         if (ignoreFixTime) {
             position.setTime(time);
@@ -1078,16 +1082,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Date time = dateFormat.parse(v[v.length - 2]);
-        if (ignoreFixTime) {
-            position.setTime(time);
-            positions.clear();
-            positions.add(position);
-        } else {
-            position.setDeviceTime(time);
-        }
-
-        return positions;
+        return setPositionTime(v, positions, position);
     }
 
     private Object decodeIgn(
@@ -1821,7 +1816,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         index += 1; // device name
         position.set("requestId", Integer.parseInt(v[index++], 16));
-        position.set(Position.KEY_TYPE, Integer.parseInt(v[index], 16));
+        position.set("messageType", Integer.parseInt(v[index], 16));
 
         Date time = dateFormat.parse(v[v.length - 2]);
         if (ignoreFixTime) {
