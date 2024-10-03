@@ -1,0 +1,130 @@
+---
+name: Build and push docker images
+
+on:
+  release:
+    types: [published]
+
+env:
+  REGISTRY: ghcr.io
+  DOCKERHUB_REPOSITORY: ghcr.io/${{ github.repository }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  docker-build-push:
+    name: Build and push docker images
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [alpine, debian, ubuntu]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+      
+      ## BUILD PROJECT
+      - run: git checkout ${{ github.ref_name }}
+        working-directory: ./traccar-web
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - run: ./gradlew build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 21
+          cache: npm
+          cache-dependency-path: traccar-web/package-lock.json
+      - run: npm ci && npm run build
+        working-directory: ./traccar-web
+      - run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install libgcc-s1:i386 libstdc++6:i386
+          sudo apt-get install innoextract makeself wine32 s3cmd
+      - name: Build installers
+        working-directory: ./setup
+        run: |
+          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_x64_windows_hotspot_21.0.4_7.zip
+          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.4_7.tar.gz
+          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.4_7.tar.gz
+          ./package.sh ${{ github.event.inputs.version }} other
+      
+      ## DEPLOY IMAGES
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        uses: damienaicheh/extract-version-from-tag-action@v1.1.0
+        
+      - name: Set and Retrieve Github ENV variables
+        shell: bash
+        run: |
+          # define variables
+          fullVersion="${{ env.MAJOR }}"
+          if [ "${{ env.MINOR }}" != "" ]; then
+            fullVersion+=".${{ env.MINOR }}"
+          elif [ "${{ env.PATCH }}" != "" ]; then
+            fullVersion+=".${{ env.PATCH }}"
+          fi
+
+          # set them as GitHub ENV variables
+          echo "FullVersion=$fullVersion" >> $GITHUB_ENV
+      
+      - name: output version number
+        run: |
+          echo "Full version output:: ${{ env.FullVersion }}"
+      
+      - name: Set environment DOCKERHUB_IMAGE_TAGS and VERSION
+        run: |
+          _VERSION="${{ env.FullVersion }}"
+          _MAJOR_VERSION=${_VERSION%.*}
+          _DOCKERHUB_IMAGE_TAGS="$DOCKERHUB_REPOSITORY:$_VERSION-${{ matrix.os }}"
+          _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_MAJOR_VERSION-${{ matrix.os }}"
+          _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ matrix.os }}"
+          if [ "${{ matrix.os }}" == "alpine" ]; then
+            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_VERSION"
+            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_MAJOR_VERSION"
+            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:latest"
+          fi
+          echo "DOCKERHUB_IMAGE_TAGS=$_DOCKERHUB_IMAGE_TAGS" >> $GITHUB_ENV
+      - name: Set environment DOCKERHUB_IMAGE_PLATFORMS
+        run: |
+          _DOCKERHUB_IMAGE_PLATFORMS="linux/amd64"
+          if [ "${{ matrix.os }}" == "debian" ]; then
+            _DOCKERHUB_IMAGE_PLATFORMS+=",linux/arm64"
+          elif [ "${{ matrix.os }}" == "ubuntu" ]; then
+            _DOCKERHUB_IMAGE_PLATFORMS+=",linux/arm64"
+          fi
+          echo "DOCKERHUB_IMAGE_PLATFORMS=$_DOCKERHUB_IMAGE_PLATFORMS" >> $GITHUB_ENV
+      - name: Build and push
+        if: env.DOCKERHUB_IMAGE_TAGS != ''
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: docker/Dockerfile.${{ matrix.os }}
+          tags: ${{ env.DOCKERHUB_IMAGE_TAGS }}
+          platforms: ${{ env.DOCKERHUB_IMAGE_PLATFORMS }}
+          push: true
+          build-args: |
+            TRACCAR_VERSION=${{ env.MAJOR }}
