@@ -75,30 +75,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version from tag
-        uses: damienaicheh/extract-version-from-tag-action@v1.1.0
-        
-      - name: Set and Retrieve Github ENV variables
-        shell: bash
-        run: |
-          # define variables
-          fullVersion="${{ env.MAJOR }}"
-          if [ "${{ env.MINOR }}" != "" ]; then
-            fullVersion+=".${{ env.MINOR }}"
-          elif [ "${{ env.PATCH }}" != "" ]; then
-            fullVersion+=".${{ env.PATCH }}"
-          fi
-
-          # set them as GitHub ENV variables
-          echo "FullVersion=$fullVersion" >> $GITHUB_ENV
-      
-      - name: output version number
-        run: |
-          echo "Full version output:: ${{ env.FullVersion }}"
-      
       - name: Set environment DOCKERHUB_IMAGE_TAGS and VERSION
         run: |
-          _VERSION="${{ env.FullVersion }}"
+          _VERSION="${{ github.ref_name }}"
+          echo "VERSION=$_VERSION" >> $GITHUB_ENV
           _MAJOR_VERSION=${_VERSION%.*}
           _DOCKERHUB_IMAGE_TAGS="$DOCKERHUB_REPOSITORY:$_VERSION-${{ matrix.os }}"
           _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_MAJOR_VERSION-${{ matrix.os }}"
@@ -128,4 +108,4 @@ jobs:
           platforms: ${{ env.DOCKERHUB_IMAGE_PLATFORMS }}
           push: true
           build-args: |
-            TRACCAR_VERSION=${{ env._VERSION }}
+            TRACCAR_VERSION=${{ env.VERSION }}
