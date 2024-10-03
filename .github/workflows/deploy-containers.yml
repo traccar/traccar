@@ -128,4 +128,4 @@ jobs:
           platforms: ${{ env.DOCKERHUB_IMAGE_PLATFORMS }}
           push: true
           build-args: |
-            TRACCAR_VERSION=${{ env.MAJOR }}
+            TRACCAR_VERSION=${{ env._VERSION }}
