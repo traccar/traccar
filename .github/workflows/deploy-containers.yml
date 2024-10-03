@@ -77,7 +77,8 @@ jobs:
 
       - name: Set environment DOCKERHUB_IMAGE_TAGS and VERSION
         run: |
-          _VERSION="${{ github.ref_name }}"
+          _TAG="${{ github.ref_name }}"
+          _VERSION=${_BRANCH#v*}
           echo "VERSION=$_VERSION" >> $GITHUB_ENV
           _MAJOR_VERSION=${_VERSION%.*}
           _DOCKERHUB_IMAGE_TAGS="$DOCKERHUB_REPOSITORY:$_VERSION-${{ matrix.os }}"
