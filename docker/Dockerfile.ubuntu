@@ -1,0 +1,21 @@
+FROM sapmachine:17-jre-headless-ubuntu-jammy
+LABEL maintainer="Godwin peter .O <peter@drolx.com>"
+ARG TRACCAR_VERSION=6.5
+ENV TRACCAR_VERSION=${TRACCAR_VERSION}
+
+WORKDIR /opt/traccar
+RUN set -ex && \
+    apt update && \
+    TERM=xterm DEBIAN_FRONTEND=noninteractive apt install -y \
+    --no-install-recommends unzip wget curl
+
+COPY ./setup/traccar-other-$TRACCAR_VERSION.zip /tmp/traccar.zip
+RUN unzip -qo /tmp/traccar.zip -d /opt/traccar && \
+    apt autoremove --yes unzip wget && \
+    apt clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/*
+
+HEALTHCHECK --interval=30s --timeout=5s CMD curl -f http://localhost:8082/ || exit 1
+EXPOSE 8082
+ENTRYPOINT ["java", "-Xms1g", "-Xmx1g", "-Djava.net.preferIPv4Stack=true"]
+CMD ["-jar", "tracker-server.jar", "conf/traccar.xml"]
