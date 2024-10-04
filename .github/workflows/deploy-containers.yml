@@ -75,22 +75,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Set VERSION
+      - name: Set environment VERSION & DOCKERHUB_IMAGE_TAGS
         run: |
           _TAG="${{ github.ref_name }}"
-          _VERSION=${_BRANCH#v*}
+          _VERSION=${_TAG#v*}
           _MAJOR_VERSION=${_VERSION%.*}
+
           echo "VERSION=$_VERSION" >> $GITHUB_ENV
           echo "MAJOR_VERSION=$_MAJOR_VERSION" >> $GITHUB_ENV
 
-      - name: Set environment DOCKERHUB_IMAGE_TAGS
-        run: |
-          _DOCKERHUB_IMAGE_TAGS="$DOCKERHUB_REPOSITORY:${{ env.VERSION }}-${{ matrix.os }}"
-          _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ env.MAJOR_VERSION }}-${{ matrix.os }}"
+          _DOCKERHUB_IMAGE_TAGS="$DOCKERHUB_REPOSITORY:$_VERSION-${{ matrix.os }}"
+          _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_MAJOR_VERSION-${{ matrix.os }}"
           _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ matrix.os }}"
           if [ "${{ matrix.os }}" == "alpine" ]; then
-            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ env.VERSION }}"
-            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ env.MAJOR_VERSION }}"
+            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_VERSION"
+            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_MAJOR_VERSION"
             _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:latest"
           fi
           echo "DOCKERHUB_IMAGE_TAGS=$_DOCKERHUB_IMAGE_TAGS" >> $GITHUB_ENV
