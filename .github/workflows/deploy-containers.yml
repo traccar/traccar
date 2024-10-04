@@ -85,15 +85,16 @@ jobs:
 
       - name: Set environment DOCKERHUB_IMAGE_TAGS
         run: |
-          _DOCKERHUB_IMAGE_TAGS="$DOCKERHUB_REPOSITORY:$VERSION-${{ matrix.os }}"
-          _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$MAJOR_VERSION-${{ matrix.os }}"
+          _DOCKERHUB_IMAGE_TAGS="$DOCKERHUB_REPOSITORY:${{ env.VERSION }}-${{ matrix.os }}"
+          _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ env.MAJOR_VERSION }}-${{ matrix.os }}"
           _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ matrix.os }}"
           if [ "${{ matrix.os }}" == "alpine" ]; then
-            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$VERSION"
-            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$MAJOR_VERSION"
+            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ env.VERSION }}"
+            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ env.MAJOR_VERSION }}"
             _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:latest"
           fi
           echo "DOCKERHUB_IMAGE_TAGS=$_DOCKERHUB_IMAGE_TAGS" >> $GITHUB_ENV
+
       - name: Set environment DOCKERHUB_IMAGE_PLATFORMS
         run: |
           _DOCKERHUB_IMAGE_PLATFORMS="linux/amd64"
