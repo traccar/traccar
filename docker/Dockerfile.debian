@@ -1,7 +1,6 @@
 FROM debian:bookworm-slim
 LABEL maintainer="Godwin peter .O <peter@drolx.com>"
 ARG TRACCAR_VERSION=6.5
-ENV TRACCAR_VERSION=${TRACCAR_VERSION}
 WORKDIR /opt/traccar
 
 RUN set -ex && \

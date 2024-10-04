@@ -23,7 +23,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [alpine, debian, ubuntu]
+        # os: [alpine, debian, ubuntu]
+        os: [alpine]
 
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +32,33 @@ jobs:
           fetch-depth: 0
           submodules: true
       
+      ## SET VERSION &IMAGES VARIABLES
+      - name: Set environment VERSION & DOCKERHUB_IMAGE_TAGS
+        run: |
+          _TAG="${{ github.ref_name }}"
+          _VERSION=${_TAG#v*}
+          _MAJOR_VERSION=${_VERSION%.*}
+          _DOCKERHUB_IMAGE_TAGS="$DOCKERHUB_REPOSITORY:$_VERSION-${{ matrix.os }}"
+          _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_MAJOR_VERSION-${{ matrix.os }}"
+          _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ matrix.os }}"
+          if [ "${{ matrix.os }}" == "alpine" ]; then
+            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_VERSION"
+            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_MAJOR_VERSION"
+            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:latest"
+          fi
+          echo "VERSION=$_VERSION" >> $GITHUB_ENV
+          echo "DOCKERHUB_IMAGE_TAGS=$_DOCKERHUB_IMAGE_TAGS" >> $GITHUB_ENV
+
+      - name: Set environment DOCKERHUB_IMAGE_PLATFORMS
+        run: |
+          _DOCKERHUB_IMAGE_PLATFORMS="linux/amd64"
+          if [ "${{ matrix.os }}" == "debian" ]; then
+            _DOCKERHUB_IMAGE_PLATFORMS+=",linux/arm64"
+          elif [ "${{ matrix.os }}" == "ubuntu" ]; then
+            _DOCKERHUB_IMAGE_PLATFORMS+=",linux/arm64"
+          fi
+          echo "DOCKERHUB_IMAGE_PLATFORMS=$_DOCKERHUB_IMAGE_PLATFORMS" >> $GITHUB_ENV
+
       ## BUILD PROJECT
       - run: git checkout ${{ github.ref_name }}
         working-directory: ./traccar-web
@@ -55,11 +83,12 @@ jobs:
       - name: Build installers
         working-directory: ./setup
         run: |
-          wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
-          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_x64_windows_hotspot_21.0.4_7.zip
-          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.4_7.tar.gz
-          wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.4_7.tar.gz
-          ./package.sh ${{ github.event.inputs.version }} other
+          # wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
+          # wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_x64_windows_hotspot_21.0.4_7.zip
+          # wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.4_7.tar.gz
+          # wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.4_7.tar.gz
+          ./package.sh ${{ env.VERSION }} other
+          ls -lsh
       
       ## DEPLOY IMAGES
       - name: Set up QEMU
@@ -75,34 +104,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Set environment VERSION & DOCKERHUB_IMAGE_TAGS
-        run: |
-          _TAG="${{ github.ref_name }}"
-          _VERSION=${_TAG#v*}
-          _MAJOR_VERSION=${_VERSION%.*}
-
-          echo "VERSION=$_VERSION" >> $GITHUB_ENV
-          echo "MAJOR_VERSION=$_MAJOR_VERSION" >> $GITHUB_ENV
-
-          _DOCKERHUB_IMAGE_TAGS="$DOCKERHUB_REPOSITORY:$_VERSION-${{ matrix.os }}"
-          _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_MAJOR_VERSION-${{ matrix.os }}"
-          _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:${{ matrix.os }}"
-          if [ "${{ matrix.os }}" == "alpine" ]; then
-            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_VERSION"
-            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:$_MAJOR_VERSION"
-            _DOCKERHUB_IMAGE_TAGS+=",$DOCKERHUB_REPOSITORY:latest"
-          fi
-          echo "DOCKERHUB_IMAGE_TAGS=$_DOCKERHUB_IMAGE_TAGS" >> $GITHUB_ENV
-
-      - name: Set environment DOCKERHUB_IMAGE_PLATFORMS
-        run: |
-          _DOCKERHUB_IMAGE_PLATFORMS="linux/amd64"
-          if [ "${{ matrix.os }}" == "debian" ]; then
-            _DOCKERHUB_IMAGE_PLATFORMS+=",linux/arm64"
-          elif [ "${{ matrix.os }}" == "ubuntu" ]; then
-            _DOCKERHUB_IMAGE_PLATFORMS+=",linux/arm64"
-          fi
-          echo "DOCKERHUB_IMAGE_PLATFORMS=$_DOCKERHUB_IMAGE_PLATFORMS" >> $GITHUB_ENV
+      
       - name: Build and push
         if: env.DOCKERHUB_IMAGE_TAGS != ''
         uses: docker/build-push-action@v4
