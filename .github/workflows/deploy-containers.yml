@@ -23,8 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [alpine, debian, ubuntu]
-        os: [alpine]
+        os: [alpine, debian, ubuntu]
 
     steps:
       - uses: actions/checkout@v4
@@ -62,34 +61,29 @@ jobs:
       ## BUILD PROJECT
       - run: git checkout ${{ github.ref_name }}
         working-directory: ./traccar-web
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 21
           cache: gradle
       - run: ./gradlew build
+
       - uses: actions/setup-node@v4
         with:
           node-version: 21
           cache: npm
           cache-dependency-path: traccar-web/package-lock.json
+
       - run: npm ci && npm run build
         working-directory: ./traccar-web
-      - run: |
-          sudo dpkg --add-architecture i386
-          sudo apt-get update
-          sudo apt-get install libgcc-s1:i386 libstdc++6:i386
-          sudo apt-get install innoextract makeself wine32 s3cmd
+
       - name: Build installers
         working-directory: ./setup
         run: |
-          # wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
-          # wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_x64_windows_hotspot_21.0.4_7.zip
-          # wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_x64_linux_hotspot_21.0.4_7.tar.gz
-          # wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.4+7/OpenJDK21U-jdk_aarch64_linux_hotspot_21.0.4_7.tar.gz
           ./package.sh ${{ env.VERSION }} other
           ls -lsh
-      
+
       ## DEPLOY IMAGES
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -103,8 +97,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
-      
+
       - name: Build and push
         if: env.DOCKERHUB_IMAGE_TAGS != ''
         uses: docker/build-push-action@v4
