@@ -83,7 +83,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
                 } else if (alternative) {
                     return encodeContent(command.getDeviceId(), "DYD," + password + "#");
                 } else {
-                    return encodeContent(command.getDeviceId(), "Relay,1#");
+                    return encodeContent(command.getDeviceId(), "RELAY,1#");
                 }
             case Command.TYPE_ENGINE_RESUME:
                 if ("G109".equals(device.getModel())) {
@@ -91,7 +91,7 @@ public class Gt06ProtocolEncoder extends BaseProtocolEncoder {
                 } else if (alternative) {
                     return encodeContent(command.getDeviceId(), "HFYD," + password + "#");
                 } else {
-                    return encodeContent(command.getDeviceId(), "Relay,0#");
+                    return encodeContent(command.getDeviceId(), "RELAY,0#");
                 }
             case Command.TYPE_CUSTOM:
                 return encodeContent(command.getDeviceId(), command.getString(Command.KEY_DATA));
