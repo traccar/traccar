@@ -135,8 +135,8 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Parser parser = new Parser(PATTERN, sentence);
-        LOGGER.warn(sentence);
         if (!parser.matches()) {
+            LOGGER.error("ignoring {}", sentence);
             return null;
         }
 
