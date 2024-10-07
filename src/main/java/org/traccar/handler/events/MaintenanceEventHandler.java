@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.netty.channel.ChannelHandler;
+import org.traccar.Context;
 import org.traccar.database.IdentityManager;
 import org.traccar.database.MaintenancesManager;
 import org.traccar.model.Event;
@@ -53,8 +54,17 @@ public class MaintenanceEventHandler extends BaseEventHandler {
         for (long maintenanceId : maintenancesManager.getAllDeviceItems(position.getDeviceId())) {
             Maintenance maintenance = maintenancesManager.getById(maintenanceId);
             if (maintenance.getPeriod() != 0) {
-                double oldValue = lastPosition.getDouble(maintenance.getType());
-                double newValue = position.getDouble(maintenance.getType());
+                String type = maintenance.getType();
+                if ("totalDistance".equals(type) && position.getDouble(Position.KEY_ODOMETER) != 0) {
+                    boolean ignoreOdometer = Context.getDeviceManager()
+                            .lookupAttributeBoolean(position.getDeviceId(), "report.ignoreOdometer",
+                                    false, false, true);
+                    if (!ignoreOdometer) {
+                        type = "odometer";
+                    }
+                }
+                double oldValue = lastPosition.getDouble(type);
+                double newValue = position.getDouble(type);
                 if (oldValue != 0.0 && newValue != 0.0 && newValue >= maintenance.getStart()) {
                     if (oldValue < maintenance.getStart()
                         || (long) ((oldValue - maintenance.getStart()) / maintenance.getPeriod())
