@@ -143,7 +143,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Position position = new Position(getProtocolName());
-        position.set("raw", sentence);
+        // position.set("raw", sentence);
 
         Boolean valid = null;
         Integer event = null;
