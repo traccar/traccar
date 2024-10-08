@@ -11,6 +11,9 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
         TaipProtocolDecoder decoder = new TaipProtocolDecoder(null);
 
         verifyPosition(decoder, text(
+                "RUS01,M1,$PGIZQ|0.0,081024110940-3250776-071436813340001060000102115170004015750E787;ID=I997;#IP1:003E;*72<"));
+
+        verifyPosition(decoder, text(
                 "RUS01,M1,$GIZQ|5.3,071024225401-3244687-071225061830151120000100815280003990575E787;ID=I997;#IP1:0029;*54<"));
 
         verifyNull(decoder, text(
