@@ -10,6 +10,9 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
 
         TaipProtocolDecoder decoder = new TaipProtocolDecoder(null);
 
+        verifyPosition(decoder, text(
+                "RUS01,M1,$GIZQ|5.3,071024225401-3244687-071225061830151120000100815280003990575E787;ID=I997;#IP1:0029;*54<"));
+
         verifyNull(decoder, text(
                 ">RLN25601000+297185103-0955755990+000059150000+0000000012000000000000000000000000000000000000000000000000000000000012;ID=3580;*48<"));
 
@@ -74,7 +77,7 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 ">REV481599462982+2578391-0802945201228512;ID=Test"),
                 position("2010-09-02 17:29:42.000", true, 25.78391, -80.29452));
-        
+
         verifyPosition(decoder, text(
                 ">REV131756153215+3359479-0075299001031332;VO=10568798;IO=310;SV=10;BL=4190;CV09=0;AD=0;AL=+47;ID=356612021059680"));
 

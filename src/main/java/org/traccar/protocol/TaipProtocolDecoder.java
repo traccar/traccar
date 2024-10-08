@@ -53,7 +53,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .number("(d{5})")                    // seconds
             .or()
-            .expression("(?:RGP|RCQ|RCV|RBR|RPI)")   // type
+            .expression("(?:RGP|RCQ|RCV|RBR|RPI|RUS01)")   // type
             .number("(dd)?")                     // event
             .number("(dd)(dd)(dd)")              // date (mmddyy)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
@@ -134,13 +134,15 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             sentence = sentence.substring(beginIndex + 1);
         }
 
-        Parser parser = new Parser(PATTERN, sentence);
+        String hammer = sentence.replaceFirst(",M1,\\$(GIZQ|GDER)\\|\\d+.\\d+,", "");
+        Parser parser = new Parser(PATTERN, hammer);
         if (!parser.matches()) {
             LOGGER.error("ignoring {}", sentence);
             return null;
         }
 
         Position position = new Position(getProtocolName());
+        position.set("raw", sentence);
 
         Boolean valid = null;
         Integer event = null;
