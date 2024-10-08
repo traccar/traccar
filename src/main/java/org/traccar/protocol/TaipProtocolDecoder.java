@@ -134,10 +134,11 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             sentence = sentence.substring(beginIndex + 1);
         }
 
-        String hammer = sentence.replaceFirst(",M1,\\$(GIZQ|GDER)\\|\\d+.\\d+,", "");
+        String hammer = sentence.replaceFirst(",M1,\\$(PGIZQ|GIZQ|GDER)\\|\\d+.\\d+,", "");
         Parser parser = new Parser(PATTERN, hammer);
         if (!parser.matches()) {
             LOGGER.error("ignoring {}", sentence);
+            LOGGER.error("hammer {}", hammer);
             return null;
         }
 
