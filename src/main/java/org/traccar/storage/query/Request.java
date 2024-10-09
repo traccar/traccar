@@ -20,27 +20,45 @@ public class Request {
     private final Columns columns;
     private final Condition condition;
     private final Order order;
+    private final Pagination pagination;
 
     public Request(Columns columns) {
-        this(columns, null, null);
+        this(columns, null, null, null);
     }
 
     public Request(Condition condition) {
-        this(null, condition, null);
+        this(null, condition, null, null);
     }
 
     public Request(Columns columns, Condition condition) {
-        this(columns, condition, null);
+        this(columns, condition, null, null);
     }
 
     public Request(Columns columns, Order order) {
-        this(columns, null, order);
+        this(columns, null, order, null);
+    }
+    
+    public Request(Columns columns, Pagination pagination) {
+        this(columns, null, null, pagination);
+    }
+    
+    public Request(Columns columns, Order order, Pagination pagination) {
+        this(columns, null, order, pagination);
+    }
+    
+    public Request(Columns columns, Condition condition, Order order) {
+    	this(columns, condition, order, null);
     }
 
-    public Request(Columns columns, Condition condition, Order order) {
+    public Request(Columns columns, Condition condition, Pagination pagination) {
+    	this(columns, condition, null, pagination);
+    }
+
+    public Request(Columns columns, Condition condition, Order order, Pagination pagination) {
         this.columns = columns;
         this.condition = condition;
         this.order = order;
+        this.pagination = pagination;
     }
 
     public Columns getColumns() {
@@ -53,6 +71,10 @@ public class Request {
 
     public Order getOrder() {
         return order;
+    }
+    
+    public Pagination getPagination() {
+    	return pagination;
     }
 
 }
