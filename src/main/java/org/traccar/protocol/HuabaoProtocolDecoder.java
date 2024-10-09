@@ -41,6 +41,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 
 public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
@@ -68,6 +69,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_TIME_SYNC_RESPONSE = 0x8109;
     public static final int MSG_PHOTO = 0x8888;
     public static final int MSG_TRANSPARENT = 0x0900;
+    public static final int MSG_PARAMETER_SETTING = 0x0310;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -112,42 +114,50 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(long value) {
-        if (BitUtil.check(value, 0)) {
-            return Position.ALARM_SOS;
+    private void decodeAlarm(Position position, String model, long value) {
+        if (model != null && Set.of("G-360P", "G-508P").contains(model)) {
+            if (BitUtil.check(value, 0) || BitUtil.check(value, 4)) {
+                position.addAlarm(Position.ALARM_REMOVING);
+            }
+            if (BitUtil.check(value, 1)) {
+                position.addAlarm(Position.ALARM_TAMPERING);
+            }
+        } else {
+            if (BitUtil.check(value, 0)) {
+                position.addAlarm(Position.ALARM_SOS);
+            }
+            if (BitUtil.check(value, 1)) {
+                position.addAlarm(Position.ALARM_OVERSPEED);
+            }
+            if (BitUtil.check(value, 5)) {
+                position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
+            }
+            if (BitUtil.check(value, 4) || BitUtil.check(value, 9)
+                    || BitUtil.check(value, 10) || BitUtil.check(value, 11)) {
+                position.addAlarm(Position.ALARM_FAULT);
+            }
+            if (BitUtil.check(value, 7) || BitUtil.check(value, 18)) {
+                position.addAlarm(Position.ALARM_LOW_BATTERY);
+            }
+            if (BitUtil.check(value, 8)) {
+                position.addAlarm(Position.ALARM_POWER_OFF);
+            }
+            if (BitUtil.check(value, 15)) {
+                position.addAlarm(Position.ALARM_VIBRATION);
+            }
+            if (BitUtil.check(value, 16) || BitUtil.check(value, 17)) {
+                position.addAlarm(Position.ALARM_TAMPERING);
+            }
+            if (BitUtil.check(value, 20)) {
+                position.addAlarm(Position.ALARM_GEOFENCE);
+            }
+            if (BitUtil.check(value, 28)) {
+                position.addAlarm(Position.ALARM_MOVEMENT);
+            }
+            if (BitUtil.check(value, 29) || BitUtil.check(value, 30)) {
+                position.addAlarm(Position.ALARM_ACCIDENT);
+            }
         }
-        if (BitUtil.check(value, 1)) {
-            return Position.ALARM_OVERSPEED;
-        }
-        if (BitUtil.check(value, 5)) {
-            return Position.ALARM_GPS_ANTENNA_CUT;
-        }
-        if (BitUtil.check(value, 4) || BitUtil.check(value, 9)
-                || BitUtil.check(value, 10) || BitUtil.check(value, 11)) {
-            return Position.ALARM_FAULT;
-        }
-        if (BitUtil.check(value, 7) || BitUtil.check(value, 18)) {
-            return Position.ALARM_LOW_BATTERY;
-        }
-        if (BitUtil.check(value, 8)) {
-            return Position.ALARM_POWER_OFF;
-        }
-        if (BitUtil.check(value, 15)) {
-            return Position.ALARM_VIBRATION;
-        }
-        if (BitUtil.check(value, 16) || BitUtil.check(value, 17)) {
-            return Position.ALARM_TAMPERING;
-        }
-        if (BitUtil.check(value, 20)) {
-            return Position.ALARM_GEOFENCE;
-        }
-        if (BitUtil.check(value, 28)) {
-            return Position.ALARM_MOVEMENT;
-        }
-        if (BitUtil.check(value, 29) || BitUtil.check(value, 30)) {
-            return Position.ALARM_ACCIDENT;
-        }
-        return null;
     }
 
     private int readSignedWord(ByteBuf buf) {
@@ -404,9 +414,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.addAlarm(decodeAlarm(buf.readUnsignedInt()));
-
         String model = getDeviceModel(deviceSession);
+
+        decodeAlarm(position, model, buf.readUnsignedInt());
 
         decodeCoordinates(position, deviceSession, buf);
 
@@ -516,6 +526,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedInt(); // alarm serial number
                     buf.readUnsignedByte(); // alarm status
                     position.set("dmsAlarm", buf.readUnsignedByte());
+                    break;
+                case 0x67:
+                    stringValue = buf.readCharSequence(8, StandardCharsets.US_ASCII).toString();
+                    position.set("password", stringValue);
                     break;
                 case 0x70:
                     buf.readUnsignedInt(); // alarm serial number

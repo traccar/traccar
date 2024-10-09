@@ -28,6 +28,8 @@ public class HuabaoProtocol extends BaseProtocol {
     @Inject
     public HuabaoProtocol(Config config) {
         setSupportedDataCommands(
+                Command.TYPE_ALARM_ARM,
+                Command.TYPE_ALARM_DISARM,
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME);
         addServer(new TrackerServer(config, getName(), false) {
