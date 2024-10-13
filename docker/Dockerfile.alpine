@@ -4,7 +4,7 @@ ARG TRACCAR_VERSION=6.5
 WORKDIR /opt/traccar
 
 RUN set -ex && \
-    apk add --no-cache --no-progress curl openjdk11-jre-headless
+    apk add --no-cache --no-progress curl openjdk17-jre-headless
 COPY ./setup/traccar-other-$TRACCAR_VERSION.zip /tmp/traccar.zip
 RUN unzip -qo /tmp/traccar.zip -d /opt/traccar && \
     rm /tmp/traccar.zip
