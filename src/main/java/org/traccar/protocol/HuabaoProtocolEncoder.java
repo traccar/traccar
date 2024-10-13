@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,20 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
             byte[] time = DataConverter.parseHex(new SimpleDateFormat("yyMMddHHmmss").format(new Date()));
 
             switch (command.getType()) {
+                case Command.TYPE_REBOOT_DEVICE:
+                    data.writeByte(1); // number of parameters
+                    data.writeByte(0x23); // parameter id
+                    data.writeByte(1); // parameter value length
+                    data.writeByte(0x03); // restart
+                    return HuabaoProtocolDecoder.formatMessage(
+                            HuabaoProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
+                case Command.TYPE_POSITION_PERIODIC:
+                    data.writeByte(1); // number of parameters
+                    data.writeByte(0x06); // parameter id
+                    data.writeByte(4); // parameter value length
+                    data.writeInt(command.getInteger(Command.KEY_FREQUENCY));
+                    return HuabaoProtocolDecoder.formatMessage(
+                            HuabaoProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
                 case Command.TYPE_ALARM_ARM:
                 case Command.TYPE_ALARM_DISARM:
                     data.writeByte(1); // number of parameters
