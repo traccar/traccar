@@ -1,7 +1,4 @@
-syntax = "proto3";
 
-package org.traccar.protobuf.dolphin.Config;
-option go_package = "dolphindevice";
 
 // begin: Config ---------------------------------------------
 
