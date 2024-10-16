@@ -843,6 +843,14 @@ public final class Keys {
             List.of(KeyType.CONFIG),
             "max-age=3600,public");
 
+     /**
+     * Set HttpOnly attribut to the session cookie.
+     */
+    public static final ConfigKey<Boolean> WEB_COOKIE_HTTP_ONLY = new BooleanConfigKey(
+        "web.cookieHttpOnly",
+        List.of(KeyType.CONFIG),
+        false);
+
     /**
      * Enable TOTP authentication on the server.
      */
