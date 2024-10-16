@@ -815,8 +815,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW));
                     buf.readUnsignedByte(); // language
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                    buf.readUnsignedByte(); // working mode
+                    int mode = buf.readUnsignedByte();
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
+                    buf.readUnsignedByte(); // reserved
+                    buf.readUnsignedShort(); // working time
+                    if (mode == 4) {
+                        position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 10.0);
+                    }
                 } else {
                     if (type == MSG_GPS_LBS_STATUS_5) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
