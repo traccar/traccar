@@ -15,11 +15,14 @@
  */
 package org.traccar.forward;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -41,9 +44,11 @@ public class PositionForwarderWialon implements PositionForwarder {
     private final DatagramSocket socket;
     private final InetAddress address;
     private final int port;
+    private final ObjectMapper objectMapper;
 
-    public PositionForwarderWialon(Config config, ExecutorService executorService, String version) {
+    public PositionForwarderWialon(Config config, ExecutorService executorService, String version, ObjectMapper objectMapper) {
         this.version = version;
+        this.objectMapper = objectMapper;
         try {
             URI url = new URI(config.getString(Keys.FORWARD_URL));
             address = InetAddress.getByName(url.getHost());
@@ -72,9 +77,15 @@ public class PositionForwarderWialon implements PositionForwarder {
 
         Position position = positionData.getPosition();
         String uniqueId = positionData.getDevice().getUniqueId();
+        String attributes = "NA";
+        try {
+            attributes = convertJsonToWialonParams(objectMapper.writeValueAsString(position.getAttributes()));
+        } catch (JsonProcessingException e) {
+            resultHandler.onResult(false, e);
+        }
 
         String payload = String.format(
-                "%s;%02d%.5f;%s;%03d%.5f;%s;%d;%d;%d;NA;NA;NA;NA;;%s;NA",
+                "%s;%02d%.5f;%s;%03d%.5f;%s;%d;%d;%d;NA;NA;NA;NA;;%s;%s",
                 dateFormat.format(position.getFixTime()),
                 (int) Math.abs(position.getLatitude()),
                 Math.abs(position.getLatitude()) % 1 * 60,
@@ -85,7 +96,8 @@ public class PositionForwarderWialon implements PositionForwarder {
                 (int) UnitsConverter.kphFromKnots(position.getSpeed()),
                 (int) position.getCourse(),
                 (int) position.getAltitude(),
-                position.getString(Position.KEY_DRIVER_UNIQUE_ID, "NA"));
+                position.getString(Position.KEY_DRIVER_UNIQUE_ID, "NA"),
+                attributes);
 
         String message;
         if (version.startsWith("2")) {
@@ -106,6 +118,31 @@ public class PositionForwarderWialon implements PositionForwarder {
         } catch (IOException e) {
             resultHandler.onResult(false, e);
         }
+    }
+
+    public static String convertJsonToWialonParams(String jsonString) {
+        JSONObject jsonObject = new JSONObject(jsonString);
+        StringBuilder result = new StringBuilder();
+
+        for (String key : jsonObject.keySet()) {
+            Object value = jsonObject.get(key);
+            String type;
+
+            if (value instanceof Integer || value instanceof Long) {
+                type = "1";
+            } else if (value instanceof Double || value instanceof Float) {
+                type = "2";
+            } else {
+                type = "3";
+            }
+
+            if (!result.isEmpty()) {
+                result.append(",");
+            }
+            result.append(key).append(":").append(type).append(":").append(value.toString());
+        }
+
+        return result.toString();
     }
 
 }
