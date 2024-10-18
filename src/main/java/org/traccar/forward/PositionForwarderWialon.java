@@ -15,14 +15,11 @@
  */
 package org.traccar.forward;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -34,6 +31,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 
@@ -44,11 +42,9 @@ public class PositionForwarderWialon implements PositionForwarder {
     private final DatagramSocket socket;
     private final InetAddress address;
     private final int port;
-    private final ObjectMapper objectMapper;
 
-    public PositionForwarderWialon(Config config, ExecutorService executorService, String version, ObjectMapper objectMapper) {
+    public PositionForwarderWialon(Config config, ExecutorService executorService, String version) {
         this.version = version;
-        this.objectMapper = objectMapper;
         try {
             URI url = new URI(config.getString(Keys.FORWARD_URL));
             address = InetAddress.getByName(url.getHost());
@@ -77,12 +73,7 @@ public class PositionForwarderWialon implements PositionForwarder {
 
         Position position = positionData.getPosition();
         String uniqueId = positionData.getDevice().getUniqueId();
-        String attributes = "NA";
-        try {
-            attributes = convertJsonToWialonParams(objectMapper.writeValueAsString(position.getAttributes()));
-        } catch (JsonProcessingException e) {
-            resultHandler.onResult(false, e);
-        }
+        String attributes = convertJsonToWialonParams(position.getAttributes());
 
         String payload = String.format(
                 "%s;%02d%.5f;%s;%03d%.5f;%s;%d;%d;%d;NA;NA;NA;NA;;%s;%s",
@@ -120,12 +111,11 @@ public class PositionForwarderWialon implements PositionForwarder {
         }
     }
 
-    public static String convertJsonToWialonParams(String jsonString) {
-        JSONObject jsonObject = new JSONObject(jsonString);
+    public static String convertJsonToWialonParams(Map<String, Object> attributes) {
         StringBuilder result = new StringBuilder();
 
-        for (String key : jsonObject.keySet()) {
-            Object value = jsonObject.get(key);
+        for (String key : attributes.keySet()) {
+            Object value = attributes.get(key);
             String type;
 
             if (value instanceof Integer || value instanceof Long) {
