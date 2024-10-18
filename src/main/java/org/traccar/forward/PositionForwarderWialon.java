@@ -34,6 +34,7 @@ import java.text.SimpleDateFormat;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 
 public class PositionForwarderWialon implements PositionForwarder {
 
@@ -73,7 +74,6 @@ public class PositionForwarderWialon implements PositionForwarder {
 
         Position position = positionData.getPosition();
         String uniqueId = positionData.getDevice().getUniqueId();
-        String attributes = convertJsonToWialonParams(position.getAttributes());
 
         String payload = String.format(
                 "%s;%02d%.5f;%s;%03d%.5f;%s;%d;%d;%d;NA;NA;NA;NA;;%s;%s",
@@ -88,7 +88,7 @@ public class PositionForwarderWialon implements PositionForwarder {
                 (int) position.getCourse(),
                 (int) position.getAltitude(),
                 position.getString(Position.KEY_DRIVER_UNIQUE_ID, "NA"),
-                attributes);
+                formatAttributes(position.getAttributes(), "NA"));
 
         String message;
         if (version.startsWith("2")) {
@@ -111,28 +111,22 @@ public class PositionForwarderWialon implements PositionForwarder {
         }
     }
 
-    public static String convertJsonToWialonParams(Map<String, Object> attributes) {
-        StringBuilder result = new StringBuilder();
-
-        for (String key : attributes.keySet()) {
-            Object value = attributes.get(key);
-            String type;
-
-            if (value instanceof Integer || value instanceof Long) {
-                type = "1";
-            } else if (value instanceof Double || value instanceof Float) {
-                type = "2";
-            } else {
-                type = "3";
-            }
-
-            if (!result.isEmpty()) {
-                result.append(",");
-            }
-            result.append(key).append(":").append(type).append(":").append(value.toString());
+    public static String formatAttributes(Map<String, Object> attributes, String defaultValue) {
+        if (attributes.isEmpty()) {
+            return defaultValue;
         }
 
-        return result.toString();
+        return attributes.entrySet().stream()
+                .map(entry -> {
+                    String key = entry.getKey();
+                    Object value = entry.getValue();
+
+                    String type = (value instanceof Integer || value instanceof Long) ? "1" :
+                                  (value instanceof Double || value instanceof Float) ? "2" : "3";
+
+                    return key + ":" + type + ":" + value.toString();
+                })
+                .collect(Collectors.joining(","));
     }
 
 }
