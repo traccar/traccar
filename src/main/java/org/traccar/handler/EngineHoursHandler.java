@@ -36,7 +36,7 @@ public class EngineHoursHandler extends BasePositionHandler {
             if (last != null) {
                 long hours = last.getLong(Position.KEY_HOURS);
                 if (last.getBoolean(Position.KEY_IGNITION) && position.getBoolean(Position.KEY_IGNITION)) {
-                    hours += position.getFixTime().getTime() - last.getFixTime().getTime();
+                    hours += position.getDeviceTime().getTime() - last.getDeviceTime().getTime();
                 }
                 if (hours != 0) {
                     position.set(Position.KEY_HOURS, hours);
