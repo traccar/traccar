@@ -121,8 +121,14 @@ public class PositionForwarderWialon implements PositionForwarder {
                     String key = entry.getKey();
                     Object value = entry.getValue();
 
-                    String type = (value instanceof Integer || value instanceof Long) ? "1" :
-                                  (value instanceof Double || value instanceof Float) ? "2" : "3";
+                    String type;
+                    if (value instanceof Integer || value instanceof Long) {
+                        type = "1";
+                    } else if (value instanceof Double || value instanceof Float) {
+                        type = "2";
+                    } else {
+                        type = "3";
+                    }
 
                     return key + ":" + type + ":" + value.toString();
                 })
