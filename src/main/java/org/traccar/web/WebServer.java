@@ -217,6 +217,8 @@ public class WebServer implements LifecycleObject {
                     break;
             }
         }
+
+        sessionCookieConfig.setHttpOnly(config.getBoolean(Keys.WEB_COOKIE_HTTP_ONLY));
     }
 
     @Override
