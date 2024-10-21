@@ -15,20 +15,33 @@
  */
 package org.traccar.api;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.helper.Log;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 
 public class ResourceErrorHandler implements ExceptionMapper<Exception> {
 
+    private static final String HIDDEN_MESSAGE_KEY = "HiddenError";
+    private boolean hideErrorDetail;
+
+    @Inject
+    public ResourceErrorHandler(Config config) {
+        this.hideErrorDetail = config.getBoolean(Keys.WEB_HIDE_ERROR_DETAIL);
+    }
+
     @Override
     public Response toResponse(Exception e) {
         if (e instanceof WebApplicationException webException) {
-            return Response.fromResponse(webException.getResponse()).entity(Log.exceptionStack(webException)).build();
+            String message = hideErrorDetail ? HIDDEN_MESSAGE_KEY : Log.exceptionStack(webException);
+            return Response.fromResponse(webException.getResponse()).entity(message).build();
         } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity(Log.exceptionStack(e)).build();
+            String message = hideErrorDetail ? HIDDEN_MESSAGE_KEY : Log.exceptionStack(e);
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
     }
 
