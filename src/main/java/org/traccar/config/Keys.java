@@ -1231,6 +1231,20 @@ public final class Keys {
     public static final ConfigKey<Boolean> NOTIFICATOR_TELEGRAM_SEND_LOCATION = new BooleanConfigKey(
             "notificator.telegram.sendLocation",
             List.of(KeyType.CONFIG));
+  
+     /**
+      * Gotify notification url.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_GOTIFY_URL = new StringConfigKey(
+            "notificator.gotify.url",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Gotify notification token.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_GOTIFY_TOKEN = new StringConfigKey(
+            "notificator.gotify.token",
+            List.of(KeyType.CONFIG));
 
     /**
      * Enable user expiration email notification.
