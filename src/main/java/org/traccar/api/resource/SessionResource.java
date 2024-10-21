@@ -81,6 +81,7 @@ public class SessionResource extends BaseResource {
             LoginResult loginResult = loginService.login(token);
             if (loginResult != null) {
                 User user = loginResult.getUser();
+                request.getSession().invalidate();
                 request.getSession().setAttribute(USER_ID_KEY, user.getId());
                 request.getSession().setAttribute(EXPIRATION_KEY, loginResult.getExpiration());
                 LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
@@ -128,6 +129,7 @@ public class SessionResource extends BaseResource {
         }
         if (loginResult != null) {
             User user = loginResult.getUser();
+            request.getSession().invalidate();
             request.getSession().setAttribute(USER_ID_KEY, user.getId());
             LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
             return user;
