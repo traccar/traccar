@@ -91,7 +91,7 @@ public class PositionForwarderWialon implements PositionForwarder {
                 (int) position.getCourse(),
                 (int) position.getAltitude(),
                 position.getString(Position.KEY_DRIVER_UNIQUE_ID, "NA"),
-                formatAttributes(position.getAttributes(), "NA"));
+                formatAttributes(position.getAttributes()));
 
         String message;
         if (version.startsWith("2")) {
@@ -148,26 +148,22 @@ public class PositionForwarderWialon implements PositionForwarder {
         return container.toByteArray();
     }
 
-    public static String formatAttributes(Map<String, Object> attributes, String defaultValue) {
+    public static String formatAttributes(Map<String, Object> attributes) {
         if (attributes.isEmpty()) {
-            return defaultValue;
+            return "NA";
         }
-
         return attributes.entrySet().stream()
                 .map(entry -> {
-                    String key = entry.getKey();
                     Object value = entry.getValue();
-
-                    String type;
-                    if (value instanceof Integer || value instanceof Long) {
-                        type = "1";
-                    } else if (value instanceof Double || value instanceof Float) {
-                        type = "2";
+                    int type;
+                    if (value instanceof Double || value instanceof Float) {
+                        type = 2;
+                    } else if (value instanceof Number) {
+                        type = 1;
                     } else {
-                        type = "3";
+                        type = 3;
                     }
-
-                    return key + ":" + type + ":" + value.toString();
+                    return entry.getKey() + ":" + type + ":" + value;
                 })
                 .collect(Collectors.joining(","));
     }
