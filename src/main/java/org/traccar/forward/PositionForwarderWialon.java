@@ -15,13 +15,14 @@
  */
 package org.traccar.forward;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -29,7 +30,6 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -42,13 +42,19 @@ import java.util.zip.Deflater;
 public class PositionForwarderWialon implements PositionForwarder {
 
     private final String version;
+    private final boolean useCompression;
 
     private final DatagramSocket socket;
     private final InetAddress address;
     private final int port;
 
-    public PositionForwarderWialon(Config config, ExecutorService executorService, String version) {
+    public PositionForwarderWialon(
+            Config config,
+            ExecutorService executorService,
+            String version,
+            boolean useCompression) {
         this.version = version;
+        this.useCompression = useCompression;
         try {
             URI url = new URI(config.getString(Keys.FORWARD_URL));
             address = InetAddress.getByName(url.getHost());
@@ -104,9 +110,16 @@ public class PositionForwarderWialon implements PositionForwarder {
         }
 
         byte[] buffer = message.getBytes();
-        byte[] compressedBuffer = compressData(buffer);
-        byte[] container = createContainer(compressedBuffer);
-        DatagramPacket packet = new DatagramPacket(container, container.length, address, port);
+        DatagramPacket packet;
+
+        if (useCompression) {
+            byte[] compressedBuffer = compressData(buffer);
+            ByteBuf container = createContainer(compressedBuffer);
+            packet = new DatagramPacket(container.array(), container.readableBytes(), address, port);
+            container.release();
+        } else {
+            packet = new DatagramPacket(buffer, buffer.length, address, port);
+        }
 
         try {
             socket.send(packet);
@@ -121,31 +134,26 @@ public class PositionForwarderWialon implements PositionForwarder {
         deflater.setInput(data);
         deflater.finish();
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(data.length);
-        byte[] buffer = new byte[1024];
+        ByteBuf buffer = Unpooled.buffer(data.length);
+        byte[] tempBuffer = new byte[1024];
 
         while (!deflater.finished()) {
-            int count = deflater.deflate(buffer);
-            byteArrayOutputStream.write(buffer, 0, count);
+            int count = deflater.deflate(tempBuffer);
+            buffer.writeBytes(tempBuffer, 0, count);
         }
         deflater.end();
 
-        return byteArrayOutputStream.toByteArray();
+        byte[] compressedData = new byte[buffer.readableBytes()];
+        buffer.readBytes(compressedData);
+        return compressedData;
     }
 
-    public static byte[] createContainer(byte[] data) {
-        ByteArrayOutputStream container = new ByteArrayOutputStream();
-
-        container.write(0xFF);
-
-        int dataLength = data.length;
-        ByteBuffer lengthBuffer = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN);
-        lengthBuffer.putShort((short) dataLength);
-        container.write(lengthBuffer.array(), 0, 2);
-
-        container.write(data, 0, dataLength);
-
-        return container.toByteArray();
+    public static ByteBuf createContainer(byte[] compressedData) {
+        ByteBuf container = Unpooled.buffer(3 + compressedData.length);
+        container.writeByte(0xFF);
+        container.writeShortLE(compressedData.length);
+        container.writeBytes(compressedData);
+        return container;
     }
 
     public static String formatAttributes(Map<String, Object> attributes) {
