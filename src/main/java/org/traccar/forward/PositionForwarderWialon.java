@@ -21,6 +21,7 @@ import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -28,6 +29,7 @@ import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -35,6 +37,7 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+import java.util.zip.Deflater;
 
 public class PositionForwarderWialon implements PositionForwarder {
 
@@ -101,7 +104,9 @@ public class PositionForwarderWialon implements PositionForwarder {
         }
 
         byte[] buffer = message.getBytes();
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, port);
+        byte[] compressedBuffer = compressData(buffer);
+        byte[] container = createContainer(compressedBuffer);
+        DatagramPacket packet = new DatagramPacket(container, container.length, address, port);
 
         try {
             socket.send(packet);
@@ -109,6 +114,38 @@ public class PositionForwarderWialon implements PositionForwarder {
         } catch (IOException e) {
             resultHandler.onResult(false, e);
         }
+    }
+
+    public static byte[] compressData(byte[] data) {
+        Deflater deflater = new Deflater();
+        deflater.setInput(data);
+        deflater.finish();
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(data.length);
+        byte[] buffer = new byte[1024];
+
+        while (!deflater.finished()) {
+            int count = deflater.deflate(buffer);
+            byteArrayOutputStream.write(buffer, 0, count);
+        }
+        deflater.end();
+
+        return byteArrayOutputStream.toByteArray();
+    }
+
+    public static byte[] createContainer(byte[] data) {
+        ByteArrayOutputStream container = new ByteArrayOutputStream();
+
+        container.write(0xFF);
+
+        int dataLength = data.length;
+        ByteBuffer lengthBuffer = ByteBuffer.allocate(2).order(ByteOrder.LITTLE_ENDIAN);
+        lengthBuffer.putShort((short) dataLength);
+        container.write(lengthBuffer.array(), 0, 2);
+
+        container.write(data, 0, dataLength);
+
+        return container.toByteArray();
     }
 
     public static String formatAttributes(Map<String, Object> attributes, String defaultValue) {
