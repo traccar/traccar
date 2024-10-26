@@ -113,6 +113,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_BMS = 0x40;                // WD-209
     public static final int MSG_MULTIMEDIA = 0x41;         // WD-209
     public static final int MSG_ALARM = 0x95;              // JC100
+    public static final int MSG_PERIPHERAL = 0xF2;         // VL842
 
     private enum Variant {
         VXT01,
@@ -1371,8 +1372,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 if (photo != null) {
                     buf.readBytes(photo, buf.readableBytes() - 3 * 2);
                     if (!photo.isWritable()) {
-                        position = new Position(getProtocolName());
-                        position.setDeviceId(deviceSession.getDeviceId());
                         getLastLocation(position, new Date(timestamp));
                         position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
                         photos.remove(mediaId).release();
@@ -1387,8 +1386,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_SERIAL) {
 
-            position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
             getLastLocation(position, null);
 
             buf.readUnsignedByte(); // external device type code
@@ -1400,6 +1397,43 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 position.set(Position.KEY_RESULT, ByteBufUtil.hexDump(data));
             }
+
+            return position;
+
+        } else if (type == MSG_PERIPHERAL) {
+
+            long timestamp = buf.readUnsignedInt() * 1000;
+            getLastLocation(position, new Date(timestamp));
+
+            while (buf.readableBytes() > 6) {
+                int statusId = buf.readUnsignedShort();
+                switch (statusId) {
+                    case 0x000A -> {
+                        int statusLength = buf.readUnsignedShort();
+                        buf.readUnsignedByte(); // mac address type
+                        position.set("mac", ByteBufUtil.hexDump(buf.readSlice(6)));
+                        int event = buf.readUnsignedByte();
+                        position.set(Position.KEY_EVENT, event);
+                        int eventData = buf.readUnsignedByte();
+                        position.set("eventData", event > 0 ? eventData : null);
+                        position.set("dataType", buf.readUnsignedByte());
+                        position.set("dataDetails", ByteBufUtil.hexDump(buf.readSlice(statusLength - 10)));
+                    }
+                    case 0x000C -> {
+                        buf.readUnsignedByte(); // length
+                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        position.set(Position.KEY_CHARGE, buf.readUnsignedByte() > 0 ? true : null);
+                        position.set("batteryCycles", buf.readUnsignedShort());
+                        buf.skipBytes(6);
+                    }
+                    default -> {
+                        int statusLength = buf.readUnsignedByte();
+                        buf.skipBytes(statusLength == 0 ? buf.readUnsignedByte() : statusLength);
+                    }
+                }
+            }
+
+            sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
 
             return position;
 
