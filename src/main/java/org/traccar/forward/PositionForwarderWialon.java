@@ -15,6 +15,8 @@
  */
 package org.traccar.forward;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.Checksum;
@@ -35,17 +37,24 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+import java.util.zip.Deflater;
 
 public class PositionForwarderWialon implements PositionForwarder {
 
     private final String version;
+    private final boolean useCompression;
 
     private final DatagramSocket socket;
     private final InetAddress address;
     private final int port;
 
-    public PositionForwarderWialon(Config config, ExecutorService executorService, String version) {
+    public PositionForwarderWialon(
+            Config config,
+            ExecutorService executorService,
+            String version,
+            boolean useCompression) {
         this.version = version;
+        this.useCompression = useCompression;
         try {
             URI url = new URI(config.getString(Keys.FORWARD_URL));
             address = InetAddress.getByName(url.getHost());
@@ -101,7 +110,14 @@ public class PositionForwarderWialon implements PositionForwarder {
         }
 
         byte[] buffer = message.getBytes();
-        DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, port);
+        DatagramPacket packet;
+
+        if (useCompression) {
+            ByteBuf container = compressData(buffer);
+            packet = new DatagramPacket(container.array(), container.readableBytes(), address, port);
+        } else {
+            packet = new DatagramPacket(buffer, buffer.length, address, port);
+        }
 
         try {
             socket.send(packet);
@@ -109,6 +125,32 @@ public class PositionForwarderWialon implements PositionForwarder {
         } catch (IOException e) {
             resultHandler.onResult(false, e);
         }
+    }
+
+    public static ByteBuf compressData(byte[] data) {
+        ByteBuf container;
+        Deflater deflater = new Deflater();
+        deflater.setInput(data);
+        deflater.finish();
+
+        ByteBuf compressedData = Unpooled.buffer(data.length);
+        byte[] tempBuffer = new byte[1024];
+
+        try {
+            while (!deflater.finished()) {
+                int count = deflater.deflate(tempBuffer);
+                compressedData.writeBytes(tempBuffer, 0, count);
+            }
+            container = Unpooled.buffer(3 + compressedData.readableBytes());
+            container.writeByte(0xFF);
+            container.writeShortLE(compressedData.readableBytes());
+            container.writeBytes(compressedData);
+        } finally {
+            deflater.end();
+            compressedData.release();
+        }
+
+        return container;
     }
 
     public static String formatAttributes(Map<String, Object> attributes) {

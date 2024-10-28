@@ -371,7 +371,7 @@ public class MainModule extends AbstractModule {
                 case "kafka" -> new PositionForwarderKafka(config, objectMapper);
                 case "mqtt" -> new PositionForwarderMqtt(config, objectMapper);
                 case "redis" -> new PositionForwarderRedis(config, objectMapper);
-                case "wialon" -> new PositionForwarderWialon(config, executorService, "1.0");
+                case "wialon" -> new PositionForwarderWialon(config, executorService, "1.0", false);
                 default -> new PositionForwarderUrl(config, client, objectMapper);
             };
         }
