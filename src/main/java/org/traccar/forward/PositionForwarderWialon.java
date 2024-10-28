@@ -113,10 +113,8 @@ public class PositionForwarderWialon implements PositionForwarder {
         DatagramPacket packet;
 
         if (useCompression) {
-            byte[] compressedBuffer = compressData(buffer);
-            ByteBuf container = createContainer(compressedBuffer);
+            ByteBuf container = compressData(buffer);
             packet = new DatagramPacket(container.array(), container.readableBytes(), address, port);
-            container.release();
         } else {
             packet = new DatagramPacket(buffer, buffer.length, address, port);
         }
@@ -129,30 +127,29 @@ public class PositionForwarderWialon implements PositionForwarder {
         }
     }
 
-    public static byte[] compressData(byte[] data) {
+    public static ByteBuf compressData(byte[] data) {
+        ByteBuf container;
         Deflater deflater = new Deflater();
         deflater.setInput(data);
         deflater.finish();
 
-        ByteBuf buffer = Unpooled.buffer(data.length);
+        ByteBuf compressedData = Unpooled.buffer(data.length);
         byte[] tempBuffer = new byte[1024];
 
-        while (!deflater.finished()) {
-            int count = deflater.deflate(tempBuffer);
-            buffer.writeBytes(tempBuffer, 0, count);
+        try {
+            while (!deflater.finished()) {
+                int count = deflater.deflate(tempBuffer);
+                compressedData.writeBytes(tempBuffer, 0, count);
+            }
+            container = Unpooled.buffer(3 + compressedData.readableBytes());
+            container.writeByte(0xFF);
+            container.writeShortLE(compressedData.readableBytes());
+            container.writeBytes(compressedData);
+        } finally {
+            deflater.end();
+            compressedData.release();
         }
-        deflater.end();
 
-        byte[] compressedData = new byte[buffer.readableBytes()];
-        buffer.readBytes(compressedData);
-        return compressedData;
-    }
-
-    public static ByteBuf createContainer(byte[] compressedData) {
-        ByteBuf container = Unpooled.buffer(3 + compressedData.length);
-        container.writeByte(0xFF);
-        container.writeShortLE(compressedData.length);
-        container.writeBytes(compressedData);
         return container;
     }
 
