@@ -101,8 +101,7 @@ public class SessionResource extends BaseResource {
         permissionsService.checkUser(getUserId(), userId);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", userId)));
-        request.getSession().setAttribute(SessionHelper.USER_ID_KEY, user.getId());
-        LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+        SessionHelper.userLogin(request, user, null);
         return user;
     }
 
