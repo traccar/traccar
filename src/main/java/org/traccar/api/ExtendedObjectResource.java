@@ -36,8 +36,7 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
     private  final String sortField;
 
     public ExtendedObjectResource(Class<T> baseClass) {
-        super(baseClass);
-        this.sortField = null;
+        this(baseClass, null);
     }
 
     public ExtendedObjectResource(Class<T> baseClass, String sortField) {
