@@ -133,4 +133,13 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         return Response.noContent().build();
     }
 
+    protected boolean hasField(String field) {
+        try {
+            baseClass.getDeclaredField(field);
+            return true;
+        } catch (NoSuchFieldException e) {
+            return false;
+        }
+    }
+
 }

@@ -73,13 +73,6 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
         } 
         return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions), order));
     }
-    private boolean hasField(String field) {
-        try {
-            baseClass.getDeclaredField(field);
-            return true;
-        } catch (NoSuchFieldException e) {
-            return false;
-        }
-    }
+
 
 }
