@@ -21,18 +21,28 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.QueryParam;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
 public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResource<T> {
 
+    private final String sortField;
+
     public SimpleObjectResource(Class<T> baseClass) {
-        super(baseClass);
+        this(baseClass, null);
     }
+
+    public SimpleObjectResource(Class<T> baseClass, String sortField) {
+        super(baseClass);
+        this.sortField = sortField;
+    }
+
 
     @GET
     public Collection<T> get(
@@ -53,7 +63,8 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
 
-        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
+        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions),
+                sortField != null ? new Order(sortField) : null));
     }
 
 }

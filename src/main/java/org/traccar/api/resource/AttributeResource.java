@@ -50,7 +50,7 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
     private ComputedAttributesHandler.Late computedAttributesHandler;
 
     public AttributeResource() {
-        super(Attribute.class);
+        super(Attribute.class, "description");
     }
 
     @POST
