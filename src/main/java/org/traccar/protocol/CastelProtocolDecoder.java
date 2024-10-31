@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -93,6 +94,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
     public static final short MSG_SC_CELL = 0x4008;
     public static final short MSG_SC_GPS_SLEEP = 0x4009;
     public static final short MSG_SC_FUEL = 0x400E;
+    public static final short MSG_SC_COMPREHENSIVE = 0x401F;
     public static final short MSG_SC_AGPS_REQUEST = 0x5101;
     public static final short MSG_SC_QUERY_RESPONSE = (short) 0xA002;
     public static final short MSG_SC_CURRENT_LOCATION = (short) 0xB001;
@@ -267,7 +269,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, ByteBuf buf,
             int version, ByteBuf id, short type, DeviceSession deviceSession) {
 
-        Position position;
+        Position position = null;
         int count;
 
         switch (type) {
@@ -282,6 +284,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
             case MSG_SC_ALARM:
             case MSG_SC_CURRENT_LOCATION:
             case MSG_SC_FUEL:
+            case MSG_SC_COMPREHENSIVE:
                 if (type == MSG_SC_LOGIN) {
                     ByteBuf response = Unpooled.buffer(10);
                     response.writeIntLE(0xFFFFFFFF);
@@ -290,8 +293,11 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     sendResponse(channel, remoteAddress, version, id, MSG_SC_LOGIN_RESPONSE, response);
                 }
 
-                if (type == MSG_SC_GPS) {
+                if (type == MSG_SC_GPS || type == MSG_SC_COMPREHENSIVE) {
                     buf.readUnsignedByte(); // historical
+                    if (type == MSG_SC_COMPREHENSIVE) {
+                        buf.readUnsignedIntLE(); // index
+                    }
                 } else if (type == MSG_SC_ALARM) {
                     buf.readUnsignedIntLE(); // alarm
                 } else if (type == MSG_SC_CURRENT_LOCATION) {
@@ -335,6 +341,61 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                 } else if (type == MSG_SC_FUEL) {
                     for (Position p : positions) {
                         p.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
+                    }
+                } else if (type == MSG_SC_COMPREHENSIVE) {
+                    if (position == null) {
+                        position = new Position(getProtocolName());
+                        position.setDeviceId(deviceSession.getDeviceId());
+                        getLastLocation(position, null);
+                    }
+
+                    int tag = buf.readUnsignedShortLE();
+                    int length = buf.readUnsignedShortLE();
+                    switch (tag) {
+                        case 0x0002 -> {
+                            int pidCount = buf.readUnsignedByte();
+                            for (int i = 0; i < pidCount; i++) {
+                                int pidTag = buf.readUnsignedShortLE();
+                                int pidLength = buf.readUnsignedShortLE();
+                                position.set("pid" + pidTag, ByteBufUtil.hexDump(buf.readSlice(pidLength)));
+                            }
+                        }
+                        case 0x0004 -> buf.skipBytes(length); // supported data streams
+                        case 0x0005 -> buf.skipBytes(length); // snapshot data
+                        case 0x0006 -> {
+                            buf.readUnsignedByte(); // fault flag
+                            int faultCount = buf.readUnsignedByte();
+                            for (int i = 1; i <= faultCount; i++) {
+                                position.set("fault" + i, buf.readUnsignedShortLE());
+                            }
+                        }
+                        case 0x0007 -> {
+                            buf.readUnsignedIntLE(); // alarm index
+                            int alarmCount = buf.readUnsignedByte();
+                            for (int i = 0; i < alarmCount; i++) {
+                                int alarmFlag = buf.readUnsignedByte();
+                                int event = buf.readUnsignedByte();
+                                if (alarmFlag > 0) {
+                                    decodeAlarm(position, event);
+                                }
+                                buf.readUnsignedShortLE(); // description
+                                buf.readUnsignedShortLE(); // threshold
+                            }
+                        }
+                        case 0x000B -> {
+                            buf.readUnsignedByte(); // fault flag
+                            int faultCount = buf.readUnsignedByte();
+                            for (int i = 1; i <= faultCount; i++) {
+                                position.set("fault" + i, buf.readUnsignedIntLE());
+                            }
+                            buf.readUnsignedShortLE(); // mil status
+                        }
+                        case 0x0010 -> position.set(Position.KEY_DEVICE_TEMP, buf.readShortLE() / 10.0);
+                        case 0x0011, 0x0012, 0x0013, 0x0014 ->
+                                position.set(Position.PREFIX_TEMP + (tag - 0x0010), buf.readShortLE() / 10.0);
+                        case 0x0020 -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 100.0);
+                        case 0x0021 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 100.0);
+                        default -> buf.skipBytes(length);
                     }
                 }
 
