@@ -78,8 +78,8 @@ public class UserResource extends BaseObjectResource<User> {
             permissionsService.checkManager(getUserId());
             conditions.add(new Condition.Permission(User.class, Device.class, deviceId).excludeGroups());
         }
-        return storage.getObjects(baseClass,
-                new Request(new Columns.All(), Condition.merge(conditions), new Order("name")));
+        return storage.getObjects(baseClass, new Request(
+                new Columns.All(), Condition.merge(conditions), new Order("name")));
     }
 
     @Override

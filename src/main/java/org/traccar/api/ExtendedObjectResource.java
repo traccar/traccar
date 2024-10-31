@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -35,10 +35,6 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
 
     private  final String sortField;
 
-    public ExtendedObjectResource(Class<T> baseClass) {
-        this(baseClass, null);
-    }
-
     public ExtendedObjectResource(Class<T> baseClass, String sortField) {
         super(baseClass);
         this.sortField = sortField;
@@ -73,9 +69,8 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             conditions.add(new Condition.Permission(Device.class, deviceId, baseClass).excludeGroups());
         }
 
-        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions),
-                sortField != null ? new Order(sortField) : null));
+        return storage.getObjects(baseClass, new Request(
+                new Columns.All(), Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
     }
-
 
 }

@@ -130,8 +130,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 }
             }
 
-            return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions),
-                    new Order("name")));
+            return storage.getObjects(baseClass, new Request(
+                    new Columns.All(), Condition.merge(conditions), new Order("name")));
 
         }
     }
