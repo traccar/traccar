@@ -32,6 +32,7 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.annotation.security.PermitAll;
@@ -44,6 +45,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
@@ -65,26 +67,22 @@ public class UserResource extends BaseObjectResource<User> {
     @GET
     public Collection<User> get(
             @QueryParam("userId") long userId, @QueryParam("deviceId") long deviceId) throws StorageException {
+        var conditions = new LinkedList<Condition>();
         if (userId > 0) {
             permissionsService.checkUser(getUserId(), userId);
-            return storage.getObjects(baseClass, new Request(
-                    new Columns.All(),
-                    new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups()));
-        } else if (deviceId > 0) {
+            conditions.add(new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups());
+        } else if (permissionsService.notAdmin(getUserId())) {
+            conditions.add(new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups());
+        }
+        if (deviceId > 0) {
             permissionsService.checkManager(getUserId());
-            var conditions = new LinkedList<Condition>();
             conditions.add(new Condition.Permission(User.class, Device.class, deviceId).excludeGroups());
             if (permissionsService.notAdmin(getUserId())) {
                 conditions.add(new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups());
             }
-            return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
-        } else if (permissionsService.notAdmin(getUserId())) {
-            return storage.getObjects(baseClass, new Request(
-                    new Columns.All(),
-                    new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()));
-        } else {
-            return storage.getObjects(baseClass, new Request(new Columns.All()));
         }
+        return storage.getObjects(baseClass,
+                new Request(new Columns.All(), Condition.merge(conditions), new Order("name")));
     }
 
     @Override
@@ -98,8 +96,8 @@ public class UserResource extends BaseObjectResource<User> {
                 int userLimit = currentUser.getUserLimit();
                 if (userLimit > 0) {
                     int userCount = storage.getObjects(baseClass, new Request(
-                            new Columns.All(),
-                            new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()))
+                                    new Columns.All(),
+                                    new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()))
                             .size();
                     if (userCount >= userLimit) {
                         throw new SecurityException("Manager user limit reached");
