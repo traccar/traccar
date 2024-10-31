@@ -21,6 +21,7 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.ws.rs.GET;
@@ -52,8 +53,13 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
             }
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
-
-        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
+        Order order = null;
+        if(hasField("name")) {
+            order = new Order("name");
+        } else if (hasField("description")) {
+            order = new Order("description");
+        }
+        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions), order));
     }
 
 }
