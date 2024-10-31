@@ -30,7 +30,7 @@ import org.traccar.model.Maintenance;
 public class MaintenanceResource extends ExtendedObjectResource<Maintenance> {
 
     public MaintenanceResource() {
-        super(Maintenance.class);
+        super(Maintenance.class, "name");
     }
 
 }

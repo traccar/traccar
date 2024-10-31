@@ -30,7 +30,7 @@ import org.traccar.model.Driver;
 public class DriverResource extends ExtendedObjectResource<Driver> {
 
     public DriverResource() {
-        super(Driver.class);
+        super(Driver.class, "name");
     }
 
 }

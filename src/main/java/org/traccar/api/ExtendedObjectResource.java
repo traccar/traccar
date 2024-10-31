@@ -33,8 +33,16 @@ import java.util.LinkedList;
 
 public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResource<T> {
 
+    private  final String sortField;
+
     public ExtendedObjectResource(Class<T> baseClass) {
         super(baseClass);
+        this.sortField = null;
+    }
+
+    public ExtendedObjectResource(Class<T> baseClass, String sortField) {
+        super(baseClass);
+        this.sortField = sortField;
     }
 
     @GET
@@ -65,13 +73,8 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             permissionsService.checkPermission(Device.class, getUserId(), deviceId);
             conditions.add(new Condition.Permission(Device.class, deviceId, baseClass).excludeGroups());
         }
-        Order order = null;
-        if(hasField("name")) {
-            order = new Order("name");
-        } else if (hasField("description")) {
-            order = new Order("description");
-        } 
-        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions), order));
+
+        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
     }
 
 

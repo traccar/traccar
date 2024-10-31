@@ -26,14 +26,24 @@ import org.traccar.storage.query.Request;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.QueryParam;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
 public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResource<T> {
 
+    private final String sortField;
+
     public SimpleObjectResource(Class<T> baseClass) {
         super(baseClass);
+        this.sortField = null;
     }
+
+    public SimpleObjectResource(Class<T> baseClass, String sortField) {
+        super(baseClass);
+        this.sortField = sortField;
+    }
+
 
     @GET
     public Collection<T> get(
@@ -53,13 +63,8 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
             }
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
-        Order order = null;
-        if(hasField("name")) {
-            order = new Order("name");
-        } else if (hasField("description")) {
-            order = new Order("description");
-        }
-        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions), order));
+
+        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
     }
 
 }

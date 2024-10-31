@@ -61,7 +61,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     private NotificatorManager notificatorManager;
 
     public NotificationResource() {
-        super(Notification.class);
+        super(Notification.class, "description");
     }
 
     @GET
