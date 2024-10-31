@@ -18,10 +18,10 @@ package org.traccar.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServlet;
 import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
-import org.traccar.api.resource.SessionResource;
 import org.traccar.api.security.LoginService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.SessionHelper;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 
@@ -69,7 +69,7 @@ public class AsyncSocketServlet extends JettyWebSocketServlet {
                     throw new RuntimeException(e);
                 }
             } else if (req.getSession() != null) {
-                userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
+                userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionHelper.USER_ID_KEY);
             }
             if (userId != null) {
                 return new AsyncSocket(objectMapper, connectionManager, storage, userId);
