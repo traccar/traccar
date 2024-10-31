@@ -20,7 +20,6 @@ import org.eclipse.jetty.server.RequestLog;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.DateCache;
 import org.eclipse.jetty.util.component.ContainerLifeCycle;
-import org.traccar.api.resource.SessionResource;
 import org.traccar.helper.SessionHelper;
 
 import java.util.Locale;
