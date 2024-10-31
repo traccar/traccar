@@ -23,6 +23,7 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.ws.rs.GET;
@@ -64,8 +65,21 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             permissionsService.checkPermission(Device.class, getUserId(), deviceId);
             conditions.add(new Condition.Permission(Device.class, deviceId, baseClass).excludeGroups());
         }
-
-        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
+        Order order = null;
+        if(hasField("name")) {
+            order = new Order("name");
+        } else if (hasField("description")) {
+            order = new Order("description");
+        } 
+        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions), order));
+    }
+    private boolean hasField(String field) {
+        try {
+            baseClass.getDeclaredField(field);
+            return true;
+        } catch (NoSuchFieldException e) {
+            return false;
+        }
     }
 
 }
