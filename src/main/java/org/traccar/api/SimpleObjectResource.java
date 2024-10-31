@@ -63,7 +63,8 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
 
-        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
+        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions),
+                sortField != null ? new Order(sortField) : null));
     }
 
 }
