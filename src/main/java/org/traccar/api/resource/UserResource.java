@@ -24,6 +24,7 @@ import org.traccar.api.BaseObjectResource;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.SessionHelper;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
 import org.traccar.model.ManagedUser;
@@ -138,7 +139,7 @@ public class UserResource extends BaseObjectResource<User> {
     public Response remove(@PathParam("id") long id) throws Exception {
         Response response = super.remove(id);
         if (getUserId() == id) {
-            request.getSession().removeAttribute(SessionResource.USER_ID_KEY);
+            request.getSession().removeAttribute(SessionHelper.USER_ID_KEY);
         }
         return response;
     }

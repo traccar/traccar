@@ -18,8 +18,8 @@ package org.traccar.api.security;
 import com.google.inject.Injector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.api.resource.SessionResource;
 import org.traccar.database.StatisticsManager;
+import org.traccar.helper.SessionHelper;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 
@@ -86,8 +86,8 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
             } else if (request.getSession() != null) {
 
-                Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
-                Date expiration = (Date) request.getSession().getAttribute(SessionResource.EXPIRATION_KEY);
+                Long userId = (Long) request.getSession().getAttribute(SessionHelper.USER_ID_KEY);
+                Date expiration = (Date) request.getSession().getAttribute(SessionHelper.EXPIRATION_KEY);
                 if (userId != null) {
                     User user = injector.getInstance(PermissionsService.class).getUser(userId);
                     if (user != null) {
