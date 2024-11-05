@@ -6,6 +6,7 @@
   <entry key='config.default'>./setup/default.xml</entry>
 
 
+
   <entry key='web.origin'>*</entry>
   <entry key='web.path'>./traccar-web</entry>
   <entry key='web.jmx.enable'>true</entry>
