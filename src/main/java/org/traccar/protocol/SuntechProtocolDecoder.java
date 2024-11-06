@@ -336,9 +336,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         String type = values[index++].substring(5);
 
-        if (!type.equals("STT") && !type.equals("EMG") && !type.equals("EVT")
-                && !type.equals("ALT") && !type.equals("UEX")) {
-            return null;
+        boolean result = values[index].equals("Res");
+        if (result) {
+            index += 1;
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
@@ -349,6 +349,16 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
         position.set(Position.KEY_TYPE, type);
+
+        if (result) {
+            position.set(Position.KEY_RESULT, String.join(";", Arrays.copyOfRange(values, index, values.length)));
+            return position;
+        }
+
+        if (!type.equals("STT") && !type.equals("EMG") && !type.equals("EVT")
+                && !type.equals("ALT") && !type.equals("UEX")) {
+            return null;
+        }
 
         if (protocol.startsWith("ST3") || protocol.equals("ST500") || protocol.equals("ST600")) {
             index += 1; // model

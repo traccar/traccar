@@ -200,6 +200,10 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, buffer(
                 "ST910;Emergency;205283272;500;20150716;19:12:01;-23.659019;-046.695403;000.602;000.00;0;4.2;1;1;02;10820;2fdb090736;724;05;0;2311;255;0;100"));
 
+        verifyAttribute(decoder, buffer(
+                "ST300CMD;Res;511848119;315;PresetA;NTW;0;eseye.com;user;pass;rastreamento.inviocar.com;6011;;;;;RPT;1800;80;80;3;1200;0;0;0;0;EVT;0;10;0;12;3;9;1;30;0;5;7;1;0;0;0;0;0;0;0;9;9;0;0;0;GSM;0;;;;;0;;;;;;;;SVC;1;200;0;0;0;0;1;0;1;0;0;0;0;ADP;T;T;0;;0;0;0;0;0;0;MSR;600;0.10;0.10;0.70;MBV;0.00;0.00;17.20;9.00;18.00;0.00;0.00;NPT;25.0;0;30;0;0;500;300;5;10;100;5;180;100;1;DEV;0;0;0;1;0;0;0;"),
+                Position.KEY_RESULT, "315;PresetA;NTW;0;eseye.com;user;pass;rastreamento.inviocar.com;6011;;;;;RPT;1800;80;80;3;1200;0;0;0;0;EVT;0;10;0;12;3;9;1;30;0;5;7;1;0;0;0;0;0;0;0;9;9;0;0;0;GSM;0;;;;;0;;;;;;;;SVC;1;200;0;0;0;0;1;0;1;0;0;0;0;ADP;T;T;0;;0;0;0;0;0;0;MSR;600;0.10;0.10;0.70;MBV;0.00;0.00;17.20;9.00;18.00;0.00;0.00;NPT;25.0;0;30;0;0;500;300;5;10;100;5;180;100;1;DEV;0;0;0;1;0;0;0;");
+
         decoder.setProtocolType(1);
 
         verifyPosition(decoder, buffer(
