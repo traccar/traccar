@@ -63,7 +63,7 @@ public class DraginoProtocolDecoder extends BaseHttpProtocolDecoder {
         position.setLatitude(decoded.getJsonNumber("Latitude").doubleValue());
         position.setLongitude(decoded.getJsonNumber("Longitude").doubleValue());
 
-        position.set("humidity", decoded.getJsonNumber("Hum").doubleValue());
+        position.set(Position.KEY_HUMIDITY, decoded.getJsonNumber("Hum").doubleValue());
         position.set(Position.KEY_BATTERY, decoded.getJsonNumber("BatV").doubleValue());
         position.set(Position.PREFIX_TEMP + 1, decoded.getJsonNumber("Tem").doubleValue());
 

@@ -79,6 +79,7 @@ public class Position extends Message {
     public static final String KEY_ARMED = "armed";
     public static final String KEY_GEOFENCE = "geofence";
     public static final String KEY_ACCELERATION = "acceleration";
+    public static final String KEY_HUMIDITY = "humidity";
     public static final String KEY_DEVICE_TEMP = "deviceTemp"; // celsius
     public static final String KEY_COOLANT_TEMP = "coolantTemp"; // celsius
     public static final String KEY_ENGINE_LOAD = "engineLoad";

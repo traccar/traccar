@@ -226,7 +226,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (v[index + 1].length() >= 12) {
             index += 1; // ble sensor mac
             position.set(Position.KEY_DEVICE_TEMP, Integer.parseInt(v[index++]));
-            position.set("humidity", Integer.parseInt(v[index++]));
+            position.set(Position.KEY_HUMIDITY, Integer.parseInt(v[index++]));
         }
 
         if (!v[index++].isEmpty()) {

@@ -341,7 +341,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                 }
                 int humidity = buf.readUnsignedShort();
                 if (!BitUtil.check(humidity, 15)) {
-                    position.set("humidity", BitUtil.to(humidity, 15) * 0.1);
+                    position.set(Position.KEY_HUMIDITY, BitUtil.to(humidity, 15) * 0.1);
                 }
                 position.set("lightSensor", buf.readUnsignedByte() == 0);
             }

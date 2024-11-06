@@ -117,7 +117,7 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
                     int index = BitUtil.to(mask, 6);
                     switch (index) {
                         case 1 -> position.set(Position.PREFIX_TEMP + 1, value);
-                        case 2 -> position.set("humidity", value);
+                        case 2 -> position.set(Position.KEY_HUMIDITY, value);
                         case 3 -> position.set("illumination", value);
                         case 4 -> position.set(Position.KEY_BATTERY, value);
                         default -> position.set("can" + index, value);

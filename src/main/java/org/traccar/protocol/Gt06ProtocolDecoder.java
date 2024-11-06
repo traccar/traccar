@@ -936,7 +936,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     temperature = -BitUtil.to(temperature, 15);
                 }
                 position.set(Position.PREFIX_TEMP + 1, temperature * 0.01);
-                position.set("humidity", buf.readUnsignedShort() * 0.01);
+                position.set(Position.KEY_HUMIDITY, buf.readUnsignedShort() * 0.01);
             }
 
             if (type == MSG_GPS_LBS_STATUS_4 && variant == Variant.SL4X) {
