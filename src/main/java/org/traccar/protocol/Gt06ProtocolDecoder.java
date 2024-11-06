@@ -1421,9 +1421,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     case 0x000C -> {
                         buf.readUnsignedByte(); // length
-                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                        position.set(Position.KEY_CHARGE, buf.readUnsignedByte() > 0 ? true : null);
-                        position.set("batteryCycles", buf.readUnsignedShort());
+                        position.set("externalBatteryLevel", buf.readUnsignedByte());
+                        position.set("externalBatteryCharge", buf.readUnsignedByte() > 0 ? true : null);
+                        position.set("externalBatteryCycles", buf.readUnsignedShort());
                         buf.skipBytes(6);
                     }
                     default -> {
