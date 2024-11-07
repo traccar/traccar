@@ -144,6 +144,12 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, binary(
                 "ff"));
 
+        decoder.setModelOverride("FMB130");
+
+        verifyAttribute(decoder, binary(
+                "00000000000000628e0100000193011f1ec8003fa9def2fc401ea4000d00000400000000000f000700ef0000f00000150500c8000045012a34492a3800000600b5001300b60011004230aa00430fb7004400002a30fb5d000200f10000c74200100000014900000000010000fbff"),
+                "eyeTemp1", -11.87);
+
         decoder.setExtended(true);
 
         verifyPositions(decoder, false, binary(

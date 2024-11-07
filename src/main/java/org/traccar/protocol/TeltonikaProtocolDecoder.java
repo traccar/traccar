@@ -289,6 +289,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         });
         register(636, fmbXXX, (p, b) -> p.set("cid4g", b.readUnsignedInt()));
         register(662, fmbXXX, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedByte() > 0));
+        register(10800, fmbXXX, (p, b) -> p.set("eyeTemp1", b.readShort() / 100.0));
+        register(10801, fmbXXX, (p, b) -> p.set("eyeTemp2", b.readShort() / 100.0));
+        register(10802, fmbXXX, (p, b) -> p.set("eyeTemp3", b.readShort() / 100.0));
+        register(10803, fmbXXX, (p, b) -> p.set("eyeTemp4", b.readShort() / 100.0));
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
