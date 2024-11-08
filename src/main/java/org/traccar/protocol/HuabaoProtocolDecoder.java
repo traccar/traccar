@@ -73,9 +73,15 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int RESULT_SUCCESS = 0;
 
-    public static ByteBuf formatMessage(int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
+    private int delimiter = 0x7e;
+
+    public boolean isAlternative() {
+        return delimiter == 0xe7;
+    }
+
+    public static ByteBuf formatMessage(int delimiter, int type, ByteBuf id, boolean shortIndex, ByteBuf data) {
         ByteBuf buf = Unpooled.buffer();
-        buf.writeByte(0x7e);
+        buf.writeByte(delimiter);
         buf.writeShort(type);
         buf.writeShort(data.readableBytes());
         buf.writeBytes(id);
@@ -87,7 +93,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         buf.writeBytes(data);
         data.release();
         buf.writeByte(Checksum.xor(buf.nioBuffer(1, buf.readableBytes() - 1)));
-        buf.writeByte(0x7e);
+        buf.writeByte(delimiter);
         return buf;
     }
 
@@ -99,7 +105,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(type);
             response.writeByte(RESULT_SUCCESS);
             channel.writeAndFlush(new NetworkMessage(
-                    formatMessage(MSG_GENERAL_RESPONSE, id, false, response), remoteAddress));
+                    formatMessage(delimiter, MSG_GENERAL_RESPONSE, id, false, response), remoteAddress));
         }
     }
 
@@ -110,7 +116,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             response.writeShort(type);
             response.writeByte(RESULT_SUCCESS);
             channel.writeAndFlush(new NetworkMessage(
-                    formatMessage(MSG_GENERAL_RESPONSE_2, id, true, response), remoteAddress));
+                    formatMessage(delimiter, MSG_GENERAL_RESPONSE_2, id, true, response), remoteAddress));
         }
     }
 
@@ -209,10 +215,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        buf.readUnsignedByte(); // start marker
+        delimiter = buf.readUnsignedByte();
         int type = buf.readUnsignedShort();
         int attribute = buf.readUnsignedShort();
-        ByteBuf id = buf.readSlice(6); // phone number
+        ByteBuf id = buf.readSlice(isAlternative() ? 7 : 6);
         int index;
         if (type == MSG_LOCATION_REPORT_2 || type == MSG_LOCATION_REPORT_BLIND) {
             index = buf.readUnsignedByte();
@@ -237,7 +243,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 response.writeByte(RESULT_SUCCESS);
                 response.writeBytes(decodeId(id).getBytes(StandardCharsets.US_ASCII));
                 channel.writeAndFlush(new NetworkMessage(
-                        formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
+                        formatMessage(delimiter, MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
         } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT || type == MSG_HEARTBEAT_2 || type == MSG_PHOTO) {
@@ -276,7 +282,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 response.writeByte(calendar.get(Calendar.MINUTE));
                 response.writeByte(calendar.get(Calendar.SECOND));
                 channel.writeAndFlush(new NetworkMessage(
-                        formatMessage(MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
+                        formatMessage(delimiter, MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
         } else if (type == MSG_ACCELERATION) {
