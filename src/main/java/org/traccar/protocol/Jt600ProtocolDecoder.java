@@ -385,7 +385,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // rfid
             .number("d+,")                       // password verification
             .number("d+,")                       // incorrect password count
-            .number("(d+),")                     // index
+            .number("(d+)")                      // index
             .any()
             .compile();
 
