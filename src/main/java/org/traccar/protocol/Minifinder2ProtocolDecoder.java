@@ -180,6 +180,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (length == 5) {
                             position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
                         }
+                        if (alarm > 0) {
+                            position.set(Position.KEY_ALARM, alarm);
+                        }
                         break;
                     case 0x14:
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
