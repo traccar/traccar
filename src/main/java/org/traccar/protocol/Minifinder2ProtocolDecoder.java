@@ -165,14 +165,49 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (BitUtil.check(alarm, 2)) {
                             position.addAlarm(Position.ALARM_FALL_DOWN);
                         }
+                        if (BitUtil.check(alarm, 4)) {
+                            position.addAlarm(BitUtil.check(alarm, 26) ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT);
+                            position.set("geo", 1);
+                        }
+                        if (BitUtil.check(alarm, 5)) {
+                            position.addAlarm(BitUtil.check(alarm, 27) ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT);
+                            position.set("geo", 2);
+                        }
+                        if (BitUtil.check(alarm, 6)) {
+                            position.addAlarm(BitUtil.check(alarm, 28) ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT);
+                            position.set("geo", 3);
+                        }
+                        if (BitUtil.check(alarm, 7)) {
+                            position.addAlarm(BitUtil.check(alarm, 29) ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT);
+                            position.set("geo", 4);
+                        }
                         if (BitUtil.check(alarm, 8)) {
                             position.addAlarm(Position.ALARM_POWER_OFF);
                         }
                         if (BitUtil.check(alarm, 9)) {
                             position.addAlarm(Position.ALARM_POWER_ON);
                         }
+                        if (BitUtil.check(alarm, 10)) {
+                            position.addAlarm(Position.ALARM_MOVEMENT);
+                            position.set(Position.KEY_MOTION, true);
+                        }
+                        if (BitUtil.check(alarm, 11)) {
+                            position.set(Position.KEY_MOTION, false);
+                        }
                         if (BitUtil.check(alarm, 12)) {
                             position.addAlarm(Position.ALARM_SOS);
+                        }
+                        if (BitUtil.check(alarm, 13)) {
+                            position.set("side1", true);
+                        }
+                        if (BitUtil.check(alarm, 14)) {
+                            position.set("side2", true);
+                        }
+                        if (BitUtil.check(alarm, 15)) {
+                            position.set(Position.KEY_CHARGE, true);
+                        }
+                        if (BitUtil.check(alarm, 16)) {
+                            position.set(Position.KEY_CHARGE, false);
                         }
                         if (BitUtil.check(alarm, 31)) {
                             position.set("bark", true);
@@ -180,9 +215,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (length == 5) {
                             position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
                         }
-                        if (alarm > 0) {
-                            position.set("alarmCode", alarm);
-                        }
+                        position.set("alarmCode", alarm);
                         break;
                     case 0x14:
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
@@ -251,9 +284,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x24:
                         position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
                         long status = buf.readUnsignedIntLE();
-                        if (BitUtil.check(status, 4)) {
-                            position.set(Position.KEY_CHARGE, true);
-                        }
+                        position.set(Position.KEY_CHARGE, BitUtil.check(status, 4));
                         if (BitUtil.check(status, 7)) {
                             position.set(Position.KEY_ARCHIVE, true);
                         }
