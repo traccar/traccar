@@ -49,7 +49,7 @@ public class OverrideFilter implements Filter {
             chain.doFilter(request, response);
             return;
         }
-
+        response.setCharacterEncoding("UTF-8");
         ResponseWrapper wrappedResponse = new ResponseWrapper((HttpServletResponse) response);
 
         chain.doFilter(request, wrappedResponse);
@@ -70,12 +70,12 @@ public class OverrideFilter implements Filter {
                 String description = server.getString("description", "Traccar GPS Tracking System");
                 String colorPrimary = server.getString("colorPrimary", "#1a237e");
 
-                String alteredContent = new String(wrappedResponse.getCapture())
+                String alteredContent = new String(wrappedResponse.getCapture(), "UTF-8")
                         .replace("${title}", title)
                         .replace("${description}", description)
                         .replace("${colorPrimary}", colorPrimary);
 
-                byte[] data = alteredContent.getBytes();
+                byte[] data = alteredContent.getBytes("UTF-8");
                 response.setContentLength(data.length);
                 response.getOutputStream().write(data);
 
