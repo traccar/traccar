@@ -50,6 +50,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    public static final int MSG_TERMINAL_GENERAL_RESPONSE = 0x0001;
     public static final int MSG_GENERAL_RESPONSE = 0x8001;
     public static final int MSG_GENERAL_RESPONSE_2 = 0x4401;
     public static final int MSG_HEARTBEAT = 0x0002;
@@ -70,6 +71,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PHOTO = 0x8888;
     public static final int MSG_TRANSPARENT = 0x0900;
     public static final int MSG_PARAMETER_SETTING = 0x0310;
+    public static final int MSG_SEND_TEXT_MESSAGE = 0x8300;
+    public static final int MSG_REPORT_TEXT_MESSAGE = 0x6006;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -246,7 +249,19 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         formatMessage(delimiter, MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
-        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT || type == MSG_HEARTBEAT_2 || type == MSG_PHOTO) {
+        } else if (type == MSG_TERMINAL_GENERAL_RESPONSE) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            buf.readUnsignedShort(); // response serial number
+            buf.readUnsignedShort(); // reply id
+            position.set(Position.KEY_RESULT, String.valueOf(buf.readUnsignedByte()));
+
+            return position;
+
+        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT || type == MSG_HEARTBEAT_2
+                || type == MSG_PHOTO || type == MSG_REPORT_TEXT_MESSAGE) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
@@ -473,10 +488,14 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     break;
                 case 0x33:
-                    stringValue = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
-                    if (stringValue.startsWith("*M00")) {
-                        String lockStatus = stringValue.substring(8, 8 + 7);
-                        position.set(Position.KEY_BATTERY, Integer.parseInt(lockStatus.substring(2, 5)) * 0.01);
+                    if (length == 1) {
+                        position.set("mode", buf.readUnsignedByte());
+                    } else {
+                        stringValue = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
+                        if (stringValue.startsWith("*M00")) {
+                            String lockStatus = stringValue.substring(8, 8 + 7);
+                            position.set(Position.KEY_BATTERY, Integer.parseInt(lockStatus.substring(2, 5)) * 0.01);
+                        }
                     }
                     break;
                 case 0x51:
@@ -670,6 +689,21 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 case 0x00B2:
                                     position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(
                                             buf.readSlice(10)).replaceAll("f", ""));
+                                    break;
+                                case 0x00B9:
+                                    buf.readUnsignedByte(); // count
+                                    String[] wifi = buf.readCharSequence(
+                                            extendedLength - 1, StandardCharsets.US_ASCII).toString().split(",");
+                                    for (int i = 0; i < wifi.length / 2; i++) {
+                                        network.addWifiAccessPoint(
+                                                WifiAccessPoint.from(wifi[i * 2], Integer.parseInt(wifi[i * 2 + 1])));
+                                    }
+                                    break;
+                                case 0x00C6:
+                                    int batteryAlarm = buf.readUnsignedByte();
+                                    if (batteryAlarm == 0x03 || batteryAlarm == 0x04) {
+                                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                                    }
                                     break;
                                 case 0x00CE:
                                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
