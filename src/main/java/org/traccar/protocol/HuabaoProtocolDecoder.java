@@ -693,7 +693,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 case 0x00B9:
                                     buf.readUnsignedByte(); // count
                                     String[] wifi = buf.readCharSequence(
-                                            extendedLength - 1, StandardCharsets.US_ASCII).toString().split(",");
+                                            extendedLength - 3, StandardCharsets.US_ASCII).toString().split(",");
                                     for (int i = 0; i < wifi.length / 2; i++) {
                                         network.addWifiAccessPoint(
                                                 WifiAccessPoint.from(wifi[i * 2], Integer.parseInt(wifi[i * 2 + 1])));
