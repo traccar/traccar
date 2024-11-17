@@ -1015,6 +1015,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
             short event = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, event);
+            position.set("eventData", buf.readUnsignedShort());
             switch (event) {
                 case 0x01 -> position.addAlarm(extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
                 case 0x0E -> position.addAlarm(Position.ALARM_LOW_POWER);
@@ -1026,6 +1027,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 case 0x91 -> position.addAlarm(Position.ALARM_BRAKING);
                 case 0x92 -> position.addAlarm(Position.ALARM_CORNERING);
                 case 0x93 -> position.addAlarm(Position.ALARM_ACCIDENT);
+            }
+
+            int filesLength = buf.readableBytes() - 6;
+            if (filesLength > 0) {
+                position.set("eventFiles", buf.readCharSequence(filesLength, StandardCharsets.US_ASCII).toString());
             }
 
         } else {
