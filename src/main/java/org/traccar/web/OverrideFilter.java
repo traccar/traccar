@@ -49,7 +49,7 @@ public class OverrideFilter implements Filter {
             chain.doFilter(request, response);
             return;
         }
-        response.setCharacterEncoding("UTF-8");
+
         ResponseWrapper wrappedResponse = new ResponseWrapper((HttpServletResponse) response);
 
         chain.doFilter(request, wrappedResponse);
