@@ -1030,6 +1030,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 case 0x93 -> position.addAlarm(Position.ALARM_ACCIDENT);
             }
 
+            int filesLength = buf.readableBytes() - 6;
+            if (filesLength > 0) {
+                position.set("eventFiles", buf.readCharSequence(filesLength, StandardCharsets.US_ASCII).toString());
+            }
+
         } else if (type == MSG_WIFI_ALARM) {
 
             DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
@@ -1120,11 +1125,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setNetwork(network);
             
-            int filesLength = buf.readableBytes() - 6;
-            if (filesLength > 0) {
-                position.set("eventFiles", buf.readCharSequence(filesLength, StandardCharsets.US_ASCII).toString());
-            }
-
         } else {
 
             if (dataLength > 0) {
