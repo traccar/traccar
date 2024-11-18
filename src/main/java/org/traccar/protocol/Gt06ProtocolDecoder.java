@@ -114,6 +114,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_MULTIMEDIA = 0x41;         // WD-209
     public static final int MSG_ALARM = 0x95;              // JC100
     public static final int MSG_PERIPHERAL = 0xF2;         // VL842
+    public static final int MSG_WIFI_ALARM = 0xA9;         // PL200
 
     private enum Variant {
         VXT01,
@@ -756,7 +757,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set("controllerFault", buf.readUnsignedInt());
 
             sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
-
+            
             return position;
 
         } else if (type == MSG_STATUS && buf.readableBytes() == 22) {
@@ -1022,6 +1023,96 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 case 0x93 -> position.addAlarm(Position.ALARM_ACCIDENT);
             }
 
+        } else if (type == MSG_WIFI_ALARM) {
+
+            DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
+                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+
+            position.setDeviceTime(dateBuilder.getDate());
+
+            int mcc = buf.readUnsignedShort();
+            int msb = (mcc & 0x8000) >> 15;
+            int actualMcc = mcc & 0x7FFF;
+
+            int mnc = 0;
+            if (msb == 1) {
+                mnc = buf.readUnsignedShort();
+            } else if (msb == 0) {
+                mnc = buf.readUnsignedByte();
+            }
+
+            int cellType = buf.readUnsignedByte();
+            int cellCount = buf.readUnsignedByte();
+            Network network = new Network();
+            if (cellType == 0x00) {
+                for (int i = 0; i < cellCount; i++) {
+                    int lac = buf.readUnsignedShort();
+                    long cid = buf.readUnsignedMedium();
+                    int rssi = buf.readUnsignedByte();
+                    network.addCellTower(CellTower.from(
+                            actualMcc, mnc, lac, cid, rssi));
+                }
+            } else if (cellType == 0x01) {
+                for (int i = 0; i < cellCount; i++) {
+                    long lac = buf.readUnsignedInt();
+                    long cid = buf.readLong();
+                    int rssi = buf.readUnsignedByte();
+                    network.addCellTower(CellTower.from(
+                            actualMcc, mnc, (int) lac, cid, rssi));
+                }
+            }
+            position.set(Position.KEY_TIMING_ADVANCE, buf.readUnsignedByte());
+
+            int wifiCount = buf.readUnsignedByte();
+            for (int i = 0; i < wifiCount; i++) {
+                String macAddress = ByteBufUtil.hexDump(buf.readSlice(6)).toUpperCase();
+                int signalStrength = buf.readUnsignedByte();
+                network.addWifiAccessPoint(WifiAccessPoint.from(
+                    macAddress, signalStrength));
+            }
+
+            int event = buf.readUnsignedByte();
+            int languageDetails = buf.readUnsignedByte();
+        
+            if (languageDetails == 0x01) {
+                position.set("alertLanguage", "Chinese");
+            } else if (languageDetails == 0x02) {
+                position.set("alertLanguage", "English");
+            } else if (languageDetails == 0x00) {
+                // no reply needed
+            }
+
+            position.set(Position.KEY_EVENT, event);
+            switch (event) {
+                case 0x00 -> position.addAlarm(Position.ALARM_GENERAL);
+                case 0x01 -> position.addAlarm(Position.ALARM_SOS);
+                case 0x02 -> position.addAlarm(Position.ALARM_POWER_CUT);
+                case 0x03 -> position.addAlarm(Position.ALARM_VIBRATION);
+                case 0x04 -> position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+                case 0x05 -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                case 0x06 -> position.addAlarm(Position.ALARM_OVERSPEED);
+                case 0x09 -> position.addAlarm(Position.ALARM_TOW);
+                case 0x0A -> position.addAlarm(Position.ALARM_GPS_BLIND_SPOT_ENTER);
+                case 0x0B -> position.addAlarm(Position.ALARM_GPS_BLIND_SPOT_EXIT);
+                case 0x0C -> position.addAlarm(Position.ALARM_POWER_ON);
+                case 0x0D -> position.addAlarm(Position.ALARM_GPS_FIRST_FIX);
+                case 0x0E -> position.addAlarm(Position.ALARM_LOW_POWER);
+                case 0x0F -> position.addAlarm(Position.ALARM_LOW_EXTERNAL_POWER);
+                case 0x10 -> position.addAlarm(Position.ALARM_SIM_CHANGE);
+                case 0x11 -> position.addAlarm(Position.ALARM_POWER_OFF);
+                case 0x12 -> position.addAlarm(Position.ALARM_AIRPLANE_MODE);
+                case 0x13 -> position.addAlarm(Position.ALARM_TAMPERING);
+                case 0x14 -> position.addAlarm(Position.ALARM_DOOR);
+                case 0x15 -> position.addAlarm(Position.ALARM_POWER_OFF);
+                case 0x16 -> position.addAlarm(Position.ALARM_VOICE_CONTROL);
+                case 0x17 -> position.addAlarm(Position.ALARM_ROGUE_BASE);
+                case 0x18 -> position.addAlarm(Position.ALARM_REMOVING);
+                case 0x19 -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+            }
+
+            position.setNetwork(network);
+            
         } else {
 
             if (dataLength > 0) {

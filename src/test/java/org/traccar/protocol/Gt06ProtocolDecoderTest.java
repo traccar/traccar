@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.forward.PositionData;
 import org.traccar.model.Position;
 
 public class Gt06ProtocolDecoderTest extends ProtocolTest {
@@ -547,7 +548,12 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, binary(
                 "78780a13460b120400160642c20d0a"),
                 Position.KEY_POWER, 28.34);
+        
+        verifyAttribute(decoder, binary(
+        "78783ea91808130c253780f0000101010000002700000000018a0b0f25000428bd890a4c3433e88d285d3b753e2abd890a4a7c402abd890a4f2848010200cea5300d0a"),
+        Position.KEY_ALARM, Position.ALARM_SOS);
 
+        
     }
 
 }
