@@ -1074,7 +1074,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                             actualMcc, mnc, (int) lac, cid, rssi));
                 }
             }
-            position.set(Position.KEY_TIMING_ADVANCE, buf.readUnsignedByte());
+            position.set("timingAdvance", buf.readUnsignedByte());
 
             int wifiCount = buf.readUnsignedByte();
             for (int i = 0; i < wifiCount; i++) {
@@ -1105,20 +1105,20 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 case 0x05 -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
                 case 0x06 -> position.addAlarm(Position.ALARM_OVERSPEED);
                 case 0x09 -> position.addAlarm(Position.ALARM_TOW);
-                case 0x0A -> position.addAlarm(Position.ALARM_GPS_BLIND_SPOT_ENTER);
-                case 0x0B -> position.addAlarm(Position.ALARM_GPS_BLIND_SPOT_EXIT);
+                case 0x0A -> position.addAlarm("gpsBlindSpotEnter");
+                case 0x0B -> position.addAlarm("gpsBlindSpotExit");
                 case 0x0C -> position.addAlarm(Position.ALARM_POWER_ON);
-                case 0x0D -> position.addAlarm(Position.ALARM_GPS_FIRST_FIX);
+                case 0x0D -> position.addAlarm("gpsFirstFix");
                 case 0x0E -> position.addAlarm(Position.ALARM_LOW_POWER);
-                case 0x0F -> position.addAlarm(Position.ALARM_LOW_EXTERNAL_POWER);
-                case 0x10 -> position.addAlarm(Position.ALARM_SIM_CHANGE);
+                case 0x0F -> position.addAlarm("lowExternalPower");
+                case 0x10 -> position.addAlarm("simChanged");
                 case 0x11 -> position.addAlarm(Position.ALARM_POWER_OFF);
-                case 0x12 -> position.addAlarm(Position.ALARM_AIRPLANE_MODE);
+                case 0x12 -> position.addAlarm("airploneModeOn");
                 case 0x13 -> position.addAlarm(Position.ALARM_TAMPERING);
                 case 0x14 -> position.addAlarm(Position.ALARM_DOOR);
                 case 0x15 -> position.addAlarm(Position.ALARM_POWER_OFF);
-                case 0x16 -> position.addAlarm(Position.ALARM_VOICE_CONTROL);
-                case 0x17 -> position.addAlarm(Position.ALARM_ROGUE_BASE);
+                case 0x16 -> position.addAlarm("voiceControl");
+                case 0x17 -> position.addAlarm("rogueBase");
                 case 0x18 -> position.addAlarm(Position.ALARM_REMOVING);
                 case 0x19 -> position.addAlarm(Position.ALARM_LOW_BATTERY);
             }

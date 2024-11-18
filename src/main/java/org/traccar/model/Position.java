@@ -35,7 +35,6 @@ public class Position extends Message {
     public static final String KEY_SATELLITES_VISIBLE = "satVisible";
     public static final String KEY_RSSI = "rssi";
     public static final String KEY_GPS = "gps";
-    public static final String KEY_TIMING_ADVANCE = "timingAdvance";
     public static final String KEY_ROAMING = "roaming";
     public static final String KEY_EVENT = "event";
     public static final String KEY_ALARM = "alarm";
@@ -122,8 +121,6 @@ public class Position extends Message {
     public static final String ALARM_FALL_DOWN = "fallDown";
     public static final String ALARM_LOW_POWER = "lowPower";
     public static final String ALARM_LOW_BATTERY = "lowBattery";
-    public static final String ALARM_LOW_EXTERNAL_POWER = "lowExternalPower";
-    public static final String ALARM_AIRPLANE_MODE = "airplaneMode";
     public static final String ALARM_FAULT = "fault";
     public static final String ALARM_POWER_OFF = "powerOff";
     public static final String ALARM_POWER_ON = "powerOn";
@@ -134,11 +131,6 @@ public class Position extends Message {
     public static final String ALARM_GEOFENCE_ENTER = "geofenceEnter";
     public static final String ALARM_GEOFENCE_EXIT = "geofenceExit";
     public static final String ALARM_GPS_ANTENNA_CUT = "gpsAntennaCut";
-    public static final String ALARM_GPS_BLIND_SPOT_ENTER = "gpsBlindSpotEnter";
-    public static final String ALARM_GPS_BLIND_SPOT_EXIT = "gpsBlindSpotExit";
-    public static final String ALARM_GPS_FIRST_FIX = "gpsFirstFix";
-    public static final String ALARM_ROGUE_BASE = "rogueBaseStation";
-    public static final String ALARM_SIM_CHANGE = "simChanged";
     public static final String ALARM_ACCIDENT = "accident";
     public static final String ALARM_TOW = "tow";
     public static final String ALARM_IDLE = "idle";
@@ -158,8 +150,6 @@ public class Position extends Message {
     public static final String ALARM_FUEL_LEAK = "fuelLeak";
     public static final String ALARM_TAMPERING = "tampering";
     public static final String ALARM_REMOVING = "removing";
-
-    public static final String ALARM_VOICE_CONTROL = "voiceControl";
 
     public Position() {
     }
