@@ -271,12 +271,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     public static boolean decodeGps(Position position, ByteBuf buf, boolean hasLength, TimeZone timezone) {
-        return decodeGps(position, buf, hasLength, true, true, false, timezone);
+        return decodeGps(position, buf, hasLength, true, true, false, false, timezone);
     }
 
     public static boolean decodeGps(
             Position position, ByteBuf buf, boolean hasLength, boolean hasSatellites,
-            boolean hasSpeed, boolean longSpeed, TimeZone timezone) {
+            boolean hasSpeed, boolean longSpeed, boolean swapFlags, TimeZone timezone) {
 
         DateBuilder dateBuilder = new DateBuilder(timezone)
                 .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
@@ -294,12 +294,18 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         double latitude = buf.readUnsignedInt() / 60.0 / 30000.0;
         double longitude = buf.readUnsignedInt() / 60.0 / 30000.0;
 
+        int flags = 0;
+        if (swapFlags) {
+            flags = buf.readUnsignedShort();
+        }
         if (hasSpeed) {
             position.setSpeed(UnitsConverter.knotsFromKph(
                     longSpeed ? buf.readUnsignedShort() : buf.readUnsignedByte()));
         }
+        if (!swapFlags) {
+            flags = buf.readUnsignedShort();
+        }
 
-        int flags = buf.readUnsignedShort();
         position.setCourse(BitUtil.to(flags, 10));
         position.setValid(BitUtil.check(flags, 12));
 
@@ -989,15 +995,15 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_ALARM) {
 
+            boolean jc400 = variant == Variant.JC400;
             boolean extendedAlarm = dataLength > 7;
             if (extendedAlarm) {
-                if (variant == Variant.JC400) {
+                if (jc400) {
                     buf.readUnsignedShort(); // marker
                     buf.readUnsignedByte(); // version
                 }
                 decodeGps(
-                        position, buf, false,
-                        variant == Variant.JC400, variant == Variant.JC400, variant == Variant.JC400,
+                        position, buf, false, jc400, jc400, jc400, jc400,
                         deviceSession.get(DeviceSession.KEY_TIMEZONE));
             } else {
                 DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
@@ -1010,6 +1016,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
             short event = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, event);
+            position.set("eventData", buf.readUnsignedShort());
             switch (event) {
                 case 0x01 -> position.addAlarm(extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
                 case 0x0E -> position.addAlarm(Position.ALARM_LOW_POWER);
@@ -1113,6 +1120,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setNetwork(network);
             
+            int filesLength = buf.readableBytes() - 6;
+            if (filesLength > 0) {
+                position.set("eventFiles", buf.readCharSequence(filesLength, StandardCharsets.US_ASCII).toString());
+            }
+
         } else {
 
             if (dataLength > 0) {

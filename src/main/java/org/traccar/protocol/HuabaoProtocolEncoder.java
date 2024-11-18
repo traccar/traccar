@@ -24,6 +24,7 @@ import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
 
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -47,6 +48,12 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
             byte[] time = DataConverter.parseHex(new SimpleDateFormat("yyMMddHHmmss").format(new Date()));
 
             switch (command.getType()) {
+                case Command.TYPE_SEND_SMS:
+                    data.writeByte(Integer.parseInt(command.getString(Command.KEY_PHONE)));
+                    Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
+                    data.writeCharSequence(command.getString(Command.KEY_MESSAGE), charset);
+                    return HuabaoProtocolDecoder.formatMessage(
+                            0x7e, HuabaoProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
                 case Command.TYPE_REBOOT_DEVICE:
                     data.writeByte(1); // number of parameters
                     data.writeByte(0x23); // parameter id

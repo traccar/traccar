@@ -30,6 +30,7 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Singleton
 public class OverrideFilter implements Filter {
@@ -70,12 +71,12 @@ public class OverrideFilter implements Filter {
                 String description = server.getString("description", "Traccar GPS Tracking System");
                 String colorPrimary = server.getString("colorPrimary", "#1a237e");
 
-                String alteredContent = new String(wrappedResponse.getCapture())
+                String alteredContent = new String(wrappedResponse.getCapture(), StandardCharsets.UTF_8)
                         .replace("${title}", title)
                         .replace("${description}", description)
                         .replace("${colorPrimary}", colorPrimary);
 
-                byte[] data = alteredContent.getBytes();
+                byte[] data = alteredContent.getBytes(StandardCharsets.UTF_8);
                 response.setContentLength(data.length);
                 response.getOutputStream().write(data);
 

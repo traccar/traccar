@@ -30,6 +30,7 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -287,6 +288,10 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
                     time = time >> 4 << 1;
                     time += 0x47798280; // 01/01/2008
+                    long threshold = System.currentTimeMillis() / 1000 - Duration.ofDays(3650).toSeconds();
+                    while (time < threshold) {
+                        time += 0x0FFFFFFF * 2;
+                    }
                     position.setTime(new Date(time * 1000));
 
                     // Read masks
