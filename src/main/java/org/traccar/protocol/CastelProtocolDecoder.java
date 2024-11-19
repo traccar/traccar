@@ -91,6 +91,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
     public static final short MSG_SC_DTCS_PASSENGER = 0x4006;
     public static final short MSG_SC_DTCS_COMMERCIAL = 0x400B;
     public static final short MSG_SC_ALARM = 0x4007;
+    public static final short MSG_SC_ALARM_RESPONSE = (short) 0xC007;
     public static final short MSG_SC_CELL = 0x4008;
     public static final short MSG_SC_GPS_SLEEP = 0x4009;
     public static final short MSG_SC_FUEL = 0x400E;
@@ -291,15 +292,15 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                     response.writeShortLE(0);
                     response.writeIntLE((int) (System.currentTimeMillis() / 1000));
                     sendResponse(channel, remoteAddress, version, id, MSG_SC_LOGIN_RESPONSE, response);
-                }
-
-                if (type == MSG_SC_GPS || type == MSG_SC_COMPREHENSIVE) {
+                } else if (type == MSG_SC_GPS || type == MSG_SC_COMPREHENSIVE) {
                     buf.readUnsignedByte(); // historical
                     if (type == MSG_SC_COMPREHENSIVE) {
                         buf.readUnsignedIntLE(); // index
                     }
                 } else if (type == MSG_SC_ALARM) {
-                    buf.readUnsignedIntLE(); // alarm
+                    ByteBuf response = Unpooled.buffer(10);
+                    response.writeIntLE(buf.readIntLE()); // alarm index
+                    sendResponse(channel, remoteAddress, version, id, MSG_SC_ALARM_RESPONSE, response);
                 } else if (type == MSG_SC_CURRENT_LOCATION) {
                     buf.readUnsignedShortLE();
                 }
