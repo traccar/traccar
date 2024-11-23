@@ -48,8 +48,8 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
             byte[] time = DataConverter.parseHex(new SimpleDateFormat("yyMMddHHmmss").format(new Date()));
 
             switch (command.getType()) {
-                case Command.TYPE_SEND_SMS:
-                    data.writeByte(Integer.parseInt(command.getString(Command.KEY_PHONE)));
+                case Command.TYPE_CUSTOM:
+                    data.writeByte(1); // flag
                     Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
                     data.writeCharSequence(command.getString(Command.KEY_MESSAGE), charset);
                     return HuabaoProtocolDecoder.formatMessage(

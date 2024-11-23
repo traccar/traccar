@@ -704,6 +704,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                     if (batteryAlarm == 0x03 || batteryAlarm == 0x04) {
                                         position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
                                     }
+                                    position.set("batteryAlarm", batteryAlarm);
                                     break;
                                 case 0x00CE:
                                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
