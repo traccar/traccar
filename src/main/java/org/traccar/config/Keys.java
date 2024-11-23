@@ -894,7 +894,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> FORWARD_URL = new StringConfigKey(
             "forward.url",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Additional HTTP header, can be used for authorization.
