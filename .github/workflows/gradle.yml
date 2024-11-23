@@ -36,7 +36,7 @@ jobs:
         aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         application_name: traccar-tf
-        environment_name: Traccar-tf-env-2
+        environment_name: Traccar-tf-env
         version_label: ${{ github.run_number }}
-        region: eu-west-3
+        region: us-east-1
         deployment_package: deploy.zip
