@@ -75,36 +75,24 @@ public class StbProtocolDecoder extends BaseProtocolDecoder {
                     JsonObject propertyObject = property.asJsonObject();
                     String id = propertyObject.getString("id");
                     switch (id) {
-                        case "01101001":
-                            locationType = Integer.parseInt(propertyObject.getString("value"));
-                            break;
-                        case "01102001":
-                            position.setLongitude(
-                                    Double.parseDouble(propertyObject.getString("value")));
-                            break;
-                        case "01103001":
-                            position.setLatitude(
-                                    Double.parseDouble(propertyObject.getString("value")));
-                            break;
-                        case "01118001":
-                            position.set(
-                                    Position.KEY_DEVICE_TEMP, Double.parseDouble(propertyObject.getString("value")));
-                            break;
-                        case "01122001":
-                            position.set(
-                                    "batteryControl", Integer.parseInt(propertyObject.getString("value")));
-                            break;
-                        case "02301001":
-                            position.set(
-                                    "switchCabinetCommand", Integer.parseInt(propertyObject.getString("value")));
-                            break;
-                        default:
+                        case "01101001" -> locationType = Integer.parseInt(propertyObject.getString("value"));
+                        case "01102001" -> position.setLongitude(
+                                Double.parseDouble(propertyObject.getString("value")));
+                        case "01103001" -> position.setLatitude(
+                                Double.parseDouble(propertyObject.getString("value")));
+                        case "01118001" -> position.set(
+                                Position.KEY_DEVICE_TEMP, Double.parseDouble(propertyObject.getString("value")));
+                        case "01122001" -> position.set(
+                                "batteryControl", Integer.parseInt(propertyObject.getString("value")));
+                        case "02301001" -> position.set(
+                                "switchCabinetCommand", Integer.parseInt(propertyObject.getString("value")));
+                        default -> {
                             String key = "id" + id;
                             if (propertyObject.containsKey("doorId")) {
                                 key += "Door" + propertyObject.getString("doorId");
                             }
                             position.set(key, propertyObject.getString("value"));
-                            break;
+                        }
                     }
                 }
                 if (locationType > 0) {

@@ -57,42 +57,21 @@ public class GenxProtocolDecoder extends BaseProtocolDecoder {
 
         for (int i = 0; i < Math.min(values.length, reportColumns.length); i++) {
             switch (reportColumns[i]) {
-                case 1:
-                case 28:
+                case 1, 28 -> {
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[i]);
                     if (deviceSession != null) {
                         position.setDeviceId(deviceSession.getDeviceId());
                     }
-                    break;
-                case 2:
-                    position.setTime(new SimpleDateFormat("MM/dd/yy HH:mm:ss").parse(values[i]));
-                    break;
-                case 3:
-                    position.setLatitude(Double.parseDouble(values[i]));
-                    break;
-                case 4:
-                    position.setLongitude(Double.parseDouble(values[i]));
-                    break;
-                case 11:
-                    position.set(Position.KEY_IGNITION, values[i].equals("ON"));
-                    break;
-                case 13:
-                    position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(values[i])));
-                    break;
-                case 17:
-                    position.setCourse(Integer.parseInt(values[i]));
-                    break;
-                case 23:
-                    position.set(Position.KEY_ODOMETER, Double.parseDouble(values[i]) * 1000);
-                    break;
-                case 27:
-                    position.setAltitude(UnitsConverter.metersFromFeet(Integer.parseInt(values[i])));
-                    break;
-                case 46:
-                    position.set(Position.KEY_SATELLITES, Integer.parseInt(values[i]));
-                    break;
-                default:
-                    break;
+                }
+                case 2 -> position.setTime(new SimpleDateFormat("MM/dd/yy HH:mm:ss").parse(values[i]));
+                case 3 -> position.setLatitude(Double.parseDouble(values[i]));
+                case 4 -> position.setLongitude(Double.parseDouble(values[i]));
+                case 11 -> position.set(Position.KEY_IGNITION, values[i].equals("ON"));
+                case 13 -> position.setSpeed(UnitsConverter.knotsFromKph(Integer.parseInt(values[i])));
+                case 17 -> position.setCourse(Integer.parseInt(values[i]));
+                case 23 -> position.set(Position.KEY_ODOMETER, Double.parseDouble(values[i]) * 1000);
+                case 27 -> position.setAltitude(UnitsConverter.metersFromFeet(Integer.parseInt(values[i])));
+                case 46 -> position.set(Position.KEY_SATELLITES, Integer.parseInt(values[i]));
             }
         }
 

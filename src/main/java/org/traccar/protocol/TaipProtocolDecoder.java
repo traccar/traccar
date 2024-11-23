@@ -122,30 +122,21 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x02:
-                return Position.ALARM_POWER_CUT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x02 -> Position.ALARM_POWER_CUT;
+            default -> null;
+        };
     }
 
     private String decodeAlarm2(int value) {
-        switch (value) {
-            case 22:
-                return Position.ALARM_ACCELERATION;
-            case 23:
-                return Position.ALARM_BRAKING;
-            case 24:
-                return Position.ALARM_ACCIDENT;
-            case 26:
-            case 28:
-                return Position.ALARM_CORNERING;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 22 -> Position.ALARM_ACCELERATION;
+            case 23 -> Position.ALARM_BRAKING;
+            case 24 -> Position.ALARM_ACCIDENT;
+            case 26, 28 -> Position.ALARM_CORNERING;
+            default -> null;
+        };
     }
 
     @Override
@@ -239,9 +230,9 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         if (event != null) {
             position.set(Position.KEY_EVENT, event);
             if (sentence.charAt(5) == ',') {
-                position.set(Position.KEY_ALARM, decodeAlarm2(event));
+                position.addAlarm(decodeAlarm2(event));
             } else {
-                position.set(Position.KEY_ALARM, decodeAlarm(event));
+                position.addAlarm(decodeAlarm(event));
             }
         }
 
@@ -273,7 +264,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                     String key = attribute.substring(0, index).toLowerCase();
                     String value = attribute.substring(index + 1);
                     switch (key) {
-                        case "id":
+                        case "id" -> {
                             uniqueId = value;
                             deviceSession = getDeviceSession(channel, remoteAddress, value);
                             if (deviceSession != null) {
@@ -282,31 +273,19 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                             if (messageIndex == null) {
                                 indexFirst = false;
                             }
-                            break;
-                        case "io":
+                        }
+                        case "io" -> {
                             position.set(Position.KEY_IGNITION, BitUtil.check(value.charAt(0) - '0', 0));
                             position.set(Position.KEY_CHARGE, BitUtil.check(value.charAt(0) - '0', 1));
                             position.set(Position.KEY_OUTPUT, value.charAt(1) - '0');
                             position.set(Position.KEY_INPUT, value.charAt(2) - '0');
-                            break;
-                        case "ix":
-                            position.set(Position.PREFIX_IO + 1, value);
-                            break;
-                        case "ad":
-                            position.set(Position.PREFIX_ADC + 1, Integer.parseInt(value));
-                            break;
-                        case "sv":
-                            position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
-                            break;
-                        case "bl":
-                            position.set(Position.KEY_BATTERY, Integer.parseInt(value) * 0.001);
-                            break;
-                        case "vo":
-                            position.set(Position.KEY_ODOMETER, Long.parseLong(value));
-                            break;
-                        default:
-                            position.set(key, value);
-                            break;
+                        }
+                        case "ix" -> position.set(Position.PREFIX_IO + 1, value);
+                        case "ad" -> position.set(Position.PREFIX_ADC + 1, Integer.parseInt(value));
+                        case "sv" -> position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
+                        case "bl" -> position.set(Position.KEY_BATTERY, Integer.parseInt(value) * 0.001);
+                        case "vo" -> position.set(Position.KEY_ODOMETER, Long.parseLong(value));
+                        default -> position.set(key, value);
                     }
                 } else if (attribute.startsWith("#")) {
                     messageIndex = attribute;
@@ -322,11 +301,14 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                         response = ">SAK;ID=" + uniqueId + ";" + messageIndex + "<";
                     } else {
                         if (indexFirst) {
-                            response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";*";
+                            response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";";
                         } else {
-                            response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
+                            response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";";
                         }
-                        response += String.format("%02X", Checksum.xor(response)) + "<";
+                        String model = getDeviceModel(deviceSession);
+                        boolean lantrix = model != null && model.toUpperCase().startsWith("LANTRIX");
+                        int checksum = Checksum.xor(lantrix ? response : response + "*");
+                        response += String.format("*%02X", checksum) + "<";
                     }
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 } else {

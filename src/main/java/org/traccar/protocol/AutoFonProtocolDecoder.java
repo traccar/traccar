@@ -174,7 +174,7 @@ public class AutoFonProtocolDecoder extends BaseProtocolDecoder {
 
             short status = buf.readUnsignedByte();
             if (BitUtil.check(status, 7)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                position.addAlarm(Position.ALARM_GENERAL);
             }
             position.set(Position.KEY_BATTERY, BitUtil.to(status, 7));
 

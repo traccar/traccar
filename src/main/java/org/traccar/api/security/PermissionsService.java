@@ -128,8 +128,7 @@ public class PermissionsService {
             throws StorageException, SecurityException {
         if (!getUser(userId).getAdministrator()) {
             checkEdit(userId, object.getClass(), addition, skipReadonly);
-            if (object instanceof GroupedModel) {
-                GroupedModel after = ((GroupedModel) object);
+            if (object instanceof GroupedModel after) {
                 if (after.getGroupId() > 0) {
                     GroupedModel before = null;
                     if (!addition) {
@@ -141,8 +140,7 @@ public class PermissionsService {
                     }
                 }
             }
-            if (object instanceof Schedulable) {
-                Schedulable after = ((Schedulable) object);
+            if (object instanceof Schedulable after) {
                 if (after.getCalendarId() > 0) {
                     Schedulable before = null;
                     if (!addition) {
@@ -154,8 +152,7 @@ public class PermissionsService {
                     }
                 }
             }
-            if (object instanceof Notification) {
-                Notification after = ((Notification) object);
+            if (object instanceof Notification after) {
                 if (after.getCommandId() > 0) {
                     Notification before = null;
                     if (!addition) {

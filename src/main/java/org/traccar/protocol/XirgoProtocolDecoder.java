@@ -116,63 +116,22 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_EVENT, event);
 
         switch (event) {
-            case 4001:
-            case 4003:
-            case 6011:
-            case 6013:
-                position.set(Position.KEY_IGNITION, true);
-                break;
-            case 4002:
-            case 4004:
-            case 6012:
-            case 6014:
-                position.set(Position.KEY_IGNITION, false);
-                break;
-            case 4005:
-                position.set(Position.KEY_CHARGE, false);
-                break;
-            case 6002:
-                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                break;
-            case 6006:
-                position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                break;
-            case 6007:
-                position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                break;
-            case 6008:
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
-                break;
-            case 6009:
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-                break;
-            case 6010:
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
-                break;
-            case 6016:
-                position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
-                break;
-            case 6017:
-                position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-                break;
-            case 6030:
-            case 6071:
-                position.set(Position.KEY_MOTION, true);
-                break;
-            case 6031:
-                position.set(Position.KEY_MOTION, false);
-                break;
-            case 6032:
-                position.set(Position.KEY_ALARM, Position.ALARM_PARKING);
-                break;
-            case 6090:
-                position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
-                break;
-            case 6091:
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                break;
-            default:
-                break;
+            case 4001, 4003, 6011, 6013 -> position.set(Position.KEY_IGNITION, true);
+            case 4002, 4004, 6012, 6014 -> position.set(Position.KEY_IGNITION, false);
+            case 4005 -> position.set(Position.KEY_CHARGE, false);
+            case 6002 -> position.addAlarm(Position.ALARM_OVERSPEED);
+            case 6006 -> position.addAlarm(Position.ALARM_ACCELERATION);
+            case 6007 -> position.addAlarm(Position.ALARM_BRAKING);
+            case 6008 -> position.addAlarm(Position.ALARM_LOW_POWER);
+            case 6009 -> position.addAlarm(Position.ALARM_POWER_CUT);
+            case 6010 -> position.addAlarm(Position.ALARM_POWER_RESTORED);
+            case 6016 -> position.addAlarm(Position.ALARM_IDLE);
+            case 6017 -> position.addAlarm(Position.ALARM_TOW);
+            case 6030, 6071 -> position.set(Position.KEY_MOTION, true);
+            case 6031 -> position.set(Position.KEY_MOTION, false);
+            case 6032 -> position.addAlarm(Position.ALARM_PARKING);
+            case 6090 -> position.addAlarm(Position.ALARM_REMOVING);
+            case 6091 -> position.addAlarm(Position.ALARM_LOW_BATTERY);
         }
     }
 
@@ -213,76 +172,49 @@ public class XirgoProtocolDecoder extends BaseProtocolDecoder {
 
         for (int i = 0; i < keys.length; i++) {
             switch (keys[i]) {
-                case "UID":
-                case "IM":
+                case "UID", "IM" -> {
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[i]);
                     if (deviceSession != null) {
                         position.setDeviceId(deviceSession.getDeviceId());
                     }
-                    break;
-                case "EV":
-                    decodeEvent(position, Integer.parseInt(values[i]));
-                    break;
-                case "D":
+                }
+                case "EV" -> decodeEvent(position, Integer.parseInt(values[i]));
+                case "D" -> {
                     String[] date = values[i].split("/");
                     dateBuilder.setMonth(Integer.parseInt(date[0]));
                     dateBuilder.setDay(Integer.parseInt(date[1]));
                     dateBuilder.setYear(Integer.parseInt(date[2]));
-                    break;
-                case "T":
+                }
+                case "T" -> {
                     String[] time = values[i].split(":");
                     dateBuilder.setHour(Integer.parseInt(time[0]));
                     dateBuilder.setMinute(Integer.parseInt(time[1]));
                     dateBuilder.setSecond(Integer.parseInt(time[2]));
-                    break;
-                case "LT":
-                    position.setLatitude(Double.parseDouble(values[i]));
-                    break;
-                case "LN":
-                    position.setLongitude(Double.parseDouble(values[i]));
-                    break;
-                case "AL":
-                    position.setAltitude(Integer.parseInt(values[i]));
-                    break;
-                case "GSPT":
-                    position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[i])));
-                    break;
-                case "HD":
+                }
+                case "LT" -> position.setLatitude(Double.parseDouble(values[i]));
+                case "LN" -> position.setLongitude(Double.parseDouble(values[i]));
+                case "AL" -> position.setAltitude(Integer.parseInt(values[i]));
+                case "GSPT" -> position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(values[i])));
+                case "HD" -> {
                     if (values[i].contains(".")) {
                         position.setCourse(Double.parseDouble(values[i]));
                     } else {
                         position.setCourse(Integer.parseInt(values[i]) * 0.1);
                     }
-                    break;
-                case "SV":
-                    position.set(Position.KEY_SATELLITES, Integer.parseInt(values[i]));
-                    break;
-                case "BV":
-                    position.set(Position.KEY_BATTERY, Double.parseDouble(values[i]));
-                    break;
-                case "CQ":
-                    position.set(Position.KEY_RSSI, Integer.parseInt(values[i]));
-                    break;
-                case "MI":
-                    position.set(Position.KEY_ODOMETER, Integer.parseInt(values[i]));
-                    break;
-                case "GS":
-                    position.setValid(Integer.parseInt(values[i]) == 3);
-                    break;
-                case "SI":
-                    position.set(Position.KEY_ICCID, values[i]);
-                    break;
-                case "IG":
+                }
+                case "SV" -> position.set(Position.KEY_SATELLITES, Integer.parseInt(values[i]));
+                case "BV" -> position.set(Position.KEY_BATTERY, Double.parseDouble(values[i]));
+                case "CQ" -> position.set(Position.KEY_RSSI, Integer.parseInt(values[i]));
+                case "MI" -> position.set(Position.KEY_ODOMETER, Integer.parseInt(values[i]));
+                case "GS" -> position.setValid(Integer.parseInt(values[i]) == 3);
+                case "SI" -> position.set(Position.KEY_ICCID, values[i]);
+                case "IG" -> {
                     int ignition = Integer.parseInt(values[i]);
                     if (ignition > 0) {
                         position.set(Position.KEY_IGNITION, ignition == 1);
                     }
-                    break;
-                case "OT":
-                    position.set(Position.KEY_OUTPUT, Integer.parseInt(values[i]));
-                    break;
-                default:
-                    break;
+                }
+                case "OT" -> position.set(Position.KEY_OUTPUT, Integer.parseInt(values[i]));
             }
         }
 

@@ -33,7 +33,7 @@ public class CopyAttributesHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         String attributesString = AttributeUtil.lookup(
                 cacheManager, Keys.PROCESSING_COPY_ATTRIBUTES, position.getDeviceId());
         Position last = cacheManager.getPosition(position.getDeviceId());

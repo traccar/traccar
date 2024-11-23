@@ -1,5 +1,5 @@
 #set($subject = "$device.name: alarm!")
-#set($alarmName = $position.getString("alarm"))
+#set($alarmName = $event.getString("alarm"))
 #if(    $alarmName == "general")
 	#set($alarmName = "General")
 #elseif($alarmName == "sos")

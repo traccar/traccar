@@ -38,9 +38,7 @@ public abstract class BaseMqttProtocolDecoder extends BaseProtocolDecoder {
     protected final Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        if (msg instanceof MqttConnectMessage) {
-
-            MqttConnectMessage message = (MqttConnectMessage) msg;
+        if (msg instanceof MqttConnectMessage message) {
 
             DeviceSession deviceSession = getDeviceSession(
                     channel, remoteAddress, message.payload().clientIdentifier());
@@ -55,9 +53,7 @@ public abstract class BaseMqttProtocolDecoder extends BaseProtocolDecoder {
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
 
-        } else if (msg instanceof MqttSubscribeMessage) {
-
-            MqttSubscribeMessage message = (MqttSubscribeMessage) msg;
+        } else if (msg instanceof MqttSubscribeMessage message) {
 
             MqttMessage response = MqttMessageBuilders.subAck()
                     .packetId(message.variableHeader().messageId())
@@ -67,14 +63,12 @@ public abstract class BaseMqttProtocolDecoder extends BaseProtocolDecoder {
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
 
-        } else if (msg instanceof MqttPublishMessage) {
+        } else if (msg instanceof MqttPublishMessage message) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession == null) {
                 return null;
             }
-
-            MqttPublishMessage message = (MqttPublishMessage) msg;
 
             Object result = decode(deviceSession, message);
 

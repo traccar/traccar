@@ -93,17 +93,9 @@ public class FlexApiProtocolDecoder extends BaseProtocolDecoder {
                         Integer.parseInt(payload.getString("modem1.cell_id"), 16),
                         payload.getInt("modem1.rssi"));
                 switch (payload.getInt("modem1.network")) {
-                    case 1:
-                        cellTower.setRadioType("gsm");
-                        break;
-                    case 2:
-                        cellTower.setRadioType("wcdma");
-                        break;
-                    case 3:
-                        cellTower.setRadioType("lte");
-                        break;
-                    default:
-                        break;
+                    case 1 -> cellTower.setRadioType("gsm");
+                    case 2 -> cellTower.setRadioType("wcdma");
+                    case 3 -> cellTower.setRadioType("lte");
                 }
                 position.setNetwork(new Network(cellTower));
             }

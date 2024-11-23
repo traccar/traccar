@@ -14,17 +14,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 
-public class AlertEventHandlerTest extends BaseTest {
+public class AlarmEventHandlerTest extends BaseTest {
 
     @Test
-    public void testAlertEventHandler() {
+    public void testAlarmEventHandler() {
         
-        AlertEventHandler alertEventHandler = new AlertEventHandler(new Config(), mock(CacheManager.class));
+        AlarmEventHandler alarmEventHandler = new AlarmEventHandler(new Config(), mock(CacheManager.class));
         
         Position position = new Position();
-        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+        position.addAlarm(Position.ALARM_GENERAL);
         List<Event> events = new ArrayList<>();
-        alertEventHandler.analyzePosition(position, events::add);
+        alarmEventHandler.analyzePosition(position, events::add);
         assertFalse(events.isEmpty());
         Event event = events.iterator().next();
         assertEquals(Event.TYPE_ALARM, event.getType());

@@ -74,13 +74,13 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     private void processStatus(Position position, long status) {
 
         if (!BitUtil.check(status, 0)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+            position.addAlarm(Position.ALARM_VIBRATION);
         } else if (!BitUtil.check(status, 1) || !BitUtil.check(status, 18)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         } else if (!BitUtil.check(status, 2)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            position.addAlarm(Position.ALARM_OVERSPEED);
         } else if (!BitUtil.check(status, 19)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+            position.addAlarm(Position.ALARM_POWER_CUT);
         }
 
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 10));
@@ -598,7 +598,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         String marker = buf.toString(0, 1, StandardCharsets.US_ASCII);
 
         switch (marker) {
-            case "*":
+            case "*" -> {
                 String sentence = buf.toString(StandardCharsets.US_ASCII).trim();
                 int typeStart = sentence.indexOf(',', sentence.indexOf(',') + 1) + 1;
                 int typeEnd = sentence.indexOf(',', typeStart);
@@ -607,33 +607,30 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                 }
                 if (typeEnd > 0) {
                     String type = sentence.substring(typeStart, typeEnd);
-                    switch (type) {
-                        case "V0":
-                        case "HTBT":
+                    return switch (type) {
+                        case "V0", "HTBT" -> {
                             if (channel != null) {
                                 String response = sentence.substring(0, typeEnd) + "#";
                                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                             }
-                            return decodeHeartbeat(sentence, channel, remoteAddress);
-                        case "NBR":
-                            return decodeLbs(sentence, channel, remoteAddress);
-                        case "LINK":
-                            return decodeLink(sentence, channel, remoteAddress);
-                        case "V3":
-                            return decodeV3(sentence, channel, remoteAddress);
-                        case "VP1":
-                            return decodeVp1(sentence, channel, remoteAddress);
-                        default:
-                            return decodeText(sentence, channel, remoteAddress);
-                    }
+                            yield decodeHeartbeat(sentence, channel, remoteAddress);
+                        }
+                        case "NBR" -> decodeLbs(sentence, channel, remoteAddress);
+                        case "LINK" -> decodeLink(sentence, channel, remoteAddress);
+                        case "V3" -> decodeV3(sentence, channel, remoteAddress);
+                        case "VP1" -> decodeVp1(sentence, channel, remoteAddress);
+                        default -> decodeText(sentence, channel, remoteAddress);
+                    };
                 } else {
                     return null;
                 }
-            case "$":
+            }
+            case "$" -> {
                 return decodeBinary(buf, channel, remoteAddress);
-            case "X":
-            default:
+            }
+            default -> {
                 return null;
+            }
         }
     }
 

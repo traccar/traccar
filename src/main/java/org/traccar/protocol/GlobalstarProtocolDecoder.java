@@ -150,7 +150,7 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                     position.set(Position.PREFIX_IN + 2, !BitUtil.check(flags, 2));
                     position.set(Position.KEY_CHARGE, !BitUtil.check(flags, 3));
                     if (BitUtil.check(flags, 4)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                        position.addAlarm(Position.ALARM_VIBRATION);
                     }
                     position.setCourse(BitUtil.from(flags, 5) * 45);
                 } else {
@@ -176,7 +176,7 @@ public class GlobalstarProtocolDecoder extends BaseHttpProtocolDecoder {
                     position.set(Position.KEY_INPUT, BitUtil.to(buf.readUnsignedByte(), 4));
                     int other = buf.readUnsignedByte();
                     if (BitUtil.check(other, 4)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                        position.addAlarm(Position.ALARM_VIBRATION);
                     }
                     position.set(Position.KEY_MOTION, BitUtil.check(other, 6));
                 }

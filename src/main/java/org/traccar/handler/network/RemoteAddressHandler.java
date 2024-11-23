@@ -44,8 +44,7 @@ public class RemoteAddressHandler extends ChannelInboundHandlerAdapter {
             InetSocketAddress remoteAddress = (InetSocketAddress) ctx.channel().remoteAddress();
             String hostAddress = remoteAddress != null ? remoteAddress.getAddress().getHostAddress() : null;
 
-            if (msg instanceof Position) {
-                Position position = (Position) msg;
+            if (msg instanceof Position position) {
                 position.set(Position.KEY_IP, hostAddress);
             }
         }

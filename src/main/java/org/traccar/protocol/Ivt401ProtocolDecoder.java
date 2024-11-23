@@ -157,23 +157,17 @@ public class Ivt401ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, parser.nextLong());
 
         if (parser.hasNext(6)) {
-            position.set(Position.KEY_ALARM, parser.nextInt() == 1 ? Position.ALARM_OVERSPEED : null);
+            position.addAlarm(parser.nextInt() == 1 ? Position.ALARM_OVERSPEED : null);
             switch (parser.nextInt()) {
-                case 1:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 2:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                case 3:
-                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
-                    break;
-                default:
-                    break;
+                case 1 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                case 2 -> position.addAlarm(Position.ALARM_BRAKING);
+                case 3 -> position.addAlarm(Position.ALARM_CORNERING);
+                default -> {
+                }
             }
-            position.set(Position.KEY_ALARM, parser.nextInt() == 1 ? Position.ALARM_LOW_BATTERY : null);
-            position.set(Position.KEY_ALARM, parser.nextInt() == 1 ? Position.ALARM_POWER_CUT : null);
-            position.set(Position.KEY_ALARM, parser.nextInt() == 1 ? Position.ALARM_TOW : null);
+            position.addAlarm(parser.nextInt() == 1 ? Position.ALARM_LOW_BATTERY : null);
+            position.addAlarm(parser.nextInt() == 1 ? Position.ALARM_POWER_CUT : null);
+            position.addAlarm(parser.nextInt() == 1 ? Position.ALARM_TOW : null);
             position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
         }
 

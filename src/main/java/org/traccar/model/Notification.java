@@ -26,6 +26,16 @@ import org.traccar.storage.StorageName;
 @StorageName("tc_notifications")
 public class Notification extends ExtendedModel implements Schedulable {
 
+    private String description;
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     private long calendarId;
 
     @Override

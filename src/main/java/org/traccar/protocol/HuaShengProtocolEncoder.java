@@ -54,14 +54,6 @@ public class HuaShengProtocolEncoder extends BaseProtocolEncoder {
                 content.writeShort(command.getInteger(Command.KEY_FREQUENCY));
                 return encodeContent(HuaShengProtocolDecoder.MSG_SET_REQ, content);
             case Command.TYPE_OUTPUT_CONTROL:
-                /*
-0x01: Lock the relay1; //relay on
-0x02: Unlock the relay1; //relay off
-0x03: Lock the relay2; //relay2 on
-0x04: Unlock the relay2; //relay2 off
-0x05: Lock the relay3; //relay3 on
-0x06: Unlock the relay3; //realy3 off
-                 */
                 content.writeByte(
                         (command.getInteger(Command.KEY_INDEX) - 1) * 2
                         + (2 - command.getInteger(Command.KEY_DATA)));

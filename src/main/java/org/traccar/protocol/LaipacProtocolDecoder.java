@@ -82,31 +82,19 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(String event) {
-        switch (event) {
-            case "Z":
-                return Position.ALARM_LOW_BATTERY;
-            case "Y":
-                return Position.ALARM_TOW;
-            case "X":
-                return Position.ALARM_GEOFENCE_ENTER;
-            case "T":
-                return Position.ALARM_TAMPERING;
-            case "H":
-                return Position.ALARM_POWER_OFF;
-            case "8":
-                return Position.ALARM_VIBRATION;
-            case "7":
-            case "4":
-                return Position.ALARM_GEOFENCE_EXIT;
-            case "6":
-                return Position.ALARM_OVERSPEED;
-            case "5":
-                return Position.ALARM_POWER_CUT;
-            case "3":
-                return Position.ALARM_SOS;
-            default:
-                return null;
-        }
+        return switch (event) {
+            case "Z" -> Position.ALARM_LOW_BATTERY;
+            case "Y" -> Position.ALARM_TOW;
+            case "X" -> Position.ALARM_GEOFENCE_ENTER;
+            case "T" -> Position.ALARM_TAMPERING;
+            case "H" -> Position.ALARM_POWER_OFF;
+            case "8" -> Position.ALARM_VIBRATION;
+            case "7", "4" -> Position.ALARM_GEOFENCE_EXIT;
+            case "6" -> Position.ALARM_OVERSPEED;
+            case "5" -> Position.ALARM_POWER_CUT;
+            case "3" -> Position.ALARM_SOS;
+            default -> null;
+        };
     }
 
     private String decodeEvent(String event, Position position, String model) {
@@ -140,30 +128,13 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             String event, String devicePassword, Channel channel, SocketAddress remoteAddress) {
 
         String responseCode = null;
-
         switch (event) {
-            case "3":
-                responseCode = "d";
-                break;
-            case "M":
-                responseCode = "m";
-                break;
-            case "S":
-            case "T":
-                responseCode = "t";
-                break;
-            case "X":
-            case "4":
-                responseCode = "x";
-                break;
-            case "Y":
-                responseCode = "y";
-                break;
-            case "Z":
-                responseCode = "z";
-                break;
-            default:
-                break;
+            case "3" -> responseCode = "d";
+            case "M" -> responseCode = "m";
+            case "S", "T" -> responseCode = "t";
+            case "X", "4" -> responseCode = "x";
+            case "Y" -> responseCode = "y";
+            case "Z" -> responseCode = "z";
         }
 
         if (responseCode != null) {
@@ -247,7 +218,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         String event = parser.next();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, decodeEvent(event, position, model));
         position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next().replaceAll("\\.", "")) * 0.001);
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);

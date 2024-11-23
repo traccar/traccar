@@ -90,16 +90,16 @@ public class SolarPoweredProtocolDecoder extends BaseProtocolDecoder {
                         int alarmMask = buf.readUnsignedByte();
                         int alarm = buf.readUnsignedByte();
                         if (BitUtil.check(alarmMask, 0) && BitUtil.check(alarm, 0)) {
-                            position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                            position.addAlarm(Position.ALARM_TAMPERING);
                         }
                         if (BitUtil.check(alarmMask, 1) && BitUtil.check(alarm, 1)) {
-                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                            position.addAlarm(Position.ALARM_LOW_POWER);
                         }
                         if (BitUtil.check(alarmMask, 2) && BitUtil.check(alarm, 2)) {
-                            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                            position.addAlarm(Position.ALARM_SOS);
                         }
                         if (BitUtil.check(alarmMask, 3) && BitUtil.check(alarm, 3)) {
-                            position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
+                            position.addAlarm(Position.ALARM_FALL_DOWN);
                         }
                         if (BitUtil.check(alarmMask, 4)) {
                             position.set(Position.KEY_MOTION, BitUtil.check(alarm, 4));

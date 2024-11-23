@@ -97,26 +97,17 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int event) {
-        switch (event) {
-            case 6:
-                return Position.ALARM_OVERSPEED;
-            case 7:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 8:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 9:
-                return Position.ALARM_POWER_CUT;
-            case 11:
-                return Position.ALARM_LOW_BATTERY;
-            case 26:
-                return Position.ALARM_TOW;
-            case 36:
-                return Position.ALARM_SOS;
-            case 42:
-                return Position.ALARM_JAMMING;
-            default:
-                return null;
-        }
+        return switch (event) {
+            case 6 -> Position.ALARM_OVERSPEED;
+            case 7 -> Position.ALARM_GEOFENCE_ENTER;
+            case 8 -> Position.ALARM_GEOFENCE_EXIT;
+            case 9 -> Position.ALARM_POWER_CUT;
+            case 11 -> Position.ALARM_LOW_BATTERY;
+            case 26 -> Position.ALARM_TOW;
+            case 36 -> Position.ALARM_SOS;
+            case 42 -> Position.ALARM_JAMMING;
+            default -> null;
+        };
     }
 
     @Override
@@ -156,161 +147,71 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                 continue;
             }
             switch (dataTags[i]) {
-                case "#ALT#":
-                case "#ALTD#":
-                    position.setAltitude(Double.parseDouble(data[i]));
-                    break;
-                case "#DAL#":
-                case "#DID#":
-                    position.set(Position.KEY_DRIVER_UNIQUE_ID, data[i]);
-                    break;
-                case "#EDT#":
-                    position.setDeviceTime(dateFormat.parse(data[i]));
-                    break;
-                case "#EDV1#":
-                case "#EDV2#":
-                    position.set("external" + dataTags[i].charAt(4), data[i]);
-                    break;
-                case "#EID#":
+                case "#ALT#", "#ALTD#" -> position.setAltitude(Double.parseDouble(data[i]));
+                case "#DAL#", "#DID#" -> position.set(Position.KEY_DRIVER_UNIQUE_ID, data[i]);
+                case "#EDT#" -> position.setDeviceTime(dateFormat.parse(data[i]));
+                case "#EDV1#", "#EDV2#" -> position.set("external" + dataTags[i].charAt(4), data[i]);
+                case "#EID#" -> {
                     event = Integer.parseInt(data[i]);
-                    position.set(Position.KEY_ALARM, decodeAlarm(event));
+                    position.addAlarm(decodeAlarm(event));
                     position.set(Position.KEY_EVENT, event);
                     if (event == 24) {
                         position.set(Position.KEY_IGNITION, true);
                     } else if (event == 25) {
                         position.set(Position.KEY_IGNITION, false);
                     }
-                    break;
-                case "#EDSC#":
-                    position.set("reason", data[i]);
-                    break;
-                case "#IARM#":
-                    position.set(Position.KEY_ARMED, Integer.parseInt(data[i]) > 0);
-                    break;
-                case "#PDT#":
-                    position.setFixTime(dateFormat.parse(data[i]));
-                    break;
-                case "#LAT#":
-                    position.setLatitude(parseCoordinate(data[i]));
-                    break;
-                case "#LONG#":
-                    position.setLongitude(parseCoordinate(data[i]));
-                    break;
-                case "#SPD#":
-                    position.setSpeed(Double.parseDouble(data[i]));
-                    break;
-                case "#SPDK#":
-                    position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(data[i])));
-                    break;
-                case "#HEAD#":
-                    position.setCourse(Integer.parseInt(data[i]));
-                    break;
-                case "#ODO#":
-                case "#ODOD#":
-                    position.set(Position.KEY_ODOMETER, (long) (Double.parseDouble(data[i]) * 1000));
-                    break;
-                case "#BATC#":
-                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(data[i]));
-                    break;
-                case "#BATH#":
-                    position.set("batteryHealth", Integer.parseInt(data[i]));
-                    break;
-                case "#TVI#":
-                    position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(data[i]));
-                    break;
-                case "#CFL#":
-                    position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(data[i]));
-                    break;
-                case "#CFL2#":
-                    position.set("fuel2", Integer.parseInt(data[i]));
-                    break;
-                case "#IN1#":
-                case "#IN2#":
-                case "#IN3#":
-                case "#IN4#":
-                    position.set(Position.PREFIX_IN + dataTags[i].charAt(3), Integer.parseInt(data[i]));
-                    break;
-                case "#OUT1#":
-                case "#OUT2#":
-                case "#OUT3#":
-                case "#OUT4#":
-                    position.set(Position.PREFIX_OUT + dataTags[i].charAt(4), Integer.parseInt(data[i]));
-                    break;
-                case "#OUTA#":
-                case "#OUTB#":
-                case "#OUTC#":
-                case "#OUTD#":
-                    position.set(Position.PREFIX_OUT + (dataTags[i].charAt(4) - 'A' + 1), Integer.parseInt(data[i]));
-                    break;
-                case "#PDOP#":
-                    position.set(Position.KEY_PDOP, Double.parseDouble(data[i]));
-                    break;
-                case "#LAC#":
+                }
+                case "#EDSC#" -> position.set("reason", data[i]);
+                case "#IARM#" -> position.set(Position.KEY_ARMED, Integer.parseInt(data[i]) > 0);
+                case "#PDT#" -> position.setFixTime(dateFormat.parse(data[i]));
+                case "#LAT#" -> position.setLatitude(parseCoordinate(data[i]));
+                case "#LONG#" -> position.setLongitude(parseCoordinate(data[i]));
+                case "#SPD#" -> position.setSpeed(Double.parseDouble(data[i]));
+                case "#SPDK#" -> position.setSpeed(UnitsConverter.knotsFromKph(Double.parseDouble(data[i])));
+                case "#HEAD#" -> position.setCourse(Integer.parseInt(data[i]));
+                case "#ODO#", "#ODOD#" ->
+                        position.set(Position.KEY_ODOMETER, (long) (Double.parseDouble(data[i]) * 1000));
+                case "#BATC#" -> position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(data[i]));
+                case "#BATH#" -> position.set("batteryHealth", Integer.parseInt(data[i]));
+                case "#TVI#" -> position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(data[i]));
+                case "#CFL#" -> position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(data[i]));
+                case "#CFL2#" -> position.set("fuel2", Integer.parseInt(data[i]));
+                case "#IN1#", "#IN2#", "#IN3#", "#IN4#" -> position.set(
+                        Position.PREFIX_IN + dataTags[i].charAt(3), Integer.parseInt(data[i]));
+                case "#OUT1#", "#OUT2#", "#OUT3#", "#OUT4#" -> position.set(
+                        Position.PREFIX_OUT + dataTags[i].charAt(4), Integer.parseInt(data[i]));
+                case "#OUTA#", "#OUTB#", "#OUTC#", "#OUTD#" -> position.set(
+                        Position.PREFIX_OUT + (dataTags[i].charAt(4) - 'A' + 1), Integer.parseInt(data[i]));
+                case "#PDOP#" -> position.set(Position.KEY_PDOP, Double.parseDouble(data[i]));
+                case "#LAC#" -> {
                     if (!data[i].isEmpty()) {
                         lac = Integer.parseInt(data[i]);
                     }
-                    break;
-                case "#CID#":
+                }
+                case "#CID#" -> {
                     if (!data[i].isEmpty()) {
                         cid = Integer.parseInt(data[i]);
                     }
-                    break;
-                case "#CSS#":
-                    position.set(Position.KEY_RSSI, Integer.parseInt(data[i]));
-                    break;
-                case "#VIN#":
-                    position.set(Position.KEY_POWER, Double.parseDouble(data[i]));
-                    break;
-                case "#VBAT#":
-                    position.set(Position.KEY_BATTERY, Double.parseDouble(data[i]));
-                    break;
-                case "#DEST#":
-                    position.set("destination", data[i]);
-                    break;
-                case "#IGN#":
-                case "#IGNL#":
-                case "#ENG#":
-                    position.set(Position.KEY_IGNITION, Integer.parseInt(data[i]) > 0);
-                    break;
-                case "#DUR#":
-                case "#TDUR#":
-                    position.set(Position.KEY_HOURS, Integer.parseInt(data[i]));
-                    break;
-                case "#SAT#":
-                case "#SATN#":
-                    position.set(Position.KEY_SATELLITES_VISIBLE, Integer.parseInt(data[i]));
-                    break;
-                case "#SATU#":
-                    position.set(Position.KEY_SATELLITES, Integer.parseInt(data[i]));
-                    break;
-                case "#STRT#":
-                    position.set("starter", Double.parseDouble(data[i]));
-                    break;
-                case "#TS1#":
-                    position.set("sensor1State", Integer.parseInt(data[i]));
-                    break;
-                case "#TS2#":
-                    position.set("sensor2State", Integer.parseInt(data[i]));
-                    break;
-                case "#TD1#":
-                case "#TD2#":
+                }
+                case "#CSS#" -> position.set(Position.KEY_RSSI, Integer.parseInt(data[i]));
+                case "#VIN#" -> position.set(Position.KEY_POWER, Double.parseDouble(data[i]));
+                case "#VBAT#" -> position.set(Position.KEY_BATTERY, Double.parseDouble(data[i]));
+                case "#DEST#" -> position.set("destination", data[i]);
+                case "#IGN#", "#IGNL#", "#ENG#" -> position.set(Position.KEY_IGNITION, Integer.parseInt(data[i]) > 0);
+                case "#DUR#", "#TDUR#" -> position.set(Position.KEY_HOURS, Integer.parseInt(data[i]));
+                case "#SAT#", "#SATN#" -> position.set(Position.KEY_SATELLITES_VISIBLE, Integer.parseInt(data[i]));
+                case "#SATU#" -> position.set(Position.KEY_SATELLITES, Integer.parseInt(data[i]));
+                case "#STRT#" -> position.set("starter", Double.parseDouble(data[i]));
+                case "#TS1#" -> position.set("sensor1State", Integer.parseInt(data[i]));
+                case "#TS2#" -> position.set("sensor2State", Integer.parseInt(data[i]));
+                case "#TD1#", "#TD2#" -> {
                     StarLinkMessage.mEventReport_TDx message =
                             StarLinkMessage.mEventReport_TDx.parseFrom(DataConverter.parseBase64(data[i]));
-                    position.set(
-                            "sensor" + message.getSensorNumber() + "Id",
-                            message.getSensorID());
-                    position.set(
-                            "sensor" + message.getSensorNumber() + "Temp",
-                            message.getTemperature() * 0.1);
-                    position.set(
-                            "sensor" + message.getSensorNumber() + "Humidity",
-                            message.getTemperature() * 0.1);
-                    position.set(
-                            "sensor" + message.getSensorNumber() + "Voltage",
-                            message.getVoltage() * 0.001);
-                    break;
-                default:
-                    break;
+                    position.set("sensor" + message.getSensorNumber() + "Id", message.getSensorID());
+                    position.set("sensor" + message.getSensorNumber() + "Temp", message.getTemperature() * 0.1);
+                    position.set("sensor" + message.getSensorNumber() + "Humidity", message.getTemperature() * 0.1);
+                    position.set("sensor" + message.getSensorNumber() + "Voltage", message.getVoltage() * 0.001);
+                }
             }
         }
 

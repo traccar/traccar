@@ -38,8 +38,8 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("RST;")
             .expression("([AL]);")               // archive
-            .expression("([^,]+);")              // model
-            .expression("(.{5});")               // firmware
+            .expression("([^;]+);")              // model
+            .expression("([^;]+);")              // firmware
             .number("(d{9});")                   // serial number
             .number("(d+);")                     // index
             .number("(d+);")                     // type

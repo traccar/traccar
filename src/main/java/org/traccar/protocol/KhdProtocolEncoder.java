@@ -73,26 +73,20 @@ public class KhdProtocolEncoder extends BaseProtocolEncoder {
 
         String uniqueId = getUniqueId(command.getDeviceId());
 
-        switch (command.getType()) {
-            case Command.TYPE_ENGINE_STOP:
-                return encodeCommand(MSG_CUT_OIL, uniqueId, null);
-            case Command.TYPE_ENGINE_RESUME:
-                return encodeCommand(MSG_RESUME_OIL, uniqueId, null);
-            case Command.TYPE_GET_VERSION:
-                return encodeCommand(MSG_CHECK_VERSION, uniqueId, null);
-            case Command.TYPE_FACTORY_RESET:
-                return encodeCommand(MSG_FACTORY_RESET, uniqueId, null);
-            case Command.TYPE_SET_SPEED_LIMIT:
+        return switch (command.getType()) {
+            case Command.TYPE_ENGINE_STOP -> encodeCommand(MSG_CUT_OIL, uniqueId, null);
+            case Command.TYPE_ENGINE_RESUME -> encodeCommand(MSG_RESUME_OIL, uniqueId, null);
+            case Command.TYPE_GET_VERSION -> encodeCommand(MSG_CHECK_VERSION, uniqueId, null);
+            case Command.TYPE_FACTORY_RESET -> encodeCommand(MSG_FACTORY_RESET, uniqueId, null);
+            case Command.TYPE_SET_SPEED_LIMIT -> {
                 ByteBuf content = Unpooled.buffer();
                 content.writeByte(command.getInteger(Command.KEY_DATA));
-                return encodeCommand(MSG_RESUME_OIL, uniqueId, content);
-            case Command.TYPE_SET_ODOMETER:
-                return encodeCommand(MSG_DELETE_MILEAGE, uniqueId, null);
-            case Command.TYPE_POSITION_SINGLE:
-                return encodeCommand(MSG_ON_DEMAND_TRACK, uniqueId, null);
-            default:
-                return null;
-        }
+                yield encodeCommand(MSG_RESUME_OIL, uniqueId, content);
+            }
+            case Command.TYPE_SET_ODOMETER -> encodeCommand(MSG_DELETE_MILEAGE, uniqueId, null);
+            case Command.TYPE_POSITION_SINGLE -> encodeCommand(MSG_ON_DEMAND_TRACK, uniqueId, null);
+            default -> null;
+        };
     }
 
 }

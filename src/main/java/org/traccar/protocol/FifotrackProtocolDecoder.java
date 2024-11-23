@@ -157,50 +157,28 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
 
     private String decodeAlarm(Integer alarm) {
         if (alarm != null) {
-            switch (alarm) {
-                case 2:
-                    return Position.ALARM_SOS;
-                case 14:
-                    return Position.ALARM_LOW_POWER;
-                case 15:
-                    return Position.ALARM_POWER_CUT;
-                case 16:
-                    return Position.ALARM_POWER_RESTORED;
-                case 17:
-                    return Position.ALARM_LOW_BATTERY;
-                case 18:
-                    return Position.ALARM_OVERSPEED;
-                case 20:
-                    return Position.ALARM_GPS_ANTENNA_CUT;
-                case 21:
-                    return Position.ALARM_VIBRATION;
-                case 23:
-                    return Position.ALARM_ACCELERATION;
-                case 24:
-                    return Position.ALARM_BRAKING;
-                case 27:
-                    return Position.ALARM_FATIGUE_DRIVING;
-                case 30:
-                case 32:
-                    return Position.ALARM_JAMMING;
-                case 31:
-                    return Position.ALARM_FALL_DOWN;
-                case 33:
-                    return Position.ALARM_GEOFENCE_EXIT;
-                case 34:
-                    return Position.ALARM_GEOFENCE_ENTER;
-                case 35:
-                    return Position.ALARM_IDLE;
-                case 40:
-                case 41:
-                    return Position.ALARM_TEMPERATURE;
-                case 53:
-                    return Position.ALARM_POWER_ON;
-                case 54:
-                    return Position.ALARM_POWER_OFF;
-                default:
-                    return null;
-            }
+            return switch (alarm) {
+                case 2 -> Position.ALARM_SOS;
+                case 14 -> Position.ALARM_LOW_POWER;
+                case 15 -> Position.ALARM_POWER_CUT;
+                case 16 -> Position.ALARM_POWER_RESTORED;
+                case 17 -> Position.ALARM_LOW_BATTERY;
+                case 18 -> Position.ALARM_OVERSPEED;
+                case 20 -> Position.ALARM_GPS_ANTENNA_CUT;
+                case 21 -> Position.ALARM_VIBRATION;
+                case 23 -> Position.ALARM_ACCELERATION;
+                case 24 -> Position.ALARM_BRAKING;
+                case 27 -> Position.ALARM_FATIGUE_DRIVING;
+                case 30, 32 -> Position.ALARM_JAMMING;
+                case 31 -> Position.ALARM_FALL_DOWN;
+                case 33 -> Position.ALARM_GEOFENCE_EXIT;
+                case 34 -> Position.ALARM_GEOFENCE_ENTER;
+                case 35 -> Position.ALARM_IDLE;
+                case 40, 41 -> Position.ALARM_TEMPERATURE;
+                case 53 -> Position.ALARM_POWER_ON;
+                case 54 -> Position.ALARM_POWER_OFF;
+                default -> null;
+            };
         }
         return null;
     }
@@ -225,7 +203,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
+        position.addAlarm(decodeAlarm(parser.nextInt()));
 
         position.setDeviceTime(parser.nextDateTime());
 
@@ -286,7 +264,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
+        position.addAlarm(decodeAlarm(parser.nextInt()));
 
         position.setTime(parser.nextDateTime());
 

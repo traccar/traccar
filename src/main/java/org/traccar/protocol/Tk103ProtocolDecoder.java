@@ -157,123 +157,52 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 1:
-                return Position.ALARM_ACCIDENT;
-            case 2:
-                return Position.ALARM_SOS;
-            case 3:
-                return Position.ALARM_VIBRATION;
-            case 4:
-                return Position.ALARM_LOW_SPEED;
-            case 5:
-                return Position.ALARM_OVERSPEED;
-            case 6:
-                return Position.ALARM_GEOFENCE_EXIT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 1 -> Position.ALARM_ACCIDENT;
+            case 2 -> Position.ALARM_SOS;
+            case 3 -> Position.ALARM_VIBRATION;
+            case 4 -> Position.ALARM_LOW_SPEED;
+            case 5 -> Position.ALARM_OVERSPEED;
+            case 6 -> Position.ALARM_GEOFENCE_EXIT;
+            default -> null;
+        };
     }
 
     private void decodeType(Position position, String type, String data) {
         switch (type) {
-            case "BQ81":
+            case "BQ81" -> {
                 switch (Integer.parseInt(data)) {
-                    case 0:
-                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                        break;
-                    case 1:
-                        position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                        break;
-                    case 2:
-                        position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
-                        break;
-                    case 3:
-                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                        break;
-                    case 4:
-                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                        break;
-                    case 5:
-                        position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
-                        break;
-                    default:
-                        break;
+                    case 0 -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+                    case 1 -> position.addAlarm(Position.ALARM_OVERSPEED);
+                    case 2 -> position.addAlarm(Position.ALARM_IDLE);
+                    case 3 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                    case 4 -> position.addAlarm(Position.ALARM_BRAKING);
+                    case 5 -> position.addAlarm(Position.ALARM_TEMPERATURE);
                 }
-                break;
-            case "BO01":
-                position.set(Position.KEY_ALARM, decodeAlarm(data.charAt(0) - '0'));
-                break;
-            case "ZC11":
-            case "DW31":
-            case "DW51":
-                position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
-                break;
-            case "ZC12":
-            case "DW32":
-            case "DW52":
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                break;
-            case "ZC13":
-            case "DW33":
-            case "DW53":
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-                break;
-            case "ZC15":
-            case "DW35":
-            case "DW55":
-                position.set(Position.KEY_IGNITION, true);
-                break;
-            case "ZC16":
-            case "DW36":
-            case "DW56":
-                position.set(Position.KEY_IGNITION, false);
-                break;
-            case "ZC29":
-            case "DW42":
-            case "DW62":
-                position.set(Position.KEY_IGNITION, true);
-                break;
-            case "ZC17":
-            case "DW37":
-            case "DW57":
-                position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
-                break;
-            case "ZC25":
-            case "DW3E":
-            case "DW5E":
-                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                break;
-            case "ZC26":
-            case "DW3F":
-            case "DW5F":
-                position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
-                break;
-            case "ZC27":
-            case "DW40":
-            case "DW60":
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
-                break;
-            default:
-                break;
+            }
+            case "BO01" -> position.addAlarm(decodeAlarm(data.charAt(0) - '0'));
+            case "ZC11", "DW31", "DW51" -> position.addAlarm(Position.ALARM_MOVEMENT);
+            case "ZC12", "DW32", "DW52" -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+            case "ZC13", "DW33", "DW53" -> position.addAlarm(Position.ALARM_POWER_CUT);
+            case "ZC15", "DW35", "DW55" -> position.set(Position.KEY_IGNITION, true);
+            case "ZC16", "DW36", "DW56" -> position.set(Position.KEY_IGNITION, false);
+            case "ZC29", "DW42", "DW62" -> position.set(Position.KEY_IGNITION, true);
+            case "ZC17", "DW37", "DW57" -> position.addAlarm(Position.ALARM_REMOVING);
+            case "ZC25", "DW3E", "DW5E" -> position.addAlarm(Position.ALARM_SOS);
+            case "ZC26", "DW3F", "DW5F" -> position.addAlarm(Position.ALARM_TAMPERING);
+            case "ZC27", "DW40", "DW60" -> position.addAlarm(Position.ALARM_LOW_POWER);
         }
     }
 
     private Integer decodeBattery(int value) {
-        switch (value) {
-            case 6:
-                return 100;
-            case 5:
-                return 80;
-            case 4:
-                return 50;
-            case 3:
-                return 20;
-            case 2:
-                return 10;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 6 -> 100;
+            case 5 -> 80;
+            case 4 -> 50;
+            case 3 -> 20;
+            case 2 -> 10;
+            default -> null;
+        };
     }
 
     private Position decodeBattery(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -516,32 +445,30 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
                 int key = Integer.parseInt(pair[0], 16);
                 ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(pair[1]));
                 switch (key) {
-                    case 0x90:
+                    case 0x90 -> {
                         position.set("cumulativeVoltage", buf.readUnsignedShortLE() * 0.1);
                         position.set("gatherVoltage", buf.readUnsignedShortLE() * 0.1);
                         position.set("current", (buf.readUnsignedShortLE() - 30000) * 0.1);
                         position.set("soc", buf.readUnsignedShortLE() * 0.1);
-                        break;
-                    case 0x91:
+                    }
+                    case 0x91 -> {
                         position.set("maxCellVoltage", buf.readUnsignedShortLE() * 0.001);
                         position.set("maxCellVoltageCount", buf.readUnsignedByte());
                         position.set("minCellVoltage", buf.readUnsignedShortLE() * 0.001);
                         position.set("minCellVoltageCount", buf.readUnsignedByte());
-                        break;
-                    case 0x92:
+                    }
+                    case 0x92 -> {
                         position.set("maxTemp", buf.readUnsignedByte() - 40);
                         position.set("maxTempCount", buf.readUnsignedByte());
                         position.set("minTemp", buf.readUnsignedByte() - 40);
                         position.set("minTempCount", buf.readUnsignedByte());
-                        break;
-                    case 0x96:
+                    }
+                    case 0x96 -> {
                         buf.readUnsignedByte(); // frame
                         while (buf.isReadable()) {
                             position.set("cellTemp" + buf.readerIndex(), buf.readUnsignedByte() - 40);
                         }
-                        break;
-                    default:
-                        break;
+                    }
                 }
 
             }

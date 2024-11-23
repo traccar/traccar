@@ -35,6 +35,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
 
 public final class Main {
 
@@ -140,6 +141,7 @@ public final class Main {
                         throw new RuntimeException(e);
                     }
                 }
+                injector.getInstance(ExecutorService.class).shutdown();
             }));
         } catch (Exception e) {
             Throwable unwrapped;

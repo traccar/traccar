@@ -38,7 +38,7 @@ public class BehaviorEventHandler extends BaseEventHandler {
     }
 
     @Override
-    public void analyzePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
 
         Position lastPosition = cacheManager.getPosition(position.getDeviceId());
         if (lastPosition != null && position.getFixTime().equals(lastPosition.getFixTime())) {

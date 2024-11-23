@@ -67,35 +67,21 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_CAMERA_DATA = 0x1F;
 
     private String decodeAlarm(Short value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_POWER_OFF;
-            case 0x02:
-                return Position.ALARM_SOS;
-            case 0x03:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x04:
-                return Position.ALARM_VIBRATION;
-            case 0x08:
-            case 0x09:
-                return Position.ALARM_GPS_ANTENNA_CUT;
-            case 0x25:
-                return Position.ALARM_REMOVING;
-            case 0x81:
-                return Position.ALARM_LOW_SPEED;
-            case 0x82:
-                return Position.ALARM_OVERSPEED;
-            case 0x83:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 0x84:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 0x85:
-                return Position.ALARM_ACCIDENT;
-            case 0x86:
-                return Position.ALARM_FALL_DOWN;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_POWER_OFF;
+            case 0x02 -> Position.ALARM_SOS;
+            case 0x03 -> Position.ALARM_LOW_BATTERY;
+            case 0x04 -> Position.ALARM_VIBRATION;
+            case 0x08, 0x09 -> Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x25 -> Position.ALARM_REMOVING;
+            case 0x81 -> Position.ALARM_LOW_SPEED;
+            case 0x82 -> Position.ALARM_OVERSPEED;
+            case 0x83 -> Position.ALARM_GEOFENCE_ENTER;
+            case 0x84 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x85 -> Position.ALARM_ACCIDENT;
+            case 0x86 -> Position.ALARM_FALL_DOWN;
+            default -> null;
+        };
     }
 
     private void decodeStatus(Position position, int status) {
@@ -151,7 +137,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_ALARM) {
 
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
 
         } else if (type == MSG_STATE) {
 
@@ -258,7 +244,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_WARNING) {
 
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
 
         } else if (type == MSG_REPORT) {
 
@@ -315,7 +301,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
 
             if (buf.readableBytes() >= 12) {
                 position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 256.0);
-                position.set("humidity", buf.readUnsignedShort() * 0.1);
+                position.set(Position.KEY_HUMIDITY, buf.readUnsignedShort() * 0.1);
                 position.set("illuminance", buf.readUnsignedInt() / 256.0);
                 position.set("co2", buf.readUnsignedInt());
             }
@@ -407,17 +393,9 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             int pid = buf.readUnsignedByte();
             int value = buf.readInt();
             switch (pid) {
-                case 0x89:
-                    position.set(Position.KEY_FUEL_CONSUMPTION, value);
-                    break;
-                case 0x8a:
-                    position.set(Position.KEY_ODOMETER, value * 1000L);
-                    break;
-                case 0x8b:
-                    position.set(Position.KEY_FUEL_LEVEL, value / 10);
-                    break;
-                default:
-                    break;
+                case 0x89 -> position.set(Position.KEY_FUEL_CONSUMPTION, value);
+                case 0x8a -> position.set(Position.KEY_ODOMETER, value * 1000L);
+                case 0x8b -> position.set(Position.KEY_FUEL_LEVEL, value / 10);
             }
         }
 

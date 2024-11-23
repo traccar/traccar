@@ -66,27 +66,17 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 164:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 165:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 168:
-            case 169:
-                return Position.ALARM_LOW_POWER;
-            case 170:
-                return Position.ALARM_POWER_OFF;
-            case 176:
-                return Position.ALARM_POWER_RESTORED;
-            case 180:
-                return Position.ALARM_FALL_DOWN;
-            case 225:
-                return Position.ALARM_JAMMING;
-            case 995:
-                return Position.ALARM_SOS;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 164 -> Position.ALARM_GEOFENCE_ENTER;
+            case 165 -> Position.ALARM_GEOFENCE_EXIT;
+            case 168, 169 -> Position.ALARM_LOW_POWER;
+            case 170 -> Position.ALARM_POWER_OFF;
+            case 176 -> Position.ALARM_POWER_RESTORED;
+            case 180 -> Position.ALARM_FALL_DOWN;
+            case 225 -> Position.ALARM_JAMMING;
+            case 995 -> Position.ALARM_SOS;
+            default -> null;
+        };
     }
 
     @Override
@@ -118,7 +108,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, parser.nextInt());
 
         int event = parser.nextInt();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
 
         position.set(Position.KEY_INPUT, parser.nextInt());

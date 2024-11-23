@@ -72,12 +72,10 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
     }
 
     private LogRecord createLogRecord(ChannelHandlerContext ctx, Object msg) {
-        if (msg instanceof NetworkMessage) {
-            NetworkMessage networkMessage = (NetworkMessage) msg;
-            if (networkMessage.getMessage() instanceof ByteBuf) {
+        if (msg instanceof NetworkMessage networkMessage) {
+            if (networkMessage.getMessage() instanceof ByteBuf data) {
                 LogRecord record = new LogRecord(ctx.channel().localAddress(), networkMessage.getRemoteAddress());
                 record.setProtocol(protocol);
-                ByteBuf data = (ByteBuf) networkMessage.getMessage();
                 if (decodeTextData && BufferUtil.isPrintable(data, data.readableBytes())) {
                     record.setData(data.getCharSequence(
                             data.readerIndex(), data.readableBytes(), StandardCharsets.US_ASCII).toString()

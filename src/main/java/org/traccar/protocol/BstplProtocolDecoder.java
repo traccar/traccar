@@ -61,20 +61,14 @@ public class BstplProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 4:
-                return Position.ALARM_LOW_BATTERY;
-            case 5:
-                return Position.ALARM_ACCELERATION;
-            case 6:
-                return Position.ALARM_BRAKING;
-            case 7:
-                return Position.ALARM_OVERSPEED;
-            case 9:
-                return Position.ALARM_SOS;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 4 -> Position.ALARM_LOW_BATTERY;
+            case 5 -> Position.ALARM_ACCELERATION;
+            case 6 -> Position.ALARM_BRAKING;
+            case 7 -> Position.ALARM_OVERSPEED;
+            case 9 -> Position.ALARM_SOS;
+            default -> null;
+        };
     }
     @Override
     protected Object decode(
@@ -95,7 +89,7 @@ public class BstplProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, decodeAlarm(type));
+        position.addAlarm(decodeAlarm(type));
 
         position.setValid(parser.next().equals("A"));
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
@@ -111,7 +105,7 @@ public class BstplProtocolDecoder extends BaseProtocolDecoder {
 
         boolean boxOpen = parser.nextInt() > 0;
         if (type == 8 && boxOpen) {
-            position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+            position.addAlarm(Position.ALARM_TAMPERING);
         }
         position.set("boxOpen", boxOpen);
 
@@ -119,7 +113,7 @@ public class BstplProtocolDecoder extends BaseProtocolDecoder {
 
         boolean charge = parser.nextInt() > 0;
         if (type == 3) {
-            position.set(Position.KEY_ALARM, charge ? Position.ALARM_POWER_RESTORED : Position.ALARM_POWER_CUT);
+            position.addAlarm(charge ? Position.ALARM_POWER_RESTORED : Position.ALARM_POWER_CUT);
         }
         position.set(Position.KEY_CHARGE, charge);
 

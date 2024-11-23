@@ -18,37 +18,9 @@ package org.traccar.session;
 import io.netty.channel.Channel;
 
 import java.net.SocketAddress;
-import java.util.Objects;
 
-public class ConnectionKey {
-
-    private final SocketAddress localAddress;
-    private final SocketAddress remoteAddress;
-
+public record ConnectionKey(SocketAddress localAddress, SocketAddress remoteAddress) {
     public ConnectionKey(Channel channel, SocketAddress remoteAddress) {
         this(channel.localAddress(), remoteAddress);
     }
-
-    public ConnectionKey(SocketAddress localAddress, SocketAddress remoteAddress) {
-        this.localAddress = localAddress;
-        this.remoteAddress = remoteAddress;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ConnectionKey that = (ConnectionKey) o;
-        return Objects.equals(localAddress, that.localAddress) && Objects.equals(remoteAddress, that.remoteAddress);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(localAddress, remoteAddress);
-    }
-
 }

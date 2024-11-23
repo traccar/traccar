@@ -37,14 +37,11 @@ public class FifotrackProtocolEncoder extends StringProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        switch (command.getType()) {
-            case Command.TYPE_CUSTOM:
-                return formatCommand(command, command.getString(Command.KEY_DATA));
-            case Command.TYPE_REQUEST_PHOTO:
-                return formatCommand(command, "D05,3");
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_CUSTOM -> formatCommand(command, command.getString(Command.KEY_DATA));
+            case Command.TYPE_REQUEST_PHOTO -> formatCommand(command, "D05,3");
+            default -> null;
+        };
     }
 
 }

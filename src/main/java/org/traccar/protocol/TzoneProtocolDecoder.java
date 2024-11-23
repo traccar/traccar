@@ -60,26 +60,17 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(Short value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x10:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x11:
-                return Position.ALARM_OVERSPEED;
-            case 0x14:
-                return Position.ALARM_BRAKING;
-            case 0x15:
-                return Position.ALARM_ACCELERATION;
-            case 0x30:
-                return Position.ALARM_PARKING;
-            case 0x42:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 0x43:
-                return Position.ALARM_GEOFENCE_ENTER;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x10 -> Position.ALARM_LOW_BATTERY;
+            case 0x11 -> Position.ALARM_OVERSPEED;
+            case 0x14 -> Position.ALARM_BRAKING;
+            case 0x15 -> Position.ALARM_ACCELERATION;
+            case 0x30 -> Position.ALARM_PARKING;
+            case 0x42 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x43 -> Position.ALARM_GEOFENCE_ENTER;
+            default -> null;
+        };
     }
 
     private boolean decodeGps(Position position, ByteBuf buf, int hardware) {
@@ -320,7 +311,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
         blockEnd = buf.readerIndex() + blockLength;
 
         if (hardware == 0x407 || blockLength >= 13) {
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
             position.set("terminalInfo", buf.readUnsignedByte());
 
             if (hardware != 0x407) {
@@ -330,7 +321,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                 status = buf.readUnsignedByte();
                 position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 4));
                 if (BitUtil.check(status, 0)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    position.addAlarm(Position.ALARM_SOS);
                 }
             }
 
@@ -350,7 +341,7 @@ public class TzoneProtocolDecoder extends BaseProtocolDecoder {
                 }
                 int humidity = buf.readUnsignedShort();
                 if (!BitUtil.check(humidity, 15)) {
-                    position.set("humidity", BitUtil.to(humidity, 15) * 0.1);
+                    position.set(Position.KEY_HUMIDITY, BitUtil.to(humidity, 15) * 0.1);
                 }
                 position.set("lightSensor", buf.readUnsignedByte() == 0);
             }

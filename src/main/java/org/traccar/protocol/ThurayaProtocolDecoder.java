@@ -110,24 +110,16 @@ public class ThurayaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int event) {
-        switch (event) {
-            case 10:
-                return Position.ALARM_VIBRATION;
-            case 11:
-                return Position.ALARM_OVERSPEED;
-            case 12:
-                return Position.ALARM_POWER_CUT;
-            case 13:
-                return Position.ALARM_LOW_BATTERY;
-            case 18:
-                return Position.ALARM_GPS_ANTENNA_CUT;
-            case 20:
-                return Position.ALARM_ACCELERATION;
-            case 21:
-                return Position.ALARM_BRAKING;
-            default:
-                return null;
-        }
+        return switch (event) {
+            case 10 -> Position.ALARM_VIBRATION;
+            case 11 -> Position.ALARM_OVERSPEED;
+            case 12 -> Position.ALARM_POWER_CUT;
+            case 13 -> Position.ALARM_LOW_BATTERY;
+            case 18 -> Position.ALARM_GPS_ANTENNA_CUT;
+            case 20 -> Position.ALARM_ACCELERATION;
+            case 21 -> Position.ALARM_BRAKING;
+            default -> null;
+        };
     }
 
     private String readString(ByteBuf buf) {
@@ -163,7 +155,7 @@ public class ThurayaProtocolDecoder extends BaseProtocolDecoder {
             decodeLocation(buf, position);
 
             int event = buf.readUnsignedByte();
-            position.set(Position.KEY_ALARM, decodeAlarm(event));
+            position.addAlarm(decodeAlarm(event));
             position.set(Position.KEY_EVENT, event);
             position.set("eventData", readString(buf));
 

@@ -98,25 +98,25 @@ public class SabertekProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_CHARGE, BitUtil.check(state, 1));
 
         if (BitUtil.check(state, 2)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+            position.addAlarm(Position.ALARM_JAMMING);
         }
         if (BitUtil.check(state, 3)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+            position.addAlarm(Position.ALARM_TAMPERING);
         }
 
         int events = parser.nextInt();
 
         if (BitUtil.check(events, 0)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+            position.addAlarm(Position.ALARM_BRAKING);
         }
         if (BitUtil.check(events, 1)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            position.addAlarm(Position.ALARM_OVERSPEED);
         }
         if (BitUtil.check(events, 2)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+            position.addAlarm(Position.ALARM_ACCIDENT);
         }
         if (BitUtil.check(events, 3)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+            position.addAlarm(Position.ALARM_CORNERING);
         }
 
         position.setValid(parser.nextInt() == 1);

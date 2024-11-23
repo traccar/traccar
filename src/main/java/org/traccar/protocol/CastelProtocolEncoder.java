@@ -59,16 +59,17 @@ public class CastelProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
         ByteBuf content = Unpooled.buffer(0);
-        switch (command.getType()) {
-            case Command.TYPE_ENGINE_STOP:
+        return switch (command.getType()) {
+            case Command.TYPE_ENGINE_STOP -> {
                 content.writeByte(1);
-                return encodeContent(command.getDeviceId(), CastelProtocolDecoder.MSG_CC_PETROL_CONTROL, content);
-            case Command.TYPE_ENGINE_RESUME:
+                yield encodeContent(command.getDeviceId(), CastelProtocolDecoder.MSG_CC_PETROL_CONTROL, content);
+            }
+            case Command.TYPE_ENGINE_RESUME -> {
                 content.writeByte(0);
-                return encodeContent(command.getDeviceId(), CastelProtocolDecoder.MSG_CC_PETROL_CONTROL, content);
-            default:
-                return null;
-        }
+                yield encodeContent(command.getDeviceId(), CastelProtocolDecoder.MSG_CC_PETROL_CONTROL, content);
+            }
+            default -> null;
+        };
     }
 
 }

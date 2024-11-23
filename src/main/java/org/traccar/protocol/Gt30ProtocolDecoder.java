@@ -55,20 +55,13 @@ public class Gt30ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 0x01:
-            case 0x02:
-            case 0x03:
-                return Position.ALARM_SOS;
-            case 0x10:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x11:
-                return Position.ALARM_OVERSPEED;
-            case 0x12:
-                return Position.ALARM_GEOFENCE;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01, 0x02, 0x03 -> Position.ALARM_SOS;
+            case 0x10 -> Position.ALARM_LOW_BATTERY;
+            case 0x11 -> Position.ALARM_OVERSPEED;
+            case 0x12 -> Position.ALARM_GEOFENCE;
+            default -> null;
+        };
     }
 
     @Override
@@ -89,7 +82,7 @@ public class Gt30ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm(parser.next().charAt(0)));
+            position.addAlarm(decodeAlarm(parser.next().charAt(0)));
         }
 
         DateBuilder dateBuilder = new DateBuilder()

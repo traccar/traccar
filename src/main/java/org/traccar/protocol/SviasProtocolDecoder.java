@@ -91,7 +91,7 @@ public class SviasProtocolDecoder extends BaseProtocolDecoder {
         int input = parser.nextInt();
         int output = parser.nextInt();
 
-        position.set(Position.KEY_ALARM, BitUtil.check(input, 0) ? Position.ALARM_SOS : null);
+        position.addAlarm(BitUtil.check(input, 0) ? Position.ALARM_SOS : null);
         position.set(Position.KEY_IGNITION, BitUtil.check(input, 4));
         position.setValid(BitUtil.check(output, 0));
 

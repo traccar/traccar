@@ -49,27 +49,23 @@ public class H02ProtocolEncoder extends StringProtocolEncoder {
     protected Object encodeCommand(Command command, Date time) {
         String uniqueId = getUniqueId(command.getDeviceId());
 
-        switch (command.getType()) {
-            case Command.TYPE_ALARM_ARM:
-                return formatCommand(time, uniqueId, "SCF", "0", "0");
-            case Command.TYPE_ALARM_DISARM:
-                return formatCommand(time, uniqueId, "SCF", "1", "1");
-            case Command.TYPE_ENGINE_STOP:
-                return formatCommand(time, uniqueId, "S20", "1", "1");
-            case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(time, uniqueId, "S20", "1", "0");
-            case Command.TYPE_POSITION_PERIODIC:
+        return switch (command.getType()) {
+            case Command.TYPE_ALARM_ARM -> formatCommand(time, uniqueId, "SCF", "0", "0");
+            case Command.TYPE_ALARM_DISARM -> formatCommand(time, uniqueId, "SCF", "1", "1");
+            case Command.TYPE_ENGINE_STOP -> formatCommand(time, uniqueId, "S20", "1", "1");
+            case Command.TYPE_ENGINE_RESUME -> formatCommand(time, uniqueId, "S20", "1", "0");
+            case Command.TYPE_POSITION_PERIODIC -> {
                 String frequency = command.getAttributes().get(Command.KEY_FREQUENCY).toString();
                 if (AttributeUtil.lookup(
                         getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()),
                         command.getDeviceId())) {
-                    return formatCommand(time, uniqueId, "D1", frequency);
+                    yield formatCommand(time, uniqueId, "D1", frequency);
                 } else {
-                    return formatCommand(time, uniqueId, "S71", "22", frequency);
+                    yield formatCommand(time, uniqueId, "S71", "22", frequency);
                 }
-            default:
-                return null;
-        }
+            }
+            default -> null;
+        };
     }
 
     @Override

@@ -33,7 +33,7 @@ import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.handler.ComputedAttributesHandler;
-import org.traccar.storage.StorageException;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
@@ -44,15 +44,18 @@ import org.traccar.storage.query.Request;
 public class AttributeResource extends ExtendedObjectResource<Attribute> {
 
     @Inject
-    private ComputedAttributesHandler computedAttributesHandler;
+    private CacheManager cacheManager;
+
+    @Inject
+    private ComputedAttributesHandler.Late computedAttributesHandler;
 
     public AttributeResource() {
-        super(Attribute.class);
+        super(Attribute.class, "description");
     }
 
     @POST
     @Path("test")
-    public Response test(@QueryParam("deviceId") long deviceId, Attribute entity) throws StorageException {
+    public Response test(@QueryParam("deviceId") long deviceId, Attribute entity) throws Exception {
         permissionsService.checkAdmin(getUserId());
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
 
@@ -60,20 +63,20 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
                 new Columns.All(),
                 new Condition.LatestPositions(deviceId)));
 
-        Object result = computedAttributesHandler.computeAttribute(entity, position);
-        if (result != null) {
-            switch (entity.getType()) {
-                case "number":
-                    Number numberValue = (Number) result;
-                    return Response.ok(numberValue).build();
-                case "boolean":
-                    Boolean booleanValue = (Boolean) result;
-                    return Response.ok(booleanValue).build();
-                default:
-                    return Response.ok(result.toString()).build();
+        var key = new Object();
+        try {
+            cacheManager.addDevice(position.getDeviceId(), key);
+            Object result = computedAttributesHandler.computeAttribute(entity, position);
+            if (result != null) {
+                return switch (entity.getType()) {
+                    case "number", "boolean" -> Response.ok(result).build();
+                    default -> Response.ok(result.toString()).build();
+                };
+            } else {
+                return Response.noContent().build();
             }
-        } else {
-            return Response.noContent().build();
+        } finally {
+            cacheManager.removeDevice(position.getDeviceId(), key);
         }
     }
 

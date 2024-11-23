@@ -47,15 +47,19 @@ public class SnsSmsClient implements SmsManager {
     }
 
     @Override
-    public void sendMessage(String destAddress, String message, boolean command) {
+    public void sendMessage(String phone, String message, boolean command) {
         Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
-        smsAttributes.put("AWS.SNS.SMS.SenderID",
+        smsAttributes.put(
+                "AWS.SNS.SMS.SenderID",
                 new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
-        smsAttributes.put("AWS.SNS.SMS.SMSType",
+        smsAttributes.put(
+                "AWS.SNS.SMS.SMSType",
                 new MessageAttributeValue().withStringValue("Transactional").withDataType("String"));
 
-        PublishRequest publishRequest = new PublishRequest().withMessage(message)
-                .withPhoneNumber(destAddress).withMessageAttributes(smsAttributes);
+        PublishRequest publishRequest = new PublishRequest()
+                .withMessage(message)
+                .withPhoneNumber(phone)
+                .withMessageAttributes(smsAttributes);
 
         snsClient.publishAsync(publishRequest, new AsyncHandler<>() {
             @Override

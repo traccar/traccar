@@ -147,11 +147,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
         byte recordType = buf.readByte();
         while (buf.readableBytes() > 0) {
             switch (recordType) {
-                case RECORD_PING:
-                case RECORD_DATA:
-                case RECORD_TEXT:
-                case RECORD_FILE:
-                case RECORD_BINARY:
+                case RECORD_PING, RECORD_DATA, RECORD_TEXT, RECORD_FILE, RECORD_BINARY -> {
                     int length = buf.readUnsignedShortLE();
                     Date time = new Date(buf.readUnsignedIntLE() * 1000);
 
@@ -162,10 +158,10 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     }
 
                     buf.readUnsignedByte(); // checksum
-                    break;
-
-                default:
+                }
+                default -> {
                     return null;
+                }
             }
 
             recordType = buf.readByte();

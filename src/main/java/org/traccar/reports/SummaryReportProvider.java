@@ -108,8 +108,10 @@ public class SummaryReportProvider {
             if (first.hasAttribute(Position.KEY_HOURS) && last.hasAttribute(Position.KEY_HOURS)) {
                 result.setStartHours(first.getLong(Position.KEY_HOURS));
                 result.setEndHours(last.getLong(Position.KEY_HOURS));
-                result.setAverageSpeed(UnitsConverter.knotsFromMps(
-                        result.getDistance() * 1000 / result.getEngineHours()));
+                long engineHours = result.getEngineHours();
+                if (engineHours > 0) {
+                    result.setAverageSpeed(UnitsConverter.knotsFromMps(result.getDistance() * 1000 / engineHours));
+                }
             }
 
             if (!ignoreOdometer

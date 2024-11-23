@@ -161,7 +161,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             Parser parser = new Parser(PATTERN_SIMPLE, status);
             if (parser.matches()) {
 
-                position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+                position.addAlarm(decodeAlarm(parser.next()));
 
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next(), id);
                 if (deviceSession == null) {
@@ -223,7 +223,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + 1, parser.next());
                 position.set(Position.PREFIX_ADC + 2, parser.next());
                 position.set(Position.PREFIX_ADC + 3, parser.next());
-                position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+                position.addAlarm(decodeAlarm(parser.next()));
 
             }
         }
@@ -257,6 +257,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(x+)?,")                    // cid
             .number("(d+)?,")                    // gsm
             .groupBegin()
+            .number("(ddd),").optional()         // heart rate
             .number("([01]{4})?,")               // input
             .number("([01]{4})?,")               // output
             .number("(d+)?,")                    // adc1
@@ -277,11 +278,13 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.?d*)")                // temperature 2
             .or().text(" ")
             .groupEnd("?").text(",")
+            .groupBegin()
             .number("(d+)?,")                    // rfid
             .number("([01])(d)?").optional()     // charge and belt status
             .expression("[^,]*,")
             .number("(d+)?,")                    // battery
             .expression("([^,]*)[,;]")           // alert
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -336,7 +339,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (parser.hasNext(5)) {
+        if (parser.hasNext(6)) {
+            position.set(Position.KEY_HEART_RATE, parser.nextInt());
             position.set(Position.KEY_INPUT, parser.nextBinInt(0));
             position.set(Position.KEY_OUTPUT, parser.nextBinInt(0));
             for (int i = 1; i <= 3; i++) {
@@ -373,7 +377,9 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_BATTERY, Integer.parseInt(battery));
         }
 
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+        if (parser.hasNext()) {
+            position.addAlarm(decodeAlarm(parser.next()));
+        }
 
         return position;
     }
@@ -387,54 +393,28 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 return Position.ALARM_GEOFENCE_EXIT;
             }
         }
-        switch (value) {
-            case "pw on":
-            case "poweron":
-                return Position.ALARM_POWER_ON;
-            case "poweroff":
-                return Position.ALARM_POWER_OFF;
-            case "sos":
-            case "help":
-                return Position.ALARM_SOS;
-            case "over speed":
-            case "overspeed":
-                return Position.ALARM_OVERSPEED;
-            case "lowspeed":
-                return Position.ALARM_LOW_SPEED;
-            case "low battery":
-            case "lowbattery":
-                return Position.ALARM_LOW_BATTERY;
-            case "low extern voltage":
-                return Position.ALARM_LOW_POWER;
-            case "gps cut":
-                return Position.ALARM_GPS_ANTENNA_CUT;
-            case "vib":
-                return Position.ALARM_VIBRATION;
-            case "move in":
-                return Position.ALARM_GEOFENCE_ENTER;
-            case "move out":
-                return Position.ALARM_GEOFENCE_EXIT;
-            case "corner":
-                return Position.ALARM_CORNERING;
-            case "fatigue":
-                return Position.ALARM_FATIGUE_DRIVING;
-            case "psd":
-                return Position.ALARM_POWER_CUT;
-            case "psr":
-                return Position.ALARM_POWER_RESTORED;
-            case "hit":
-                return Position.ALARM_VIBRATION;
-            case "belt on":
-            case "belton":
-                return Position.ALARM_LOCK;
-            case "belt off":
-            case "beltoff":
-                return Position.ALARM_UNLOCK;
-            case "error":
-                return Position.ALARM_FAULT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case "pw on", "poweron" -> Position.ALARM_POWER_ON;
+            case "poweroff" -> Position.ALARM_POWER_OFF;
+            case "sos", "help" -> Position.ALARM_SOS;
+            case "over speed", "overspeed" -> Position.ALARM_OVERSPEED;
+            case "lowspeed" -> Position.ALARM_LOW_SPEED;
+            case "low battery", "lowbattery" -> Position.ALARM_LOW_BATTERY;
+            case "low extern voltage" -> Position.ALARM_LOW_POWER;
+            case "gps cut" -> Position.ALARM_GPS_ANTENNA_CUT;
+            case "vib" -> Position.ALARM_VIBRATION;
+            case "move in" -> Position.ALARM_GEOFENCE_ENTER;
+            case "move out" -> Position.ALARM_GEOFENCE_EXIT;
+            case "corner" -> Position.ALARM_CORNERING;
+            case "fatigue" -> Position.ALARM_FATIGUE_DRIVING;
+            case "psd" -> Position.ALARM_POWER_CUT;
+            case "psr" -> Position.ALARM_POWER_RESTORED;
+            case "hit" -> Position.ALARM_VIBRATION;
+            case "belt on", "belton" -> Position.ALARM_LOCK;
+            case "belt off", "beltoff" -> Position.ALARM_UNLOCK;
+            case "error" -> Position.ALARM_FAULT;
+            default -> null;
+        };
     }
 
     @Override

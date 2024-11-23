@@ -81,55 +81,33 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm1(int value) {
-        switch (value) {
-            case 1:
-                return Position.ALARM_POWER_CUT;
-            case 2:
-                return Position.ALARM_LOW_BATTERY;
-            case 3:
-                return Position.ALARM_SOS;
-            case 4:
-                return Position.ALARM_OVERSPEED;
-            case 5:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 6:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 7:
-                return Position.ALARM_TOW;
-            case 8:
-            case 10:
-                return Position.ALARM_VIBRATION;
-            case 21:
-                return Position.ALARM_JAMMING;
-            case 23:
-                return Position.ALARM_POWER_RESTORED;
-            case 24:
-                return Position.ALARM_LOW_POWER;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 1 -> Position.ALARM_POWER_CUT;
+            case 2 -> Position.ALARM_LOW_BATTERY;
+            case 3 -> Position.ALARM_SOS;
+            case 4 -> Position.ALARM_OVERSPEED;
+            case 5 -> Position.ALARM_GEOFENCE_ENTER;
+            case 6 -> Position.ALARM_GEOFENCE_EXIT;
+            case 7 -> Position.ALARM_TOW;
+            case 8, 10 -> Position.ALARM_VIBRATION;
+            case 21 -> Position.ALARM_JAMMING;
+            case 23 -> Position.ALARM_POWER_RESTORED;
+            case 24 -> Position.ALARM_LOW_POWER;
+            default -> null;
+        };
     }
 
     private String decodeAlarm2(int value) {
-        switch (value) {
-            case 1:
-            case 4:
-                return Position.ALARM_REMOVING;
-            case 2:
-                return Position.ALARM_TAMPERING;
-            case 3:
-                return Position.ALARM_SOS;
-            case 5:
-                return Position.ALARM_FALL_DOWN;
-            case 6:
-                return Position.ALARM_LOW_BATTERY;
-            case 14:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 15:
-                return Position.ALARM_GEOFENCE_EXIT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 1, 4 -> Position.ALARM_REMOVING;
+            case 2 -> Position.ALARM_TAMPERING;
+            case 3 -> Position.ALARM_SOS;
+            case 5 -> Position.ALARM_FALL_DOWN;
+            case 6 -> Position.ALARM_LOW_BATTERY;
+            case 14 -> Position.ALARM_GEOFENCE_ENTER;
+            case 15 -> Position.ALARM_GEOFENCE_EXIT;
+            default -> null;
+        };
     }
 
     private Date readDate(ByteBuf buf) {
@@ -195,24 +173,15 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             switch (buf.readUnsignedByte()) {
-                case 0:
-                case 4:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                case 1:
-                case 3:
-                case 5:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 2:
+                case 0, 4 -> position.addAlarm(Position.ALARM_BRAKING);
+                case 1, 3, 5 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                case 2 -> {
                     if (type == MSG_DRIVER_BEHAVIOR_1) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                        position.addAlarm(Position.ALARM_BRAKING);
                     } else {
-                        position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                        position.addAlarm(Position.ALARM_CORNERING);
                     }
-                    break;
-                default:
-                    break;
+                }
             }
 
             position.setTime(readDate(buf));
@@ -275,39 +244,39 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         int i = 1;
         while (buf.isReadable()) {
             switch (buf.readUnsignedShort()) {
-                case 0x01:
+                case 0x01 -> {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 1.22);
                     position.set("tag" + i + "TirePressure", buf.readUnsignedByte() * 1.527 * 2);
                     position.set("tag" + i + "TireTemp", buf.readUnsignedByte() - 55);
                     position.set("tag" + i + "TireStatus", buf.readUnsignedByte());
-                    break;
-                case 0x02:
+                }
+                case 0x02 -> {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("tag" + i + "Battery", BcdUtil.readInteger(buf, 2) * 0.1);
                     switch (buf.readUnsignedByte()) {
                         case 0:
-                            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                            position.addAlarm(Position.ALARM_SOS);
                             break;
                         case 1:
-                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                            position.addAlarm(Position.ALARM_LOW_BATTERY);
                             break;
                         default:
                             break;
                     }
                     buf.readUnsignedByte(); // status
                     buf.skipBytes(16); // location
-                    break;
-                case 0x03:
+                }
+                case 0x03 -> {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("tag" + i + "Battery", BcdUtil.readInteger(buf, 2) * 0.1);
                     if (buf.readUnsignedByte() == 1) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                        position.addAlarm(Position.ALARM_LOW_BATTERY);
                     }
                     buf.readUnsignedByte(); // status
                     buf.skipBytes(16); // location
-                    break;
-                case 0x04:
+                }
+                case 0x04 -> {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
                     buf.readUnsignedByte(); // battery level
@@ -315,23 +284,21 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                     position.set("tag" + i + "Humidity", buf.readUnsignedShort() * 0.01);
                     position.set("tag" + i + "LightSensor", buf.readUnsignedShort());
                     position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
-                    break;
-                case 0x05:
+                }
+                case 0x05 -> {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
                     buf.readUnsignedByte(); // battery level
                     position.set("tag" + i + "Temp", decodeBleTemp(buf));
                     position.set("tag" + i + "Door", buf.readUnsignedByte() > 0);
                     position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
-                    break;
-                case 0x06:
+                }
+                case 0x06 -> {
                     position.set("tag" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6)));
                     position.set("tag" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2);
                     position.set("tag" + i + "Output", buf.readUnsignedByte() > 0);
                     position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
-                    break;
-                default:
-                    break;
+                }
             }
             i += 1;
         }
@@ -399,7 +366,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int alarm = buf.readUnsignedByte();
-        position.set(Position.KEY_ALARM, header != 0x2727 ? decodeAlarm1(alarm) : decodeAlarm2(alarm));
+        position.addAlarm(header != 0x2727 ? decodeAlarm1(alarm) : decodeAlarm2(alarm));
         position.set("alarmCode", alarm);
 
         if (header != 0x2727) {

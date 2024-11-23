@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -152,7 +153,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceTime(new Date(1356998400000L + buf.readUnsignedIntLE() * 1000)); // since 1 Jan 2013
 
             int event = buf.readUnsignedByte();
-            position.set(Position.KEY_ALARM, decodeAlarm(event));
+            position.addAlarm(decodeAlarm(event));
             position.set(Position.KEY_EVENT, event);
 
             while (buf.readerIndex() < recordEnd) {
@@ -187,38 +188,40 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
 
                     if (!BitUtil.check(status, 1)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                        position.addAlarm(Position.ALARM_LOW_BATTERY);
                     } else if (BitUtil.check(status, 6)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                        position.addAlarm(Position.ALARM_TAMPERING);
                     }
 
                     position.set(Position.KEY_INPUT, input);
                     position.set(Position.KEY_OUTPUT, output);
                     position.set(Position.KEY_STATUS, status);
 
+                } else if (fieldId == 3) {
+
+                    int driverIdType = buf.readUnsignedByte();
+                    String driverId = switch (driverIdType) {
+                        case 1 -> ByteBufUtil.hexDump(buf.readSlice(5));
+                        case 2 -> ByteBufUtil.hexDump(buf.readSlice(6));
+                        case 3 -> buf.readCharSequence(4, StandardCharsets.US_ASCII).toString();
+                        case 4 -> buf.readCharSequence(5, StandardCharsets.US_ASCII).toString();
+                        case 5, 6 -> buf.readCharSequence(fieldLength - 1, StandardCharsets.US_ASCII).toString();
+                        case 7 -> ByteBufUtil.hexDump(buf.readSlice(fieldLength - 1));
+                        default -> null;
+                    };
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, driverId);
+
                 } else if (fieldId == 6) {
 
                     while (buf.readerIndex() < fieldEnd) {
                         int number = buf.readUnsignedByte();
                         switch (number) {
-                            case 1:
-                                position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
-                                break;
-                            case 2:
-                                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
-                                break;
-                            case 3:
-                                position.set(Position.KEY_DEVICE_TEMP, buf.readShortLE() * 0.01);
-                                break;
-                            case 4:
-                                position.set(Position.KEY_RSSI, buf.readUnsignedShortLE());
-                                break;
-                            case 5:
-                                position.set("solarPower", buf.readUnsignedShortLE() * 0.001);
-                                break;
-                            default:
-                                position.set(Position.PREFIX_IO + number, buf.readUnsignedShortLE());
-                                break;
+                            case 1 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.001);
+                            case 2 -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
+                            case 3 -> position.set(Position.KEY_DEVICE_TEMP, buf.readShortLE() * 0.01);
+                            case 4 -> position.set(Position.KEY_RSSI, buf.readUnsignedShortLE());
+                            case 5 -> position.set("solarPower", buf.readUnsignedShortLE() * 0.001);
+                            default -> position.set(Position.PREFIX_IO + number, buf.readUnsignedShortLE());
                         }
                     }
 
@@ -249,28 +252,18 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 12:
-                return Position.ALARM_BRAKING;
-            case 13:
-                return Position.ALARM_ACCELERATION;
-            case 14:
-                return Position.ALARM_CORNERING;
-            case 18:
-                return Position.ALARM_OVERSPEED;
-            case 20:
-                return Position.ALARM_TOW;
-            case 23:
-                return Position.ALARM_ACCIDENT;
-            case 29:
-                return Position.ALARM_TAMPERING;
-            case 44:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 45:
-                return Position.ALARM_GEOFENCE_EXIT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 12 -> Position.ALARM_BRAKING;
+            case 13 -> Position.ALARM_ACCELERATION;
+            case 14 -> Position.ALARM_CORNERING;
+            case 18 -> Position.ALARM_OVERSPEED;
+            case 20 -> Position.ALARM_TOW;
+            case 23 -> Position.ALARM_ACCIDENT;
+            case 29 -> Position.ALARM_TAMPERING;
+            case 44 -> Position.ALARM_GEOFENCE_ENTER;
+            case 45 -> Position.ALARM_GEOFENCE_EXIT;
+            default -> null;
+        };
     }
 
     @Override

@@ -53,15 +53,18 @@ public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
         ByteBuf content = Unpooled.buffer();
 
         switch (command.getType()) {
-            case Command.TYPE_POSITION_SINGLE:
+            case Command.TYPE_POSITION_SINGLE -> {
                 return encodeContent(CityeasyProtocolDecoder.MSG_LOCATION_REQUEST, content);
-            case Command.TYPE_POSITION_PERIODIC:
+            }
+            case Command.TYPE_POSITION_PERIODIC -> {
                 content.writeShort(command.getInteger(Command.KEY_FREQUENCY));
                 return encodeContent(CityeasyProtocolDecoder.MSG_LOCATION_INTERVAL, content);
-            case Command.TYPE_POSITION_STOP:
+            }
+            case Command.TYPE_POSITION_STOP -> {
                 content.writeShort(0);
                 return encodeContent(CityeasyProtocolDecoder.MSG_LOCATION_INTERVAL, content);
-            case Command.TYPE_SET_TIMEZONE:
+            }
+            case Command.TYPE_SET_TIMEZONE -> {
                 int timezone = TimeZone.getTimeZone(command.getString(Command.KEY_TIMEZONE)).getRawOffset() / 60000;
                 if (timezone < 0) {
                     content.writeByte(1);
@@ -70,8 +73,10 @@ public class CityeasyProtocolEncoder extends BaseProtocolEncoder {
                 }
                 content.writeShort(Math.abs(timezone));
                 return encodeContent(CityeasyProtocolDecoder.MSG_TIMEZONE, content);
-            default:
+            }
+            default -> {
                 return null;
+            }
         }
     }
 

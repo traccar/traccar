@@ -74,20 +74,14 @@ public class EsealProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(String type) {
-        switch (type) {
-            case "Event-Door":
-                return Position.ALARM_DOOR;
-            case "Event-Shock":
-                return Position.ALARM_VIBRATION;
-            case "Event-Drop":
-                return Position.ALARM_FALL_DOWN;
-            case "Event-Lock":
-                return Position.ALARM_LOCK;
-            case "Event-RC-Unlock":
-                return Position.ALARM_UNLOCK;
-            default:
-                return null;
-        }
+        return switch (type) {
+            case "Event-Door" -> Position.ALARM_DOOR;
+            case "Event-Shock" -> Position.ALARM_VIBRATION;
+            case "Event-Drop" -> Position.ALARM_FALL_DOWN;
+            case "Event-Lock" -> Position.ALARM_LOCK;
+            case "Event-RC-Unlock" -> Position.ALARM_UNLOCK;
+            default -> null;
+        };
     }
 
     @Override
@@ -113,7 +107,7 @@ public class EsealProtocolDecoder extends BaseProtocolDecoder {
         int index = parser.nextInt();
 
         position.set(Position.KEY_INDEX, index);
-        position.set(Position.KEY_ALARM, decodeAlarm(type));
+        position.addAlarm(decodeAlarm(type));
 
         switch (type) {
             case "Startup":
@@ -141,14 +135,8 @@ public class EsealProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt()));
 
         switch (parser.next()) {
-            case "Open":
-                position.set(Position.KEY_DOOR, true);
-                break;
-            case "Close":
-                position.set(Position.KEY_DOOR, false);
-                break;
-            default:
-                break;
+            case "Open" -> position.set(Position.KEY_DOOR, true);
+            case "Close" -> position.set(Position.KEY_DOOR, false);
         }
 
         position.set(Position.KEY_ACCELERATION, parser.nextDouble());

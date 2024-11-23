@@ -65,22 +65,15 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int event) {
-        switch (event) {
-            case 0:
-                return Position.ALARM_POWER_ON;
-            case 5:
-                return Position.ALARM_SOS;
-            case 8:
-                return Position.ALARM_LOW_BATTERY;
-            case 9:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 10:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 12:
-                return Position.ALARM_POWER_OFF;
-            default:
-                return null;
-        }
+        return switch (event) {
+            case 0 -> Position.ALARM_POWER_ON;
+            case 5 -> Position.ALARM_SOS;
+            case 8 -> Position.ALARM_LOW_BATTERY;
+            case 9 -> Position.ALARM_GEOFENCE_ENTER;
+            case 10 -> Position.ALARM_GEOFENCE_EXIT;
+            case 12 -> Position.ALARM_POWER_OFF;
+            default -> null;
+        };
     }
 
     private void decodeLocation(Position position, String data) throws ParseException {
@@ -97,7 +90,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(Integer.parseInt(values[index++]));
 
         int event = Integer.parseInt(values[index++]);
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
         position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) * 0.001);
     }
@@ -144,7 +137,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         position.setNetwork(network);
 
         int event = Integer.parseInt(values[index++]);
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
         position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) * 0.001);
     }
@@ -160,7 +153,7 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         index += 4; // fix values
 
         int event = Integer.parseInt(values[index++]);
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
         position.set(Position.KEY_BATTERY, Integer.parseInt(values[index++]) * 0.001);
     }
@@ -231,28 +224,15 @@ public class MictrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_TYPE, Integer.parseInt(fragments[1]));
 
         switch (fragments[3]) {
-            case "R0":
-                decodeLocation(position, fragments[4]);
-                break;
-            case "R1":
-                decodeNetwork(position, fragments[4], true, false, false);
-                break;
-            case "R2":
-            case "R3":
-                decodeNetwork(position, fragments[4], false, false, true);
-                break;
-            case "R12":
-            case "R13":
-                decodeNetwork(position, fragments[4], true, false, true);
-                break;
-            case "RH":
-                decodeStatus(position, fragments[4]);
-                break;
-            case "Y1":
-                decodeNetwork(position, fragments[4], true, true, false);
-                break;
-            default:
+            case "R0" -> decodeLocation(position, fragments[4]);
+            case "R1" -> decodeNetwork(position, fragments[4], true, false, false);
+            case "R2", "R3" -> decodeNetwork(position, fragments[4], false, false, true);
+            case "R12", "R13" -> decodeNetwork(position, fragments[4], true, false, true);
+            case "RH" -> decodeStatus(position, fragments[4]);
+            case "Y1" -> decodeNetwork(position, fragments[4], true, true, false);
+            default -> {
                 return null;
+            }
         }
 
         return position;

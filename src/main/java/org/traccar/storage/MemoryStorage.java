@@ -60,54 +60,44 @@ public class MemoryStorage extends Storage {
             return true;
         }
 
-        if (genericCondition instanceof Condition.Compare) {
+        if (genericCondition instanceof Condition.Compare condition) {
 
-            var condition = (Condition.Compare) genericCondition;
             Object value = retrieveValue(object, condition.getVariable());
             int result = ((Comparable) value).compareTo(condition.getValue());
-            switch (condition.getOperator()) {
-                case "<":
-                    return result < 0;
-                case "<=":
-                    return result <= 0;
-                case ">":
-                    return result > 0;
-                case ">=":
-                    return result >= 0;
-                case "=":
-                    return result == 0;
-                default:
-                    throw new RuntimeException("Unsupported comparison condition");
-            }
+            return switch (condition.getOperator()) {
+                case "<" -> result < 0;
+                case "<=" -> result <= 0;
+                case ">" -> result > 0;
+                case ">=" -> result >= 0;
+                case "=" -> result == 0;
+                default -> throw new RuntimeException("Unsupported comparison condition");
+            };
 
-        } else if (genericCondition instanceof Condition.Between) {
+        } else if (genericCondition instanceof Condition.Between condition) {
 
-            var condition = (Condition.Between) genericCondition;
             Object fromValue = retrieveValue(object, condition.getFromVariable());
             int fromResult = ((Comparable) fromValue).compareTo(condition.getFromValue());
             Object toValue = retrieveValue(object, condition.getToVariable());
             int toResult = ((Comparable) toValue).compareTo(condition.getToValue());
             return fromResult >= 0 && toResult <= 0;
 
-        } else if (genericCondition instanceof Condition.Binary) {
+        } else if (genericCondition instanceof Condition.Binary condition) {
 
-            var condition = (Condition.Binary) genericCondition;
             if (condition.getOperator().equals("AND")) {
                 return checkCondition(condition.getFirst(), object) && checkCondition(condition.getSecond(), object);
             } else if (condition.getOperator().equals("OR")) {
                 return checkCondition(condition.getFirst(), object) || checkCondition(condition.getSecond(), object);
             }
 
-        } else if (genericCondition instanceof Condition.Permission) {
+        } else if (genericCondition instanceof Condition.Permission condition) {
 
-            var condition = (Condition.Permission) genericCondition;
             long id = (Long) retrieveValue(object, "id");
             return getPermissionsSet(condition.getOwnerClass(), condition.getPropertyClass()).stream()
                     .anyMatch(pair -> {
                         if (condition.getOwnerId() > 0) {
-                            return pair.getFirst() == condition.getOwnerId() && pair.getSecond() == id;
+                            return pair.first() == condition.getOwnerId() && pair.second() == id;
                         } else {
-                            return pair.getFirst() == id && pair.getSecond() == condition.getPropertyId();
+                            return pair.first() == id && pair.second() == condition.getPropertyId();
                         }
                     });
 
@@ -178,9 +168,9 @@ public class MemoryStorage extends Storage {
             Class<? extends BaseModel> ownerClass, long ownerId,
             Class<? extends BaseModel> propertyClass, long propertyId) {
         return getPermissionsSet(ownerClass, propertyClass).stream()
-                .filter(pair -> ownerId == 0 || pair.getFirst().equals(ownerId))
-                .filter(pair -> propertyId == 0 || pair.getSecond().equals(propertyId))
-                .map(pair -> new Permission(ownerClass, pair.getFirst(), propertyClass, pair.getSecond()))
+                .filter(pair -> ownerId == 0 || pair.first().equals(ownerId))
+                .filter(pair -> propertyId == 0 || pair.second().equals(propertyId))
+                .map(pair -> new Permission(ownerClass, pair.first(), propertyClass, pair.second()))
                 .collect(Collectors.toList());
     }
 

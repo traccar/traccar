@@ -32,7 +32,7 @@ public class MotionHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         if (!position.hasAttribute(Position.KEY_MOTION)) {
             double threshold = AttributeUtil.lookup(
                     cacheManager, Keys.EVENT_MOTION_SPEED_THRESHOLD, position.getDeviceId());

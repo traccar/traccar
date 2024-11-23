@@ -51,55 +51,39 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
             int n;
 
             switch (type) {
-                case 2:
-                    position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedMedium());
-                    break;
-                case 5:
-                    position.set(Position.KEY_INPUT, buf.readUnsignedByte());
-                    break;
-                case 6:
+                case 2 -> position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedMedium());
+                case 5 -> position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+                case 6 -> {
                     n = buf.readUnsignedByte() >> 4;
                     if (n < 2) {
                         position.set(Position.PREFIX_ADC + n, buf.readFloat());
                     } else {
                         position.set("di" + (n - 2), buf.readFloat());
                     }
-                    break;
-                case 7:
+                }
+                case 7 -> {
                     int alarm = buf.readUnsignedByte();
                     buf.readUnsignedByte();
                     if (BitUtil.check(alarm, 5)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                        position.addAlarm(Position.ALARM_GENERAL);
                     }
-                    break;
-                case 8:
-                    position.set("antihijack", buf.readUnsignedByte());
-                    break;
-                case 9:
-                    position.set("unauthorized", ByteBufUtil.hexDump(buf.readSlice(8)));
-                    break;
-                case 10:
-                    position.set("authorized", ByteBufUtil.hexDump(buf.readSlice(8)));
-                    break;
-                case 24:
+                }
+                case 8 -> position.set("antihijack", buf.readUnsignedByte());
+                case 9 -> position.set("unauthorized", ByteBufUtil.hexDump(buf.readSlice(8)));
+                case 10 -> position.set("authorized", ByteBufUtil.hexDump(buf.readSlice(8)));
+                case 24 -> {
                     for (int i = 0; i < length / 2; i++) {
                         position.set(Position.PREFIX_TEMP + buf.readUnsignedByte(), buf.readByte());
                     }
-                    break;
-                case 28:
+                }
+                case 28 -> {
                     position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedShort());
                     buf.readUnsignedByte();
-                    break;
-                case 90:
-                    position.set(Position.KEY_POWER, buf.readFloat());
-                    break;
-                case 101:
-                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
-                    break;
-                case 102:
-                    position.set(Position.KEY_RPM, buf.readUnsignedByte() * 50);
-                    break;
-                case 107:
+                }
+                case 90 -> position.set(Position.KEY_POWER, buf.readFloat());
+                case 101 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
+                case 102 -> position.set(Position.KEY_RPM, buf.readUnsignedByte() * 50);
+                case 107 -> {
                     int fuel = buf.readUnsignedShort();
                     int fuelFormat = fuel >> 14;
                     if (fuelFormat == 1) {
@@ -109,16 +93,10 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     } else if (fuelFormat == 3) {
                         position.set("fuelValue", (fuel & 0x3fff) * -0.5 + " l");
                     }
-                    break;
-                case 108:
-                    position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 5);
-                    break;
-                case 150:
-                    position.set(Position.KEY_DOOR, buf.readUnsignedByte());
-                    break;
-                default:
-                    buf.skipBytes(length);
-                    break;
+                }
+                case 108 -> position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 5);
+                case 150 -> position.set(Position.KEY_DOOR, buf.readUnsignedByte());
+                default -> buf.skipBytes(length);
             }
         }
     }

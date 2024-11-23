@@ -101,43 +101,17 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeStatus(Position position, String status) {
         switch (status) {
-            case "AUTOSTART":
-            case "AUTO":
-                position.set(Position.KEY_IGNITION, true);
-                break;
-            case "AUTOSTOP":
-            case "AUTOLOW":
-                position.set(Position.KEY_IGNITION, false);
-                break;
-            case "TOWED":
-                position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-                break;
-            case "SHAKE":
-                position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
-                break;
-            case "SOS":
-                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                break;
-            case "DEF":
-                position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-                break;
-            case "BLP":
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-                break;
-            case "CLP":
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
-                break;
-            case "OS":
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
-                break;
-            case "RS":
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
-                break;
-            case "OVERSPEED":
-                position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                break;
-            default:
-                break;
+            case "AUTOSTART", "AUTO" -> position.set(Position.KEY_IGNITION, true);
+            case "AUTOSTOP", "AUTOLOW" -> position.set(Position.KEY_IGNITION, false);
+            case "TOWED" -> position.addAlarm(Position.ALARM_TOW);
+            case "SHAKE" -> position.addAlarm(Position.ALARM_VIBRATION);
+            case "SOS" -> position.addAlarm(Position.ALARM_SOS);
+            case "DEF" -> position.addAlarm(Position.ALARM_POWER_CUT);
+            case "BLP" -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+            case "CLP" -> position.addAlarm(Position.ALARM_LOW_POWER);
+            case "OS" -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+            case "RS" -> position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+            case "OVERSPEED" -> position.addAlarm(Position.ALARM_OVERSPEED);
         }
     }
 
@@ -174,7 +148,10 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
 
         String status = parser.next();
 
-        String[] messages = sentence.substring(sentence.indexOf('\n') + 1).split("\r\n");
+        String[] messages = sentence.substring(
+                sentence.indexOf('\n') + 1,
+                sentence.endsWith("##") ? sentence.length() - 4 : sentence.length())
+                .split("\r\n");
         List<Position> positions = new LinkedList<>();
 
         for (String message : messages) {

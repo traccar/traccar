@@ -157,10 +157,10 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
                     if (recordLength >= 4) {
                         int extraFlags = data.readUnsignedByte();
                         if (BitUtil.check(extraFlags, 0)) {
-                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+                            position.addAlarm(Position.ALARM_LOW_POWER);
                         }
                         if (BitUtil.check(extraFlags, 1)) {
-                            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                            position.addAlarm(Position.ALARM_LOW_BATTERY);
                         }
                     }
                     break;
@@ -205,17 +205,9 @@ public class FleetGuideProtocolDecoder extends BaseProtocolDecoder {
                 case 18:
                     int sensorIndex = data.readUnsignedByte();
                     switch (recordLength - 1) {
-                        case 1:
-                            position.set("sensor" + sensorIndex, data.readUnsignedByte());
-                            break;
-                        case 2:
-                            position.set("sensor" + sensorIndex, data.readUnsignedShortLE());
-                            break;
-                        case 4:
-                            position.set("sensor" + sensorIndex, data.readUnsignedIntLE());
-                            break;
-                        default:
-                            break;
+                        case 1 -> position.set("sensor" + sensorIndex, data.readUnsignedByte());
+                        case 2 -> position.set("sensor" + sensorIndex, data.readUnsignedShortLE());
+                        case 4 -> position.set("sensor" + sensorIndex, data.readUnsignedIntLE());
                     }
                     break;
                 default:

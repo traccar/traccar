@@ -61,7 +61,7 @@ public class MotorProtocolDecoder extends BaseProtocolDecoder {
         int flags = buf.readUnsignedByte();
         position.setValid(BitUtil.check(flags, 7));
         if (BitUtil.check(flags, 0)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            position.addAlarm(Position.ALARM_GENERAL);
         }
 
         position.setLatitude(BcdUtil.readInteger(buf, 2) + BcdUtil.readInteger(buf, 6) * 0.0001 / 60);
