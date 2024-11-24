@@ -17,8 +17,8 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           # Update system and install CloudWatch Agent
-          sudo apt-get update
-          sudo apt-get install -y amazon-cloudwatch-agent
+          wget https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+          sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
           
           # Create AWS credentials file for the CloudWatch Agent
           mkdir -p ~/.aws
