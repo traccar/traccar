@@ -36,7 +36,7 @@ jobs:
         makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
         mkdir deploy
         mv traccar.run deploy
-        mv traccar.xml deploy
+        mv ../traccar.xml deploy
     - name: ssh deploy
       uses: easingthemes/ssh-deploy@main
       with:
