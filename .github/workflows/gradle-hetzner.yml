@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    environment: nginx
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v4
