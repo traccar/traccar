@@ -31,7 +31,7 @@ jobs:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: "setup/amazon-cloudwatch-agent.json"
+        source: "./setup/amazon-cloudwatch-agent.json"
         target: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
     - name: Restart CloudWatch Agent
       uses: appleboy/ssh-action@v1.2.0
