@@ -20,7 +20,12 @@ jobs:
       run: |
         echo "Environment=DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ./setup/traccar.service
         echo "Environment=DOMAIN=${{ vars.DOMAIN }}" >> ./setup/traccar.service
-        echo "Environment=EMAIL=${{ secrets.EMAIL }}" >> ./setup/traccar.service
+        echo "Environment=EMAIL=${{ vars.EMAIL }}" >> ./setup/traccar.service
+        echo "Environment=EVENT_FORWARD_URL=${{ vars.EVENT_FORWARD_URL }}" >> ./setup/traccar.service
+        echo "Environment=FORWARD_URL=${{ vars.FORWARD_URL }}" >> ./setup/traccar.service
+        echo "Environment=GEOCODER_TYPE=${{ vars.GEOCODER_TYPE }}" >> ./setup/traccar.service
+        echo "Environment=GEOCODER_URL=${{ vars.GEOCODER_URL }}" >> ./setup/traccar.service
+        echo "Environment=REDIS_HOST=${{ vars.REDIS_HOST }}" >> ./setup/traccar.service
 
     - name: Build installers
       working-directory: ./setup
