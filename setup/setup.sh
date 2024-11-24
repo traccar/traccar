@@ -1,7 +1,7 @@
 #!/bin/sh
 
 mkdir -p /opt/traccar
-cp -r * /opt/traccar
+cp -vr * /opt/traccar
 chmod -vR go+rX /opt/traccar
 
 mv -v /opt/traccar/traccar.service /etc/systemd/system
