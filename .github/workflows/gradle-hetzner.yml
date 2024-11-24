@@ -30,25 +30,7 @@ jobs:
           
           # Create CloudWatch Agent configuration file
           sudo tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json > /dev/null <<EOF
-          {
-            "logs": {
-              "logs_collected": {
-                "files": {
-                  "collect_list": [
-                    {
-                      "file_path": "/opt/traccar/logs/tracker-server.log",
-                      "log_group_name": "traccar-hetzner-logs",
-                      "log_stream_name": "traccar-hetzner-logs",
-                      "timestamp_format": "%Y-%m-%d %H:%M:%S"
-                    }
-                  ]
-                }
-              }
-            },
-            "agent": {
-              "region": "us-east-1"
-            }
-          }
+          
           EOF
           
           # Start and enable the CloudWatch Agent
