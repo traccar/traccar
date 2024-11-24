@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.Command;
 import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -34,6 +35,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -260,8 +262,21 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT || type == MSG_HEARTBEAT_2
-                || type == MSG_PHOTO || type == MSG_REPORT_TEXT_MESSAGE) {
+        } else if (type == MSG_REPORT_TEXT_MESSAGE) {
+
+            sendGeneralResponse(channel, remoteAddress, id, type, index);
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            buf.readUnsignedByte(); // encoding
+            Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
+
+            position.set(Position.KEY_RESULT, buf.readCharSequence(buf.readableBytes() - 2, charset).toString());
+
+            return position;
+
+        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT || type == MSG_HEARTBEAT_2 || type == MSG_PHOTO) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
