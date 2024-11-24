@@ -24,13 +24,14 @@ jobs:
           aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           EOF
     - uses: actions/checkout@v4
+
     - name: Upload CloudWatch Config
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: ".setup/amazon-cloudwatch-agent.json"
+        source: "setup/amazon-cloudwatch-agent.json"
         target: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
     - name: Restart CloudWatch Agent
       uses: appleboy/ssh-action@v1.2.0
