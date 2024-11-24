@@ -16,6 +16,7 @@ jobs:
         SOURCE: "./setup/amazon-cloudwatch-agent.json ./.platform/nginx/nginx.conf"
         REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        TARGET: "/root"
         SCRIPT_AFTER: |
           sudo apt install nginx certbot -y
           cp nginx.conf /etc/nginx/nginx.conf
