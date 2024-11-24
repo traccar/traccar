@@ -11,8 +11,9 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v4
       with:
-        java-version: '11'
-        distribution: 'corretto'
+        distribution: temurin
+        java-version: 21
+        cache: gradle
     - run: |
         ./gradlew build -x checkstyleMain --no-daemon
         zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
