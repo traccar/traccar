@@ -2,6 +2,9 @@
 Description=traccar
 After=network.target
 
+[Install]
+WantedBy=multi-user.target
+
 [Service]
 Type=simple
 WorkingDirectory=/opt/traccar
@@ -12,5 +15,3 @@ WatchdogSec=300
 Restart=on-failure
 RestartSec=10
 
-[Install]
-WantedBy=multi-user.target
