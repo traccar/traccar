@@ -31,8 +31,10 @@ jobs:
         cp setup.sh out
         cp traccar.service out
         tar -xf OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz
+        echo "jlink"
         jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
         rm -rf jdk-*
+        echo "makeself"
         makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
         mkdir deploy
         mv traccar.run deploy
