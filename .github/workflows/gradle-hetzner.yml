@@ -20,10 +20,11 @@ jobs:
       run: |
         sudo apt-get install makeself
         wget -q https://corretto.aws/downloads/resources/11.0.25.9.1/amazon-corretto-11.0.25.9.1-linux-x64.tar.gz
-        mkdir -p out/{conf,data,lib,logs,web,schema,templates}
-        cp ../target/tracker-server.jar out
-        cp ../target/lib/* out/lib
-        cp ../traccar.xml default.xml out/conf
+        mkdir -p out/{conf,data,lib,logs,web,schema,templates,setup}
+        cp -v ../target/tracker-server.jar out
+        cp -v ../target/lib/* out/lib
+        cp -v ../traccar.xml out/conf
+        cp -v default.xml out/setup
         cp -v setup.sh traccar.service out
         tar -xf amazon-corretto-11.0.25.9.1-linux-x64.tar.gz
         echo "jlink"
