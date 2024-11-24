@@ -8,6 +8,51 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
+      # 2. Connect to Remote Server and Configure CloudWatch Agent
+    - name: Install and Configure CloudWatch Agent on Remote Server
+      uses: appleboy/ssh-action@v0.1.12
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          # Update system and install CloudWatch Agent
+          sudo apt-get update
+          sudo apt-get install -y amazon-cloudwatch-agent
+          
+          # Create AWS credentials file for the CloudWatch Agent
+          mkdir -p ~/.aws
+          sudo tee ~/.aws/credentials > /dev/null <<EOF
+          [default]
+          aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          EOF
+          
+          # Create CloudWatch Agent configuration file
+          sudo tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json > /dev/null <<EOF
+          {
+            "logs": {
+              "logs_collected": {
+                "journal": {
+                  "include_units": ["traccar.service"],
+                  "log_group_name": "traccar-hetzner-logs",
+                  "log_stream_name": "traccar-hetzner-logs",
+                  "retention_in_days": 30
+                }
+              }
+            },
+            "agent": {
+              "region": "us-east-1"
+            }
+          }
+          EOF
+          
+          # Start and enable the CloudWatch Agent
+          sudo systemctl enable amazon-cloudwatch-agent
+          sudo systemctl start amazon-cloudwatch-agent
+          
+          # Verify the agent status
+          sudo systemctl status amazon-cloudwatch-agent
     - uses: actions/checkout@v4
     - uses: actions/setup-java@v4
       with:
