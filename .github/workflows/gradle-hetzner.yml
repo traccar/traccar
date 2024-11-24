@@ -10,7 +10,7 @@ jobs:
     steps:
       # 2. Connect to Remote Server and Configure CloudWatch Agent
     - name: Install and Configure CloudWatch Agent on Remote Server
-      uses: appleboy/ssh-action@v0.1.12
+      uses: appleboy/ssh-action@v1.2.0
       with:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
