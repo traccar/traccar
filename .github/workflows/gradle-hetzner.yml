@@ -18,9 +18,14 @@ jobs:
 
     - name: Add env vars
       run: |
-        echo "Environment=DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> ./setup/traccar.service
+        echo "Environment=DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ./setup/traccar.service
         echo "Environment=DOMAIN=${{ vars.DOMAIN }}" >> ./setup/traccar.service
-        echo "Environment=EMAIL=${{ secrets.EMAIL }}" >> ./setup/traccar.service
+        echo "Environment=EMAIL=${{ vars.EMAIL }}" >> ./setup/traccar.service
+        echo "Environment=EVENT_FORWARD_URL=${{ vars.EVENT_FORWARD_URL }}" >> ./setup/traccar.service
+        echo "Environment=FORWARD_URL=${{ vars.FORWARD_URL }}" >> ./setup/traccar.service
+        echo "Environment=GEOCODER_TYPE=${{ vars.GEOCODER_TYPE }}" >> ./setup/traccar.service
+        echo "Environment=GEOCODER_URL=${{ vars.GEOCODER_URL }}" >> ./setup/traccar.service
+        echo "Environment=REDIS_HOST=${{ vars.REDIS_HOST }}" >> ./setup/traccar.service
 
     - name: Build installers
       working-directory: ./setup
@@ -31,7 +36,7 @@ jobs:
         cp -v ../target/tracker-server.jar out
         cp -v ../target/lib/* out/lib
         cp -v ../traccar.xml out/conf
-        cp -v default.xml out/setup
+        cp -v default.xml out/conf/setup
         cp -v setup.sh traccar.service out
         tar -xf amazon-corretto-11.0.25.9.1-linux-x64.tar.gz
         echo "jlink"

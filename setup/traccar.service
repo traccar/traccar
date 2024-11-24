@@ -14,4 +14,4 @@ SuccessExitStatus=143
 WatchdogSec=300
 Restart=on-failure
 RestartSec=10
-
+Environment=CONFIG_USE_ENVIRONMENT_VARIABLES=true
