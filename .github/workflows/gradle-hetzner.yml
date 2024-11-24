@@ -25,24 +25,21 @@ jobs:
           EOF
     - uses: actions/checkout@v4
 
-    - name: Upload CloudWatch Config
-      uses: appleboy/scp-action@v0.1.7
+    - name: Update cloudwatch configuration
+      uses: easingthemes/ssh-deploy@main
       with:
-        host: ${{ secrets.REMOTE_HOST }}
-        username: ${{ secrets.REMOTE_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        source: "./setup/amazon-cloudwatch-agent.json"
-        target: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
-    - name: Restart CloudWatch Agent
-      uses: appleboy/ssh-action@v1.2.0
-      with:
-        host: ${{ secrets.REMOTE_HOST }}
-        username: ${{ secrets.REMOTE_USER }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        ARGS: "-rlgoDzvc -i"
+        SOURCE: "./setup/amazon-cloudwatch-agent.json"
+        TARGET: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
+        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+        REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        SCRIPT_AFTER: |
           sudo systemctl enable amazon-cloudwatch-agent
           sudo systemctl start amazon-cloudwatch-agent          
           sudo systemctl status amazon-cloudwatch-agent
+          echo $RSYNC_STDOUT
+
     - uses: actions/setup-java@v4
       with:
         java-version: '11'
