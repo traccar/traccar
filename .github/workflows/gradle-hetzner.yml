@@ -27,7 +27,7 @@ jobs:
         cp ../target/lib/* out/lib
         cp ../schema/* out/schema
         cp -r ../templates/* out/templates
-        cp traccar.xml out/conf
+        cp ../traccar.xml out/conf
         cp setup.sh out
         cp traccar.service out
         tar -xf OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz
@@ -37,16 +37,16 @@ jobs:
         mkdir deploy
         mv traccar.run deploy
         mv traccar.xml deploy
-          - name: ssh deploy
-        uses: easingthemes/ssh-deploy@main
-        with:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          ARGS: "-rlgoDzvc -i"
-          SOURCE: "setup/deploy"
-          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-          REMOTE_USER: ${{ secrets.REMOTE_USER }}
-          SCRIPT_AFTER: |
-            sudo /home/${{ secrets.REMOTE_USER }}/deploy/traccar.run
-            sudo cp -v /home/${{ secrets.REMOTE_USER }}/deploy/traccar.xml /opt/traccar/conf/
-            sudo service traccar start
-            echo $RSYNC_STDOUT
+    - name: ssh deploy
+      uses: easingthemes/ssh-deploy@main
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        ARGS: "-rlgoDzvc -i"
+        SOURCE: "setup/deploy"
+        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+        REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        SCRIPT_AFTER: |
+          sudo /home/${{ secrets.REMOTE_USER }}/deploy/traccar.run
+          sudo cp -v /home/${{ secrets.REMOTE_USER }}/deploy/traccar.xml /opt/traccar/conf/
+          sudo service traccar start
+          echo $RSYNC_STDOUT
