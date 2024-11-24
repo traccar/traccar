@@ -23,29 +23,23 @@ jobs:
         mkdir -p out/{conf,data,lib,logs,web,schema,templates}
         cp ../target/tracker-server.jar out
         cp ../target/lib/* out/lib
-        cp ../schema/* out/schema
-        cp -r ../templates/* out/templates
-        cp ../traccar.xml out/conf
-        cp -v setup.sh default.xml traccar.service out
+        cp ../traccar.xml default.xml out/conf
+        cp -v setup.sh traccar.service out
         tar -xf amazon-corretto-11.0.25.9.1-linux-x64.tar.gz
         echo "jlink"
         jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
         rm -rf jdk-*
         echo "makeself"
         makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
-        mkdir deploy
-        mv traccar.run deploy
-        mv ../traccar.xml deploy
     - name: ssh deploy
       uses: easingthemes/ssh-deploy@main
       with:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         ARGS: "-rlgoDzvc -i"
-        SOURCE: "setup/deploy"
+        SOURCE: "setup/traccar.run"
         REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
         SCRIPT_AFTER: |
-          sudo /home/${{ secrets.REMOTE_USER }}/deploy/traccar.run
-          sudo cp -v /home/${{ secrets.REMOTE_USER }}/deploy/traccar.xml /opt/traccar/conf/
+          sudo traccar.run
           sudo service traccar start
           echo $RSYNC_STDOUT
