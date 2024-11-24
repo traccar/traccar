@@ -1,0 +1,52 @@
+name: deploy
+
+on:
+  push:
+    branches: [ aws2 ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    environment: nginx
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'corretto'
+    - run: |
+        ./gradlew build -x checkstyleMain
+        zip -r deploy.zip . -x '*.git*' -x 'traccar-web-master/*' -x 'src/*' -x '.gradle/*' -x 'gradle/*'
+    - name: Build installers
+      working-directory: ./setup
+      run: |
+        sudo apt-get install makeself
+        wget -q https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.2+13/OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz
+        mkdir -p out/{conf,data,lib,logs,web,schema,templates}
+        cp ../target/tracker-server.jar out
+        cp ../target/lib/* out/lib
+        cp ../schema/* out/schema
+        cp -r ../templates/* out/templates
+        cp traccar.xml out/conf
+        cp setup.sh out
+        cp traccar.service out
+        tar -xf OpenJDK21U-jdk_x64_linux_hotspot_21.0.2_13.tar.gz
+        jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
+        rm -rf jdk-*
+        makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
+        mkdir deploy
+        mv traccar.run deploy
+        mv traccar.xml deploy
+          - name: ssh deploy
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rlgoDzvc -i"
+          SOURCE: "setup/deploy"
+          REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.REMOTE_USER }}
+          SCRIPT_AFTER: |
+            sudo /home/${{ secrets.REMOTE_USER }}/deploy/traccar.run
+            sudo cp -v /home/${{ secrets.REMOTE_USER }}/deploy/traccar.xml /opt/traccar/conf/
+            sudo service traccar start
+            echo $RSYNC_STDOUT
