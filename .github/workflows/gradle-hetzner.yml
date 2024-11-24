@@ -26,8 +26,7 @@ jobs:
         cp ../schema/* out/schema
         cp -r ../templates/* out/templates
         cp ../traccar.xml out/conf
-        cp setup.sh out
-        cp traccar.service out
+        cp -v setup.sh default.xml traccar.service out
         tar -xf amazon-corretto-11.0.25.9.1-linux-x64.tar.gz
         echo "jlink"
         jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
