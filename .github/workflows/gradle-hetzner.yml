@@ -33,11 +33,15 @@ jobs:
           {
             "logs": {
               "logs_collected": {
-                "journal": {
-                  "include_units": ["traccar.service"],
-                  "log_group_name": "traccar-hetzner-logs",
-                  "log_stream_name": "traccar-hetzner-logs",
-                  "retention_in_days": 30
+                "files": {
+                  "collect_list": [
+                    {
+                      "file_path": "/opt/traccar/logs/tracker-server.log",
+                      "log_group_name": "traccar-hetzner-logs",
+                      "log_stream_name": "traccar-hetzner-logs",
+                      "timestamp_format": "%Y-%m-%d %H:%M:%S"
+                    }
+                  ]
                 }
               }
             },
@@ -71,6 +75,7 @@ jobs:
         echo "Environment=GEOCODER_TYPE=${{ vars.GEOCODER_TYPE }}" >> ./setup/traccar.service
         echo "Environment=GEOCODER_URL=${{ vars.GEOCODER_URL }}" >> ./setup/traccar.service
         echo "Environment=REDIS_HOST=${{ vars.REDIS_HOST }}" >> ./setup/traccar.service
+        echo "Environment=LOGGER_CONSOLE=false" >> ./setup/traccar.service
 
     - name: Build installers
       working-directory: ./setup
