@@ -15,6 +15,13 @@ jobs:
         distribution: 'corretto'
     - run: |
         ./gradlew build -x checkstyleMain --no-daemon
+
+    - name: Add env vars
+      run: |
+        echo "Environment=DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> /setup/traccar.service
+        echo "Environment=DOMAIN=${{ vars.DOMAIN }}" >> /setup/traccar.service
+        echo "Environment=EMAIL=${{ secrets.EMAIL }}" >> /setup/traccar.service
+
     - name: Build installers
       working-directory: ./setup
       run: |
