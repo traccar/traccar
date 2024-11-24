@@ -8,13 +8,16 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-    - name: Install CloudWatch Agent
+    - name: Install deps
       uses: appleboy/ssh-action@v1.2.0
       with:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
+          sudo apt install nginx certbot -y
+          cp ./.platform/nginx/nginx.conf /etc/nginx/nginx.conf
+          service nginx restart
           wget https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
           sudo dpkg -i -E ./amazon-cloudwatch-agent.deb        
           mkdir -p ~/.aws
