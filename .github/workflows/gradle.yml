@@ -1,4 +1,4 @@
-name: deploy
+name: deploy aws
 
 on:
   push:
