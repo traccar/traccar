@@ -8,38 +8,40 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      # 2. Connect to Remote Server and Configure CloudWatch Agent
-    - name: Install and Configure CloudWatch Agent on Remote Server
+    - name: Install CloudWatch Agent
       uses: appleboy/ssh-action@v1.2.0
       with:
         host: ${{ secrets.REMOTE_HOST }}
         username: ${{ secrets.REMOTE_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
-          # Update system and install CloudWatch Agent
           wget https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-          sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
-          
-          # Create AWS credentials file for the CloudWatch Agent
+          sudo dpkg -i -E ./amazon-cloudwatch-agent.deb        
           mkdir -p ~/.aws
           sudo tee ~/.aws/credentials > /dev/null <<EOF
           [AmazonCloudWatchAgent]
           aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           EOF
-          
-          # Create CloudWatch Agent configuration file
-          sudo tee /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json > /dev/null <<EOF
-          
-          EOF
-          
-          # Start and enable the CloudWatch Agent
-          sudo systemctl enable amazon-cloudwatch-agent
-          sudo systemctl start amazon-cloudwatch-agent
-          
-          # Verify the agent status
-          sudo systemctl status amazon-cloudwatch-agent
     - uses: actions/checkout@v4
+    - name: Upload CloudWatch Config
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        source: ".setup/amazon-cloudwatch-agent.json"
+        target: "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
+    - name: Restart CloudWatch Agent
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: ${{ secrets.REMOTE_HOST }}
+        username: ${{ secrets.REMOTE_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        script: |
+          sudo systemctl enable amazon-cloudwatch-agent
+          sudo systemctl start amazon-cloudwatch-agent          
+          sudo systemctl status amazon-cloudwatch-agent
     - uses: actions/setup-java@v4
       with:
         java-version: '11'
