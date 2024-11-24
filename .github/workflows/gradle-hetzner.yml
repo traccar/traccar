@@ -19,11 +19,12 @@ jobs:
         TARGET: "/root"
         SCRIPT_AFTER: |
           sudo apt install nginx certbot -y
-          cp nginx.conf /etc/nginx/nginx.conf
+          cp -v nginx.conf /etc/nginx/nginx.conf
           service nginx restart
           wget https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
-          sudo dpkg -i -E ./amazon-cloudwatch-agent.deb        
-          cp amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+          sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
+          rm ./amazon-cloudwatch-agent.deb
+          cp -v amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
           mkdir -p ~/.aws
           sudo tee ~/.aws/credentials > /dev/null <<EOF
           [AmazonCloudWatchAgent]
