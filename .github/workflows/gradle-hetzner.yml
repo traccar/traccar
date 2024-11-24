@@ -2,7 +2,7 @@ name: deploy hetzner
 
 on:
   push:
-    branches: [ aws2 ]
+    branches: [ hetzner ]
 
 jobs:
   build:
