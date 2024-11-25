@@ -268,6 +268,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
+            getLastLocation(position, null);
+
             buf.readUnsignedByte(); // encoding
             Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
 
