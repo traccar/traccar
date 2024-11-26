@@ -250,17 +250,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         formatMessage(delimiter, MSG_TERMINAL_REGISTER_RESPONSE, id, false, response), remoteAddress));
             }
 
-        } else if (type == MSG_TERMINAL_GENERAL_RESPONSE) {
-
-            Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            buf.readUnsignedShort(); // response serial number
-            buf.readUnsignedShort(); // reply id
-            position.set(Position.KEY_RESULT, String.valueOf(buf.readUnsignedByte()));
-
-            return position;
-
         } else if (type == MSG_REPORT_TEXT_MESSAGE) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
