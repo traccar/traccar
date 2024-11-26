@@ -1979,4 +1979,20 @@ public final class Keys {
             "broadcast.secondary",
             List.of(KeyType.CONFIG));
 
+    /** Cache type. **/
+    public static final ConfigKey<String> CACHE_TYPE = new StringConfigKey(
+            "cache.type",
+            List.of(KeyType.CONFIG));
+    /** Cache host. **/
+    public static final ConfigKey<String> CACHE_HOST = new StringConfigKey(
+            "cache.host",
+            List.of(KeyType.CONFIG));
+
+    public static final ConfigKey<Integer> CACHE_PORT = new IntegerConfigKey(
+            "cache.port",
+            List.of(KeyType.CONFIG));
+
+    public static final ConfigKey<String> CACHE_PASSWORD = new StringConfigKey(
+            "cache.password",
+            List.of(KeyType.CONFIG));
 }

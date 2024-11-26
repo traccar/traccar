@@ -27,4 +27,13 @@
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
 
+    <!--<entry key='forward.type'>redis</entry>
+    <entry key='forward.url'>redis://localhost:6379</entry>
+
+    <entry key='cache.type'>redis</entry>
+    <entry key='cache.host'>localhost</entry>
+    <entry key='cache.port'>6379</entry>
+    <entry key='cache.user'></entry>
+    <entry key='cache.password'></entry>-->
+
 </properties>

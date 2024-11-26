@@ -86,6 +86,10 @@ import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
 import org.traccar.mail.SmtpMailManager;
 import org.traccar.session.cache.CacheManager;
+import org.traccar.session.cache.CacheType;
+import org.traccar.session.cache.InMemoryCacheManager;
+import org.traccar.session.cache.redis.RedisCacheGraph;
+import org.traccar.session.cache.redis.RedisCacheManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
 import org.traccar.sms.SnsSmsClient;
@@ -94,6 +98,7 @@ import org.traccar.speedlimit.SpeedLimitProvider;
 import org.traccar.storage.DatabaseStorage;
 import org.traccar.storage.MemoryStorage;
 import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
 import org.traccar.web.WebServer;
 import org.traccar.api.security.LoginService;
 
@@ -101,6 +106,9 @@ import jakarta.annotation.Nullable;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -391,4 +399,26 @@ public class MainModule extends AbstractModule {
         return velocityEngine;
     }
 
+    @Singleton
+    @Provides
+    public static CacheManager provideCacheManager(Config config, Storage storage, BroadcastService broadcastService,
+                                                   ObjectMapper objectMapper) throws StorageException {
+       if (config.hasKey(Keys.CACHE_TYPE)
+               && config.getString(Keys.CACHE_TYPE).equalsIgnoreCase(CacheType.REDIS.toString())) {
+           String redisHost = config.getString(Keys.CACHE_HOST, "localhost");
+           int redisPort = config.getInteger(Keys.CACHE_PORT, 6379);
+           String redisPassword = config.getString(Keys.CACHE_PASSWORD, null);
+           JedisPoolConfig poolConfig = new JedisPoolConfig();
+           JedisPool jedisPool;
+           if (redisPassword != null && !redisPassword.isEmpty()) {
+               jedisPool = new JedisPool(poolConfig, redisHost, redisPort, 2000, redisPassword);
+           } else {
+               jedisPool = new JedisPool(poolConfig, redisHost, redisPort);
+           }
+           RedisCacheGraph graph = new RedisCacheGraph(jedisPool, objectMapper);
+            return new RedisCacheManager(config, storage, broadcastService, objectMapper, graph, jedisPool);
+        } else {
+            return new InMemoryCacheManager(config, storage, broadcastService);
+        }
+    }
 }

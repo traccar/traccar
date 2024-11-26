@@ -17,8 +17,8 @@ package org.traccar.session.cache;
 
 import org.traccar.model.BaseModel;
 
-record CacheKey(Class<? extends BaseModel> clazz, long id) {
-    CacheKey(BaseModel object) {
+public record CacheKey(Class<? extends BaseModel> clazz, long id) {
+    public CacheKey(BaseModel object) {
         this(object.getClass(), object.getId());
     }
 }

@@ -17,9 +17,10 @@ package org.traccar.session;
 
 import io.netty.channel.Channel;
 
+import java.io.Serializable;
 import java.net.SocketAddress;
 
-public record ConnectionKey(SocketAddress localAddress, SocketAddress remoteAddress) {
+public record ConnectionKey(SocketAddress localAddress, SocketAddress remoteAddress) implements Serializable {
     public ConnectionKey(Channel channel, SocketAddress remoteAddress) {
         this(channel.localAddress(), remoteAddress);
     }

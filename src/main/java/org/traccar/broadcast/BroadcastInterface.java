@@ -21,7 +21,9 @@ import org.traccar.model.Event;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
 
-public interface BroadcastInterface {
+import java.io.Serializable;
+
+public interface BroadcastInterface extends Serializable {
 
     default void updateDevice(boolean local, Device device) {
     }
