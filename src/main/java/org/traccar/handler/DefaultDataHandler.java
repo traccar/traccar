@@ -17,6 +17,7 @@ package org.traccar.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.channel.ChannelHandler;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
@@ -38,8 +39,9 @@ public class DefaultDataHandler extends BaseDataHandler {
 
     public DefaultDataHandler(DataManager dataManager) {
         this.dataManager = dataManager;
-        this.jedisHost = Context.getConfig().getString("redis.host", "redis.pinme.io");
-        this.jedisPool = new JedisPool(this.jedisHost);
+        this.jedisHost = Context.getConfig().getString("public.redis.host", "inoredis.pinme.io");
+        String redisPass = Context.getConfig().getString("public.redis.password");
+        this.jedisPool = new JedisPool(new GenericObjectPoolConfig(), this.jedisHost, 6379, 2000, redisPass);
     }
 
     @Override
