@@ -1,4 +1,4 @@
-name: deploy aws us
+name: deploy aws us take 2
 
 on:
   push:
