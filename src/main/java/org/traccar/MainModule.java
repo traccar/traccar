@@ -331,9 +331,9 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static DefaultDataHandler provideDefaultDataHandler(@Nullable DataManager dataManager) {
-        if (dataManager != null) {
-            return new DefaultDataHandler(dataManager);
+    public static DefaultDataHandler provideDefaultDataHandler(@Nullable DeviceManager deviceManager) {
+        if (deviceManager != null) {
+            return new DefaultDataHandler(deviceManager);
         }
         return null;
     }

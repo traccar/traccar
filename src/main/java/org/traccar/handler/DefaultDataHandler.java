@@ -15,33 +15,32 @@
  */
 package org.traccar.handler;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.netty.channel.ChannelHandler;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
-import org.traccar.Context;
-import org.traccar.database.DataManager;
+import org.traccar.database.DeviceManager;
+import org.traccar.model.Device;
 import org.traccar.model.Position;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 @ChannelHandler.Sharable
 public class DefaultDataHandler extends BaseDataHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultDataHandler.class);
 
-    private final DataManager dataManager;
+    AtomicLong id;
 
-    private final JedisPool jedisPool;
-    private final String jedisHost;
+    public DefaultDataHandler(DeviceManager deviceManager) {
 
-    public DefaultDataHandler(DataManager dataManager) {
-        this.dataManager = dataManager;
-        this.jedisHost = Context.getConfig().getString("public.redis.host", "inoredis.pinme.io");
-        String redisPass = Context.getConfig().getString("public.redis.password");
-        this.jedisPool = new JedisPool(new GenericObjectPoolConfig(), this.jedisHost, 6379, 2000, redisPass);
+        long maxId = deviceManager.getAllDevices()
+                                  .stream()
+                                  .mapToLong(Device::getPositionId)
+                                  .max()
+                                  .orElseGet(() -> 0);
+
+        id = new AtomicLong(maxId + 100000000);
     }
 
     @Override
@@ -51,19 +50,8 @@ public class DefaultDataHandler extends BaseDataHandler {
             return position;
         }
 
-        try (Jedis jedis = jedisPool.getResource()) {
-            // dataManager.addObject(position);
-            position.setId(jedis.incr("dbid"));
-        } catch (Exception error) {
-            LOGGER.error(String.format("%s trying to store position using %s", error.getMessage(), this.jedisHost));
-            try {
-                LOGGER.error(Context.getObjectMapper().writeValueAsString(position));
-            } catch (JsonProcessingException e) {
-                LOGGER.error("Error serializing", e);
-            }
-        }
+        position.setId(id.incrementAndGet());
 
         return position;
     }
-
 }
