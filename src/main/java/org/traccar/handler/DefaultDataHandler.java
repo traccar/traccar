@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseDataHandler;
 import org.traccar.database.DeviceManager;
-import org.traccar.model.Device;
 import org.traccar.model.Position;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -34,9 +33,9 @@ public class DefaultDataHandler extends BaseDataHandler {
 
     public DefaultDataHandler(DeviceManager deviceManager) {
 
-        long maxId = deviceManager.getAllDevices()
+        long maxId = deviceManager.getInitialState(1/*admin*/)
                                   .stream()
-                                  .mapToLong(Device::getPositionId)
+                                  .mapToLong(Position::getId)
                                   .max()
                                   .orElseGet(() -> 0);
 
