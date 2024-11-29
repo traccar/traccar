@@ -33,13 +33,20 @@ public class DefaultDataHandler extends BaseDataHandler {
 
     public DefaultDataHandler(DeviceManager deviceManager) {
 
-        long maxId = deviceManager.getInitialState(1/*admin*/)
-                                  .stream()
-                                  .mapToLong(Position::getId)
-                                  .max()
-                                  .orElseGet(() -> 0);
+        long maxPositionId = 0;
+        try {
+            maxPositionId = deviceManager.getInitialState(1/*admin*/)
+                                         .stream()
+                                         .mapToLong(Position::getId)
+                                         .max()
+                                         .orElseGet(() -> 0);
+        }
+        catch (Exception ex){
+            LOGGER.error("Failed to get maxPositionId. error - " + ex);
+        }
 
-        id = new AtomicLong(maxId + 100000000);
+        id = new AtomicLong(maxPositionId + 100000000);
+        LOGGER.warn("maxPositionId: " + maxPositionId + " - position id starting with " + id.get());
     }
 
     @Override
@@ -49,7 +56,7 @@ public class DefaultDataHandler extends BaseDataHandler {
             return position;
         }
 
-        position.setId(id.incrementAndGet());
+        position.setId(id.getAndIncrement());
 
         return position;
     }
