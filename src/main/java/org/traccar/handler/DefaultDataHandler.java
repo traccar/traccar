@@ -46,7 +46,7 @@ public class DefaultDataHandler extends BaseDataHandler {
         }
 
         id = new AtomicLong(maxPositionId + 100000000);
-        LOGGER.warn("maxPositionId: " + maxPositionId + " - position id starting with " + id.get());
+        LOGGER.error("maxPositionId: " + maxPositionId + " - position id starting with " + id.get());
     }
 
     @Override
