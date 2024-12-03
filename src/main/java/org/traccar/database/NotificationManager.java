@@ -142,7 +142,7 @@ public class NotificationManager {
                     }
                     if (event.getMaintenanceId() != 0
                             && cacheManager.getUserObjects(user.getId(), Maintenance.class).stream()
-                            .noneMatch(g -> g.getId() == event.getMaintenanceId())) {
+                            .noneMatch(m -> m.getId() == event.getMaintenanceId())) {
                         LOGGER.info("User {} doesn't have access to maintenance {}",
                             user.getId(), event.getMaintenanceId());
                         return;
