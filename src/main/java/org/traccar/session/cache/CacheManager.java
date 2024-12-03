@@ -109,6 +109,16 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
+    public <T extends BaseModel> Set<T> getUserObjects(long userId, Class<T> clazz) {
+        try {
+            lock.readLock().lock();
+            return graph.getObjects(Device.class, userId, clazz, Set.of(Group.class), true)
+                    .collect(Collectors.toUnmodifiableSet());
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
     public Position getPosition(long deviceId) {
         try {
             lock.readLock().lock();

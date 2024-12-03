@@ -134,6 +134,12 @@ public class NotificationManager {
                         LOGGER.info("User {} notification blocked", user.getId());
                         return;
                     }
+                    if (event.getGeofenceId() != 0
+                        && cacheManager.getUserObjects(user.getId(), Geofence.class).stream()
+                            .noneMatch(g -> g.getId() == event.getGeofenceId())) {
+                        LOGGER.info("Geofence {} not in user {}", event.getGeofenceId(), user.getId());
+                        return;
+                    }
                     for (String notificator : notification.getNotificatorsTypes()) {
                         try {
                             notificatorManager.getNotificator(notificator).send(notification, user, event, position);
