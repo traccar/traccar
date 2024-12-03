@@ -137,7 +137,7 @@ public class NotificationManager {
                     if (event.getGeofenceId() != 0
                                 && cacheManager.getUserObjects(user.getId(), Geofence.class).stream()
                                 .noneMatch(g -> g.getId() == event.getGeofenceId())) {
-                        LOGGER.info("Geofence {} not in user {}", event.getGeofenceId(), user.getId());
+                        LOGGER.info("User {} doesn't have access to geofence {}", user.getId(), event.getGeofenceId());
                         return;
                     }
                     for (String notificator : notification.getNotificatorsTypes()) {
