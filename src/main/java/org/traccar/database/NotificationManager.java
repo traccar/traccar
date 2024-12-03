@@ -140,6 +140,13 @@ public class NotificationManager {
                         LOGGER.info("User {} doesn't have access to geofence {}", user.getId(), event.getGeofenceId());
                         return;
                     }
+                    if (event.getMaintenanceId() != 0
+                            && cacheManager.getUserObjects(user.getId(), Maintenance.class).stream()
+                            .noneMatch(g -> g.getId() == event.getMaintenanceId())) {
+                        LOGGER.info("User {} doesn't have access to maintenance {}",
+                            user.getId(), event.getMaintenanceId());
+                        return;
+                    }
                     for (String notificator : notification.getNotificatorsTypes()) {
                         try {
                             notificatorManager.getNotificator(notificator).send(notification, user, event, position);
