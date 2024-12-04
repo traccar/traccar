@@ -270,6 +270,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceTime(time);
         }
 
+        getLastLocation(position, position.getDeviceTime());
+
         return position;
     }
 
