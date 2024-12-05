@@ -58,7 +58,7 @@ jobs:
     - name: Build installers
       working-directory: ./setup
       run: |
-        sudo apt-get install makeself
+        sudo apt-get install makeself 
         wget -q https://corretto.aws/downloads/resources/11.0.25.9.1/amazon-corretto-11.0.25.9.1-linux-x64.tar.gz
         mkdir -p out/{conf,data,lib,logs,web,schema,templates,setup}
         cp -v ../target/tracker-server.jar out
@@ -81,6 +81,8 @@ jobs:
         REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
         SCRIPT_AFTER: |
+          apt update
+          apt install -y nginx certbot
           sudo /home/${{ secrets.REMOTE_USER }}/traccar.run
           sudo service traccar start
           echo $RSYNC_STDOUT
