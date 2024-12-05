@@ -1,0 +1,46 @@
+{
+  "metrics": {
+    "metrics_collected": {
+      "cpu": {
+        "resources": ["*"],
+        "measurement": ["cpu_usage_guest", "cpu_usage_nice", "cpu_usage_idle"],
+        "totalcpu": false
+      },
+      "disk": {
+        "resources": ["/", "/tmp"],
+        "measurement": ["free", "total", "used"],
+        "ignore_file_system_types": ["sysfs", "devtmpfs"]
+      },
+      "swap": {
+        "measurement": ["swap_used", "swap_free", "swap_used_percent"]
+      },
+      "mem": {
+        "measurement": ["mem_used", "mem_cached", "mem_total"]
+      },
+      "net": {
+        "resources": ["eth0"],
+        "measurement": ["bytes_sent", "bytes_recv", "drop_in", "drop_out"]
+      },
+      "netstat": {
+        "measurement": ["tcp_established", "tcp_syn_sent", "tcp_close"]
+      },
+      "processes": {
+        "measurement": ["running", "sleeping", "dead"]
+      }
+    }
+  },
+  "logs": {
+    "logs_collected": {
+      "files": {
+        "collect_list": [
+          {
+            "file_path": "/opt/traccar/logs/tracker-server.log",
+            "log_group_name": "traccar-hetzner-logs",
+            "log_stream_name": "traccar-hetzner-logs",
+            "timestamp_format": "%Y-%m-%d %H:%M:%S"
+          }
+        ]
+      }
+    }
+  }
+}

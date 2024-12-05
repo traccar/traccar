@@ -9,6 +9,33 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
+    - name: Install deps
+      uses: easingthemes/ssh-deploy@main
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        SOURCE: "./setup/amazon-cloudwatch-agent.json ./.platform/nginx/nginx.conf"
+        REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
+        REMOTE_USER: ${{ secrets.REMOTE_USER }}
+        TARGET: "/root"
+        SCRIPT_AFTER: |
+          sudo apt install nginx certbot nginx-extras -y
+          cp -v nginx.conf /etc/nginx/nginx.conf
+          service nginx restart
+          wget https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
+          sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
+          rm ./amazon-cloudwatch-agent.deb
+          cp -v amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+          mkdir -p ~/.aws
+          sudo tee ~/.aws/credentials > /dev/null <<EOF
+          [AmazonCloudWatchAgent]
+          aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          EOF
+          sudo systemctl enable amazon-cloudwatch-agent
+          sudo systemctl start amazon-cloudwatch-agent          
+          sudo systemctl status amazon-cloudwatch-agent
+          echo $RSYNC_STDOUT
+
     - uses: actions/setup-java@v4
       with:
         java-version: '11'
@@ -26,6 +53,7 @@ jobs:
         echo "Environment=GEOCODER_TYPE=${{ vars.GEOCODER_TYPE }}" >> ./setup/traccar.service
         echo "Environment=GEOCODER_URL=${{ vars.GEOCODER_URL }}" >> ./setup/traccar.service
         echo "Environment=REDIS_HOST=${{ vars.REDIS_HOST }}" >> ./setup/traccar.service
+        echo "Environment=LOGGER_CONSOLE=false" >> ./setup/traccar.service
 
     - name: Build installers
       working-directory: ./setup
