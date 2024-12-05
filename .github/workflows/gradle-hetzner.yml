@@ -64,6 +64,7 @@ jobs:
         cp -v ../target/tracker-server.jar out
         cp -v ../target/lib/* out/lib
         cp -v ../traccar.xml out/conf
+        mkdir -p out/conf/setup
         cp -v default.xml out/conf/setup
         cp -v setup.sh traccar.service out
         tar -xf amazon-corretto-11.0.25.9.1-linux-x64.tar.gz
