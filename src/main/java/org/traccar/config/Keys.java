@@ -1226,10 +1226,24 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Telegram notification send location message.
+     * Notification send location message.
      */
-    public static final ConfigKey<Boolean> NOTIFICATOR_TELEGRAM_SEND_LOCATION = new BooleanConfigKey(
-            "notificator.telegram.sendLocation",
+    public static final ConfigKey<Boolean> NOTIFICATOR_SEND_LOCATION = new BooleanConfigKey(
+            "notificator.sendLocation",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Viber notification API key.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_VIBER_KEY = new StringConfigKey(
+            "notificator.viber.key",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Viber notification chat id to post messages to.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_VIBER_CHAT_ID = new StringConfigKey(
+            "notificator.viber.uid",
             List.of(KeyType.CONFIG));
 
     /**
