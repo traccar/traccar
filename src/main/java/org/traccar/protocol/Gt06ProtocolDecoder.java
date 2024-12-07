@@ -794,7 +794,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_TYPE, type);
 
-            if ("NT20".equals(model)) {
+            if (type == MSG_GPS_LBS_2 && "NT20".equals(model)) {
                 buf.readUnsignedByte(); // location source type
                 buf.skipBytes(8); // imei
 
