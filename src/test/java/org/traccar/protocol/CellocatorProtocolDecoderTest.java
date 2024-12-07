@@ -12,6 +12,10 @@ public class CellocatorProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new CellocatorProtocolDecoder(null));
 
         verifyAttribute(decoder, binary(
+                "4d4347500003310f004018331424641a1d002000638000002a00b67ff6000000b8a5c7010000402d00040210af1ba9f88fb383fc10080100000000000000190015050ce80714"),
+                Position.KEY_DRIVER_UNIQUE_ID, "b8a5c7010000");
+
+        verifyAttribute(decoder, binary(
                 "4d4347500098ab31000856b12b2c041016002c0023b3000021f3f5ffb04c8f0100000000000078dd0004020f716445f75f3b0701126e0200b303000036002538151b0ce607ab"),
                 Position.KEY_IGNITION, true);
 
