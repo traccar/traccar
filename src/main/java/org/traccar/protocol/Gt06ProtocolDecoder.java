@@ -847,7 +847,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     if (type == MSG_STATUS && "R11".equals(model)) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     } else {
-                        int battery = "NT20".equals(model) ? (int) (buf.readUnsignedByte() * 0.1) : buf.readUnsignedByte();
+                        int battery = buf.readUnsignedByte();
+                        if ("NT20".equals(model)) {
+                            battery = (int) (battery * 0.1);
+                        }
                         if (battery <= 6) {
                             position.set(Position.KEY_BATTERY_LEVEL, battery * 100 / 6);
                         } else if (battery <= 100) {
