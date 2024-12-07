@@ -812,7 +812,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (hasLbs(type) && buf.readableBytes() > 6) {
-                boolean hasLength = (hasStatus(type) || "NT20".equals(model))
+                boolean hasLength = (hasStatus(type)
+                        || ("NT20".equals(model) && type == MSG_GPS_LBS_2))
                         && type != MSG_LBS_STATUS
                         && type != MSG_LBS_ALARM
                         && (type != MSG_GPS_LBS_STATUS_1 || variant != Variant.VXT01)
@@ -820,7 +821,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 decodeLbs(position, buf, type, hasLength);
             }
 
-            if (hasStatus(type) || "NT20".equals(model)) {
+            if (hasStatus(type) || ("NT20".equals(model) && type == MSG_GPS_LBS_2)) {
                 if (type == MSG_GPS_LBS_STATUS_5) {
                     buf.readUnsignedByte(); // network indicator
                 }
@@ -841,14 +842,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 10.0);
                     }
                 } else {
-                    if (type == MSG_GPS_LBS_STATUS_5 || "NT20".equals(model)) {
+                    if (type == MSG_GPS_LBS_STATUS_5 || ("NT20".equals(model) && type == MSG_GPS_LBS_2)) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     }
                     if (type == MSG_STATUS && "R11".equals(model)) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     } else {
                         int battery = buf.readUnsignedByte();
-                        if ("NT20".equals(model)) {
+                        if ("NT20".equals(model) && type == MSG_GPS_LBS_2) {
                             battery = (int) (battery * 0.1);
                         }
                         if (battery <= 6) {
@@ -992,7 +993,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // validity
             }
 
-            if (!"NT20".equals(model) && (buf.readableBytes() == 3 + 6 || buf.readableBytes() == 3 + 4 + 6)) {
+            if ((buf.readableBytes() == 3 + 6 || buf.readableBytes() == 3 + 4 + 6)
+                    && !("NT20".equals(model) && type == MSG_GPS_LBS_2)) {
                 position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
                 buf.readUnsignedByte(); // upload mode
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0 ? true : null);
@@ -1006,7 +1008,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_GEOFENCE, buf.readUnsignedByte());
             }
 
-            if ("NT20".equals(model)) {
+            if ("NT20".equals(model) && type == MSG_GPS_LBS_2) {
                 buf.readUnsignedByte(); // language
                 position.set(Position.KEY_ODOMETER, buf.readMedium());
                 position.set(Position.KEY_HOURS, buf.readMedium() * 60 * 1000);
