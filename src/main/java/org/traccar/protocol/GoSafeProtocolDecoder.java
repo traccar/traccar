@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.traccar.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
@@ -30,6 +32,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.LinkedList;
@@ -212,16 +215,18 @@ public class GoSafeProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage("1234", remoteAddress));
+            channel.writeAndFlush(new NetworkMessage(
+                    Unpooled.copiedBuffer("1234", StandardCharsets.US_ASCII), remoteAddress));
         }
 
-        String sentence = (String) msg;
+        ByteBuf buf = (ByteBuf) msg;
+        String sentence = buf.toString(StandardCharsets.US_ASCII);
         Pattern pattern = PATTERN;
         if (sentence.startsWith("*GS02")) {
             pattern = PATTERN_OLD;
         }
 
-        Parser parser = new Parser(pattern, (String) msg);
+        Parser parser = new Parser(pattern, sentence);
         if (!parser.matches()) {
             return null;
         }
