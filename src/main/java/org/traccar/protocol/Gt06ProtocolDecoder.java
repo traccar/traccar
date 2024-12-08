@@ -669,7 +669,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 || type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI || type == MSG_LBS_2 || type == MSG_LBS_3
                 || (type == MSG_WIFI_3 && variant != Variant.LW4G) || type == MSG_WIFI_5) {
 
-            getLastLocation(position, getDate(buf, deviceSession));
+            getLastLocation(position, decodeDate(buf, deviceSession));
 
             if (variant == Variant.WANWAY_S20 || variant == Variant.SL4X) {
                 buf.readUnsignedByte(); // ta
@@ -796,7 +796,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (type == MSG_GPS_LBS_2 && modelNt20) {
                 buf.readUnsignedByte(); // location source type
                 buf.skipBytes(8); // imei
-                position.setDeviceTime(getDate(buf, deviceSession));
+                position.setDeviceTime(decodeDate(buf, deviceSession));
             }
 
             if (hasGps(type)) {
@@ -1019,7 +1019,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position, buf, false, jc400, jc400, jc400, jc400,
                         deviceSession.get(DeviceSession.KEY_TIMEZONE));
             } else {
-                getLastLocation(position, getDate(buf, deviceSession));
+                getLastLocation(position, decodeDate(buf, deviceSession));
             }
             if (variant == Variant.JC400) {
                 position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
@@ -1062,7 +1062,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static Date getDate(ByteBuf buf, DeviceSession deviceSession) {
+    private static Date decodeDate(ByteBuf buf, DeviceSession deviceSession) {
         DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
                 .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
                 .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
@@ -1149,7 +1149,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             } else if (subType == 0x05) {
 
                 if (buf.readableBytes() >= 6 + 1 + 6) {
-                    position.setDeviceTime(getDate(buf, deviceSession));
+                    position.setDeviceTime(decodeDate(buf, deviceSession));
                 }
 
                 int flags = buf.readUnsignedByte();
@@ -1252,7 +1252,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_OBD) {
 
-            getLastLocation(position, getDate(buf, deviceSession));
+            getLastLocation(position, decodeDate(buf, deviceSession));
 
             position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
 
