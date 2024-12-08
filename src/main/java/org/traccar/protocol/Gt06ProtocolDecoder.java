@@ -669,11 +669,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 || type == MSG_LBS_EXTEND || type == MSG_LBS_WIFI || type == MSG_LBS_2 || type == MSG_LBS_3
                 || (type == MSG_WIFI_3 && variant != Variant.LW4G) || type == MSG_WIFI_5) {
 
-            DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
-                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
-
-            getLastLocation(position, dateBuilder.getDate());
+            getLastLocation(position, getDate(buf, deviceSession));
 
             if (variant == Variant.WANWAY_S20 || variant == Variant.SL4X) {
                 buf.readUnsignedByte(); // ta
@@ -800,12 +796,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (type == MSG_GPS_LBS_2 && modelNt20) {
                 buf.readUnsignedByte(); // location source type
                 buf.skipBytes(8); // imei
-
-                DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
-                        .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                        .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
-
-                position.setDeviceTime(dateBuilder.getDate());
+                position.setDeviceTime(getDate(buf, deviceSession));
             }
 
             if (hasGps(type)) {
@@ -1029,10 +1020,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position, buf, false, jc400, jc400, jc400, jc400,
                         deviceSession.get(DeviceSession.KEY_TIMEZONE));
             } else {
-                DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
-                        .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                        .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
-                getLastLocation(position, dateBuilder.getDate());
+                getLastLocation(position, getDate(buf, deviceSession));
             }
             if (variant == Variant.JC400) {
                 position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
@@ -1073,6 +1061,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
 
         return position;
+    }
+
+    private static Date getDate(ByteBuf buf, DeviceSession deviceSession) {
+        DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
+                .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
+                .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
+        return dateBuilder.getDate();
     }
 
     private Object decodeExtended(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
@@ -1155,10 +1150,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             } else if (subType == 0x05) {
 
                 if (buf.readableBytes() >= 6 + 1 + 6) {
-                    DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
-                            .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                            .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
-                    position.setDeviceTime(dateBuilder.getDate());
+                    position.setDeviceTime(getDate(buf, deviceSession));
                 }
 
                 int flags = buf.readUnsignedByte();
@@ -1261,11 +1253,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         } else if (type == MSG_OBD) {
 
-            DateBuilder dateBuilder = new DateBuilder((TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE))
-                    .setDate(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte())
-                    .setTime(buf.readUnsignedByte(), buf.readUnsignedByte(), buf.readUnsignedByte());
-
-            getLastLocation(position, dateBuilder.getDate());
+            getLastLocation(position, getDate(buf, deviceSession));
 
             position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
 
