@@ -161,8 +161,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd):(dd):(dd)")            // time
             .compile();
 
-    private static boolean isSupported(int type, boolean modelNt20) {
-        return hasGps(type) || hasLbs(type) || hasStatus(type, modelNt20);
+    private static boolean isSupported(int type, String model) {
+        return hasGps(type) || hasLbs(type) || hasStatus(type, model);
     }
 
     private static boolean hasGps(int type) {
@@ -217,7 +217,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private static boolean hasStatus(int type, boolean modelNt20) {
+    private static boolean hasStatus(int type, String model) {
         switch (type) {
             case MSG_STATUS:
             case MSG_STATUS_2:
@@ -231,7 +231,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_LBS_ALARM:
                 return true;
             case MSG_GPS_LBS_2:
-                return modelNt20;
+                return "NT20".equalsIgnoreCase(model);
             default:
                 return false;
         }
@@ -785,7 +785,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             double temperature = BitUtil.to(value, 15) * 0.1;
             position.set(Position.PREFIX_TEMP + 1, BitUtil.check(value, 15) ? temperature : -temperature);
 
-        } else if (isSupported(type, modelNt20)) {
+        } else if (isSupported(type, model)) {
 
             if (type == MSG_LBS_STATUS && variant == Variant.SPACE10X) {
                 return null; // multi-lbs message
@@ -806,7 +806,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (hasLbs(type) && buf.readableBytes() > 6) {
-                boolean hasLength = hasStatus(type, modelNt20)
+                boolean hasLength = hasStatus(type, model)
                         && type != MSG_LBS_STATUS
                         && type != MSG_LBS_ALARM
                         && (type != MSG_GPS_LBS_STATUS_1 || variant != Variant.VXT01)
@@ -814,7 +814,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 decodeLbs(position, buf, type, hasLength);
             }
 
-            if (hasStatus(type, modelNt20)) {
+            if (hasStatus(type, model)) {
                 if (type == MSG_GPS_LBS_STATUS_5) {
                     buf.readUnsignedByte(); // network indicator
                 }
