@@ -850,7 +850,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     } else {
                         int battery = buf.readUnsignedByte();
                         if ("NT20".equals(model) && type == MSG_GPS_LBS_2) {
-                            battery = (int) (battery * 0.1);
+                            battery = battery / 10;
                         }
                         if (battery <= 6) {
                             position.set(Position.KEY_BATTERY_LEVEL, battery * 100 / 6);
