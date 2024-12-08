@@ -986,8 +986,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // validity
             }
 
-            if ((buf.readableBytes() == 3 + 6 || buf.readableBytes() == 3 + 4 + 6)
-                    && !(modelNt20 && type == MSG_GPS_LBS_2)) {
+            if (modelNt20 && type == MSG_GPS_LBS_2) {
+                buf.readUnsignedByte(); // language
+                position.set(Position.KEY_ODOMETER, buf.readMedium());
+                position.set(Position.KEY_HOURS, buf.readMedium() * 60 * 1000);
+            }
+
+            if (buf.readableBytes() == 3 + 6 || buf.readableBytes() == 3 + 4 + 6) {
                 position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
                 buf.readUnsignedByte(); // upload mode
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0 ? true : null);
@@ -999,12 +1004,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             if (type == MSG_GPS_LBS_STATUS_3 || type == MSG_FENCE_MULTI) {
                 position.set(Position.KEY_GEOFENCE, buf.readUnsignedByte());
-            }
-
-            if (modelNt20 && type == MSG_GPS_LBS_2) {
-                buf.readUnsignedByte(); // language
-                position.set(Position.KEY_ODOMETER, buf.readMedium());
-                position.set(Position.KEY_HOURS, buf.readMedium() * 60 * 1000);
             }
 
         } else if (type == MSG_ALARM) {
