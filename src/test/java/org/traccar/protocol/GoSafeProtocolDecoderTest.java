@@ -11,6 +11,9 @@ public class GoSafeProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new GoSafeProtocolDecoder(null));
 
+        verifyPosition(decoder, binary(
+                "f80601013fb82203661b2ee46249007a13003f45feefeeb401db1bbe00000000060e00d602018904036412080c010111e121003100410051010807000000000000004655f8"));
+
         verifyPositions(decoder, false, buffer(
                 "*GS06,357330050846344,RST#"));
 
