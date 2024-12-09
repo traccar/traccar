@@ -52,6 +52,7 @@ jobs:
         echo "Environment=REDIS_HOST=${{ vars.REDIS_HOST }}" >> ./setup/traccar.service
         echo "Environment=LOGGER_CONSOLE=false" >> ./setup/traccar.service
         echo "Environment=WEB_PORT=80" >> ./setup/traccar.service
+        echo "Environment=WATCHDOG_USEC=60" >> ./setup/traccar.service
 
     - name: Build installers
       working-directory: ./setup
