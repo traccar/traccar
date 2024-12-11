@@ -13,7 +13,7 @@ jobs:
       uses: easingthemes/ssh-deploy@main
       with:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SOURCE: "./setup/amazon-cloudwatch-agent.json ./.platform/nginx/nginx.conf"
+        SOURCE: "./setup/amazon-cloudwatch-agent.json"
         REMOTE_HOST: ${{ vars.REMOTE_HOST }}
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
         TARGET: "/root"
@@ -81,8 +81,6 @@ jobs:
         REMOTE_HOST: ${{ vars.REMOTE_HOST }}
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
         SCRIPT_AFTER: |
-          apt update
-          apt install -y nginx certbot
           sudo /home/${{ secrets.REMOTE_USER }}/traccar.run
           sudo service traccar start
           echo $RSYNC_STDOUT
