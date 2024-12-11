@@ -415,7 +415,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(short value, boolean modelLW) {
+    private String decodeAlarm(short value, boolean modelLW, boolean modelSW) {
         return switch (value) {
             case 0x01 -> Position.ALARM_SOS;
             case 0x02 -> Position.ALARM_POWER_CUT;
@@ -429,10 +429,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case 0x14 -> Position.ALARM_DOOR;
             case 0x18 -> modelLW ? Position.ALARM_ACCIDENT : Position.ALARM_REMOVING;
             case 0x19 -> modelLW ? Position.ALARM_ACCELERATION : Position.ALARM_LOW_BATTERY;
-            case 0x1A, 0x28 -> Position.ALARM_BRAKING;
+            case 0x1A, 0x27 -> Position.ALARM_BRAKING;
             case 0x1B, 0x2A, 0x2B, 0x2E -> Position.ALARM_CORNERING;
             case 0x23 -> Position.ALARM_FALL_DOWN;
-            case 0x29 -> Position.ALARM_ACCELERATION;
+            case 0x26 -> Position.ALARM_ACCELERATION;
+            case 0x28 -> modelSW ? Position.ALARM_CORNERING : Position.ALARM_BRAKING;
+            case 0x29 -> modelSW ? Position.ALARM_ACCIDENT : Position.ALARM_ACCELERATION;
             case 0x2C -> Position.ALARM_ACCIDENT;
             case 0x30 -> Position.ALARM_JAMMING;
             default -> null;
@@ -460,7 +462,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
         String model = deviceSession != null ? getDeviceModel(deviceSession) : null;
         boolean modelLW = model != null && model.toUpperCase().startsWith("LW");
-        boolean modelNt20 = model != null && model.equalsIgnoreCase("NT20");
+        boolean modelSW = "SEEWORLD".equalsIgnoreCase(model);
+        boolean modelNT20 = "NT20".equalsIgnoreCase(model);
 
         if (type == MSG_LOGIN) {
 
@@ -793,7 +796,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_TYPE, type);
 
-            if (type == MSG_GPS_LBS_2 && modelNt20) {
+            if (type == MSG_GPS_LBS_2 && modelNT20) {
                 buf.readUnsignedByte(); // location source type
                 buf.skipBytes(8); // imei
                 position.setDeviceTime(decodeDate(buf, deviceSession));
@@ -824,7 +827,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     int satellites = BitUtil.between(signal, 10, 15) + BitUtil.between(signal, 5, 10);
                     position.set(Position.KEY_SATELLITES, satellites);
                     position.set(Position.KEY_RSSI, BitUtil.to(signal, 5));
-                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW));
+                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW));
                     buf.readUnsignedByte(); // language
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     int mode = buf.readUnsignedByte();
@@ -835,14 +838,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 10.0);
                     }
                 } else {
-                    if (type == MSG_GPS_LBS_STATUS_5 || (modelNt20 && type == MSG_GPS_LBS_2)) {
+                    if (type == MSG_GPS_LBS_STATUS_5 || (modelNT20 && type == MSG_GPS_LBS_2)) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     }
                     if (type == MSG_STATUS && "R11".equals(model)) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     } else {
                         int battery = buf.readUnsignedByte();
-                        if (modelNt20 && type == MSG_GPS_LBS_2) {
+                        if (modelNT20 && type == MSG_GPS_LBS_2) {
                             battery = battery / 10;
                         }
                         if (battery <= 6) {
@@ -856,10 +859,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_POWER, BitUtil.to(buf.readUnsignedShort(), 12) / 10.0);
                     } else {
                         short extension = buf.readUnsignedByte();
-                        if (type == MSG_STATUS && "SEEWORLD".equals(model)) {
+                        if (type == MSG_STATUS && modelSW) {
                             position.set(Position.KEY_POWER, (double) extension);
                         } else if (variant != Variant.VXT01) {
-                            position.addAlarm(decodeAlarm(extension, modelLW));
+                            position.addAlarm(decodeAlarm(extension, modelLW, modelSW));
                         }
                     }
                 }
@@ -921,7 +924,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     decodeStatus(position, buf);
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW));
+                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW));
                     position.set("oil", buf.readUnsignedShort());
                     int temperature = buf.readUnsignedByte();
                     if (BitUtil.check(temperature, 7)) {
@@ -958,7 +961,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if ((type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_3 || type == MSG_GPS_LBS_4 || type == MSG_GPS_LBS_5)
-                    && buf.readableBytes() >= 3 + 6 && !modelNt20) {
+                    && buf.readableBytes() >= 3 + 6 && !modelNT20) {
                 position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte()); // reason
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
@@ -986,7 +989,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // validity
             }
 
-            if (modelNt20 && type == MSG_GPS_LBS_2) {
+            if (modelNT20 && type == MSG_GPS_LBS_2) {
                 buf.readUnsignedByte(); // language
                 position.set(Position.KEY_ODOMETER, buf.readMedium());
                 position.set(Position.KEY_HOURS, buf.readMedium() * 60 * 1000);
