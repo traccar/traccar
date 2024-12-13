@@ -37,6 +37,7 @@
   <entry key='database.maxPoolSize'>50</entry>
   <entry key='database.ignoreUnknown'>false</entry>
   <entry key='database.registerUnknown'>true</entry>
+  <entry key='database.saveOriginal'>true</entry>
 
   <entry key='database.selectLatestPositions'>
     SELECT * FROM tc_positions_last
