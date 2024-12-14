@@ -47,7 +47,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("imei:")
             .number("(d+),")                     // imei
-            .expression("([^,]+),")              // alarm
+            .expression("([^,]*),")              // alarm
             .groupBegin()
             .number("(dd)/?(dd)/?(dd) ?")        // local date (yymmdd)
             .number("(dd):?(dd)(?:dd)?,")        // local time (hhmmss)
