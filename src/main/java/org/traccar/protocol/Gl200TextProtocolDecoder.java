@@ -213,7 +213,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
     private Object decodeInf(Channel channel, SocketAddress remoteAddress, String sentence) {
         Parser parser = new Parser(PATTERN_INF, sentence);
-        LOGGER.error(sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -865,7 +864,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (!parser.matches()) {
             return null;
         }
-        LOGGER.error(sentence);
 
         String protocolVersion = parser.next();
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
@@ -1529,7 +1527,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
-        LOGGER.error("gl200 {}", sentence);
         Parser parser = new Parser(PATTERN, sentence);
         Position position = initPosition(parser, channel, remoteAddress);
         if (position == null) {
@@ -1706,102 +1703,106 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         Object result;
         String type = sentence.substring(typeIndex + 3, typeIndex + 6);
-        if (sentence.startsWith("+ACK")) {
-            result = decodeAck(channel, remoteAddress, values);
-        } else {
-            switch (type) {
-                case "INF":
-                    result = decodeInf(channel, remoteAddress, sentence);
-                    break;
-                case "OBD":
-                    result = decodeObd(channel, remoteAddress, sentence);
-                    break;
-                case "CAN":
-                    LOGGER.error(sentence);
-                    result = decodeCan(channel, remoteAddress, values);
-                    break;
-                case "CTN":
-                case "FRI":
-                case "GEO":
-                case "RTL":
-                case "DOG":
-                case "STR":
-                    result = decodeFri(channel, remoteAddress, sentence, values);
-                    break;
-                case "ERI":
-                    result = decodeEri(channel, remoteAddress, values);
-                    break;
-                case "IGN":
-                case "IGF":
-                case "VGN":
-                case "VGF":
-                    result = decodeIgn(channel, remoteAddress, values, type);
-                    break;
-                case "LSW":
-                case "TSW":
-                    result = decodeLsw(channel, remoteAddress, sentence);
-                    break;
-                case "IDA":
-                    result = decodeIda(channel, remoteAddress, sentence);
-                    break;
-                case "WIF":
-                    result = decodeWif(channel, remoteAddress, sentence);
-                    break;
-                case "GSM":
-                    result = decodeGsm(channel, remoteAddress, sentence);
-                    break;
-                case "VER":
-                    result = decodeVer(channel, remoteAddress, sentence);
-                    break;
-                case "PNA":
-                case "PFA":
-                    result = decodePna(channel, remoteAddress, sentence);
-                    break;
-                case "DAR":
-                    result = decodeDar(channel, remoteAddress, sentence);
-                    break;
-                case "DTT":
-                    result = decodeDtt(channel, remoteAddress, sentence);
-                    break;
-                case "BAA":
-                    result = decodeBaa(channel, remoteAddress, sentence);
-                    break;
-                case "BID":
-                    result = decodeBid(channel, remoteAddress, sentence);
-                    break;
-                case "LSA":
-                    result = decodeLsa(channel, remoteAddress, sentence);
-                    break;
-                case "TTR":
-                    result = decodeTtr(channel, remoteAddress, values);
-                    break;
-                default:
-                    result = decodeOther(channel, remoteAddress, sentence, type);
-                    break;
-            }
-
-            if (result == null) {
-                result = decodeBasic(channel, remoteAddress, sentence, type);
-            }
-
-            if (result != null) {
-                if (result instanceof Position) {
-                    ((Position) result).set(Position.KEY_TYPE, type);
-                } else {
-                    for (Position p : (List<Position>) result) {
-                        p.set(Position.KEY_TYPE, type);
-                    }
-                }
+        try {
+            if (sentence.startsWith("+ACK")) {
+                result = decodeAck(channel, remoteAddress, values);
             } else {
-                LOGGER.error("ignoring: " + sentence);
+                switch (type) {
+                    case "INF":
+                        result = decodeInf(channel, remoteAddress, sentence);
+                        break;
+                    case "OBD":
+                        result = decodeObd(channel, remoteAddress, sentence);
+                        break;
+                    case "CAN":
+                        result = decodeCan(channel, remoteAddress, values);
+                        break;
+                    case "CTN":
+                    case "FRI":
+                    case "GEO":
+                    case "RTL":
+                    case "DOG":
+                    case "STR":
+                        result = decodeFri(channel, remoteAddress, sentence, values);
+                        break;
+                    case "ERI":
+                        result = decodeEri(channel, remoteAddress, values);
+                        break;
+                    case "IGN":
+                    case "IGF":
+                    case "VGN":
+                    case "VGF":
+                        result = decodeIgn(channel, remoteAddress, values, type);
+                        break;
+                    case "LSW":
+                    case "TSW":
+                        result = decodeLsw(channel, remoteAddress, sentence);
+                        break;
+                    case "IDA":
+                        result = decodeIda(channel, remoteAddress, sentence);
+                        break;
+                    case "WIF":
+                        result = decodeWif(channel, remoteAddress, sentence);
+                        break;
+                    case "GSM":
+                        result = decodeGsm(channel, remoteAddress, sentence);
+                        break;
+                    case "VER":
+                        result = decodeVer(channel, remoteAddress, sentence);
+                        break;
+                    case "PNA":
+                    case "PFA":
+                        result = decodePna(channel, remoteAddress, sentence);
+                        break;
+                    case "DAR":
+                        result = decodeDar(channel, remoteAddress, sentence);
+                        break;
+                    case "DTT":
+                        result = decodeDtt(channel, remoteAddress, sentence);
+                        break;
+                    case "BAA":
+                        result = decodeBaa(channel, remoteAddress, sentence);
+                        break;
+                    case "BID":
+                        result = decodeBid(channel, remoteAddress, sentence);
+                        break;
+                    case "LSA":
+                        result = decodeLsa(channel, remoteAddress, sentence);
+                        break;
+                    case "TTR":
+                        result = decodeTtr(channel, remoteAddress, values);
+                        break;
+                    default:
+                        result = decodeOther(channel, remoteAddress, sentence, type);
+                        break;
+                }
+
+                if (result == null) {
+                    result = decodeBasic(channel, remoteAddress, sentence, type);
+                }
+
+                if (result != null) {
+                    if (result instanceof Position) {
+                        ((Position) result).set(Position.KEY_TYPE, type);
+                    } else {
+                        for (Position p : (List<Position>) result) {
+                            p.set(Position.KEY_TYPE, type);
+                        }
+                    }
+                } else {
+                    LOGGER.error("gl200 ignoring: " + sentence);
+                }
             }
-        }
 
-        if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage("+SACK:" + values[values.length - 1] + "$", remoteAddress));
-        }
+            if (channel != null) {
+                channel.writeAndFlush(new NetworkMessage("+SACK:" + values[values.length - 1] + "$", remoteAddress));
+            }
 
-        return result;
+            return result;
+        } catch (Exception e) {
+            LOGGER.error("gl200", e);
+            return null;
+        }
     }
 
     private Object decodeTtr(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
