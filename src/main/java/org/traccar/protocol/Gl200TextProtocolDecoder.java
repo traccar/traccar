@@ -632,7 +632,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             reportMaskExt = Long.parseLong(v[index - 1], 16);
         }
         if (BitUtil.check(reportMaskExt, 0) && !v[index++].isEmpty()) {
-            position.set("adBlueLevel", Integer.parseInt(v[index - 1]));
+            position.set("adBlueLevel", Double.parseDouble(v[index - 1].substring(1)));
         }
         if (BitUtil.check(reportMaskExt, 1) && !v[index++].isEmpty()) {
             position.set("axleWeight1", Integer.parseInt(v[index - 1]));
