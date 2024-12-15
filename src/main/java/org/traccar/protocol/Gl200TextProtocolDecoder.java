@@ -1815,6 +1815,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+        getLastLocation(position, null);
         try {
             index += 1; // device name
             position.set("requestId", Integer.parseInt(v[index++], 16));
