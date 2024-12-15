@@ -1816,19 +1816,20 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
         getLastLocation(position, null);
-        try {
-            index += 1; // device name
-            position.set("requestId", Integer.parseInt(v[index++], 16));
-            position.set("messageType", Integer.parseInt(v[index], 16));
+        index += 1; // device name
+        position.set("requestId", Integer.parseInt(v[index++], 16));
+        position.set("messageType", Integer.parseInt(v[index++], 16));
+        position.set("option1", v[index++]);
+        position.set("option2", v[index++]);
+        position.set("option3", v[index++]);
+        position.set("option4", v[index++]);
+        position.set("option5", v[index]);
 
-            Date time = dateFormat.parse(v[v.length - 2]);
-            if (ignoreFixTime) {
-                position.setTime(time);
-            } else {
-                position.setDeviceTime(time);
-            }
-        } catch (Exception e) {
-            LOGGER.error("gl200", e);
+        Date time = dateFormat.parse(v[v.length - 2]);
+        if (ignoreFixTime) {
+            position.setTime(time);
+        } else {
+            position.setDeviceTime(time);
         }
         return position;
     }
