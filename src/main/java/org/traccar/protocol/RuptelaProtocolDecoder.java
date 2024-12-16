@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -109,6 +110,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 29 -> position.set(Position.KEY_POWER, readValue(buf, length, false) * 0.001);
             case 30 -> position.set(Position.KEY_BATTERY, readValue(buf, length, false) * 0.001);
             case 32 -> position.set(Position.KEY_DEVICE_TEMP, readValue(buf, length, true));
+            case 34 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(length)));
             case 39 -> position.set(Position.KEY_ENGINE_LOAD, readValue(buf, length, false));
             case 65 -> position.set(Position.KEY_ODOMETER, readValue(buf, length, false));
             case 74 -> position.set(Position.PREFIX_TEMP + 3, readValue(buf, length, true) * 0.1);

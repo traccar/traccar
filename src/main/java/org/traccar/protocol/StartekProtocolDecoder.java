@@ -90,6 +90,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+)?|")                    // instant fuel
             .number("(d+)[%L]").optional()       // fuel level
             .groupEnd("?")
+            .expression(",([^,]{20,})").optional() // driver id
             .number(",(d+)").optional()          // hours
             .groupEnd("?")
             .groupEnd("?")
@@ -234,6 +235,10 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextInt() * 0.1);
             }
             position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        }
+
+        if (parser.hasNext()) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
         }
 
         if (parser.hasNext()) {

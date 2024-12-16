@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,24 +26,27 @@ import jakarta.ws.rs.client.InvocationCallback;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.session.cache.CacheManager;
 
 public class PositionForwarderJson implements PositionForwarder {
 
-    private final String url;
     private final String header;
 
     private final Client client;
     private final ObjectMapper objectMapper;
+    private final CacheManager cacheManager;
 
-    public PositionForwarderJson(Config config, Client client, ObjectMapper objectMapper) {
+    public PositionForwarderJson(Config config, Client client, ObjectMapper objectMapper, CacheManager cacheManager) {
         this.client = client;
         this.objectMapper = objectMapper;
-        this.url = config.getString(Keys.FORWARD_URL);
+        this.cacheManager = cacheManager;
         this.header = config.getString(Keys.FORWARD_HEADER);
     }
 
     @Override
     public void forward(PositionData positionData, ResultHandler resultHandler) {
+        String url = AttributeUtil.lookup(cacheManager, Keys.FORWARD_URL, positionData.getDevice().getId());
         var requestBuilder = client.target(url).request();
 
         MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
