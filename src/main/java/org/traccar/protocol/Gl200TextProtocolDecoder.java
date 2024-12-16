@@ -913,7 +913,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+            Double odometer = parser.nextDouble();
+            if (odometer != 0) {
+                position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
+            }
         }
         position.set(Position.KEY_HOURS, parseHours(parser.next()));
         position.set(Position.PREFIX_ADC + 1, parser.next());
