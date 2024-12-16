@@ -29,12 +29,16 @@ import org.traccar.helper.PatternBuilder;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 public class UproProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UproProtocolDecoder.class);
 
     public UproProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -264,6 +268,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                             Integer.parseInt(data.readSlice(5).toString(StandardCharsets.US_ASCII)) * 0.001);
                     break;
                 default:
+                    LOGGER.error("upro ignoring "  + data.toString(StandardCharsets.US_ASCII));
                     break;
             }
 
