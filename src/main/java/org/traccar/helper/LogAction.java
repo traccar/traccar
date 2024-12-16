@@ -54,6 +54,7 @@ public final class LogAction {
     private static final String PATTERN_COMMAND_DEVICE = "user: %d, action: %s, deviceId: %d, type: %s";
     private static final String PATTERN_COMMAND_GROUP = "user: %d, action: %s, groupId: %d, type: %s";
     private static final String PATTERN_REPORT = "user: %d, %s: %s, from: %s, to: %s, devices: %s, groups: %s";
+    private static final String PATTERN_REPORT_GEOFENCE = "user: %d, %s: %s, from: %s, to: %s, geofences: %s";
 
     public static void create(long userId, BaseModel object) {
         logObjectAction(ACTION_CREATE, userId, object.getClass(), object.getId());
@@ -131,6 +132,16 @@ public final class LogAction {
             remoteAddress = "unknown";
         }
         LOGGER.info(String.format(PATTERN_LOGIN, userId, action, remoteAddress));
+    }
+
+    public static void reportGeofence(
+            long userId, boolean scheduled, String report,
+            Date from, Date to, List<Long> geofenceIds) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        LOGGER.info(String.format(
+                PATTERN_REPORT_GEOFENCE, userId, scheduled ? "scheduled" : "report", report,
+                dateFormat.format(from), dateFormat.format(to),
+                geofenceIds.toString()));
     }
 
 }
