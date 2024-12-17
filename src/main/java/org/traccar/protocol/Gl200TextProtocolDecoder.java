@@ -759,7 +759,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        if (!"GV355CEU".equals(model) && BitUtil.check(reportMask, 30)) {
+        if ("GV355CEU".equals(model) && BitUtil.check(reportMask, 30)) {
             while (v[index].isEmpty()) {
                 index += 1;
             }
