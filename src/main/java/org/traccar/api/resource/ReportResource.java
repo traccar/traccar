@@ -22,19 +22,10 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.Report;
 import org.traccar.model.UserRestrictions;
-import org.traccar.reports.CombinedReportProvider;
-import org.traccar.reports.DevicesReportProvider;
-import org.traccar.reports.EventsReportProvider;
-import org.traccar.reports.RouteReportProvider;
-import org.traccar.reports.StopsReportProvider;
-import org.traccar.reports.SummaryReportProvider;
-import org.traccar.reports.TripsReportProvider;
+import org.traccar.reports.*;
 import org.traccar.reports.common.ReportExecutor;
 import org.traccar.reports.common.ReportMailer;
-import org.traccar.reports.model.CombinedReportItem;
-import org.traccar.reports.model.StopReportItem;
-import org.traccar.reports.model.SummaryReportItem;
-import org.traccar.reports.model.TripReportItem;
+import org.traccar.reports.model.*;
 import org.traccar.storage.StorageException;
 
 import jakarta.inject.Inject;
@@ -80,6 +71,9 @@ public class ReportResource extends SimpleObjectResource<Report> {
 
     @Inject
     private DevicesReportProvider devicesReportProvider;
+
+    @Inject
+    private GeofenceReportProvider geofenceReportProvider;
 
     @Inject
     private ReportMailer reportMailer;
@@ -332,6 +326,17 @@ public class ReportResource extends SimpleObjectResource<Report> {
         return executeReport(getUserId(), type.equals("mail"), stream -> {
             devicesReportProvider.getExcel(stream, getUserId());
         });
+    }
+
+    @Path("geofences")
+    @GET
+    public Collection<GeofenceReportItem> getGeofences(
+            @QueryParam("geofenceId") List<Long> geofenceIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        LogAction.reportGeofence(getUserId(), false, "geofences", from, to, geofenceIds);
+        return geofenceReportProvider.getObjects(getUserId(), geofenceIds, from, to);
     }
 
 }

@@ -28,6 +28,8 @@ import org.jxls.formula.StandardFormulaProcessor;
 import org.jxls.transform.Transformer;
 import org.jxls.transform.poi.PoiTransformer;
 import org.jxls.util.TransformerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -43,6 +45,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.reports.model.BaseReportItem;
+import org.traccar.reports.model.GeofenceReportItem;
 import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.TripReportItem;
 import org.traccar.session.state.MotionProcessor;
@@ -66,7 +69,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ReportUtils {
-
     private final Config config;
     private final Storage storage;
     private final PermissionsService permissionsService;
@@ -396,6 +398,50 @@ public class ReportUtils {
         }
 
         return result;
+    }
+
+    public List<GeofenceReportItem> getGeofenceReport(long geofenceId, List<Device> devices, Date from, Date to) {
+        List<GeofenceReportItem> result = new ArrayList<>();
+        try {
+            var events = storage.getObjects(Event.class, new Request(
+                    new Columns.All(),
+                    new Condition.And(
+                            new Condition.Equals("geofenceId", geofenceId),
+                            new Condition.Between("eventTime", "from", from, "to", to)),
+                    new Order("eventTime")));
+
+            for (Event event: events) {
+                if (event.getType().equals(Event.TYPE_GEOFENCE_ENTER)) {
+                    GeofenceReportItem geofenceReportItem = new GeofenceReportItem();
+                    geofenceReportItem.setGeofenceId(geofenceId);
+                    geofenceReportItem.setDeviceId(event.getDeviceId());
+                    geofenceReportItem.setEnterTime(event.getEventTime());
+                    result.add(geofenceReportItem);
+                } else if (event.getType().equals(Event.TYPE_GEOFENCE_EXIT)) {
+                    boolean found = false;
+                    for (GeofenceReportItem geofenceReportItem: result) {
+                        if (geofenceReportItem.getDeviceId() == event.getDeviceId() && geofenceReportItem.getExitTime() == null) {
+                            geofenceReportItem.setExitTime(event.getEventTime());
+                            Duration duration = Duration.between(geofenceReportItem.getEnterTime().toInstant(), geofenceReportItem.getExitTime().toInstant());
+                            geofenceReportItem.setDuration(duration.toSeconds());
+                            found = true;
+                        }
+                    }
+                    if (!found) {
+                        GeofenceReportItem geofenceReportItem = new GeofenceReportItem();
+                        geofenceReportItem.setGeofenceId(geofenceId);
+                        geofenceReportItem.setDeviceId(event.getDeviceId());
+                        geofenceReportItem.setExitTime(event.getEventTime());
+                        result.add(geofenceReportItem);
+                    }
+                }
+            }
+
+            return result;
+
+        } catch (StorageException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }
