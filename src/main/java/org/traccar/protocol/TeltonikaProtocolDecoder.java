@@ -567,7 +567,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         }
                         index += 1;
                     }
-                } else if (id == 548 || id == 10829 || id == 10831) {
+                } else if (id == 548 || id == 10828 || id == 10829 || id == 10831) {
                     ByteBuf data = buf.readSlice(length);
                     data.readUnsignedByte(); // header
                     for (int i = 1; data.isReadable(); i++) {

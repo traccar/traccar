@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -141,8 +142,8 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
 
-        buf.skipBytes(6); // multi-purpose data
         buf.readUnsignedShortLE(); // fix time
         buf.readUnsignedByte(); // location status
         buf.readUnsignedByte(); // mode 1

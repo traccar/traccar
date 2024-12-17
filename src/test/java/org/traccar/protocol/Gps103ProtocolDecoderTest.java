@@ -16,6 +16,9 @@ public class Gps103ProtocolDecoderTest extends ProtocolTest {
                 Position.KEY_ALARM, Position.ALARM_VIBRATION);
 
         verifyPosition(decoder, text(
+                "imei:864035052942928,,241214083746,100%,F,123746.000,A,1012.63368,N,06757.59559,W,0.00,340.61;"));
+
+        verifyPosition(decoder, text(
                 "imei:864035050002451,tracker,201223064947,,F,064947,A,1935.70640,N,09859.94436,W,0.025,;"));
 
         verifyPosition(decoder, text(
