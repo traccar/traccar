@@ -157,9 +157,12 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     decodeLocation(position, data.toString(StandardCharsets.US_ASCII));
                     break;
                 case 'B':
-                    position.set(Position.KEY_STATUS, data.toString(StandardCharsets.US_ASCII));
+                    String _status = data.toString(StandardCharsets.US_ASCII);
+                    position.set(Position.KEY_STATUS, _status);
                     position.set(Position.KEY_IGNITION,
-                            BitUtil.check(Integer.parseInt(String.valueOf(position.getString(Position.KEY_STATUS).charAt(1))), 0));
+                            BitUtil.check(Integer.parseInt(String.valueOf(_status.charAt(1))), 0));
+                    position.set(Position.KEY_BLOCKED,
+                            BitUtil.check(Integer.parseInt(String.valueOf(_status.charAt(0))), 1));
                     break;
                 case 'C':
                     long odometer = 0;
