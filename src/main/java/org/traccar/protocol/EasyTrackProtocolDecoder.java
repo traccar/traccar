@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.config.Keys;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -128,7 +129,16 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-        String type = sentence.substring(20, 22);
+        int typeIndex = sentence.indexOf(',', 4) + 1;
+        String type = sentence.substring(typeIndex, typeIndex + 2);
+
+        if (channel != null) {
+            if (type.equals("TX") || type.equals("MQ")) {
+                channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
+            } else if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+                channel.writeAndFlush(new NetworkMessage(sentence.substring(0, typeIndex + 3) + "ACK#", remoteAddress));
+            }
+        }
 
         if (channel != null && (type.equals("TX") || type.equals("MQ"))) {
             channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
