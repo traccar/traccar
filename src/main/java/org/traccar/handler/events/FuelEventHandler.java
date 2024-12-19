@@ -23,9 +23,6 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
-import java.util.HashMap;
-import java.util.Map;
-
 
 public class FuelEventHandler extends BaseEventHandler {
 
@@ -58,22 +55,18 @@ public class FuelEventHandler extends BaseEventHandler {
                     double threshold = AttributeUtil.lookup(
                             cacheManager, Keys.EVENT_FUEL_INCREASE_THRESHOLD, position.getDeviceId());
                     if (threshold > 0 && change >= threshold) {
-                        Map<String, Object> attributes = new HashMap<>();
-                        attributes.put("before", before);
-                        attributes.put("after", after);
                         Event event = new Event(Event.TYPE_DEVICE_FUEL_INCREASE, position);
-                        event.setAttributes(attributes);
+                        event.set("before", before);
+                        event.set("after", after);
                         callback.eventDetected(event);
                     }
                 } else if (change < 0) {
                     double threshold = AttributeUtil.lookup(
                             cacheManager, Keys.EVENT_FUEL_DROP_THRESHOLD, position.getDeviceId());
                     if (threshold > 0 && Math.abs(change) >= threshold) {
-                        Map<String, Object> attributes = new HashMap<>();
-                        attributes.put("before", before);
-                        attributes.put("after", after);
                         Event event = new Event(Event.TYPE_DEVICE_FUEL_DROP, position);
-                        event.setAttributes(attributes);
+                        event.set("before", before);
+                        event.set("after", after);
                         callback.eventDetected(event);
                     }
                 }
