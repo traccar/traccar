@@ -73,12 +73,13 @@ public class OpenIdProvider {
     private final URI baseUrl;
     private final String adminGroup;
     private final String allowGroup;
+    private final String groupsClaimName;
 
     private final LoginService loginService;
 
     @Inject
     public OpenIdProvider(Config config, LoginService loginService, HttpClient httpClient, ObjectMapper objectMapper)
-        throws InterruptedException, IOException, URISyntaxException {
+            throws InterruptedException, IOException, URISyntaxException {
 
         this.loginService = loginService;
 
@@ -89,11 +90,12 @@ public class OpenIdProvider {
         baseUrl = new URI(WebHelper.retrieveWebUrl(config));
         callbackUrl = new URI(WebHelper.retrieveWebUrl(config) + "/api/session/openid/callback");
 
+
         if (config.hasKey(Keys.OPENID_ISSUER_URL)) {
             HttpRequest httpRequest = HttpRequest.newBuilder(
-                URI.create(config.getString(Keys.OPENID_ISSUER_URL) + "/.well-known/openid-configuration"))
-                .header("Accept", "application/json")
-                .build();
+                            URI.create(config.getString(Keys.OPENID_ISSUER_URL) + "/.well-known/openid-configuration"))
+                    .header("Accept", "application/json")
+                    .build();
 
             String httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString()).body();
 
@@ -111,13 +113,14 @@ public class OpenIdProvider {
 
         adminGroup = config.getString(Keys.OPENID_ADMIN_GROUP);
         allowGroup = config.getString(Keys.OPENID_ALLOW_GROUP);
+        groupsClaimName = config.getString(Keys.OPENID_GROUPS_CLAIM_NAME);
     }
 
     public URI createAuthUri() {
         Scope scope = new Scope("openid", "profile", "email");
 
         if (adminGroup != null) {
-            scope.add("groups");
+            scope.add(groupsClaimName);
         }
 
         AuthenticationRequest.Builder request = new AuthenticationRequest.Builder(
@@ -155,7 +158,7 @@ public class OpenIdProvider {
 
         if (!userInfoResponse.indicatesSuccess()) {
             throw new GeneralSecurityException(
-                "Failed to access OpenID Connect user info endpoint. Please contact your administrator.");
+                    "Failed to access OpenID Connect user info endpoint. Please contact your administrator.");
         }
 
         return userInfoResponse.toSuccessResponse().getUserInfo();
@@ -182,7 +185,7 @@ public class OpenIdProvider {
 
         UserInfo userInfo = getUserInfo(bearerToken);
 
-        List<String> userGroups = userInfo.getStringListClaim("groups");
+        List<String> userGroups = userInfo.getStringListClaim(groupsClaimName);
         boolean administrator = adminGroup != null && userGroups.contains(adminGroup);
 
         if (!(administrator || allowGroup == null || userGroups.contains(allowGroup))) {
