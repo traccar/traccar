@@ -691,7 +691,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (type == MSG_WIFI_ALARM) {
                 cellType = buf.readUnsignedByte();
             }
-            int cellCount = variant == Variant.WANWAY_S20 || type == MSG_WIFI_ALARM ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
+            int cellCount = variant == Variant.WANWAY_S20 
+            || type == MSG_WIFI_ALARM ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
             for (int i = 0; i < cellCount; i++) {
                 int lac;
                 int cid;
@@ -732,13 +733,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                 int event = buf.readUnsignedByte();
                 int languageDetails = buf.readUnsignedByte();
-            
                 if (languageDetails == 0x01) {
                     position.set("alertLanguage", "Chinese");
                 } else if (languageDetails == 0x02) {
                     position.set("alertLanguage", "English");
-                } else if (languageDetails == 0x00) {
-                    // no reply needed
                 }
                 position.set(Position.KEY_EVENT, event);
                 switch (event) {
@@ -816,7 +814,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
             
             return position;
-
         } else if (type == MSG_STATUS && buf.readableBytes() == 22) {
 
             getLastLocation(position, null);
@@ -1099,7 +1096,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
             
         } else {
-
             if (dataLength > 0) {
                 buf.skipBytes(dataLength);
             }
