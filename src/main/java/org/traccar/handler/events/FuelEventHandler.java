@@ -26,6 +26,7 @@ import org.traccar.session.cache.CacheManager;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class FuelEventHandler extends BaseEventHandler {
 
     private final CacheManager cacheManager;
@@ -52,7 +53,6 @@ public class FuelEventHandler extends BaseEventHandler {
                 double before = lastPosition.getDouble(Position.KEY_FUEL_LEVEL);
                 double after = position.getDouble(Position.KEY_FUEL_LEVEL);
                 double change = after - before;
-                double difference = Math.abs(after - before);
 
                 if (change > 0) {
                     double threshold = AttributeUtil.lookup(
@@ -61,7 +61,6 @@ public class FuelEventHandler extends BaseEventHandler {
                         Map<String, Object> attributes = new HashMap<>();
                         attributes.put("before", before);
                         attributes.put("after", after);
-                        attributes.put("change", change);
                         Event event = new Event(Event.TYPE_DEVICE_FUEL_INCREASE, position);
                         event.setAttributes(attributes);
                         callback.eventDetected(event);
@@ -69,11 +68,10 @@ public class FuelEventHandler extends BaseEventHandler {
                 } else if (change < 0) {
                     double threshold = AttributeUtil.lookup(
                             cacheManager, Keys.EVENT_FUEL_DROP_THRESHOLD, position.getDeviceId());
-                    if (threshold > 0 && difference >= threshold) {
+                    if (threshold > 0 && Math.abs(change) >= threshold) {
                         Map<String, Object> attributes = new HashMap<>();
                         attributes.put("before", before);
                         attributes.put("after", after);
-                        attributes.put("difference", difference);
                         Event event = new Event(Event.TYPE_DEVICE_FUEL_DROP, position);
                         event.setAttributes(attributes);
                         callback.eventDetected(event);
