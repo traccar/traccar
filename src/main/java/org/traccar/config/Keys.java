@@ -844,6 +844,13 @@ public final class Keys {
             "max-age=3600,public");
 
     /**
+     * Show or hide technical details in error messages displayed to users.
+     */
+    public static final ConfigKey<Boolean> WEB_HIDE_ERROR_DETAIL = new BooleanConfigKey(
+        "web.hideErrorDetail",
+        List.of(KeyType.CONFIG));
+
+    /**
      * Enable TOTP authentication on the server.
      */
     public static final ConfigKey<Boolean> WEB_TOTP_ENABLE = new BooleanConfigKey(
