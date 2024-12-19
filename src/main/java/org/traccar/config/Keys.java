@@ -704,7 +704,8 @@ public final class Keys {
      */
     public static final ConfigKey<String> OPENID_GROUPS_CLAIM_NAME = new StringConfigKey(
             "openid.groupsClaimName",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "groups");
 
     /**
      * OpenID Connect group to restrict access to.

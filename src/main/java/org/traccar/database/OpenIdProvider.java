@@ -33,7 +33,6 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
 import java.io.IOException;
-import java.util.Objects;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -122,7 +121,7 @@ public class OpenIdProvider {
         Scope scope = new Scope("openid", "profile", "email");
 
         if (adminGroup != null) {
-            scope.add(Objects.requireNonNullElse(groupsClaimName, "groups"));
+            scope.add(groupsClaimName);
         }
 
         AuthenticationRequest.Builder request = new AuthenticationRequest.Builder(
@@ -187,9 +186,7 @@ public class OpenIdProvider {
 
         UserInfo userInfo = getUserInfo(bearerToken);
 
-        List<String> userGroups = groupsClaimName != null
-                ? userInfo.getStringListClaim(groupsClaimName)
-                : userInfo.getStringListClaim("groups");
+        List<String> userGroups = userInfo.getStringListClaim(groupsClaimName);
         boolean administrator = adminGroup != null && userGroups.contains(adminGroup);
 
         if (!(administrator || allowGroup == null || userGroups.contains(allowGroup))) {
