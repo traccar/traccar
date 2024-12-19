@@ -23,6 +23,8 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FuelEventHandler extends BaseEventHandler {
 
@@ -50,18 +52,31 @@ public class FuelEventHandler extends BaseEventHandler {
                 double before = lastPosition.getDouble(Position.KEY_FUEL_LEVEL);
                 double after = position.getDouble(Position.KEY_FUEL_LEVEL);
                 double change = after - before;
+                double difference = Math.abs(after - before);
 
                 if (change > 0) {
                     double threshold = AttributeUtil.lookup(
                             cacheManager, Keys.EVENT_FUEL_INCREASE_THRESHOLD, position.getDeviceId());
                     if (threshold > 0 && change >= threshold) {
-                        callback.eventDetected(new Event(Event.TYPE_DEVICE_FUEL_INCREASE, position));
+                        Map<String, Object> attributes = new HashMap<>();
+                        attributes.put("before", before);
+                        attributes.put("after", after);
+                        attributes.put("change", change);
+                        Event event = new Event(Event.TYPE_DEVICE_FUEL_INCREASE, position);
+                        event.setAttributes(attributes);
+                        callback.eventDetected(event);
                     }
                 } else if (change < 0) {
                     double threshold = AttributeUtil.lookup(
                             cacheManager, Keys.EVENT_FUEL_DROP_THRESHOLD, position.getDeviceId());
-                    if (threshold > 0 && Math.abs(change) >= threshold) {
-                        callback.eventDetected(new Event(Event.TYPE_DEVICE_FUEL_DROP, position));
+                    if (threshold > 0 && difference >= threshold) {
+                        Map<String, Object> attributes = new HashMap<>();
+                        attributes.put("before", before);
+                        attributes.put("after", after);
+                        attributes.put("difference", difference);
+                        Event event = new Event(Event.TYPE_DEVICE_FUEL_DROP, position);
+                        event.setAttributes(attributes);
+                        callback.eventDetected(event);
                     }
                 }
             }
