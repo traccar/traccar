@@ -28,7 +28,7 @@ public class MediaEventHandler extends BaseEventHandler {
     }
 
     @Override
-    public void analyzePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         Stream.of(Position.KEY_IMAGE, Position.KEY_VIDEO, Position.KEY_AUDIO)
                 .filter(position::hasAttribute)
                 .map(type -> {

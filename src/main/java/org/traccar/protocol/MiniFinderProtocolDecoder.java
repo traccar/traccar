@@ -86,25 +86,25 @@ public class MiniFinderProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(flags, 2)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_FAULT);
+            position.addAlarm(Position.ALARM_FAULT);
         }
         if (BitUtil.check(flags, 6)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         }
         if (BitUtil.check(flags, 7)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            position.addAlarm(Position.ALARM_OVERSPEED);
         }
         if (BitUtil.check(flags, 8)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
+            position.addAlarm(Position.ALARM_FALL_DOWN);
         }
         if (BitUtil.check(flags, 9) || BitUtil.check(flags, 10) || BitUtil.check(flags, 11)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE);
+            position.addAlarm(Position.ALARM_GEOFENCE);
         }
         if (BitUtil.check(flags, 12)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+            position.addAlarm(Position.ALARM_LOW_BATTERY);
         }
         if (BitUtil.check(flags, 15) || BitUtil.check(flags, 14)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
+            position.addAlarm(Position.ALARM_MOVEMENT);
         }
 
         position.set(Position.KEY_RSSI, BitUtil.between(flags, 16, 21));

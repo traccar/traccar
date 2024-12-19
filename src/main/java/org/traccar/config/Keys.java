@@ -902,7 +902,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> FORWARD_URL = new StringConfigKey(
             "forward.url",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Additional HTTP header, can be used for authorization.
@@ -1545,6 +1545,13 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> PROCESSING_REMOTE_ADDRESS_ENABLE = new BooleanConfigKey(
             "processing.remoteAddress.enable",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Use linked driver id for positions if a device does not send driver id.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_USE_LINKED_DRIVER = new BooleanConfigKey(
+            "processing.useLinkedDriver",
             List.of(KeyType.CONFIG));
 
     /**

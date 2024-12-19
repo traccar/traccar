@@ -69,7 +69,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     private ServerManager serverManager;
 
     public CommandResource() {
-        super(Command.class);
+        super(Command.class, "description");
     }
 
     private BaseProtocol getDeviceProtocol(long deviceId) throws StorageException {

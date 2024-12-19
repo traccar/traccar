@@ -65,7 +65,7 @@ public class TytanProtocolDecoder extends BaseProtocolDecoder {
                     int alarm = buf.readUnsignedByte();
                     buf.readUnsignedByte();
                     if (BitUtil.check(alarm, 5)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                        position.addAlarm(Position.ALARM_GENERAL);
                     }
                 }
                 case 8 -> position.set("antihijack", buf.readUnsignedByte());

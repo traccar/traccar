@@ -33,6 +33,7 @@ import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
@@ -129,7 +130,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 }
             }
 
-            return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
+            return storage.getObjects(baseClass, new Request(
+                    new Columns.All(), Condition.merge(conditions), new Order("name")));
 
         }
     }

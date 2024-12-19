@@ -31,7 +31,7 @@ public class OutdatedHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         if (position.getOutdated()) {
             Position last = cacheManager.getPosition(position.getDeviceId());
             if (last != null) {

@@ -34,7 +34,7 @@ public class FuelEventHandler extends BaseEventHandler {
     }
 
     @Override
-    public void analyzePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
 
         Device device = cacheManager.getObject(Device.class, position.getDeviceId());
         if (device == null) {

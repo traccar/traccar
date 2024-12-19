@@ -108,7 +108,7 @@ public class IntellitracProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, parser.nextInt());
 
         int event = parser.nextInt();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
 
         position.set(Position.KEY_INPUT, parser.nextInt());

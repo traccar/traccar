@@ -37,18 +37,20 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 public class ComputedAttributesHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputedAttributesHandler.class);
 
     private final CacheManager cacheManager;
+    private boolean early;
 
     private final JexlEngine engine;
 
@@ -57,15 +59,30 @@ public class ComputedAttributesHandler extends BasePositionHandler {
     private final boolean includeDeviceAttributes;
     private final boolean includeLastAttributes;
 
-    @Inject
-    public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
+    public static class Early extends ComputedAttributesHandler {
+        @Inject
+        public Early(Config config, CacheManager cacheManager) {
+            super(config, cacheManager, true);
+        }
+    }
+
+    public static class Late extends ComputedAttributesHandler {
+        @Inject
+        public Late(Config config, CacheManager cacheManager) {
+            super(config, cacheManager, false);
+        }
+    }
+
+    public ComputedAttributesHandler(Config config, CacheManager cacheManager, boolean early) {
         this.cacheManager = cacheManager;
+        this.early = early;
         JexlSandbox sandbox = new JexlSandbox(false);
         sandbox.allow("com.safe.Functions");
         sandbox.allow(Math.class.getName());
         List.of(
             Double.class, Float.class, Integer.class, Long.class, Short.class,
-            Character.class, Boolean.class, String.class, Byte.class, Date.class)
+            Character.class, Boolean.class, String.class, Byte.class, Date.class,
+            HashMap.class, LinkedHashMap.class, double[].class, int[].class, boolean[].class, String[].class)
                 .forEach((type) -> sandbox.allow(type.getName()));
         features = new JexlFeatures()
                 .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
@@ -140,10 +157,11 @@ public class ComputedAttributesHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         var attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class).stream()
+                .filter(attribute -> attribute.getPriority() < 0 == early)
                 .sorted(Comparator.comparing(Attribute::getPriority).reversed())
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
                 try {

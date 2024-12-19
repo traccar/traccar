@@ -65,7 +65,7 @@ public class TeraTrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_ODOMETER, Integer.parseInt(json.getString("Mileage")));
         position.set(Position.KEY_LOCK, json.getString("LockOpen").equals("0"));
         position.set(Position.KEY_DRIVER_UNIQUE_ID, json.getString("CardNo"));
-        position.set(Position.KEY_ALARM, json.getString("LowPower").equals("1") ? Position.ALARM_LOW_POWER : null);
+        position.addAlarm(json.getString("LowPower").equals("1") ? Position.ALARM_LOW_POWER : null);
         position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(json.getString("Power")));
         position.set(Position.KEY_RSSI, Integer.parseInt(json.getString("GSM")));
 

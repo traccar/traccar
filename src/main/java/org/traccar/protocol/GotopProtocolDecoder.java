@@ -46,8 +46,14 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
             .expression("LO[NT]:").optional()
             .number("(d+.d+)([EW]),")            // longitude
             .text("Speed:").number("(d+.d+),")   // speed
-            .expression("([^,]+),")              // status
-            .number("(d+)?")                     // course
+            .groupBegin()
+            .number("(d+)-")                     // battery
+            .number("(d+),")                     // rssi
+            .groupBegin()
+            .number("(d+.d),")                   // altitude
+            .number("(d+.dd)")                   // hdop
+            .groupEnd("?")
+            .groupEnd("?")
             .any()
             .compile();
 
@@ -70,12 +76,12 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
 
         String type = parser.next();
         if (type.equals("CMD-KEY")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         } else if (type.startsWith("ALM-B")) {
             if (Character.getNumericValue(type.charAt(5)) % 2 > 0) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+                position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
             } else {
-                position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+                position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
             }
         }
 
@@ -85,11 +91,12 @@ public class GotopProtocolDecoder extends BaseProtocolDecoder {
 
         position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
         position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_HEM));
-        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
+        position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble()));
 
-        position.set(Position.KEY_STATUS, parser.next());
-
-        position.setCourse(parser.nextDouble(0));
+        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+        position.set(Position.KEY_RSSI, parser.nextInt());
+        position.setAltitude(parser.nextDouble(0));
+        position.set(Position.KEY_HDOP, parser.nextDouble());
 
         return position;
     }

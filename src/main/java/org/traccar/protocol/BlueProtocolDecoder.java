@@ -128,7 +128,7 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
                 int status;
 
                 status = buf.readUnsignedByte(); // status 1
-                position.set(Position.KEY_ALARM, BitUtil.check(status, 1) ? Position.ALARM_VIBRATION : null);
+                position.addAlarm(BitUtil.check(status, 1) ? Position.ALARM_VIBRATION : null);
 
                 buf.readUnsignedByte(); // status 2
                 buf.readUnsignedByte(); // status 3
@@ -149,7 +149,7 @@ public class BlueProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (type == 0x81) {
 
-                position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
 
             } else if (type == 0x84) {
 

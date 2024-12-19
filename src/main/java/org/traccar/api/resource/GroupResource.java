@@ -29,7 +29,7 @@ import jakarta.ws.rs.core.MediaType;
 public class GroupResource extends SimpleObjectResource<Group> {
 
     public GroupResource() {
-        super(Group.class);
+        super(Group.class, "name");
     }
 
 }

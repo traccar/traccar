@@ -107,7 +107,7 @@ public class EsealProtocolDecoder extends BaseProtocolDecoder {
         int index = parser.nextInt();
 
         position.set(Position.KEY_INDEX, index);
-        position.set(Position.KEY_ALARM, decodeAlarm(type));
+        position.addAlarm(decodeAlarm(type));
 
         switch (type) {
             case "Startup":

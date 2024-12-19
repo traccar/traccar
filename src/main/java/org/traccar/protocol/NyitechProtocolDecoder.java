@@ -132,7 +132,7 @@ public class NyitechProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedShortLE(); // random number
             buf.readUnsignedByte(); // tag
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
             buf.readUnsignedShortLE(); // threshold
             buf.readUnsignedShortLE(); // value
             buf.skipBytes(6); // time

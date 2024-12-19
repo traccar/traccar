@@ -167,28 +167,28 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
 
     private void setEventOrAlarm(Position position, String trigger, Integer reportType) {
         switch (trigger) {
-            case "9" -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-            case "1" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_ON);
+            case "9" -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+            case "1" -> position.addAlarm(Position.ALARM_POWER_ON);
             case "i" -> position.set(Position.KEY_IGNITION, true);
             case "I" -> position.set(Position.KEY_IGNITION, false);
-            case "E" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
-            case "e" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-            case "!" -> position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-            case "s" -> position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            case "E" -> position.addAlarm(Position.ALARM_POWER_RESTORED);
+            case "e" -> position.addAlarm(Position.ALARM_POWER_CUT);
+            case "!" -> position.addAlarm(Position.ALARM_TOW);
+            case "s" -> position.addAlarm(Position.ALARM_OVERSPEED);
             case "h" -> {
                 switch (reportType) {
                     case 0:
                     case 3:
-                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                        position.addAlarm(Position.ALARM_BRAKING);
                         break;
                     case 1:
                     case 4:
-                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                        position.addAlarm(Position.ALARM_ACCELERATION);
                         break;
                     case 2:
                     case 5:
                     default:
-                        position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                        position.addAlarm(Position.ALARM_CORNERING);
                         break;
                 }
             }

@@ -30,7 +30,7 @@ import org.traccar.model.Calendar;
 public class CalendarResource extends SimpleObjectResource<Calendar> {
 
     public CalendarResource() {
-        super(Calendar.class);
+        super(Calendar.class, "name");
     }
 
 }

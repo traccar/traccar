@@ -168,7 +168,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (type != null && type.equals("EMR")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         }
 
         if (event != null) {
@@ -187,7 +187,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             } else if (status.equals("IF")) {
                 position.set(Position.KEY_IGNITION, false);
             } else {
-                position.set(Position.KEY_ALARM, decodeAlarm(status));
+                position.addAlarm(decodeAlarm(status));
             }
         }
 

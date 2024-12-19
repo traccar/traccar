@@ -226,17 +226,17 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "EL" -> position.set(Position.KEY_ENGINE_LOAD, Integer.parseInt(values[i]));
                 case "HA" -> {
                     if (Integer.parseInt(values[i]) > 0) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                        position.addAlarm(Position.ALARM_ACCELERATION);
                     }
                 }
                 case "HB" -> {
                     if (Integer.parseInt(values[i]) > 0) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                        position.addAlarm(Position.ALARM_BRAKING);
                     }
                 }
                 case "HC" -> {
                     if (Integer.parseInt(values[i]) > 0) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                        position.addAlarm(Position.ALARM_CORNERING);
                     }
                 }
                 case "MT" -> position.set(Position.KEY_MOTION, Integer.parseInt(values[i]) > 0);
@@ -374,13 +374,13 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.PREFIX_IN + key.charAt(2), buf.readUnsignedByte() > 0);
                 }
                 case "HA" -> {
-                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_ACCELERATION : null);
+                    position.addAlarm(buf.readUnsignedByte() > 0 ? Position.ALARM_ACCELERATION : null);
                 }
                 case "HB" -> {
-                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_BRAKING : null);
+                    position.addAlarm(buf.readUnsignedByte() > 0 ? Position.ALARM_BRAKING : null);
                 }
                 case "HC" -> {
-                    position.set(Position.KEY_ALARM, buf.readUnsignedByte() > 0 ? Position.ALARM_CORNERING : null);
+                    position.addAlarm(buf.readUnsignedByte() > 0 ? Position.ALARM_CORNERING : null);
                 }
             }
         }
@@ -624,7 +624,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
             int type = buf.readUnsignedByte();
             position.set(Position.KEY_TYPE, type);
-            position.set(Position.KEY_ALARM, alarmMap.get(type));
+            position.addAlarm(alarmMap.get(type));
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
             position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);

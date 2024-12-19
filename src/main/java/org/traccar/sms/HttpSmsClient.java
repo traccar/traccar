@@ -16,6 +16,7 @@
  */
 package org.traccar.sms;
 
+import com.fasterxml.jackson.core.io.JsonStringEncoder;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DataConverter;
@@ -37,7 +38,6 @@ public class HttpSmsClient implements SmsManager {
     private final String authorizationHeader;
     private final String authorization;
     private final String template;
-    private final boolean encode;
     private final MediaType mediaType;
 
     public HttpSmsClient(Config config, Client client) {
@@ -58,26 +58,29 @@ public class HttpSmsClient implements SmsManager {
         }
         template = config.getString(Keys.SMS_HTTP_TEMPLATE).trim();
         if (template.charAt(0) == '<') {
-            encode = false;
             mediaType = MediaType.APPLICATION_XML_TYPE;
         } else if (template.charAt(0) == '{' || template.charAt(0) == '[') {
-            encode = false;
             mediaType = MediaType.APPLICATION_JSON_TYPE;
         } else {
-            encode = true;
             mediaType = MediaType.APPLICATION_FORM_URLENCODED_TYPE;
         }
     }
 
     private String prepareValue(String value) throws UnsupportedEncodingException {
-        return encode ? URLEncoder.encode(value, StandardCharsets.UTF_8) : value;
+        if (mediaType == MediaType.APPLICATION_FORM_URLENCODED_TYPE) {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8);
+        }
+        if (mediaType == MediaType.APPLICATION_JSON_TYPE) {
+            return new String(JsonStringEncoder.getInstance().quoteAsString(value));
+        }
+        return value;
     }
 
-    private String preparePayload(String destAddress, String message) {
+    private String preparePayload(String phone, String message) {
         try {
             return template
-                    .replace("{phone}", prepareValue(destAddress))
-                    .replace("{message}", prepareValue(message.trim()));
+                    .replace("{phone}", prepareValue(phone))
+                    .replace("{message}", prepareValue(message));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
@@ -92,9 +95,9 @@ public class HttpSmsClient implements SmsManager {
     }
 
     @Override
-    public void sendMessage(String destAddress, String message, boolean command) throws MessageException {
+    public void sendMessage(String phone, String message, boolean command) throws MessageException {
         try (Response response = getRequestBuilder()
-                .post(Entity.entity(preparePayload(destAddress, message), mediaType))) {
+                .post(Entity.entity(preparePayload(phone, message), mediaType))) {
             if (response.getStatus() / 100 != 2) {
                 throw new MessageException(response.readEntity(String.class));
             }

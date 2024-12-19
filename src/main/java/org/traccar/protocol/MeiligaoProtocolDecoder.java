@@ -461,7 +461,7 @@ public class MeiligaoProtocolDecoder extends BaseProtocolDecoder {
             if (command == MSG_ALARM) {
                 short alarmCode = buf.readUnsignedByte();
                 String model = getDeviceModel(deviceSession);
-                position.set(Position.KEY_ALARM, decodeAlarm(model, alarmCode));
+                position.addAlarm(decodeAlarm(model, alarmCode));
                 if (alarmCode >= 0x02 && alarmCode <= 0x05) {
                     position.set(Position.PREFIX_IN + alarmCode, 1);
                 } else if (alarmCode >= 0x32 && alarmCode <= 0x35) {

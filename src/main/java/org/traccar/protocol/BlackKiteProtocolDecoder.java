@@ -123,7 +123,7 @@ public class BlackKiteProtocolDecoder extends BaseProtocolDecoder {
                     int status = buf.readUnsignedShortLE();
                     position.set(Position.KEY_IGNITION, BitUtil.check(status, 9));
                     if (BitUtil.check(status, 15)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                        position.addAlarm(Position.ALARM_GENERAL);
                     }
                     position.set(Position.KEY_CHARGE, BitUtil.check(status, 2));
                     break;

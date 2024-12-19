@@ -243,6 +243,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(110, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_CONSUMPTION, b.readUnsignedShort() * 0.1));
         register(113, fmbXXX, (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));
         register(115, fmbXXX, (p, b) -> p.set("engineTemp", b.readShort() * 0.1));
+        register(701, Set.of("FMC640", "FMC650", "FMM640"), (p, b) -> p.set("bleTemp1", b.readShort() * 0.01));
+        register(702, Set.of("FMC640", "FMC650", "FMM640"), (p, b) -> p.set("bleTemp2", b.readShort() * 0.01));
+        register(703, Set.of("FMC640", "FMC650", "FMM640"), (p, b) -> p.set("bleTemp3", b.readShort() * 0.01));
+        register(704, Set.of("FMC640", "FMC650", "FMM640"), (p, b) -> p.set("bleTemp4", b.readShort() * 0.01));
         register(179, null, (p, b) -> p.set(Position.PREFIX_OUT + 1, b.readUnsignedByte() > 0));
         register(180, null, (p, b) -> p.set(Position.PREFIX_OUT + 2, b.readUnsignedByte() > 0));
         register(181, null, (p, b) -> p.set(Position.KEY_PDOP, b.readUnsignedShort() * 0.1));
@@ -256,35 +260,39 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(234, fmbXXX, (p, b) -> p.set("cngLevel", b.readUnsignedShort()));
         register(235, fmbXXX, (p, b) -> p.set("oilLevel", b.readUnsignedByte()));
         register(236, null, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_GENERAL : null);
         });
         register(239, null, (p, b) -> p.set(Position.KEY_IGNITION, b.readUnsignedByte() > 0));
         register(240, null, (p, b) -> p.set(Position.KEY_MOTION, b.readUnsignedByte() > 0));
         register(241, null, (p, b) -> p.set(Position.KEY_OPERATOR, b.readUnsignedInt()));
         register(246, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_TOW : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_TOW : null);
         });
         register(247, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_ACCIDENT : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_ACCIDENT : null);
         });
         register(249, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null);
         });
         register(251, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_IDLE : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_IDLE : null);
         });
         register(252, fmbXXX, (p, b) -> {
-            p.set(Position.KEY_ALARM, b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null);
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null);
         });
         register(253, null, (p, b) -> {
             switch (b.readUnsignedByte()) {
-                case 1 -> p.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                case 2 -> p.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                case 3 -> p.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                case 1 -> p.addAlarm(Position.ALARM_ACCELERATION);
+                case 2 -> p.addAlarm(Position.ALARM_BRAKING);
+                case 3 -> p.addAlarm(Position.ALARM_CORNERING);
             }
         });
         register(636, fmbXXX, (p, b) -> p.set("cid4g", b.readUnsignedInt()));
         register(662, fmbXXX, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedByte() > 0));
+        register(10800, fmbXXX, (p, b) -> p.set("eyeTemp1", b.readShort() / 100.0));
+        register(10801, fmbXXX, (p, b) -> p.set("eyeTemp2", b.readShort() / 100.0));
+        register(10802, fmbXXX, (p, b) -> p.set("eyeTemp3", b.readShort() / 100.0));
+        register(10803, fmbXXX, (p, b) -> p.set("eyeTemp4", b.readShort() / 100.0));
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
@@ -299,7 +307,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             case 221 -> position.set("button", readValue(buf, length));
             case 222 -> {
                 if (readValue(buf, length) == 1) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    position.addAlarm(Position.ALARM_SOS);
                 }
             }
             case 240 -> position.set(Position.KEY_MOTION, readValue(buf, length) == 1);
@@ -559,7 +567,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         }
                         index += 1;
                     }
-                } else if (id == 548 || id == 10829 || id == 10831) {
+                } else if (id == 548 || id == 10828 || id == 10829 || id == 10831) {
                     ByteBuf data = buf.readSlice(length);
                     data.readUnsignedByte(); // header
                     for (int i = 1; data.isReadable(); i++) {

@@ -153,7 +153,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                 case "#EDV1#", "#EDV2#" -> position.set("external" + dataTags[i].charAt(4), data[i]);
                 case "#EID#" -> {
                     event = Integer.parseInt(data[i]);
-                    position.set(Position.KEY_ALARM, decodeAlarm(event));
+                    position.addAlarm(decodeAlarm(event));
                     position.set(Position.KEY_EVENT, event);
                     if (event == 24) {
                         position.set(Position.KEY_IGNITION, true);

@@ -24,6 +24,7 @@ import org.traccar.api.BaseObjectResource;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.SessionHelper;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
 import org.traccar.model.ManagedUser;
@@ -32,6 +33,7 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.annotation.security.PermitAll;
@@ -45,6 +47,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.Collection;
+import java.util.LinkedList;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -64,23 +67,19 @@ public class UserResource extends BaseObjectResource<User> {
     @GET
     public Collection<User> get(
             @QueryParam("userId") long userId, @QueryParam("deviceId") long deviceId) throws StorageException {
+        var conditions = new LinkedList<Condition>();
         if (userId > 0) {
             permissionsService.checkUser(getUserId(), userId);
-            return storage.getObjects(baseClass, new Request(
-                    new Columns.All(),
-                    new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups()));
-        } else if (deviceId > 0) {
-            permissionsService.checkAdmin(getUserId());
-            return storage.getObjects(baseClass, new Request(
-                    new Columns.All(),
-                    new Condition.Permission(User.class, Device.class, deviceId).excludeGroups()));
+            conditions.add(new Condition.Permission(User.class, userId, ManagedUser.class).excludeGroups());
         } else if (permissionsService.notAdmin(getUserId())) {
-            return storage.getObjects(baseClass, new Request(
-                    new Columns.All(),
-                    new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()));
-        } else {
-            return storage.getObjects(baseClass, new Request(new Columns.All()));
+            conditions.add(new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups());
         }
+        if (deviceId > 0) {
+            permissionsService.checkManager(getUserId());
+            conditions.add(new Condition.Permission(User.class, Device.class, deviceId).excludeGroups());
+        }
+        return storage.getObjects(baseClass, new Request(
+                new Columns.All(), Condition.merge(conditions), new Order("name")));
     }
 
     @Override
@@ -134,7 +133,7 @@ public class UserResource extends BaseObjectResource<User> {
     public Response remove(@PathParam("id") long id) throws Exception {
         Response response = super.remove(id);
         if (getUserId() == id) {
-            request.getSession().removeAttribute(SessionResource.USER_ID_KEY);
+            request.getSession().removeAttribute(SessionHelper.USER_ID_KEY);
         }
         return response;
     }

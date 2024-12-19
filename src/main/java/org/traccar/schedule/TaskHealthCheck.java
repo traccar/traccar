@@ -99,7 +99,7 @@ public class TaskHealthCheck implements ScheduleTask {
 
             int messageCurrentTotal = statisticsManager.messageStoredCount();
             int messageCurrentPeriod = messageCurrentTotal - messageLastTotal;
-            if (dropThreshold > 0 && messageLastPeriod > 0) {
+            if (dropThreshold > 0 && messageLastPeriod > 0 && messageCurrentPeriod > 0) {
                 double drop = messageCurrentPeriod / (double) messageLastPeriod;
                 if (drop < dropThreshold) {
                     success = false;

@@ -196,73 +196,73 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             }
             case "alarm.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                    position.addAlarm(Position.ALARM_GENERAL);
                 }
                 yield true;
             }
             case "towing.event.trigger", "towing.alarm.status" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+                    position.addAlarm(Position.ALARM_TOW);
                 }
                 yield true;
             }
             case "geofence.event.enter" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+                    position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
                 }
                 yield true;
             }
             case "geofence.event.exit" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+                    position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
                 }
                 yield true;
             }
             case "shock.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                    position.addAlarm(Position.ALARM_VIBRATION);
                 }
                 yield true;
             }
             case "overspeeding.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                    position.addAlarm(Position.ALARM_OVERSPEED);
                 }
                 yield true;
             }
             case "harsh.acceleration.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    position.addAlarm(Position.ALARM_ACCELERATION);
                 }
                 yield true;
             }
             case "harsh.braking.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    position.addAlarm(Position.ALARM_BRAKING);
                 }
                 yield true;
             }
             case "harsh.cornering.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    position.addAlarm(Position.ALARM_CORNERING);
                 }
                 yield true;
             }
             case "gnss.antenna.cut.status" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
+                    position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
                 }
                 yield true;
             }
             case "gsm.jamming.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                    position.addAlarm(Position.ALARM_JAMMING);
                 }
                 yield true;
             }
             case "hood.open.status" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_BONNET);
+                    position.addAlarm(Position.ALARM_BONNET);
                 }
                 yield true;
             }

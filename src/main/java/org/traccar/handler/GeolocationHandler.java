@@ -47,7 +47,7 @@ public class GeolocationHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         if ((position.getOutdated() || processInvalidPositions && !position.getValid())
                 && position.getNetwork() != null
                 && (!requireWifi || position.getNetwork().getWifiAccessPoints() != null)) {

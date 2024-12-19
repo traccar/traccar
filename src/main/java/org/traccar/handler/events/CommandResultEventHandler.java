@@ -26,7 +26,7 @@ public class CommandResultEventHandler extends BaseEventHandler {
     }
 
     @Override
-    public void analyzePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         Object commandResult = position.getAttributes().get(Position.KEY_RESULT);
         if (commandResult != null) {
             Event event = new Event(Event.TYPE_COMMAND_RESULT, position);

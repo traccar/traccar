@@ -53,28 +53,6 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_FIRMWARE = 0x7E;
     public static final int MSG_RESPONSE = 0x7F;
 
-    private String decodeAlarm(long code) {
-        if (BitUtil.check(code, 0)) {
-            return Position.ALARM_LOW_BATTERY;
-        }
-        if (BitUtil.check(code, 1)) {
-            return Position.ALARM_OVERSPEED;
-        }
-        if (BitUtil.check(code, 2)) {
-            return Position.ALARM_FALL_DOWN;
-        }
-        if (BitUtil.check(code, 8)) {
-            return Position.ALARM_POWER_OFF;
-        }
-        if (BitUtil.check(code, 9)) {
-            return Position.ALARM_POWER_ON;
-        }
-        if (BitUtil.check(code, 12)) {
-            return Position.ALARM_SOS;
-        }
-        return null;
-    }
-
     private void sendResponse(Channel channel, SocketAddress remoteAddress, int index, int type, ByteBuf buf) {
 
         if (channel != null) {
@@ -178,7 +156,24 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 0x02:
                         long alarm = buf.readUnsignedIntLE();
-                        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
+                        if (BitUtil.check(alarm, 0)) {
+                            position.addAlarm(Position.ALARM_LOW_BATTERY);
+                        }
+                        if (BitUtil.check(alarm, 1)) {
+                            position.addAlarm(Position.ALARM_OVERSPEED);
+                        }
+                        if (BitUtil.check(alarm, 2)) {
+                            position.addAlarm(Position.ALARM_FALL_DOWN);
+                        }
+                        if (BitUtil.check(alarm, 8)) {
+                            position.addAlarm(Position.ALARM_POWER_OFF);
+                        }
+                        if (BitUtil.check(alarm, 9)) {
+                            position.addAlarm(Position.ALARM_POWER_ON);
+                        }
+                        if (BitUtil.check(alarm, 12)) {
+                            position.addAlarm(Position.ALARM_SOS);
+                        }
                         if (BitUtil.check(alarm, 31)) {
                             position.set("bark", true);
                         }
@@ -214,7 +209,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             int lac = buf.readUnsignedShortLE();
                             long cid;
                             if (key == 0x29) {
-                                cid = buf.readLongLE();
+                                cid = buf.readIntLE();
                             } else {
                                 cid = buf.readUnsignedShortLE();
                             }

@@ -69,39 +69,39 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeAlarmStatus(Position position, byte[] status) {
         if (BitUtil.check(status[0], 4)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+            position.addAlarm(Position.ALARM_LOW_POWER);
         } else if (BitUtil.check(status[0], 6)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+            position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
         } else if (BitUtil.check(status[0], 7)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+            position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
         } else if (BitUtil.check(status[1], 0)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         } else if (BitUtil.check(status[1], 1)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            position.addAlarm(Position.ALARM_OVERSPEED);
         } else if (BitUtil.check(status[1], 3)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+            position.addAlarm(Position.ALARM_POWER_CUT);
         } else if (BitUtil.check(status[1], 6)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+            position.addAlarm(Position.ALARM_TOW);
         } else if (BitUtil.check(status[1], 7)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
+            position.addAlarm(Position.ALARM_DOOR);
         } else if (BitUtil.check(status[2], 2)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
+            position.addAlarm(Position.ALARM_TEMPERATURE);
         } else if (BitUtil.check(status[2], 4)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+            position.addAlarm(Position.ALARM_TAMPERING);
         }  else if (BitUtil.check(status[2], 6)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+            position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
         } else if (BitUtil.check(status[2], 7)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
+            position.addAlarm(Position.ALARM_IDLE);
         } else if (BitUtil.check(status[6], 3)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+            position.addAlarm(Position.ALARM_VIBRATION);
         } else if (BitUtil.check(status[6], 4)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+            position.addAlarm(Position.ALARM_BRAKING);
         } else if (BitUtil.check(status[6], 5)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+            position.addAlarm(Position.ALARM_ACCELERATION);
         } else if (BitUtil.check(status[6], 6)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+            position.addAlarm(Position.ALARM_CORNERING);
         } else if (BitUtil.check(status[6], 7)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+            position.addAlarm(Position.ALARM_ACCIDENT);
         }
     }
 

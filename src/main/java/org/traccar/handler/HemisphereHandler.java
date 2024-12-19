@@ -46,7 +46,7 @@ public class HemisphereHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         if (latitudeFactor != 0) {
             position.setLatitude(Math.abs(position.getLatitude()) * latitudeFactor);
         }

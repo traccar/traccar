@@ -105,7 +105,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ARCHIVE, true);
                     int subtype = buf.readUnsignedShortLE();
                     if (subtype == MSG_ALARM) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                        position.addAlarm(Position.ALARM_GENERAL);
                     }
                     if (buf.readUnsignedShortLE() > buf.readableBytes()) {
                         lastIndex += 1;
@@ -151,7 +151,7 @@ public class ProgressProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 if (type == MSG_ALARM) {
-                    position.set(Position.KEY_ALARM, true);
+                    position.addAlarm(Position.ALARM_GENERAL);
                     byte[] response = {(byte) 0xC9, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
                     channel.writeAndFlush(new NetworkMessage(Unpooled.wrappedBuffer(response), remoteAddress));
                 }

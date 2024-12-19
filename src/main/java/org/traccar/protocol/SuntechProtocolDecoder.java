@@ -137,7 +137,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (type.equals("Emergency") || type.equals("Alert")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            position.addAlarm(Position.ALARM_GENERAL);
         }
 
         if (!type.equals("Alert") || getProtocolType(deviceSession.getDeviceId()) == 0) {
@@ -336,9 +336,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
         String type = values[index++].substring(5);
 
-        if (!type.equals("STT") && !type.equals("EMG") && !type.equals("EVT")
-                && !type.equals("ALT") && !type.equals("UEX")) {
-            return null;
+        boolean result = values[index].equals("Res");
+        if (result) {
+            index += 1;
         }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, values[index++]);
@@ -349,6 +349,16 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
         position.set(Position.KEY_TYPE, type);
+
+        if (result) {
+            position.set(Position.KEY_RESULT, String.join(";", Arrays.copyOfRange(values, index, values.length)));
+            return position;
+        }
+
+        if (!type.equals("STT") && !type.equals("EMG") && !type.equals("EVT")
+                && !type.equals("ALT") && !type.equals("UEX")) {
+            return null;
+        }
 
         if (protocol.startsWith("ST3") || protocol.equals("ST500") || protocol.equals("ST600")) {
             index += 1; // model
@@ -396,9 +406,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_STATUS, Integer.parseInt(values[index++]));
                 position.set(Position.KEY_INDEX, Integer.parseInt(values[index++]));
             }
-            case "EMG" -> position.set(Position.KEY_ALARM, decodeEmergency(Integer.parseInt(values[index++])));
+            case "EMG" -> position.addAlarm(decodeEmergency(Integer.parseInt(values[index++])));
             case "EVT" -> position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));
-            case "ALT" -> position.set(Position.KEY_ALARM, decodeAlert(Integer.parseInt(values[index++])));
+            case "ALT" -> position.addAlarm(decodeAlert(Integer.parseInt(values[index++])));
             case "UEX" -> index = decodeSerialData(position, values, index);
         }
 
@@ -582,7 +592,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 case "ALT" -> {
                     if (BitUtil.check(mask, 19)) {
                         int alertId = Integer.parseInt(values[index++]);
-                        position.set(Position.KEY_ALARM, decodeAlert(alertId));
+                        position.addAlarm(decodeAlert(alertId));
                     }
                     if (BitUtil.check(mask, 20)) {
                         position.set("alertModifier", values[index++]);
@@ -717,7 +727,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(mask, 19)) {
             alertId = buf.readUnsignedByte();
             if (type == 0x82) {
-                position.set(Position.KEY_ALARM, decodeAlert(alertId));
+                position.addAlarm(decodeAlert(alertId));
             }
         }
 

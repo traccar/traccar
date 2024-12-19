@@ -29,7 +29,7 @@ import jakarta.ws.rs.core.MediaType;
 public class OrderResource extends SimpleObjectResource<Order> {
 
     public OrderResource() {
-        super(Order.class);
+        super(Order.class, "description");
     }
 
 }

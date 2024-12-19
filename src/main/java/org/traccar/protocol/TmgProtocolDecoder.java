@@ -104,10 +104,10 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         switch (type) {
-            case "rmv" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-            case "ebl" -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
-            case "ibl" -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-            case "tmp", "smt", "btt" -> position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+            case "rmv" -> position.addAlarm(Position.ALARM_POWER_CUT);
+            case "ebl" -> position.addAlarm(Position.ALARM_LOW_POWER);
+            case "ibl" -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+            case "tmp", "smt", "btt" -> position.addAlarm(Position.ALARM_TAMPERING);
             case "ion" -> position.set(Position.KEY_IGNITION, true);
             case "iof" -> position.set(Position.KEY_IGNITION, false);
         }
@@ -137,7 +137,7 @@ public class TmgProtocolDecoder extends BaseProtocolDecoder {
             int output = parser.nextBinInt();
 
             if (!BitUtil.check(input, 0)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                position.addAlarm(Position.ALARM_SOS);
             }
 
             position.set(Position.KEY_INPUT, input);

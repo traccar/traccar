@@ -17,11 +17,10 @@ package org.traccar.database;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.api.resource.SessionResource;
 import org.traccar.api.security.LoginService;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
-import org.traccar.helper.LogAction;
+import org.traccar.helper.SessionHelper;
 import org.traccar.helper.WebHelper;
 
 import java.net.URI;
@@ -197,8 +196,7 @@ public class OpenIdProvider {
         User user = loginService.login(
                 userInfo.getEmailAddress(), userInfo.getName(), administrator).getUser();
 
-        request.getSession().setAttribute(SessionResource.USER_ID_KEY, user.getId());
-        LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+        SessionHelper.userLogin(request, user, null);
 
         return baseUrl;
     }

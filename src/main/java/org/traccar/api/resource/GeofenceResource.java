@@ -29,7 +29,7 @@ import jakarta.ws.rs.core.MediaType;
 public class GeofenceResource extends ExtendedObjectResource<Geofence> {
 
     public GeofenceResource() {
-        super(Geofence.class);
+        super(Geofence.class, "name");
     }
 
 }

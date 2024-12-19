@@ -363,15 +363,16 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static PositionForwarder providePositionForwarder(
-            Config config, Client client, ExecutorService executorService, ObjectMapper objectMapper) {
+            Config config, Client client, ExecutorService executorService,
+            ObjectMapper objectMapper, CacheManager cacheManager) {
         if (config.hasKey(Keys.FORWARD_URL)) {
             return switch (config.getString(Keys.FORWARD_TYPE)) {
-                case "json" -> new PositionForwarderJson(config, client, objectMapper);
+                case "json" -> new PositionForwarderJson(config, client, objectMapper, cacheManager);
                 case "amqp" -> new PositionForwarderAmqp(config, objectMapper);
                 case "kafka" -> new PositionForwarderKafka(config, objectMapper);
                 case "mqtt" -> new PositionForwarderMqtt(config, objectMapper);
                 case "redis" -> new PositionForwarderRedis(config, objectMapper);
-                case "wialon" -> new PositionForwarderWialon(config, executorService, "1.0");
+                case "wialon" -> new PositionForwarderWialon(config, executorService, "1.0", false);
                 default -> new PositionForwarderUrl(config, client, objectMapper);
             };
         }
