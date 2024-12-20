@@ -691,7 +691,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (type == MSG_WIFI_ALARM) {
                 cellType = buf.readUnsignedByte();
             }
-            int cellCount = variant == Variant.WANWAY_S20 
+            int cellCount = variant == Variant.WANWAY_S20
             || type == MSG_WIFI_ALARM ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
             for (int i = 0; i < cellCount; i++) {
                 int lac;
@@ -812,7 +812,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set("controllerFault", buf.readUnsignedInt());
 
             sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
-            
             return position;
         } else if (type == MSG_STATUS && buf.readableBytes() == 22) {
 
@@ -1094,7 +1093,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (filesLength > 0) {
                 position.set("eventFiles", buf.readCharSequence(filesLength, StandardCharsets.US_ASCII).toString());
             }
-            
         } else {
             if (dataLength > 0) {
                 buf.skipBytes(dataLength);
