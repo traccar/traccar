@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,13 +53,13 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{8}),")                   // status
             .number("(x+),")                     // signal
             .number("(d+),")                     // power
-            .number("(x+),")                     // fuel
+            .number("(x+),")                     // fuel / index
             .number("(x+)")                      // odometer
             .groupBegin()
             .number(",(x+)")                     // altitude
             .groupBegin()
             .number(",d+")                       // gps data
-            .number(",(d*)")                     // rfid
+            .number(",(x*)")                     // rfid
             .number(",(x+)")                     // temperature
             .number(",(d+.d+)")                  // adc
             .number(",(d+)")                     // satellites
@@ -99,29 +99,46 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private String decodeAlarm(long status) {
+    private void decodeAlarm(Position position, long status, String model) {
         if ((status & 0x02000000L) != 0) {
-            return Position.ALARM_GEOFENCE_ENTER;
+            position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
         }
         if ((status & 0x04000000L) != 0) {
-            return Position.ALARM_GEOFENCE_EXIT;
+            position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
         }
         if ((status & 0x08000000L) != 0) {
-            return Position.ALARM_LOW_BATTERY;
+            position.addAlarm(Position.ALARM_LOW_BATTERY);
+        }
+        if ((status & 0x10000000L) != 0 || (status & 0x00000008L) != 0) {
+            position.addAlarm(Position.ALARM_JAMMING);
         }
         if ((status & 0x20000000L) != 0) {
-            return Position.ALARM_VIBRATION;
+            position.addAlarm(Position.ALARM_VIBRATION);
         }
         if ((status & 0x80000000L) != 0) {
-            return Position.ALARM_OVERSPEED;
+            position.addAlarm(Position.ALARM_OVERSPEED);
         }
-        if ((status & 0x00010000L) != 0) {
-            return Position.ALARM_SOS;
+        if ((status & 0x00010000L) != 0 || (status & 0x00000400L) != 0) {
+            position.addAlarm(Position.ALARM_SOS);
         }
         if ((status & 0x00040000L) != 0) {
-            return Position.ALARM_POWER_CUT;
+            position.addAlarm("BWS".equalsIgnoreCase(model) ? Position.ALARM_TAMPERING : Position.ALARM_POWER_CUT);
         }
-        return null;
+        if ((status & 0x00040000L) != 0) {
+            position.addAlarm(Position.ALARM_POWER_CUT);
+        }
+        if ((status & 0x00004000L) != 0) {
+            position.addAlarm(Position.ALARM_LOW_POWER);
+        }
+        if ((status & 0x00008000L) != 0) {
+            position.addAlarm(Position.ALARM_TEMPERATURE);
+        }
+        if ((status & 0x00000001L) != 0) {
+            position.addAlarm(Position.ALARM_BRAKING);
+        }
+        if ((status & 0x00000002L) != 0) {
+            position.addAlarm(Position.ALARM_ACCELERATION);
+        }
     }
 
     @Override
@@ -165,6 +182,8 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        String model = getDeviceModel(deviceSession);
+
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
@@ -196,20 +215,31 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         long status = parser.nextHexLong();
-        position.addAlarm(decodeAlarm(status));
+        decodeAlarm(position, status, model);
         position.set(Position.KEY_BLOCKED, (status & 0x00080000) > 0);
         position.set(Position.KEY_IGNITION, (status & 0x00800000) > 0);
         position.set(Position.KEY_STATUS, status);
 
         position.set(Position.KEY_RSSI, parser.nextHexInt());
         position.set(Position.KEY_POWER, parser.nextDouble());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+
+        if ("BWS".equalsIgnoreCase(model)) {
+            position.set(Position.KEY_INDEX, parser.nextHexInt());
+        } else {
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+        }
+
         position.set(Position.KEY_ODOMETER, parser.nextHexInt() * 100);
 
         position.setAltitude(parser.nextDouble(0));
 
         if (parser.hasNext(4)) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+            if ("BWS".equalsIgnoreCase(model)) {
+                position.set(Position.KEY_HOURS, parser.nextHexLong() * 60000);
+            } else {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+            }
+
             position.set(Position.PREFIX_TEMP + 1, parser.nextHexInt() * 0.01);
             position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
             position.set(Position.KEY_SATELLITES, parser.nextInt());

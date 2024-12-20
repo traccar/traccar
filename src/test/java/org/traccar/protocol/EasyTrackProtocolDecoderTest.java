@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class EasyTrackProtocolDecoderTest extends ProtocolTest {
 
@@ -67,6 +68,15 @@ public class EasyTrackProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "*ET,135790246811221,HB,A,050915,0C2A27,00CE5954,04132263,0000,0000,01000000,20,4,0000,00F123,100,200"));
+
+        decoder.setModelOverride("BWS");
+
+        verifyPosition(decoder, text(
+                "*ET,135790246811221,HB,A,050915,0C2A27,00CE5954,04132263,0000,F000,01000000,20,4,000,00F123,100,4845423835,0091564212,0B45,10.00,9"));
+
+        verifyAttribute(decoder, text(
+                "*ET,135790246811221,DW,A,180709,16081C,80D74F8D,81ACFAD6,04B0,1C20,00800000,23,0,0348,004491,725,0000000000,00181A8C,0DAC,13.41,15"),
+                Position.KEY_HOURS, 94779600000L);
 
     }
 
