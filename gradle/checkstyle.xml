@@ -7,9 +7,8 @@
 
     <module name="SuppressWarningsFilter"/>
 
-    <module name="SuppressionSingleFilter">
-        <property name="files" value="[/\\]protobuf[/\\]"/>
-        <property name="checks" value=".*"/>
+    <module name="BeforeExecutionExclusionFileFilter">
+        <property name="fileNamePattern" value="^.*[\\/]protobuf[\\/].*$"/>
     </module>
 
     <!--<property name="fileExtensions" value="java, properties, xml"/>-->
@@ -78,10 +77,10 @@
         <!-- See http://checkstyle.sf.net/config_sizes.html -->
         <!--<module name="MethodLength">
             <property name="max" value="200"/>
-        </module>-->
+        </module>
         <module name="ParameterNumber">
             <property name="tokens" value="METHOD_DEF"/>
-        </module>
+        </module>-->
 
         <!-- Checks for whitespace                               -->
         <!-- See http://checkstyle.sf.net/config_whitespace.html -->
@@ -115,7 +114,7 @@
         <module name="EqualsHashCode"/>
         <module name="IllegalInstantiation"/>
         <!--<module name="InnerAssignment"/>-->
-        <module name="MissingSwitchDefault"/>
+        <!--<module name="MissingSwitchDefault"/>-->
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
 

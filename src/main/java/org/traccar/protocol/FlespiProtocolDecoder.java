@@ -93,169 +93,205 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
     }
 
     private boolean decodeParam(String name, int index, JsonValue value, Position position) {
-        switch (name) {
-            case "timestamp":
+        return switch (name) {
+            case "timestamp" -> {
                 position.setTime(new Date(((JsonNumber) value).longValue() * 1000));
-                return true;
-            case "position.latitude":
+                yield true;
+            }
+            case "position.latitude" -> {
                 position.setLatitude(((JsonNumber) value).doubleValue());
-                return true;
-            case "position.longitude":
+                yield true;
+            }
+            case "position.longitude" -> {
                 position.setLongitude(((JsonNumber) value).doubleValue());
-                return true;
-            case "position.speed":
+                yield true;
+            }
+            case "position.speed" -> {
                 position.setSpeed(UnitsConverter.knotsFromKph(((JsonNumber) value).doubleValue()));
-                return true;
-            case "position.direction":
+                yield true;
+            }
+            case "position.direction" -> {
                 position.setCourse(((JsonNumber) value).doubleValue());
-                return true;
-            case "position.altitude":
+                yield true;
+            }
+            case "position.altitude" -> {
                 position.setAltitude(((JsonNumber) value).doubleValue());
-                return true;
-            case "position.satellites":
+                yield true;
+            }
+            case "position.satellites" -> {
                 position.set(Position.KEY_SATELLITES, ((JsonNumber) value).intValue());
-                return true;
-            case "position.valid":
+                yield true;
+            }
+            case "position.valid" -> {
                 position.setValid(value == JsonValue.TRUE);
-                return true;
-            case "position.hdop":
+                yield true;
+            }
+            case "position.hdop" -> {
                 position.set(Position.KEY_HDOP, ((JsonNumber) value).doubleValue());
-                return true;
-            case "position.pdop":
+                yield true;
+            }
+            case "position.pdop" -> {
                 position.set(Position.KEY_PDOP, ((JsonNumber) value).doubleValue());
-                return true;
-            case "din":
+                yield true;
+            }
+            case "din" -> {
                 position.set(Position.KEY_INPUT, ((JsonNumber) value).intValue());
-                return true;
-            case "dout":
+                yield true;
+            }
+            case "dout" -> {
                 position.set(Position.KEY_OUTPUT, ((JsonNumber) value).intValue());
-                return true;
-            case "report.reason":
+                yield true;
+            }
+            case "report.reason" -> {
                 position.set(Position.KEY_EVENT, ((JsonNumber) value).intValue());
-                return true;
-            case "gps.vehicle.mileage":
+                yield true;
+            }
+            case "gps.vehicle.mileage" -> {
                 position.set(Position.KEY_ODOMETER, ((JsonNumber) value).doubleValue());
-                return true;
-            case "external.powersource.voltage":
+                yield true;
+            }
+            case "external.powersource.voltage" -> {
                 position.set(Position.KEY_POWER, ((JsonNumber) value).doubleValue());
-                return true;
-            case "battery.voltage":
+                yield true;
+            }
+            case "battery.voltage" -> {
                 position.set(Position.KEY_BATTERY, ((JsonNumber) value).doubleValue());
-                return true;
-            case "battery.level":
+                yield true;
+            }
+            case "battery.level" -> {
                 position.set(Position.KEY_BATTERY_LEVEL, ((JsonNumber) value).intValue());
-                return true;
-            case "fuel.level":
-            case "can.fuel.level":
+                yield true;
+            }
+            case "fuel.level", "can.fuel.level" -> {
                 position.set(Position.KEY_FUEL_LEVEL, ((JsonNumber) value).doubleValue());
-                return true;
-            case "engine.rpm":
-            case "can.engine.rpm":
+                yield true;
+            }
+            case "engine.rpm", "can.engine.rpm" -> {
                 position.set(Position.KEY_RPM, ((JsonNumber) value).doubleValue());
-                return true;
-            case "can.engine.temperature":
+                yield true;
+            }
+            case "can.engine.temperature" -> {
                 position.set(Position.PREFIX_TEMP + Math.max(index, 0), ((JsonNumber) value).doubleValue());
-                return true;
-            case "engine.ignition.status":
+                yield true;
+            }
+            case "engine.ignition.status" -> {
                 position.set(Position.KEY_IGNITION, value == JsonValue.TRUE);
-                return true;
-            case "movement.status":
+                yield true;
+            }
+            case "movement.status" -> {
                 position.set(Position.KEY_MOTION, value == JsonValue.TRUE);
-                return true;
-            case "device.temperature":
+                yield true;
+            }
+            case "device.temperature" -> {
                 position.set(Position.KEY_DEVICE_TEMP, ((JsonNumber) value).doubleValue());
-                return true;
-            case "ibutton.code":
+                yield true;
+            }
+            case "ibutton.code" -> {
                 position.set(Position.KEY_DRIVER_UNIQUE_ID, ((JsonString) value).getString());
-                return true;
-            case "vehicle.vin":
+                yield true;
+            }
+            case "vehicle.vin" -> {
                 position.set(Position.KEY_VIN, ((JsonString) value).getString());
-                return true;
-            case "alarm.event.trigger":
+                yield true;
+            }
+            case "alarm.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                    position.addAlarm(Position.ALARM_GENERAL);
                 }
-                return true;
-            case "towing.event.trigger":
-            case "towing.alarm.status":
+                yield true;
+            }
+            case "towing.event.trigger", "towing.alarm.status" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+                    position.addAlarm(Position.ALARM_TOW);
                 }
-                return true;
-            case "geofence.event.enter":
+                yield true;
+            }
+            case "geofence.event.enter" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+                    position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
                 }
-                return true;
-            case "geofence.event.exit":
+                yield true;
+            }
+            case "geofence.event.exit" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+                    position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
                 }
-                return true;
-            case "shock.event.trigger":
+                yield true;
+            }
+            case "shock.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+                    position.addAlarm(Position.ALARM_VIBRATION);
                 }
-                return true;
-            case "overspeeding.event.trigger":
+                yield true;
+            }
+            case "overspeeding.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+                    position.addAlarm(Position.ALARM_OVERSPEED);
                 }
-                return true;
-            case "harsh.acceleration.event.trigger":
+                yield true;
+            }
+            case "harsh.acceleration.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    position.addAlarm(Position.ALARM_ACCELERATION);
                 }
-                return true;
-            case "harsh.braking.event.trigger":
+                yield true;
+            }
+            case "harsh.braking.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    position.addAlarm(Position.ALARM_BRAKING);
                 }
-                return true;
-            case "harsh.cornering.event.trigger":
+                yield true;
+            }
+            case "harsh.cornering.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    position.addAlarm(Position.ALARM_CORNERING);
                 }
-                return true;
-            case "gnss.antenna.cut.status":
+                yield true;
+            }
+            case "gnss.antenna.cut.status" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
+                    position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
                 }
-                return true;
-            case "gsm.jamming.event.trigger":
+                yield true;
+            }
+            case "gsm.jamming.event.trigger" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                    position.addAlarm(Position.ALARM_JAMMING);
                 }
-                return true;
-            case "hood.open.status":
+                yield true;
+            }
+            case "hood.open.status" -> {
                 if (value == JsonValue.TRUE) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_BONNET);
+                    position.addAlarm(Position.ALARM_BONNET);
                 }
-                return true;
-            case "custom.wln_accel_max":
+                yield true;
+            }
+            case "custom.wln_accel_max" -> {
                 position.set("maxAcceleration", ((JsonNumber) value).doubleValue());
-                return true;
-            case "custom.wln_brk_max":
+                yield true;
+            }
+            case "custom.wln_brk_max" -> {
                 position.set("maxBraking", ((JsonNumber) value).doubleValue());
-                return true;
-            case "custom.wln_crn_max":
+                yield true;
+            }
+            case "custom.wln_crn_max" -> {
                 position.set("maxCornering", ((JsonNumber) value).doubleValue());
-                return true;
-            default:
-                return false;
-        }
+                yield true;
+            }
+            default -> false;
+        };
     }
 
     private void decodeUnknownParam(String name, JsonValue value, Position position) {
-        if (value instanceof JsonNumber) {
-            if (((JsonNumber) value).isIntegral()) {
-                position.set(name, ((JsonNumber) value).longValue());
+        if (value instanceof JsonNumber jsonNumber) {
+            if (jsonNumber.isIntegral()) {
+                position.set(name, jsonNumber.longValue());
             } else {
-                position.set(name, ((JsonNumber) value).doubleValue());
+                position.set(name, jsonNumber.doubleValue());
             }
-            position.set(name, ((JsonNumber) value).doubleValue());
-        } else if (value instanceof JsonString) {
-            position.set(name, ((JsonString) value).getString());
+            position.set(name, jsonNumber.doubleValue());
+        } else if (value instanceof JsonString jsonString) {
+            position.set(name, jsonString.getString());
         } else if (value == JsonValue.TRUE || value == JsonValue.FALSE) {
             position.set(name, value == JsonValue.TRUE);
         }

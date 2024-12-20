@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -95,16 +96,12 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(short reason) {
-        switch (reason) {
-            case 70:
-                return Position.ALARM_SOS;
-            case 80:
-                return Position.ALARM_POWER_CUT;
-            case 81:
-                return Position.ALARM_LOW_POWER;
-            default:
-                return null;
-        }
+        return switch (reason) {
+            case 70 -> Position.ALARM_SOS;
+            case 80 -> Position.ALARM_POWER_CUT;
+            case 81 -> Position.ALARM_LOW_POWER;
+            default -> null;
+        };
     }
 
     private Position decodeStatus(ByteBuf buf, DeviceSession deviceSession, boolean alternative) {
@@ -121,7 +118,7 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // operator / configuration flags
         buf.readUnsignedByte(); // reason data
         short event = buf.readUnsignedByte();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
 
         position.set("mode", buf.readUnsignedByte());
@@ -145,8 +142,8 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
 
-        buf.skipBytes(6); // multi-purpose data
         buf.readUnsignedShortLE(); // fix time
         buf.readUnsignedByte(); // location status
         buf.readUnsignedByte(); // mode 1

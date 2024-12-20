@@ -63,18 +63,13 @@ public class NyitechProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int type) {
-        switch (type) {
-            case 0x09:
-                return Position.ALARM_ACCELERATION;
-            case 0x0a:
-                return Position.ALARM_BRAKING;
-            case 0x0b:
-                return Position.ALARM_CORNERING;
-            case 0x0e:
-                return Position.ALARM_SOS;
-            default:
-                return null;
-        }
+        return switch (type) {
+            case 0x09 -> Position.ALARM_ACCELERATION;
+            case 0x0a -> Position.ALARM_BRAKING;
+            case 0x0b -> Position.ALARM_CORNERING;
+            case 0x0e -> Position.ALARM_SOS;
+            default -> null;
+        };
     }
 
     @Override
@@ -121,18 +116,10 @@ public class NyitechProtocolDecoder extends BaseProtocolDecoder {
                     int pid = buf.readUnsignedShortLE();
                     int length = buf.readUnsignedByte();
                     switch (length) {
-                        case 1:
-                            position.add(ObdDecoder.decodeData(pid, buf.readByte(), true));
-                            break;
-                        case 2:
-                            position.add(ObdDecoder.decodeData(pid, buf.readShortLE(), true));
-                            break;
-                        case 4:
-                            position.add(ObdDecoder.decodeData(pid, buf.readIntLE(), true));
-                            break;
-                        default:
-                            buf.skipBytes(length);
-                            break;
+                        case 1 -> position.add(ObdDecoder.decodeData(pid, buf.readByte(), true));
+                        case 2 -> position.add(ObdDecoder.decodeData(pid, buf.readShortLE(), true));
+                        case 4 -> position.add(ObdDecoder.decodeData(pid, buf.readIntLE(), true));
+                        default -> buf.skipBytes(length);
                     }
                 }
             }
@@ -145,7 +132,7 @@ public class NyitechProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedShortLE(); // random number
             buf.readUnsignedByte(); // tag
-            position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+            position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
             buf.readUnsignedShortLE(); // threshold
             buf.readUnsignedShortLE(); // value
             buf.skipBytes(6); // time

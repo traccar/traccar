@@ -108,38 +108,19 @@ public class AdmProtocolDecoder extends BaseProtocolDecoder {
                 int endIndex = buf.readerIndex() + buf.readUnsignedByte();
                 while (buf.readerIndex() < endIndex) {
                     int mask = buf.readUnsignedByte();
-                    long value;
-                    switch (BitUtil.from(mask, 6)) {
-                        case 3:
-                            value = buf.readLongLE();
-                            break;
-                        case 2:
-                            value = buf.readUnsignedIntLE();
-                            break;
-                        case 1:
-                            value = buf.readUnsignedShortLE();
-                            break;
-                        default:
-                            value = buf.readUnsignedByte();
-                            break;
-                    }
+                    long value = switch (BitUtil.from(mask, 6)) {
+                        case 3 -> buf.readLongLE();
+                        case 2 -> buf.readUnsignedIntLE();
+                        case 1 -> buf.readUnsignedShortLE();
+                        default -> buf.readUnsignedByte();
+                    };
                     int index = BitUtil.to(mask, 6);
                     switch (index) {
-                        case 1:
-                            position.set(Position.PREFIX_TEMP + 1, value);
-                            break;
-                        case 2:
-                            position.set("humidity", value);
-                            break;
-                        case 3:
-                            position.set("illumination", value);
-                            break;
-                        case 4:
-                            position.set(Position.KEY_BATTERY, value);
-                            break;
-                        default:
-                            position.set("can" + index, value);
-                            break;
+                        case 1 -> position.set(Position.PREFIX_TEMP + 1, value);
+                        case 2 -> position.set(Position.KEY_HUMIDITY, value);
+                        case 3 -> position.set("illumination", value);
+                        case 4 -> position.set(Position.KEY_BATTERY, value);
+                        default -> position.set("can" + index, value);
                     }
                 }
             }

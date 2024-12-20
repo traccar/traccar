@@ -116,29 +116,18 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(String status) {
-        switch (status) {
-            case "WD":
-            case "EA":
-                return Position.ALARM_SOS;
-            case "BL":
-                return Position.ALARM_LOW_BATTERY;
-            case "HB":
-                return Position.ALARM_BRAKING;
-            case "HA":
-                return Position.ALARM_ACCELERATION;
-            case "RT":
-                return Position.ALARM_CORNERING;
-            case "OS":
-                return Position.ALARM_OVERSPEED;
-            case "TA":
-                return Position.ALARM_TAMPERING;
-            case "BD":
-                return Position.ALARM_POWER_CUT;
-            case "BR":
-                return Position.ALARM_POWER_RESTORED;
-            default:
-                return null;
-        }
+        return switch (status) {
+            case "WD", "EA" -> Position.ALARM_SOS;
+            case "BL" -> Position.ALARM_LOW_BATTERY;
+            case "HB" -> Position.ALARM_BRAKING;
+            case "HA" -> Position.ALARM_ACCELERATION;
+            case "RT" -> Position.ALARM_CORNERING;
+            case "OS" -> Position.ALARM_OVERSPEED;
+            case "TA" -> Position.ALARM_TAMPERING;
+            case "BD" -> Position.ALARM_POWER_CUT;
+            case "BR" -> Position.ALARM_POWER_RESTORED;
+            default -> null;
+        };
     }
 
     @Override
@@ -179,7 +168,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (type != null && type.equals("EMR")) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         }
 
         if (event != null) {
@@ -198,7 +187,7 @@ public class ItsProtocolDecoder extends BaseProtocolDecoder {
             } else if (status.equals("IF")) {
                 position.set(Position.KEY_IGNITION, false);
             } else {
-                position.set(Position.KEY_ALARM, decodeAlarm(status));
+                position.addAlarm(decodeAlarm(status));
             }
         }
 

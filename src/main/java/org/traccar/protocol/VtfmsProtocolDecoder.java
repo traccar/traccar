@@ -77,20 +77,14 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 10:
-                return Position.ALARM_OVERSPEED;
-            case 14:
-                return Position.ALARM_POWER_CUT;
-            case 15:
-                return Position.ALARM_POWER_RESTORED;
-            case 32:
-                return Position.ALARM_BRAKING;
-            case 33:
-                return Position.ALARM_ACCELERATION;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 10 -> Position.ALARM_OVERSPEED;
+            case 14 -> Position.ALARM_POWER_CUT;
+            case 15 -> Position.ALARM_POWER_RESTORED;
+            case 32 -> Position.ALARM_BRAKING;
+            case 33 -> Position.ALARM_ACCELERATION;
+            default -> null;
+        };
     }
 
     private double convertToDegrees(double value) {
@@ -115,7 +109,7 @@ public class VtfmsProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
+        position.addAlarm(decodeAlarm(parser.nextInt()));
         position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_SATELLITES, parser.nextInt());
 

@@ -59,24 +59,16 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(String type) {
-        switch (type) {
-            case "T8":
-                return Position.ALARM_LOW_BATTERY;
-            case "T9":
-                return Position.ALARM_VIBRATION;
-            case "T10":
-                return Position.ALARM_POWER_CUT;
-            case "T11":
-                return Position.ALARM_LOW_POWER;
-            case "T12":
-                return Position.ALARM_GEOFENCE_EXIT;
-            case "T13":
-                return Position.ALARM_OVERSPEED;
-            case "T15":
-                return Position.ALARM_TOW;
-            default:
-                return null;
-        }
+        return switch (type) {
+            case "T8" -> Position.ALARM_LOW_BATTERY;
+            case "T9" -> Position.ALARM_VIBRATION;
+            case "T10" -> Position.ALARM_POWER_CUT;
+            case "T11" -> Position.ALARM_LOW_POWER;
+            case "T12" -> Position.ALARM_GEOFENCE_EXIT;
+            case "T13" -> Position.ALARM_OVERSPEED;
+            case "T15" -> Position.ALARM_TOW;
+            default -> null;
+        };
     }
 
     @Override
@@ -116,7 +108,7 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_TYPE, type);
-        position.set(Position.KEY_ALARM, decodeAlarm(type));
+        position.addAlarm(decodeAlarm(type));
 
         int status = parser.nextHexInt();
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));

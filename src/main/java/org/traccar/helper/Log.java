@@ -49,7 +49,7 @@ public final class Log {
     }
 
     private static final String STACK_PACKAGE = "org.traccar";
-    private static final int STACK_LIMIT = 3;
+    private static final int STACK_LIMIT = 4;
 
     private static class RollingFileHandler extends Handler {
 
@@ -126,21 +126,13 @@ public final class Log {
         }
 
         private static String formatLevel(Level level) {
-            switch (level.getName()) {
-                case "FINEST":
-                    return "TRACE";
-                case "FINER":
-                case "FINE":
-                case "CONFIG":
-                    return "DEBUG";
-                case "INFO":
-                    return "INFO";
-                case "WARNING":
-                    return "WARN";
-                case "SEVERE":
-                default:
-                    return "ERROR";
-            }
+            return switch (level.getName()) {
+                case "FINEST" -> "TRACE";
+                case "FINER", "FINE", "CONFIG" -> "DEBUG";
+                case "INFO" -> "INFO";
+                case "WARNING" -> "WARN";
+                default -> "ERROR";
+            };
         }
 
         @Override
@@ -152,7 +144,7 @@ public final class Log {
             }
 
             if (record.getThrown() != null) {
-                if (message.length() > 0) {
+                if (!message.isEmpty()) {
                     message.append(" - ");
                 }
                 if (fullStackTraces) {
@@ -292,8 +284,8 @@ public final class Log {
             }
         }
         return stores.stream()
-                .sorted(Comparator.comparingDouble(p -> p.getFirst() / (double) p.getSecond()))
-                .flatMap(p -> Stream.of(p.getFirst(), p.getSecond()))
+                .sorted(Comparator.comparingDouble(p -> p.first() / (double) p.second()))
+                .flatMap(p -> Stream.of(p.first(), p.second()))
                 .mapToLong(Long::longValue)
                 .toArray();
     }

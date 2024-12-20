@@ -48,7 +48,7 @@ public class MotionEventHandler extends BaseEventHandler {
     }
 
     @Override
-    public void analyzePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
 
         long deviceId = position.getDeviceId();
         Device device = cacheManager.getObject(Device.class, deviceId);

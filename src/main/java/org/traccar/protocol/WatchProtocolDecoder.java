@@ -132,7 +132,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STEPS, parser.nextInt(0));
 
         int status = parser.nextHexInt(0);
-        position.set(Position.KEY_ALARM, decodeAlarm(status));
+        position.addAlarm(decodeAlarm(status));
         if (BitUtil.check(status, 4)) {
             position.set(Position.KEY_MOTION, true);
         }
@@ -269,7 +269,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
 
             if (type.startsWith("AL")) {
                 if (position != null && !position.hasAttribute(Position.KEY_ALARM)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                    position.addAlarm(Position.ALARM_GENERAL);
                 }
                 sendResponse(channel, id, index, "AL");
             }

@@ -94,101 +94,45 @@ public class PacificTrackProtocolDecoder extends BaseProtocolDecoder {
                         int fieldPrefix = BitUtil.from(field, 5);
                         if (fieldPrefix < 0b100) {
                             switch (BitUtil.between(field, 2, 5)) {
-                                case 0b000:
-                                    position.set("bus", BitUtil.to(field, 2));
-                                    break;
-                                case 0b001:
-                                    position.set("currentGear", BitUtil.to(field, 2));
-                                    break;
-                                default:
-                                    break;
+                                case 0b000 -> position.set("bus", BitUtil.to(field, 2));
+                                case 0b001 -> position.set("currentGear", BitUtil.to(field, 2));
                             }
                         } else if (fieldPrefix < 0b101) {
                             switch (BitUtil.to(field, 5)) {
-                                case 0b00000:
-                                    position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
-                                    break;
-                                case 0b00001:
-                                    position.set(Position.KEY_RPM, buf.readUnsignedByte() * 32);
-                                    break;
-                                case 0b00011:
-                                    position.set("oilPressure", buf.readUnsignedByte() * 4);
-                                    break;
-                                case 0b00100:
-                                    position.set("oilLevel", buf.readUnsignedByte() * 0.4);
-                                    break;
-                                case 0b00101:
-                                    position.set("oilTemp", buf.readUnsignedByte() - 40);
-                                    break;
-                                case 0b00110:
-                                    position.set("coolantLevel", buf.readUnsignedByte() * 0.4);
-                                    break;
-                                case 0b00111:
-                                    position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
-                                    break;
-                                case 0b01000:
-                                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
-                                    break;
-                                case 0b01001:
-                                    position.set("defLevel", buf.readUnsignedByte() * 0.4);
-                                    break;
-                                case 0b01010:
-                                    position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
-                                    break;
-                                case 0b01011:
-                                    position.set("barometer", buf.readUnsignedByte() * 0.5);
-                                    break;
-                                case 0b01100:
-                                    position.set("intakeManifoldTemp", buf.readUnsignedByte() - 40);
-                                    break;
-                                case 0b01101:
-                                    position.set("fuelTankTemp", buf.readUnsignedByte() - 40);
-                                    break;
-                                case 0b01110:
-                                    position.set("intercoolerTemp", buf.readUnsignedByte() - 40);
-                                    break;
-                                case 0b01111:
-                                    position.set("turboOilTemp", buf.readUnsignedByte() - 40);
-                                    break;
-                                case 0b10000:
-                                    position.set("transOilTemp", buf.readUnsignedByte() - 40);
-                                    break;
-                                default:
-                                    buf.readUnsignedByte();
-                                    break;
+                                case 0b00000 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
+                                case 0b00001 -> position.set(Position.KEY_RPM, buf.readUnsignedByte() * 32);
+                                case 0b00011 -> position.set("oilPressure", buf.readUnsignedByte() * 4);
+                                case 0b00100 -> position.set("oilLevel", buf.readUnsignedByte() * 0.4);
+                                case 0b00101 -> position.set("oilTemp", buf.readUnsignedByte() - 40);
+                                case 0b00110 -> position.set("coolantLevel", buf.readUnsignedByte() * 0.4);
+                                case 0b00111 -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
+                                case 0b01000 -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
+                                case 0b01001 -> position.set("defLevel", buf.readUnsignedByte() * 0.4);
+                                case 0b01010 -> position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
+                                case 0b01011 -> position.set("barometer", buf.readUnsignedByte() * 0.5);
+                                case 0b01100 -> position.set("intakeManifoldTemp", buf.readUnsignedByte() - 40);
+                                case 0b01101 -> position.set("fuelTankTemp", buf.readUnsignedByte() - 40);
+                                case 0b01110 -> position.set("intercoolerTemp", buf.readUnsignedByte() - 40);
+                                case 0b01111 -> position.set("turboOilTemp", buf.readUnsignedByte() - 40);
+                                case 0b10000 -> position.set("transOilTemp", buf.readUnsignedByte() - 40);
+                                default -> buf.readUnsignedByte();
                             }
                         } else if (fieldPrefix < 0b110) {
                             switch (BitUtil.to(field, 5)) {
-                                case 0b00010:
-                                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 512.0);
-                                    break;
-                                case 0b00011:
-                                    position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() * 0.03125 - 273);
-                                    break;
-                                default:
-                                    buf.readUnsignedShort();
-                                    break;
+                                case 0b00010 -> position.set(
+                                        Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() / 512.0);
+                                case 0b00011 -> position.set(
+                                        Position.PREFIX_TEMP + 1, buf.readUnsignedShort() * 0.03125 - 273);
+                                default -> buf.readUnsignedShort();
                             }
                         }  else if (fieldPrefix < 0b111) {
                             switch (BitUtil.to(field, 5)) {
-                                case 0b00000:
-                                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
-                                    break;
-                                case 0b00001:
-                                    position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 180);
-                                    break;
-                                case 0b00010:
-                                    position.set("idleHours", buf.readUnsignedInt() * 180);
-                                    break;
-                                case 0b00100:
-                                    position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.5);
-                                    break;
-                                case 0b00101:
-                                    position.set("fuelUsedIdle", buf.readUnsignedInt() * 0.5);
-                                    break;
-                                default:
-                                    buf.readUnsignedInt();
-                                    break;
+                                case 0b00000 -> position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
+                                case 0b00001 -> position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 180);
+                                case 0b00010 -> position.set("idleHours", buf.readUnsignedInt() * 180);
+                                case 0b00100 -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.5);
+                                case 0b00101 -> position.set("fuelUsedIdle", buf.readUnsignedInt() * 0.5);
+                                default -> buf.readUnsignedInt();
                             }
                         } else {
                             buf.skipBytes(buf.readUnsignedByte());

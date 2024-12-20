@@ -19,6 +19,13 @@ public class EasyTrackProtocolEncoderTest extends ProtocolTest {
 
         assertEquals("*ET,123456789012345,FD,Y1#", encoder.encodeCommand(command));
 
+        command = new Command();
+        command.setDeviceId(1);
+        command.setType(Command.TYPE_CUSTOM);
+        command.set(Command.KEY_DATA, "SPEED120");
+
+        assertEquals("*ET,123456789012345,KS,SPEED120#", encoder.encodeCommand(command));
+
     }
 
 }

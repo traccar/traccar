@@ -37,18 +37,20 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Date;
-import java.util.stream.Collectors;
 
 public class ComputedAttributesHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputedAttributesHandler.class);
 
     private final CacheManager cacheManager;
+    private boolean early;
 
     private final JexlEngine engine;
 
@@ -57,15 +59,30 @@ public class ComputedAttributesHandler extends BasePositionHandler {
     private final boolean includeDeviceAttributes;
     private final boolean includeLastAttributes;
 
-    @Inject
-    public ComputedAttributesHandler(Config config, CacheManager cacheManager) {
+    public static class Early extends ComputedAttributesHandler {
+        @Inject
+        public Early(Config config, CacheManager cacheManager) {
+            super(config, cacheManager, true);
+        }
+    }
+
+    public static class Late extends ComputedAttributesHandler {
+        @Inject
+        public Late(Config config, CacheManager cacheManager) {
+            super(config, cacheManager, false);
+        }
+    }
+
+    public ComputedAttributesHandler(Config config, CacheManager cacheManager, boolean early) {
         this.cacheManager = cacheManager;
+        this.early = early;
         JexlSandbox sandbox = new JexlSandbox(false);
         sandbox.allow("com.safe.Functions");
         sandbox.allow(Math.class.getName());
         List.of(
             Double.class, Float.class, Integer.class, Long.class, Short.class,
-            Character.class, Boolean.class, String.class, Byte.class, Date.class)
+            Character.class, Boolean.class, String.class, Byte.class, Date.class,
+            HashMap.class, LinkedHashMap.class, double[].class, int[].class, boolean[].class, String[].class)
                 .forEach((type) -> sandbox.allow(type.getName()));
         features = new JexlFeatures()
                 .localVar(config.getBoolean(Keys.PROCESSING_COMPUTED_ATTRIBUTES_LOCAL_VARIABLES))
@@ -140,63 +157,48 @@ public class ComputedAttributesHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         var attributes = cacheManager.getDeviceObjects(position.getDeviceId(), Attribute.class).stream()
+                .filter(attribute -> attribute.getPriority() < 0 == early)
                 .sorted(Comparator.comparing(Attribute::getPriority).reversed())
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
         for (Attribute attribute : attributes) {
             if (attribute.getAttribute() != null) {
-                Object result = null;
                 try {
-                    result = computeAttribute(attribute, position);
-                } catch (JexlException error) {
-                    LOGGER.warn("Attribute computation error", error);
-                }
-                if (result != null) {
-                    try {
+                    Object result = computeAttribute(attribute, position);
+                    if (result != null) {
                         switch (attribute.getAttribute()) {
-                            case "valid":
-                                position.setValid((Boolean) result);
-                                break;
-                            case "latitude":
-                                position.setLatitude(((Number) result).doubleValue());
-                                break;
-                            case "longitude":
-                                position.setLongitude(((Number) result).doubleValue());
-                                break;
-                            case "altitude":
-                                position.setAltitude(((Number) result).doubleValue());
-                                break;
-                            case "speed":
-                                position.setSpeed(((Number) result).doubleValue());
-                                break;
-                            case "course":
-                                position.setCourse(((Number) result).doubleValue());
-                                break;
-                            case "address":
-                                position.setAddress((String) result);
-                                break;
-                            case "accuracy":
-                                position.setAccuracy(((Number) result).doubleValue());
-                                break;
-                            default:
+                            case "valid" -> position.setValid((Boolean) result);
+                            case "latitude" -> position.setLatitude(((Number) result).doubleValue());
+                            case "longitude" -> position.setLongitude(((Number) result).doubleValue());
+                            case "altitude" -> position.setAltitude(((Number) result).doubleValue());
+                            case "speed" -> position.setSpeed(((Number) result).doubleValue());
+                            case "course" -> position.setCourse(((Number) result).doubleValue());
+                            case "address" -> position.setAddress((String) result);
+                            case "accuracy" -> position.setAccuracy(((Number) result).doubleValue());
+                            default -> {
                                 switch (attribute.getType()) {
-                                    case "number":
+                                    case "number" -> {
                                         Number numberValue = (Number) result;
                                         position.getAttributes().put(attribute.getAttribute(), numberValue);
-                                        break;
-                                    case "boolean":
+                                    }
+                                    case "boolean" -> {
                                         Boolean booleanValue = (Boolean) result;
                                         position.getAttributes().put(attribute.getAttribute(), booleanValue);
-                                        break;
-                                    default:
+                                    }
+                                    default -> {
                                         position.getAttributes().put(attribute.getAttribute(), result.toString());
+                                    }
                                 }
-                                break;
+                            }
                         }
-                    } catch (ClassCastException error) {
-                        LOGGER.warn("Attribute cast error", error);
+                    } else {
+                        position.getAttributes().remove(attribute.getAttribute());
                     }
+                } catch (JexlException error) {
+                    LOGGER.warn("Attribute computation error", error);
+                } catch (ClassCastException error) {
+                    LOGGER.warn("Attribute cast error", error);
                 }
             }
         }

@@ -37,24 +37,16 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 4:
-                return Position.ALARM_LOW_BATTERY;
-            case 6:
-                return Position.ALARM_POWER_RESTORED;
-            case 10:
-                return Position.ALARM_SOS;
-            case 13:
-                return Position.ALARM_BRAKING;
-            case 14:
-                return Position.ALARM_ACCELERATION;
-            case 17:
-                return Position.ALARM_OVERSPEED;
-            case 23:
-                return Position.ALARM_ACCIDENT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 4 -> Position.ALARM_LOW_BATTERY;
+            case 6 -> Position.ALARM_POWER_RESTORED;
+            case 10 -> Position.ALARM_SOS;
+            case 13 -> Position.ALARM_BRAKING;
+            case 14 -> Position.ALARM_ACCELERATION;
+            case 17 -> Position.ALARM_OVERSPEED;
+            case 23 -> Position.ALARM_ACCIDENT;
+            default -> null;
+        };
     }
 
     @Override
@@ -102,14 +94,14 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(status0, 6));
         position.set(Position.PREFIX_IN + 3, BitUtil.check(status0, 5));
         if (BitUtil.check(status0, 4)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+            position.addAlarm(Position.ALARM_POWER_OFF);
         }
         position.set(Position.KEY_IGNITION, BitUtil.check(status0, 3));
 
         buf.readUnsignedByte(); // reserved
 
         int event = buf.readUnsignedByte();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
 
         int status3 = buf.readUnsignedByte();
@@ -117,7 +109,7 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ARCHIVE, true);
         }
         if (BitUtil.check(status3, 5)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
+            position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
         }
 
         int rssi = buf.readUnsignedByte();

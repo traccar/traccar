@@ -93,7 +93,7 @@ public class IdplProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_POWER, parser.nextInt(0));
         position.set(Position.KEY_BATTERY, parser.nextDouble(0));
         if (parser.nextInt(0) == 1) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         }
         parser.nextInt(0); // body tamper
         position.set("acStatus", parser.nextInt(0));

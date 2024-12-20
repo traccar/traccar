@@ -91,16 +91,12 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 1:
-                return Position.ALARM_SOS;
-            case 3:
-                return Position.ALARM_GEOFENCE;
-            case 4:
-                return Position.ALARM_POWER_CUT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 1 -> Position.ALARM_SOS;
+            case 3 -> Position.ALARM_GEOFENCE;
+            case 4 -> Position.ALARM_POWER_CUT;
+            default -> null;
+        };
     }
 
     private Object decodeSrt(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -145,7 +141,7 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         parser.next(); // seq
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextInt()));
+        position.addAlarm(decodeAlarm(parser.nextInt()));
         parser.next(); // alert status or data
 
         position.setLatitude(parser.nextDouble());
@@ -220,14 +216,11 @@ public class TrakMateProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String type = sentence.substring(typeIndex + 3, typeIndex + 6);
-        switch (type) {
-            case "ALT":
-                return decodeAlt(channel, remoteAddress, sentence);
-            case "SRT":
-                return decodeSrt(channel, remoteAddress, sentence);
-            default:
-                return decodePer(channel, remoteAddress, sentence);
-        }
+        return switch (type) {
+            case "ALT" -> decodeAlt(channel, remoteAddress, sentence);
+            case "SRT" -> decodeSrt(channel, remoteAddress, sentence);
+            default -> decodePer(channel, remoteAddress, sentence);
+        };
     }
 
 }

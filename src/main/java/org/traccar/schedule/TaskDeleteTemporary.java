@@ -28,7 +28,7 @@ import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class TaskDeleteTemporary implements ScheduleTask {
+public class TaskDeleteTemporary extends SingleScheduleTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskDeleteTemporary.class);
 

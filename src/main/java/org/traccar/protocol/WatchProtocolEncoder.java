@@ -134,42 +134,28 @@ public class WatchProtocolEncoder extends StringProtocolEncoder implements Strin
     @Override
     protected Object encodeCommand(Channel channel, Command command) {
 
-        switch (command.getType()) {
-            case Command.TYPE_CUSTOM:
-                return formatTextCommand(channel, command, command.getString(Command.KEY_DATA));
-            case Command.TYPE_POSITION_SINGLE:
-                return formatTextCommand(channel, command, "CR");
-            case Command.TYPE_SOS_NUMBER:
-                return formatTextCommand(channel, command, "SOS%s,%s", Command.KEY_INDEX, Command.KEY_PHONE);
-            case Command.TYPE_ALARM_SOS:
-                return formatTextCommand(channel, command, "SOSSMS,%s", Command.KEY_ENABLE);
-            case Command.TYPE_ALARM_BATTERY:
-                return formatTextCommand(channel, command, "LOWBAT,%s", Command.KEY_ENABLE);
-            case Command.TYPE_REBOOT_DEVICE:
-                return formatTextCommand(channel, command, "RESET");
-            case Command.TYPE_POWER_OFF:
-                return formatTextCommand(channel, command, "POWEROFF");
-            case Command.TYPE_ALARM_REMOVE:
-                return formatTextCommand(channel, command, "REMOVE,%s", Command.KEY_ENABLE);
-            case Command.TYPE_SILENCE_TIME:
-                return formatTextCommand(channel, command, "SILENCETIME,%s", Command.KEY_DATA);
-            case Command.TYPE_ALARM_CLOCK:
-                return formatTextCommand(channel, command, "REMIND,%s", Command.KEY_DATA);
-            case Command.TYPE_SET_PHONEBOOK:
-                return formatTextCommand(channel, command, "PHB,%s", Command.KEY_DATA);
-            case Command.TYPE_MESSAGE:
-                return formatTextCommand(channel, command, "MESSAGE,%s", Command.KEY_MESSAGE);
-            case Command.TYPE_VOICE_MESSAGE:
-                return formatBinaryCommand(channel, command, "TK,", getBinaryData(command));
-            case Command.TYPE_POSITION_PERIODIC:
-                return formatTextCommand(channel, command, "UPLOAD,%s", Command.KEY_FREQUENCY);
-            case Command.TYPE_SET_TIMEZONE:
-                return formatTextCommand(channel, command, "LZ,%s,%s", Command.KEY_LANGUAGE, Command.KEY_TIMEZONE);
-            case Command.TYPE_SET_INDICATOR:
-                return formatTextCommand(channel, command, "FLOWER,%s", Command.KEY_DATA);
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_CUSTOM -> formatTextCommand(channel, command, command.getString(Command.KEY_DATA));
+            case Command.TYPE_POSITION_SINGLE -> formatTextCommand(channel, command, "CR");
+            case Command.TYPE_SOS_NUMBER ->
+                    formatTextCommand(channel, command, "SOS%s,%s", Command.KEY_INDEX, Command.KEY_PHONE);
+            case Command.TYPE_ALARM_SOS -> formatTextCommand(channel, command, "SOSSMS,%s", Command.KEY_ENABLE);
+            case Command.TYPE_ALARM_BATTERY -> formatTextCommand(channel, command, "LOWBAT,%s", Command.KEY_ENABLE);
+            case Command.TYPE_REBOOT_DEVICE -> formatTextCommand(channel, command, "RESET");
+            case Command.TYPE_POWER_OFF -> formatTextCommand(channel, command, "POWEROFF");
+            case Command.TYPE_ALARM_REMOVE -> formatTextCommand(channel, command, "REMOVE,%s", Command.KEY_ENABLE);
+            case Command.TYPE_SILENCE_TIME -> formatTextCommand(channel, command, "SILENCETIME,%s", Command.KEY_DATA);
+            case Command.TYPE_ALARM_CLOCK -> formatTextCommand(channel, command, "REMIND,%s", Command.KEY_DATA);
+            case Command.TYPE_SET_PHONEBOOK -> formatTextCommand(channel, command, "PHB,%s", Command.KEY_DATA);
+            case Command.TYPE_MESSAGE -> formatTextCommand(channel, command, "MESSAGE,%s", Command.KEY_MESSAGE);
+            case Command.TYPE_VOICE_MESSAGE -> formatBinaryCommand(channel, command, "TK,", getBinaryData(command));
+            case Command.TYPE_POSITION_PERIODIC ->
+                    formatTextCommand(channel, command, "UPLOAD,%s", Command.KEY_FREQUENCY);
+            case Command.TYPE_SET_TIMEZONE ->
+                    formatTextCommand(channel, command, "LZ,%s,%s", Command.KEY_LANGUAGE, Command.KEY_TIMEZONE);
+            case Command.TYPE_SET_INDICATOR -> formatTextCommand(channel, command, "FLOWER,%s", Command.KEY_DATA);
+            default -> null;
+        };
     }
 
 }

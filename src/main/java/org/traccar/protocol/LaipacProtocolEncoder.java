@@ -38,19 +38,15 @@ public class LaipacProtocolEncoder extends StringProtocolEncoder {
 
         initDevicePassword(command, LaipacProtocolDecoder.DEFAULT_DEVICE_PASSWORD);
 
-        switch (command.getType()) {
-            case Command.TYPE_CUSTOM:
-                return formatCommand(command, "%s",
-                    Command.KEY_DATA);
-            case Command.TYPE_POSITION_SINGLE:
-                return formatCommand(command, "AVREQ,%s,1",
-                    Command.KEY_DEVICE_PASSWORD);
-            case Command.TYPE_REBOOT_DEVICE:
-                return formatCommand(command, "AVRESET,%s,%s",
-                    Command.KEY_UNIQUE_ID, Command.KEY_DEVICE_PASSWORD);
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_CUSTOM -> formatCommand(
+                    command, "%s", Command.KEY_DATA);
+            case Command.TYPE_POSITION_SINGLE -> formatCommand(
+                    command, "AVREQ,%s,1", Command.KEY_DEVICE_PASSWORD);
+            case Command.TYPE_REBOOT_DEVICE -> formatCommand(
+                    command, "AVRESET,%s,%s", Command.KEY_UNIQUE_ID, Command.KEY_DEVICE_PASSWORD);
+            default -> null;
+        };
 
     }
 

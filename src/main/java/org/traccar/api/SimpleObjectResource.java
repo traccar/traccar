@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,17 +21,22 @@ import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.QueryParam;
+
 import java.util.Collection;
 import java.util.LinkedList;
 
 public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResource<T> {
 
-    public SimpleObjectResource(Class<T> baseClass) {
+    private final String sortField;
+
+    public SimpleObjectResource(Class<T> baseClass, String sortField) {
         super(baseClass);
+        this.sortField = sortField;
     }
 
     @GET
@@ -53,7 +58,8 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
 
-        return storage.getObjects(baseClass, new Request(new Columns.All(), Condition.merge(conditions)));
+        return storage.getObjects(baseClass, new Request(
+                new Columns.All(), Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
     }
 
 }

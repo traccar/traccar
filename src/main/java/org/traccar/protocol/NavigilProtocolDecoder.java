@@ -287,22 +287,15 @@ public class NavigilProtocolDecoder extends BaseProtocolDecoder {
             sendAcknowledgment(channel, sequenceNumber);
         }
 
-        switch (messageId) {
-            case MSG_UNIT_REPORT:
-                return parseUnitReport(deviceSession, buf, sequenceNumber);
-            case MSG_TG2_REPORT:
-                return parseTg2Report(deviceSession, buf, sequenceNumber);
-            case MSG_POSITION_REPORT:
-                return parsePositionReport(deviceSession, buf, sequenceNumber, timestamp);
-            case MSG_POSITION_REPORT_2:
-                return parsePositionReport2(deviceSession, buf, sequenceNumber, timestamp);
-            case MSG_SNAPSHOT4:
-                return parseSnapshot4(deviceSession, buf, sequenceNumber);
-            case MSG_TRACKING_DATA:
-                return parseTrackingData(deviceSession, buf, sequenceNumber, timestamp);
-            default:
-                return null;
-        }
+        return switch (messageId) {
+            case MSG_UNIT_REPORT -> parseUnitReport(deviceSession, buf, sequenceNumber);
+            case MSG_TG2_REPORT -> parseTg2Report(deviceSession, buf, sequenceNumber);
+            case MSG_POSITION_REPORT -> parsePositionReport(deviceSession, buf, sequenceNumber, timestamp);
+            case MSG_POSITION_REPORT_2 -> parsePositionReport2(deviceSession, buf, sequenceNumber, timestamp);
+            case MSG_SNAPSHOT4 -> parseSnapshot4(deviceSession, buf, sequenceNumber);
+            case MSG_TRACKING_DATA -> parseTrackingData(deviceSession, buf, sequenceNumber, timestamp);
+            default -> null;
+        };
     }
 
 }

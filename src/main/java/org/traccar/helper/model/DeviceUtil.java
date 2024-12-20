@@ -70,7 +70,7 @@ public final class DeviceUtil {
             long groupId = groupQueue.pop();
             results.addAll(devicesByGroup.getOrDefault(groupId, Collections.emptyList()));
             groupQueue.addAll(groupsByGroup.getOrDefault(groupId, Collections.emptyList())
-                    .stream().map(Group::getId).collect(Collectors.toUnmodifiableList()));
+                    .stream().map(Group::getId).toList());
         }
 
         return results;

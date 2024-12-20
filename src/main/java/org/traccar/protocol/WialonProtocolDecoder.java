@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_ANY = new PatternBuilder()
+            .number("d.d;").optional()
             .expression("([^#]+)?")              // imei
             .text("#")                           // start byte
             .expression("([^#]+)")               // type
@@ -49,9 +50,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(?:NA|(dd)(dd)(dd));")      // date (ddmmyy)
             .number("(?:NA|(dd)(dd)(dd));")      // time (hhmmss)
-            .number("(?:NA|(dd)(dd.d+));")       // latitude
+            .number("(?:NA|(d+)(dd.d+));")       // latitude
             .expression("(?:NA|([NS]));")
-            .number("(?:NA|(ddd)(dd.d+));")      // longitude
+            .number("(?:NA|(d+)(dd.d+));")       // longitude
             .expression("(?:NA|([EW]));")
             .number("(?:NA|(d+.?d*))?;")         // speed
             .number("(?:NA|(d+.?d*))?;")         // course
@@ -175,12 +176,15 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         String type = parser.next();
         String data = parser.next();
 
+        DeviceSession deviceSession;
+        Position position;
+
         switch (type) {
 
             case "L":
                 String[] values = data.split(";");
                 String imei = values[0].indexOf('.') >= 0 ? values[1] : values[0];
-                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+                deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 if (deviceSession != null) {
                     sendResponse(channel, remoteAddress, type, 1);
                 }
@@ -192,7 +196,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
             case "D":
             case "SD":
-                Position position = decodePosition(channel, remoteAddress, id, data);
+                position = decodePosition(channel, remoteAddress, id, data);
                 if (position != null) {
                     sendResponse(channel, remoteAddress, "D", 1);
                     return position;

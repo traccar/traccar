@@ -47,7 +47,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .text("imei:")
             .number("(d+),")                     // imei
-            .expression("([^,]+),")              // alarm
+            .expression("([^,]*),")              // alarm
             .groupBegin()
             .number("(dd)/?(dd)/?(dd) ?")        // local date (yymmdd)
             .number("(dd):?(dd)(?:dd)?,")        // local time (hhmmss)
@@ -141,35 +141,21 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         } else if (value.startsWith("oil")) {
             return Position.ALARM_FUEL_LEAK;
         }
-        switch (value) {
-            case "help me":
-                return Position.ALARM_SOS;
-            case "low battery":
-                return Position.ALARM_LOW_BATTERY;
-            case "stockade":
-                return Position.ALARM_GEOFENCE;
-            case "move":
-                return Position.ALARM_MOVEMENT;
-            case "speed":
-                return Position.ALARM_OVERSPEED;
-            case "door alarm":
-                return Position.ALARM_DOOR;
-            case "ac alarm":
-                return Position.ALARM_POWER_CUT;
-            case "accident alarm":
-                return Position.ALARM_ACCIDENT;
-            case "sensor alarm":
-                return Position.ALARM_VIBRATION;
-            case "bonnet alarm":
-                return Position.ALARM_BONNET;
-            case "footbrake alarm":
-                return Position.ALARM_FOOT_BRAKE;
-            case "DTC":
-                return Position.ALARM_FAULT;
-            case "tracker":
-            default:
-                return null;
-        }
+        return switch (value) {
+            case "help me" -> Position.ALARM_SOS;
+            case "low battery" -> Position.ALARM_LOW_BATTERY;
+            case "stockade" -> Position.ALARM_GEOFENCE;
+            case "move" -> Position.ALARM_MOVEMENT;
+            case "speed" -> Position.ALARM_OVERSPEED;
+            case "door alarm" -> Position.ALARM_DOOR;
+            case "ac alarm" -> Position.ALARM_POWER_CUT;
+            case "accident alarm" -> Position.ALARM_ACCIDENT;
+            case "sensor alarm" -> Position.ALARM_VIBRATION;
+            case "bonnet alarm" -> Position.ALARM_BONNET;
+            case "footbrake alarm" -> Position.ALARM_FOOT_BRAKE;
+            case "DTC" -> Position.ALARM_FAULT;
+            default -> null;
+        };
     }
 
     private Position decodeRegular(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -189,7 +175,7 @@ public class Gps103ProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         String alarm = parser.next();
-        position.set(Position.KEY_ALARM, decodeAlarm(alarm));
+        position.addAlarm(decodeAlarm(alarm));
         if (alarm.equals("help me")) {
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage("**,imei:" + imei + ",E;", remoteAddress));

@@ -46,7 +46,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Singleton
 public class NotificationManager {
@@ -114,7 +113,7 @@ public class NotificationManager {
                     Calendar calendar = calendarId != 0 ? cacheManager.getObject(Calendar.class, calendarId) : null;
                     return calendar == null || calendar.checkMoment(event.getEventTime());
                 })
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
 
         Device device = cacheManager.getObject(Device.class, event.getDeviceId());
         LOGGER.info(
@@ -171,13 +170,14 @@ public class NotificationManager {
         for (Entry<Event, Position> entry : events.entrySet()) {
             Event event = entry.getKey();
             Position position = entry.getValue();
+            var key = new Object();
             try {
-                cacheManager.addDevice(event.getDeviceId());
+                cacheManager.addDevice(event.getDeviceId(), key);
                 updateEvent(event, position);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
-                cacheManager.removeDevice(event.getDeviceId());
+                cacheManager.removeDevice(event.getDeviceId(), key);
             }
         }
     }

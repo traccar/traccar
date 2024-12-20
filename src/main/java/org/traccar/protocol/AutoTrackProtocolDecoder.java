@@ -103,7 +103,7 @@ public class AutoTrackProtocolDecoder extends BaseProtocolDecoder {
 
         DeviceSession deviceSession;
         switch (type) {
-            case MSG_LOGIN_REQUEST:
+            case MSG_LOGIN_REQUEST -> {
                 String imei = ByteBufUtil.hexDump(buf.readSlice(8));
                 deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 if (deviceSession == null) {
@@ -123,16 +123,17 @@ public class AutoTrackProtocolDecoder extends BaseProtocolDecoder {
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 }
                 return null;
-            case MSG_TELEMETRY_1:
-            case MSG_TELEMETRY_2:
-            case MSG_TELEMETRY_3:
+            }
+            case MSG_TELEMETRY_1, MSG_TELEMETRY_2, MSG_TELEMETRY_3 -> {
                 deviceSession = getDeviceSession(channel, remoteAddress);
                 if (deviceSession == null) {
                     return null;
                 }
                 return decodeTelemetry(channel, remoteAddress, deviceSession, buf);
-            default:
+            }
+            default -> {
                 return null;
+            }
         }
     }
 

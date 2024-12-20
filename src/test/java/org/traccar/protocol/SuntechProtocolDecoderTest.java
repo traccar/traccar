@@ -12,6 +12,9 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new SuntechProtocolDecoder(null));
 
+        verifyPosition(decoder, buffer(
+                "ST419STT;807587388;306;41;04;30062;724;2;-65;5221;255;30061;724;2;5221;0;0;30212;724;2;5221;0;0;30071;724;2;5221;0;0;30222;724;2;5221;0;0;30213;724;2;5221;0;0;30063;724;2;5221;0;0;3.92;1;0185;1;00010000;26.1;1;20240729;19:22:43;-22.754650;-043.437569;000.185;297.35;6;1"));
+
         verifyAttribute(decoder, buffer(
                 "UEX;1610020241;03FFFFFF;161;3.0.9;0;20240506;15:52:55;00006697;724;11;4EDA;33;-5.129240;-42.797868;0.00;0.00;11;1;00000001;00000000;24;GTSL|6|1|0|22574684|1|\r\n;A7;;164;0;11.82"),
                 Position.KEY_DRIVER_UNIQUE_ID, "22574684");
@@ -196,6 +199,10 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
         
         verifyPosition(decoder, buffer(
                 "ST910;Emergency;205283272;500;20150716;19:12:01;-23.659019;-046.695403;000.602;000.00;0;4.2;1;1;02;10820;2fdb090736;724;05;0;2311;255;0;100"));
+
+        verifyAttribute(decoder, buffer(
+                "ST300CMD;Res;511848119;315;PresetA;NTW;0;eseye.com;user;pass;rastreamento.inviocar.com;6011;;;;;RPT;1800;80;80;3;1200;0;0;0;0;EVT;0;10;0;12;3;9;1;30;0;5;7;1;0;0;0;0;0;0;0;9;9;0;0;0;GSM;0;;;;;0;;;;;;;;SVC;1;200;0;0;0;0;1;0;1;0;0;0;0;ADP;T;T;0;;0;0;0;0;0;0;MSR;600;0.10;0.10;0.70;MBV;0.00;0.00;17.20;9.00;18.00;0.00;0.00;NPT;25.0;0;30;0;0;500;300;5;10;100;5;180;100;1;DEV;0;0;0;1;0;0;0;"),
+                Position.KEY_RESULT, "315;PresetA;NTW;0;eseye.com;user;pass;rastreamento.inviocar.com;6011;;;;;RPT;1800;80;80;3;1200;0;0;0;0;EVT;0;10;0;12;3;9;1;30;0;5;7;1;0;0;0;0;0;0;0;9;9;0;0;0;GSM;0;;;;;0;;;;;;;;SVC;1;200;0;0;0;0;1;0;1;0;0;0;0;ADP;T;T;0;;0;0;0;0;0;0;MSR;600;0.10;0.10;0.70;MBV;0.00;0.00;17.20;9.00;18.00;0.00;0.00;NPT;25.0;0;30;0;0;500;300;5;10;100;5;180;100;1;DEV;0;0;0;1;0;0;0;");
 
         decoder.setProtocolType(1);
 

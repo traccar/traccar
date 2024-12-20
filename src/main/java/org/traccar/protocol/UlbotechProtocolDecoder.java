@@ -147,21 +147,12 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             int id = BitUtil.from(value, 12);
             value = BitUtil.to(value, 12);
             switch (id) {
-                case 0:
-                    position.set(Position.KEY_POWER, value * (100 + 10) / 4096.0 - 10);
-                    break;
-                case 1:
-                    position.set(Position.PREFIX_TEMP + 1, value * (125 + 55) / 4096.0 - 55);
-                    break;
-                case 2:
-                    position.set(Position.KEY_BATTERY, value * (100 + 10) / 4096.0 - 10);
-                    break;
-                case 3:
-                    position.set(Position.PREFIX_ADC + 1, value * (100 + 10) / 4096.0 - 10);
-                    break;
-                default:
-                    position.set(Position.PREFIX_IO + id, value);
-                    break;
+                case 0 -> position.set(Position.KEY_POWER, value * (100 + 10) / 4096.0 - 10);
+                case 1 -> position.set(Position.PREFIX_TEMP + 1, value * (125 + 55) / 4096.0 - 55);
+                case 2 -> position.set(Position.KEY_BATTERY, value * (100 + 10) / 4096.0 - 10);
+                case 3 -> position.set(Position.PREFIX_ADC + 1, value * (100 + 10) / 4096.0 - 10);
+                case 5, 6, 7, 8, 9 -> position.set("fuel" + (id - 4), value * 2000 / 4096.0);
+                default -> position.set(Position.PREFIX_IO + id, value);
             }
         }
     }
@@ -236,8 +227,7 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
             int length = type == DATA_CANBUS ? buf.readUnsignedShort() : buf.readUnsignedByte();
 
             switch (type) {
-
-                case DATA_GPS:
+                case DATA_GPS -> {
                     hasLocation = true;
                     position.setLatitude(buf.readInt() / 1000000.0);
                     position.setLongitude(buf.readInt() / 1000000.0);
@@ -246,9 +236,8 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     int hdop = buf.readUnsignedShort();
                     position.setValid(hdop < 9999);
                     position.set(Position.KEY_HDOP, hdop * 0.01);
-                    break;
-
-                case DATA_LBS:
+                }
+                case DATA_LBS -> {
                     if (length == 11) {
                         position.setNetwork(new Network(CellTower.from(
                                 buf.readUnsignedShort(), buf.readUnsignedShort(),
@@ -261,72 +250,39 @@ public class UlbotechProtocolDecoder extends BaseProtocolDecoder {
                     if (length > 9 && length != 11) {
                         buf.skipBytes(length - 9);
                     }
-                    break;
-
-                case DATA_STATUS:
+                }
+                case DATA_STATUS -> {
                     int status = buf.readUnsignedShort();
                     position.set(Position.KEY_IGNITION, BitUtil.check(status, 9));
                     position.set(Position.KEY_STATUS, status);
-                    position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedShort()));
-                    break;
-
-                case DATA_ODOMETER:
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
-                    break;
-
-                case DATA_ADC:
-                    decodeAdc(position, buf, length);
-                    break;
-
-                case DATA_GEOFENCE:
+                    position.addAlarm(decodeAlarm(buf.readUnsignedShort()));
+                }
+                case DATA_ODOMETER -> position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
+                case DATA_ADC -> decodeAdc(position, buf, length);
+                case DATA_GEOFENCE -> {
                     position.set("geofenceIn", buf.readUnsignedInt());
                     position.set("geofenceAlarm", buf.readUnsignedInt());
-                    break;
-
-                case DATA_OBD2:
-                    decodeObd(position, buf, length);
-                    break;
-
-                case DATA_FUEL:
-                    position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() / 10000.0);
-                    break;
-
-                case DATA_OBD2_ALARM:
-                    decodeObd(position, buf, length);
-                    break;
-
-                case DATA_HARSH_DRIVER:
-                    decodeDriverBehavior(position, buf);
-                    break;
-
-                case DATA_CANBUS:
-                    position.set("can", ByteBufUtil.hexDump(buf.readSlice(length)));
-                    break;
-
-                case DATA_J1708:
-                    decodeJ1708(position, buf, length);
-                    break;
-
-                case DATA_VIN:
-                    position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
-                    break;
-
-                case DATA_RFID:
+                }
+                case DATA_OBD2 -> decodeObd(position, buf, length);
+                case DATA_FUEL -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() / 10000.0);
+                case DATA_OBD2_ALARM -> decodeObd(position, buf, length);
+                case DATA_HARSH_DRIVER -> decodeDriverBehavior(position, buf);
+                case DATA_CANBUS -> position.set("can", ByteBufUtil.hexDump(buf.readSlice(length)));
+                case DATA_J1708 -> decodeJ1708(position, buf, length);
+                case DATA_VIN ->
+                        position.set(Position.KEY_VIN, buf.readSlice(length).toString(StandardCharsets.US_ASCII));
+                case DATA_RFID -> {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID,
                             buf.readSlice(length - 1).toString(StandardCharsets.US_ASCII));
                     position.set("authorized", buf.readUnsignedByte() != 0);
-                    break;
-
-                case DATA_EVENT:
+                }
+                case DATA_EVENT -> {
                     position.set(Position.KEY_EVENT, buf.readUnsignedByte());
                     if (length > 1) {
                         position.set("eventMask", buf.readUnsignedInt());
                     }
-                    break;
-
-                default:
-                    buf.skipBytes(length);
-                    break;
+                }
+                default -> buf.skipBytes(length);
             }
         }
 

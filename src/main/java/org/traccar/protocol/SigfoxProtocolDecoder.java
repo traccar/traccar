@@ -203,48 +203,34 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
                 int event = buf.readUnsignedByte();
                 position.set(Position.KEY_EVENT, event);
                 if (event == 0x22 || event == 0x62) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    position.addAlarm(Position.ALARM_SOS);
                 }
 
                 while (buf.isReadable()) {
                     int type = buf.readUnsignedByte();
                     switch (type) {
-                        case 0x01:
+                        case 0x01 -> {
                             position.setValid(true);
                             position.setLatitude(buf.readMedium());
                             position.setLongitude(buf.readMedium());
-                            break;
-                        case 0x02:
+                        }
+                        case 0x02 -> {
                             position.setValid(true);
                             position.setLatitude(buf.readFloat());
                             position.setLongitude(buf.readFloat());
-                            break;
-                        case 0x03:
-                            position.set(Position.PREFIX_TEMP + 1, buf.readByte() * 0.5);
-                            break;
-                        case 0x04:
-                            position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
-                            break;
-                        case 0x05:
-                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                            break;
-                        case 0x06:
+                        }
+                        case 0x03 -> position.set(Position.PREFIX_TEMP + 1, buf.readByte() * 0.5);
+                        case 0x04 -> position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
+                        case 0x05 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        case 0x06 -> {
                             String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
                             position.setNetwork(new Network(WifiAccessPoint.from(
                                     mac.substring(0, mac.length() - 1), buf.readUnsignedByte())));
-                            break;
-                        case 0x07:
-                            buf.skipBytes(10); // wifi extended
-                            break;
-                        case 0x08:
-                            buf.skipBytes(6); // accelerometer
-                            break;
-                        case 0x09:
-                            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-                            break;
-                        default:
-                            buf.readUnsignedByte(); // fence number
-                            break;
+                        }
+                        case 0x07 -> buf.skipBytes(10); // wifi extended
+                        case 0x08 -> buf.skipBytes(6); // accelerometer
+                        case 0x09 -> position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                        default -> buf.readUnsignedByte(); // fence number
                     }
                 }
             } finally {

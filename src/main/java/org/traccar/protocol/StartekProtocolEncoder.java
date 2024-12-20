@@ -39,18 +39,14 @@ public class StartekProtocolEncoder extends StringProtocolEncoder {
     @Override
     protected Object encodeCommand(Channel channel, Command command) {
 
-        switch (command.getType()) {
-            case Command.TYPE_CUSTOM:
-                return formatCommand(command, "%s", Command.KEY_DATA);
-            case Command.TYPE_OUTPUT_CONTROL:
-                return formatCommand(command, "900,%s,%s", Command.KEY_INDEX, Command.KEY_DATA);
-            case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "900,1,1");
-            case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "900,1,0");
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_CUSTOM -> formatCommand(command, "%s", Command.KEY_DATA);
+            case Command.TYPE_OUTPUT_CONTROL ->
+                    formatCommand(command, "900,%s,%s", Command.KEY_INDEX, Command.KEY_DATA);
+            case Command.TYPE_ENGINE_STOP -> formatCommand(command, "900,1,1");
+            case Command.TYPE_ENGINE_RESUME -> formatCommand(command, "900,1,0");
+            default -> null;
+        };
     }
 
 }

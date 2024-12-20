@@ -103,7 +103,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         TAG_LENGTH_MAP.put(0x5b, 7); // variable length
         TAG_LENGTH_MAP.put(0x5c, 68);
         TAG_LENGTH_MAP.put(0xfd, 8);
-        TAG_LENGTH_MAP.put(0xfe, 8);
+        TAG_LENGTH_MAP.put(0xfe, 8); // TODO this is probably incorrect
     }
 
     private static int getTagLength(int tag) {
@@ -149,94 +149,42 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeTagOther(Position position, ByteBuf buf, int tag) {
         switch (tag) {
-            case 0x01:
-                position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
-                break;
-            case 0x02:
-                position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
-                break;
-            case 0x04:
-                position.set("deviceId", buf.readUnsignedShortLE());
-                break;
-            case 0x10:
-                position.set(Position.KEY_INDEX, buf.readUnsignedShortLE());
-                break;
-            case 0x20:
-                position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
-                break;
-            case 0x33:
+            case 0x01 -> position.set(Position.KEY_VERSION_HW, buf.readUnsignedByte());
+            case 0x02 -> position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
+            case 0x04 -> position.set("deviceId", buf.readUnsignedShortLE());
+            case 0x10 -> position.set(Position.KEY_INDEX, buf.readUnsignedShortLE());
+            case 0x20 -> position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
+            case 0x33 -> {
                 position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE() * 0.1));
                 position.setCourse(buf.readUnsignedShortLE() * 0.1);
-                break;
-            case 0x34:
-                position.setAltitude(buf.readShortLE());
-                break;
-            case 0x35:
-                position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
-                break;
-            case 0x40:
-                position.set(Position.KEY_STATUS, buf.readUnsignedShortLE());
-                break;
-            case 0x41:
-                position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 1000.0);
-                break;
-            case 0x42:
-                position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 1000.0);
-                break;
-            case 0x43:
-                position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
-                break;
-            case 0x44:
-                position.set(Position.KEY_ACCELERATION, buf.readUnsignedIntLE());
-                break;
-            case 0x45:
-                position.set(Position.KEY_OUTPUT, buf.readUnsignedShortLE());
-                break;
-            case 0x46:
-                position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
-                break;
-            case 0x48:
-                position.set("statusExtended", buf.readUnsignedShortLE());
-                break;
-            case 0x58:
-                position.set("rs2320", buf.readUnsignedShortLE());
-                break;
-            case 0x59:
-                position.set("rs2321", buf.readUnsignedShortLE());
-                break;
-            case 0x90:
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
-                break;
-            case 0xc0:
-                position.set("fuelTotal", buf.readUnsignedIntLE() * 0.5);
-                break;
-            case 0xc1:
+            }
+            case 0x34 -> position.setAltitude(buf.readShortLE());
+            case 0x35 -> position.set(Position.KEY_HDOP, buf.readUnsignedByte() * 0.1);
+            case 0x40 -> position.set(Position.KEY_STATUS, buf.readUnsignedShortLE());
+            case 0x41 -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 1000.0);
+            case 0x42 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 1000.0);
+            case 0x43 -> position.set(Position.KEY_DEVICE_TEMP, buf.readByte());
+            case 0x44 -> position.set(Position.KEY_ACCELERATION, buf.readUnsignedIntLE());
+            case 0x45 -> position.set(Position.KEY_OUTPUT, buf.readUnsignedShortLE());
+            case 0x46 -> position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
+            case 0x48 -> position.set("statusExtended", buf.readUnsignedShortLE());
+            case 0x58 -> position.set("rs2320", buf.readUnsignedShortLE());
+            case 0x59 -> position.set("rs2321", buf.readUnsignedShortLE());
+            case 0x90 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
+            case 0xc0 -> position.set("fuelTotal", buf.readUnsignedIntLE() * 0.5);
+            case 0xc1 -> {
                 position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
                 position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
                 position.set(Position.KEY_RPM, buf.readUnsignedShortLE() * 0.125);
-                break;
-            case 0xc2:
-                position.set("canB0", buf.readUnsignedIntLE());
-                break;
-            case 0xc3:
-                position.set("canB1", buf.readUnsignedIntLE());
-                break;
-            case 0xd4:
-                position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
-                break;
-            case 0xe0:
-                position.set(Position.KEY_INDEX, buf.readUnsignedIntLE());
-                break;
-            case 0xe1:
-                position.set(Position.KEY_RESULT,
-                        buf.readSlice(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
-                break;
-            case 0xea:
-                position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
-                break;
-            default:
-                buf.skipBytes(getTagLength(tag));
-                break;
+            }
+            case 0xc2 -> position.set("canB0", buf.readUnsignedIntLE());
+            case 0xc3 -> position.set("canB1", buf.readUnsignedIntLE());
+            case 0xd4 -> position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+            case 0xe0 -> position.set(Position.KEY_INDEX, buf.readUnsignedIntLE());
+            case 0xe1 -> position.set(Position.KEY_RESULT,
+                    buf.readSlice(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));
+            case 0xea -> position.set("userDataArray", ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())));
+            default -> buf.skipBytes(getTagLength(tag));
         }
     }
 
@@ -279,7 +227,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         position.setLongitude(360 * bits.readUnsigned(22) / 4194304.0 - 180);
         position.setLatitude(180 * bits.readUnsigned(21) / 2097152.0 - 90);
         if (bits.readUnsigned(1) > 0) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            position.addAlarm(Position.ALARM_GENERAL);
         }
     }
 

@@ -11,6 +11,16 @@ public class GotopProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new GotopProtocolDecoder(null));
 
+        verifyAttribute(decoder, text(
+                "867648044456745,CMD-T,A,DATE:240813,TIME:235937,LAT:02.9930825N,LON:101.5746188E,Speed:000.0,095-70,59.5,00.90,502~16~513770~421~3150~-98~-9~-68~6,3150~421~-10~-98~-67~-20,>"),
+                Position.KEY_BATTERY_LEVEL, 95);
+
+        verifyPosition(decoder, text(
+                "012896001901633,CMD-T,A,130104,175950,24.0234233S,029.4691133E,Speed:001.8,90-24,1.3,10,10,65501-0371-170D,12,1-1,00.00"));
+
+        verifyPosition(decoder, text(
+                "012896001901633,CMD-T,A,130104,175950,24.0234233S,029.4691133E,Speed:001.8,90-24,1.3,00.00"));
+
         verifyNull(decoder, text(
                 ""));
 

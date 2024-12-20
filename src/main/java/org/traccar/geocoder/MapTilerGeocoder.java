@@ -66,9 +66,4 @@ public class MapTilerGeocoder extends JsonGeocoder {
         return null;
     }
 
-    @Override
-    protected String parseError(JsonObject json) {
-        return null;
-    }
-
 }

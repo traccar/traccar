@@ -62,7 +62,7 @@ public class DevicesReportProvider {
                 new Columns.All(),
                 new Condition.Permission(User.class, userId, Device.class))).stream()
                 .map(device -> new DeviceReportItem(device, positions.get(device.getId())))
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
 
     public void getExcel(OutputStream outputStream, long userId) throws StorageException, IOException {

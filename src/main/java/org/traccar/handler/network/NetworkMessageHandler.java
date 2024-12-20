@@ -32,16 +32,14 @@ public class NetworkMessageHandler extends ChannelDuplexHandler {
         if (ctx.channel() instanceof DatagramChannel) {
             DatagramPacket packet = (DatagramPacket) msg;
             ctx.fireChannelRead(new NetworkMessage(packet.content(), packet.sender()));
-        } else if (msg instanceof ByteBuf) {
-            ByteBuf buffer = (ByteBuf) msg;
+        } else if (msg instanceof ByteBuf buffer) {
             ctx.fireChannelRead(new NetworkMessage(buffer, ctx.channel().remoteAddress()));
         }
     }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) {
-        if (msg instanceof NetworkMessage) {
-            NetworkMessage message = (NetworkMessage) msg;
+        if (msg instanceof NetworkMessage message) {
             if (ctx.channel() instanceof DatagramChannel) {
                 InetSocketAddress recipient = (InetSocketAddress) message.getRemoteAddress();
                 InetSocketAddress sender = (InetSocketAddress) ctx.channel().localAddress();

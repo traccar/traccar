@@ -22,6 +22,7 @@ import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.database.OpenIdProvider;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.SessionHelper;
 import org.traccar.helper.WebHelper;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
@@ -57,9 +58,6 @@ import java.net.URI;
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class SessionResource extends BaseResource {
 
-    public static final String USER_ID_KEY = "userId";
-    public static final String EXPIRATION_KEY = "expiration";
-
     @Inject
     private LoginService loginService;
 
@@ -81,14 +79,12 @@ public class SessionResource extends BaseResource {
             LoginResult loginResult = loginService.login(token);
             if (loginResult != null) {
                 User user = loginResult.getUser();
-                request.getSession().setAttribute(USER_ID_KEY, user.getId());
-                request.getSession().setAttribute(EXPIRATION_KEY, loginResult.getExpiration());
-                LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+                SessionHelper.userLogin(request, user, loginResult.getExpiration());
                 return user;
             }
         }
 
-        Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
+        Long userId = (Long) request.getSession().getAttribute(SessionHelper.USER_ID_KEY);
         if (userId != null) {
             User user = permissionsService.getUser(userId);
             if (user != null) {
@@ -105,8 +101,7 @@ public class SessionResource extends BaseResource {
         permissionsService.checkUser(getUserId(), userId);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", userId)));
-        request.getSession().setAttribute(USER_ID_KEY, user.getId());
-        LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+        SessionHelper.userLogin(request, user, null);
         return user;
     }
 
@@ -128,8 +123,7 @@ public class SessionResource extends BaseResource {
         }
         if (loginResult != null) {
             User user = loginResult.getUser();
-            request.getSession().setAttribute(USER_ID_KEY, user.getId());
-            LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+            SessionHelper.userLogin(request, user, null);
             return user;
         } else {
             LogAction.failedLogin(WebHelper.retrieveRemoteAddress(request));
@@ -140,7 +134,7 @@ public class SessionResource extends BaseResource {
     @DELETE
     public Response remove() {
         LogAction.logout(getUserId(), WebHelper.retrieveRemoteAddress(request));
-        request.getSession().removeAttribute(USER_ID_KEY);
+        request.getSession().removeAttribute(SessionHelper.USER_ID_KEY);
         return Response.noContent().build();
     }
 
@@ -148,7 +142,7 @@ public class SessionResource extends BaseResource {
     @POST
     public String requestToken(
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-        Date currentExpiration = (Date) request.getSession().getAttribute(EXPIRATION_KEY);
+        Date currentExpiration = (Date) request.getSession().getAttribute(SessionHelper.EXPIRATION_KEY);
         if (currentExpiration != null && currentExpiration.before(expiration)) {
             expiration = currentExpiration;
         }

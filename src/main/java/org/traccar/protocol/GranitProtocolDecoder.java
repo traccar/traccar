@@ -72,7 +72,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         short flags = buf.readUnsignedByte();
         position.setValid(BitUtil.check(flags, 7));
         if (BitUtil.check(flags, 1)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            position.addAlarm(Position.ALARM_GENERAL);
         }
 
         short satDel = buf.readUnsignedByte();

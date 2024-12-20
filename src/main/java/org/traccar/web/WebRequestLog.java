@@ -20,7 +20,7 @@ import org.eclipse.jetty.server.RequestLog;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.util.DateCache;
 import org.eclipse.jetty.util.component.ContainerLifeCycle;
-import org.traccar.api.resource.SessionResource;
+import org.traccar.helper.SessionHelper;
 
 import java.util.Locale;
 import java.util.TimeZone;
@@ -40,7 +40,7 @@ public class WebRequestLog extends ContainerLifeCycle implements RequestLog {
     @Override
     public void log(Request request, Response response) {
         try {
-            Long userId = (Long) request.getSession().getAttribute(SessionResource.USER_ID_KEY);
+            Long userId = (Long) request.getSession().getAttribute(SessionHelper.USER_ID_KEY);
             writer.write(String.format("%s - %s [%s] \"%s %s %s\" %d %d",
                     request.getRemoteHost(),
                     userId != null ? String.valueOf(userId) : "-",

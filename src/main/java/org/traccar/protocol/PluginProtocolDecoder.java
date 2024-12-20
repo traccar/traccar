@@ -125,15 +125,8 @@ public class PluginProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             int event = parser.nextInt();
             switch (event) {
-                case 11317:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 11319:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                default:
-                    break;
-
+                case 11317 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                case 11319 -> position.addAlarm(Position.ALARM_BRAKING);
             }
             position.set(Position.KEY_EVENT, event);
         }

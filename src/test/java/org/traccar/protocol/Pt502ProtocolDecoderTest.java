@@ -51,7 +51,8 @@ public class Pt502ProtocolDecoderTest extends ProtocolTest {
                 "$FDA,40456789,083125.000,A,2232.0971,N,11400.9504,E,0.0,5.00,090714,,,A/00000,00/0,0/200076//FE7/"));
 
         verifyAttribute(decoder, buffer(
-                "$CPA,40456789,083125.000,A,2232.0971,N,11400.9504,E,7.62,265.24,291117,,,A/00000,00000/0/1200//#"), Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+                "$CPA,40456789,083125.000,A,2232.0971,N,11400.9504,E,7.62,265.24,291117,,,A/00000,00000/0/1200//#"),
+                Position.KEY_ALARM, Position.ALARM_POWER_CUT);
 
         verifyPosition(decoder, buffer(
                 "$POS,216769295715,163237.000,A,3258.1738,S,02755.4350,E,0.00,215.88,100915,,,A/0000,0//232300//5b3/"),

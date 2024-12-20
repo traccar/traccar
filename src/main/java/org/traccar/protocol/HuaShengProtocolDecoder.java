@@ -72,24 +72,16 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int event) {
-        switch (event) {
-            case 4:
-                return Position.ALARM_FATIGUE_DRIVING;
-            case 6:
-                return Position.ALARM_SOS;
-            case 7:
-                return Position.ALARM_BRAKING;
-            case 8:
-                return Position.ALARM_ACCELERATION;
-            case 9:
-                return Position.ALARM_CORNERING;
-            case 10:
-                return Position.ALARM_ACCIDENT;
-            case 16:
-                return Position.ALARM_REMOVING;
-            default:
-                return null;
-        }
+        return switch (event) {
+            case 4 -> Position.ALARM_FATIGUE_DRIVING;
+            case 6 -> Position.ALARM_SOS;
+            case 7 -> Position.ALARM_BRAKING;
+            case 8 -> Position.ALARM_ACCELERATION;
+            case 9 -> Position.ALARM_CORNERING;
+            case 10 -> Position.ALARM_ACCIDENT;
+            case 16 -> Position.ALARM_REMOVING;
+            default -> null;
+        };
     }
 
     @Override
@@ -163,21 +155,12 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() > 2) {
             String value = ByteBufUtil.hexDump(buf.readSlice(2));
             int digit = Integer.parseInt(value.substring(0, 1), 16);
-            char prefix;
-            switch (digit >> 2) {
-                default:
-                    prefix = 'P';
-                    break;
-                case 1:
-                    prefix = 'C';
-                    break;
-                case 2:
-                    prefix = 'B';
-                    break;
-                case 3:
-                    prefix = 'U';
-                    break;
-            }
+            char prefix = switch (digit >> 2) {
+                default -> 'P';
+                case 1 -> 'C';
+                case 2 -> 'B';
+                case 3 -> 'U';
+            };
             codes.append(prefix).append(digit % 4).append(value.substring(1));
             if (buf.readableBytes() > 2) {
                 codes.append(' ');
@@ -208,7 +191,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 14));
 
         int event = buf.readUnsignedShort();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
 
         String time = buf.readCharSequence(12, StandardCharsets.US_ASCII).toString();

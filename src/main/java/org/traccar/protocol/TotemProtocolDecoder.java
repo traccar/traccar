@@ -218,57 +218,35 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm123(int value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x10:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x11:
-                return Position.ALARM_OVERSPEED;
-            case 0x30:
-                return Position.ALARM_PARKING;
-            case 0x42:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 0x43:
-                return Position.ALARM_GEOFENCE_ENTER;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x10 -> Position.ALARM_LOW_BATTERY;
+            case 0x11 -> Position.ALARM_OVERSPEED;
+            case 0x30 -> Position.ALARM_PARKING;
+            case 0x42 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x43 -> Position.ALARM_GEOFENCE_ENTER;
+            default -> null;
+        };
     }
 
     private String decodeAlarm4(int value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x02:
-                return Position.ALARM_OVERSPEED;
-            case 0x04:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 0x05:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 0x06:
-                return Position.ALARM_TOW;
-            case 0x07:
-                return Position.ALARM_GPS_ANTENNA_CUT;
-            case 0x10:
-                return Position.ALARM_POWER_CUT;
-            case 0x11:
-                return Position.ALARM_POWER_RESTORED;
-            case 0x12:
-                return Position.ALARM_LOW_POWER;
-            case 0x13:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x40:
-                return Position.ALARM_VIBRATION;
-            case 0x41:
-                return Position.ALARM_IDLE;
-            case 0x42:
-                return Position.ALARM_ACCELERATION;
-            case 0x43:
-                return Position.ALARM_BRAKING;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x02 -> Position.ALARM_OVERSPEED;
+            case 0x04 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x05 -> Position.ALARM_GEOFENCE_ENTER;
+            case 0x06 -> Position.ALARM_TOW;
+            case 0x07 -> Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x10 -> Position.ALARM_POWER_CUT;
+            case 0x11 -> Position.ALARM_POWER_RESTORED;
+            case 0x12 -> Position.ALARM_LOW_POWER;
+            case 0x13 -> Position.ALARM_LOW_BATTERY;
+            case 0x40 -> Position.ALARM_VIBRATION;
+            case 0x41 -> Position.ALARM_IDLE;
+            case 0x42 -> Position.ALARM_ACCELERATION;
+            case 0x43 -> Position.ALARM_BRAKING;
+            default -> null;
+        };
     }
 
     private Position decode12(Channel channel, SocketAddress remoteAddress, String sentence, Pattern pattern) {
@@ -287,7 +265,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm123(Short.parseShort(parser.next(), 16)));
+            position.addAlarm(decodeAlarm123(Short.parseShort(parser.next(), 16)));
         }
         DateBuilder dateBuilder = new DateBuilder();
         int year = 0, month = 0, day = 0;
@@ -326,7 +304,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         int io = parser.nextBinInt();
         position.set(Position.KEY_STATUS, io);
         if (pattern == PATTERN1) {
-            position.set(Position.KEY_ALARM, BitUtil.check(io, 0) ? Position.ALARM_SOS : null);
+            position.addAlarm(BitUtil.check(io, 0) ? Position.ALARM_SOS : null);
             position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 4));
             position.set(Position.PREFIX_IN + 4, BitUtil.check(io, 5));
             position.set(Position.PREFIX_IN + 1, BitUtil.check(io, 6));
@@ -377,7 +355,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm123(Short.parseShort(parser.next(), 16)));
+            position.addAlarm(decodeAlarm123(Short.parseShort(parser.next(), 16)));
         }
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
@@ -432,17 +410,17 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, decodeAlarm4(type));
+        position.addAlarm(decodeAlarm4(type));
 
         long status = parser.nextHexLong();
 
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 1) ? Position.ALARM_SOS : null);
+        position.addAlarm(BitUtil.check(status, 32 - 1) ? Position.ALARM_SOS : null);
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 32 - 2));
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 3) ? Position.ALARM_OVERSPEED : null);
+        position.addAlarm(BitUtil.check(status, 32 - 3) ? Position.ALARM_OVERSPEED : null);
         position.set(Position.KEY_CHARGE, BitUtil.check(status, 32 - 4));
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 7) ? Position.ALARM_GPS_ANTENNA_CUT : null);
+        position.addAlarm(BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
+        position.addAlarm(BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
+        position.addAlarm(BitUtil.check(status, 32 - 7) ? Position.ALARM_GPS_ANTENNA_CUT : null);
         position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 32 - 9));
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 32 - 10));
         position.set(Position.PREFIX_OUT + 3, BitUtil.check(status, 32 - 11));

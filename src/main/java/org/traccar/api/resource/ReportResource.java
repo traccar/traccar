@@ -85,7 +85,7 @@ public class ReportResource extends SimpleObjectResource<Report> {
     private ReportMailer reportMailer;
 
     public ReportResource() {
-        super(Report.class);
+        super(Report.class, "description");
     }
 
     private Response executeReport(long userId, boolean mail, ReportExecutor executor) {

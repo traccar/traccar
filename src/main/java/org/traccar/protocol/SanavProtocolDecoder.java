@@ -97,7 +97,7 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 7));
             position.set(Position.KEY_CHARGE, BitUtil.check(io, 8));
             if (!BitUtil.check(io, 9)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                position.addAlarm(Position.ALARM_LOW_BATTERY);
             }
         }
 

@@ -180,8 +180,9 @@ def send_message(port, message):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', port))
     s.send(message.encode('ascii'))
-    time.sleep(1.0)
+    time.sleep(0.5)
     s.close()
+    time.sleep(0.5)
 
 def get_protocols(cookie, device_id):
     params = { 'deviceId' : device_id, 'from' : '2000-01-01T00:00:00.000Z', 'to' : '2050-01-01T00:00:00.000Z' }

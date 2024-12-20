@@ -30,13 +30,11 @@ public class UlbotechProtocolEncoder extends BaseProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-        switch (command.getType()) {
-            case Command.TYPE_CUSTOM:
-                return Unpooled.copiedBuffer(
-                        "*TS01," + command.getString(Command.KEY_DATA) + "#", StandardCharsets.US_ASCII);
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_CUSTOM -> Unpooled.copiedBuffer(
+                    "*TS01," + command.getString(Command.KEY_DATA) + "#", StandardCharsets.US_ASCII);
+            default -> null;
+        };
     }
 
 }
