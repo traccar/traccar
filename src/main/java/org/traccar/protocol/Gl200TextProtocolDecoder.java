@@ -1831,8 +1831,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         index++; // reserved
         position.set("fileFrameEndFlag", v[index++]);
         position.set("currentFrameIndex", v[index++]);
-        position.set("ddd data length", v[index++]);
-        position.set("ddd data", v[index++]);
+        position.set("dddDataLength", v[index++]);
+        position.set("dddData", v[index++]);
 
         Date time = dateFormat.parse(v[v.length - 2]);
         if (ignoreFixTime) {
