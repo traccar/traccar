@@ -1781,6 +1781,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                     case "TRD":
                         result = decodeTrd(channel, remoteAddress, values);
                         break;
+                    case "TRL":
+                        result = decodeTrl(channel, remoteAddress, values);
+                        break;
                     default:
                         result = decodeOther(channel, remoteAddress, sentence, type);
                         break;
@@ -1813,6 +1816,31 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
     }
+
+    private Object decodeTrl(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
+        int index = 0;
+        index += 1; // header
+        index++; // protocol version
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
+        if (deviceSession == null) {
+            return null;
+        }
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        getLastLocation(position, null);
+        index += 1; // device name
+        position.set("fileDownloadCount", Integer.parseInt(v[index++], 16));
+        position.set("dddFileName", v[index]);
+
+        Date time = dateFormat.parse(v[v.length - 2]);
+        if (ignoreFixTime) {
+            position.setTime(time);
+        } else {
+            position.setDeviceTime(time);
+        }
+        return position;
+    }
+
 
     private Object decodeTrd(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
         int index = 0;
