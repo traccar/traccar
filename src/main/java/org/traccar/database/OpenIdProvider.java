@@ -91,7 +91,6 @@ public class OpenIdProvider {
         baseUrl = new URI(WebHelper.retrieveWebUrl(config));
         callbackUrl = new URI(WebHelper.retrieveWebUrl(config) + "/api/session/openid/callback");
 
-
         if (config.hasKey(Keys.OPENID_ISSUER_URL)) {
             HttpRequest httpRequest = HttpRequest.newBuilder(
                 URI.create(config.getString(Keys.OPENID_ISSUER_URL) + "/.well-known/openid-configuration"))
