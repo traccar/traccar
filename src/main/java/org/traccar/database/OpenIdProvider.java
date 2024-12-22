@@ -80,7 +80,7 @@ public class OpenIdProvider {
 
     @Inject
     public OpenIdProvider(Config config, LoginService loginService, HttpClient httpClient, ObjectMapper objectMapper)
-            throws InterruptedException, IOException, URISyntaxException {
+        throws InterruptedException, IOException, URISyntaxException {
 
         this.loginService = loginService;
 
@@ -94,9 +94,9 @@ public class OpenIdProvider {
 
         if (config.hasKey(Keys.OPENID_ISSUER_URL)) {
             HttpRequest httpRequest = HttpRequest.newBuilder(
-                            URI.create(config.getString(Keys.OPENID_ISSUER_URL) + "/.well-known/openid-configuration"))
-                    .header("Accept", "application/json")
-                    .build();
+                URI.create(config.getString(Keys.OPENID_ISSUER_URL) + "/.well-known/openid-configuration"))
+                .header("Accept", "application/json")
+                .build();
 
             String httpResponse = httpClient.send(httpRequest, BodyHandlers.ofString()).body();
 
