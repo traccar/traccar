@@ -208,7 +208,7 @@ public final class Keys {
     /**
      * Suntech HBM configuration value.
      */
-    public static final ConfigKey<Boolean> PROTOCOL_HBM = new BooleanConfigKey(
+    public static final ConfigKey<Integer> PROTOCOL_HBM = new IntegerConfigKey(
             "suntech.hbm",
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
