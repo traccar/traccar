@@ -163,11 +163,12 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("deviceId") List<Long> deviceIds,
             @QueryParam("groupId") List<Long> groupIds,
             @QueryParam("type") List<String> types,
+            @QueryParam("alarm") List<String> alarms,
             @QueryParam("from") Date from,
             @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         LogAction.report(getUserId(), false, "events", from, to, deviceIds, groupIds);
-        return eventsReportProvider.getObjects(getUserId(), deviceIds, groupIds, types, from, to);
+        return eventsReportProvider.getObjects(getUserId(), deviceIds, groupIds, types, alarms, from, to);
     }
 
     @Path("events")
@@ -177,13 +178,14 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("deviceId") List<Long> deviceIds,
             @QueryParam("groupId") List<Long> groupIds,
             @QueryParam("type") List<String> types,
+            @QueryParam("alarm") List<String> alarms,
             @QueryParam("from") Date from,
             @QueryParam("to") Date to,
             @QueryParam("mail") boolean mail) throws StorageException {
         permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
         return executeReport(getUserId(), mail, stream -> {
             LogAction.report(getUserId(), false, "events", from, to, deviceIds, groupIds);
-            eventsReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, types, from, to);
+            eventsReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, types, alarms, from, to);
         });
     }
 
@@ -194,10 +196,11 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("deviceId") List<Long> deviceIds,
             @QueryParam("groupId") List<Long> groupIds,
             @QueryParam("type") List<String> types,
+            @QueryParam("alarm") List<String> alarms,
             @QueryParam("from") Date from,
             @QueryParam("to") Date to,
             @PathParam("type") String type) throws StorageException {
-        return getEventsExcel(deviceIds, groupIds, types, from, to, type.equals("mail"));
+        return getEventsExcel(deviceIds, groupIds, types, alarms, from, to, type.equals("mail"));
     }
 
     @Path("summary")

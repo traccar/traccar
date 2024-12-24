@@ -121,7 +121,7 @@ public class TaskReports extends SingleScheduleTask {
                 case "events" -> {
                     var eventsReportProvider = injector.getInstance(EventsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, List.of(), from, to));
+                            stream, user.getId(), deviceIds, groupIds, List.of(), List.of(), from, to));
                 }
                 case "route" -> {
                     var routeReportProvider = injector.getInstance(RouteReportProvider.class);
