@@ -645,13 +645,12 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        buf.readUnsignedByte(); // model
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(5)));
         if (deviceSession == null) {
             return null;
         }
 
+        buf.readUnsignedByte(); // model
         buf.readUnsignedShort(); // software version
 
         Position position = new Position(getProtocolName());
