@@ -645,7 +645,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(5)));
+        DeviceSession deviceSession = getDeviceSession(
+                channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(5)).substring(0, 9));
         if (deviceSession == null) {
             return null;
         }
