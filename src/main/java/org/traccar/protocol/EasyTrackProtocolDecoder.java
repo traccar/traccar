@@ -133,6 +133,9 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         if ((status & 0x00008000L) != 0) {
             position.addAlarm(Position.ALARM_TEMPERATURE);
         }
+        if ((status & 0x00000100L) != 0) {
+            position.addAlarm(Position.ALARM_REMOVING);
+        }
         if ((status & 0x00000001L) != 0) {
             position.addAlarm(Position.ALARM_BRAKING);
         }
