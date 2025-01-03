@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.config.Keys;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -41,7 +40,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("*").expression("..,")         // manufacturer
-            .number("(d+),")                     // imei
+            .number("d+,")                       // imei
             .expression("([^,]{2}),")            // command
             .expression("([AV]),")               // validity
             .number("(xx)(xx)(xx),")             // date (yymmdd)
@@ -70,9 +69,9 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_CELL = new PatternBuilder()
             .text("*").expression("..,")         // manufacturer
-            .number("(d+),")                     // imei
+            .number("d+,")                       // imei
             .text("JZ,")                         // command
-            .number("([01]),")                   // result
+            .number("[01],")                     // result
             .number("(d+),")                     // cid
             .number("(d+),")                     // lac
             .number("(d+),")                     // mcc
@@ -82,7 +81,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_OBD = new PatternBuilder()
             .text("*").expression("..,")         // manufacturer
-            .number("(d+),")                     // imei
+            .number("d+,")                       // imei
             .text("OB,")                         // command
             .text("BD$")
             .number("V(d+.d);")                  // battery
@@ -150,38 +149,38 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         String sentence = (String) msg;
         int typeIndex = sentence.indexOf(',', 4) + 1;
+        String imei = sentence.substring(4, typeIndex - 1);
         String type = sentence.substring(typeIndex, typeIndex + 2);
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
+            return null;
+        }
 
         if (channel != null) {
             if (type.equals("TX") || type.equals("MQ")) {
                 channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
-            } else if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+            } else if ("BWS".equalsIgnoreCase(getDeviceModel(deviceSession))) {
                 channel.writeAndFlush(new NetworkMessage(sentence.substring(0, typeIndex + 3) + "ACK#", remoteAddress));
             }
         }
 
-        if (channel != null && (type.equals("TX") || type.equals("MQ"))) {
-            channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
-        }
-
         if (type.equals("OB")) {
-            return decodeObd(channel, remoteAddress, sentence);
+            return decodeObd(deviceSession, sentence);
         } else if (type.equals("JZ")) {
-            return decodeCell(channel, remoteAddress, sentence);
+            if (channel != null && Integer.parseInt(sentence.substring(typeIndex + 3, typeIndex + 4)) > 0) {
+                channel.writeAndFlush(new NetworkMessage(String.format("*ET,%s,JZ,undefined#", imei), remoteAddress));
+            }
+            return decodeCell(deviceSession, sentence);
         } else {
-            return decodeLocation(channel, remoteAddress, sentence);
+            return decodeLocation(deviceSession, sentence);
         }
     }
 
-    private Position decodeLocation(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Position decodeLocation(DeviceSession deviceSession, String sentence) {
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
-            return null;
-        }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
             return null;
         }
 
@@ -251,16 +250,10 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeCell(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Position decodeCell(DeviceSession deviceSession, String sentence) {
 
         Parser parser = new Parser(PATTERN_CELL, sentence);
         if (!parser.matches()) {
-            return null;
-        }
-
-        String imei = parser.next();
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
-        if (deviceSession == null) {
             return null;
         }
 
@@ -268,11 +261,6 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         getLastLocation(position, null);
-
-        if (channel != null && parser.nextInt() > 0) {
-            String response = String.format("*ET,%s,JZ,undefined#", imei);
-            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-        }
 
         int cid = parser.nextInt();
         int lac = parser.nextInt();
@@ -283,15 +271,10 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeObd(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Position decodeObd(DeviceSession deviceSession, String sentence) {
 
         Parser parser = new Parser(PATTERN_OBD, sentence);
         if (!parser.matches()) {
-            return null;
-        }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
             return null;
         }
 
