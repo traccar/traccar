@@ -17,17 +17,14 @@
 package org.traccar.api;
 
 import org.traccar.api.security.ServiceAccountUser;
-import org.traccar.model.ObjectOperation;
+import org.traccar.model.*;
 import org.traccar.helper.LogAction;
-import org.traccar.model.BaseModel;
-import org.traccar.model.Group;
-import org.traccar.model.Permission;
-import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
@@ -38,6 +35,8 @@ import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Response;
+
+import java.util.List;
 
 public abstract class BaseObjectResource<T extends BaseModel> extends BaseResource {
 
@@ -78,6 +77,14 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             cacheManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId(), true);
             connectionManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId(), true);
             LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
+        }
+
+        if (entity instanceof Geofence geofence) {
+            List<Device> devices = storage.getObjects(Device.class, new Request(
+                    new Columns.All(), new Condition.Permission(User.class, getUserId(), baseClass)));
+            for (Device device: devices) {
+                storage.addPermission(new Permission(Device.class, device.getId(), baseClass, entity.getId()));
+            }
         }
 
         return Response.ok(entity).build();
