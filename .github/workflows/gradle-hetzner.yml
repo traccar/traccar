@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
-    - name: Install deps
+    - name: Configure cloudwatch
       uses: easingthemes/ssh-deploy@main
       with:
         SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-        SOURCE: "./setup/amazon-cloudwatch-agent.json"
+        SOURCE: "./setup/cloudwatch"
         REMOTE_HOST: ${{ vars.REMOTE_HOST }}
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
         TARGET: "/root"
@@ -21,9 +21,13 @@ jobs:
           wget https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
           sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
           rm ./amazon-cloudwatch-agent.deb
-          cp -v amazon-cloudwatch-agent.json /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
+          cp -v amazon-cloudwatch-agent.json send_metrics.sh /opt/aws/amazon-cloudwatch-agent/etc
           mkdir -p ~/.aws
           sudo tee ~/.aws/credentials > /dev/null <<EOF
+          [default]
+          region = us-east-1
+          aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key = ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           [AmazonCloudWatchAgent]
           region = us-east-1
           aws_access_key_id = ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -32,6 +36,11 @@ jobs:
           sudo systemctl enable amazon-cloudwatch-agent
           sudo systemctl start amazon-cloudwatch-agent          
           sudo systemctl status amazon-cloudwatch-agent
+          
+          echo "*/5 * * * * /bin/bash /opt/aws/amazon-cloudwatch-agent/etc/send_metrics.sh >> /var/log/send_metrics.log 2>&1" > /etc/cron.d/send_metrics_task
+          chmod 644 /etc/cron.d/send_metrics_task
+          crontab /etc/cron.d/send_metrics_task          
+          
           echo $RSYNC_STDOUT
 
     - uses: actions/setup-java@v4
