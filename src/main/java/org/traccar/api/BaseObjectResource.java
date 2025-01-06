@@ -81,7 +81,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
 
         if (entity instanceof Geofence geofence) {
             List<Device> devices = storage.getObjects(Device.class, new Request(
-                    new Columns.All(), new Condition.Permission(User.class, getUserId(), baseClass)));
+                    new Columns.All(), new Condition.Permission(User.class, getUserId(), Device.class)));
             for (Device device: devices) {
                 storage.addPermission(new Permission(Device.class, device.getId(), baseClass, entity.getId()));
             }
