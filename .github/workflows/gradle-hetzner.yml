@@ -18,6 +18,7 @@ jobs:
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
         TARGET: "/root"
         SCRIPT_AFTER: |
+          cd cloudwatch
           wget https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
           sudo dpkg -i -E ./amazon-cloudwatch-agent.deb
           rm ./amazon-cloudwatch-agent.deb
