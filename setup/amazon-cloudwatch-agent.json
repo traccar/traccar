@@ -11,9 +11,6 @@
         "measurement": ["free", "total", "used"],
         "ignore_file_system_types": ["sysfs", "devtmpfs"]
       },
-      "swap": {
-        "measurement": ["swap_used", "swap_free", "swap_used_percent"]
-      },
       "mem": {
         "measurement": ["mem_used", "mem_cached", "mem_total"]
       },
