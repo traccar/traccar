@@ -22,10 +22,7 @@
         "measurement": ["bytes_sent", "bytes_recv", "drop_in", "drop_out"]
       },
       "netstat": {
-        "measurement": ["tcp_established", "tcp_syn_sent", "tcp_close"]
-      },
-      "processes": {
-        "measurement": ["running", "sleeping", "dead"]
+        "measurement": ["tcp_established", "netstat_udp_socket"]
       }
     }
   },
