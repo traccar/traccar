@@ -16,6 +16,8 @@
 package org.traccar.protocol;
 
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.Protocol;
@@ -31,6 +33,8 @@ import java.net.SocketAddress;
 import java.util.regex.Pattern;
 
 public class StartekProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StartekProtocolDecoder.class);
 
     public StartekProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -120,6 +124,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN, (String) msg);
         if (!parser.matches()) {
+            LOGGER.error("startek ignoring " + msg);
             return null;
         }
 
@@ -151,6 +156,7 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN_POSITION, content);
         if (!parser.matches()) {
+            LOGGER.error("ignoring " + content);
             return null;
         }
 
