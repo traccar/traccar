@@ -1,5 +1,5 @@
 [submodule "trailblazer-web"]
-	path = trailblazer-web
-	url = ../trailblazer-web
-	branch = master
-	ignore = all
+    path = trailblazer-web
+    url = ../trailblazer-web.git
+    branch = master
+    ignore = all
