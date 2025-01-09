@@ -1702,6 +1702,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         int typeIndex = sentence.indexOf(":GT");
         if (typeIndex < 0) {
+            LOGGER.error("gl200 ignoring " + sentence);
             return null;
         }
 
