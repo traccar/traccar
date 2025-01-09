@@ -10,6 +10,8 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         Gl200TextProtocolDecoder decoder = new Gl200TextProtocolDecoder(null);
+        verifyAttributes(decoder, buffer("+RESP:GTFTP,8020050704,867488060253563,,,2M_20250109_1520_2177MTX_YS2K4X20001928585.DDD,1,0.0,177,719.4,-3.681970,40.524373,20250109152452,0214,0003,046E,0BB3,00,20250109152453,092A"));
+
         verifyAttributes(decoder, buffer(
                 "+RESP:GTACN,8020050402,867488060253563,,2,1,0000,20250108173715,69D0$"));
 
