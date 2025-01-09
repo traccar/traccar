@@ -1785,6 +1785,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                         case "TRL":
                             result = decodeTrl(channel, remoteAddress, values);
                             break;
+                        case "ACN":
+                            result = decodeAcn(channel, remoteAddress, values);
+                            break;
                         default:
                             result = decodeOther(channel, remoteAddress, sentence, type);
                             break;
@@ -1846,6 +1849,36 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Object decodeAcn(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
+        int index = 0;
+        index += 1; // header
+        index++; // protocol version
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
+        if (deviceSession == null) {
+            return null;
+        }
+        index++; // device name
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        getLastLocation(position, null);
+        position.set("reportType", Integer.parseInt(v[index++]));
+        index++; // canbus device state
+        index++; // tacho report mask
+        if (v.length > 12) {
+            position.set(Position.KEY_IGNITION, Integer.parseInt(v[index++]) > 0);
+            position.set("tachoInfo", v[index++]);
+            position.set("driverCard1", v[index++]);
+            position.set("driverCard2", v[index++]);
+        }
+
+        Date time = dateFormat.parse(v[v.length - 2]);
+        if (ignoreFixTime) {
+            position.setTime(time);
+        } else {
+            position.setDeviceTime(time);
+        }
+        return position;
+    }
 
     private Object decodeTrd(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
         int index = 0;
