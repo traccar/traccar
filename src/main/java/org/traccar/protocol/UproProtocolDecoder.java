@@ -325,7 +325,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                             Integer.parseInt(data.toString(StandardCharsets.US_ASCII)) / 100.0);
                     break;
                 default:
-                    LOGGER.error("upro deviceId {} ignoring {}", deviceSession.getDeviceId(),  data.toString(StandardCharsets.US_ASCII));
+                    LOGGER.error("upro deviceId {} ignoring {} {}", deviceSession.getDeviceId(), dataType, data.toString(StandardCharsets.US_ASCII));
                     break;
             }
 
