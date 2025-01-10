@@ -99,10 +99,6 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private boolean isE3Plus(String model) {
-        return "E3+".equals(model) || "E3+4G".equals(model);
-    }
-
     private void decodeAlarm(Position position, long status, String model) {
         if ((status & 0x02000000L) != 0) {
             position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
@@ -126,7 +122,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             position.addAlarm(Position.ALARM_SOS);
         }
         if ((status & 0x00040000L) != 0) {
-            position.addAlarm(isE3Plus(model) ? Position.ALARM_TAMPERING : Position.ALARM_POWER_CUT);
+            position.addAlarm("E3+4G".equals(model) ? Position.ALARM_TAMPERING : Position.ALARM_POWER_CUT);
         }
         if ((status & 0x00040000L) != 0) {
             position.addAlarm(Position.ALARM_POWER_CUT);
@@ -165,7 +161,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             if (type.equals("TX") || type.equals("MQ")) {
                 channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
-            } else if (isE3Plus(getDeviceModel(deviceSession)) && Set.of("HB", "CC", "AM", "DW", "JZ").contains(type)) {
+            } else if ("E3+4G".equals(getDeviceModel(deviceSession)) && Set.of("HB", "CC", "AM", "DW", "JZ").contains(type)) {
                 channel.writeAndFlush(new NetworkMessage(sentence.substring(0, typeIndex + 3) + "ACK#", remoteAddress));
             }
         }
@@ -230,7 +226,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_RSSI, parser.nextHexInt());
         position.set(Position.KEY_POWER, parser.nextDouble());
 
-        if (isE3Plus(model)) {
+        if ("E3+4G".equals(model)) {
             position.set(Position.KEY_INDEX, parser.nextHexInt());
         } else {
             position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
@@ -241,7 +237,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextDouble(0));
 
         if (parser.hasNext(4)) {
-            if (isE3Plus(model)) {
+            if ("E3+4G".equals(model)) {
                 position.set(Position.KEY_HOURS, parser.nextHexLong() * 60000);
             } else {
                 position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
