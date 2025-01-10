@@ -161,7 +161,8 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             if (type.equals("TX") || type.equals("MQ")) {
                 channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
-            } else if ("E3+4G".equals(getDeviceModel(deviceSession)) && Set.of("HB", "CC", "AM", "DW", "JZ").contains(type)) {
+            } else if ("E3+4G".equals(getDeviceModel(deviceSession))
+                    && Set.of("HB", "CC", "AM", "DW", "JZ").contains(type)) {
                 channel.writeAndFlush(new NetworkMessage(sentence.substring(0, typeIndex + 3) + "ACK#", remoteAddress));
             }
         }
