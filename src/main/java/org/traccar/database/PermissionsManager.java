@@ -38,6 +38,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class PermissionsManager {
 
@@ -52,6 +54,8 @@ public class PermissionsManager {
     private final Map<Long, Set<Long>> devicePermissions = new HashMap<>();
     private final Map<Long, Set<Long>> deviceUsers = new HashMap<>();
     private final Map<Long, Set<Long>> groupDevices = new HashMap<>();
+
+    private final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     public PermissionsManager(DataManager dataManager, UsersManager usersManager) {
         this.dataManager = dataManager;
@@ -78,10 +82,16 @@ public class PermissionsManager {
     }
 
     public Set<Long> getDevicePermissions(long userId) {
-        if (!devicePermissions.containsKey(userId)) {
-            devicePermissions.put(userId, new HashSet<>());
+        lock.readLock().lock();
+        try {
+            if (!devicePermissions.containsKey(userId)) {
+                devicePermissions.put(userId, new HashSet<>());
+            }
+            return devicePermissions.get(userId);
         }
-        return devicePermissions.get(userId);
+        finally {
+            lock.readLock().unlock();
+        }
     }
 
     private Set<Long> getAllDeviceUsers(long deviceId) {
@@ -122,9 +132,10 @@ public class PermissionsManager {
     }
 
     public final void refreshDeviceAndGroupPermissions() {
-        groupPermissions.clear();
-        devicePermissions.clear();
+        lock.writeLock().lock();
         try {
+            groupPermissions.clear();
+            devicePermissions.clear();
             GroupTree groupTree = new GroupTree(Context.getGroupsManager().getItems(
                     Context.getGroupsManager().getAllItems()),
                     Context.getDeviceManager().getAllDevices());
@@ -150,16 +161,17 @@ public class PermissionsManager {
                     getGroupDevices(groupId).add(device.getId());
                 }
             }
+            deviceUsers.clear();
+            for (Map.Entry<Long, Set<Long>> entry : devicePermissions.entrySet()) {
+                for (long deviceId : entry.getValue()) {
+                    getAllDeviceUsers(deviceId).add(entry.getKey());
+                }
+            }
 
         } catch (SQLException | ClassNotFoundException error) {
             LOGGER.warn("Refresh device permissions error", error);
-        }
-
-        deviceUsers.clear();
-        for (Map.Entry<Long, Set<Long>> entry : devicePermissions.entrySet()) {
-            for (long deviceId : entry.getValue()) {
-                getAllDeviceUsers(deviceId).add(entry.getKey());
-            }
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
