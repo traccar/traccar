@@ -315,6 +315,22 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                                 Integer.parseInt(data.readSlice(5).toString(StandardCharsets.US_ASCII)) * 0.001);
                     }
                     break;
+                case 'Z':
+                    stringValue = data.toString(StandardCharsets.US_ASCII);
+                    int s0 = Integer.parseInt(stringValue.substring(0, 1));
+                    if (BitUtil.check(s0, 0)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+                    }
+                    if (BitUtil.check(s0, 1)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+                    }
+                    if (BitUtil.check(s0, 2) || BitUtil.check(s0, 3)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+                    }
+                    if (BitUtil.check(Integer.parseInt(stringValue.substring(1, 2)), 2)) {
+                        position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+                    }
+                    break;
                 case 'b':
                     if (data.readableBytes() > 3) {
                         position.set("serial", data.toString(StandardCharsets.US_ASCII).substring(3));
