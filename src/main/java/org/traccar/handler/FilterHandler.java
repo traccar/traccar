@@ -106,7 +106,7 @@ public class FilterHandler extends BaseDataHandler {
     }
 
     private boolean filterMaxSpeed(Position position, Position last) {
-        if (filterMaxSpeed != 0 && last != null) {
+        if (filterMaxSpeed != 0 && last != null && last.getValid()) {
             double time = position.getFixTime().getTime() - last.getFixTime().getTime();
             double distance = position.getDouble(Position.KEY_DISTANCE);
             if (time >= 1000 && distance > 1000) {
