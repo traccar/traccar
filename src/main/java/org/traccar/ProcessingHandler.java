@@ -105,11 +105,11 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
                 GeofenceHandler.class,
                 GeocoderHandler.class,
                 SpeedLimitHandler.class,
+                CopyAttributesHandler.class,
                 MotionHandler.class,
                 ComputedAttributesHandler.Late.class,
                 EngineHoursHandler.class,
                 DriverHandler.class,
-                CopyAttributesHandler.class,
                 PositionForwardingHandler.class,
                 DatabaseHandler.class)
                 .map((clazz) -> (BasePositionHandler) injector.getInstance(clazz))
