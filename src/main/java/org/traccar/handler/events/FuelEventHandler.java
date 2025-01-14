@@ -55,13 +55,19 @@ public class FuelEventHandler extends BaseEventHandler {
                     double threshold = AttributeUtil.lookup(
                             cacheManager, Keys.EVENT_FUEL_INCREASE_THRESHOLD, position.getDeviceId());
                     if (threshold > 0 && change >= threshold) {
-                        callback.eventDetected(new Event(Event.TYPE_DEVICE_FUEL_INCREASE, position));
+                        Event event = new Event(Event.TYPE_DEVICE_FUEL_INCREASE, position);
+                        event.set("before", before);
+                        event.set("after", after);
+                        callback.eventDetected(event);
                     }
                 } else if (change < 0) {
                     double threshold = AttributeUtil.lookup(
                             cacheManager, Keys.EVENT_FUEL_DROP_THRESHOLD, position.getDeviceId());
                     if (threshold > 0 && Math.abs(change) >= threshold) {
-                        callback.eventDetected(new Event(Event.TYPE_DEVICE_FUEL_DROP, position));
+                        Event event = new Event(Event.TYPE_DEVICE_FUEL_DROP, position);
+                        event.set("before", before);
+                        event.set("after", after);
+                        callback.eventDetected(event);
                     }
                 }
             }

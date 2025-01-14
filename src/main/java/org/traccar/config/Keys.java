@@ -208,7 +208,7 @@ public final class Keys {
     /**
      * Suntech HBM configuration value.
      */
-    public static final ConfigKey<Boolean> PROTOCOL_HBM = new BooleanConfigKey(
+    public static final ConfigKey<Integer> PROTOCOL_HBM = new IntegerConfigKey(
             "suntech.hbm",
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
@@ -699,6 +699,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * OpenID Connect group scope claim name.
+     * If this is not provided, Traccar will use name "groups" scope.
+     */
+    public static final ConfigKey<String> OPENID_GROUPS_CLAIM_NAME = new StringConfigKey(
+            "openid.groupsClaimName",
+            List.of(KeyType.CONFIG),
+            "groups");
+
+    /**
      * OpenID Connect group to restrict access to.
      * If this is not provided, all OpenID users will have access to Traccar.
      * This option will only work if your OpenID provider supports the groups scope.
@@ -894,7 +903,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> FORWARD_URL = new StringConfigKey(
             "forward.url",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Additional HTTP header, can be used for authorization.
