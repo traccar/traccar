@@ -1781,12 +1781,14 @@ components:
           type: string
         phone:
           type: string
+          nullable: true
         readonly:
           type: boolean
         administrator:
           type: boolean
         map:
           type: string
+          nullable: true
         latitude:
           type: number
         longitude:
@@ -1797,6 +1799,7 @@ components:
           type: string
         coordinateFormat:
           type: string
+          nullable: true
         disabled:
           type: boolean
         expirationTime:
@@ -1816,6 +1819,7 @@ components:
           type: boolean
         poiLayer:
           type: string
+          nullable: true
         attributes:
           type: object
           properties: {}
@@ -1890,18 +1894,25 @@ components:
           type: string
           description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
+          nullable: true
         positionId:
           type: integer
+          nullable: true
         groupId:
           type: integer
+          nullable: true
         phone:
           type: string
+          nullable: true
         model:
           type: string
+          nullable: true
         contact:
           type: string
+          nullable: true
         category:
           type: string
+          nullable: true
         attributes:
           type: object
           properties: {}
