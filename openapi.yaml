@@ -1916,7 +1916,6 @@ components:
         attributes:
           type: object
           properties: {}
-          nullable: true
     Group:
       type: object
       properties:
