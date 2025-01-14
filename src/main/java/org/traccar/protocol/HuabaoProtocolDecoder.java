@@ -403,7 +403,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         String model = getDeviceModel(deviceSession);
 
-        position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
+        // position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
         position.set(Position.KEY_MOTION, BitUtil.check(status, 4));
         position.set(Position.KEY_BLOCKED, BitUtil.check(status, 10));
         position.set(Position.KEY_CHARGE, BitUtil.check(status, 26));
