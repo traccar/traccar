@@ -32,7 +32,14 @@ public class SuntechFrameDecoder extends BaseFrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        if (buf.getByte(buf.readerIndex() + 1) == 0) {
+        if (buf.getByte(buf.readerIndex()) == 0x02) {
+
+            int length = 1 + 2 + buf.getShort(buf.readerIndex() + 1) + 1;
+            if (buf.readableBytes() >= length) {
+                return buf.readRetainedSlice(length);
+            }
+
+        } else if (buf.getByte(buf.readerIndex() + 1) == 0) {
 
             int length = 1 + 2 + buf.getShort(buf.readerIndex() + 1);
             if (buf.readableBytes() >= length) {

@@ -9,7 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: '6.5'
+  version: '6.6'
 servers:
   - url: https://demo.traccar.org/api
     description: Demo Server 1

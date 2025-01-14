@@ -1,6 +1,6 @@
 /*
  * Copyright 2017 Jan-Piet Mens (jpmens@gmail.com)
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,43 +46,19 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         JsonObject root = Json.createReader(
                 new StringReader(request.content().toString(StandardCharsets.US_ASCII))).readObject();
 
-        if (!root.containsKey("_type")) {
+        if (!root.getString("_type").equals("location")) {
             sendResponse(channel, HttpResponseStatus.OK);
             return null;
         }
-        if (!root.getString("_type").equals("location")
-            && !root.getString("_type").equals("lwt")) {
-            sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
-            return null;
-        }
 
-        Position position = new Position(getProtocolName());
-        String uniqueId;
-
-        if (root.containsKey("topic")) {
-            uniqueId = root.getString("topic");
-            if (root.containsKey("tid")) {
-                position.set("tid", root.getString("tid"));
-            }
-        } else {
-            uniqueId = root.getString("tid");
-        }
+        String uniqueId = root.getString("tid");
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, uniqueId);
         if (deviceSession == null) {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
         }
 
-        if (root.getString("_type").equals("lwt")) {
-            sendResponse(channel, HttpResponseStatus.OK);
-            return null;
-        }
-
-        if (root.containsKey("t") && root.getString("t").equals("p")) {
-            sendResponse(channel, HttpResponseStatus.OK);
-            return null;
-        }
-
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.setTime(new Date(root.getJsonNumber("tst").longValue() * 1000));
@@ -108,13 +84,9 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setAccuracy(root.getInt("acc"));
         }
         if (root.containsKey("t")) {
-            String trigger = root.getString("t");
-            position.set("t", trigger);
-            int reportType = -1;
-            if (root.containsKey("rty")) {
-                 reportType = root.getInt("rty");
-            }
-            setEventOrAlarm(position, trigger, reportType);
+            String event = root.getString("t");
+            decodeAlarm(position, event, root.getInt("rty", -1));
+            position.set(Position.KEY_EVENT, event);
         }
         if (root.containsKey("batt")) {
             position.set(Position.KEY_BATTERY_LEVEL, root.getInt("batt"));
@@ -148,8 +120,8 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         }
 
         if (root.containsKey("anum")) {
-            int numberOfAnalogueInputs = root.getInt("anum");
-            for (int i = 0; i < numberOfAnalogueInputs; i++) {
+            int inputCount = root.getInt("anum");
+            for (int i = 0; i < inputCount; i++) {
                 String indexString = String.format("%02d", i);
                 if (root.containsKey("adda-" + indexString)) {
                     position.set(Position.PREFIX_ADC + (i + 1), root.getString("adda-" + indexString));
@@ -165,8 +137,8 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
         return position;
     }
 
-    private void setEventOrAlarm(Position position, String trigger, Integer reportType) {
-        switch (trigger) {
+    private void decodeAlarm(Position position, String event, Integer reportType) {
+        switch (event) {
             case "9" -> position.addAlarm(Position.ALARM_LOW_BATTERY);
             case "1" -> position.addAlarm(Position.ALARM_POWER_ON);
             case "i" -> position.set(Position.KEY_IGNITION, true);
@@ -177,19 +149,9 @@ public class OwnTracksProtocolDecoder extends BaseHttpProtocolDecoder {
             case "s" -> position.addAlarm(Position.ALARM_OVERSPEED);
             case "h" -> {
                 switch (reportType) {
-                    case 0:
-                    case 3:
-                        position.addAlarm(Position.ALARM_BRAKING);
-                        break;
-                    case 1:
-                    case 4:
-                        position.addAlarm(Position.ALARM_ACCELERATION);
-                        break;
-                    case 2:
-                    case 5:
-                    default:
-                        position.addAlarm(Position.ALARM_CORNERING);
-                        break;
+                    case 0, 3 -> position.addAlarm(Position.ALARM_BRAKING);
+                    case 1, 4 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                    case 2, 5 -> position.addAlarm(Position.ALARM_CORNERING);
                 }
             }
         }
