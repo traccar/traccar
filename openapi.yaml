@@ -1781,6 +1781,7 @@ components:
           type: string
         phone:
           type: string
+          nullable: true
         readonly:
           type: boolean
         administrator:
@@ -1790,13 +1791,10 @@ components:
           nullable: true
         latitude:
           type: number
-          nullable: true
         longitude:
           type: number
-          nullable: true
         zoom:
           type: integer
-          nullable: true
         password:
           type: string
         coordinateFormat:
@@ -1937,51 +1935,41 @@ components:
         userId:
           type: integer
           description: User id, can be only first parameter
-          nullable: true
         deviceId:
           type: integer
           description: >-
             Device id, can be first parameter or second only in combination with
             userId
-          nullable: true
         groupId:
           type: integer
           description: >-
             Group id, can be first parameter or second only in combination with
             userId
-          nullable: true
         geofenceId:
           type: integer
           description: Geofence id, can be second parameter only
-          nullable: true
         notificationId:
           type: integer
           description: Notification id, can be second parameter only
-          nullable: true
         calendarId:
           type: integer
           description: >-
             Calendar id, can be second parameter only and only in combination
             with userId
-          nullable: true
         attributeId:
           type: integer
           description: Computed attribute id, can be second parameter only
-          nullable: true
         driverId:
           type: integer
           description: Driver id, can be second parameter only
-          nullable: true
         managedUserId:
           type: integer
           description: >-
             User id, can be second parameter only and only in combination with
             userId
-          nullable: true
         commandId:
           type: integer
           description: Saved command id, can be second parameter only
-          nullable: true
       description: >-
         This is a permission map that contain two object indexes. It is used to
         link/unlink objects. Order is important. Example: { deviceId:8,
