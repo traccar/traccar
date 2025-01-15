@@ -19,6 +19,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -40,6 +42,7 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Gl200TextProtocolDecoder.class);
     public static final int MSG_NULL = 0;
     public static final int MSG_ACK = 1;
     public static final int MSG_EVENT_REPORT = 2;
@@ -209,6 +212,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == MSG_EVENT_REPORT || type == MSG_LOCATE_REPORT || type == MSG_MINI_EVENT_REPORT) {
             return decodePosition(deviceSession, type, buf);
+        } else {
+            LOGGER.error("calamp deviceId {} ignoring {} {}", deviceSession.getDeviceId(), type, ByteBufUtil.hexDump(buf));
         }
 
         return null;
