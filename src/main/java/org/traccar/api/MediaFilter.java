@@ -90,7 +90,7 @@ public class MediaFilter implements Filter {
             httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
         } catch (SecurityException | StorageException e) {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            httpResponse.getWriter().println(Log.exceptionStack(e));
+            e.printStackTrace(httpResponse.getWriter());
         }
     }
 

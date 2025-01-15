@@ -15,20 +15,25 @@
  */
 package org.traccar.api;
 
-import org.traccar.helper.Log;
-
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 public class ResourceErrorHandler implements ExceptionMapper<Exception> {
 
     @Override
-    public Response toResponse(Exception e) {
-        if (e instanceof WebApplicationException webException) {
-            return Response.fromResponse(webException.getResponse()).entity(Log.exceptionStack(webException)).build();
+    public Response toResponse(Exception exception) {
+        StringWriter stringWriter = new StringWriter();
+        PrintWriter printWriter = new PrintWriter(stringWriter);
+        exception.printStackTrace(printWriter);
+
+        if (exception instanceof WebApplicationException webException) {
+            return Response.fromResponse(webException.getResponse()).entity(stringWriter.toString()).build();
         } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity(Log.exceptionStack(e)).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(stringWriter.toString()).build();
         }
     }
 
