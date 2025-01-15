@@ -35,7 +35,12 @@ public class EngineHoursHandler extends BasePositionHandler {
             Position last = cacheManager.getPosition(position.getDeviceId());
             if (last != null) {
                 long hours = last.getLong(Position.KEY_HOURS);
-                if (last.getBoolean(Position.KEY_IGNITION) && position.getBoolean(Position.KEY_IGNITION)) {
+                boolean lastIgnition = last.getBoolean(Position.KEY_IGNITION);
+                boolean currentIgnition = position.getBoolean(Position.KEY_IGNITION);
+                
+                if (lastIgnition && currentIgnition) {
+                    hours += position.getDeviceTime().getTime() - last.getDeviceTime().getTime();
+                } else if (lastIgnition && !currentIgnition) {
                     hours += position.getDeviceTime().getTime() - last.getDeviceTime().getTime();
                 }
                 if (hours != 0) {
