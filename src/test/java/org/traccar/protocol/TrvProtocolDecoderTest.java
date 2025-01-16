@@ -12,6 +12,9 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new TrvProtocolDecoder(null));
 
         verifyNull(decoder, text(
+                "IWAP00355932600077007,8901240204123656505f,310240202365650#"));
+
+        verifyNull(decoder, text(
                 "TRVAP00352121088015548"));
 
         verifyNull(decoder, text(
