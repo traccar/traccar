@@ -69,7 +69,7 @@ public class EasyTrackProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "*ET,135790246811221,HB,A,050915,0C2A27,00CE5954,04132263,0000,0000,01000000,20,4,0000,00F123,100,200"));
 
-        decoder.setModelOverride("BWS");
+        decoder.setModelOverride("E3+4G");
 
         verifyPosition(decoder, text(
                 "*ET,135790246811221,HB,A,050915,0C2A27,00CE5954,04132263,0000,F000,01000000,20,4,000,00F123,100,4845423835,0091564212,0B45,10.00,9"));

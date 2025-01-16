@@ -18,7 +18,7 @@ compileJava.options.encoding = "UTF-8"
 jar.destinationDirectory = file("$projectDir/target")
 
 checkstyle {
-    toolVersion = "10.18.1"
+    toolVersion = "10.21.1"
     configFile = file("gradle/checkstyle.xml")
     checkstyleTest.enabled = false
 }
@@ -33,11 +33,11 @@ enforce {
 ext {
     guiceVersion = "7.0.0"
     jettyVersion = "11.0.24"
-    jerseyVersion = "3.1.8"
-    jacksonVersion = "2.17.2" // same version as jersey-media-json-jackson dependency
-    protobufVersion = "4.28.1"
+    jerseyVersion = "3.1.10"
+    jacksonVersion = "2.18.2" // same version as jersey-media-json-jackson dependency
+    protobufVersion = "4.29.3"
     jxlsVersion = "2.14.0" // version 3 has breaking changes
-    junitVersion = "5.11.0"
+    junitVersion = "5.11.4"
 }
 
 protobuf {
@@ -47,14 +47,14 @@ protobuf {
 }
 
 dependencies {
-    implementation "commons-codec:commons-codec:1.17.1"
+    implementation "commons-codec:commons-codec:1.17.2"
     implementation "com.h2database:h2:2.3.232"
-    implementation "com.mysql:mysql-connector-j:9.0.0"
-    implementation "org.mariadb.jdbc:mariadb-java-client:3.4.1"
+    implementation "com.mysql:mysql-connector-j:9.1.0"
+    implementation "org.mariadb.jdbc:mariadb-java-client:3.5.1"
     implementation "org.postgresql:postgresql:42.7.4"
     implementation "com.microsoft.sqlserver:mssql-jdbc:12.8.1.jre11"
-    implementation "com.zaxxer:HikariCP:5.1.0"
-    implementation "io.netty:netty-all:4.1.113.Final"
+    implementation "com.zaxxer:HikariCP:6.2.1"
+    implementation "io.netty:netty-all:4.1.116.Final"
     implementation "org.slf4j:slf4j-jdk14:2.0.16"
     implementation "com.google.inject:guice:$guiceVersion"
     implementation "com.google.inject.extensions:guice-servlet:$guiceVersion"
@@ -77,27 +77,27 @@ dependencies {
     implementation "org.apache.commons:commons-jexl3:3.4.0"
     implementation "org.jxls:jxls:$jxlsVersion"
     implementation "org.jxls:jxls-poi:$jxlsVersion"
-    implementation "org.apache.velocity:velocity-engine-core:2.3"
+    implementation "org.apache.velocity:velocity-engine-core:2.4.1"
     implementation "org.apache.velocity.tools:velocity-tools-generic:3.1"
     implementation "org.apache.commons:commons-collections4:4.4"
-    implementation "org.mnode.ical4j:ical4j:4.0.4"
+    implementation "org.mnode.ical4j:ical4j:4.0.8"
     implementation "org.locationtech.spatial4j:spatial4j:0.8"
     implementation "org.locationtech.jts:jts-core:1.20.0"
-    implementation "net.java.dev.jna:jna-platform:5.14.0"
-    implementation "com.github.jnr:jnr-posix:3.1.19"
+    implementation "net.java.dev.jna:jna-platform:5.16.0"
+    implementation "com.github.jnr:jnr-posix:3.1.20"
     implementation "com.google.protobuf:protobuf-java:$protobufVersion"
-    implementation "com.amazonaws:aws-java-sdk-sns:1.12.772"
-    implementation "org.apache.kafka:kafka-clients:3.8.0"
-    implementation "com.hivemq:hivemq-mqtt-client:1.3.3"
-    implementation "redis.clients:jedis:5.1.5"
-    implementation "com.google.firebase:firebase-admin:9.3.0"
-    implementation "com.nimbusds:oauth2-oidc-sdk:11.19.1"
-    implementation "com.rabbitmq:amqp-client:5.21.0"
+    implementation "com.amazonaws:aws-java-sdk-sns:1.12.780"
+    implementation "org.apache.kafka:kafka-clients:3.9.0"
+    implementation "com.hivemq:hivemq-mqtt-client:1.3.4"
+    implementation "redis.clients:jedis:5.2.0"
+    implementation "com.google.firebase:firebase-admin:9.4.3"
+    implementation "com.nimbusds:oauth2-oidc-sdk:11.20.2"
+    implementation "com.rabbitmq:amqp-client:5.24.0"
     implementation "com.warrenstrange:googleauth:1.5.0"
     implementation "com.google.openlocationcode:openlocationcode:1.0.4"
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    testImplementation "org.mockito:mockito-core:5.13.0"
+    testImplementation "org.mockito:mockito-core:5.15.2"
 }
 
 test {
@@ -114,7 +114,7 @@ jar {
     manifest {
         attributes(
                 "Main-Class": "org.traccar.Main",
-                "Implementation-Version": "6.5",
+                "Implementation-Version": "6.6",
                 "Class-Path": configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(" "))
     }
 }

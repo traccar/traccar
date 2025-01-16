@@ -50,7 +50,7 @@ public class ComputedAttributesHandler extends BasePositionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComputedAttributesHandler.class);
 
     private final CacheManager cacheManager;
-    private boolean early;
+    private final boolean early;
 
     private final JexlEngine engine;
 

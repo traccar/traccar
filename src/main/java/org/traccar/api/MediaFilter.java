@@ -19,7 +19,6 @@ package org.traccar.api;
 import com.google.inject.Provider;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.database.StatisticsManager;
-import org.traccar.helper.Log;
 import org.traccar.helper.SessionHelper;
 import org.traccar.model.Device;
 import org.traccar.storage.Storage;
@@ -90,7 +89,7 @@ public class MediaFilter implements Filter {
             httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
         } catch (SecurityException | StorageException e) {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            httpResponse.getWriter().println(Log.exceptionStack(e));
+            e.printStackTrace(httpResponse.getWriter());
         }
     }
 
