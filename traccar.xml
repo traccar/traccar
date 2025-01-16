@@ -62,7 +62,7 @@
   <entry key='filter.maxSpeed'>118</entry>
 
   <entry key='processing.copyAttributes.enable'>true</entry>
-  <entry key='processing.copyAttributes'>ignition,fuel,odometer,driverState,fuelUsed</entry>
+  <entry key='processing.copyAttributes'>ignition,fuel,odometer,driverState,fuelUsed,power</entry>
   <entry key='processing.computedAttributes.deviceAttributes'>true</entry>
 
   <entry key='event.forward.enable'>false</entry>
