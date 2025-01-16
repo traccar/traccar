@@ -27,4 +27,11 @@
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
 
+
+
+    <entry key='speedLimit.enable'>true</entry>
+    <entry key='speedLimit.type'>overpass</entry>
+    <entry key='speedLimit.url'>https://overpass.private.coffee/api/interpreter</entry>
+    <entry key='speedLimit.accuracy'>100</entry>
+
 </properties>
