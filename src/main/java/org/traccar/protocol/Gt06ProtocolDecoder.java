@@ -1203,6 +1203,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
                 return position;
 
+            } else if (subType == 0x1e) {
+
+                position.set(Position.PREFIX_TEMP + 1, buf.readInt() / 10.0);
+                position.set(Position.KEY_HUMIDITY, buf.readInt() / 10.0);
+
+                return position;
+
             }
 
         } else if (type == MSG_X1_PHOTO_DATA) {
