@@ -682,9 +682,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             int mcc = buf.readUnsignedShort();
             int mnc = BitUtil.check(mcc, 15) || variant == Variant.SL4X
                     ? buf.readUnsignedShort() : buf.readUnsignedByte();
-            if (type == MSG_WIFI_ALARM) {
-                mcc = mcc & 0x7FFF;
-            }
+            mcc = mcc & 0x7FFF;
             Network network = new Network();
 
             int cellType = type == MSG_WIFI_ALARM ? buf.readUnsignedByte() : 0;
