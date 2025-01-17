@@ -1,6 +1,8 @@
 package org.traccar.tollroute;
 
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
+
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.AsyncInvoker;
@@ -12,10 +14,14 @@ import jakarta.ws.rs.client.InvocationCallback;
 public class OverPassTollRouteProvider implements TollRouteProvider {
     private final Client client;
     private final String url;
+    private final int accuracy;
 
     public OverPassTollRouteProvider(Config config, Client client, String url) {
         this.client = client;
-        this.url = url + "?data=[out:json];way[toll](around:100,%f,%f);out%%20tags;";
+        //! got the url from the config , and set it using the base url , hope this works :)
+        final String Baseurl = config.getString(Keys.TOLL_ROUTE_URL, url);
+        this.accuracy = config.getInteger(Keys.TOLL_ROUTE_ACCURACY);
+        this.url = Baseurl + "?data=[out:json];way[toll](around:" + accuracy + ",%f,%f);out%%20tags;";
     }
 
     @Override
@@ -39,16 +45,13 @@ public class OverPassTollRouteProvider implements TollRouteProvider {
                     //     "ref": "NH60;NH65",
                     //     "toll": "no"
                     //   }
-// we need the toll , ref and name , in that order
+                    // we need the toll , ref and name , in that order
                     JsonObject tags = elements.getJsonObject(0).getJsonObject("tags");
                     String toll = tags.getString("toll", "no");
                     String ref = tags.getString("ref", "");
                     String name = tags.getString("name", "");
                     if (tags.containsKey("toll") && tags.getString("toll").equals("yes")) {
-
                         // Default toll cost if found
-                        callback.onSuccess(new TollData(toll, ref, name));
-                    } else {
                         callback.onSuccess(new TollData(toll, ref, name));
                     }
                 } else {
