@@ -687,12 +687,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
             Network network = new Network();
 
-            int cellType = 0;
-            if (type == MSG_WIFI_ALARM) {
-                cellType = buf.readUnsignedByte();
+            int cellType = type == MSG_WIFI_ALARM ? buf.readUnsignedByte() : 0;
+
+            int cellCount;
+            if (variant == Variant.WANWAY_S20 || type == MSG_WIFI_ALARM) {
+                cellCount = buf.readUnsignedByte();
+            } else if (type == MSG_WIFI_5) {
+                cellCount = 6;
+            } else {
+                cellCount = 7;
             }
-            int cellCount = variant == Variant.WANWAY_S20
-            || type == MSG_WIFI_ALARM ? buf.readUnsignedByte() : type == MSG_WIFI_5 ? 6 : 7;
+
             for (int i = 0; i < cellCount; i++) {
                 int lac;
                 int cid;
@@ -713,7 +718,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (variant != Variant.WANWAY_S20 && variant != Variant.SL4X) {
-                position.set("timingAdvance", buf.readUnsignedByte()); // ta
+                position.set("timingAdvance", buf.readUnsignedByte());
             }
 
             if (type != MSG_LBS_MULTIPLE_1 && type != MSG_LBS_MULTIPLE_2 && type != MSG_LBS_MULTIPLE_3
@@ -721,9 +726,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 int wifiCount = buf.readUnsignedByte();
                 for (int i = 0; i < wifiCount; i++) {
                     String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
-                    int signalStrength = buf.readUnsignedByte();
                     network.addWifiAccessPoint(WifiAccessPoint.from(
-                            mac.substring(0, mac.length() - 1), signalStrength));
+                            mac.substring(0, mac.length() - 1), buf.readUnsignedByte()));
                 }
             }
 
@@ -740,7 +744,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
                 position.set(Position.KEY_EVENT, event);
                 switch (event) {
-                    case 0x00 -> position.addAlarm(Position.ALARM_GENERAL);
                     case 0x01 -> position.addAlarm(Position.ALARM_SOS);
                     case 0x02 -> position.addAlarm(Position.ALARM_POWER_CUT);
                     case 0x03 -> position.addAlarm(Position.ALARM_VIBRATION);
@@ -748,20 +751,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x05 -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
                     case 0x06 -> position.addAlarm(Position.ALARM_OVERSPEED);
                     case 0x09 -> position.addAlarm(Position.ALARM_TOW);
-                    case 0x0A -> position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
-                    case 0x0B -> position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
+                    case 0x0A, 0x0B, 0x0D -> position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
                     case 0x0C -> position.addAlarm(Position.ALARM_POWER_ON);
-                    case 0x0D -> position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
-                    case 0x0E -> position.addAlarm(Position.ALARM_LOW_POWER);
-                    case 0x0F -> position.addAlarm(Position.ALARM_LOW_POWER);
-                    case 0x10 -> position.addAlarm(Position.ALARM_TAMPERING);
-                    case 0x11 -> position.addAlarm(Position.ALARM_POWER_OFF);
+                    case 0x0E, 0x0F -> position.addAlarm(Position.ALARM_LOW_POWER);
+                    case 0x10, 0x13, 0x16, 0x17 -> position.addAlarm(Position.ALARM_TAMPERING);
+                    case 0x11, 0x15 -> position.addAlarm(Position.ALARM_POWER_OFF);
                     case 0x12 -> position.addAlarm(Position.ALARM_GENERAL);
-                    case 0x13 -> position.addAlarm(Position.ALARM_TAMPERING);
                     case 0x14 -> position.addAlarm(Position.ALARM_DOOR);
-                    case 0x15 -> position.addAlarm(Position.ALARM_POWER_OFF);
-                    case 0x16 -> position.addAlarm(Position.ALARM_TAMPERING);
-                    case 0x17 -> position.addAlarm(Position.ALARM_TAMPERING);
                     case 0x18 -> position.addAlarm(Position.ALARM_REMOVING);
                     case 0x19 -> position.addAlarm(Position.ALARM_LOW_BATTERY);
                 }
@@ -1094,6 +1090,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.set("eventFiles", buf.readCharSequence(filesLength, StandardCharsets.US_ASCII).toString());
             }
         } else {
+            
             if (dataLength > 0) {
                 buf.skipBytes(dataLength);
             }
