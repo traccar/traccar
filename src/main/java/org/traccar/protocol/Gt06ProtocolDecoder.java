@@ -741,24 +741,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set("alertLanguage", "English");
                 }
                 position.set(Position.KEY_EVENT, event);
-                switch (event) {
-                    case 0x01 -> position.addAlarm(Position.ALARM_SOS);
-                    case 0x02 -> position.addAlarm(Position.ALARM_POWER_CUT);
-                    case 0x03 -> position.addAlarm(Position.ALARM_VIBRATION);
-                    case 0x04 -> position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
-                    case 0x05 -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
-                    case 0x06 -> position.addAlarm(Position.ALARM_OVERSPEED);
-                    case 0x09 -> position.addAlarm(Position.ALARM_TOW);
-                    case 0x0A, 0x0B, 0x0D -> position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
-                    case 0x0C -> position.addAlarm(Position.ALARM_POWER_ON);
-                    case 0x0E, 0x0F -> position.addAlarm(Position.ALARM_LOW_POWER);
-                    case 0x10, 0x13, 0x16, 0x17 -> position.addAlarm(Position.ALARM_TAMPERING);
-                    case 0x11, 0x15 -> position.addAlarm(Position.ALARM_POWER_OFF);
-                    case 0x12 -> position.addAlarm(Position.ALARM_GENERAL);
-                    case 0x14 -> position.addAlarm(Position.ALARM_DOOR);
-                    case 0x18 -> position.addAlarm(Position.ALARM_REMOVING);
-                    case 0x19 -> position.addAlarm(Position.ALARM_LOW_BATTERY);
-                }
+                handleEvent(event, position, false, cellType);
             }
 
         } else if (type == MSG_STRING) {
@@ -806,7 +789,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             position.set("controllerFault", buf.readUnsignedInt());
 
             sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
+
             return position;
+
         } else if (type == MSG_STATUS && buf.readableBytes() == 22) {
 
             getLastLocation(position, null);
@@ -1070,25 +1055,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             short event = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, event);
             position.set("eventData", buf.readUnsignedShort());
-            switch (event) {
-                case 0x01 -> position.addAlarm(extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
-                case 0x0E -> position.addAlarm(Position.ALARM_LOW_POWER);
-                case 0x76 -> position.addAlarm(Position.ALARM_TEMPERATURE);
-                case 0x80 -> position.addAlarm(Position.ALARM_VIBRATION);
-                case 0x87 -> position.addAlarm(Position.ALARM_OVERSPEED);
-                case 0x88 -> position.addAlarm(Position.ALARM_POWER_CUT);
-                case 0x90 -> position.addAlarm(Position.ALARM_ACCELERATION);
-                case 0x91 -> position.addAlarm(Position.ALARM_BRAKING);
-                case 0x92 -> position.addAlarm(Position.ALARM_CORNERING);
-                case 0x93 -> position.addAlarm(Position.ALARM_ACCIDENT);
-            }
-
+            handleEvent(event, position, extendedAlarm, type);
             int filesLength = buf.readableBytes() - 6;
             if (filesLength > 0) {
                 position.set("eventFiles", buf.readCharSequence(filesLength, StandardCharsets.US_ASCII).toString());
             }
+
         } else {
-            
+
             if (dataLength > 0) {
                 buf.skipBytes(dataLength);
             }
@@ -1562,6 +1536,39 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    public void handleEvent(int event, Position position, boolean extendedAlarm, int type) {
+        switch (event) {
+            case 0x01 -> {
+                if (type == MSG_ALARM) {
+                    position.addAlarm(extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
+                } else {
+                    position.addAlarm(Position.ALARM_SOS);
+                }
+            }
+            case 0x02, 0x88 -> position.addAlarm(Position.ALARM_POWER_CUT);
+            case 0x03, 0x80 -> position.addAlarm(Position.ALARM_VIBRATION);
+            case 0x04 -> position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+            case 0x05 -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+            case 0x06 -> position.addAlarm(Position.ALARM_OVERSPEED);
+            case 0x09 -> position.addAlarm(Position.ALARM_TOW);
+            case 0x0A, 0x0B, 0x0D -> position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
+            case 0x0C -> position.addAlarm(Position.ALARM_POWER_ON);
+            case 0x0E, 0x0F -> position.addAlarm(Position.ALARM_LOW_POWER);
+            case 0x10, 0x13, 0x16, 0x17 -> position.addAlarm(Position.ALARM_TAMPERING);
+            case 0x11, 0x15 -> position.addAlarm(Position.ALARM_POWER_OFF);
+            case 0x12 -> position.addAlarm(Position.ALARM_GENERAL);
+            case 0x14 -> position.addAlarm(Position.ALARM_DOOR);
+            case 0x18 -> position.addAlarm(Position.ALARM_REMOVING);
+            case 0x19 -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+            case 0x76 -> position.addAlarm(Position.ALARM_TEMPERATURE);
+            case 0x87 -> position.addAlarm(Position.ALARM_OVERSPEED);
+            case 0x90 -> position.addAlarm(Position.ALARM_ACCELERATION);
+            case 0x91 -> position.addAlarm(Position.ALARM_BRAKING);
+            case 0x92 -> position.addAlarm(Position.ALARM_CORNERING);
+            case 0x93 -> position.addAlarm(Position.ALARM_ACCIDENT);
+        }
+    }
+    
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
