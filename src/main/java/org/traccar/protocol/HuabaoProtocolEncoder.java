@@ -51,7 +51,7 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                 case Command.TYPE_CUSTOM:
                     if ("BSJ".equals(getDeviceModel(command.getDeviceId()))) {
                         data.writeByte(1); // flag
-                        Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
+                        var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
                         data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
                         return HuabaoProtocolDecoder.formatMessage(
                                 0x7e, HuabaoProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
