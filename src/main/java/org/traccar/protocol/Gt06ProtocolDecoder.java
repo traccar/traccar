@@ -735,11 +735,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
                 int event = buf.readUnsignedByte();
                 int languageDetails = buf.readUnsignedByte();
-                if (languageDetails == 0x01) {
-                    position.set("alertLanguage", "Chinese");
-                } else if (languageDetails == 0x02) {
-                    position.set("alertLanguage", "English");
-                }
                 position.set(Position.KEY_EVENT, event);
                 handleEvent(event, position, false, cellType);
             }
