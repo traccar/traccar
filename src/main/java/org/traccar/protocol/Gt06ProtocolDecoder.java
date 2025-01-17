@@ -416,28 +416,37 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(short value, boolean modelLW, boolean modelSW) {
+    private String decodeAlarm(short value, boolean modelLW, boolean modelSW, boolean extendedAlarm, int type) {
         return switch (value) {
-            case 0x01 -> Position.ALARM_SOS;
-            case 0x02 -> Position.ALARM_POWER_CUT;
-            case 0x03, 0x09 -> Position.ALARM_VIBRATION;
+            case 0x01 -> {
+                if (type == MSG_ALARM) {
+                    yield extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL;
+                } else {
+                    yield Position.ALARM_SOS;
+                }
+            }
+            case 0x02, 0x88 -> Position.ALARM_POWER_CUT;
+            case 0x03, 0x80, 0x09 -> Position.ALARM_VIBRATION;
             case 0x04 -> Position.ALARM_GEOFENCE_ENTER;
             case 0x05 -> Position.ALARM_GEOFENCE_EXIT;
-            case 0x06 -> Position.ALARM_OVERSPEED;
+            case 0x06, 0x87 -> Position.ALARM_OVERSPEED;
             case 0x0E, 0x0F -> Position.ALARM_LOW_BATTERY;
-            case 0x11 -> Position.ALARM_POWER_OFF;
-            case 0x0C, 0x13, 0x25 -> Position.ALARM_TAMPERING;
+            case 0x0A, 0x0B, 0x0D -> Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x11, 0x15 -> Position.ALARM_POWER_OFF;
+            case 0x0C, 0x13, 0x25, 0x10, 0x16, 0x17 -> Position.ALARM_TAMPERING;
+            case 0x12 -> Position.ALARM_GENERAL;
             case 0x14 -> Position.ALARM_DOOR;
             case 0x18 -> modelLW ? Position.ALARM_ACCIDENT : Position.ALARM_REMOVING;
             case 0x19 -> modelLW ? Position.ALARM_ACCELERATION : Position.ALARM_LOW_BATTERY;
-            case 0x1A, 0x27 -> Position.ALARM_BRAKING;
-            case 0x1B, 0x2A, 0x2B, 0x2E -> Position.ALARM_CORNERING;
+            case 0x1A, 0x27, 0x91 -> Position.ALARM_BRAKING;
+            case 0x1B, 0x2A, 0x2B, 0x2E, 0x92 -> Position.ALARM_CORNERING;
             case 0x23 -> Position.ALARM_FALL_DOWN;
-            case 0x26 -> Position.ALARM_ACCELERATION;
+            case 0x26, 0x90 -> Position.ALARM_ACCELERATION;
             case 0x28 -> modelSW ? Position.ALARM_CORNERING : Position.ALARM_BRAKING;
             case 0x29 -> modelSW ? Position.ALARM_ACCIDENT : Position.ALARM_ACCELERATION;
-            case 0x2C -> Position.ALARM_ACCIDENT;
+            case 0x2C, 0x93 -> Position.ALARM_ACCIDENT;
             case 0x30 -> Position.ALARM_JAMMING;
+            case 0x76 -> Position.ALARM_TEMPERATURE;
             default -> null;
         };
     }
@@ -681,7 +690,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             int mcc = buf.readUnsignedShort();
             int mnc = BitUtil.check(mcc, 15) || variant == Variant.SL4X
-                    ? buf.readUnsignedShort() : buf.readUnsignedByte();
+                    ? BitUtil.to(buf.readUnsignedShort(), 15) : buf.readUnsignedByte();
             mcc = mcc & 0x7FFF;
             Network network = new Network();
 
@@ -733,10 +742,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             if (type == MSG_WIFI_ALARM) {
 
-                int event = buf.readUnsignedByte();
+                short event = buf.readUnsignedByte();
                 int languageDetails = buf.readUnsignedByte();
                 position.set(Position.KEY_EVENT, event);
-                handleEvent(event, position, false, cellType);
+                position.addAlarm(decodeAlarm(event, modelLW, modelSW, false, type));
             }
 
         } else if (type == MSG_STRING) {
@@ -847,7 +856,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     int satellites = BitUtil.between(signal, 10, 15) + BitUtil.between(signal, 5, 10);
                     position.set(Position.KEY_SATELLITES, satellites);
                     position.set(Position.KEY_RSSI, BitUtil.to(signal, 5));
-                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW));
+                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, false, type));
                     buf.readUnsignedByte(); // language
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     int mode = buf.readUnsignedByte();
@@ -882,7 +891,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         if (type == MSG_STATUS && modelSW) {
                             position.set(Position.KEY_POWER, (double) extension);
                         } else if (variant != Variant.VXT01) {
-                            position.addAlarm(decodeAlarm(extension, modelLW, modelSW));
+                            position.addAlarm(decodeAlarm(extension, modelLW, modelSW, false, type));
                         }
                     }
                 }
@@ -944,7 +953,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     decodeStatus(position, buf);
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW));
+                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, false, type));
                     position.set("oil", buf.readUnsignedShort());
                     int temperature = buf.readUnsignedByte();
                     if (BitUtil.check(temperature, 7)) {
@@ -1050,7 +1059,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             short event = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, event);
             position.set("eventData", buf.readUnsignedShort());
-            handleEvent(event, position, extendedAlarm, type);
+            position.addAlarm(decodeAlarm(event, modelLW, modelSW, extendedAlarm, type));
             int filesLength = buf.readableBytes() - 6;
             if (filesLength > 0) {
                 position.set("eventFiles", buf.readCharSequence(filesLength, StandardCharsets.US_ASCII).toString());
@@ -1071,6 +1080,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, false, type, buf.getShort(buf.writerIndex() - 6), null);
 
         return position;
+
     }
 
     private static Date decodeDate(ByteBuf buf, DeviceSession deviceSession) {
@@ -1528,39 +1538,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.LW4G;
         } else {
             variant = Variant.STANDARD;
-        }
-    }
-
-    public void handleEvent(int event, Position position, boolean extendedAlarm, int type) {
-        switch (event) {
-            case 0x01 -> {
-                if (type == MSG_ALARM) {
-                    position.addAlarm(extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
-                } else {
-                    position.addAlarm(Position.ALARM_SOS);
-                }
-            }
-            case 0x02, 0x88 -> position.addAlarm(Position.ALARM_POWER_CUT);
-            case 0x03, 0x80 -> position.addAlarm(Position.ALARM_VIBRATION);
-            case 0x04 -> position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
-            case 0x05 -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
-            case 0x06 -> position.addAlarm(Position.ALARM_OVERSPEED);
-            case 0x09 -> position.addAlarm(Position.ALARM_TOW);
-            case 0x0A, 0x0B, 0x0D -> position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
-            case 0x0C -> position.addAlarm(Position.ALARM_POWER_ON);
-            case 0x0E, 0x0F -> position.addAlarm(Position.ALARM_LOW_POWER);
-            case 0x10, 0x13, 0x16, 0x17 -> position.addAlarm(Position.ALARM_TAMPERING);
-            case 0x11, 0x15 -> position.addAlarm(Position.ALARM_POWER_OFF);
-            case 0x12 -> position.addAlarm(Position.ALARM_GENERAL);
-            case 0x14 -> position.addAlarm(Position.ALARM_DOOR);
-            case 0x18 -> position.addAlarm(Position.ALARM_REMOVING);
-            case 0x19 -> position.addAlarm(Position.ALARM_LOW_BATTERY);
-            case 0x76 -> position.addAlarm(Position.ALARM_TEMPERATURE);
-            case 0x87 -> position.addAlarm(Position.ALARM_OVERSPEED);
-            case 0x90 -> position.addAlarm(Position.ALARM_ACCELERATION);
-            case 0x91 -> position.addAlarm(Position.ALARM_BRAKING);
-            case 0x92 -> position.addAlarm(Position.ALARM_CORNERING);
-            case 0x93 -> position.addAlarm(Position.ALARM_ACCIDENT);
         }
     }
     
