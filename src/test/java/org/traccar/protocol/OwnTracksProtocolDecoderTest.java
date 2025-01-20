@@ -12,16 +12,16 @@ public class OwnTracksProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new OwnTracksProtocolDecoder(null));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
-                buffer("{\"_type\":\"location\",\"topic\":\"owntracks/user/5t\",\"acc\":15,\"alt\":440,\"batt\":46,\"conn\":\"w\",\"lat\":46.0681247,\"lon\":11.1512805,\"t\":\"u\",\"tid\":\"5t\",\"tst\":1551874878,\"vac\":2,\"vel\":0}")));
+                buffer("{\"_type\":\"location\",\"acc\":15,\"alt\":440,\"batt\":46,\"conn\":\"w\",\"lat\":46.0681247,\"lon\":11.1512805,\"t\":\"u\",\"tid\":\"5t\",\"tst\":1551874878,\"vac\":2,\"vel\":0}")));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
-                buffer("{\"topic\":\"owntracks/user/JJ\",\"lon\":2.29513,\"lat\":48.85833,\"tst\":1497349316,\"_type\":\"location\",\"tid\":\"JJ\"}")));
+                buffer("{\"lon\":2.29513,\"lat\":48.85833,\"tst\":1497349316,\"_type\":\"location\",\"tid\":\"JJ\"}")));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
-                buffer("{\"topic\":\"owntracks/user/JJ\",\"cog\":271,\"lon\":2.29513,\"acc\":5,\"vel\":61,\"vac\":21,\"lat\":48.85833,\"tst\":1497349316,\"alt\":167,\"_type\":\"location\",\"tid\":\"JJ\",\"t\":\"u\",\"batt\":67}")));
+                buffer("{\"cog\":271,\"lon\":2.29513,\"acc\":5,\"vel\":61,\"vac\":21,\"lat\":48.85833,\"tst\":1497349316,\"alt\":167,\"_type\":\"location\",\"tid\":\"JJ\",\"t\":\"u\",\"batt\":67}")));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
-                buffer("{\"topic\":\"owntracks/user/JJ\",\"lat\":48.85,\"lon\":2.295,\"_type\":\"location\",\"tid\":\"JJ\",\"tst\":1497476456}")));
+                buffer("{\"lat\":48.85,\"lon\":2.295,\"_type\":\"location\",\"tid\":\"JJ\",\"tst\":1497476456}")));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"lon\":-122,\"acc\":5,\"created_at\":1736161415,\"lat\":37,\"topic\":\"owntracks/ckrey/22A67880-15C3-41A6-9157-25545C7993AC\",\"t\":\"u\",\"m\":1,\"tst\":1736161169,\"conn\":\"w\",\"alt\":0,\"_type\":\"location\",\"tid\":\"AC\"}")));
