@@ -80,6 +80,7 @@ import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
+import org.traccar.handler.TollRouteHandler;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
@@ -287,6 +288,15 @@ public class MainModule extends AbstractModule {
                     default -> throw new IllegalArgumentException("Unknown Toll Route provider");
                 };
             }
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static TollRouteHandler provideTollRouteHandler(@Nullable TollRouteProvider  tollRouteProvider) {
+        if (tollRouteProvider != null) {
+            return new TollRouteHandler(tollRouteProvider);
         }
         return null;
     }

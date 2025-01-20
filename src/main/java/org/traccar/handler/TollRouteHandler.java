@@ -23,7 +23,7 @@ public class TollRouteHandler extends BasePositionHandler {
 
     @Override
     public void onPosition(Position position, Callback callback) {
-        if (tollRouteProvider !=null && position.getValid()) {
+        if (position.getValid()) {
             tollRouteProvider.getTollRoute(position.getLatitude(), position.getLongitude(),
                     new TollRouteProvider.TollRouteProviderCallback() {
                 @Override
