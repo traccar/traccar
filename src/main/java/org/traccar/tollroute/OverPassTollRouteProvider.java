@@ -53,6 +53,8 @@ public class OverPassTollRouteProvider implements TollRouteProvider {
                     if (tags.containsKey("toll") && tags.getString("toll").equals("yes")) {
                         // Default toll cost if found
                         callback.onSuccess(new TollData(toll, ref, name));
+                    } else {
+                        callback.onFailure(new RuntimeException("No toll data found with specific parameters"));
                     }
                 } else {
                     callback.onFailure(new RuntimeException("No toll data found"));

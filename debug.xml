@@ -34,4 +34,11 @@
     <entry key='speedLimit.url'>https://overpass.private.coffee/api/interpreter</entry>
     <entry key='speedLimit.accuracy'>100</entry>
 
+    <entry key='tollRoute.enable'>true</entry>
+    <entry key='tollRoute.type'>overpass</entry>
+    <entry key='tollRoute.url'>https://overpass.private.coffee/api/interpreter</entry>
+    <entry key='tollRoute.accuracy'>100</entry>
+
+
+
 </properties>
