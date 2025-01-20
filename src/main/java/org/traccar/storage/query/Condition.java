@@ -18,6 +18,7 @@ package org.traccar.storage.query;
 import org.traccar.model.GroupedModel;
 
 import java.util.List;
+import java.util.Set;
 
 public interface Condition {
 
@@ -194,17 +195,24 @@ public interface Condition {
 
     class LatestPositions implements Condition {
         private final long deviceId;
+        private final Set<Long> deviceIds;
+
+        public LatestPositions(Set<Long> deviceIds) {
+            this.deviceId = 0;
+            this.deviceIds = deviceIds;
+        }
 
         public LatestPositions(long deviceId) {
             this.deviceId = deviceId;
-        }
-
-        public LatestPositions() {
-            this(0);
+            this.deviceIds = null;
         }
 
         public long getDeviceId() {
             return deviceId;
+        }
+
+        public Set<Long> getDeviceIds() {
+            return deviceIds;
         }
     }
 

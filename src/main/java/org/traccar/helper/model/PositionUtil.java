@@ -64,14 +64,17 @@ public final class PositionUtil {
                 new Order("fixTime")));
     }
 
-    public static List<Position> getLatestPositions(Storage storage, long userId) throws StorageException {
-        var devices = storage.getObjects(Device.class, new Request(
-                new Columns.Include("id"),
-                new Condition.Permission(User.class, userId, Device.class)));
+    public static List<Position> getLatestPositions(Storage storage, long userId, List<Device> devices)
+            throws StorageException {
+        if (devices == null) {
+            devices = storage.getObjects(Device.class, new Request(
+                    new Columns.Include("id"),
+                    new Condition.Permission(User.class, userId, Device.class)));
+        }
         var deviceIds = devices.stream().map(BaseModel::getId).collect(Collectors.toUnmodifiableSet());
 
         var positions = storage.getObjects(Position.class, new Request(
-                new Columns.All(), new Condition.LatestPositions()));
+                new Columns.All(), new Condition.LatestPositions(deviceIds)));
         return positions.stream()
                 .filter(position -> deviceIds.contains(position.getDeviceId()))
                 .collect(Collectors.toList());
