@@ -39,6 +39,10 @@
     <entry key='tollRoute.url'>https://overpass.private.coffee/api/interpreter</entry>
     <entry key='tollRoute.accuracy'>100</entry>
 
+    <entry key='notification.types'>
+    deviceOnline,deviceOffline,deviceUnknown,deviceInactive,deviceMoving,deviceStopped,
+    deviceOverspeed,deviceFuelDrop,deviceFuelIncrease,tollRoute
+    </entry>
 
 
 </properties>

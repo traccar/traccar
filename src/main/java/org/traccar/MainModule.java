@@ -33,6 +33,7 @@ import org.traccar.broadcast.NullBroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.LdapProvider;
+import org.traccar.database.NotificationManager;
 import org.traccar.database.OpenIdProvider;
 import org.traccar.database.StatisticsManager;
 import org.traccar.forward.EventForwarder;
@@ -294,12 +295,12 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static TollRouteHandler provideTollRouteHandler(@Nullable TollRouteProvider  tollRouteProvider) {
+    public static TollRouteHandler provideTollRouteHandler(@Nullable TollRouteProvider  tollRouteProvider , NotificationManager notificationManager) {
         if (tollRouteProvider != null) {
-            return new TollRouteHandler(tollRouteProvider);
+            return new TollRouteHandler(tollRouteProvider , notificationManager);
         }
         return null;
-    }
+    } 
 
     @Singleton
     @Provides

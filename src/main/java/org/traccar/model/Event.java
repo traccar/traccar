@@ -68,6 +68,10 @@ public class Event extends Message {
     public static final String TYPE_DRIVER_CHANGED = "driverChanged";
     public static final String TYPE_MEDIA = "media";
 
+    //making sure this appears in /notifications/types in frontend 
+    // This is handled in NotificationResource lol 
+    public static final String TYPE_TOLL_ROUTE = "tollRoute";
+
     private Date eventTime;
 
     public Date getEventTime() {
