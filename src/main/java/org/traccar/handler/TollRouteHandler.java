@@ -46,7 +46,7 @@ public class TollRouteHandler extends BasePositionHandler {
                                 Map<Event, Position> updates = new HashMap<>();
                             updates.put(event, position);
 
-                            
+
                             notificationManager.updateEvents(updates);    
                             
                 }
