@@ -655,9 +655,17 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             if (custom) {
                 String form = this.form;
                 if (form == null) {
-                    form = readString(buf).trim().substring("%CI".length());
-                }
-                readBinaryCustomData(position, buf, form);
+                    form = readString(buf);
+                    if (form != null && form.startsWith("%CI")) {
+                        form = form.substring("%CI".length()).trim();
+                        readBinaryCustomData(position, buf, form);
+                    } else {  
+                        // Skip Nothing to decode
+                    }
+
+                } else {
+                    readBinaryCustomData(position, buf, form);
+                }    
             }
 
             positions.add(position);
