@@ -104,6 +104,34 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private Position decodeTransparent(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
+
+        Position position = new Position(getProtocolName());
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+        if (deviceSession == null) {
+            return null;
+        }
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        buf.skipBytes(24); // header
+
+        int dataType = buf.readUnsignedShort();
+        int dataLength = buf.readUnsignedShort();
+
+        if (dataType == 0x4009) {
+            position.set(
+                    Position.KEY_DRIVER_UNIQUE_ID,
+                    buf.readCharSequence(dataLength, StandardCharsets.US_ASCII).toString());
+        } else {
+            position.set("data", ByteBufUtil.hexDump(buf.readSlice(dataLength)));
+        }
+
+        getLastLocation(position, null);
+
+        return position;
+    }
+
     private Position decodeBinary(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
 
         Position position = new Position(getProtocolName());
@@ -599,6 +627,11 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         switch (marker) {
             case "*" -> {
+                if (buf.readableBytes() >= 28 && buf.getCharSequence(
+                        buf.readerIndex() + 22, 2, StandardCharsets.US_ASCII).toString().equals("GY")) {
+                    return decodeTransparent(buf, channel, remoteAddress);
+                }
+
                 String sentence = buf.toString(StandardCharsets.US_ASCII).trim();
                 int typeStart = sentence.indexOf(',', sentence.indexOf(',') + 1) + 1;
                 int typeEnd = sentence.indexOf(',', typeStart);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,11 +49,15 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
 
             switch (command.getType()) {
                 case Command.TYPE_CUSTOM:
-                    data.writeByte(1); // flag
-                    Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
-                    data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
-                    return HuabaoProtocolDecoder.formatMessage(
-                            0x7e, HuabaoProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
+                    if ("BSJ".equals(getDeviceModel(command.getDeviceId()))) {
+                        data.writeByte(1); // flag
+                        var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
+                        data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
+                        return HuabaoProtocolDecoder.formatMessage(
+                                0x7e, HuabaoProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
+                    } else {
+                        return Unpooled.wrappedBuffer(DataConverter.parseHex(command.getString(Command.KEY_DATA)));
+                    }
                 case Command.TYPE_REBOOT_DEVICE:
                     data.writeByte(1); // number of parameters
                     data.writeByte(0x23); // parameter id

@@ -188,7 +188,8 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (type.equals("AP00")) {
-            getDeviceSession(channel, remoteAddress, sentence.substring(id.length() + type.length()));
+            String imei = sentence.split(",")[0].substring(id.length() + type.length());
+            getDeviceSession(channel, remoteAddress, imei);
             return null;
         }
 
