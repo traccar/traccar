@@ -476,7 +476,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
                     break;
                 case 0x02:
-                    position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShort() * 0.1);
+                    int fuel = buf.readUnsignedShort();
+                    if (BitUtil.check(fuel, 15)) {
+                        position.set(Position.KEY_FUEL_LEVEL, BitUtil.to(fuel, 15));
+                    } else {
+                        position.set(Position.KEY_FUEL_LEVEL, fuel / 10.0);
+                    }
                     break;
                 case 0x25:
                     position.set(Position.KEY_INPUT, buf.readUnsignedInt());
@@ -988,7 +993,57 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedByte();
 
-        if (type == 0xF0) {
+        if (type == 0x41) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            String data = buf.readCharSequence(buf.readableBytes() - 2, StandardCharsets.US_ASCII).toString().trim();
+            String[] values = data.split(",");
+            int index = 1; // skip header
+
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_POWER, Double.parseDouble(values[index - 1]));
+            }
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_RPM, Integer.parseInt(values[index - 1]));
+            }
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[index - 1]));
+            }
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_THROTTLE, Double.parseDouble(values[index - 1]));
+            }
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_ENGINE_LOAD, Double.parseDouble(values[index - 1]));
+            }
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index - 1]));
+            }
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1])); // instant
+            }
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1])); // average
+            }
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_ODOMETER_TRIP, Double.parseDouble(values[index - 1]));
+            }
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_OBD_ODOMETER, Integer.parseInt(values[index - 1]));
+            }
+            if (!values[index++].isEmpty()) {
+                position.set("tripFuelUsed", Double.parseDouble(values[index - 1]));
+            }
+            if (!values[index++].isEmpty()) {
+                position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index - 1]));
+            }
+
+            return position;
+
+        } else if (type == 0xF0) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
