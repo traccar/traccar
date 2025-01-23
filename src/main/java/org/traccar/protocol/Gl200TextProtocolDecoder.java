@@ -1501,10 +1501,13 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{1,3})?,")                // battery
             .or()
             .number("(d{1,7}.d)?,")              // odometer
+            .groupBegin()
+            .number("(dddd)(dd)(dd)")            // event date (yyyymmdd)
+            .number("(dd)(dd)(dd),")             // event time (hhmmss)
+            .groupEnd("?")
             .groupEnd()
             .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)")              // time (hhmmss)
-            .text(",")
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
             .number("(xxxx)")                    // count number
             .text("$").optional()
             .compile();
@@ -1543,6 +1546,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         }
+
+        parser.skip(6); // event time
 
         decodeDeviceTime(position, parser);
 
