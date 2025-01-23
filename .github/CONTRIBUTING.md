@@ -13,12 +13,12 @@ GitHub issues should be used ONLY for feature requests, code discussions and bug
 
 There are multiple DigitalEgiz projects. If you create a new issue you MUST do it in the relevant repository:
 
-- [DigitalEgiz Server](https://github.com/tananaev/digitalegiz/issues)
-- [DigitalEgiz Web Interface](https://github.com/tananaev/digitalegiz-web/issues)
-- [DigitalEgiz Client for Android](https://github.com/tananaev/digitalegiz-client-android/issues)
-- [DigitalEgiz Client for iOS](https://github.com/tananaev/digitalegiz-client-ios/issues)
-- [DigitalEgiz Manager for Android](https://github.com/tananaev/digitalegiz-manager-android/issues)
-- [DigitalEgiz Manager for iOS](https://github.com/tananaev/digitalegiz-manager-ios/issues)
+- [DigitalEgiz Server](https://github.com/kzbraman/digitalegiz/issues)
+- [DigitalEgiz Web Interface](https://github.com/kzbraman/digitalegiz-web/issues)
+- [DigitalEgiz Client for Android](https://github.com/kzbraman/digitalegiz-client-android/issues)
+- [DigitalEgiz Client for iOS](https://github.com/kzbraman/digitalegiz-client-ios/issues)
+- [DigitalEgiz Manager for Android](https://github.com/kzbraman/digitalegiz-manager-android/issues)
+- [DigitalEgiz Manager for iOS](https://github.com/kzbraman/digitalegiz-manager-ios/issues)
 
 If you are not sure where your issue belongs to, please use DigitalEgiz Server main repository.
 
