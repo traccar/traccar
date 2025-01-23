@@ -49,7 +49,11 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
 
             switch (command.getType()) {
                 case Command.TYPE_CUSTOM:
-                    if ("BSJ".equals(getDeviceModel(command.getDeviceId()))) {
+                    // Check if the device model is "gosafe"
+                    if ("gosafe".equals(getDeviceModel(command.getDeviceId()))) {
+                        // Send the data directly as raw
+                        return Unpooled.wrappedBuffer(DataConverter.parseHex(command.getString(Command.KEY_DATA)));
+                    } else if ("BSJ".equals(getDeviceModel(command.getDeviceId()))) {
                         data.writeByte(1); // flag
                         var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
                         data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
