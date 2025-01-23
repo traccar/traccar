@@ -8,7 +8,7 @@ cd $(dirname $0)
 
 usage () {
   echo "Usage: $0 VERSION [PLATFORM]"
-  echo "Build Traccar installers."
+  echo "Build DigitalEgiz installers."
   echo
   echo "Without PLATFORM provided, builds installers for all platforms."
   echo
@@ -52,7 +52,7 @@ check_requirement () {
 }
 
 info "Checking build requirements for platform: "$PLATFORM
-check_requirement "Traccar server archive" "ls ../target/tracker-server.jar" "Missing traccar archive"
+check_requirement "DigitalEgiz server archive" "ls ../target/tracker-server.jar" "Missing digitalegiz archive"
 check_requirement "Zip" "which zip" "Missing zip binary"
 check_requirement "Unzip" "which unzip" "Missing unzip binary"
 if [ $PLATFORM != "other" ]; then
@@ -87,8 +87,8 @@ prepare () {
   cp ../target/lib/* out/lib
   cp ../schema/* out/schema
   cp -r ../templates/* out/templates
-  cp -r ../traccar-web/build/* out/web
-  cp traccar.xml out/conf
+  cp -r ../digitalegiz-web/build/* out/web
+  cp digitalegiz.xml out/conf
 
   if [ $PLATFORM = "all" -o $PLATFORM = "windows-64" ]; then
 	innoextract i*setup-*.exe >/dev/null
@@ -109,7 +109,7 @@ package_other () {
   info "Building Zip archive"
   cp README.txt out
   cd out
-  zip -q -r ../traccar-other-$VERSION.zip *
+  zip -q -r ../digitalegiz-other-$VERSION.zip *
   cd ..
   rm out/README.txt
   ok "Created Zip archive"
@@ -120,28 +120,28 @@ package_windows () {
   unzip -q OpenJDK*64_windows*.zip
   jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
   rm -rf jdk-*
-  wine app/ISCC.exe traccar.iss >/dev/null
+  wine app/ISCC.exe digitalegiz.iss >/dev/null
   rm -rf out/jre
-  zip -q -j traccar-windows-64-$VERSION.zip Output/traccar-setup.exe README.txt
+  zip -q -j digitalegiz-windows-64-$VERSION.zip Output/digitalegiz-setup.exe README.txt
   rm -r Output
   ok "Created Windows 64 installer"
 }
 
 package_linux () {
   cp setup.sh out
-  cp traccar.service out
+  cp digitalegiz.service out
 
   tar -xf OpenJDK*$2_linux*.tar.gz
   jlink --module-path jdk-*/jmods --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported --output out/jre
   rm -rf jdk-*
-  makeself --needroot --quiet --notemp out traccar.run "traccar" ./setup.sh
+  makeself --needroot --quiet --notemp out digitalegiz.run "digitalegiz" ./setup.sh
   rm -rf out/jre
 
-  zip -q -j traccar-linux-$1-$VERSION.zip traccar.run README.txt
+  zip -q -j digitalegiz-linux-$1-$VERSION.zip digitalegiz.run README.txt
 
-  rm traccar.run
+  rm digitalegiz.run
   rm out/setup.sh
-  rm out/traccar.service
+  rm out/digitalegiz.service
 }
 
 package_linux_64 () {

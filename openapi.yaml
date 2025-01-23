@@ -1,25 +1,25 @@
 openapi: 3.1.0
 info:
-  title: Traccar
-  description: Traccar GPS tracking server API documentation. To use the API you need to have a server instance. For testing purposes you can use one of free [demo servers](https://www.traccar.org/demo-server/). For production use you can install your own server or get a [subscription service](https://www.traccar.org/product/tracking-server/).
+  title: DigitalEgiz
+  description: DigitalEgiz GPS tracking server API documentation. To use the API you need to have a server instance. For testing purposes you can use one of free [demo servers](https://www.digitalegiz.org/demo-server/). For production use you can install your own server or get a [subscription service](https://www.digitalegiz.org/product/tracking-server/).
   contact:
-    name: Traccar Support
-    url: https://www.traccar.org/
-    email: support@traccar.org
+    name: DigitalEgiz Support
+    url: https://www.digitalegiz.org/
+    email: support@digitalegiz.org
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
   version: '6.6'
 servers:
-  - url: https://demo.traccar.org/api
+  - url: https://demo.digitalegiz.org/api
     description: Demo Server 1
-  - url: https://demo2.traccar.org/api
+  - url: https://demo2.digitalegiz.org/api
     description: Demo Server 2
-  - url: https://demo3.traccar.org/api
+  - url: https://demo3.digitalegiz.org/api
     description: Demo Server 3
-  - url: https://demo4.traccar.org/api
+  - url: https://demo4.digitalegiz.org/api
     description: Demo Server 4
-  - url: https://server.traccar.org/api
+  - url: https://server.digitalegiz.org/api
     description: Subscription Server
   - url: http://{host}:{port}/api
     description: Other Server
@@ -514,8 +514,8 @@ paths:
     get:
       summary: Fetches a list of Positions
       description: >-
-        We strongly recommend using [Traccar WebSocket
-        API](https://www.traccar.org/traccar-api/) instead of periodically
+        We strongly recommend using [DigitalEgiz WebSocket
+        API](https://www.digitalegiz.org/digitalegiz-api/) instead of periodically
         polling positions endpoint. Without any params, it returns a list of
         last known positions for all the user's Devices. _from_ and _to_ fields
         are not required with _id_.

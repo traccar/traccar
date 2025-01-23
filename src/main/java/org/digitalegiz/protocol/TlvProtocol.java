@@ -1,0 +1,39 @@
+/*
+ * Copyright 2017 - 2018 Anton Tananaev (anton@digitalegiz.org)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.digitalegiz.protocol;
+
+import org.digitalegiz.BaseProtocol;
+import org.digitalegiz.CharacterDelimiterFrameDecoder;
+import org.digitalegiz.PipelineBuilder;
+import org.digitalegiz.TrackerServer;
+import org.digitalegiz.config.Config;
+
+import jakarta.inject.Inject;
+
+public class TlvProtocol extends BaseProtocol {
+
+    @Inject
+    public TlvProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
+            @Override
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '\0'));
+                pipeline.addLast(new TlvProtocolDecoder(TlvProtocol.this));
+            }
+        });
+    }
+
+}

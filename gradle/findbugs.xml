@@ -12,22 +12,22 @@
     <Bug pattern="EI_EXPOSE_REP2" />
   </Match>
   <Match>
-    <Class name="org.traccar.notification.PropertiesProvider" />
+    <Class name="org.digitalegiz.notification.PropertiesProvider" />
     <Method name="getBoolean" />
     <Bug pattern="NP_BOOLEAN_RETURN_NULL" />
   </Match>
   <Match>
-    <Class name="org.traccar.protocol.TrvProtocolDecoder" />
+    <Class name="org.digitalegiz.protocol.TrvProtocolDecoder" />
     <Method name="decodeOptionalValue" />
     <Bug pattern="NP_BOOLEAN_RETURN_NULL" />
   </Match>
   <Match>
-    <Class name="org.traccar.protocol.Gps056ProtocolDecoder" />
+    <Class name="org.digitalegiz.protocol.Gps056ProtocolDecoder" />
     <Method name="decodeCoordinate" />
     <Bug pattern="ICAST_IDIV_CAST_TO_DOUBLE" />
   </Match>
   <Match>
-    <Class name="org.traccar.protocol.PricolProtocolDecoder" />
+    <Class name="org.digitalegiz.protocol.PricolProtocolDecoder" />
     <Method name="decode" />
     <Bug pattern="ICAST_IDIV_CAST_TO_DOUBLE" />
   </Match>

@@ -1,12 +1,12 @@
-Traccar is a free and open source GPS tracking system.
+DigitalEgiz is a free and open source GPS tracking system.
 
 Installation instructions are available on the official website:
 
-Windows - https://www.traccar.org/windows/
-Linux   - https://www.traccar.org/linux/
-Docker  - https://www.traccar.org/docker/
-Other   - https://www.traccar.org/manual-installation/
+Windows - https://www.digitalegiz.org/windows/
+Linux   - https://www.digitalegiz.org/linux/
+Docker  - https://www.digitalegiz.org/docker/
+Other   - https://www.digitalegiz.org/manual-installation/
 
 If you have any questions or problems visit support page:
 
-https://www.traccar.org/support/
+https://www.digitalegiz.org/support/

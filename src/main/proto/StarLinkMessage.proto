@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package org.traccar.protobuf.starlink;
+package org.digitalegiz.protobuf.starlink;
 
 // StarLink Message
 message StarLink_Message {

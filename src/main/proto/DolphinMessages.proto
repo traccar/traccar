@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package org.traccar.protobuf.dolphin.Messages;
+package org.digitalegiz.protobuf.dolphin.Messages;
 option go_package = "dolphindevice";
 
 import "DolphinConfig.proto";

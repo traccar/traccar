@@ -1,26 +1,26 @@
 #!/bin/sh
 
 PRESERVECONFIG=0
-if [ -f /opt/traccar/conf/traccar.xml ]
+if [ -f /opt/digitalegiz/conf/digitalegiz.xml ]
 then
-    cp /opt/traccar/conf/traccar.xml /opt/traccar/conf/traccar.xml.saved
+    cp /opt/digitalegiz/conf/digitalegiz.xml /opt/digitalegiz/conf/digitalegiz.xml.saved
     PRESERVECONFIG=1
 fi
 
-mkdir -p /opt/traccar
-cp -r * /opt/traccar
-chmod -R go+rX /opt/traccar
+mkdir -p /opt/digitalegiz
+cp -r * /opt/digitalegiz
+chmod -R go+rX /opt/digitalegiz
 
-if [ ${PRESERVECONFIG} -eq 1 ] && [ -f /opt/traccar/conf/traccar.xml.saved ]
+if [ ${PRESERVECONFIG} -eq 1 ] && [ -f /opt/digitalegiz/conf/digitalegiz.xml.saved ]
 then
-    mv -f /opt/traccar/conf/traccar.xml.saved /opt/traccar/conf/traccar.xml
+    mv -f /opt/digitalegiz/conf/digitalegiz.xml.saved /opt/digitalegiz/conf/digitalegiz.xml
 fi
 
-mv /opt/traccar/traccar.service /etc/systemd/system
-chmod 664 /etc/systemd/system/traccar.service
+mv /opt/digitalegiz/digitalegiz.service /etc/systemd/system
+chmod 664 /etc/systemd/system/digitalegiz.service
 
 systemctl daemon-reload
-systemctl enable traccar.service
+systemctl enable digitalegiz.service
 
-rm /opt/traccar/setup.sh
+rm /opt/digitalegiz/setup.sh
 rm -r ../out

@@ -1,5 +1,5 @@
-[submodule "traccar-web"]
-	path = traccar-web
-	url = ../traccar-web.git
+[submodule "digitalegiz-web"]
+	path = digitalegiz-web
+	url = ../digitalegiz-web.git
 	branch = master
 	ignore = all

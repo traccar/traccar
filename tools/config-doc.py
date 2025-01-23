@@ -5,7 +5,7 @@ import os
 import argparse
 
 _KEYS_FILE = os.path.join(
-    os.path.dirname(__file__), "../src/main/java/org/traccar/config/Keys.java"
+    os.path.dirname(__file__), "../src/main/java/org/digitalegiz/config/Keys.java"
 )
 
 

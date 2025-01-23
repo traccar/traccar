@@ -138,7 +138,7 @@ debug = '-v' in sys.argv
 def load_ports():
     ports = {}
     dir = os.path.dirname(os.path.abspath(__file__))
-    with open(dir + '/../src/main/java/org/traccar/config/PortConfigSuffix.java', 'r') as file:
+    with open(dir + '/../src/main/java/org/digitalegiz/config/PortConfigSuffix.java', 'r') as file:
         content = file.read()
     pattern = re.compile(r'PORTS\.put\("([^"]+)",\s*(\d+)\);')
     matches = pattern.findall(content)

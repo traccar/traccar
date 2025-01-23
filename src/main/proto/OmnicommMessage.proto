@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package org.traccar.protobuf.omnicomm;
+package org.digitalegiz.protobuf.omnicomm;
 
 message OmnicommMessage {
 
