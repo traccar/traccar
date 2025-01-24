@@ -23,4 +23,7 @@ conn = httplib.HTTPConnection(server)
 
 for i in range(0, len(points)):
     (moment, lat, lon, speed) = points[i]
-    send(conn, time.mktime(datetime.datetime.strptime(moment, "%Y-%m-%d %H:%M:%S").timetuple()), lat, lon, speed)
+#     send(conn, time.mktime(datetime.datetime.strptime(moment, "%Y-%m-%d %H:%M:%S").timetuple()), lat, lon, speed)
+    print("sending ", time.mktime(time.localtime(time.time())), lat, lon, speed)
+    send(conn, time.mktime(time.localtime(time.time())), lat, lon, speed)
+    time.sleep(2)

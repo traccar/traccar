@@ -20,6 +20,7 @@
     <entry key='database.url'>jdbc:h2:./target/database</entry>
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
+    <entry key='notificator.types'>web,mail</entry>
 
     <!--<entry key='server.instantAcknowledgement'>true</entry>
     <entry key='server.buffering.threshold'>5000</entry>-->
@@ -38,6 +39,9 @@
     <entry key='tollRoute.type'>overpass</entry>
     <entry key='tollRoute.url'>https://overpass.private.coffee/api/interpreter</entry>
     <entry key='tollRoute.accuracy'>100</entry>
+
+
+    <entry key='mail.debug'>true</entry>
 
     <entry key='notification.types'>
     deviceOnline,deviceOffline,deviceUnknown,deviceInactive,deviceMoving,deviceStopped,
