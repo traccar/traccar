@@ -118,6 +118,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
 
         Parser parser = new Parser(PATTERN_HEADER, header);
         if (!parser.matches()) {
+            LOGGER.error("upro ignoring "  + buf.toString(StandardCharsets.US_ASCII));
             return null;
         }
 
