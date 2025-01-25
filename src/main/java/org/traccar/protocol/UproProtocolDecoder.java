@@ -279,7 +279,9 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                             decodeAlarm(Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII))));
                     break;
                 case 'X':
-                    String[] cells = data.toString(StandardCharsets.US_ASCII).split(";");
+                    String x = data.toString(StandardCharsets.US_ASCII);
+                    LOGGER.error("upro x " + x);
+                    String[] cells = x.split(";");
                     if (!cells[0].startsWith("(")) {
                         for (int i = 0; i < cells.length; i++) {
                             String[] values = cells[i].split(",");
