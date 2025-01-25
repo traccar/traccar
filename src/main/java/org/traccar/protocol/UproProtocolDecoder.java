@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class UproProtocolDecoder extends BaseProtocolDecoder {
@@ -280,23 +281,16 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 'X':
                     String x = data.toString(StandardCharsets.US_ASCII);
-                    LOGGER.error("upro x " + x);
-                    String[] cells = x.split(";");
-                    if (!cells[0].startsWith("(")) {
-                        for (int i = 0; i < cells.length; i++) {
-                            String[] values = cells[i].split(",");
-                            int index = 0;
-                            if (i == 0) {
-                                mcc = Integer.parseInt(values[index++]);
-                                mnc = Integer.parseInt(values[index++]);
-                            }
-                            network.addCellTower(CellTower.from(
-                                    mcc, mnc,
-                                    Integer.parseInt(values[index++]),
-                                    Integer.parseInt(values[index++]),
-                                    Integer.parseInt(values[index])));
+                    Pattern pattern = Pattern.compile("\\((.+?)\\)");
+                    Matcher matcher = pattern.matcher(x);
+                    while (matcher.find()) {
+                        String group = matcher.group(1);
+                        char t = group.charAt(0);
+                        if (t == 'k') {
+                            position.set(Position.KEY_ICCID, group.substring(1));
+                        } else {
+                            position.set(String.valueOf(t), group.substring(1));
                         }
-                        position.setNetwork(network);
                     }
                     break;
                 case 'Y':
