@@ -157,7 +157,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             }
 
             ByteBuf data = buf.readSlice(delimiterIndex - buf.readerIndex());
-            int mcc = 0, mnc = 0, count;
+            int mcc, mnc, count;
             String stringValue;
 
             switch (dataType) {
@@ -283,14 +283,18 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     String x = data.toString(StandardCharsets.US_ASCII);
                     Pattern pattern = Pattern.compile("\\((.+?)\\)");
                     Matcher matcher = pattern.matcher(x);
-                    while (matcher.find()) {
-                        String group = matcher.group(1);
-                        char t = group.charAt(0);
-                        if (t == 'k') {
-                            position.set(Position.KEY_ICCID, group.substring(1));
-                        } else {
-                            position.set(String.valueOf(t), group.substring(1));
+                    if (matcher.matches()) {
+                        while (matcher.find()) {
+                            String group = matcher.group(1);
+                            char t = group.charAt(0);
+                            if (t == 'k') {
+                                position.set(Position.KEY_ICCID, group.substring(1));
+                            } else {
+                                position.set(String.valueOf(t), group.substring(1));
+                            }
                         }
+                    } else {
+                        LOGGER.error("upro ignoring " + x);
                     }
                     break;
                 case 'Y':
