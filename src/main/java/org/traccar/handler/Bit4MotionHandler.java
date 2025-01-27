@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Bit4MotionHandler:
- *  - Relies on Huabao decoder to set Position.KEY_MOTION from bit4 (true/false).
- *  - Detects false->true transition; if device model contains "gosafe", sends "<SPGS*CHP>" after 15s.
+ *  - Relies on HuabaoProtocolDecoder to set Position.KEY_MOTION from bit4 (true/false).
+ *  - Detects false -> true transition; if device model contains "gosafe", sends "<SPGS*CHP>" after 15s.
  *  - Persists oldMotion in device attributes so it survives restarts.
  */
 public class Bit4MotionHandler extends BasePositionHandler {
@@ -32,7 +32,7 @@ public class Bit4MotionHandler extends BasePositionHandler {
     private static final ScheduledExecutorService SCHEDULER =
             Executors.newSingleThreadScheduledExecutor();
 
-    // Attribute name for storing oldMotion in device attributes (DB)
+    // Attribute key to store "oldMotion" in device attributes
     private static final String ATTR_OLD_MOTION = "huabaoOldMotion";
 
     private final CacheManager cacheManager;
@@ -47,33 +47,29 @@ public class Bit4MotionHandler extends BasePositionHandler {
     }
 
     /**
-     * onPosition is the method from BasePositionHandler that you need to implement.
-     * If you want this handler to continue in the pipeline, call callback.processed(false).
-     * If you want to filter (stop) this position, call callback.processed(true).
+     * Method from BasePositionHandler. Invoked for each new Position.
      */
     @Override
     public void onPosition(Position position, Callback callback) {
 
         long deviceId = position.getDeviceId();
         if (deviceId == 0) {
-            // No associated device
             callback.processed(false);
             return;
         }
 
         // Must already have KEY_MOTION set by HuabaoProtocolDecoder (bit4 check)
         if (!position.hasAttribute(Position.KEY_MOTION)) {
-            // No motion info from bit4
             callback.processed(false);
             return;
         }
 
         boolean currentMotion = position.getBoolean(Position.KEY_MOTION);
 
-        // Retrieve device from cache
+        // Retrieve Device from cache
         Device device = cacheManager.getObject(Device.class, deviceId);
         if (device == null) {
-            // Device not found in cache
+            LOGGER.warn("Device {} not found in cache", deviceId);
             callback.processed(false);
             return;
         }
@@ -90,12 +86,11 @@ public class Bit4MotionHandler extends BasePositionHandler {
             }
         }
 
-        // false -> true transition
+        // Check for false -> true transition
         if (!oldMotion && currentMotion) {
-            // Check if "gosafe" is in model
+            // If device model includes "gosafe", schedule sending <SPGS*CHP> after 15s
             String model = device.getModel() != null ? device.getModel() : "";
             if (model.toLowerCase().contains("gosafe")) {
-                // Schedule sending "<SPGS*CHP>" command after 15 seconds
                 SCHEDULER.schedule(() -> {
                     try {
                         sendHuabaoCommand(deviceId, "<SPGS*CHP>");
@@ -106,60 +101,78 @@ public class Bit4MotionHandler extends BasePositionHandler {
             }
         }
 
-        // Store updated motion
+        // Persist the updated motion into device attributes
         attributes.put(ATTR_OLD_MOTION, currentMotion);
         device.setAttributes(attributes);
 
-        // If you have a direct way to persist the device, do so here:
+        // If your Traccar version supports direct DB writes, do it here, for example:
         // cacheManager.updateObject(Device.class, device);
-        // or any logic your version of Traccar uses to update the DB.
 
+        // Position was not filtered, continue pipeline
         callback.processed(false);
     }
 
+    /**
+     * Schedules a raw Huabao-like command to the device.
+     */
     private void sendHuabaoCommand(long deviceId, String messageText) {
-        // Retrieve session from ConnectionManager
+
+        // Retrieve active session from ConnectionManager
         DeviceSession session = connectionManager.getDeviceSession(deviceId);
         if (session == null || session.getChannel() == null) {
             LOGGER.info("Device {} offline or no active channel; command not sent", deviceId);
             return;
         }
 
-        ByteBuf command = buildHuabaoCommand(messageText, session.getDeviceUniqueId());
-        // Send out the raw buffer to the device
-        session.getChannel().writeAndFlush(
-                new NetworkMessage(command, session.getChannel().remoteAddress()));
+        // We can retrieve the device again (or pass it in):
+        Device device = cacheManager.getObject(Device.class, deviceId);
+        if (device == null) {
+            LOGGER.warn("Cannot send command, device {} not found", deviceId);
+            return;
+        }
+
+        // Usually device.getUniqueId() returns a string with the IMEI (decimal).
+        // If your protocol expects hex IMEI, you can convert it. Otherwise, pass it as needed:
+        String imeiOrHex = device.getUniqueId();
+
+        // Build raw Huabao command
+        ByteBuf command = buildHuabaoCommand(messageText, imeiOrHex);
+
+        // Write the command to the device's channel
+        session.getChannel().writeAndFlush(new NetworkMessage(command, session.getChannel().remoteAddress()));
 
         LOGGER.info("Sent '{}' command to device {}", messageText, deviceId);
     }
 
+    /**
+     * Constructs a Huabao-like message for demonstration.
+     * Adjust if your device expects a different format or requires hex IMEI.
+     */
     private ByteBuf buildHuabaoCommand(String messageText, String imei) {
-        // For demonstration, we build a raw Huabao-like message:
-        // Adjust the structure as needed for your device protocol.
 
-        // Convert ascii to hex
+        // Convert ASCII to hex
         String hexText = asciiToHex(messageText);
-        // txtLength (2 bytes)
+
+        // text length (2 bytes)
         int txtLength = hexText.length() / 2;
         String txtLengthHex = String.format("%04X", txtLength);
 
-        // Hard-coded fields as example
-        String header        = "7E";
-        String messageId     = "8304";
-        String markByte      = "4E";
-        String serialNumber  = "0001"; // can be replaced with an incremental or unique ID
-        int packetLength     = 1 + 2 + txtLength;  // 1 + 2 bytes + actual text
-        String packetLenHex  = String.format("%04X", packetLength);
+        // Example fields
+        String header       = "7E";
+        String messageId    = "8304";
+        String serialNumber = "0001"; // Could be dynamic or incremented
+        String markByte     = "4E";
+        int packetLength    = 1 + 2 + txtLength;  // 1 + 2 + text length
+        String packetLenHex = String.format("%04X", packetLength);
 
-        // Compose content
-        // messageId + length + IMEI(hex) + serial + markByte + txtLengthHex + hexText
+        // Build content
         String content = messageId + packetLenHex + imei + serialNumber
-                + markByte + txtLengthHex + hexText;
+                       + markByte + txtLengthHex + hexText;
 
-        // CRC (XOR)
+        // Compute XOR-based CRC
         String crcHex = calculateXor(content);
 
-        // Final
+        // Combine everything
         String finalCommand = header + content + crcHex + header;
 
         return Unpooled.wrappedBuffer(DataConverter.parseHex(finalCommand));
@@ -182,3 +195,4 @@ public class Bit4MotionHandler extends BasePositionHandler {
         return String.format("%02X", crc);
     }
 }
+
