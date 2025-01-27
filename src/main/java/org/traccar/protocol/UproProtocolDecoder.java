@@ -252,11 +252,6 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                                     Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16))));
                         }
                         break;
-                    case 'Q':
-                        if (!head.startsWith("HQ")) {
-                            position.set("obdPid", ByteBufUtil.hexDump(data));
-                        }
-                        break;
                     case 'R':
                         if (head.startsWith("HQ")) {
                             position.set(Position.KEY_RSSI,
@@ -347,7 +342,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                                 Integer.parseInt(data.toString(StandardCharsets.US_ASCII)) / 100.0);
                         break;
                     default:
-                        LOGGER.error("upro deviceId {} ignoring {} {}", deviceSession.getDeviceId(), dataType, data.toString(StandardCharsets.US_ASCII));
+                        position.set(String.valueOf(dataType), data.toString(StandardCharsets.US_ASCII));
                         break;
                 }
 
