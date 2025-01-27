@@ -91,6 +91,10 @@ public class Bit4MotionHandler extends BasePositionHandler {
             // If device model includes "gosafe", schedule sending <SPGS*CHP> after 15s
             String model = device.getModel() != null ? device.getModel() : "";
             if (model.toLowerCase().contains("gosafe")) {
+
+                // NEW LOG LINE: indicates we are scheduling the command
+                LOGGER.info("Device {} has started motion; scheduling <SPGS*CHP> in 15 seconds", deviceId);
+
                 SCHEDULER.schedule(() -> {
                     try {
                         sendHuabaoCommand(deviceId, "<SPGS*CHP>");
@@ -167,7 +171,7 @@ public class Bit4MotionHandler extends BasePositionHandler {
 
         // Build content
         String content = messageId + packetLenHex + imei + serialNumber
-                       + markByte + txtLengthHex + hexText;
+                + markByte + txtLengthHex + hexText;
 
         // Compute XOR-based CRC
         String crcHex = calculateXor(content);
@@ -195,4 +199,3 @@ public class Bit4MotionHandler extends BasePositionHandler {
         return String.format("%02X", crc);
     }
 }
-
