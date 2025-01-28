@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
  * Bit4MotionHandler:
  *  - Relies on HuabaoProtocolDecoder to set Position.KEY_MOTION from bit4 (true/false).
  *  - Detects false -> true transition; if device model contains "gosafe", sends "<SPGS*CHP>" after 15s.
- *  - Persists oldMotion in device attributes so it survives restarts.
+ *  - Fixes deficiency in the gosafe huabao implementation.
  */
 public class Bit4MotionHandler extends BasePositionHandler {
 
@@ -92,7 +92,6 @@ public class Bit4MotionHandler extends BasePositionHandler {
             String model = device.getModel() != null ? device.getModel() : "";
             if (model.toLowerCase().contains("gosafe")) {
 
-                // NEW LOG LINE: indicates we are scheduling the command
                 LOGGER.info("Device {} has started motion; scheduling <SPGS*CHP> in 15 seconds", deviceId);
 
                 SCHEDULER.schedule(() -> {
@@ -105,19 +104,15 @@ public class Bit4MotionHandler extends BasePositionHandler {
             }
         }
 
-        // Persist the updated motion into device attributes
+        // Persist the updated motion into memory device attributes
         attributes.put(ATTR_OLD_MOTION, currentMotion);
         device.setAttributes(attributes);
 
-        // If your Traccar version supports direct DB writes, do it here, for example:
-        // cacheManager.updateObject(Device.class, device);
-
-        // Position was not filtered, continue pipeline
         callback.processed(false);
     }
 
     /**
-     * Schedules a raw Huabao-like command to the device.
+     * Schedules command to the device.
      */
     private void sendHuabaoCommand(long deviceId, String messageText) {
 
@@ -135,12 +130,11 @@ public class Bit4MotionHandler extends BasePositionHandler {
             return;
         }
 
-        // Usually device.getUniqueId() returns a string with the IMEI (decimal).
-        // If your protocol expects hex IMEI, you can convert it. Otherwise, pass it as needed:
-        String imeiOrHex = device.getUniqueId();
+        // Get device UniqueId
+        String uniqueid = device.getUniqueId();
 
         // Build raw Huabao command
-        ByteBuf command = buildHuabaoCommand(messageText, imeiOrHex);
+        ByteBuf command = buildHuabaoCommand(messageText, uniqueid);
 
         // Write the command to the device's channel
         session.getChannel().writeAndFlush(new NetworkMessage(command, session.getChannel().remoteAddress()));
@@ -149,8 +143,7 @@ public class Bit4MotionHandler extends BasePositionHandler {
     }
 
     /**
-     * Constructs a Huabao-like message for demonstration.
-     * Adjust if your device expects a different format or requires hex IMEI.
+     * Construct Huabao message.
      */
     private ByteBuf buildHuabaoCommand(String messageText, String imei) {
 
@@ -161,7 +154,6 @@ public class Bit4MotionHandler extends BasePositionHandler {
         int txtLength = hexText.length() / 2;
         String txtLengthHex = String.format("%04X", txtLength);
 
-        // Example fields
         String header       = "7E";
         String messageId    = "8304";
         String serialNumber = "0001"; // Could be dynamic or incremented
