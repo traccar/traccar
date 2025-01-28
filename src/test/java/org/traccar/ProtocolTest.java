@@ -11,7 +11,11 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.helper.DataConverter;
-import org.traccar.model.*;
+import org.traccar.model.CellTower;
+import org.traccar.model.Command;
+import org.traccar.model.Network;
+import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;

@@ -155,21 +155,18 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            // interpret accuracy
             if (position.hasAttribute("accuracy")) {
                 position.setAccuracy(position.getDouble("accuracy"));
                 position.removeAttribute("accuracy");
             }
 
-            // interpret LBS
-            // this dance is necessary to account for the fact that the LBS data can be in multiple formats
             Network network = new Network();
-            if (position.hasAttribute("mcc")) {
-                interpretLBSAndRemoveAttribute(position, network, "");
-            }
-            if (position.hasAttribute("mcc1")) {
+            if (position.hasAttribute("mcc") || position.hasAttribute("mcc1")) {
+                decodeCellData(position, network, "");
                 for (int i = 1; i <= 9; i++) {
-                    interpretLBSAndRemoveAttribute(position, network, String.valueOf(i));
+                    if (!decodeCellData(position, network, String.valueOf(i))) {
+                        break;
+                    }
                 }
             }
 
@@ -181,8 +178,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static void interpretLBSAndRemoveAttribute(Position position, Network network, String suffix) {
-        // mnc, mcc, lac, cell_id are expected, ignore if incomplete
+    private static boolean decodeCellData(Position position, Network network, String suffix) {
         if (position.hasAttribute("mnc" + suffix)
                 && position.hasAttribute("mcc" + suffix)
                 && position.hasAttribute("lac" + suffix)
@@ -199,7 +195,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             position.removeAttribute("mcc" + suffix);
             position.removeAttribute("lac" + suffix);
             position.removeAttribute("cell_id" + suffix);
+            return true;
         }
+        return false;
     }
 
     @Override

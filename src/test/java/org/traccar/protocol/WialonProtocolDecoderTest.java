@@ -96,12 +96,10 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
 
         verifyNetwork(
                 decoder,
-                text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;mnc1:1:02,mcc1:1:250,lac1:1:5901,cell_id1:1:45542,mnc2:1:22,mcc2:1:222,lac2:1:2222,cell_id2:1:22222"),
+                text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;mnc1:1:02,mcc1:1:250,lac1:1:5901,cell_id1:1:45542,mnc2:1:22,mcc2:1:222,lac2:1:2222,cell_id2:1:22222,mcc3:1:333"),
                 position(Arrays.asList(
                         CellTower.from(250, 2, 5901, 45542),
-                        CellTower.from(222, 22, 2222, 22222)
-                ))
-        );
+                        CellTower.from(222, 22, 2222, 22222))));
     }
 
 }
