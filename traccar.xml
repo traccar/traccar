@@ -44,9 +44,9 @@
   </entry>
 
   <entry key='database.selectPositionByDevice'>
-    SELECT * FROM tc_positions_last where deviceId = :deviceId and id = :positionId
+    SELECT * FROM tc_positions_day where deviceId = :deviceId and id = :positionId
   </entry>
-
+  
   <entry key='geocoder.enable'>true</entry>
   <entry key='geocoder.type'>here</entry>
   <entry key='geocoder.url'>https://revgeocode.search.hereapi.com/v1/revgeocode</entry>
