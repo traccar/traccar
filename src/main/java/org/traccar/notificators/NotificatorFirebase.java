@@ -125,7 +125,7 @@ public class NotificatorFirebase extends Notificator {
                 if (!failedTokens.isEmpty()) {
                     registrationTokens.removeAll(failedTokens);
                     if (registrationTokens.isEmpty()) {
-                        user.getAttributes().remove("notificationTokens");
+                        user.removeAttribute("notificationTokens");
                     } else {
                         user.set("notificationTokens", String.join(",", registrationTokens));
                     }

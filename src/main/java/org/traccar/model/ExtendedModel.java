@@ -154,4 +154,7 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
+    public Object removeAttribute(String key) {
+        return attributes.remove(key);
+    }
 }
