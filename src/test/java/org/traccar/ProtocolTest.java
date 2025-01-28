@@ -13,6 +13,7 @@ import io.netty.handler.codec.http.HttpVersion;
 import org.traccar.helper.DataConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Command;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
@@ -21,9 +22,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,6 +45,16 @@ public class ProtocolTest extends BaseTest {
         position.setLatitude(lat);
         position.setLongitude(lon);
 
+        return position;
+    }
+
+    protected Position position(Collection<CellTower> cellTowers) {
+        var position = new Position();
+
+        var network = new Network();
+        network.setCellTowers(cellTowers);
+
+        position.setNetwork(network);
         return position;
     }
 
@@ -126,15 +135,17 @@ public class ProtocolTest extends BaseTest {
     }
 
     protected void verifyAttributes(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object), false, true, null);
+        verifyDecodedPosition(decoder.decode(null, null, object), false, true);
     }
 
     protected void verifyPosition(BaseProtocolDecoder decoder, Object object) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object), true, false, null);
+        verifyDecodedPosition(decoder.decode(null, null, object), true, false);
     }
 
     protected void verifyPosition(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
-        verifyDecodedPosition(decoder.decode(null, null, object), true, false, position);
+        var decoded = decoder.decode(null, null, object);
+        verifyDecodedPosition(decoded, true, false);
+        verifyExpectations(decoded, position);
     }
 
     protected void verifyPositions(BaseProtocolDecoder decoder, Object object) throws Exception {
@@ -149,52 +160,43 @@ public class ProtocolTest extends BaseTest {
         verifyDecodedList(decoder.decode(null, null, object), true, position);
     }
 
-    private void verifyDecodedList(Object decodedObject, boolean checkLocation, Position expected) {
+    protected void verifyNetwork(BaseProtocolDecoder decoder, Object object, Position position) throws Exception {
+        var decoded = decoder.decode(null, null, object);
+        verifyExpectations(decoded, position);
+    }
 
+    private void verifyDecodedList(Object decodedObject, boolean checkLocation, Position expected) {
         assertNotNull(decodedObject, "list is null");
         assertInstanceOf(List.class, decodedObject, "not a list");
         assertFalse(((List<?>) decodedObject).isEmpty(), "list is empty");
 
         for (Object item : (List<?>) decodedObject) {
-            verifyDecodedPosition(item, checkLocation, false, expected);
+            verifyDecodedPosition(item, checkLocation, false);
+            if (expected != null) {
+                verifyExpectations(item, expected);
+            }
         }
 
     }
 
-    private void verifyDecodedPosition(Object decodedObject, boolean checkLocation, boolean checkAttributes, Position expected) {
+    private void verifyDecodedPosition(Object decodedObject, boolean checkLocation, boolean checkAttributes) {
 
         assertNotNull(decodedObject, "position is null");
         assertInstanceOf(Position.class, decodedObject, "not a position");
 
-        Position position = (Position) decodedObject;
+        var position = (Position) decodedObject;
 
         if (checkLocation) {
+            assertNotNull(position.getServerTime());
+            assertNotNull(position.getFixTime());
 
-            if (expected != null) {
+            assertTrue(position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000, "time < +25 h");
 
-                if (expected.getFixTime() != null) {
-                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-                    dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    assertEquals(dateFormat.format(expected.getFixTime()), dateFormat.format(position.getFixTime()), "time");
-                }
-                assertEquals(expected.getValid(), position.getValid(), "valid");
-                assertEquals(expected.getLatitude(), position.getLatitude(), 0.00001, "latitude");
-                assertEquals(expected.getLongitude(), position.getLongitude(), 0.00001, "longitude");
+            assertTrue(position.getLatitude() >= -90, "latitude >= -90");
+            assertTrue(position.getLatitude() <= 90, "latitude <= 90");
 
-            } else {
-
-                assertNotNull(position.getServerTime());
-                assertNotNull(position.getFixTime());
-                assertTrue(position.getFixTime().after(new Date(915148800000L)), "year > 1999");
-                assertTrue(position.getFixTime().getTime() < System.currentTimeMillis() + 25 * 3600000, "time < +25 h");
-
-                assertTrue(position.getLatitude() >= -90, "latitude >= -90");
-                assertTrue(position.getLatitude() <= 90, "latitude <= 90");
-
-                assertTrue(position.getLongitude() >= -180, "longitude >= -180");
-                assertTrue(position.getLongitude() <= 180, "longitude <= 180");
-
-            }
+            assertTrue(position.getLongitude() >= -180, "longitude >= -180");
+            assertTrue(position.getLongitude() <= 180, "longitude <= 180");
 
             assertTrue(position.getAltitude() >= -12262, "altitude >= -12262");
             assertTrue(position.getAltitude() <= 18000, "altitude <= 18000");
@@ -208,10 +210,9 @@ public class ProtocolTest extends BaseTest {
             assertNotNull(position.getProtocol(), "protocol is null");
 
             assertTrue(position.getDeviceId() > 0, "deviceId > 0");
-
         }
 
-        Map<String, Object> attributes = position.getAttributes();
+        var attributes = position.getAttributes();
 
         if (checkAttributes) {
             assertFalse(attributes.isEmpty(), "no attributes");
@@ -326,7 +327,32 @@ public class ProtocolTest extends BaseTest {
                 }
             }
         }
+    }
 
+    private void verifyExpectations(Object decodedObject, Position expected) {
+        assertNotNull(decodedObject, "position is null");
+        assertNotNull(expected, "expectation can't be null");
+        assertInstanceOf(Position.class, decodedObject, "not a position");
+
+        var position = (Position) decodedObject;
+
+        if (expected.getFixTime() != null) {
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            assertEquals(dateFormat.format(expected.getFixTime()), dateFormat.format(position.getFixTime()), "time");
+        }
+        assertEquals(expected.getValid(), position.getValid(), "valid");
+        assertEquals(expected.getLatitude(), position.getLatitude(), 0.00001, "latitude");
+        assertEquals(expected.getLongitude(), position.getLongitude(), 0.00001, "longitude");
+
+        if (expected.getNetwork() != null) {
+            var network = expected.getNetwork();
+            var decodedNetwork = position.getNetwork();
+
+            assertNotNull(decodedNetwork, "network is null");
+            assertEquals(network.getCellTowers(), position.getNetwork().getCellTowers(), "cell towers");
+            assertEquals(network.getWifiAccessPoints(), position.getNetwork().getWifiAccessPoints(), "access points");
+        }
     }
 
     private void checkInteger(Object value, int min, int max) {
