@@ -17,6 +17,8 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -140,11 +142,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                     String key = paramParser.group(1).toLowerCase();
                     String value = paramParser.group(2);
                     try {
-                        if (key.equals("accuracy")) {
-                            position.setAccuracy(Double.parseDouble(value));
-                        } else {
-                            position.set(key, Double.parseDouble(value));
-                        }
+                        position.set(key, Double.parseDouble(value));
                     } catch (NumberFormatException e) {
                         if (value.equalsIgnoreCase("true")) {
                             position.set(key, true);
@@ -156,9 +154,52 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
             }
+
+            // interpret accuracy
+            if (position.hasAttribute("accuracy")) {
+                position.setAccuracy(position.getDouble("accuracy"));
+                position.removeAttribute("accuracy");
+            }
+
+            // interpret LBS
+            // this dance is necessary to account for the fact that the LBS data can be in multiple formats
+            Network network = new Network();
+            if (position.hasAttribute("mcc")) {
+                interpretLBSAndRemoveAttribute(position, network, "");
+            }
+            if (position.hasAttribute("mcc1")) {
+                for (int i = 1; i <= 9; i++) {
+                    interpretLBSAndRemoveAttribute(position, network, String.valueOf(i));
+                }
+            }
+
+            if (network.getCellTowers() != null) {
+                position.setNetwork(network);
+            }
         }
 
         return position;
+    }
+
+    private static void interpretLBSAndRemoveAttribute(Position position, Network network, String suffix) {
+        // mnc, mcc, lac, cell_id are expected, ignore if incomplete
+        if (position.hasAttribute("mnc" + suffix)
+                && position.hasAttribute("mcc" + suffix)
+                && position.hasAttribute("lac" + suffix)
+                && position.hasAttribute("cell_id" + suffix)
+        ) {
+            network.addCellTower(CellTower.from(
+                    position.getInteger("mcc" + suffix),
+                    position.getInteger("mnc" + suffix),
+                    position.getInteger("lac" + suffix),
+                    position.getLong("cell_id" + suffix)
+            ));
+
+            position.removeAttribute("mnc" + suffix);
+            position.removeAttribute("mcc" + suffix);
+            position.removeAttribute("lac" + suffix);
+            position.removeAttribute("cell_id" + suffix);
+        }
     }
 
     @Override
