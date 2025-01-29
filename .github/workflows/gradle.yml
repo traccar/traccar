@@ -19,3 +19,4 @@ jobs:
         java-version: 17
         cache: gradle
     - run: ./gradlew build --no-daemon --stacktrace
+ 
