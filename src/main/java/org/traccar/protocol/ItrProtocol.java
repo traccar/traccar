@@ -1,9 +1,12 @@
 package org.traccar.protocol;
 
 import org.traccar.BaseProtocol;
-import org.traccar.TrackerServer;
 import org.traccar.PipelineBuilder;
-import io.netty.channel.ChannelPipeline;
+import org.traccar.TrackerServer;
+
+import io.netty.handler.codec.string.StringEncoder;
+
+import java.util.List;
 
 public class ItrProtocol extends BaseProtocol {
 
@@ -12,6 +15,7 @@ public class ItrProtocol extends BaseProtocol {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline) {
                 pipeline.addLast(new ItrProtocolFrameDecoder());
+                pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new ItrProtocolDecoder(ItrProtocol.this));
             }
         });
