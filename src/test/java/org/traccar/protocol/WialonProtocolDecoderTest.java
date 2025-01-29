@@ -5,9 +5,6 @@ import org.traccar.ProtocolTest;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 public class WialonProtocolDecoderTest extends ProtocolTest {
 
     @Test
