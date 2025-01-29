@@ -1,33 +1,31 @@
 package org.traccar.protocol;
 
-import org.traccar.BaseFrameDecoder;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
 
-public class ItrProtocolFrameDecoder extends BaseFrameDecoder {
+import java.util.List;
+
+public class ItrProtocolFrameDecoder extends ByteToMessageDecoder {
 
     @Override
-    protected Object decode(ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
-        if (buf.readableBytes() < 5) {
-            return null;
+    protected void decode(ChannelHandlerContext ctx, ByteBuf buf, List<Object> out) throws Exception {
+        // Verifica se há dados suficientes para ler o cabeçalho do pacote
+        if (buf.readableBytes() < 7) {
+            return;
         }
 
-        buf.markReaderIndex();
-        int startMarker = buf.readUnsignedShort();
-        
-        if (startMarker != 0x2828) {  // Verifica o marcador do protocolo
-            buf.resetReaderIndex();
-            return null;
+        // Verifica o marcador do pacote (0x28 0x28)
+        if (buf.getUnsignedShort(buf.readerIndex()) != 0x2828) {
+            buf.skipBytes(1);
+            return;
         }
 
-        int length = buf.getUnsignedShort(buf.readerIndex() + 2);
-        
+        int length = buf.getUnsignedShort(buf.readerIndex() + 3); // Tamanho do pacote
+
+        // Verifica se o pacote está completo
         if (buf.readableBytes() >= length + 5) {
-            return buf.readRetainedSlice(length + 5);
+            out.add(buf.readRetainedSlice(length + 5));
         }
-
-        buf.resetReaderIndex();
-        return null;
     }
 }
