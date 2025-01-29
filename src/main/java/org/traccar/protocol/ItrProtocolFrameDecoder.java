@@ -17,7 +17,7 @@ public class ItrProtocolFrameDecoder extends ByteToMessageDecoder {
 
         // Verifica o marcador do pacote (0x28 0x28)
         if (buf.getUnsignedShort(buf.readerIndex()) != 0x2828) {
-            buf.skipBytes(1);
+            buf.skipBytes(1); // Ignora bytes inválidos
             return;
         }
 
@@ -25,7 +25,7 @@ public class ItrProtocolFrameDecoder extends ByteToMessageDecoder {
 
         // Verifica se o pacote está completo
         if (buf.readableBytes() >= length + 5) {
-            out.add(buf.readRetainedSlice(length + 5));
+            out.add(buf.readRetainedSlice(length + 5)); // Adiciona o pacote completo à lista de saída
         }
     }
 }
