@@ -1,47 +1,32 @@
+package org.traccar.protocol;
 
-class ItrProtocolDecoder extends BaseProtocolDecoder {
+import org.traccar.BaseFrameDecoder;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
 
-    public ItrProtocolDecoder(ItrProtocol protocol) {
-        super(protocol);
-    }
+public class ItrProtocolFrameDecoder extends BaseFrameDecoder {
 
     @Override
-    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
-        ByteBuf buf = (ByteBuf) msg;
-
+    protected Object decode(ChannelHandlerContext ctx, ByteBuf buf) throws Exception {
         if (buf.readableBytes() < 5) {
             return null;
         }
 
-        buf.skipBytes(2); // Marca inicial (0x28 0x28)
-        int pid = buf.readUnsignedByte(); // Identificador do Pacote
-        int length = buf.readUnsignedShort(); // Tamanho do pacote
-        int sequence = buf.readUnsignedShort(); // Sequência do pacote
-
-        if (pid == 0x12) { // Location Package
-            Position position = new Position();
-            position.setProtocol(getProtocolName());
-
-            long time = buf.readUnsignedInt();
-            position.setFixTime(new java.util.Date(time * 1000));
-
-            double latitude = buf.readInt() / 1800000.0;
-            double longitude = buf.readInt() / 1800000.0;
-            position.setLatitude(latitude);
-            position.setLongitude(longitude);
-
-            int altitude = buf.readShort();
-            position.setAltitude((double) altitude);
-
-            int speed = buf.readUnsignedShort();
-            position.setSpeed(speed * 0.539957); // Converter para nós
-
-            int course = buf.readUnsignedShort();
-            position.setCourse(course);
-
-            return position;
+        buf.markReaderIndex();
+        int startMarker = buf.readUnsignedShort();
+        
+        if (startMarker != 0x2828) {  // Verifica o marcador do protocolo
+            buf.resetReaderIndex();
+            return null;
         }
 
+        int length = buf.getUnsignedShort(buf.readerIndex() + 2);
+        
+        if (buf.readableBytes() >= length + 5) {
+            return buf.readRetainedSlice(length + 5);
+        }
+
+        buf.resetReaderIndex();
         return null;
     }
 }
