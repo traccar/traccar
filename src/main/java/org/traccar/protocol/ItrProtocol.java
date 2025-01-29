@@ -2,28 +2,19 @@ package org.traccar.protocol;
 
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
-import org.traccar.TrackerServer;
-import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
-import org.traccar.model.Position;
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import java.net.SocketAddress;
-import java.util.List;
+import org.traccar.Config;
+import io.netty.channel.ChannelPipeline;
 
 public class ItrProtocol extends BaseProtocol {
 
-    public ItrProtocol() {
-        super("itr");
-    }
-
-    @Override
-    protected void initTrackerServers(List<TrackerServer> serverList) {
-        serverList.add(new TrackerServer(false, getName()) {
+    public ItrProtocol(Config config) {
+        super(config);
+        addServer(new BaseProtocol.Server(this, false, new PipelineBuilder() {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addHandlers(ChannelPipeline pipeline) {
+                pipeline.addLast(new ItrProtocolFrameDecoder());
                 pipeline.addLast(new ItrProtocolDecoder(ItrProtocol.this));
             }
-        });
+        }));
     }
 }
