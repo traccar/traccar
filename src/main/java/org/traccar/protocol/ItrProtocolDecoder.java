@@ -10,14 +10,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.net.SocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
 public class ItrProtocolDecoder extends BaseProtocolDecoder {
 
-    public ItrProtocolDecoder(BaseProtocol protocol) {
+    public ItrProtocolDecoder(ItrProtocol protocol) {
         super(protocol);
     }
 
@@ -35,31 +32,34 @@ public class ItrProtocolDecoder extends BaseProtocolDecoder {
         int sequence = buf.readUnsignedShort(); // Número de sequência
 
         Position position = new Position(getProtocolName());
-        position.setDeviceId(getDeviceId(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII)));
+        position.setDeviceId(getDeviceId(channel, remoteAddress, String.valueOf(sequence)));
 
         // Decodifica o pacote com base no PID
         switch (pid) {
-            case 0x01: // Login package
-                // Implemente a decodificação do pacote de login
+            case 0x01: // Pacote de login
+                // Implemente a decodificação do pacote de login, se necessário
                 break;
-            case 0x12: // Location package
+
+            case 0x12: // Pacote de localização
                 position.setTime(new Date(buf.readUnsignedInt() * 1000L)); // Tempo UTC
                 int mask = buf.readUnsignedByte(); // Máscara de dados válidos
 
                 if (BitUtil.check(mask, 0)) { // Dados GPS válidos
-                    position.setLatitude(buf.readInt() / 5000000.0);
-                    position.setLongitude(buf.readInt() / 5000000.0);
-                    position.setAltitude(buf.readShort());
-                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort()));
-                    position.setCourse(buf.readUnsignedShort());
-                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
+                    position.setLatitude(buf.readInt() / 5000000.0); // Latitude
+                    position.setLongitude(buf.readInt() / 5000000.0); // Longitude
+                    position.setAltitude(buf.readShort()); // Altitude
+                    position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort())); // Velocidade
+                    position.setCourse(buf.readUnsignedShort()); // Curso
+                    position.set(Position.KEY_SATELLITES, buf.readUnsignedByte()); // Número de satélites
                 }
 
-                // Adicione mais decodificações para outros campos, como status, bateria, etc.
+                // Decodifica outros campos, como status, bateria, etc.
+                position.set(Position.KEY_STATUS, buf.readUnsignedShort()); // Status do dispositivo
+                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0); // Tensão da bateria
                 break;
-            // Implemente outros casos para diferentes tipos de pacotes
+
             default:
-                return null;
+                return null; // Ignora pacotes desconhecidos
         }
 
         return position;
