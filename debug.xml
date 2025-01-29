@@ -26,6 +26,6 @@
 
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
-    <entry key='protocol.itr120.port'>5020</entry>
+    <entry key='itr120.port'>4999</entry>
 
 </properties>
