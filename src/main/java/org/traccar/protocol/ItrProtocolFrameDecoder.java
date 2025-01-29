@@ -2,12 +2,13 @@ package org.traccar.protocol;
 
 import org.traccar.BaseFrameDecoder;
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 
 public class ItrProtocolFrameDecoder extends BaseFrameDecoder {
 
     @Override
-    protected Object decode(ChannelHandlerContext ctx, ByteBuf buf) throws Exception {
+    protected Object decode(ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
         if (buf.readableBytes() < 5) {
             return null;
         }
