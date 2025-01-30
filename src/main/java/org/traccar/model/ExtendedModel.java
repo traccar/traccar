@@ -154,7 +154,56 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
-    public Object removeAttribute(String key) {
-        return attributes.remove(key);
+    public void removeAttribute(String key) {
+        attributes.remove(key);
+    }
+
+    public String removeString(String key) {
+        var value = attributes.remove(key);
+        return value != null ? value.toString() : null;
+    }
+
+    public Double removeDouble(String key) {
+        var value = attributes.remove(key);
+        if (value == null) {
+            return null;
+        } else if (value instanceof Number numberValue) {
+            return numberValue.doubleValue();
+        } else {
+            return Double.parseDouble(value.toString());
+        }
+    }
+
+    public Boolean removeBoolean(String key) {
+        var value = attributes.remove(key);
+        if (value == null) {
+            return null;
+        } else if (value instanceof Boolean booleanValue) {
+            return booleanValue;
+        } else {
+            return Boolean.parseBoolean(value.toString());
+        }
+    }
+
+    public Integer removeInteger(String key) {
+        var value = attributes.remove(key);
+        if (value == null) {
+            return null;
+        } else if (value instanceof Number numberValue) {
+            return numberValue.intValue();
+        } else {
+            return Integer.parseInt(value.toString());
+        }
+    }
+
+    public Long removeLong(String key) {
+        var value = attributes.remove(key);
+        if (value == null) {
+            return null;
+        } else if (value instanceof Number numberValue) {
+            return numberValue.longValue();
+        } else {
+            return Long.parseLong(value.toString());
+        }
     }
 }
