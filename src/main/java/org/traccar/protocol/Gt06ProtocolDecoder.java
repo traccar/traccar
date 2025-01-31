@@ -114,6 +114,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_MULTIMEDIA = 0x41;         // WD-209
     public static final int MSG_ALARM = 0x95;              // JC100
     public static final int MSG_PERIPHERAL = 0xF2;         // VL842
+    public static final int MSG_STATUS_3 = 0xA3;           // GL21L
 
     private enum Variant {
         VXT01,
@@ -161,11 +162,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd):(dd):(dd)")            // time
             .compile();
 
-    private static boolean isSupported(int type, String model) {
+    private boolean isSupported(int type, String model) {
         return hasGps(type) || hasLbs(type) || hasStatus(type, model);
     }
 
-    private static boolean hasGps(int type) {
+    private boolean hasGps(int type) {
         switch (type) {
             case MSG_GPS:
             case MSG_GPS_LBS_1:
@@ -183,15 +184,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_EXTEND:
             case MSG_GPS_LBS_7:
             case MSG_GPS_LBS_RFID:
-            case MSG_FENCE_SINGLE:
             case MSG_FENCE_MULTI:
                 return true;
+            case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
+                return variant != Variant.SEEWORLD;
             default:
                 return false;
         }
     }
 
-    private static boolean hasLbs(int type) {
+    private boolean hasLbs(int type) {
         switch (type) {
             case MSG_LBS_STATUS:
             case MSG_GPS_LBS_1:
@@ -207,17 +209,18 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_STATUS_5:
             case MSG_GPS_LBS_7:
             case MSG_GPS_LBS_RFID:
-            case MSG_FENCE_SINGLE:
             case MSG_FENCE_MULTI:
             case MSG_LBS_ALARM:
             case MSG_LBS_ADDRESS:
                 return true;
+            case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
+                return variant != Variant.SEEWORLD;
             default:
                 return false;
         }
     }
 
-    private static boolean hasStatus(int type, String model) {
+    private boolean hasStatus(int type, String model) {
         switch (type) {
             case MSG_STATUS:
             case MSG_STATUS_2:
@@ -232,6 +235,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return true;
             case MSG_GPS_LBS_2:
                 return "NT20".equalsIgnoreCase(model);
+            case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
+                return variant == Variant.SEEWORLD;
             default:
                 return false;
         }
@@ -1520,6 +1525,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         } else if (header == 0x7878 && type == MSG_GPS_LBS_2 && length == 0x2f) {
             variant = Variant.SEEWORLD;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x26) {
+            variant = Variant.SEEWORLD;
+        } else if (header == 0x7878 && type == MSG_STATUS_3 && length == 0x0c) {
             variant = Variant.SEEWORLD;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_RFID && length == 0x28) {
             variant = Variant.RFID;
