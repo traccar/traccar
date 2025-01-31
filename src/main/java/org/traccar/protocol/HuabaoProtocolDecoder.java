@@ -107,7 +107,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf response = Unpooled.buffer();
             response.writeShort(index);
             response.writeShort(type);
-            response.writeByte(RESULT_SUCCESS);
+            response.writeShort(RESULT_SUCCESS);
             channel.writeAndFlush(new NetworkMessage(
                     formatMessage(delimiter, MSG_GENERAL_RESPONSE, id, false, response), remoteAddress));
         }
