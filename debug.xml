@@ -11,7 +11,7 @@
     <entry key='media.path'>./target/media</entry>
 
     <entry key='logger.console'>true</entry>
-    <entry key='logger.queries'>false</entry>
+    <entry key='logger.queries'>true</entry>
     <entry key='logger.fullStackTraces'>true</entry>
 
     <entry key='mail.debug'>true</entry>
@@ -26,5 +26,11 @@
 
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
+
+
+    <entry key='speedLimit.enable'>true</entry>
+    <entry key='speedLimit.type'>overpass</entry>
+    <entry key='speedLimit.url'>https://overpass.private.coffee/api/interpreter</entry>
+    <entry key='speedLimit.accuracy'>100</entry>
 
 </properties>

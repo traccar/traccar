@@ -24,6 +24,26 @@ import java.util.Date;
 @StorageName("tc_devices")
 public class Device extends GroupedModel implements Disableable, Schedulable {
 
+    private String license;
+
+    public String getLicense() {
+        return license;
+    }
+
+    public void setLicense(String license) {
+        this.license = license;
+    }
+
+    private String vin;
+
+    public String getVin() {
+        return vin;
+    }
+
+    public void setVin(String vin) {
+        this.vin = vin;
+    }
+
     private long calendarId;
 
     @Override
