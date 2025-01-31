@@ -24,9 +24,8 @@ import java.util.Date;
 @StorageName("tc_devices")
 public class Device extends GroupedModel implements Disableable, Schedulable {
 
-        private String license;
-    private String vin;
-    
+    private String license;
+
     public String getLicense() {
         return license;
     }
@@ -34,6 +33,8 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
     public void setLicense(String license) {
         this.license = license;
     }
+
+    private String vin;
 
     public String getVin() {
         return vin;

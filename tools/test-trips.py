@@ -33,7 +33,6 @@ def send(conn, time, lat, lon, speed):
         ('lat', lat),
         ('lon', lon),
         ('speed', speed),
-        ('attributes', '{"speedLimit": 50}')  # Adding a speed limit attribute
     )
     conn.request('POST', '?' + urllib.parse.urlencode(params))
     conn.getresponse().read()
