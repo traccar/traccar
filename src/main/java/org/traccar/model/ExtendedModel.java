@@ -90,83 +90,64 @@ public class ExtendedModel extends BaseModel {
     }
 
     public String getString(String key, String defaultValue) {
-        if (attributes.containsKey(key)) {
-            Object value = attributes.get(key);
-            return value != null ? value.toString() : null;
-        } else {
-            return defaultValue;
-        }
+        return parseAsString(attributes.get(key), defaultValue);
     }
 
     public String getString(String key) {
-        return getString(key, null);
+        return parseAsString(attributes.get(key), null);
     }
 
     public double getDouble(String key) {
-        if (attributes.containsKey(key)) {
-            Object value = attributes.get(key);
-            if (value instanceof Number numberValue) {
-                return numberValue.doubleValue();
-            } else {
-                return Double.parseDouble(value.toString());
-            }
-        } else {
-            return 0.0;
-        }
+        return parseAsDouble(attributes.get(key), 0.0);
     }
 
     public boolean getBoolean(String key) {
-        if (attributes.containsKey(key)) {
-            Object value = attributes.get(key);
-            if (value instanceof Boolean booleanValue) {
-                return booleanValue;
-            } else {
-                return Boolean.parseBoolean(value.toString());
-            }
-        } else {
-            return false;
-        }
+        return parseAsBoolean(attributes.get(key), false);
     }
 
     public int getInteger(String key) {
-        if (attributes.containsKey(key)) {
-            Object value = attributes.get(key);
-            if (value instanceof Number numberValue) {
-                return numberValue.intValue();
-            } else {
-                return Integer.parseInt(value.toString());
-            }
-        } else {
-            return 0;
-        }
+        return parseAsInteger(attributes.get(key), 0);
     }
 
     public long getLong(String key) {
-        if (attributes.containsKey(key)) {
-            Object value = attributes.get(key);
-            if (value instanceof Number numberValue) {
-                return numberValue.longValue();
-            } else {
-                return Long.parseLong(value.toString());
-            }
-        } else {
-            return 0;
-        }
+        return parseAsLong(attributes.get(key), 0L);
     }
 
-    public void removeAttribute(String key) {
-        attributes.remove(key);
+    public Object removeAttribute(String key) {
+        return attributes.remove(key);
     }
 
     public String removeString(String key) {
-        var value = attributes.remove(key);
-        return value != null ? value.toString() : null;
+        return parseAsString(attributes.remove(key), null);
     }
 
     public Double removeDouble(String key) {
-        var value = attributes.remove(key);
+        return parseAsDouble(attributes.remove(key), null);
+    }
+
+    public Boolean removeBoolean(String key) {
+        return parseAsBoolean(attributes.remove(key), null);
+    }
+
+    public Integer removeInteger(String key) {
+        return parseAsInteger(attributes.remove(key), null);
+    }
+
+    public Long removeLong(String key) {
+        return parseAsLong(attributes.remove(key), null);
+    }
+
+    private String parseAsString(Object value, String defaultValue) {
         if (value == null) {
-            return null;
+            return defaultValue;
+        } else {
+            return value.toString();
+        }
+    }
+
+    private static Double parseAsDouble(Object value, Double defaultValue) {
+        if (value == null) {
+            return defaultValue;
         } else if (value instanceof Number numberValue) {
             return numberValue.doubleValue();
         } else {
@@ -174,10 +155,9 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
-    public Boolean removeBoolean(String key) {
-        var value = attributes.remove(key);
+    private static Boolean parseAsBoolean(Object value, Boolean defaultValue) {
         if (value == null) {
-            return null;
+            return defaultValue;
         } else if (value instanceof Boolean booleanValue) {
             return booleanValue;
         } else {
@@ -185,10 +165,9 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
-    public Integer removeInteger(String key) {
-        var value = attributes.remove(key);
+    private static Integer parseAsInteger(Object value, Integer defaultValue) {
         if (value == null) {
-            return null;
+            return defaultValue;
         } else if (value instanceof Number numberValue) {
             return numberValue.intValue();
         } else {
@@ -196,10 +175,9 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
-    public Long removeLong(String key) {
-        var value = attributes.remove(key);
+    private static Long parseAsLong(Object value, Long defaultValue) {
         if (value == null) {
-            return null;
+            return defaultValue;
         } else if (value instanceof Number numberValue) {
             return numberValue.longValue();
         } else {
