@@ -193,7 +193,7 @@ public class ComputedAttributesHandler extends BasePositionHandler {
                             }
                         }
                     } else {
-                        position.getAttributes().remove(attribute.getAttribute());
+                        position.removeAttribute(attribute.getAttribute());
                     }
                 } catch (JexlException error) {
                     LOGGER.warn("Attribute computation error", error);
