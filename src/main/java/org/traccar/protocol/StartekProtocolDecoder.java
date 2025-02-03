@@ -48,7 +48,6 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
             .number("(xxx),")                    // type
             .expression("(.+)")                  // content
             .number("xx")                        // checksum
-            .text("\r\n")
             .compile();
 
     private static final Pattern PATTERN_POSITION = new PatternBuilder()
@@ -124,7 +123,8 @@ public class StartekProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        String message = msg.toString().trim();
+        Parser parser = new Parser(PATTERN, message);
         if (!parser.matches()) {
             LOGGER.error("startek ignoring " + msg);
             return null;
