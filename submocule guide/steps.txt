@@ -1,0 +1,8 @@
+git submodule status
+[returns current commit id of submodule]
+git submodule update --remote
+[returns new commit ID]
+cd .\traccar-web\
+git switch --detach (ID from first cmd)
+
+git switch --detach (ID from second cmd)
