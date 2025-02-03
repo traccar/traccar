@@ -6,3 +6,7 @@ cd .\traccar-web\
 git switch --detach (ID from first cmd)
 
 git switch --detach (ID from second cmd)
+
+cd ..
+
+git add .\traccar-web\
