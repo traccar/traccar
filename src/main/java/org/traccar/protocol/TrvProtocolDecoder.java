@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,9 +38,7 @@ import java.util.Set;
 public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Set<String> IGNORE_RESPONSE = Set.of(
-        "AP12", "AP14", "AP33", "AP34", "AP40",
-        "AP76", "AP77", "AP84", "AP85", "AP86", "AP87"
-    );
+        "AP12", "AP14", "AP33", "AP34", "AP40", "AP76", "AP77", "AP84", "AP85", "AP86", "AP87");
 
     public TrvProtocolDecoder(Protocol protocol) {
         super(protocol);
