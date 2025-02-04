@@ -50,7 +50,7 @@ public class Position extends Message {
     public static final String KEY_IMAGE = "image";
     public static final String KEY_VIDEO = "video";
     public static final String KEY_AUDIO = "audio";
-    public static final String KEY_TOLL_COST = "tollCost";
+    public static final String KEY_TOLL = "isToll";
     public static final String KEY_TOLL_REF = "tollRef";
     public static final String KEY_TOLL_NAME = "tollName";
 

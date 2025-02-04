@@ -55,6 +55,9 @@ public class Event extends Message {
     public static final String TYPE_DEVICE_FUEL_DROP = "deviceFuelDrop";
     public static final String TYPE_DEVICE_FUEL_INCREASE = "deviceFuelIncrease";
 
+    public static final String TYPE_DEVICE_TOLLROUTE = "deviceTollRoute";
+
+
     public static final String TYPE_GEOFENCE_ENTER = "geofenceEnter";
     public static final String TYPE_GEOFENCE_EXIT = "geofenceExit";
 
@@ -68,9 +71,6 @@ public class Event extends Message {
     public static final String TYPE_DRIVER_CHANGED = "driverChanged";
     public static final String TYPE_MEDIA = "media";
 
-    //making sure this appears in /notifications/types in frontend 
-    // This is handled in NotificationResource lol 
-    public static final String TYPE_TOLL_ROUTE = "tollRoute";
 
     private Date eventTime;
 

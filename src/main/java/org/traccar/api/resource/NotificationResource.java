@@ -72,8 +72,6 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
         for (Field field : fields) {
             if (Modifier.isStatic(field.getModifiers()) && field.getName().startsWith("TYPE_")) {
                 try {
-                    String type = field.get(null).toString();
-                    LOGGER.info("found types for notifications : {}", type);
                     types.add(new Typed(field.get(null).toString()));
                 } catch (IllegalArgumentException | IllegalAccessException error) {
                     LOGGER.warn("Get event types error", error);

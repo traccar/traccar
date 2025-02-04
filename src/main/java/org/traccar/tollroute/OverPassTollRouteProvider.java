@@ -19,9 +19,9 @@ public class OverPassTollRouteProvider implements TollRouteProvider {
     public OverPassTollRouteProvider(Config config, Client client, String url) {
         this.client = client;
         //! got the url from the config , and set it using the base url , hope this works :)
-        final String Baseurl = config.getString(Keys.TOLL_ROUTE_URL, url);
+        final String baseurl = config.getString(Keys.TOLL_ROUTE_URL, url);
         this.accuracy = config.getInteger(Keys.TOLL_ROUTE_ACCURACY);
-        this.url = Baseurl + "?data=[out:json];way[toll](around:" + accuracy + ",%f,%f);out%%20tags;";
+        this.url = baseurl + "?data=[out:json];way[toll](around:" + accuracy + ",%f,%f);out%%20tags;";
     }
 
     @Override
@@ -33,26 +33,12 @@ public class OverPassTollRouteProvider implements TollRouteProvider {
             public void completed(JsonObject json) {
                 JsonArray elements = json.getJsonArray("elements");
                 if (!elements.isEmpty()) {
-                    // we get the json object with the toll cost
-                    // it kinda looks like this : 
-                    //     "tags": {
-                    //     "embankment": "yes",
-                    //     "highway": "trunk",
-                    //     "lanes": "3",
-                    //     "name": "Old Pune–Mumbai Highway",
-                    //     "name:mr": "जुना पुणे-मुंबई महामार्ग",
-                    //     "oneway": "yes",
-                    //     "ref": "NH60;NH65",
-                    //     "toll": "no"
-                    //   }
-                    // we need the toll , ref and name , in that order
                     JsonObject tags = elements.getJsonObject(0).getJsonObject("tags");
-                    String toll = tags.getString("toll", "no");
-                    String ref = tags.getString("ref", "");
-                    String name = tags.getString("name", "");
-                    if (tags.containsKey("toll") && tags.getString("toll").equals("yes")) {
-                        // Default toll cost if found
-                        callback.onSuccess(new TollData(toll, ref, name));
+                    Boolean isToll = determineToll(tags.getString("toll", "no"));
+                    String ref = tags.getString("destination:ref", null);
+                    String name = tags.getString("destination:name", null);
+                    if (tags.containsKey("toll")) {
+                        callback.onSuccess(new TollData(isToll, ref, name));
                     } else {
                         callback.onFailure(new RuntimeException("No toll data found with specific parameters"));
                     }
@@ -66,6 +52,9 @@ public class OverPassTollRouteProvider implements TollRouteProvider {
                 callback.onFailure(throwable);
             }
         });
+    }
+    private Boolean determineToll(String tollKey) {
+        return tollKey.equals("yes");
     }
 
 }

@@ -251,4 +251,31 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
         this.overspeedGeofenceId = overspeedGeofenceId;
     }
 
+
+    private boolean tollrouteState;
+
+    @QueryIgnore
+    @JsonIgnore
+    public boolean getTollrouteState() {
+        return tollrouteState;
+    }
+
+    @JsonIgnore
+    public void setTollrouteState(boolean tollrouteState) {
+        this.tollrouteState = tollrouteState;
+    }
+
+    private Date tollrouteTime;
+
+    @QueryIgnore
+    @JsonIgnore
+    public Date getTollrouteTime() {
+        return tollrouteTime;
+    }
+
+    @JsonIgnore
+    public void setTollrouteTime(Date tollrouteTime) {
+        this.tollrouteTime = tollrouteTime;
+    }
+
 }

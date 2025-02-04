@@ -1992,28 +1992,28 @@ public final class Keys {
  * Boolean flag to enable toll route API to get toll information depending on location.
  */
 public static final ConfigKey<Boolean> TOLL_ROUTE_ENABLE = new BooleanConfigKey(
-        "toll.enable",
+        "tollRoute.enable",
         List.of(KeyType.CONFIG));
 
 /**
  * Provider to use for toll route information. Available options: overpass
  */
 public static final ConfigKey<String> TOLL_ROUTE_TYPE = new StringConfigKey(
-        "toll.type",
+        "tollRoute.type",
         List.of(KeyType.CONFIG));
 
 /**
  * Toll route provider API URL address.
  */
 public static final ConfigKey<String> TOLL_ROUTE_URL = new StringConfigKey(
-        "toll.url",
+        "tollRoute.url",
         List.of(KeyType.CONFIG));
 
 /**
  * Search radius for toll routes in meters. Default value is 100. hope this works :)
  */
 public static final ConfigKey<Integer> TOLL_ROUTE_ACCURACY = new IntegerConfigKey(
-        "toll.accuracy",
+        "tollRoute.accuracy",
         List.of(KeyType.CONFIG),
         100);
 
