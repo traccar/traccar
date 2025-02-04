@@ -163,58 +163,60 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
+        try {
 
-        if (BitUtil.check(buf.getByte(buf.readerIndex()), 7)) {
+            if (BitUtil.check(buf.getByte(buf.readerIndex()), 7)) {
 
-            int content = buf.readUnsignedByte();
+                int content = buf.readUnsignedByte();
 
-            if (BitUtil.check(content, 0)) {
-                String id = ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())).replace("f", "");
-                getDeviceSession(channel, remoteAddress, id);
+                if (BitUtil.check(content, 0)) {
+                    String id = ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte())).replace("f", "");
+                    getDeviceSession(channel, remoteAddress, id);
+                }
+
+                if (BitUtil.check(content, 1)) {
+                    buf.skipBytes(buf.readUnsignedByte()); // identifier type
+                }
+
+                if (BitUtil.check(content, 2)) {
+                    buf.skipBytes(buf.readUnsignedByte()); // authentication
+                }
+
+                if (BitUtil.check(content, 3)) {
+                    buf.skipBytes(buf.readUnsignedByte()); // routing
+                }
+
+                if (BitUtil.check(content, 4)) {
+                    buf.skipBytes(buf.readUnsignedByte()); // forwarding
+                }
+
+                if (BitUtil.check(content, 5)) {
+                    buf.skipBytes(buf.readUnsignedByte()); // response redirection
+                }
+
             }
 
-            if (BitUtil.check(content, 1)) {
-                buf.skipBytes(buf.readUnsignedByte()); // identifier type
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            if (deviceSession == null) {
+                return null;
             }
 
-            if (BitUtil.check(content, 2)) {
-                buf.skipBytes(buf.readUnsignedByte()); // authentication
+            int service = buf.readUnsignedByte();
+            int type = buf.readUnsignedByte();
+            int index = buf.readUnsignedShort();
+
+            if (service == SERVICE_ACKNOWLEDGED) {
+                sendResponse(channel, remoteAddress, type, index, 0);
             }
 
-            if (BitUtil.check(content, 3)) {
-                buf.skipBytes(buf.readUnsignedByte()); // routing
+            if (type == MSG_EVENT_REPORT || type == MSG_LOCATE_REPORT
+                    || type == MSG_MINI_EVENT_REPORT || type == MSG_USER_DATA) {
+                return decodePosition(deviceSession, type, buf);
             }
-
-            if (BitUtil.check(content, 4)) {
-                buf.skipBytes(buf.readUnsignedByte()); // forwarding
-            }
-
-            if (BitUtil.check(content, 5)) {
-                buf.skipBytes(buf.readUnsignedByte()); // response redirection
-            }
-
-        }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-        if (deviceSession == null) {
-            return null;
-        }
-
-        int service = buf.readUnsignedByte();
-        int type = buf.readUnsignedByte();
-        int index = buf.readUnsignedShort();
-
-        if (service == SERVICE_ACKNOWLEDGED) {
-            sendResponse(channel, remoteAddress, type, index, 0);
-        }
-
-        if (type == MSG_EVENT_REPORT || type == MSG_LOCATE_REPORT
-                || type == MSG_MINI_EVENT_REPORT || type == MSG_USER_DATA) {
-            return decodePosition(deviceSession, type, buf);
-        } else {
             LOGGER.error("calamp deviceId {} ignoring {} {}", deviceSession.getDeviceId(), type, ByteBufUtil.hexDump(buf));
+        } catch (Exception e) {
+            LOGGER.error("calamp", e);
         }
-
         return null;
     }
 
