@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,12 +29,9 @@ import org.traccar.helper.BitUtil;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
-import java.net.Inet4Address;
 import java.net.SocketAddress;
-import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-
-import static org.traccar.model.Position.KEY_SOURCE;
 
 public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
@@ -60,16 +57,6 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
     public static final int SERVICE_ACKNOWLEDGED = 1;
     public static final int SERVICE_RESPONSE = 2;
 
-    private static String hostAddress;
-
-    static {
-        try {
-            hostAddress = Inet4Address.getLocalHost().getHostAddress();
-        } catch (UnknownHostException e) {
-            hostAddress = e.getMessage();
-        }
-    }
-
     private void sendResponse(Channel channel, SocketAddress remoteAddress, int type, int index, int result) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer(10);
@@ -88,7 +75,6 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.set(KEY_SOURCE, hostAddress);
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         if (type != MSG_MINI_EVENT_REPORT) {
@@ -139,22 +125,34 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_EVENT, buf.readUnsignedByte());
         }
 
-        int accType = BitUtil.from(buf.getUnsignedByte(buf.readerIndex()), 6);
-        int accCount = BitUtil.to(buf.readUnsignedByte(), 6);
+        if (type == MSG_EVENT_REPORT || type == MSG_LOCATE_REPORT || type == MSG_MINI_EVENT_REPORT) {
 
-        if (type != MSG_MINI_EVENT_REPORT) {
-            position.set("append", buf.readUnsignedByte());
-        }
+            int accType = BitUtil.from(buf.getUnsignedByte(buf.readerIndex()), 6);
+            int accCount = BitUtil.to(buf.readUnsignedByte(), 6);
 
-        if (accType == 1) {
-            buf.readUnsignedInt(); // threshold
-            buf.readUnsignedInt(); // mask
-        }
-
-        for (int i = 0; i < accCount; i++) {
-            if (buf.readableBytes() >= 4) {
-                position.set("acc" + i, buf.readUnsignedInt());
+            if (type != MSG_MINI_EVENT_REPORT) {
+                position.set("append", buf.readUnsignedByte());
             }
+
+            if (accType == 1) {
+                buf.readUnsignedInt(); // threshold
+                buf.readUnsignedInt(); // mask
+            }
+
+            for (int i = 0; i < accCount; i++) {
+                if (buf.readableBytes() >= 4) {
+                    position.set("acc" + i, buf.readUnsignedInt());
+                }
+            }
+
+        } else if (type == MSG_USER_DATA) {
+
+            buf.readUnsignedByte(); // message route
+            buf.readUnsignedByte(); // message id
+            position.set(
+                    Position.KEY_RESULT,
+                    buf.readCharSequence(buf.readUnsignedShort(), StandardCharsets.US_ASCII).toString().trim());
+
         }
 
         return position;
@@ -210,7 +208,8 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
             sendResponse(channel, remoteAddress, type, index, 0);
         }
 
-        if (type == MSG_EVENT_REPORT || type == MSG_LOCATE_REPORT || type == MSG_MINI_EVENT_REPORT) {
+        if (type == MSG_EVENT_REPORT || type == MSG_LOCATE_REPORT
+                || type == MSG_MINI_EVENT_REPORT || type == MSG_USER_DATA) {
             return decodePosition(deviceSession, type, buf);
         } else {
             LOGGER.error("calamp deviceId {} ignoring {} {}", deviceSession.getDeviceId(), type, ByteBufUtil.hexDump(buf));
