@@ -156,8 +156,15 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (position.hasAttribute("accuracy")) {
-                position.setAccuracy(position.getDouble("accuracy"));
-                position.removeAttribute("accuracy");
+                position.setAccuracy(position.removeDouble("accuracy"));
+            }
+
+            if (position.hasAttribute("bat")) {
+                position.set(Position.KEY_BATTERY_LEVEL, position.removeInteger("bat"));
+            }
+
+            if (position.hasAttribute("temp")) {
+                position.set(Position.KEY_DEVICE_TEMP, position.removeInteger("temp"));
             }
 
             Network network = new Network();
@@ -185,16 +192,10 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                 && position.hasAttribute("cell_id" + suffix)
         ) {
             network.addCellTower(CellTower.from(
-                    position.getInteger("mcc" + suffix),
-                    position.getInteger("mnc" + suffix),
-                    position.getInteger("lac" + suffix),
-                    position.getLong("cell_id" + suffix)
-            ));
-
-            position.removeAttribute("mnc" + suffix);
-            position.removeAttribute("mcc" + suffix);
-            position.removeAttribute("lac" + suffix);
-            position.removeAttribute("cell_id" + suffix);
+                    position.removeInteger("mcc" + suffix),
+                    position.removeInteger("mnc" + suffix),
+                    position.removeInteger("lac" + suffix),
+                    position.getLong("cell_id" + suffix)));
             return true;
         }
         return false;

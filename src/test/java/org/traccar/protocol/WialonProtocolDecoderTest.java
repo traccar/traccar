@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
+import org.traccar.model.Position;
 
 public class WialonProtocolDecoderTest extends ProtocolTest {
 
@@ -27,10 +28,10 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
 
         verifyAttributes(decoder, text(
                 "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;101_521347:1:521246,101_158:1:510,101_521055:1:510,101_521055_2.9:1:509,101_521056:1:3;626B"));
-
+        
         verifyNull(decoder, text(
                 "#L#123456789012345;test"));
-
+        
         verifyNull(decoder, text(
                 "#L#2002;NA"));
 
@@ -59,10 +60,10 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "#SD#021214;065947;2237.7552;N;11404.8851;E;0.000;;170.9;5"));
-
+        
         verifyPosition(decoder, text(
                 "#D#270413;205601;5544.6025;N;03739.6834;E;1;2;3;4;0.0;0;0;14.77,0.02,3.6;NA;count1:1:564,fuel:2:45.8,hw:3:V4.5"));
-
+        
         verifyPosition(decoder, text(
                 "#D#190114;051312;4459.6956;N;04105.9930;E;35;306;204.000000;12;NA;452986639;NA;106.000000;NA;sats_gps:1:9,sats_glonass:1:3,balance:2:12123.000000,stay_balance:1:0"));
 
@@ -71,7 +72,7 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "#D#021214;065947;2237.7552;N;11404.8851;E;0.000;;170.9;5;1.74;NA;NA;;NA;NA"));
-
+        
         verifyPositions(decoder, text(
                 "#B#080914;073235;5027.50625;N;03026.19321;E;0.700;0.000;NA;4;NA;NA;NA;;NA;Батарея:3:100 %|080914;073420;5027.50845;N;03026.18854;E;1.996;292.540;NA;4;NA;NA;NA;;NA;Батарея:3:100 %"));
 
@@ -88,16 +89,22 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
                 "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;motion:3:false"),
                 "motion", false);
 
-        verifyAttribute(decoder, text(
-                "#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;mnc:1:02,mcc:1:250,lac:1:5901,cell_id:1:45542"),
-                "network", new Network(CellTower.from(250, 2, 5901, 45542)));
-
         verifyAttribute(
                 decoder,
                 text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;mnc1:1:02,mcc1:1:250,lac1:1:5901,cell_id1:1:45542,mnc2:1:22,mcc2:1:222,lac2:1:2222,cell_id2:1:22222,mcc3:1:333"),
                 "network", new Network(
                         CellTower.from(250, 2, 5901, 45542),
                         CellTower.from(222, 22, 2222, 22222)));
+
+        verifyAttribute(
+                decoder,
+                text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;SOS:1:0,temp:3:18,bat:3:99"),
+                Position.KEY_DEVICE_TEMP, 18);
+
+        verifyAttribute(
+                decoder,
+                text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;SOS:1:0,temp:3:18,bat:3:99"),
+                Position.KEY_BATTERY_LEVEL, 99);
     }
 
 }
