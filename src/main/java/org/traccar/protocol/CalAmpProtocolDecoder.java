@@ -82,6 +82,10 @@ public class CalAmpProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setLatitude(buf.readInt() * 0.0000001);
         position.setLongitude(buf.readInt() * 0.0000001);
+        if (position.getLatitude() == 0 && position.getLongitude() == 0) {
+            position.setLatitude(0.00001); //hammmer to avoid zero filter
+            position.setValid(false);
+        }
         if (type != MSG_MINI_EVENT_REPORT) {
             position.setAltitude(buf.readInt() * 0.01);
             position.setSpeed(UnitsConverter.knotsFromCps(buf.readUnsignedInt()));
