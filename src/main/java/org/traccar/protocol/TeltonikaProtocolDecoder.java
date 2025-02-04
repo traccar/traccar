@@ -342,10 +342,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (position.hasAttribute(mncKey) && position.hasAttribute(lacKey) && position.hasAttribute(cidKey)) {
             CellTower cellTower = CellTower.from(
                     getConfig().getInteger(Keys.GEOLOCATION_MCC),
-                    ((Number) position.getAttributes().remove(mncKey)).intValue(),
-                    ((Number) position.getAttributes().remove(lacKey)).intValue(),
-                    ((Number) position.getAttributes().remove(cidKey)).longValue());
-            cellTower.setSignalStrength(((Number) position.getAttributes().remove(rssiKey)).intValue());
+                    position.removeInteger(mncKey),
+                    position.removeInteger(lacKey),
+                    position.removeLong(cidKey));
+            cellTower.setSignalStrength(position.removeInteger(rssiKey));
             network.addCellTower(cellTower);
         }
     }
@@ -361,9 +361,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.setNetwork(network);
             }
         } else {
-            Integer cid2g = (Integer) position.getAttributes().remove("cid2g");
-            Long cid4g = (Long) position.getAttributes().remove("cid4g");
-            Integer lac = (Integer) position.getAttributes().remove("lac");
+            Integer cid2g = position.removeInteger("cid2g");
+            Long cid4g = position.removeLong("cid4g");
+            Integer lac = position.removeInteger("lac");
             if (lac != null && (cid2g != null || cid4g != null)) {
                 Network network = new Network();
                 CellTower cellTower;
