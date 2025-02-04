@@ -189,8 +189,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         if (position.hasAttribute("mnc" + suffix)
                 && position.hasAttribute("mcc" + suffix)
                 && position.hasAttribute("lac" + suffix)
-                && position.hasAttribute("cell_id" + suffix)) 
-        {
+                && position.hasAttribute("cell_id" + suffix)) {
             network.addCellTower(CellTower.from(
                     position.removeInteger("mcc" + suffix),
                     position.removeInteger("mnc" + suffix),
