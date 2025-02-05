@@ -28,13 +28,15 @@ public class Network {
     }
 
     public Network(CellTower... cellTowers) {
-        for (CellTower tower : cellTowers) {
+        for (var tower : cellTowers) {
             addCellTower(tower);
         }
     }
 
-    public Network(WifiAccessPoint wifiAccessPoint) {
-        addWifiAccessPoint(wifiAccessPoint);
+    public Network(WifiAccessPoint... wifiAccessPoints) {
+        for (var accessPoint : wifiAccessPoints) {
+            addWifiAccessPoint(accessPoint);
+        }
     }
 
     private Integer homeMobileCountryCode;

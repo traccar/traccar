@@ -168,12 +168,10 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             }
 
             Network network = new Network();
-            if (position.hasAttribute("mcc") || position.hasAttribute("mcc1")) {
-                decodeCellData(position, network, "");
-                for (int i = 1; i <= 9; i++) {
-                    if (!decodeCellData(position, network, String.valueOf(i))) {
-                        break;
-                    }
+            decodeCellData(position, network, "");
+            for (int i = 1; i <= 9; i++) {
+                if (!decodeCellData(position, network, String.valueOf(i))) {
+                    break;
                 }
             }
 
