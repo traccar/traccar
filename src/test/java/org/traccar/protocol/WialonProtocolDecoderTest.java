@@ -2,6 +2,9 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
+import org.traccar.model.Position;
 
 public class WialonProtocolDecoderTest extends ProtocolTest {
 
@@ -86,6 +89,22 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
                 "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;motion:3:false"),
                 "motion", false);
 
+        verifyAttribute(
+                decoder,
+                text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;mnc1:1:02,mcc1:1:250,lac1:1:5901,cell_id1:1:45542,mnc2:1:22,mcc2:1:222,lac2:1:2222,cell_id2:1:22222,mcc3:1:333"),
+                "network", new Network(
+                        CellTower.from(250, 2, 5901, 45542),
+                        CellTower.from(222, 22, 2222, 22222)));
+
+        verifyAttribute(
+                decoder,
+                text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;SOS:1:0,temp:3:18,bat:3:99"),
+                Position.KEY_DEVICE_TEMP, 18);
+
+        verifyAttribute(
+                decoder,
+                text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;SOS:1:0,temp:3:18,bat:3:99"),
+                Position.KEY_BATTERY_LEVEL, 99);
     }
 
 }
