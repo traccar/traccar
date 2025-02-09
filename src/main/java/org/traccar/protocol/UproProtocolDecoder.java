@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,20 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             return Position.ALARM_TAMPERING;
         }
         return null;
+    }
+
+    private void decodeTransparent(ByteBuf buf, Position position) {
+
+        int dataType = buf.readUnsignedShort();
+        int dataLength = buf.readUnsignedShort();
+
+        if (dataType == 0x4009) {
+            position.set(
+                    Position.KEY_DRIVER_UNIQUE_ID,
+                    buf.readCharSequence(dataLength, StandardCharsets.US_ASCII).toString());
+        } else {
+            position.set("data", ByteBufUtil.hexDump(buf.readSlice(dataLength)));
+        }
     }
 
     private void decodeRegular(String head, ByteBuf buf, Position position) {
@@ -297,7 +311,6 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-
         String type = parser.next();
         String subtype = parser.next();
 
@@ -305,7 +318,11 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             channel.writeAndFlush(new NetworkMessage("*" + head + "Y" + type + subtype + "#", remoteAddress));
         }
 
-        decodeRegular(head, buf, position);
+        if (type.equals("G") && subtype.equals("Y")) {
+            decodeTransparent(buf, position);
+        } else {
+            decodeRegular(head, buf, position);
+        }
 
         if (position.getLatitude() == 0 || position.getLongitude() == 0) {
             if (position.getAttributes().isEmpty()) {
