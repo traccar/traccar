@@ -371,14 +371,13 @@ public class ConnectionManager implements BroadcastInterface {
         void onUpdateLog(LogRecord record);
     }
 
-    public synchronized void addListener(long userId, UpdateListener listener) throws StorageException {
+    public synchronized void addListener(long userId, UpdateListener listener, List<Device> devices)
+            throws StorageException {
         var set = listeners.get(userId);
         if (set == null) {
             set = new HashSet<>();
             listeners.put(userId, set);
 
-            var devices = storage.getObjects(Device.class, new Request(
-                    new Columns.Include("id"), new Condition.Permission(User.class, userId, Device.class)));
             userDevices.put(userId, devices.stream().map(BaseModel::getId).collect(Collectors.toSet()));
             devices.forEach(device -> deviceUsers.computeIfAbsent(device.getId(), id -> new HashSet<>()).add(userId));
         }

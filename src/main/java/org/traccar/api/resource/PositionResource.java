@@ -84,7 +84,7 @@ public class PositionResource extends BaseResource {
                         new Columns.All(), new Condition.LatestPositions(deviceId)));
             }
         } else {
-            return PositionUtil.getLatestPositions(storage, getUserId());
+            return PositionUtil.getLatestPositions(storage, getUserId(), null);
         }
     }
 
