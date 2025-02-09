@@ -95,45 +95,9 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private void decodeRegular(String head, ByteBuf buf, Position position) {
 
-        ByteBuf buf = (ByteBuf) msg;
-
-        if (buf.getByte(buf.readerIndex()) != '*') {
-            return null;
-        }
-
-        int headerIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '&');
-        if (headerIndex < 0) {
-            headerIndex = buf.writerIndex();
-        }
-        String header = buf.readSlice(headerIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
-
-        Parser parser = new Parser(PATTERN_HEADER, header);
-        if (!parser.matches()) {
-            return null;
-        }
-
-        String head = parser.next();
-        boolean reply = parser.next().equals("1");
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
         Network network = new Network();
-
-        String type = parser.next();
-        String subtype = parser.next();
-
-        if (reply && channel != null) {
-            channel.writeAndFlush(new NetworkMessage("*" + head + "Y" + type + subtype + "#", remoteAddress));
-        }
 
         while (buf.readableBytes() > 1) {
 
@@ -299,6 +263,49 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
             position.setNetwork(network);
         }
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        ByteBuf buf = (ByteBuf) msg;
+
+        if (buf.getByte(buf.readerIndex()) != '*') {
+            return null;
+        }
+
+        int headerIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',') + 1;
+        while (headerIndex < buf.writerIndex() && Character.isLetterOrDigit(buf.getByte(headerIndex))) {
+            headerIndex += 1;
+        }
+        String header = buf.readSlice(headerIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
+
+        Parser parser = new Parser(PATTERN_HEADER, header);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        String head = parser.next();
+        boolean reply = parser.next().equals("1");
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+
+        String type = parser.next();
+        String subtype = parser.next();
+
+        if (reply && channel != null) {
+            channel.writeAndFlush(new NetworkMessage("*" + head + "Y" + type + subtype + "#", remoteAddress));
+        }
+
+        decodeRegular(head, buf, position);
 
         if (position.getLatitude() == 0 || position.getLongitude() == 0) {
             if (position.getAttributes().isEmpty()) {
