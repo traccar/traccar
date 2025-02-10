@@ -74,7 +74,7 @@ public final class TollRouteProcessor {
                         event.set(Position.KEY_TOLL_NAME, state.getTollRef());
                     }
                     if (state.getTollName() == null && state.getTollRef() == null) {
-                        event.set(Position.KEY_TOLL_NAME, "");
+                        event.set(Position.KEY_TOLL_NAME, " ");
                     }
                     event.set(Position.KEY_TOLL_REF, state.getTollRef());
                     state.setTollrouteTime(null);
