@@ -11,8 +11,16 @@ public class TollData {
         this.name = name;
     }
 
-    public Boolean getToll() { return toll; }
-    public String getRef() { return ref; }
-    public String getName() { return name; }
-    
+    public Boolean getToll() {
+        return toll;
+    }
+
+    public String getRef() {
+        return ref;
+    }
+
+    public String getName() {
+        return name;
+    }
+
 }

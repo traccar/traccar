@@ -32,7 +32,6 @@ public class SpeedLimitHandler extends BasePositionHandler {
         this.speedLimitProvider = speedLimitProvider;
     }
 
-    
     @Override
     public void onPosition(Position position, Callback callback) {
 

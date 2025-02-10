@@ -252,17 +252,17 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
     }
 
 
-    private boolean tollrouteState;
+    private double tollStartDistance;
 
     @QueryIgnore
     @JsonIgnore
-    public boolean getTollrouteState() {
-        return tollrouteState;
+    public double getTollStartDistance() {
+        return tollStartDistance;
     }
 
     @JsonIgnore
-    public void setTollrouteState(boolean tollrouteState) {
-        this.tollrouteState = tollrouteState;
+    public void setTollStartDistance(double tollStartDistance) {
+        this.tollStartDistance = tollStartDistance;
     }
 
     private Date tollrouteTime;

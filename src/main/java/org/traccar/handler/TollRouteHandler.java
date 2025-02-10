@@ -1,16 +1,9 @@
-
-// todo implement cache
 package org.traccar.handler;
 
 import jakarta.inject.Inject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.database.NotificationManager;
-import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.tollroute.TollData;
 import org.traccar.tollroute.TollRouteProvider;
@@ -18,13 +11,11 @@ import org.traccar.tollroute.TollRouteProvider;
 public class TollRouteHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TollRouteHandler.class);
-//    private final NotificationManager notificationManager;
     private final TollRouteProvider tollRouteProvider;
 
     @Inject
-    public TollRouteHandler( TollRouteProvider tollRouteProvider , NotificationManager notificationManager) {
+    public TollRouteHandler(TollRouteProvider tollRouteProvider) {
         this.tollRouteProvider = tollRouteProvider;
-//        this.notificationManager = notificationManager;
 
     }
 
@@ -40,8 +31,6 @@ public class TollRouteHandler extends BasePositionHandler {
                     position.set(Position.KEY_TOLL_REF, tollData.getRef());
                     position.set(Position.KEY_TOLL_NAME, tollData.getName());
                     callback.processed(false);
-//                    Event event = new Event(Event.TYPE_TOLL_ROUTE, position.getDeviceId());
-//                    event.setPositionId(position.getId());
                 }
 
                 @Override

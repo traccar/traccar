@@ -1987,7 +1987,7 @@ public final class Keys {
     public static final ConfigKey<Boolean> BROADCAST_SECONDARY = new BooleanConfigKey(
             "broadcast.secondary",
                     List.of(KeyType.CONFIG));
-        
+
                     /**
  * Boolean flag to enable toll route API to get toll information depending on location.
  */

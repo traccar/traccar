@@ -55,7 +55,8 @@ public class Event extends Message {
     public static final String TYPE_DEVICE_FUEL_DROP = "deviceFuelDrop";
     public static final String TYPE_DEVICE_FUEL_INCREASE = "deviceFuelIncrease";
 
-    public static final String TYPE_DEVICE_TOLLROUTE = "deviceTollRoute";
+    public static final String TYPE_DEVICE_TOLLROUTE_ENTER = "deviceTollRouteEnter";
+    public static final String TYPE_DEVICE_TOLLROUTE_EXIT = "deviceTollRouteExit";
 
 
     public static final String TYPE_GEOFENCE_ENTER = "geofenceEnter";

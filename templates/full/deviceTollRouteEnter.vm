@@ -3,7 +3,7 @@
 <html>
 <body>
 Device: $device.name<br>
-Entered the $position.attributes.tollRef: $position.attributes.tollName<br>
+Entered the $event.attributes.tollName toll<br>
 Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
 Point: <a href="$webUrl?eventId=$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

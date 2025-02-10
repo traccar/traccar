@@ -9,7 +9,7 @@
   <changeSet author="author" id="changelog-6.6.1">
 
     <addColumn tableName="tc_devices">
-      <column name="tollrouteState" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="tollStartDistance" type="DOUBLE" defaultValueNumeric="0" />
       <column name="tollrouteTime" type="TIMESTAMP" />
     </addColumn>
 

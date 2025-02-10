@@ -68,7 +68,7 @@ public class NotificationManager {
             NotificatorManager notificatorManager, @Nullable Geocoder geocoder) {
         this.storage = storage;
         this.cacheManager = cacheManager;
-        this.eventForwarder = eventForwarder;   
+        this.eventForwarder = eventForwarder;
         this.notificatorManager = notificatorManager;
         this.geocoder = geocoder;
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);

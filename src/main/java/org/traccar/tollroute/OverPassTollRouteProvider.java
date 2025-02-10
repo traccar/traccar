@@ -21,7 +21,7 @@ public class OverPassTollRouteProvider implements TollRouteProvider {
         //! got the url from the config , and set it using the base url , hope this works :)
         final String baseurl = config.getString(Keys.TOLL_ROUTE_URL, url);
         this.accuracy = config.getInteger(Keys.TOLL_ROUTE_ACCURACY);
-        this.url = baseurl + "?data=[out:json];way[toll](around:" + accuracy + ",%f,%f);out%%20tags;";
+        this.url = baseurl + "?data=[out:json];way[toll=yes](around:" + accuracy + ",%f,%f);out%%20tags;";
     }
 
     @Override
