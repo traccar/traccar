@@ -196,7 +196,7 @@ public class OpenIdProvider {
 
         SessionHelper.userLogin(request, user, null);
 
-        return baseUrl;
+        return baseUrl.resolve("?openid=success");
     }
 
     public boolean getForce() {
