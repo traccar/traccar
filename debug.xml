@@ -36,7 +36,6 @@
     <entry key='intellitrac.port'>6037</entry>
 
 
-
     <entry key='speedLimit.enable'>true</entry>
     <entry key='speedLimit.type'>overpass</entry>
     <entry key='speedLimit.url'>https://overpass.private.coffee/api/interpreter</entry>
@@ -54,6 +53,5 @@
     deviceOnline,deviceOffline,deviceUnknown,deviceInactive,deviceMoving,deviceStopped,
     deviceOverspeed,deviceFuelDrop,deviceFuelIncrease,tollRoute
     </entry>
-
 
 </properties>
