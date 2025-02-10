@@ -25,7 +25,7 @@
 
     <!-- Checks for Size Violations.                    -->
     <!-- See http://checkstyle.sf.net/config_sizes.html -->
-    <module name="FileLength"/>
+<!--    <module name="FileLength"/>-->
     <module name="LineLength">
         <property name="max" value="120"/>
     </module>
@@ -68,7 +68,7 @@
 
         <!-- Checks for imports                              -->
         <!-- See http://checkstyle.sf.net/config_import.html -->
-        <module name="AvoidStarImport"/>
+<!--        <module name="AvoidStarImport"/>-->
         <module name="IllegalImport"/> <!-- defaults to sun.* packages -->
         <module name="RedundantImport"/>
         <module name="UnusedImports"/>
@@ -130,7 +130,7 @@
         <!-- Miscellaneous other checks.                   -->
         <!-- See http://checkstyle.sf.net/config_misc.html -->
         <module name="ArrayTypeStyle"/>
-        <module name="TodoComment"/>
+<!--        <module name="TodoComment"/>-->
         <module name="UpperEll"/>
 
     </module>

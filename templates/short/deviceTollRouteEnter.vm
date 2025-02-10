@@ -1,0 +1,2 @@
+#set($subject = "$device.name: has entered  Toll")
+$device.name has entered the toll $event.attributes.tollName at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)
