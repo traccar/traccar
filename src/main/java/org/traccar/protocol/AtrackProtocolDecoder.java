@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -33,6 +32,9 @@ import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
@@ -49,6 +51,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AtrackProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AtrackProtocolDecoder.class);
 
     private static final int MIN_DATA_LENGTH = 40;
 
@@ -175,9 +179,9 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                         if (BitUtil.check(mask, 5)) {
                             switch (hardwareId) {
                                 case 1, 4 -> data.skipBytes(11); // fuel
-                                case 2 -> data.skipBytes(2); // temperature
-                                case 3 -> data.skipBytes(6); // temperature and luminosity
-                                case 5 -> data.skipBytes(10); // temperature, humidity, luminosity and pressure
+                                case 2 -> data.skipBytes(2);  // temperature
+                                case 3 -> data.skipBytes(6);  // temperature + luminosity
+                                case 5 -> data.skipBytes(10); // temperature, humidity, luminosity, pressure
                             }
                         }
                     }
@@ -243,8 +247,11 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "BC" -> {
                     String[] beaconValues = values[i].split(":");
                     decodeBeaconData(
-                            position, Integer.parseInt(beaconValues[0]), Integer.parseInt(beaconValues[1]),
-                            Unpooled.wrappedBuffer(DataConverter.parseHex(beaconValues[2])));
+                            position,
+                            Integer.parseInt(beaconValues[0]),
+                            Integer.parseInt(beaconValues[1]),
+                            Unpooled.wrappedBuffer(DataConverter.parseHex(beaconValues[2]))
+                    );
                 }
                 default -> {
                 }
@@ -302,7 +309,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "CD" -> position.set(Position.KEY_ICCID, readString(buf));
                 case "CM" -> buf.readLong(); // imsi
                 case "GN" -> buf.skipBytes(60); // g sensor data
-                case "GV" -> buf.skipBytes(6); // maximum g force
+                case "GV" -> buf.skipBytes(6);  // maximum g force
                 case "ME" -> buf.readLong(); // imei
                 case "IA" -> buf.readUnsignedByte(); // intake air temperature
                 case "MP" -> buf.readUnsignedByte(); // manifold absolute pressure
@@ -374,13 +381,21 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.PREFIX_IN + key.charAt(2), buf.readUnsignedByte() > 0);
                 }
                 case "HA" -> {
-                    position.addAlarm(buf.readUnsignedByte() > 0 ? Position.ALARM_ACCELERATION : null);
+                    if (buf.readUnsignedByte() > 0) {
+                        position.addAlarm(Position.ALARM_ACCELERATION);
+                    }
                 }
                 case "HB" -> {
-                    position.addAlarm(buf.readUnsignedByte() > 0 ? Position.ALARM_BRAKING : null);
+                    if (buf.readUnsignedByte() > 0) {
+                        position.addAlarm(Position.ALARM_BRAKING);
+                    }
                 }
                 case "HC" -> {
-                    position.addAlarm(buf.readUnsignedByte() > 0 ? Position.ALARM_CORNERING : null);
+                    if (buf.readUnsignedByte() > 0) {
+                        position.addAlarm(Position.ALARM_CORNERING);
+                    }
+                }
+                default -> {
                 }
             }
         }
@@ -416,7 +431,6 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private Position decodeInfo(Channel channel, SocketAddress remoteAddress, String sentence) {
 
         Position position = new Position(getProtocolName());
-
         getLastLocation(position, null);
 
         DeviceSession deviceSession;
@@ -440,7 +454,6 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         } else {
 
             deviceSession = getDeviceSession(channel, remoteAddress);
-
             position.set(Position.KEY_RESULT, sentence);
 
         }
@@ -491,6 +504,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        // Acknowledge message right away for text protocol
         sendResponse(channel, remoteAddress, id, index);
 
         List<Position> positions = new LinkedList<>();
@@ -505,7 +519,6 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
         return positions;
     }
-
 
     private Position decodeTextLine(DeviceSession deviceSession, String sentence) {
 
@@ -532,8 +545,24 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(Long.parseLong(time) * 1000));
         }
 
-        position.setLongitude(parser.nextInt() * 0.000001);
-        position.setLatitude(parser.nextInt() * 0.000001);
+        // Convert and set longitude/latitude
+        double rawLon = parser.nextInt() * 0.000001;
+        double rawLat = parser.nextInt() * 0.000001;
+
+        boolean validCoordinates = true;
+        if (rawLon < -180 || rawLon > 180) {
+            validCoordinates = false;
+            LOGGER.warn("Invalid longitude in text message: {}", rawLon);
+        }
+        if (rawLat < -90 || rawLat > 90) {
+            validCoordinates = false;
+            LOGGER.warn("Invalid latitude in text message: {}", rawLat);
+        }
+
+        position.setLongitude(rawLon);
+        position.setLatitude(rawLat);
+        position.setValid(validCoordinates);
+
         position.setCourse(parser.nextInt());
 
         position.set(Position.KEY_EVENT, parser.nextInt());
@@ -553,14 +582,21 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, parser.nextInt());
         position.set(Position.PREFIX_TEMP + 2, parser.nextInt());
 
-        if (custom) {
+        if (custom && parser.hasNext()) {
             String data = parser.next();
-            String form = this.form;
-            if (form == null) {
-                form = data.substring(0, data.indexOf(',')).substring("%CI".length());
-                data = data.substring(data.indexOf(',') + 1);
+            String localForm = this.form;
+            if (localForm == null) {
+                if (data.startsWith("%CI")) {
+                    int commaIndex = data.indexOf(',');
+                    if (commaIndex > 0) {
+                        localForm = data.substring(0, commaIndex).substring("%CI".length());
+                        data = data.substring(commaIndex + 1);
+                    }
+                }
             }
-            readTextCustomData(position, data, form);
+            if (localForm != null) {
+                readTextCustomData(position, data, localForm);
+            }
         }
 
         return position;
@@ -593,7 +629,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    private List<Position> decodeBinary(DeviceSession deviceSession, ByteBuf buf) {
+
+    private List<Position> decodeBinary(DeviceSession deviceSession, ByteBuf buf,
+                                        Channel channel, SocketAddress remoteAddress,
+                                        long id, int index) {
 
         List<Position> positions = new LinkedList<>();
 
@@ -614,17 +653,36 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             } else {
                 position.setFixTime(new Date(buf.readUnsignedInt() * 1000));
                 position.setDeviceTime(new Date(buf.readUnsignedInt() * 1000));
-                buf.readUnsignedInt(); // send time
+                buf.readUnsignedInt(); 
             }
 
-            position.setValid(true);
-            position.setLongitude(buf.readInt() * 0.000001);
-            position.setLatitude(buf.readInt() * 0.000001);
+            // Read raw coordinates
+            double rawLon = buf.readInt() * 0.000001;
+            double rawLat = buf.readInt() * 0.000001;
+
+            // Validate
+            boolean validCoordinates = true;
+            if (rawLon < -180 || rawLon > 180) {
+                validCoordinates = false;
+                LOGGER.warn("Invalid longitude: {}", rawLon);
+            }
+            if (rawLat < -90 || rawLat > 90) {
+                validCoordinates = false;
+                LOGGER.warn("Invalid latitude: {}", rawLat);
+            }
+
+            // Set them (even if invalid, so we can store for debugging)
+            position.setLongitude(rawLon);
+            position.setLatitude(rawLat);
+            position.setValid(validCoordinates);
+
             position.setCourse(buf.readUnsignedShort());
 
             int type = buf.readUnsignedByte();
             position.set(Position.KEY_TYPE, type);
-            position.addAlarm(alarmMap.get(type));
+            if (alarmMap.containsKey(type)) {
+                position.addAlarm(alarmMap.get(type));
+            }
 
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
             position.set(Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
@@ -653,64 +711,111 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (custom) {
-                String form = this.form;
-                if (form == null) {
-                    form = readString(buf);
-                    if (form != null && form.startsWith("%CI")) {
-                        form = form.substring("%CI".length()).trim();
-                        readBinaryCustomData(position, buf, form);
-                    } else {  
-                        // Skip Nothing to decode
+                String localForm = this.form;
+                if (localForm == null) {
+                    localForm = readString(buf);
+                    if (localForm != null && localForm.startsWith("%CI")) {
+                        localForm = localForm.substring("%CI".length()).trim();
+                        readBinaryCustomData(position, buf, localForm);
                     }
-
                 } else {
-                    readBinaryCustomData(position, buf, form);
-                }    
+                    readBinaryCustomData(position, buf, localForm);
+                }
             }
 
             positions.add(position);
-
         }
 
+        // Even if invalid data was found, we've "processed" it. 
+        // The actual 'sendResponse' is handled in decode(...) after we finish reading.
         return positions;
     }
 
+    /**
+     * Main decode method with a catch for any exceptions that might occur.
+     * If an exception is caught:
+     *  - log the error,
+     *  - Attempts to parse enough of the buffer to ACK the device (if possible),
+     *  - Then returns null.
+     */
     @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        if (buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(buf.retain(), remoteAddress)); // keep-alive message
-            }
-            return null;
-        } else if (buf.getByte(buf.readerIndex()) == '$') {
-            return decodeInfo(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII).trim());
-        } else if (buf.getByte(buf.readerIndex() + 2) == ',') {
-            return decodeText(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII).trim());
-        } else {
+        try {
 
+            if (buf.getUnsignedShort(buf.readerIndex()) == 0xfe02) {
+                if (channel != null) {
+                    channel.writeAndFlush(new NetworkMessage(buf.retain(), remoteAddress));
+                }
+                return null;
+            }
+
+            if (buf.getByte(buf.readerIndex()) == '$') {
+                return decodeInfo(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII).trim());
+            }
+
+            if (buf.getByte(buf.readerIndex() + 2) == ',') {
+                return decodeText(channel, remoteAddress, buf.toString(StandardCharsets.US_ASCII).trim());
+            }
+
+            // Otherwise, handle binary
+            // Read and skip prefix, checksum, length, index in order:
             String prefix = buf.readCharSequence(2, StandardCharsets.US_ASCII).toString();
-            buf.readUnsignedShort(); // checksum
-            buf.readUnsignedShort(); // length
+            buf.readUnsignedShort(); 
+            int length = buf.readUnsignedShort(); 
             int index = buf.readUnsignedShort();
 
+            // Attempt to get device ID
             long id = buf.readLong();
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(id));
             if (deviceSession == null) {
                 return null;
             }
 
+            // Always acknowledge the device, even if we find errors later
             sendResponse(channel, remoteAddress, id, index);
 
+            // If it's a photo (@R) or normal data
             if (prefix.equals("@R")) {
                 return decodePhoto(deviceSession, buf, id);
             } else {
-                return decodeBinary(deviceSession, buf);
+                // decode binary payload, passing channel and remoteAddress so we can have full context
+                return decodeBinary(deviceSession, buf, channel, remoteAddress, id, index);
             }
 
+        } catch (Exception e) {
+            LOGGER.error("Decoding error: {}", e.getMessage(), e);
+
+            // Attempt to read enough from 'buf' to respond if possible
+            try {
+                if (buf.readableBytes() >= 14) { // enough bytes to parse ID and index
+                    // Save current reader index
+                    int savedReaderIndex = buf.readerIndex();
+
+                    // Attempt to parse out prefix, checksum, length, index, id for ack
+
+                    // If the buffer was partially read, we might need to reset index:
+                    buf.readerIndex(savedReaderIndex);
+
+                    // This is a partial parse to attempt to get 'id' and 'index'
+                    String prefix = buf.readCharSequence(2, StandardCharsets.US_ASCII).toString();
+                    buf.readUnsignedShort(); // checksum
+                    buf.readUnsignedShort(); // length
+                    int index = buf.readUnsignedShort();
+                    long id = buf.readLong();
+
+                    // Ack the device
+                    sendResponse(channel, remoteAddress, id, index);
+
+                }
+            } catch (Exception ackEx) {
+                LOGGER.warn("Failed to parse ID/index for ack after error: {}", ackEx.getMessage());
+            }
+
+            // Return null so we don't pass partial data up
+            return null;
         }
     }
 
