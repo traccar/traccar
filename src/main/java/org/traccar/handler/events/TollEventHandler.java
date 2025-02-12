@@ -31,7 +31,7 @@ public class TollEventHandler extends BaseEventHandler {
     public TollEventHandler(Config config, CacheManager cacheManager, Storage storage) {
         this.cacheManager = cacheManager;
         this.storage = storage;
-        minimalDuration = config.getLong(Keys.EVENT_OVERSPEED_MINIMAL_DURATION) * 1000;
+        minimalDuration = config.getLong(Keys.EVENT_TOLL_ROUTE_MINIMAL_DURATION) * 1000;
 
     }
 
@@ -39,7 +39,7 @@ public class TollEventHandler extends BaseEventHandler {
     public void onPosition(Position position, Callback callback) {
         long deviceId = position.getDeviceId();
 
-        Device device = cacheManager.getObject(Device.class, position.getDeviceId());
+        Device device = cacheManager.getObject(Device.class, deviceId);
         if (device == null) {
             return;
         }
