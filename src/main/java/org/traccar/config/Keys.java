@@ -2016,6 +2016,12 @@ public static final ConfigKey<Integer> TOLL_ROUTE_ACCURACY = new IntegerConfigKe
         "tollRoute.accuracy",
         List.of(KeyType.CONFIG),
         100);
+/**
+ * Minimal toll duration to trigger the event. Value in seconds.
+ */
+public static final ConfigKey<Long> EVENT_TOLL_ROUTE_MINIMAL_DURATION = new LongConfigKey(
+        "event.tollRoute.minimalDuration",
+        List.of(KeyType.CONFIG));
 
 
 }

@@ -32,28 +32,27 @@ public final class TollRouteProcessor {
             double currentTollDist = currentTotalDist - oldTollDist;
             if (currentTollDist < 0) { // if current distance traveled on toll is less invalid
                 state.setTollStartDistance(0);
-                checkEvent(state, position, currentTollDist, tollRef, tollName, minimalDuration);
+                checkEvent(state, position, currentTollDist, minimalDuration);
                 state.setTollrouteTime(null);
             }
             if (toll) {
-                checkEvent(state, position, currentTollDist, tollRef, tollName, minimalDuration);
+                checkEvent(state, position, currentTollDist, minimalDuration);
             } else {
                 state.setTollStartDistance(0);
-                state.setTollrouteTime(position.getFixTime());
-                checkEvent(state, position, currentTollDist, tollRef, tollName, minimalDuration);
+//                state.setTollrouteTime(position.getFixTime());
+                checkEvent(state, position, currentTollDist, minimalDuration);
                 state.setTollrouteTime(null);
             }
         } else if (position != null) {
             if (toll) {
                 state.setTollStartDistance(currentTotalDist);
                 state.setTollrouteTime(position.getFixTime());
-                checkEvent(state, position, 0, tollRef, tollName, minimalDuration);
+                checkEvent(state, position, 0, minimalDuration);
             }
         }
     }
 
-    private static void checkEvent(TollRouteState state, Position position, double tollDist, String tollRef,
-                                   String tollName, long minimalDuration) {
+    private static void checkEvent(TollRouteState state, Position position, double tollDist, long minimalDuration) {
         //TODO: add logic to delay first event till name or ref is available
         if (state.getTollrouteTime() != null) {
             long oldTime = state.getTollrouteTime().getTime();
@@ -63,7 +62,6 @@ public final class TollRouteProcessor {
                 Event event = null;
                 if (tollStart == 0 && tollDist > 0) {
                     event = new Event(Event.TYPE_DEVICE_TOLLROUTE_EXIT, position);
-
                     event.set(ATTRIBUTE_TOLL_DIST, tollDist);
                 } else if (tollStart > 0 && tollDist == 0) {
                     event = new Event(Event.TYPE_DEVICE_TOLLROUTE_ENTER, position);

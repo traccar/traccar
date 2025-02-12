@@ -44,7 +44,8 @@
     <entry key='tollRoute.enable'>true</entry>
     <entry key='tollRoute.type'>overpass</entry>
     <entry key='tollRoute.url'>https://overpass.private.coffee/api/interpreter</entry>
-    <entry key='tollRoute.accuracy'>40</entry>
+    <entry key='tollRoute.accuracy'>10</entry>
+    <entry key='event.tollRoute.minimalDuration'>5</entry>
 
 
 <!--    <entry key='mail.debug'>true</entry>-->
