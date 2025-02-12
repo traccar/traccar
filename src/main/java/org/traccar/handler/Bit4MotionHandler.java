@@ -92,15 +92,18 @@ public class Bit4MotionHandler extends BasePositionHandler {
             String model = device.getModel() != null ? device.getModel() : "";
             if (model.toLowerCase().contains("gosafe")) {
 
-                LOGGER.info("Device {} has started motion; scheduling <SPGS*CHP> in 15 seconds", deviceId);
+                LOGGER.info("Device {} has started motion; scheduling <SPGS*CHP>", deviceId);
 
-                SCHEDULER.schedule(() -> {
-                    try {
-                        sendHuabaoCommand(deviceId, "<SPGS*CHP>");
-                    } catch (Exception e) {
-                        LOGGER.error("Failed to send Huabao command", e);
-                    }
-                }, 15, TimeUnit.SECONDS);
+                for (int i = 1; i <= 3; i++) {
+                    int delay = i * 15;
+                    SCHEDULER.schedule(() -> {
+                        try {
+                            sendHuabaoCommand(deviceId, "<SPGS*CHP>");
+                        } catch (Exception e) {
+                            LOGGER.error("Failed to send Huabao command", e);
+                        }
+                    }, delay, TimeUnit.SECONDS);    
+                }
             }
         }
 
