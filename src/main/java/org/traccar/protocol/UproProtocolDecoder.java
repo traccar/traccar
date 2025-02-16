@@ -270,6 +270,14 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case 'd' -> position.set(Position.PREFIX_ADC + 1,
                         Integer.parseInt(data.toString(StandardCharsets.US_ASCII)) / 100.0);
+                case 'l' -> {
+                    String status = data.toString(StandardCharsets.US_ASCII);
+                    int[] s = new int[4];
+                    for (int i = 0; i < 4; i++) {
+                        s[i] = status.charAt(i) - '0';
+                    }
+                    position.set("logisticsLock", BitUtil.to(s[0], 3));
+                }
             }
 
         }
