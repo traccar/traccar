@@ -53,6 +53,7 @@ public class Position extends Message {
     public static final String KEY_TOLL = "isToll";
     public static final String KEY_TOLL_REF = "tollRef";
     public static final String KEY_TOLL_NAME = "tollName";
+    public static final String KEY_TOLL_EXIT = "tollExitDist";
 
     // The units for the below four KEYs currently vary.
     // The preferred units of measure are specified in the comment for each.

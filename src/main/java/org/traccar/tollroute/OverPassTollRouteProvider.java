@@ -40,10 +40,10 @@ public class OverPassTollRouteProvider implements TollRouteProvider {
                     if (tags.containsKey("toll")) {
                         callback.onSuccess(new TollData(isToll, ref, name));
                     } else {
-                        callback.onFailure(new RuntimeException("No toll data found with specific parameters"));
+                        callback.onSuccess(new TollData(isToll, ref, name));
                     }
                 } else {
-                    callback.onFailure(new RuntimeException("No toll data found"));
+                    callback.onSuccess(new TollData(false, null, null));
                 }
             }
 
