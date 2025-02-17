@@ -4,29 +4,20 @@ import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 public class TollRouteState {
 
-
-    public static final String STATUS_ENTERED = "entered";
-    public static final String STATUS_EXITED = "exited";
-    public static final String STATUS_ON_TOLL = "toll";
-    public static final String STATUS_OFF_TOLL = "noToll";
-
-
-    public static TollRouteState fromDevice(Device device) {
-        TollRouteState state = new TollRouteState();
+    public void fromDevice(Device device) {
         if (device.hasAttribute(Position.KEY_TOLL_NAME)) {
-            state.tollName = device.getString(Position.KEY_TOLL_NAME);
+            this.tollName = device.getString(Position.KEY_TOLL_NAME);
         }
         if (device.hasAttribute(Position.KEY_TOLL_REF)) {
-            state.tollRef = device.getString(Position.KEY_TOLL_REF);
+            this.tollRef = device.getString(Position.KEY_TOLL_REF);
         }
-        state.tollStartDistance = device.getTollStartDistance();
-        state.tollrouteTime = device.getTollrouteTime();
-        return state;
+        this.tollStartDistance = device.getTollStartDistance();
+        this.tollExitDistance = device.getDouble(Position.KEY_TOLL_EXIT);
+        this.tollrouteTime = device.getTollrouteTime();
     }
 
     public void toDevice(Device device) {
@@ -36,11 +27,14 @@ public class TollRouteState {
         if (tollRef != null) {
             device.set(Position.KEY_TOLL_REF, tollRef);
         }
+        device.set(Position.KEY_TOLL_EXIT, tollExitDistance);
+
 
         if (event != null && event.getType().equals(Event.TYPE_DEVICE_TOLLROUTE_EXIT)) {
             Map<String, Object> deviceAttributes = device.getAttributes();
             deviceAttributes.remove(Position.KEY_TOLL_REF);
             deviceAttributes.remove(Position.KEY_TOLL_NAME);
+            deviceAttributes.remove(Position.KEY_TOLL_EXIT);
             device.setAttributes(deviceAttributes);
         }
 
@@ -55,6 +49,37 @@ public class TollRouteState {
         return changed;
     }
 
+
+    private List<Boolean> tollWindow;
+
+    public List<Boolean> getTollWindow() {
+        return tollWindow;
+    }
+
+    public void addOnToll(Boolean isToll) {
+        if (this.tollWindow == null) {
+            this.tollWindow = new ArrayList<Boolean>();
+        }
+        this.tollWindow.add(isToll);
+        if (this.tollWindow.size() > 6) {
+            this.tollWindow.remove(0);
+        }
+    }
+
+    public Boolean isOnToll() {
+        Set<Boolean> tollWindowSet = new HashSet<Boolean>(this.tollWindow);
+        if (tollWindowSet.size() == 1) {
+            if (this.tollWindow.size() == 6) {
+                return tollWindowSet.iterator().next();
+            } else if (this.tollWindow.size() < 6 && tollWindowSet.contains(false)) {
+                return false;
+            }
+        }
+        return null;
+    }
+
+
+
     private double tollStartDistance;
 
     public double getTollStartDistance() {
@@ -62,8 +87,19 @@ public class TollRouteState {
     }
 
     public void setTollStartDistance(double tollStartDistance) {
-        changed = true;
+        this.changed = true;
         this.tollStartDistance = tollStartDistance;
+    }
+
+    private double tollExitDistance;
+
+    public double getTollExitDistance() {
+        return tollExitDistance;
+    }
+
+    public void setTollExitDistance(double tollExitDistance) {
+        this.changed = true;
+        this.tollExitDistance = tollExitDistance;
     }
 
     private Date tollrouteTime;
@@ -73,7 +109,7 @@ public class TollRouteState {
     }
 
     public void setTollrouteTime(Date tollrouteTime) {
-        changed = true;
+        this.changed = true;
         this.tollrouteTime = tollrouteTime;
     }
 
@@ -94,10 +130,12 @@ public class TollRouteState {
     }
 
     public void setTollRef(String tollRef) {
-        if (this.tollRef == null || !tollRef.equals(this.tollRef)) {
-            changed = true;
+        if (tollRef != null) {
+            if (this.tollRef == null || !tollRef.equals(this.tollRef)) {
+                this.changed = true;
+                this.tollRef = tollRef;
+            }
         }
-        this.tollRef = tollRef;
     }
 
     private String tollName;
@@ -107,7 +145,7 @@ public class TollRouteState {
     }
 
     public void setTollName(String tollName) {
-        changed = true;
+        this.changed = true;
         this.tollName = tollName;
     }
 
