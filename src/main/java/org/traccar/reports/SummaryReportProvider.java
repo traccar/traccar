@@ -21,6 +21,7 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
@@ -101,7 +102,9 @@ public class SummaryReportProvider {
         }
 
         if (first != null && last != null) {
-            boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
+            boolean ignoreOdometer = AttributeUtil.lookup(
+                new AttributeUtil.StorageProvider(config, storage, permissionsService, device),
+                Keys.REPORT_IGNORE_ODOMETER);
             result.setDistance(PositionUtil.calculateDistance(first, last, !ignoreOdometer));
             result.setSpentFuel(reportUtils.calculateFuel(first, last));
 

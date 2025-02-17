@@ -27,17 +27,19 @@ public class TripsConfig {
                 AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MINIMAL_TRIP_DURATION) * 1000,
                 AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MINIMAL_PARKING_DURATION) * 1000,
                 AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MINIMAL_NO_DATA_DURATION) * 1000,
-                AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_USE_IGNITION));
+                AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_USE_IGNITION),
+                AttributeUtil.lookup(attributeProvider, Keys.REPORT_IGNORE_ODOMETER));
     }
 
     public TripsConfig(
             double minimalTripDistance, long minimalTripDuration, long minimalParkingDuration,
-            long minimalNoDataDuration, boolean useIgnition) {
+            long minimalNoDataDuration, boolean useIgnition, boolean ignoreOdometer) {
         this.minimalTripDistance = minimalTripDistance;
         this.minimalTripDuration = minimalTripDuration;
         this.minimalParkingDuration = minimalParkingDuration;
         this.minimalNoDataDuration = minimalNoDataDuration;
         this.useIgnition = useIgnition;
+        this.ignoreOdometer = ignoreOdometer;
     }
 
     private final double minimalTripDistance;
@@ -68,6 +70,12 @@ public class TripsConfig {
 
     public boolean getUseIgnition() {
         return useIgnition;
+    }
+
+    private final boolean ignoreOdometer;
+
+    public boolean getIgnoreOdometer() {
+        return ignoreOdometer;
     }
 
 }
