@@ -21,12 +21,14 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
+import org.traccar.reports.common.TripsConfig;
 import org.traccar.reports.model.SummaryReportItem;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -101,7 +103,9 @@ public class SummaryReportProvider {
         }
 
         if (first != null && last != null) {
-            boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
+            TripsConfig tripsConfig = new TripsConfig(
+                    new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
+            boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
             result.setDistance(PositionUtil.calculateDistance(first, last, !ignoreOdometer));
             result.setSpentFuel(reportUtils.calculateFuel(first, last));
 
