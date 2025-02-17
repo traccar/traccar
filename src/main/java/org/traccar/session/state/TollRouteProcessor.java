@@ -24,7 +24,7 @@ public final class TollRouteProcessor {
         if (isOnToll != null) {
             if (isOnToll && oldTollDist == 0) {
 
-                stateStartToll(state, currentTotalDist, position.getFixTime(), tollRef,tollName);
+                stateStartToll(state, currentTotalDist, position.getFixTime(), tollRef, tollName);
                 checkEvent(state, position, 0, currentTotalDist, minimalDuration);
             } else if (isOnToll && oldTollDist > 0) {
                 if (state.getTollRef() == null && tollRef != null) {
@@ -76,11 +76,10 @@ public final class TollRouteProcessor {
                     event.set(Position.KEY_TOLL_REF, state.getTollRef());
                     state.setTollrouteTime(null);
                     state.setEvent(event);
-                    return ;
+                    return;
                 }
              }
         }
-        return ;
     }
 
     private static void stateStartToll(TollRouteState state, double tollStartDistance, Date startTime,
