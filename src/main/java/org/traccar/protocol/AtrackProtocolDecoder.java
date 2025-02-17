@@ -302,7 +302,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "MT" -> position.set(Position.KEY_MOTION, buf.readUnsignedByte() > 0);
                 case "MV" -> position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
                 case "BV" -> position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
-                case "GQ" -> cellTower.setSignalStrength(buf.readUnsignedByte());
+                case "GQ" -> cellTower.setSignalStrength((int) buf.readUnsignedByte());
                 case "CE" -> cellTower.setCellId(buf.readUnsignedInt());
                 case "LC" -> cellTower.setLocationAreaCode(buf.readUnsignedShort());
                 case "CN" -> {
