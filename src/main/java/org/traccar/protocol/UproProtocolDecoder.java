@@ -88,13 +88,6 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(int alarm) {
-        if (BitUtil.check(alarm, 2)) {
-            return Position.ALARM_TAMPERING;
-        }
-        return null;
-    }
-
     private void decodeTransparent(ByteBuf buf, Position position) {
 
         int dataType = buf.readUnsignedShort();
@@ -133,7 +126,28 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
 
             switch (dataType) {
                 case 'A' -> decodeLocation(position, data.toString(StandardCharsets.US_ASCII));
-                case 'B' -> position.set(Position.KEY_STATUS, data.toString(StandardCharsets.US_ASCII));
+                case 'B' -> {
+                    String status = data.toString(StandardCharsets.US_ASCII);
+
+                    int[] s = new int[5];
+                    for (int i = 0; i < 5; i++) {
+                        s[i] = status.charAt(i) - '0';
+                    }
+                    position.set(Position.KEY_IGNITION, BitUtil.check(s[1], 0));
+
+                    int[] a = new int[5];
+                    for (int i = 0; i < 5; i++) {
+                        a[i] = status.charAt(i + 5) - '0';
+                    }
+                    position.addAlarm(BitUtil.check(a[0], 0) ? Position.ALARM_SOS : null);
+                    position.addAlarm(BitUtil.check(a[0], 2) ? Position.ALARM_VIBRATION : null);
+                    position.addAlarm(BitUtil.check(a[0], 3) ? Position.ALARM_MOVEMENT : null);
+                    position.addAlarm(BitUtil.check(a[1], 2) ? Position.ALARM_OVERSPEED : null);
+                    position.addAlarm(BitUtil.check(a[3], 1) ? Position.ALARM_TAMPERING : null);
+                    position.addAlarm(BitUtil.check(a[3], 2) ? Position.ALARM_LOW_POWER : null);
+
+                    position.set(Position.KEY_STATUS, status);
+                }
                 case 'C' -> {
                     long odometer = 0;
                     while (data.isReadable()) {
@@ -223,11 +237,24 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case 'V' -> position.set(Position.KEY_POWER,
                         Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
-                case 'W' -> position.addAlarm(
-                        decodeAlarm(Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII))));
+                case 'W' -> {
+                    int alarms = Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII));
+                    position.addAlarm(BitUtil.check(alarms, 2) ? Position.ALARM_TAMPERING : null);
+                }
                 case 'X' -> {
-                    String[] cells = data.toString(StandardCharsets.US_ASCII).split(";");
-                    if (!cells[0].startsWith("(")) {
+                    String stringData = data.toString(StandardCharsets.US_ASCII);
+                    if (stringData.startsWith("(")) {
+                        String[] parameters = stringData.substring(1, stringData.length() - 1).split("\\)\\(");
+                        for (String parameter : parameters) {
+                            char type = parameter.charAt(0);
+                            String value = parameter.substring(1);
+                            switch (type) {
+                                case 'J' -> position.set("timezone", value);
+                                case 'k' -> position.set(Position.KEY_ICCID, value);
+                            }
+                        }
+                    } else {
+                        String[] cells = stringData.split(";");
                         for (int i = 0; i < cells.length; i++) {
                             String[] values = cells[i].split(",");
                             int index = 0;
