@@ -686,6 +686,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     } else {
                         while (buf.readerIndex() < endIndex) {
                             int extendedLength = buf.readUnsignedShort();
+                            int extendedEndIndex = buf.readerIndex() + extendedLength;
                             int extendedType = buf.readUnsignedShort();
                             switch (extendedType) {
                                 case 0x0001:
@@ -729,9 +730,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                                     break;
                                 default:
-                                    buf.skipBytes(extendedLength - 2);
                                     break;
                             }
+                            buf.readerIndex(extendedEndIndex);
                         }
                     }
                     break;
