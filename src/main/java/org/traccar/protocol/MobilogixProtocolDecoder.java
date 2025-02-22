@@ -81,12 +81,14 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             String time = sentence.substring(1, 20);
             String response;
-            if (type.equals("T1")) {
-                response = String.format("[%s,S1,1]", time);
-            } else {
-                response = String.format("[%s,S%s]", time, type.substring(1));
+            if (!type.equals("T6")) {
+                if (type.equals("T1")) {
+                    response = String.format("[%s,S1,1]", time);
+                } else {
+                    response = String.format("[%s,S%s]", time, type.substring(1));
+                }
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
-            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
         Parser parser = new Parser(PATTERN, sentence);
@@ -111,6 +113,8 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         position.addAlarm(decodeAlarm(type));
 
         int status = parser.nextHexInt();
+        position.set(Position.KEY_BLOCKED, !BitUtil.check(status, 0));
+        position.set(Position.KEY_CHARGE, BitUtil.check(status, 1));
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
         position.set(Position.KEY_MOTION, BitUtil.check(status, 3));
         position.set(Position.KEY_STATUS, status);

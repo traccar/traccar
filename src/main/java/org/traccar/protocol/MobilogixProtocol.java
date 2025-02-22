@@ -33,7 +33,9 @@ public class MobilogixProtocol extends BaseProtocol {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_ENGINE_RESUME,
-                Command.TYPE_ENGINE_STOP);
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_REBOOT_DEVICE);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
