@@ -23,6 +23,7 @@ import org.traccar.model.Command;
 import java.util.Date;
 
 public class MobilogixProtocolEncoder extends StringProtocolEncoder {
+
     public MobilogixProtocolEncoder(Protocol protocol) {
         super(protocol);
     }
@@ -38,11 +39,11 @@ public class MobilogixProtocolEncoder extends StringProtocolEncoder {
 
     protected Object encodeCommand(Command command, Date time) {
         return switch (command.getType()) {
-            case Command.TYPE_REBOOT_DEVICE -> encodeCommand(time, "S7");
-            case Command.TYPE_POSITION_SINGLE -> encodeCommand(time, "S4,1,1");
-            case Command.TYPE_ENGINE_STOP -> encodeCommand(time, "S6,RELAY=1");
-            case Command.TYPE_ENGINE_RESUME -> encodeCommand(time, "S6,RELAY=0");
             case Command.TYPE_CUSTOM -> encodeCommand(time, command.getString(Command.KEY_DATA));
+            case Command.TYPE_ENGINE_RESUME -> encodeCommand(time, "S6,RELAY=0");
+            case Command.TYPE_ENGINE_STOP -> encodeCommand(time, "S6,RELAY=1");
+            case Command.TYPE_POSITION_SINGLE -> encodeCommand(time, "S4,1,1");
+            case Command.TYPE_REBOOT_DEVICE -> encodeCommand(time, "S7");
             default -> null;
         };
     }
