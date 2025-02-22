@@ -38,6 +38,7 @@ public class MobilogixProtocolEncoder extends StringProtocolEncoder {
 
     protected Object encodeCommand(Command command, Date time) {
         return switch (command.getType()) {
+            case Command.TYPE_REBOOT_DEVICE -> encodeCommand(time, "S7");
             case Command.TYPE_POSITION_SINGLE -> encodeCommand(time, "S4,1,1");
             case Command.TYPE_ENGINE_STOP -> encodeCommand(time, "S6,RELAY=1");
             case Command.TYPE_ENGINE_RESUME -> encodeCommand(time, "S6,RELAY=0");

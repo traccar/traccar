@@ -81,12 +81,14 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
         if (channel != null) {
             String time = sentence.substring(1, 20);
             String response;
-            if (type.equals("T1")) {
-                response = String.format("[%s,S1,1]", time);
-            } else {
-                response = String.format("[%s,S%s]", time, type.substring(1));
+            if (!type.equals("T6")) {
+                if (type.equals("T1")) {
+                    response = String.format("[%s,S1,1]", time);
+                } else {
+                    response = String.format("[%s,S%s]", time, type.substring(1));
+                }
+                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             }
-            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
         }
 
         Parser parser = new Parser(PATTERN, sentence);
