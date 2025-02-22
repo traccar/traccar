@@ -23,6 +23,7 @@ import org.traccar.model.Command;
 import java.util.Date;
 
 public class MobilogixProtocolEncoder extends StringProtocolEncoder {
+
     public MobilogixProtocolEncoder(Protocol protocol) {
         super(protocol);
     }
