@@ -112,7 +112,9 @@ public class MobilogixProtocolDecoder extends BaseProtocolDecoder {
 
         int status = parser.nextHexInt();
         position.set(Position.KEY_BLOCKED, !BitUtil.check(status, 0));
-        position.set(Position.KEY_CHARGE, BitUtil.check(status, 1));
+        if (BitUtil.check(status, 1)) {
+            position.set(Position.KEY_CHARGE, true);
+        }
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 2));
         position.set(Position.KEY_MOTION, BitUtil.check(status, 3));
         position.set(Position.KEY_STATUS, status);
