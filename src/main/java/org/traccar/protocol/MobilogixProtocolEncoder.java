@@ -39,9 +39,9 @@ public class MobilogixProtocolEncoder extends StringProtocolEncoder {
 
     protected Object encodeCommand(Command command, Date time) {
         return switch (command.getType()) {
-            case Command.TYPE_ENGINE_STOP -> encodeCommand(time, "RELAY=1");
-            case Command.TYPE_ENGINE_RESUME -> encodeCommand(time, "RELAY=0");
             case Command.TYPE_CUSTOM -> encodeCommand(time, command.getString(Command.KEY_DATA));
+            case Command.TYPE_ENGINE_RESUME -> encodeCommand(time, "RELAY=0");
+            case Command.TYPE_ENGINE_STOP -> encodeCommand(time, "RELAY=1");
             default -> null;
         };
     }
