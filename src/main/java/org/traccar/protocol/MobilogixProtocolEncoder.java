@@ -28,7 +28,7 @@ public class MobilogixProtocolEncoder extends StringProtocolEncoder {
     }
 
     private Object encodeCommand(Date time, String param) {
-        return String.format("[%s,S6,%s]", DateUtil.formatDate(time, false), param);
+        return String.format("[%s,%s]", DateUtil.formatDate(time, false), param);
     }
 
     @Override
@@ -38,8 +38,9 @@ public class MobilogixProtocolEncoder extends StringProtocolEncoder {
 
     protected Object encodeCommand(Command command, Date time) {
         return switch (command.getType()) {
-            case Command.TYPE_ENGINE_STOP -> encodeCommand(time, "RELAY=1");
-            case Command.TYPE_ENGINE_RESUME -> encodeCommand(time, "RELAY=0");
+            case Command.TYPE_POSITION_SINGLE -> encodeCommand(time, "S4,0,1");
+            case Command.TYPE_ENGINE_STOP -> encodeCommand(time, "S6,RELAY=1");
+            case Command.TYPE_ENGINE_RESUME -> encodeCommand(time, "S6,RELAY=0");
             case Command.TYPE_CUSTOM -> encodeCommand(time, command.getString(Command.KEY_DATA));
             default -> null;
         };
