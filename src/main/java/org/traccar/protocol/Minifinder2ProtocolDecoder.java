@@ -186,12 +186,6 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (BitUtil.check(alarm, 12)) {
                             position.addAlarm(Position.ALARM_SOS);
                         }
-                        if (BitUtil.check(alarm, 13)) {
-                            position.set("side1", true);
-                        }
-                        if (BitUtil.check(alarm, 14)) {
-                            position.set("side2", true);
-                        }
                         if (BitUtil.check(alarm, 31)) {
                             position.set("bark", true);
                         }
@@ -267,7 +261,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     case 0x24:
                         position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
                         long status = buf.readUnsignedIntLE();
-                        position.set(Position.KEY_CHARGE, BitUtil.check(status, 4));
+                        if (BitUtil.check(status, 4)) {
+                            position.set(Position.KEY_CHARGE, true);
+                        }
                         if (BitUtil.check(status, 7)) {
                             position.set(Position.KEY_ARCHIVE, true);
                         }
