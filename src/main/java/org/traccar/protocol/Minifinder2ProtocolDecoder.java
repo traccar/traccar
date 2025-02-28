@@ -165,11 +165,24 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (BitUtil.check(alarm, 2)) {
                             position.addAlarm(Position.ALARM_FALL_DOWN);
                         }
+                        for (int i = 0; i < 4; i++) {
+                            if (BitUtil.check(alarm, i + 4)) {
+                                if (BitUtil.check(alarm, i + 26)) {
+                                    position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+                                } else {
+                                    position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                                }
+                                position.set(Position.KEY_GEOFENCE, i + 1);
+                            }
+                        }
                         if (BitUtil.check(alarm, 8)) {
                             position.addAlarm(Position.ALARM_POWER_OFF);
                         }
                         if (BitUtil.check(alarm, 9)) {
                             position.addAlarm(Position.ALARM_POWER_ON);
+                        }
+                        if (BitUtil.check(alarm, 10)) {
+                            position.addAlarm(Position.ALARM_MOVEMENT);
                         }
                         if (BitUtil.check(alarm, 12)) {
                             position.addAlarm(Position.ALARM_SOS);
@@ -180,6 +193,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (length == 5) {
                             position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
                         }
+                        position.set(Position.KEY_EVENT, alarm);
                         break;
                     case 0x14:
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
