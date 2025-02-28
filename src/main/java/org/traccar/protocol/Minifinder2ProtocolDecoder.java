@@ -180,9 +180,6 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (BitUtil.check(alarm, 10)) {
                             position.addAlarm(Position.ALARM_MOVEMENT);
                         }
-                        if (BitUtil.check(alarm, 11)) {
-                            position.addAlarm(Position.ALARM_IDLE);
-                        }
                         if (BitUtil.check(alarm, 12)) {
                             position.addAlarm(Position.ALARM_SOS);
                         }
