@@ -167,7 +167,11 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         }
                         for (int i = 0; i < 4; i++) {
                             if (BitUtil.check(alarm, i + 4)) {
-                                position.addAlarm(BitUtil.check(alarm, i + 26) ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT);
+                                if (BitUtil.check(alarm, i + 26)) {
+                                    position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+                                } else {
+                                    position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                                }
                                 position.set(Position.KEY_GEOFENCE, i + 1);
                             }
                         }
