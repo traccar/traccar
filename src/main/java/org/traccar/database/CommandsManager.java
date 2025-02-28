@@ -89,11 +89,13 @@ public class CommandsManager implements BroadcastInterface {
             DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
             if (deviceSession != null && deviceSession.supportsLiveCommands()) {
                 deviceSession.sendCommand(command);
-            } else {
+            } else if (!command.getBoolean(Command.KEY_NO_QUEUE)) {
                 QueuedCommand queuedCommand = QueuedCommand.fromCommand(command);
                 queuedCommand.setId(storage.addObject(queuedCommand, new Request(new Columns.Exclude("id"))));
                 broadcastService.updateCommand(true, deviceId);
                 return queuedCommand;
+            } else {
+                throw new RuntimeException("Failed to send command");
             }
         }
         return null;
