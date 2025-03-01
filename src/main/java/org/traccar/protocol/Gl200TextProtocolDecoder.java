@@ -143,6 +143,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeAnalog(Position position, int index, String adcString) {
+        if (adcString.startsWith("F")) {
+            position.set("fuel" + index, Integer.parseInt(adcString.substring(1)));
+        } else {
+            position.set(Position.PREFIX_ADC + index, Integer.parseInt(adcString) * 0.001);
+        }
+    }
+
     private Long parseHours(String hoursString) {
         if (hoursString != null && !hoursString.isEmpty()) {
             String[] hours = hoursString.split(":");
@@ -954,13 +962,19 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (!model.startsWith("GL5")) {
             position.set(Position.KEY_ODOMETER, v[index++].isEmpty() ? null : Double.parseDouble(v[index - 1]) * 1000);
             position.set(Position.KEY_HOURS, parseHours(v[index++]));
-            position.set(Position.PREFIX_ADC + 1, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001);
+            if (!v[index++].isEmpty()) {
+                decodeAnalog(position, 1, v[index - 1]);
+            }
         }
         if (model.startsWith("GV") && !model.startsWith("GV6") && !model.equals("GV350M")) {
-            position.set(Position.PREFIX_ADC + 2, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001);
+            if (!v[index++].isEmpty()) {
+                decodeAnalog(position, 2, v[index - 1]);
+            }
         }
         if (model.equals("GV200") || model.equals("GV310LAU")) {
-            position.set(Position.PREFIX_ADC + 3, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001);
+            if (!v[index++].isEmpty()) {
+                decodeAnalog(position, 3, v[index - 1]);
+            }
         }
         if (model.startsWith("GV355CEU")) {
             index += 1; // reserved
