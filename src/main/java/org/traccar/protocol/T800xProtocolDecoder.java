@@ -299,6 +299,12 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                     position.set("tag" + i + "Output", buf.readUnsignedByte() > 0);
                     position.set("tag" + i + "Rssi", buf.readUnsignedByte() - 128);
                 }
+                case 0x07 -> {
+                    position.set("bleFuel" + i + "Id", ByteBufUtil.hexDump(buf.readSlice(6))); // Read ble sensor MAC address (6 bytes)
+                    position.set("bleFuel" + i + "Battery", buf.readUnsignedByte() * 0.01 + 2); // Read BLE Sensor battery level
+                    position.set("bleFuel" + i + "Level", buf.readUnsignedShort()); // Read BLE sensor level (0-4096)
+                    position.set("bleFuel" + i + "Temp", buf.readUnsignedShort() * 0.01); // Read BLE Sensor temperature
+                }
             }
             i += 1;
         }
