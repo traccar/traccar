@@ -38,14 +38,14 @@
 
     <entry key='speedLimit.enable'>true</entry>
     <entry key='speedLimit.type'>overpass</entry>
-    <entry key='speedLimit.url'>https://overpass.private.coffee/api/interpreter</entry>
+    <entry key='speedLimit.url'>http://roadinfo.iotrides.com/api/interpreter</entry>
     <entry key='speedLimit.accuracy'>100</entry>
 
     <entry key='tollRoute.enable'>true</entry>
     <entry key='tollRoute.type'>overpass</entry>
-    <entry key='tollRoute.url'>https://overpass.private.coffee/api/interpreter</entry>
+    <entry key='tollRoute.url'>http://roadinfo.iotrides.com/api/interpreter</entry>
     <entry key='tollRoute.accuracy'>10</entry>
-    <entry key='event.tollRoute.minimalDuration'>0</entry>
+    <entry key='event.tollRoute.minimalDuration'>6</entry>
 
 
 <!--    <entry key='mail.debug'>true</entry>-->
