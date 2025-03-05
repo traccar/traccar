@@ -991,7 +991,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         } else {
             position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             if (!v[index++].isEmpty()) {
-                decodeStatus(position, Long.parseLong(v[index - 1]));
+                decodeStatus(position, Long.parseLong(v[index - 1], 16));
             }
             index += 1; // reserved / uart device type
         }
