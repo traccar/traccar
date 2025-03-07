@@ -52,10 +52,6 @@ public class TollRouteState {
 
     private List<Boolean> tollWindow;
 
-    public List<Boolean> getTollWindow() {
-        return tollWindow;
-    }
-
     public void addOnToll(Boolean isToll) {
         if (this.tollWindow == null) {
             this.tollWindow = new ArrayList<Boolean>();
@@ -66,10 +62,10 @@ public class TollRouteState {
         }
     }
 
-    public Boolean isOnToll() {
+    public Boolean isOnToll(int duration) {
         Set<Boolean> tollWindowSet = new HashSet<Boolean>(this.tollWindow);
         if (tollWindowSet.size() == 1) {
-            if (this.tollWindow.size() == 6) {
+            if (this.tollWindow.size() == (int) duration) {
                 return tollWindowSet.iterator().next();
             } else if (this.tollWindow.size() < 6 && tollWindowSet.contains(false)) {
                 return false;

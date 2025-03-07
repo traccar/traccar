@@ -27,13 +27,13 @@ public class TollEventHandler extends BaseEventHandler {
     private final Storage storage;
     private final LocalCache localCache;
 
-    private final long minimalDuration;
+    private final int minimalDuration;
 
     @Inject
     public TollEventHandler(Config config, CacheManager cacheManager, Storage storage, LocalCache localCache) {
         this.cacheManager = cacheManager;
         this.storage = storage;
-        minimalDuration = config.getLong(Keys.EVENT_TOLL_ROUTE_MINIMAL_DURATION) * 1000;
+        minimalDuration = config.getInteger(Keys.EVENT_TOLL_ROUTE_MINIMAL_DURATION);
         this.localCache = localCache;
     }
 
@@ -51,7 +51,6 @@ public class TollEventHandler extends BaseEventHandler {
             return;
         }
         String positionTollRef = position.getString(Position.KEY_TOLL_REF);
-
         Boolean positionIsToll = position.getBoolean(Position.KEY_TOLL);
         String positionTollName = position.getString(Position.KEY_TOLL_NAME);
 
@@ -65,7 +64,7 @@ public class TollEventHandler extends BaseEventHandler {
         TollRouteProcessor.updateState(tollState, position, positionTollRef, positionTollName,
                 minimalDuration);
 
-        if (tollState.isOnToll() == null || tollState.isOnToll()) {
+        if (tollState.isOnToll(minimalDuration) == null || tollState.isOnToll(minimalDuration)) {
             localCache.put(cacheKey, tollState);
         }
 
