@@ -1,0 +1,12 @@
+#set($subject = "$device.name: has exited Toll")
+#if($distanceUnit == 'mi')
+#set($distanceUnitValue = $event.attributes.tollDistance * 0.00062137)
+#set($distanceUnitString = $numberTool.format("0.0 mi", $distanceUnitValue))
+#elseif($distanceUnit == 'nmi')
+#set($distanceUnitValue = $event.attributes.tollDistance * 0.00053995)
+#set($distanceUnitString = $numberTool.format("0.0 nmi", $distanceUnitValue))
+#else
+#set($distanceUnitValue = $event.attributes.tollDistance * 0.001)
+#set($distanceUnitString = $numberTool.format("0.0 km", $distanceUnitValue))
+#end
+$device.name has exited the toll $event.attributes.tollName after $distanceUnitString at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

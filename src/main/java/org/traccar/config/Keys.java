@@ -1986,6 +1986,42 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> BROADCAST_SECONDARY = new BooleanConfigKey(
             "broadcast.secondary",
-            List.of(KeyType.CONFIG));
+                    List.of(KeyType.CONFIG));
+
+                    /**
+ * Boolean flag to enable toll route API to get toll information depending on location.
+ */
+public static final ConfigKey<Boolean> TOLL_ROUTE_ENABLE = new BooleanConfigKey(
+        "tollRoute.enable",
+        List.of(KeyType.CONFIG));
+
+/**
+ * Provider to use for toll route information. Available options: overpass
+ */
+public static final ConfigKey<String> TOLL_ROUTE_TYPE = new StringConfigKey(
+        "tollRoute.type",
+        List.of(KeyType.CONFIG));
+
+/**
+ * Toll route provider API URL address.
+ */
+public static final ConfigKey<String> TOLL_ROUTE_URL = new StringConfigKey(
+        "tollRoute.url",
+        List.of(KeyType.CONFIG));
+
+/**
+ * Search radius for toll routes in meters. Default value is 100. hope this works :)
+ */
+public static final ConfigKey<Integer> TOLL_ROUTE_ACCURACY = new IntegerConfigKey(
+        "tollRoute.accuracy",
+        List.of(KeyType.CONFIG),
+        100);
+/**
+ * Minimal toll duration to trigger the event. Value in seconds.
+ */
+public static final ConfigKey<Integer> EVENT_TOLL_ROUTE_MINIMAL_DURATION = new IntegerConfigKey(
+        "event.tollRoute.minimalDuration",
+        List.of(KeyType.CONFIG));
+
 
 }

@@ -11,20 +11,48 @@
     <entry key='media.path'>./target/media</entry>
 
     <entry key='logger.console'>true</entry>
-    <entry key='logger.queries'>false</entry>
+    <entry key='logger.queries'>true</entry>
     <entry key='logger.fullStackTraces'>true</entry>
 
     <entry key='mail.debug'>true</entry>
 
-    <entry key='database.driver'>org.h2.Driver</entry>
-    <entry key='database.url'>jdbc:h2:./target/database</entry>
-    <entry key='database.user'>sa</entry>
-    <entry key='database.password'></entry>
+
+<!--    <entry key='database.driver'>org.h2.Driver</entry>-->
+<!--    <entry key='database.url'>jdbc:h2:./target/database</entry>-->
+<!--    <entry key='database.user'>sa</entry>-->
+<!--    <entry key='database.password'></entry>-->
+
+    <entry key='database.driver'>com.mysql.cj.jdbc.Driver</entry>
+    <entry key='database.url'>jdbc:mysql://localhost/traccar?zeroDateTimeBehavior=round&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true&amp;useSSL=false&amp;allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>
+    <entry key='database.user'>root</entry>
+    <entry key='database.password'>root</entry>
+    <entry key='notificator.types'>web,mail</entry>
+
 
     <!--<entry key='server.instantAcknowledgement'>true</entry>
     <entry key='server.buffering.threshold'>5000</entry>-->
 
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
+
+
+    <entry key='speedLimit.enable'>true</entry>
+    <entry key='speedLimit.type'>overpass</entry>
+    <entry key='speedLimit.url'>http://roadinfo.iotrides.com/api/interpreter</entry>
+    <entry key='speedLimit.accuracy'>100</entry>
+
+    <entry key='tollRoute.enable'>true</entry>
+    <entry key='tollRoute.type'>overpass</entry>
+    <entry key='tollRoute.url'>http://roadinfo.iotrides.com/api/interpreter</entry>
+    <entry key='tollRoute.accuracy'>10</entry>
+    <entry key='event.tollRoute.minimalDuration'>6</entry>
+
+
+<!--    <entry key='mail.debug'>true</entry>-->
+
+    <entry key='notification.types'>
+    deviceOnline,deviceOffline,deviceUnknown,deviceInactive,deviceMoving,deviceStopped,
+    deviceOverspeed,deviceFuelDrop,deviceFuelIncrease,tollRoute
+    </entry>
 
 </properties>

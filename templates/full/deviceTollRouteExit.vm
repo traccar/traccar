@@ -1,0 +1,24 @@
+#set($subject = "$device.name: has exited a Toll Route")
+#if($distanceUnit == 'mi')
+#set($distanceUnitValue = $event.attributes.tollDistance * 0.00062137)
+#set($distanceUnitString = $numberTool.format("0.0 mi", $distanceUnitValue))
+#elseif($distanceUnit == 'nmi')
+#set($distanceUnitValue = $event.attributes.tollDistance * 0.00053995)
+#set($distanceUnitString = $numberTool.format("0.0 nmi", $distanceUnitValue))
+#else
+#set($distanceUnitValue = $event.attributes.tollDistance * 0.001)
+#set($distanceUnitString = $numberTool.format("0.0 km", $distanceUnitValue))
+#end
+
+<!DOCTYPE html>
+<html>
+<body>
+Device: $device.name<br>
+Exited the $event.attributes.tollName toll<br>
+after $distanceUnitString at<br>
+Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
+Point: <a href="$webUrl?eventId=$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+</body>
+</html>

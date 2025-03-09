@@ -80,6 +80,7 @@ import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
+import org.traccar.handler.TollRouteHandler;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
@@ -94,6 +95,8 @@ import org.traccar.speedlimit.SpeedLimitProvider;
 import org.traccar.storage.DatabaseStorage;
 import org.traccar.storage.MemoryStorage;
 import org.traccar.storage.Storage;
+import org.traccar.tollroute.OverPassTollRouteProvider;
+import org.traccar.tollroute.TollRouteProvider;
 import org.traccar.web.WebServer;
 import org.traccar.api.security.LoginService;
 
@@ -269,6 +272,31 @@ public class MainModule extends AbstractModule {
                 case "overpass" -> new OverpassSpeedLimitProvider(config, client, url);
                 default -> throw new IllegalArgumentException("Unknown speed limit provider");
             };
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static TollRouteProvider provideTollRouteProvider(Config config, Client client) {
+        if (config.getBoolean(Keys.TOLL_ROUTE_ENABLE)) {
+            String type = config.getString(Keys.TOLL_ROUTE_TYPE);
+            String url = config.getString(Keys.TOLL_ROUTE_URL);
+            if (url != null) {
+                return switch (type) {
+                    case "overpass" -> new OverPassTollRouteProvider(config, client, url);
+                    default -> throw new IllegalArgumentException("Unknown Toll Route provider");
+                };
+            }
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static TollRouteHandler provideTollRouteHandler(@Nullable TollRouteProvider  tollRouteProvider) {
+        if (tollRouteProvider != null) {
+            return new TollRouteHandler(tollRouteProvider);
         }
         return null;
     }

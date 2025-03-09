@@ -42,18 +42,8 @@ import org.traccar.handler.PositionForwardingHandler;
 import org.traccar.handler.PostProcessHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
-import org.traccar.handler.events.AlarmEventHandler;
-import org.traccar.handler.events.BaseEventHandler;
-import org.traccar.handler.events.BehaviorEventHandler;
-import org.traccar.handler.events.CommandResultEventHandler;
-import org.traccar.handler.events.DriverEventHandler;
-import org.traccar.handler.events.FuelEventHandler;
-import org.traccar.handler.events.GeofenceEventHandler;
-import org.traccar.handler.events.IgnitionEventHandler;
-import org.traccar.handler.events.MaintenanceEventHandler;
-import org.traccar.handler.events.MediaEventHandler;
-import org.traccar.handler.events.MotionEventHandler;
-import org.traccar.handler.events.OverspeedEventHandler;
+import org.traccar.handler.TollRouteHandler;
+import org.traccar.handler.events.*;
 import org.traccar.handler.network.AcknowledgementHandler;
 import org.traccar.helper.PositionLogger;
 import org.traccar.model.Position;
@@ -105,6 +95,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
                 GeofenceHandler.class,
                 GeocoderHandler.class,
                 SpeedLimitHandler.class,
+                TollRouteHandler.class,
                 MotionHandler.class,
                 ComputedAttributesHandler.Late.class,
                 EngineHoursHandler.class,
@@ -120,6 +111,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
                 MediaEventHandler.class,
                 CommandResultEventHandler.class,
                 OverspeedEventHandler.class,
+                TollEventHandler.class,
                 BehaviorEventHandler.class,
                 FuelEventHandler.class,
                 MotionEventHandler.class,
