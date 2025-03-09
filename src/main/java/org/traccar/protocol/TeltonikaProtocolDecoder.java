@@ -287,7 +287,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 case 3 -> p.addAlarm(Position.ALARM_CORNERING);
             }
         });
-        register(175, null, (p, b) -> {
+        register(175, fmbXXX, (p, b) -> {
             switch (b.readUnsignedByte()) {
                 case 0 -> p.addAlarm(Position.ALARM_GEOFENCE_EXIT);
                 case 1 -> p.addAlarm(Position.ALARM_GEOFENCE_ENTER);
