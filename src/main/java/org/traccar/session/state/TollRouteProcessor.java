@@ -14,18 +14,18 @@ public final class TollRouteProcessor {
 
     public static void updateState(
             TollRouteState state, Position position,
-            String tollRef, String tollName, long minimalDuration) {
+            String tollRef, String tollName, int  minimalDuration) {
 
         state.setEvent(null);
 
         double currentTotalDist =  position.getDouble(Position.KEY_TOTAL_DISTANCE);
         double oldTollDist = state.getTollStartDistance();
-        Boolean isOnToll = state.isOnToll();
+        Boolean isOnToll = state.isOnToll(minimalDuration);
         if (isOnToll != null) {
             if (isOnToll && oldTollDist == 0) {
 
                 stateStartToll(state, currentTotalDist, position.getFixTime(), tollRef, tollName);
-                checkEvent(state, position, 0, currentTotalDist, minimalDuration);
+                checkEvent(state, position, 0, currentTotalDist);
             } else if (isOnToll && oldTollDist > 0) {
                 if (state.getTollRef() == null && tollRef != null) {
                     state.setTollRef(tollRef);
@@ -39,7 +39,7 @@ public final class TollRouteProcessor {
                     state.setTollExitDistance(currentTotalDist);
                     state.setTollrouteTime(position.getFixTime());
 
-                    checkEvent(state, position, currentTollDist, 0, minimalDuration);
+                    checkEvent(state, position, currentTollDist, 0);
                     state.setTollStartDistance(0);
                     state.setTollrouteTime(null);
                 } else if (state.getTollExitDistance() == 0) {
@@ -51,34 +51,30 @@ public final class TollRouteProcessor {
     }
 
     private static void checkEvent(TollRouteState state, Position position, double tollDist,
-                                      double tollStart, long minimalDuration) {
+                                      double tollStart) {
         if (state.getTollrouteTime() != null) {
-            long oldTime = state.getTollrouteTime().getTime();
-            long newTime = position.getFixTime().getTime();
-            if (newTime - oldTime >= minimalDuration) {
-                Event event = null;
-                if (tollStart > 0) {
-                    event = new Event(Event.TYPE_DEVICE_TOLLROUTE_ENTER, position);
-                    state.setTollExitDistance(-1);
-                } else if (tollStart == 0) {
-                     event = new Event(Event.TYPE_DEVICE_TOLLROUTE_EXIT, position);
-                    event.set(ATTRIBUTE_TOLL_DIST, tollDist);
-                }
+            Event event = null;
+            if (tollStart > 0) {
+                event = new Event(Event.TYPE_DEVICE_TOLLROUTE_ENTER, position);
+                state.setTollExitDistance(-1);
+            } else if (tollStart == 0) {
+                 event = new Event(Event.TYPE_DEVICE_TOLLROUTE_EXIT, position);
+                event.set(ATTRIBUTE_TOLL_DIST, tollDist);
+            }
 
-                if (event != null) {
-                    event.set(Position.KEY_TOLL_NAME, state.getTollName());
-                    if (state.getTollName() == null && state.getTollRef() != null) {
-                        event.set(Position.KEY_TOLL_NAME, state.getTollRef());
-                    }
-                    if (state.getTollName() == null && state.getTollRef() == null) {
-                        event.set(Position.KEY_TOLL_NAME, " ");
-                    }
-                    event.set(Position.KEY_TOLL_REF, state.getTollRef());
-                    state.setTollrouteTime(null);
-                    state.setEvent(event);
-                    return;
+            if (event != null) {
+                event.set(Position.KEY_TOLL_NAME, state.getTollName());
+                if (state.getTollName() == null && state.getTollRef() != null) {
+                    event.set(Position.KEY_TOLL_NAME, state.getTollRef());
                 }
-             }
+                if (state.getTollName() == null && state.getTollRef() == null) {
+                    event.set(Position.KEY_TOLL_NAME, " ");
+                }
+                event.set(Position.KEY_TOLL_REF, state.getTollRef());
+                state.setTollrouteTime(null);
+                state.setEvent(event);
+                return;
+            }
         }
     }
 
