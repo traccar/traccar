@@ -1054,6 +1054,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         String model = getDeviceModel(deviceSession, protocolVersion);
         index += 1; // device name
+        index += 1; // virtual ignition mode
         index += 1; // duration of ignition on/off
 
         index = decodeLocation(position, model, v, index);
