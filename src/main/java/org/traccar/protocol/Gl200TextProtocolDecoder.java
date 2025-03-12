@@ -143,6 +143,14 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeAnalog(Position position, int index, String adcString) {
+        if (adcString.startsWith("F")) {
+            position.set("fuel" + index, Integer.parseInt(adcString.substring(1)));
+        } else {
+            position.set(Position.PREFIX_ADC + index, Integer.parseInt(adcString) * 0.001);
+        }
+    }
+
     private Long parseHours(String hoursString) {
         if (hoursString != null && !hoursString.isEmpty()) {
             String[] hours = hoursString.split(":");
@@ -954,15 +962,21 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         if (!model.startsWith("GL5")) {
             position.set(Position.KEY_ODOMETER, v[index++].isEmpty() ? null : Double.parseDouble(v[index - 1]) * 1000);
             position.set(Position.KEY_HOURS, parseHours(v[index++]));
-            position.set(Position.PREFIX_ADC + 1, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001);
+            if (!v[index++].isEmpty()) {
+                decodeAnalog(position, 1, v[index - 1]);
+            }
         }
         if (model.startsWith("GV") && !model.startsWith("GV6") && !model.equals("GV350M")) {
-            position.set(Position.PREFIX_ADC + 2, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001);
+            if (!v[index++].isEmpty()) {
+                decodeAnalog(position, 2, v[index - 1]);
+            }
         }
         if (model.equals("GV200") || model.equals("GV310LAU")) {
-            position.set(Position.PREFIX_ADC + 3, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]) * 0.001);
+            if (!v[index++].isEmpty()) {
+                decodeAnalog(position, 3, v[index - 1]);
+            }
         }
-        if (model.startsWith("GV355CEU")) {
+        if (model.startsWith("GV355CEU") || model.startsWith("GV600M")) {
             index += 1; // reserved
         }
 
@@ -977,9 +991,18 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         } else {
             position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             if (!v[index++].isEmpty()) {
-                decodeStatus(position, Long.parseLong(v[index - 1]));
+                decodeStatus(position, Long.parseLong(v[index - 1], 16));
             }
             index += 1; // reserved / uart device type
+        }
+
+        Date time = dateFormat.parse(v[v.length - 2]);
+        if (ignoreFixTime) {
+            position.setTime(time);
+            positions.clear();
+            positions.add(position);
+        } else {
+            position.setDeviceTime(time);
         }
 
         if (BitUtil.check(mask, 0)) {
@@ -998,7 +1021,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 2)) {
-            index += 1; // can data
+            return positions; // can data not supported
         }
 
         if (BitUtil.check(mask, 3) || BitUtil.check(mask, 4)) {
@@ -1014,13 +1037,72 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        Date time = dateFormat.parse(v[v.length - 2]);
-        if (ignoreFixTime) {
-            position.setTime(time);
-            positions.clear();
-            positions.add(position);
-        } else {
-            position.setDeviceTime(time);
+        if (BitUtil.check(mask, 7)) {
+            int deviceCount = Integer.parseInt(v[index++]);
+            for (int i = 1; i <= deviceCount; i++) {
+                index += 1; // serial number
+                int type = Integer.parseInt(v[index++]);
+                index += 1; // temperature
+                if (type == 2) {
+                    index += 1; // humidity
+                }
+            }
+        }
+
+        if (BitUtil.check(mask, 8)) {
+            int deviceCount = Integer.parseInt(v[index++]);
+            for (int i = 1; i <= deviceCount; i++) {
+                index += 1; // index
+                index += 1; // type
+                index += 1; // model
+                if (model.startsWith("GV600M")) {
+                    index += 1; // raw data length
+                }
+                index += 1; // raw data
+                int deviceMask = Integer.parseInt(v[index++], 16);
+                if (BitUtil.check(deviceMask, 0)) {
+                    index += 1; // name
+                }
+                if (BitUtil.check(deviceMask, 1)) {
+                    position.set("tag" + i + "Id", v[index++]);
+                }
+                if (BitUtil.check(deviceMask, 2)) {
+                    index += 1; // status
+                }
+                if (BitUtil.check(deviceMask, 3)) {
+                    index += 1; // battery level
+                }
+                if (BitUtil.check(deviceMask, 4) && !v[index++].isEmpty()) {
+                    position.set("tag" + i + "Temp", Double.parseDouble(v[index - 1]));
+                }
+                if (BitUtil.check(deviceMask, 5) && !v[index++].isEmpty()) {
+                    position.set("tag" + i + "Humidity", Integer.parseInt(v[index - 1]));
+                }
+                if (BitUtil.check(deviceMask, 7)) {
+                    index += 1; // input / output
+                }
+                if (BitUtil.check(deviceMask, 8)) {
+                    index += 1; // event notification
+                }
+                if (BitUtil.check(deviceMask, 9)) {
+                    index += 1; // tire pressure
+                }
+                if (BitUtil.check(deviceMask, 10)) {
+                    index += 1; // timestamp
+                }
+                if (BitUtil.check(deviceMask, 11)) {
+                    index += 1; // enhanced temperature
+                }
+                if (BitUtil.check(deviceMask, 12)) {
+                    index += 1; // magnet
+                }
+                if (BitUtil.check(deviceMask, 13) && !v[index++].isEmpty()) {
+                    position.set("tag" + i + "Battery", Integer.parseInt(v[index - 1]));
+                }
+                if (BitUtil.check(deviceMask, 14)) {
+                    index += 1; // relay
+                }
+            }
         }
 
         return positions;
@@ -1046,7 +1128,9 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_IGNITION, type.contains("GN"));
         position.set(Position.KEY_HOURS, parseHours(v[index++]));
-        position.set(Position.KEY_ODOMETER, Double.parseDouble(v[index]) * 1000);
+        if (!v[index++].isEmpty()) {
+            position.set(Position.KEY_ODOMETER, Double.parseDouble(v[index - 1]) * 1000);
+        }
 
         Date time = dateFormat.parse(v[v.length - 2]);
         if (ignoreFixTime) {

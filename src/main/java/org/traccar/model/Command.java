@@ -83,6 +83,7 @@ public class Command extends BaseCommand {
     public static final String KEY_PHONE = "phone";
     public static final String KEY_SERVER = "server";
     public static final String KEY_PORT = "port";
+    public static final String KEY_NO_QUEUE = "noQueue";
 
     @QueryIgnore
     @Override
