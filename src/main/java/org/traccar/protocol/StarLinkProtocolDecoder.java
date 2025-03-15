@@ -114,7 +114,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        Parser parser = new Parser(PATTERN, ((String) msg).trim());
         if (!parser.matches()) {
             return null;
         }
