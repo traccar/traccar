@@ -60,11 +60,14 @@ public abstract class GeofenceGeometry {
     }
 
     public boolean containsPoint(double latitude, double longitude) {
-        if (min.lon >= 0 || max.lon < 0) {
-            if (latitude < min.lat || latitude > max.lat) {
+        boolean boundsDoNotCrossDateLine = min.lon >= 0 || max.lon < 0;
+        if (boundsDoNotCrossDateLine) {
+            boolean latitudeOutsideBounds = latitude < min.lat || latitude > max.lat;
+            if (latitudeOutsideBounds) {
                 return false;
             }
-            if (longitude < min.lon || longitude > max.lon) {
+            boolean longitudeOutsideBounds = longitude < min.lon || longitude > max.lon;
+            if (longitudeOutsideBounds) {
                 return false;
             }
         }
