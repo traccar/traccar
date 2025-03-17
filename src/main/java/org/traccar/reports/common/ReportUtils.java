@@ -76,6 +76,7 @@ public class ReportUtils {
     private final PermissionsService permissionsService;
     private final VelocityEngine velocityEngine;
     private final Geocoder geocoder;
+    private final ReportAddressResolver addressResolver;
 
     @Inject
     public ReportUtils(
@@ -86,6 +87,7 @@ public class ReportUtils {
         this.permissionsService = permissionsService;
         this.velocityEngine = velocityEngine;
         this.geocoder = geocoder;
+        this.addressResolver = new ReportAddressResolver(config, geocoder);
     }
 
     public <T extends BaseModel> T getObject(long userId, Class<T> clazz, long objectId) {
@@ -171,16 +173,6 @@ public class ReportUtils {
         transformer.write();
     }
 
-    private String resolveAddress(double latitude, double longitude, String existingAddress) {
-        if (existingAddress != null) {
-            return existingAddress;
-        }
-        if (geocoder != null && config.getBoolean(Keys.GEOCODER_ON_REQUEST)) {
-            return geocoder.getAddress(latitude, longitude, null);
-        }
-        return null;
-    }
-
     private TripReportItem calculateTrip(
             Device device, Position startTrip, Position endTrip, double maxSpeed,
             boolean ignoreOdometer) throws StorageException {
@@ -196,14 +188,14 @@ public class ReportUtils {
         trip.setStartLat(startTrip.getLatitude());
         trip.setStartLon(startTrip.getLongitude());
         trip.setStartTime(startTrip.getFixTime());
-        trip.setStartAddress(resolveAddress(
+        trip.setStartAddress(addressResolver.resolveAddress(
                 startTrip.getLatitude(), startTrip.getLongitude(), startTrip.getAddress()));
 
         trip.setEndPositionId(endTrip.getId());
         trip.setEndLat(endTrip.getLatitude());
         trip.setEndLon(endTrip.getLongitude());
         trip.setEndTime(endTrip.getFixTime());
-        trip.setEndAddress(resolveAddress(
+        trip.setEndAddress(addressResolver.resolveAddress(
                 endTrip.getLatitude(), endTrip.getLongitude(), endTrip.getAddress()));
 
         trip.setDistance(PositionUtil.calculateDistance(startTrip, endTrip, !ignoreOdometer));
@@ -243,7 +235,7 @@ public class ReportUtils {
         stop.setLatitude(startStop.getLatitude());
         stop.setLongitude(startStop.getLongitude());
         stop.setStartTime(startStop.getFixTime());
-        stop.setAddress(resolveAddress(
+        stop.setAddress(addressResolver.resolveAddress(
                 startStop.getLatitude(), startStop.getLongitude(), startStop.getAddress()));
 
         stop.setEndTime(endStop.getFixTime());
