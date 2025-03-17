@@ -299,7 +299,7 @@ public class ReportUtils {
         var attributeProvider = new AttributeUtil.StorageProvider(config, storage, permissionsService, device);
         TripsConfig tripsConfig = new TripsConfig(attributeProvider);
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
-        boolean trips = reportClass.equals(TripReportItem.class);
+        boolean isTripReport = reportClass.equals(TripReportItem.class);
         boolean useNewLogic = config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC);
 
         List<Event> events = new ArrayList<>();
@@ -309,7 +309,7 @@ public class ReportUtils {
         var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
         if (!positions.isEmpty()) {
             boolean initialValue = positions.get(0).getBoolean(Position.KEY_MOTION);
-            if (initialValue == trips) {
+            if (initialValue == isTripReport) {
                 startPosition = positions.get(0);
                 maxSpeed = startPosition.getSpeed();
             }
@@ -371,7 +371,7 @@ public class ReportUtils {
 
         for (Event event : events) {
             boolean motion = event.getType().equals(Event.TYPE_DEVICE_MOVING);
-            if (motion == trips) {
+            if (motion == isTripReport) {
                 startPosition = positionMap.get(event.getPositionId());
             } else if (startPosition != null) {
                 Position endPosition = positionMap.get(event.getPositionId());
@@ -400,7 +400,7 @@ public class ReportUtils {
         TripsConfig tripsConfig = new TripsConfig(
                 new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
-        boolean trips = reportClass.equals(TripReportItem.class);
+        boolean isTripReport = reportClass.equals(TripReportItem.class);
 
         var events = storage.getObjects(Event.class, new Request(
                 new Columns.All(),
@@ -419,7 +419,7 @@ public class ReportUtils {
 
         for (Event event : events) {
             boolean motion = event.getType().equals(Event.TYPE_DEVICE_MOVING);
-            if (motion == trips) {
+            if (motion == isTripReport) {
                 startPosition = storage.getObject(Position.class, new Request(
                         new Columns.All(), new Condition.Equals("id", event.getPositionId())));
             } else if (startPosition != null) {
