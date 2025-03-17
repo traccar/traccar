@@ -171,6 +171,16 @@ public class ReportUtils {
         transformer.write();
     }
 
+    private String resolveAddress(double latitude, double longitude, String existingAddress) {
+        if (existingAddress != null) {
+            return existingAddress;
+        }
+        if (geocoder != null && config.getBoolean(Keys.GEOCODER_ON_REQUEST)) {
+            return geocoder.getAddress(latitude, longitude, null);
+        }
+        return null;
+    }
+
     private TripReportItem calculateTrip(
             Device device, Position startTrip, Position endTrip, double maxSpeed,
             boolean ignoreOdometer) throws StorageException {
@@ -186,21 +196,15 @@ public class ReportUtils {
         trip.setStartLat(startTrip.getLatitude());
         trip.setStartLon(startTrip.getLongitude());
         trip.setStartTime(startTrip.getFixTime());
-        String startAddress = startTrip.getAddress();
-        if (startAddress == null && geocoder != null && config.getBoolean(Keys.GEOCODER_ON_REQUEST)) {
-            startAddress = geocoder.getAddress(startTrip.getLatitude(), startTrip.getLongitude(), null);
-        }
-        trip.setStartAddress(startAddress);
+        trip.setStartAddress(resolveAddress(
+                startTrip.getLatitude(), startTrip.getLongitude(), startTrip.getAddress()));
 
         trip.setEndPositionId(endTrip.getId());
         trip.setEndLat(endTrip.getLatitude());
         trip.setEndLon(endTrip.getLongitude());
         trip.setEndTime(endTrip.getFixTime());
-        String endAddress = endTrip.getAddress();
-        if (endAddress == null && geocoder != null && config.getBoolean(Keys.GEOCODER_ON_REQUEST)) {
-            endAddress = geocoder.getAddress(endTrip.getLatitude(), endTrip.getLongitude(), null);
-        }
-        trip.setEndAddress(endAddress);
+        trip.setEndAddress(resolveAddress(
+                endTrip.getLatitude(), endTrip.getLongitude(), endTrip.getAddress()));
 
         trip.setDistance(PositionUtil.calculateDistance(startTrip, endTrip, !ignoreOdometer));
         trip.setDuration(tripDuration);
@@ -239,11 +243,8 @@ public class ReportUtils {
         stop.setLatitude(startStop.getLatitude());
         stop.setLongitude(startStop.getLongitude());
         stop.setStartTime(startStop.getFixTime());
-        String address = startStop.getAddress();
-        if (address == null && geocoder != null && config.getBoolean(Keys.GEOCODER_ON_REQUEST)) {
-            address = geocoder.getAddress(stop.getLatitude(), stop.getLongitude(), null);
-        }
-        stop.setAddress(address);
+        stop.setAddress(resolveAddress(
+                startStop.getLatitude(), startStop.getLongitude(), startStop.getAddress()));
 
         stop.setEndTime(endStop.getFixTime());
 
