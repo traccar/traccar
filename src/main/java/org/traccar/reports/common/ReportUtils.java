@@ -77,6 +77,8 @@ public class ReportUtils {
     private final VelocityEngine velocityEngine;
     private final Geocoder geocoder;
     private final ReportAddressResolver addressResolver;
+    private final TripReportItemCalculator tripReportItemCalculator;
+    private final StopReportItemCalculator stopReportItemCalculator;
 
     @Inject
     public ReportUtils(
@@ -88,6 +90,8 @@ public class ReportUtils {
         this.velocityEngine = velocityEngine;
         this.geocoder = geocoder;
         this.addressResolver = new ReportAddressResolver(config, geocoder);
+        this.tripReportItemCalculator = new TripReportItemCalculator(this);
+        this.stopReportItemCalculator = new StopReportItemCalculator(this);
     }
 
     public <T extends BaseModel> T getObject(long userId, Class<T> clazz, long objectId) {
@@ -180,7 +184,7 @@ public class ReportUtils {
         transformer.write();
     }
 
-    private TripReportItem calculateTrip(
+    TripReportItem calculateTrip(
             Device device, Position startTrip, Position endTrip, double maxSpeed,
             boolean ignoreOdometer) throws StorageException {
 
@@ -229,7 +233,7 @@ public class ReportUtils {
         return trip;
     }
 
-    private StopReportItem calculateStop(
+    StopReportItem calculateStop(
             Device device, Position startStop, Position endStop, boolean ignoreOdometer) {
 
         StopReportItem stop = new StopReportItem();
@@ -273,11 +277,16 @@ public class ReportUtils {
     private <T extends BaseReportItem> T calculateTripOrStop(
             Device device, Position startPosition, Position endPosition, double maxSpeed,
             boolean ignoreOdometer, Class<T> reportClass) throws StorageException {
+        TripStopReportCalculator<T> calculator = getCalculator(reportClass);
+        return calculator.calculate(device, startPosition, endPosition, maxSpeed, ignoreOdometer);
+    }
 
+    @SuppressWarnings("unchecked")
+    private <T extends BaseReportItem> TripStopReportCalculator<T> getCalculator(Class<T> reportClass) {
         if (reportClass.equals(TripReportItem.class)) {
-            return (T) calculateTrip(device, startPosition, endPosition, maxSpeed, ignoreOdometer);
+            return (TripStopReportCalculator<T>) tripReportItemCalculator;
         } else {
-            return (T) calculateStop(device, startPosition, endPosition, ignoreOdometer);
+            return (TripStopReportCalculator<T>) stopReportItemCalculator;
         }
     }
 
