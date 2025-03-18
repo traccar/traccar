@@ -80,6 +80,7 @@ import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
+import org.traccar.helper.LogAction;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
@@ -187,10 +188,10 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static OpenIdProvider provideOpenIDProvider(
-        Config config, LoginService loginService, ObjectMapper objectMapper
-        ) throws InterruptedException, IOException, URISyntaxException {
+            Config config, LoginService loginService, LogAction actionLogger,
+            ObjectMapper objectMapper) throws InterruptedException, IOException, URISyntaxException {
         if (config.hasKey(Keys.OPENID_CLIENT_ID)) {
-            return new OpenIdProvider(config, loginService, HttpClient.newHttpClient(), objectMapper);
+            return new OpenIdProvider(config, loginService, actionLogger, HttpClient.newHttpClient(), objectMapper);
         }
         return null;
     }
