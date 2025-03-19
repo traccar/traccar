@@ -156,7 +156,8 @@ public final class ReportUtils {
             return distance;
         }
         if (isValid(firstPosition, lastPosition, distance)
-                && firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)) {
+                && firstPosition.getAttributes().containsKey(Position.KEY_ODOMETER)
+                && positions.stream().noneMatch(p -> p.getAttributes().containsKey("putAccumulators"))) {
             return distance;
         }
 
