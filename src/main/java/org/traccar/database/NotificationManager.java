@@ -52,6 +52,8 @@ public class NotificationManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
 
+    private static final String ATTRIBUTE_DEVICE_ALLOW_FORWARDING = "enableEventForwarding";
+
     private final Storage storage;
     private final CacheManager cacheManager;
     private final EventForwarder eventForwarder;
@@ -61,6 +63,8 @@ public class NotificationManager {
     private final boolean geocodeOnRequest;
     private final long timeThreshold;
     private final Set<Long> blockedUsers = new HashSet<>();
+
+    private final boolean enablePerDevice;
 
     @Inject
     public NotificationManager(
@@ -79,6 +83,8 @@ public class NotificationManager {
                 blockedUsers.add(Long.parseLong(userIdString));
             }
         }
+
+        enablePerDevice = config.getBoolean(Keys.EVENT_FORWARD_ENABLE_PER_DEVICE);
     }
 
     private void updateEvent(Event event, Position position) {
@@ -148,21 +154,28 @@ public class NotificationManager {
 
     private void forwardEvent(Event event, Position position) {
         if (eventForwarder != null) {
-            EventData eventData = new EventData();
-            eventData.setEvent(event);
-            eventData.setPosition(position);
-            eventData.setDevice(cacheManager.getObject(Device.class, event.getDeviceId()));
-            if (event.getGeofenceId() != 0) {
-                eventData.setGeofence(cacheManager.getObject(Geofence.class, event.getGeofenceId()));
-            }
-            if (event.getMaintenanceId() != 0) {
-                eventData.setMaintenance(cacheManager.getObject(Maintenance.class, event.getMaintenanceId()));
-            }
-            eventForwarder.forward(eventData, (success, throwable) -> {
-                if (!success) {
-                    LOGGER.warn("Event forwarding failed", throwable);
+            Device device = cacheManager.getObject(Device.class, event.getDeviceId());
+
+            boolean allowForwarding = (boolean) device.getAttributes().get(ATTRIBUTE_DEVICE_ALLOW_FORWARDING);
+            if (!enablePerDevice || (enablePerDevice && allowForwarding)) {
+                EventData eventData = new EventData();
+                eventData.setEvent(event);
+                eventData.setPosition(position);
+                eventData.setDevice(cacheManager.getObject(Device.class, event.getDeviceId()));
+                if (event.getGeofenceId() != 0) {
+                    eventData.setGeofence(cacheManager.getObject(Geofence.class, event.getGeofenceId()));
                 }
-            });
+                if (event.getMaintenanceId() != 0) {
+                    eventData.setMaintenance(cacheManager.getObject(Maintenance.class, event.getMaintenanceId()));
+                }
+                eventForwarder.forward(eventData, (success, throwable) -> {
+                    if (!success) {
+                        LOGGER.warn("Event forwarding failed", throwable);
+                    }
+                });
+            } else {
+                LOGGER.debug("Forwarding events not enabled for {}", event.getDeviceId());
+            }
         }
     }
 
