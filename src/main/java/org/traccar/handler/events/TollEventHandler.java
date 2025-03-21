@@ -30,18 +30,24 @@ public class TollEventHandler extends BaseEventHandler {
     private final int minimalDuration;
 
     @Inject
-    public TollEventHandler(Config config, CacheManager cacheManager, Storage storage, LocalCache localCache) {
+    public TollEventHandler(Config config, CacheManager cacheManager, Storage storage) {
         this.cacheManager = cacheManager;
         this.storage = storage;
         minimalDuration = config.getInteger(Keys.EVENT_TOLL_ROUTE_MINIMAL_DURATION);
-        this.localCache = localCache;
+        //TODO: fix later
+        this.localCache = new LocalCache(key -> {
+            TollRouteState state = new TollRouteState();
+            Device device = cacheManager.getObject(Device.class, Long.parseLong(key));
+            state.fromDevice(device);
+            return state;
+        });
     }
 
     @Override
     public void onPosition(Position position, Callback callback) {
         long deviceId = position.getDeviceId();
 
-        String cacheKey = String.format("tollID_%s", deviceId);
+        String cacheKey = String.format("%s", deviceId);
 
         Device device = cacheManager.getObject(Device.class, deviceId);
         if (device == null) {
@@ -56,18 +62,20 @@ public class TollEventHandler extends BaseEventHandler {
 
         TollRouteState tollState = (TollRouteState) localCache.get(cacheKey);
 
+        LOGGER.info("CACHE INFO" + localCache.logCacheStats());
+
         if (tollState == null) {
             tollState = new TollRouteState();
         }
 
-        Boolean wasOnToll = tollState.isOnToll(minimalDuration);
         tollState.addOnToll(positionIsToll, minimalDuration);
         tollState.fromDevice(device);
 
         TollRouteProcessor.updateState(tollState, position, positionTollRef, positionTollName,
                 minimalDuration);
 
-        if (wasOnToll == null || wasOnToll || positionIsToll) {
+        Boolean tollConfidence = tollState.isOnToll(minimalDuration);
+        if (tollConfidence == null || tollConfidence) {
             localCache.put(cacheKey, tollState);
         }
 

@@ -18,6 +18,7 @@ public class TollRouteState {
         this.tollStartDistance = device.getTollStartDistance();
         this.tollExitDistance = device.getDouble(Position.KEY_TOLL_EXIT);
         this.tollrouteTime = device.getTollrouteTime();
+        this.id = device.getId();
     }
 
     public void toDevice(Device device) {
@@ -43,6 +44,11 @@ public class TollRouteState {
 
     }
 
+    private long id;
+    public long getid() {
+        return id;
+    }
+
     private boolean changed;
 
     public boolean isChanged() {
@@ -63,8 +69,11 @@ public class TollRouteState {
     }
 
     public Boolean isOnToll(int duration) {
-        Set<Boolean> tollWindowSet = new HashSet<Boolean>(this.tollWindow);
-        if (tollWindowSet.size() == 1) {
+        Set<Boolean> tollWindowSet = null;
+        if (this.tollWindow != null) {
+            tollWindowSet = new HashSet<>(this.tollWindow);
+        }
+        if (tollWindowSet != null && tollWindowSet.size() == 1) {
             if (this.tollWindow.size() == (int) duration) {
                 return tollWindowSet.iterator().next();
             } else if (this.tollWindow.size() < duration && tollWindowSet.contains(false)) {

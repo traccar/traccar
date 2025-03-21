@@ -19,30 +19,31 @@ public final class TollRouteProcessor {
         state.setEvent(null);
 
         double currentTotalDist =  position.getDouble(Position.KEY_TOTAL_DISTANCE);
-        double oldTollDist = state.getTollStartDistance();
+        double startTollDist = state.getTollStartDistance();
         Boolean isOnToll = state.isOnToll(minimalDuration);
         if (isOnToll != null) {
-            if (isOnToll && oldTollDist == 0) {
-
-                stateStartToll(state, currentTotalDist, position.getFixTime(), tollRef, tollName);
-                checkEvent(state, position, 0, currentTotalDist);
-            } else if (isOnToll && oldTollDist > 0) {
-                if (state.getTollRef() == null && tollRef != null) {
-                    state.setTollRef(tollRef);
+            if (isOnToll) {
+                if (startTollDist == 0) {   //entered toll
+                    stateStartToll(state, currentTotalDist, position.getFixTime(), tollRef, tollName);
+                    checkEvent(state, position, 0, currentTotalDist);
+                } else if (startTollDist > 0) { // set names for tolls
+                    if (state.getTollRef() == null && tollRef != null) {
+                        state.setTollRef(tollRef);
+                    }
+                    if (state.getTollName() == null && tollName != null) {
+                        state.setTollName(tollName);
+                    }
                 }
-                if (state.getTollName() == null && tollName != null) {
-                    state.setTollName(tollName);
-                }
-            } else if (!isOnToll && oldTollDist > 0) {
-                double currentTollDist = currentTotalDist - oldTollDist;
-                if (state.getTollExitDistance() == -1) {
+            } else if (startTollDist > 0) { // exited toll
+                double currentTollDist = currentTotalDist - startTollDist;
+                if (state.getTollExitDistance() == -1) { // good exit (enter notif was sent)
                     state.setTollExitDistance(currentTotalDist);
                     state.setTollrouteTime(position.getFixTime());
 
                     checkEvent(state, position, currentTollDist, 0);
                     state.setTollStartDistance(0);
                     state.setTollrouteTime(null);
-                } else if (state.getTollExitDistance() == 0) {
+                } else if (state.getTollExitDistance() == 0) { // bad exit (no enter event)
                     state.setTollStartDistance(0);
                     state.setTollrouteTime(null);
                 }
