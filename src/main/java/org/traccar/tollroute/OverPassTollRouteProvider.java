@@ -35,8 +35,14 @@ public class OverPassTollRouteProvider implements TollRouteProvider {
                 if (!elements.isEmpty()) {
                     JsonObject tags = elements.getJsonObject(0).getJsonObject("tags");
                     Boolean isToll = determineToll(tags.getString("toll", "no"));
-                    String ref = tags.getString("destination:ref", null);
-                    String name = tags.getString("destination:name", null);
+                    String ref = tags.getString("ref", null);
+                    String name = tags.getString("name", null);
+                    if (ref == null) {
+                        ref = tags.getString("destination:ref", null);
+                    }
+                    if (name == null) {
+                        name = tags.getString("destination:name", null);
+                    }
                     if (tags.containsKey("toll")) {
                         callback.onSuccess(new TollData(isToll, ref, name));
                     } else {
