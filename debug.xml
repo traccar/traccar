@@ -45,7 +45,7 @@
     <entry key='tollRoute.type'>overpass</entry>
     <entry key='tollRoute.url'>http://roadinfo.iotrides.com/api/interpreter</entry>
     <entry key='tollRoute.accuracy'>10</entry>
-    <entry key='event.tollRoute.minimalDuration'>6</entry>
+    <entry key='event.tollRoute.minimalDuration'>4</entry>
 
 
 <!--    <entry key='mail.debug'>true</entry>-->

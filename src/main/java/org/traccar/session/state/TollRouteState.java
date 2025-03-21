@@ -52,12 +52,12 @@ public class TollRouteState {
 
     private List<Boolean> tollWindow;
 
-    public void addOnToll(Boolean isToll) {
+    public void addOnToll(Boolean isToll, int duration) {
         if (this.tollWindow == null) {
             this.tollWindow = new ArrayList<Boolean>();
         }
         this.tollWindow.add(isToll);
-        if (this.tollWindow.size() > 6) {
+        if (this.tollWindow.size() > duration) {
             this.tollWindow.remove(0);
         }
     }
@@ -67,7 +67,7 @@ public class TollRouteState {
         if (tollWindowSet.size() == 1) {
             if (this.tollWindow.size() == (int) duration) {
                 return tollWindowSet.iterator().next();
-            } else if (this.tollWindow.size() < 6 && tollWindowSet.contains(false)) {
+            } else if (this.tollWindow.size() < duration && tollWindowSet.contains(false)) {
                 return false;
             }
         }

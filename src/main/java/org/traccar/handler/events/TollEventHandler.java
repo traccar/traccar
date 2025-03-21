@@ -55,16 +55,19 @@ public class TollEventHandler extends BaseEventHandler {
         String positionTollName = position.getString(Position.KEY_TOLL_NAME);
 
         TollRouteState tollState = (TollRouteState) localCache.get(cacheKey);
+
         if (tollState == null) {
             tollState = new TollRouteState();
         }
-        tollState.addOnToll(positionIsToll);
+
+        Boolean wasOnToll = tollState.isOnToll(minimalDuration);
+        tollState.addOnToll(positionIsToll, minimalDuration);
         tollState.fromDevice(device);
 
         TollRouteProcessor.updateState(tollState, position, positionTollRef, positionTollName,
                 minimalDuration);
 
-        if (tollState.isOnToll(minimalDuration) == null || tollState.isOnToll(minimalDuration)) {
+        if (wasOnToll == null || wasOnToll || positionIsToll) {
             localCache.put(cacheKey, tollState);
         }
 
