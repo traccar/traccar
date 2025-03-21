@@ -449,7 +449,15 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
         } else {
 
             if (buf.readableBytes() >= 2) {
-                position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
+
+                if (header == 0x2525 && (type == MSG_GPS_2 || type == MSG_ALARM_2)) {
+                    position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 4) * 0.01);
+                    position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
+                } else {
+                    if (header != 0x2323) {
+                        position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
+                    }
+                }
             }
             if (buf.readableBytes() >= 19) {
                 position.set(Position.KEY_OBD_SPEED, BcdUtil.readInteger(buf, 4) * 0.01);
