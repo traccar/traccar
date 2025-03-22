@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BufferUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -429,6 +430,54 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodePeripherals(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
+
+        String deviceId = buf.getCharSequence(1, 11, StandardCharsets.US_ASCII).toString();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        int startIndex = 0;
+        for (int i = 0; i < 6; i++) {
+            startIndex = buf.indexOf(startIndex + 1, buf.writerIndex(), (byte) ',');
+        }
+        buf.readerIndex(startIndex + 1);
+
+        decodeBinaryLocation(buf, position);
+
+        buf.skipBytes(6); // sensor time
+        buf.skipBytes(5); // sensor id
+        buf.readUnsignedByte(); // sensor index
+        position.set("sensorBattery", buf.readUnsignedShort() / 100.0);
+        position.set("sensorBatteryLevel", buf.readUnsignedByte());
+        position.set("sensorRssi", -buf.readUnsignedByte());
+
+        int type = buf.readUnsignedByte();
+
+        if (type == 1) {
+
+            int temperature = buf.readUnsignedShort();
+            if (temperature != 0xffff) {
+                int value = temperature & 0xfff;
+                if ((temperature & 0xf000) > 0) {
+                    value = -value;
+                }
+                position.set(Position.PREFIX_TEMP + 1, value / 10.0);
+            }
+
+            position.set(Position.KEY_HUMIDITY, buf.readUnsignedByte());
+            buf.readUnsignedShort(); // data count
+            buf.readUnsignedByte(); // status
+
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -439,6 +488,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         if (first == '$') {
             return decodeBinary(buf, channel, remoteAddress);
         } else if (first == '(') {
+            if (BufferUtil.indexOf("WLNET,5,", buf) > 0) {
+                return decodePeripherals(buf, channel, remoteAddress);
+            }
             String sentence = buf.toString(StandardCharsets.US_ASCII);
             if (sentence.contains("W01")) {
                 return decodeW01(sentence, channel, remoteAddress);
