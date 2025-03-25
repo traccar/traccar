@@ -504,7 +504,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if ((selector & 0x0010) != 0) {
-            position.set("engineTemp", buf.readShort());
+            position.set(Position.KEY_ENGINE_TEMP, buf.readShort());
             position.set("engineTempMax", buf.readShort());
             position.set("engineTempMin", buf.readShort());
         }
