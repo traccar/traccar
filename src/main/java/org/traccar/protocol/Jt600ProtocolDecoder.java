@@ -432,7 +432,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodePeripherals(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
 
-        String deviceId = buf.getCharSequence(1, 11, StandardCharsets.US_ASCII).toString();
+        String deviceId = buf.getCharSequence(1, 10, StandardCharsets.US_ASCII).toString();
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
         if (deviceSession == null) {
             return null;
