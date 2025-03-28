@@ -103,14 +103,15 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        String id;
+        String[] ids;
         if (modelM588) {
-            id = imei;
+            ids = new String[] {imei};
             buf.skipBytes(8);
         } else {
-            id = decodeId(
+            String id = decodeId(
                     buf.readUnsignedByte(), buf.readUnsignedByte(),
                     buf.readUnsignedByte(), buf.readUnsignedByte());
+            ids = new String[] {"1" + id, id};
         }
 
         sendResponse(channel, remoteAddress, type, buf.getByte(buf.writerIndex() - 2));
@@ -120,7 +121,7 @@ public class GatorProtocolDecoder extends BaseProtocolDecoder {
 
             Position position = new Position(getProtocolName());
 
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, "1" + id, id);
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ids);
             if (deviceSession == null) {
                 return null;
             }
