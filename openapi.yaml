@@ -600,6 +600,24 @@ paths:
         '400':
           description: Bad Request
           content: {}
+  /positions/{id}:
+    delete:
+      summary: Delete a Position
+      tags:
+        - Positions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '404':
+          description: Not Found
+          content: {}
   /server:
     get:
       summary: Fetch Server information
