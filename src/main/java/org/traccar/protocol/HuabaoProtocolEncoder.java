@@ -53,7 +53,8 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                     if (Set.of("AL300", "GL100", "VL300").contains(getDeviceModel(command.getDeviceId()))) {
                         data.writeByte(1); // number of parameters
                         data.writeInt(0xF030); // AT command transparent transmission
-                        data.writeByte(command.getString(Command.KEY_DATA).length());
+                        int length = command.getString(Command.KEY_DATA).length();
+                        data.writeByte(length);
                         data.writeCharSequence(command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII);
                         return HuabaoProtocolDecoder.formatMessage(
                                 0x7e, HuabaoProtocolDecoder.MSG_CONFIG_DEVICE_PARAMS, id, false, data);
