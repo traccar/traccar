@@ -51,25 +51,19 @@ public class TeltonikaProtocolEncoder extends BaseProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-        switch (command.getType()) {
-            case Command.TYPE_ENGINE_STOP -> {
-                return encodeContent("setdigout 1\r\n".getBytes(StandardCharsets.US_ASCII));
-            }
-            case Command.TYPE_ENGINE_RESUME -> {
-                return encodeContent("setdigout 0\r\n".getBytes(StandardCharsets.US_ASCII));
-            }
+        return switch (command.getType()) {
+            case Command.TYPE_ENGINE_STOP -> encodeContent("setdigout 1\r\n".getBytes(StandardCharsets.US_ASCII));
+            case Command.TYPE_ENGINE_RESUME -> encodeContent("setdigout 0\r\n".getBytes(StandardCharsets.US_ASCII));
             case Command.TYPE_CUSTOM -> {
                 String data = command.getString(Command.KEY_DATA);
                 if (data.matches("(\\p{XDigit}{2})+")) {
-                    return encodeContent(DataConverter.parseHex(data));
+                    yield encodeContent(DataConverter.parseHex(data));
                 } else {
-                    return encodeContent((data + "\r\n").getBytes(StandardCharsets.US_ASCII));
+                    yield encodeContent((data + "\r\n").getBytes(StandardCharsets.US_ASCII));
                 }
             }
-            default -> {
-                return null;
-            }
-        }
+            default -> null;
+        };
     }
 
 }
