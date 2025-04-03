@@ -800,7 +800,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     int fieldMask = buf.readUnsignedByte();
                     if (BitUtil.check(fieldMask, 0)) {
-                        position.set("light", buf.readUnsignedShort());
+                        position.set("lightSensor", buf.readUnsignedShort());
                     }
                     if (BitUtil.check(fieldMask, 1)) {
                         position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
