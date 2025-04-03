@@ -57,7 +57,7 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                         data.writeByte(length);
                         data.writeCharSequence(command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII);
                         return HuabaoProtocolDecoder.formatMessage(
-                                0x7e, HuabaoProtocolDecoder.MSG_CONFIG_DEVICE_PARAMS, id, false, data);
+                                0x7e, HuabaoProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                     } else if ("BSJ".equals(getDeviceModel(command.getDeviceId()))) {
                         data.writeByte(1); // flag
                         var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;

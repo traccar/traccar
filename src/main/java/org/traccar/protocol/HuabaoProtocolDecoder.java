@@ -74,7 +74,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PARAMETER_SETTING = 0x0310;
     public static final int MSG_SEND_TEXT_MESSAGE = 0x8300;
     public static final int MSG_REPORT_TEXT_MESSAGE = 0x6006;
-    public static final int MSG_CONFIG_DEVICE_PARAMS = 0x8103;
+    public static final int MSG_CONFIGURATION_PARAMETERS = 0x8103;
 
     public static final int RESULT_SUCCESS = 0;
 
