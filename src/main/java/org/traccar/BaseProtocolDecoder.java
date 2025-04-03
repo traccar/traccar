@@ -142,7 +142,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
                 message.append(" (").append(((InetSocketAddress) remoteAddress).getHostString()).append(")");
             }
             if (deviceId == 0) {
-                LOGGER.error("findDeviceId {} {}", deviceId, message);
+                LOGGER.error("{} {}", protocol, message);
             } else {
                 LOGGER.warn("findDeviceId {} {}", deviceId, message);
             }
