@@ -165,6 +165,9 @@ public class OverspeedEventHandler extends BaseEventHandler {
     }
 
     private long getMinimalDuration(long deviceId) {
+        if (deviceId == 0) {
+            return minimalDuration;
+        }
         return deviceManager.lookupAttributeLong(deviceId, ATTRIBUTE_MINIMAL_DURATION, minimalDuration / 1000,
                 false, false) * 1000;
     }
