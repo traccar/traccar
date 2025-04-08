@@ -35,6 +35,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
 
     public static final String ATTRIBUTE_SPEED = "speed";
     public static final String ATTRIBUTE_SPEED_LIMIT = "speedLimit";
+    public static final String ATTRIBUTE_MINIMAL_DURATION = "overspeedMinimalDuration";
 
     private final DeviceManager deviceManager;
     private final GeofenceManager geofenceManager;
@@ -70,6 +71,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
             long currentTime = System.currentTimeMillis();
             Position overspeedPosition = deviceState.getOverspeedPosition();
             long overspeedTime = overspeedPosition.getFixTime().getTime();
+            long minimalDuration = getMinimalDuration(overspeedPosition.getDeviceId());
             if (overspeedTime + minimalDuration <= currentTime) {
                 result = newEvent(deviceState, speedLimit);
             }
@@ -101,6 +103,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         Position overspeedPosition = deviceState.getOverspeedPosition();
         if (overspeedPosition != null) {
             long overspeedTime = overspeedPosition.getFixTime().getTime();
+            long minimalDuration = getMinimalDuration(overspeedPosition.getDeviceId());
             if (newOverspeed && overspeedTime + minimalDuration <= currentTime) {
                 result = newEvent(deviceState, speedLimit);
             }
@@ -159,6 +162,11 @@ public class OverspeedEventHandler extends BaseEventHandler {
 
         deviceManager.setDeviceState(deviceId, deviceState);
         return result;
+    }
+
+    private long getMinimalDuration(long deviceId) {
+        return deviceManager.lookupAttributeLong(deviceId, ATTRIBUTE_MINIMAL_DURATION, minimalDuration / 1000,
+                false, false) * 1000;
     }
 
 }
