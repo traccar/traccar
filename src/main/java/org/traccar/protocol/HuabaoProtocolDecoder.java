@@ -491,6 +491,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_FUEL_LEVEL, fuel / 10.0);
                     }
                     break;
+                case 0x06:
+                    position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                    break;
                 case 0x25:
                     position.set(Position.KEY_INPUT, buf.readUnsignedInt());
                     break;
