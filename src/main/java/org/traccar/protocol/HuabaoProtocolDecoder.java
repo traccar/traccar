@@ -1013,6 +1013,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         int type = buf.readUnsignedByte();
 
         if (type == 0x40) {
+
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
@@ -1022,9 +1023,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 String[] values = data.split("\\|");
                 if (values.length > 4) {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, values[4]);
-                    return position;
                 }
             }
+
+            return position.getAttributes().isEmpty() ? null : position;
 
         } else if (type == 0x41) {
 
