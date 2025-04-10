@@ -1012,7 +1012,22 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         int type = buf.readUnsignedByte();
 
-        if (type == 0x41) {
+        if (type == 0x40) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+            String data = buf.readCharSequence(buf.readableBytes(), StandardCharsets.US_ASCII).toString().trim();
+            if (data.startsWith("GTSL")) {
+                String[] values = data.split("\\|");
+                if (values.length > 4) {
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, values[4]);
+                }
+            }
+
+            return position;
+
+        } else if (type == 0x41) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -1224,24 +1239,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type == 0x40) {
-            Position position = new Position(getProtocolName());
-            position.setDeviceId(deviceSession.getDeviceId());
-
-            getLastLocation(position, null);
-            String data = buf.readCharSequence(buf.readableBytes(), StandardCharsets.US_ASCII).toString().trim();
-            if (data.startsWith("GTSL")) {
-                String[] values = data.split("\\|");
-                if (values.length > 4) {
-                    position.set(Position.KEY_DRIVER_UNIQUE_ID, values[4]);
-                }
-            }
-
-            return position;
-        } else {
-            return null;
         }
 
+        return null;
     }
 
 }
