@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1570,106 +1570,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private static final Pattern PATTERN = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF):GT...,")
-            .expression("(?:.{6}|.{10})?,")      // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .expression("[^,]*,")                // device name
-            .number("d*,")
-            .number("(x{1,2}),")                 // report type
-            .number("d{1,2},")                   // count
-            .number("d*,").optional()            // reserved
-            .expression(PATTERN_LOCATION.pattern())
-            .groupBegin()
-            .number("(?:(d{1,7}.d)|0)?,").optional() // odometer
-            .number("(d{1,3})?,")                // battery
-            .or()
-            .number("(d{1,7}.d)?,")              // odometer
-            .groupBegin()
-            .number("(dddd)(dd)(dd)")            // event date (yyyymmdd)
-            .number("(dd)(dd)(dd),")             // event time (hhmmss)
-            .groupEnd("?")
-            .groupEnd()
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd),")             // time (hhmmss)
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
-    private Object decodeOther(Channel channel, SocketAddress remoteAddress, String sentence, String type) {
-        Parser parser = new Parser(PATTERN, sentence);
-        Position position = initPosition(parser, channel, remoteAddress);
-        if (position == null) {
-            return null;
-        }
-
-        int reportType = parser.nextHexInt();
-        if (type.equals("NMR")) {
-            position.set(Position.KEY_MOTION, reportType == 1);
-        } else if (type.equals("SOS")) {
-            position.addAlarm(Position.ALARM_SOS);
-        } else if (type.equals("DIS")) {
-            position.set(Position.PREFIX_IN + reportType / 0x10, reportType % 0x10 == 1);
-        } else if (type.equals("IGL")) {
-            position.set(Position.KEY_IGNITION, reportType % 0x10 == 1);
-        } else if (type.equals("HBM")) {
-            switch (reportType % 0x10) {
-                case 0, 3 -> position.addAlarm(Position.ALARM_BRAKING);
-                case 1, 4 -> position.addAlarm(Position.ALARM_ACCELERATION);
-                case 2 -> position.addAlarm(Position.ALARM_CORNERING);
-            }
-        }
-
-        decodeLocation(position, parser);
-
-        if (parser.hasNext()) {
-            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
-        }
-        position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
-
-        if (parser.hasNext()) {
-            position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
-        }
-
-        parser.skip(6); // event time
-
-        decodeDeviceTime(position, parser);
-
-        return position;
-    }
-
-    private static final Pattern PATTERN_BASIC = new PatternBuilder()
-            .text("+").expression("(?:RESP|BUFF)").text(":")
-            .expression("GT...,")
-            .expression("[^,]+,").optional()     // protocol version
-            .number("(d{15}|x{14}),")            // imei
-            .any()
-            .text(",")
-            .number("(d{1,2}),")                 // hdop
-            .groupBegin()
-            .number("(d{1,3}.d),")               // speed
-            .number("(d{1,3}),")                 // course
-            .number("(-?d{1,5}.d),")             // altitude
-            .number("(-?d{1,3}.d{6}),")          // longitude
-            .number("(-?d{1,2}.d{6}),")          // latitude
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)")              // time (hhmmss)
-            .text(",")
-            .or()
-            .text(",,,,,,")
-            .groupEnd()
-            .number("(d+),")                     // mcc
-            .number("(d+),")                     // mnc
-            .number("(x+),")                     // lac
-            .number("(x+),").optional(4)         // cell
-            .any()
-            .number("(dddd)(dd)(dd)")            // date (yyyymmdd)
-            .number("(dd)(dd)(dd)").optional(2)  // time (hhmmss)
-            .text(",")
-            .number("(xxxx)")                    // count number
-            .text("$").optional()
-            .compile();
-
     private Object decodeBasic(
             Channel channel, SocketAddress remoteAddress, String[] v, String type) throws ParseException {
 
@@ -1683,6 +1583,23 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        if (v[index + 2].matches("\\p{XDigit}{1,2}")) {
+            int reportType = Integer.parseInt(v[index + 2], 16);
+            switch (type) {
+                case "NMR" -> position.set(Position.KEY_MOTION, reportType == 1);
+                case "SOS" -> position.addAlarm(Position.ALARM_SOS);
+                case "DIS" -> position.set(Position.PREFIX_IN + reportType / 0x10, reportType % 0x10 == 1);
+                case "IGL" -> position.set(Position.KEY_IGNITION, reportType % 0x10 == 1);
+                case "HBM" -> {
+                    switch (reportType % 0x10) {
+                        case 0, 3 -> position.addAlarm(Position.ALARM_BRAKING);
+                        case 1, 4 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                        case 2 -> position.addAlarm(Position.ALARM_CORNERING);
+                    }
+                }
+            }
+        }
 
         while (index + 2 < v.length) {
             if (v[index].matches("-?\\d{1,3}\\.\\d{6}") && v[index + 1].matches("-?\\d{1,3}\\.\\d{6}")) {
@@ -1723,6 +1640,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 position.setTime(dateFormat.parse(v[index]));
             } else {
                 position.setDeviceTime(dateFormat.parse(v[index]));
+            }
+
+            if (v[index - 1].matches("\\d{1,3}")) {
+                position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index - 1]));
             }
         }
 
@@ -1780,7 +1701,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "BID" -> decodeBid(channel, remoteAddress, sentence);
                 case "LSA" -> decodeLsa(channel, remoteAddress, sentence);
                 case "LBS" -> decodeLbs(channel, remoteAddress, values);
-                default -> decodeOther(channel, remoteAddress, sentence, type);
+                default -> null;
             };
 
             if (result == null) {
