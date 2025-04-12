@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+        logicalFilePath="changelog-6.6">
+
+    <!-- Add fk_organisation_id column to tc_users -->
+    <changeSet author="author" id="changelog-6.6.4">
+
+        <addColumn tableName="tc_users">
+            <column name="fk_organisation_id" type="INT"/>
+        </addColumn>
+
+        <!-- Add foreign key constraint for tc_users -->
+        <addForeignKeyConstraint
+                baseTableName="tc_users"
+                baseColumnNames="fk_organisation_id"
+                referencedTableName="tc_organisation"
+                referencedColumnNames="id"
+                constraintName="fk_tc_users_organisation"/>
+
+    </changeSet>
+
+    <!-- Add fk_organisation_id column to tc_devices -->
+    <changeSet author="author" id="changelog-6.6.4-add-fk-to-devices">
+
+        <addColumn tableName="tc_devices">
+            <column name="fk_organisation_id" type="INT"/>
+        </addColumn>
+
+        <!-- Add foreign key constraint for tc_devices -->
+        <addForeignKeyConstraint
+                baseTableName="tc_devices"
+                baseColumnNames="fk_organisation_id"
+                referencedTableName="tc_organisation"
+                referencedColumnNames="id"
+                constraintName="fk_tc_devices_organisation"/>
+
+    </changeSet>
+
+</databaseChangeLog>
