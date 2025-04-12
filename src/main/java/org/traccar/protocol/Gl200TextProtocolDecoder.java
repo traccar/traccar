@@ -1588,7 +1588,6 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             int reportType = Integer.parseInt(v[index + 2], 16);
             switch (type) {
                 case "NMR" -> position.set(Position.KEY_MOTION, reportType == 1);
-                case "SOS" -> position.addAlarm(Position.ALARM_SOS);
                 case "DIS" -> position.set(Position.PREFIX_IN + reportType / 0x10, reportType % 0x10 == 1);
                 case "IGL" -> position.set(Position.KEY_IGNITION, reportType % 0x10 == 1);
                 case "HBM" -> {
@@ -1648,6 +1647,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         switch (type) {
+            case "SOS" -> position.addAlarm(Position.ALARM_SOS);
+            case "SPD" -> position.addAlarm(Position.ALARM_OVERSPEED);
             case "TOW" -> position.addAlarm(Position.ALARM_TOW);
             case "IDL" -> position.addAlarm(Position.ALARM_IDLE);
             case "PNA" -> position.addAlarm(Position.ALARM_POWER_ON);
