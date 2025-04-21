@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,10 +23,13 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
 import org.traccar.model.QueuedCommand;
+import org.traccar.push.PushCommandManager;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
+import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.SmsManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -52,33 +55,39 @@ public class CommandsManager implements BroadcastInterface {
     private final ConnectionManager connectionManager;
     private final BroadcastService broadcastService;
     private final NotificationManager notificationManager;
+    private final CacheManager cacheManager;
+    private final PushCommandManager pushCommandManager;
 
     @Inject
     public CommandsManager(
             Storage storage, ServerManager serverManager, @Nullable SmsManager smsManager,
             ConnectionManager connectionManager, BroadcastService broadcastService,
-            NotificationManager notificationManager) {
+            NotificationManager notificationManager, CacheManager cacheManager,
+            @Nullable PushCommandManager pushCommandManager) {
         this.storage = storage;
         this.serverManager = serverManager;
         this.smsManager = smsManager;
         this.connectionManager = connectionManager;
         this.broadcastService = broadcastService;
         this.notificationManager = notificationManager;
+        this.cacheManager = cacheManager;
+        this.pushCommandManager = pushCommandManager;
         broadcastService.registerListener(this);
     }
 
     public QueuedCommand sendCommand(Command command) throws Exception {
         long deviceId = command.getDeviceId();
+        Device device = storage.getObject(Device.class, new Request(
+                new Columns.Include("positionId", "phone", "attributes"), new Condition.Equals("id", deviceId)));
+        Position position = storage.getObject(Position.class, new Request(
+                new Columns.All(), new Condition.Equals("id", device.getPositionId())));
+        BaseProtocol protocol = position != null ? serverManager.getProtocol(position.getProtocol()) : null;
+
         if (command.getTextChannel()) {
             if (smsManager == null) {
                 throw new RuntimeException("SMS not configured");
             }
-            Device device = storage.getObject(Device.class, new Request(
-                    new Columns.Include("positionId", "phone"), new Condition.Equals("id", deviceId)));
-            Position position = storage.getObject(Position.class, new Request(
-                    new Columns.All(), new Condition.Equals("id", device.getPositionId())));
             if (position != null) {
-                BaseProtocol protocol = serverManager.getProtocol(position.getProtocol());
                 protocol.sendTextCommand(device.getPhone(), command);
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
                 smsManager.sendMessage(device.getPhone(), command.getString(Command.KEY_DATA), true);
@@ -86,16 +95,21 @@ public class CommandsManager implements BroadcastInterface {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }
         } else {
-            DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
-            if (deviceSession != null && deviceSession.supportsLiveCommands()) {
-                deviceSession.sendCommand(command);
-            } else if (!command.getBoolean(Command.KEY_NO_QUEUE)) {
-                QueuedCommand queuedCommand = QueuedCommand.fromCommand(command);
-                queuedCommand.setId(storage.addObject(queuedCommand, new Request(new Columns.Exclude("id"))));
-                broadcastService.updateCommand(true, deviceId);
-                return queuedCommand;
+            if (pushCommandManager != null && protocol != null
+                    && protocol.getSupportedPushCommands().contains(command.getType())) {
+                pushCommandManager.sendCommand(device, command);
             } else {
-                throw new RuntimeException("Failed to send command");
+                DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
+                if (deviceSession != null && deviceSession.supportsLiveCommands()) {
+                    deviceSession.sendCommand(command);
+                } else if (!command.getBoolean(Command.KEY_NO_QUEUE)) {
+                    QueuedCommand queuedCommand = QueuedCommand.fromCommand(command);
+                    queuedCommand.setId(storage.addObject(queuedCommand, new Request(new Columns.Exclude("id"))));
+                    broadcastService.updateCommand(true, deviceId);
+                    return queuedCommand;
+                } else {
+                    throw new RuntimeException("Failed to send command");
+                }
             }
         }
         return null;
@@ -136,6 +150,23 @@ public class CommandsManager implements BroadcastInterface {
                     deviceSession.sendCommand(command);
                 }
             }
+        }
+    }
+
+    public void updateNotificationToken(long deviceId, String token) {
+        var key = new Object();
+        try {
+            cacheManager.addDevice(deviceId, key);
+            Device device = cacheManager.getObject(Device.class, deviceId);
+            device.set("notificationTokens", token);
+            storage.updateObject(Device.class, new Request(
+                    new Columns.Include("attributes"),
+                    new Condition.Equals("id", deviceId)));
+            cacheManager.invalidateObject(true, Device.class, deviceId, ObjectOperation.UPDATE);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            cacheManager.removeDevice(deviceId, key);
         }
     }
 

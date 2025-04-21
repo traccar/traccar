@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ public abstract class BaseProtocol implements Protocol {
     private final String name;
     private final Set<String> supportedDataCommands = new HashSet<>();
     private final Set<String> supportedTextCommands = new HashSet<>();
+    private final Set<String> supportedPushCommands = new HashSet<>();
     private final List<TrackerConnector> connectorList = new LinkedList<>();
 
     private SmsManager smsManager;
@@ -84,6 +85,10 @@ public abstract class BaseProtocol implements Protocol {
         supportedTextCommands.addAll(Arrays.asList(commands));
     }
 
+    public void setSupportedPushCommands(String... commands) {
+        supportedPushCommands.addAll(Arrays.asList(commands));
+    }
+
     @Override
     public Collection<String> getSupportedDataCommands() {
         Set<String> commands = new HashSet<>(supportedDataCommands);
@@ -96,6 +101,11 @@ public abstract class BaseProtocol implements Protocol {
         Set<String> commands = new HashSet<>(supportedTextCommands);
         commands.add(Command.TYPE_CUSTOM);
         return commands;
+    }
+
+    @Override
+    public Set<String> getSupportedPushCommands() {
+        return supportedPushCommands;
     }
 
     @Override
