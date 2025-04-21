@@ -1,6 +1,7 @@
 package org.traccar.protocol;
 
 import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.ReadOnlyHttpHeaders;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
@@ -10,6 +11,9 @@ public class GlobalstarProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new GlobalstarProtocolDecoder(null));
+
+        verifyPositions(decoder, request(HttpMethod.POST, "/", new ReadOnlyHttpHeaders(true, "Content-Type", "application/json"), buffer(
+                "{\"version\": 1,\"entity\": \"Mayacom\",\"resource\": \"GPS Device\",\"entry\": {\"devices\": [{\"gpsCoordinate\": {\"latitude\": \"\",\"longitude\": \"\"},\"deviceIdentify\": {\"esn\": \"0-99990\",\"unixTime\": 1034268516},\"deviceInfo\": {\"messageType\": 3,\"batteryStatus\": \"Good\",\"gpsDataValid\": \"Invalid\",\"missedEventInput1\": \"No\",\"missedEventInput2\": \"No\",\"gpsFailCounter\": 1,\"diagnosticMessage\": \"Replace Battery\",\"numberOfTransmissions\": 3,\"gpsSystemOk\": \"OK\",\"transmitterOk\": \"OK\",\"schedulerSubsystemOk\": \"OK\",\"minTransmissionInterval\": \"300 seconds\",\"maxTransmissionInterval\": \"600 seconds\",\"meanGpsSearchTime\": \"79 seconds\",\"failedGpsAttempts\": 0,\"transmissionsSinceLastDiagnostic\": 9,\"input1Triggered\": \"Yes\",\"input1State\": \"Closed\",\"input2Triggered\": \"No\",\"input2State\": \"Open\",\"messageSubType\": \"Location Message\",\"vibrationTriggered\": \"Yes\",\"unitInVibration\": \"No\",\"gps3DFix\": \"No\",\"deviceAtRest\": \"Yes\",\"highGpsFixAccuracy\": \"No\"}}]}}")));
 
         decoder.setModelOverride("AtlasTrax");
 

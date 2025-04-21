@@ -193,10 +193,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     static {
         var fmbXXX = Set.of(
-                "FMB001", "FMB010", "FMB002", "FMB020", "FMB003", "FMB110", "FMB120", "FMB122", "FMB125", "FMB130",
-                "FMB140", "FMU125", "FMB900", "FMB920", "FMB962", "FMB964", "FM3001", "FMB202", "FMB204", "FMB206",
-                "FMT100", "MTB100", "FMP100", "MSP500", "FMC125", "FMM125", "FMU130", "FMC130", "FMM130", "FMB150",
-                "FMC150", "FMM150", "FMC920");
+                "FMB001", "FMC001", "FMB010", "FMB002", "FMB020", "FMB003", "FMB110", "FMB120", "FMB122", "FMB125",
+                "FMB130", "FMB140", "FMU125", "FMB900", "FMB920", "FMB962", "FMB964", "FM3001", "FMB202", "FMB204",
+                "FMB206", "FMT100", "MTB100", "FMP100", "MSP500", "FMC125", "FMM125", "FMU130", "FMC130", "FMM130",
+                "FMB150", "FMC150", "FMM150", "FMC920");
 
         register(1, null, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
         register(2, null, (p, b) -> p.set(Position.PREFIX_IN + 2, b.readUnsignedByte() > 0));
@@ -342,10 +342,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         if (position.hasAttribute(mncKey) && position.hasAttribute(lacKey) && position.hasAttribute(cidKey)) {
             CellTower cellTower = CellTower.from(
                     getConfig().getInteger(Keys.GEOLOCATION_MCC),
-                    ((Number) position.getAttributes().remove(mncKey)).intValue(),
-                    ((Number) position.getAttributes().remove(lacKey)).intValue(),
-                    ((Number) position.getAttributes().remove(cidKey)).longValue());
-            cellTower.setSignalStrength(((Number) position.getAttributes().remove(rssiKey)).intValue());
+                    position.removeInteger(mncKey),
+                    position.removeInteger(lacKey),
+                    position.removeLong(cidKey));
+            cellTower.setSignalStrength(position.removeInteger(rssiKey));
             network.addCellTower(cellTower);
         }
     }
@@ -361,9 +361,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 position.setNetwork(network);
             }
         } else {
-            Integer cid2g = (Integer) position.getAttributes().remove("cid2g");
-            Long cid4g = (Long) position.getAttributes().remove("cid4g");
-            Integer lac = (Integer) position.getAttributes().remove("lac");
+            Integer cid2g = position.removeInteger("cid2g");
+            Long cid4g = position.removeLong("cid4g");
+            Integer lac = position.removeInteger("lac");
             if (lac != null && (cid2g != null || cid4g != null)) {
                 Network network = new Network();
                 CellTower cellTower;

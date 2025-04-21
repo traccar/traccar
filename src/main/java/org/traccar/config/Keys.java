@@ -1339,7 +1339,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> REPORT_IGNORE_ODOMETER = new BooleanConfigKey(
             "report.ignoreOdometer",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             false);
 
     /**
