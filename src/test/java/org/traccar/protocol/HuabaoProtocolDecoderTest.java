@@ -12,6 +12,10 @@ public class HuabaoProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new HuabaoProtocolDecoder(null));
 
         verifyAttribute(decoder, binary(
+                "7e02000070012040000004019c00000000000004030158df9706c9606b002c000000ab250417170023010400000c5305030000003001153101158202008b530b0101cc00262600000ff1137730017e19f100384d08026e73e0003a4d08037e19e800000000047e3b950000000005409017000000000640a69600000000337e"),
+                "tire1Pressure", 1.4);
+
+        verifyAttribute(decoder, binary(
                 "7e0900001b41305888975883194000184754534c7c367c317c307c31303231383039347c317c0d0ab47e"),
                 Position.KEY_DRIVER_UNIQUE_ID, "10218094");
 

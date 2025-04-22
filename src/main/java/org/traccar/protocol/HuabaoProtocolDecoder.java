@@ -593,6 +593,15 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x69:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
                     break;
+                case 0x77:
+                    while (buf.readerIndex() < endIndex) {
+                        int tireIndex = buf.readUnsignedByte();
+                        position.set("tire" + tireIndex + "SensorId", ByteBufUtil.hexDump(buf.readSlice(3)));
+                        position.set("tire" + tireIndex + "Pressure", BitUtil.to(buf.readUnsignedShort(), 10) / 40.0);
+                        position.set("tire" + tireIndex + "Temp", buf.readUnsignedByte() - 50);
+                        position.set("tire" + tireIndex + "Status", buf.readUnsignedByte());
+                    }
+                    break;
                 case 0x80:
                     buf.readUnsignedByte(); // content
                     endIndex = buf.writerIndex() - 2;
