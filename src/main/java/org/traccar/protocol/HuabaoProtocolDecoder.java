@@ -75,6 +75,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_SEND_TEXT_MESSAGE = 0x8300;
     public static final int MSG_REPORT_TEXT_MESSAGE = 0x6006;
     public static final int MSG_CONFIGURATION_PARAMETERS = 0x8103;
+    public static final int MSG_COMMAND_RESPONSE = 0x0701;
 
     public static final int RESULT_SUCCESS = 0;
 
@@ -344,6 +345,18 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
             return decodeTransparent(deviceSession, buf);
+
+        } else if (type == MSG_COMMAND_RESPONSE) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            String result = buf.readCharSequence(buf.readInt(), StandardCharsets.US_ASCII).toString();
+            position.set(Position.KEY_RESULT, result);
+
+            return position;
 
         }
 
