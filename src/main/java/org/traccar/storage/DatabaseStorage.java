@@ -25,6 +25,7 @@ import org.traccar.model.Permission;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Pagination;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
@@ -68,6 +69,7 @@ public class DatabaseStorage extends Storage {
         query.append(" FROM ").append(getStorageName(clazz));
         query.append(formatCondition(request.getCondition()));
         query.append(formatOrder(request.getOrder()));
+        query.append(formatPagination(request.getPagination()));
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
             for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
@@ -297,16 +299,31 @@ public class DatabaseStorage extends Storage {
             if (order.getDescending()) {
                 result.append(" DESC");
             }
-            if (order.getLimit() > 0) {
-                if (databaseType.equals("Microsoft SQL Server")) {
-                    result.append(" OFFSET 0 ROWS FETCH FIRST ");
-                    result.append(order.getLimit());
-                    result.append(" ROWS ONLY");
-                } else {
-                    result.append(" LIMIT ");
-                    result.append(order.getLimit());
-                }
+        }
+        return result.toString();
+    }
+    
+    private String formatPagination(Pagination pagination) {
+        StringBuilder result = new StringBuilder();
+        if (pagination != null) {
+        	if (databaseType.equals("Microsoft SQL Server")) {
+        		result.append(" OFFSET ");
+        		result.append(pagination.getSkip());
+        		result.append(" ROWS FETCH FIRST ");
+                result.append(pagination.getLimit());
+                result.append(" ROWS ONLY");
+                return result.toString();
+        	}
+        	
+            if (pagination.getLimit() > 0) {
+            	result.append(" LIMIT ");
+                result.append(pagination.getLimit());
             }
+
+            if(pagination.getSkip() > 0) {
+        		result.append(" OFFSET ");
+                result.append(pagination.getSkip());
+        	}
         }
         return result.toString();
     }
