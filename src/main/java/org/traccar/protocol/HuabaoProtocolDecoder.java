@@ -714,35 +714,37 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xEA:
-                    buf.readUnsignedByte(); // extended info type
-                    while (buf.readerIndex() < endIndex) {
-                        int extendedType = buf.readUnsignedByte();
-                        int extendedLength = buf.readUnsignedByte();
-                        int extendedEndIndex = buf.readerIndex() + extendedLength;
-                        switch (extendedType) {
-                            case 0x11:
-                                position.set("externalAlarms", buf.readUnsignedShort());
-                                position.set("alarmThresholdType", buf.readUnsignedByte());
-                                buf.readUnsignedInt(); // upper threshold
-                                buf.readUnsignedInt(); // current value
-                                buf.readUnsignedInt(); // lower threshold
-                                break;
-                            case 0x13:
-                                position.set("externalIlluminance", buf.readUnsignedShort());
-                                break;
-                            case 0x14:
-                                position.set("externalAirPressure", buf.readUnsignedShort());
-                                break;
-                            case 0x15:
-                                position.set("externalHumidity", buf.readUnsignedShort() / 10.0);
-                                break;
-                            case 0x16:
-                                position.set("externalTemp", buf.readUnsignedShort() / 10.0 - 50);
-                                break;
-                            default:
-                                break;
+                    if (length > 2) {
+                        buf.readUnsignedByte(); // extended info type
+                        while (buf.readerIndex() < endIndex) {
+                            int extendedType = buf.readUnsignedByte();
+                            int extendedLength = buf.readUnsignedByte();
+                            int extendedEndIndex = buf.readerIndex() + extendedLength;
+                            switch (extendedType) {
+                                case 0x11:
+                                    position.set("externalAlarms", buf.readUnsignedShort());
+                                    position.set("alarmThresholdType", buf.readUnsignedByte());
+                                    buf.readUnsignedInt(); // upper threshold
+                                    buf.readUnsignedInt(); // current value
+                                    buf.readUnsignedInt(); // lower threshold
+                                    break;
+                                case 0x13:
+                                    position.set("externalIlluminance", buf.readUnsignedShort());
+                                    break;
+                                case 0x14:
+                                    position.set("externalAirPressure", buf.readUnsignedShort());
+                                    break;
+                                case 0x15:
+                                    position.set("externalHumidity", buf.readUnsignedShort() / 10.0);
+                                    break;
+                                case 0x16:
+                                    position.set("externalTemp", buf.readUnsignedShort() / 10.0 - 50);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            buf.readerIndex(extendedEndIndex);
                         }
-                        buf.readerIndex(extendedEndIndex);
                     }
                     break;
                 case 0xEB:
