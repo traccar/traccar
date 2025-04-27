@@ -714,6 +714,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xEA:
+                    buf.readUnsignedByte(); // extended info type
                     while (buf.readerIndex() < endIndex) {
                         int extendedType = buf.readUnsignedByte();
                         int extendedLength = buf.readUnsignedByte();
