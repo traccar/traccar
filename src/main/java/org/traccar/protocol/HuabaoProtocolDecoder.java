@@ -866,7 +866,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xF8:
-                    position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort() / 10.0 - 50);
+                    position.set(Position.PREFIX_TEMP + 2, buf.readUnsignedShort() / 10.0 - 50);
                     break;
                 case 0xFB:
                     position.set("container", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
