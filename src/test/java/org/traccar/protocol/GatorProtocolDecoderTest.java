@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,6 +19,13 @@ public class GatorProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new GatorProtocolDecoder(null));
+
+        verifyPosition(decoder, binary(
+                "24248000278632210440910210250107210008006368860032001400000057c047000000185c050da7f9960d"));
+
+        verifyAttribute(decoder, binary(
+                "24248000278632210440910210250107210008006368860032001400000057c047000000185c050da7f90000000001960d"),
+                Position.KEY_ALARM, Position.ALARM_ACCELERATION);
 
         verifyAttributes(decoder, binary(
                 "242480002600341cad190917022021812497260280594200000000c047010000135400009bb600ff00b90d"));
@@ -47,7 +55,7 @@ public class GatorProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, binary(
                 "24248000260009632d141121072702059226180104367500000000c04700079c0c34000ad80b00ff000a0d"));
-        
+
     }
 
 }

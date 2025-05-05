@@ -171,6 +171,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Frame mask for Atrack protocol.
+     */
+    public static final ConfigSuffix<Integer> PROTOCOL_FRAME_MASK = new IntegerConfigSuffix(
+            ".frameMask",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Protocol configuration. Required for some devices for decoding incoming data.
      */
     public static final ConfigSuffix<String> PROTOCOL_CONFIG = new StringConfigSuffix(

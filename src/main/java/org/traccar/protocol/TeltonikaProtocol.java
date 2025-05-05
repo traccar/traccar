@@ -28,7 +28,9 @@ public class TeltonikaProtocol extends BaseProtocol {
     @Inject
     public TeltonikaProtocol(Config config) {
         setSupportedDataCommands(
-                Command.TYPE_CUSTOM);
+                Command.TYPE_CUSTOM,
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {

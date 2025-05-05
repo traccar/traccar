@@ -33,6 +33,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
@@ -86,6 +87,23 @@ public class PositionResource extends BaseResource {
         } else {
             return PositionUtil.getLatestPositions(storage, getUserId());
         }
+    }
+
+    @Path("{id}")
+    @DELETE
+    public Response removeById(@PathParam("id") long positionId) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getReadonly);
+
+        Request request = new Request(new Columns.All(), new Condition.Equals("id", positionId));
+        Position position = storage.getObject(Position.class, request);
+        if (position == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        permissionsService.checkPermission(Device.class, getUserId(), position.getDeviceId());
+
+        storage.removeObject(Position.class, request);
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     @DELETE

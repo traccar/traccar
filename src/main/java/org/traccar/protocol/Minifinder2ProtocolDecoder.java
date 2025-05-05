@@ -230,6 +230,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             position.getNetwork().addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
                         }
                         break;
+                    case 0x19:
                     case 0x22:
                         if (position.getNetwork() == null) {
                             position.setNetwork(new Network());
@@ -239,6 +240,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
                             position.getNetwork().addWifiAccessPoint(WifiAccessPoint.from(
                                     mac.substring(0, mac.length() - 1), rssi));
+                            if (key == 0x19) {
+                                buf.skipBytes(buf.readUnsignedByte()); // name
+                            }
                         }
                         break;
                     case 0x23:
@@ -281,18 +285,31 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setAltitude(buf.readShortLE());
                         break;
                     case 0x28:
+                    case 0x2c:
                         int beaconFlags = buf.readUnsignedByte();
                         position.set("tagId", readTagId(buf));
                         position.set("tagRssi", (int) buf.readByte());
                         position.set("tag1mRssi", (int) buf.readByte());
+                        if (key == 0x2c) {
+                            position.set("tagBattery", buf.readUnsignedByte());
+                        }
                         if (BitUtil.check(beaconFlags, 7)) {
                             position.setLatitude(buf.readIntLE() * 0.0000001);
                             position.setLongitude(buf.readIntLE() * 0.0000001);
                             position.setValid(true);
                         }
                         if (BitUtil.check(beaconFlags, 6)) {
+                            int descriptionLength;
+                            if (key == 0x2c) {
+                                descriptionLength = buf.readUnsignedByte();
+                            } else {
+                                descriptionLength = endIndex - buf.readerIndex();
+                            }
                             position.set("description", buf.readCharSequence(
-                                    endIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString());
+                                    descriptionLength, StandardCharsets.US_ASCII).toString());
+                        }
+                        if (key == 0x2c) {
+                            position.set("tagTemp", buf.readShort() / 10.0);
                         }
                         break;
                     case 0x2A:

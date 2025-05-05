@@ -17,6 +17,8 @@
  */
 package org.traccar.api.resource;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
@@ -67,6 +69,12 @@ public class CommandResource extends ExtendedObjectResource<Command> {
 
     @Inject
     private ServerManager serverManager;
+
+    @Inject
+    private LogAction actionLogger;
+
+    @Context
+    private HttpServletRequest request;
 
     public CommandResource() {
         super(Command.class, "description");
@@ -142,7 +150,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
             }
         }
 
-        LogAction.command(getUserId(), groupId, entity.getDeviceId(), entity.getType());
+        actionLogger.command(request, getUserId(), groupId, entity.getDeviceId(), entity.getType());
         return Response.ok(entity).build();
     }
 

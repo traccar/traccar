@@ -350,53 +350,55 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
                         getLastLocation(position, null);
                     }
 
-                    int tag = buf.readUnsignedShortLE();
-                    int length = buf.readUnsignedShortLE();
-                    switch (tag) {
-                        case 0x0002 -> {
-                            int pidCount = buf.readUnsignedByte();
-                            for (int i = 0; i < pidCount; i++) {
-                                int pidTag = buf.readUnsignedShortLE();
-                                int pidLength = buf.readUnsignedShortLE();
-                                position.set("pid" + pidTag, ByteBufUtil.hexDump(buf.readSlice(pidLength)));
-                            }
-                        }
-                        case 0x0004 -> buf.skipBytes(length); // supported data streams
-                        case 0x0005 -> buf.skipBytes(length); // snapshot data
-                        case 0x0006 -> {
-                            buf.readUnsignedByte(); // fault flag
-                            int faultCount = buf.readUnsignedByte();
-                            for (int i = 1; i <= faultCount; i++) {
-                                position.set("fault" + i, buf.readUnsignedShortLE());
-                            }
-                        }
-                        case 0x0007 -> {
-                            buf.readUnsignedIntLE(); // alarm index
-                            int alarmCount = buf.readUnsignedByte();
-                            for (int i = 0; i < alarmCount; i++) {
-                                int alarmFlag = buf.readUnsignedByte();
-                                int event = buf.readUnsignedByte();
-                                if (alarmFlag > 0) {
-                                    decodeAlarm(position, event);
+                    while (buf.readableBytes() > 4) {
+                        int tag = buf.readUnsignedShortLE();
+                        int length = buf.readUnsignedShortLE();
+                        switch (tag) {
+                            case 0x0002 -> {
+                                int pidCount = buf.readUnsignedByte();
+                                for (int i = 0; i < pidCount; i++) {
+                                    int pidTag = buf.readUnsignedShortLE();
+                                    int pidLength = buf.readUnsignedShortLE();
+                                    position.set("pid" + pidTag, ByteBufUtil.hexDump(buf.readSlice(pidLength)));
                                 }
-                                buf.readUnsignedShortLE(); // description
-                                buf.readUnsignedShortLE(); // threshold
                             }
-                        }
-                        case 0x000B -> {
-                            buf.readUnsignedByte(); // fault flag
-                            int faultCount = buf.readUnsignedByte();
-                            for (int i = 1; i <= faultCount; i++) {
-                                position.set("fault" + i, buf.readUnsignedIntLE());
+                            case 0x0004 -> buf.skipBytes(length); // supported data streams
+                            case 0x0005 -> buf.skipBytes(length); // snapshot data
+                            case 0x0006 -> {
+                                buf.readUnsignedByte(); // fault flag
+                                int faultCount = buf.readUnsignedByte();
+                                for (int i = 1; i <= faultCount; i++) {
+                                    position.set("fault" + i, buf.readUnsignedShortLE());
+                                }
                             }
-                            buf.readUnsignedShortLE(); // mil status
+                            case 0x0007 -> {
+                                buf.readUnsignedIntLE(); // alarm index
+                                int alarmCount = buf.readUnsignedByte();
+                                for (int i = 0; i < alarmCount; i++) {
+                                    int alarmFlag = buf.readUnsignedByte();
+                                    int event = buf.readUnsignedByte();
+                                    if (alarmFlag > 0) {
+                                        decodeAlarm(position, event);
+                                    }
+                                    buf.readUnsignedShortLE(); // description
+                                    buf.readUnsignedShortLE(); // threshold
+                                }
+                            }
+                            case 0x000B -> {
+                                buf.readUnsignedByte(); // fault flag
+                                int faultCount = buf.readUnsignedByte();
+                                for (int i = 1; i <= faultCount; i++) {
+                                    position.set("fault" + i, buf.readUnsignedIntLE());
+                                }
+                                buf.readUnsignedShortLE(); // mil status
+                            }
+                            case 0x0010 -> position.set(Position.KEY_DEVICE_TEMP, buf.readShortLE() / 10.0);
+                            case 0x0011, 0x0012, 0x0013, 0x0014 ->
+                                    position.set(Position.PREFIX_TEMP + (tag - 0x0010), buf.readShortLE() / 10.0);
+                            case 0x0020 -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 100.0);
+                            case 0x0021 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 100.0);
+                            default -> buf.skipBytes(length);
                         }
-                        case 0x0010 -> position.set(Position.KEY_DEVICE_TEMP, buf.readShortLE() / 10.0);
-                        case 0x0011, 0x0012, 0x0013, 0x0014 ->
-                                position.set(Position.PREFIX_TEMP + (tag - 0x0010), buf.readShortLE() / 10.0);
-                        case 0x0020 -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() / 100.0);
-                        case 0x0021 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() / 100.0);
-                        default -> buf.skipBytes(length);
                     }
                 }
 

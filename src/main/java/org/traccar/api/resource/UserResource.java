@@ -57,6 +57,9 @@ public class UserResource extends BaseObjectResource<User> {
     @Inject
     private Config config;
 
+    @Inject
+    private LogAction actionLogger;
+
     @Context
     private HttpServletRequest request;
 
@@ -119,11 +122,11 @@ public class UserResource extends BaseObjectResource<User> {
                 new Columns.Include("hashedPassword", "salt"),
                 new Condition.Equals("id", entity.getId())));
 
-        LogAction.create(getUserId(), entity);
+        actionLogger.create(request, getUserId(), entity);
 
         if (currentUser != null && currentUser.getUserLimit() != 0) {
             storage.addPermission(new Permission(User.class, getUserId(), ManagedUser.class, entity.getId()));
-            LogAction.link(getUserId(), User.class, getUserId(), ManagedUser.class, entity.getId());
+            actionLogger.link(request, getUserId(), User.class, getUserId(), ManagedUser.class, entity.getId());
         }
         return Response.ok(entity).build();
     }

@@ -74,6 +74,11 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                         }
                         position.setDeviceId(deviceSession.getDeviceId());
                         break;
+                    case "notificationToken":
+                        if (position.getDeviceId() > 0) {
+                            getCommandsManager().updateNotificationToken(position.getDeviceId(), value);
+                        }
+                        break;
                     case "valid":
                         position.setValid(Boolean.parseBoolean(value) || "1".equals(value));
                         break;

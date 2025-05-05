@@ -18,6 +18,7 @@ package org.traccar.database;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.api.security.LoginService;
+import org.traccar.helper.LogAction;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.helper.SessionHelper;
@@ -76,12 +77,16 @@ public class OpenIdProvider {
     private final String groupsClaimName;
 
     private final LoginService loginService;
+    private final LogAction actionLogger;
 
     @Inject
-    public OpenIdProvider(Config config, LoginService loginService, HttpClient httpClient, ObjectMapper objectMapper)
+    public OpenIdProvider(
+            Config config, LoginService loginService, LogAction actionLogger,
+            HttpClient httpClient, ObjectMapper objectMapper)
         throws InterruptedException, IOException, URISyntaxException {
 
         this.loginService = loginService;
+        this.actionLogger = actionLogger;
 
         force = config.getBoolean(Keys.OPENID_FORCE);
         clientId = new ClientID(config.getString(Keys.OPENID_CLIENT_ID));
@@ -194,7 +199,7 @@ public class OpenIdProvider {
         User user = loginService.login(
                 userInfo.getEmailAddress(), userInfo.getName(), administrator).getUser();
 
-        SessionHelper.userLogin(request, user, null);
+        SessionHelper.userLogin(actionLogger, request, user, null);
 
         return baseUrl.resolve("?openid=success");
     }

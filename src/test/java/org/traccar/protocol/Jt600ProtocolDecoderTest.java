@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class Jt600ProtocolDecoderTest extends ProtocolTest {
 
@@ -9,6 +10,13 @@ public class Jt600ProtocolDecoderTest extends ProtocolTest {
     public void testDecode() throws Exception {
 
         var decoder = inject(new Jt600ProtocolDecoder(null));
+
+        verifyPosition(decoder, binary(
+                "28383035343230313937332c312c3136382c574c4e45542c352c322c28022508595325169288057327940900002802250859551021220618730140644701011d4300000029"));
+
+        verifyAttribute(decoder, binary(
+                "28373530303331333630392C32332C32392C574C4E45542C352C322C22071916311822350966113549495E1F232207191622591190702002FE0117623C0101134700000029"),
+                Position.PREFIX_TEMP + 1, 27.5);
 
         verifyPosition(decoder, buffer(
                 "(2050018634,P45,051124,204046,9.861502,N,83.950336,W,A,1,0,1,1,0012260888,0,0,0)"));

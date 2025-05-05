@@ -177,6 +177,18 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
 
                 sendResponse(channel, remoteAddress, receiver, sender, payload);
 
+            } else if (type.startsWith("*@C")) {
+
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+                if (deviceSession == null) {
+                    return null;
+                }
+
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                position.set(Position.KEY_RESULT, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                return position;
+
             }
 
         } else {

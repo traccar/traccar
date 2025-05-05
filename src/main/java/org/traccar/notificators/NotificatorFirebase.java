@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,22 +16,16 @@
  */
 package org.traccar.notificators;
 
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.AndroidConfig;
 import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.ApnsConfig;
 import com.google.firebase.messaging.Aps;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MessagingErrorCode;
 import com.google.firebase.messaging.MulticastMessage;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
@@ -39,15 +33,14 @@ import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
+import org.traccar.push.FirebaseClient;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -57,26 +50,20 @@ import java.util.List;
 public class NotificatorFirebase extends Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorFirebase.class);
+
+    private final FirebaseClient firebaseClient;
     private final Storage storage;
     private final CacheManager cacheManager;
 
     @Inject
     public NotificatorFirebase(
-            Config config, NotificationFormatter notificationFormatter,
+            FirebaseClient firebaseClient, NotificationFormatter notificationFormatter,
             Storage storage, CacheManager cacheManager) throws IOException {
 
         super(notificationFormatter, "short");
+        this.firebaseClient = firebaseClient;
         this.storage = storage;
         this.cacheManager = cacheManager;
-
-        InputStream serviceAccount = new ByteArrayInputStream(
-                config.getString(Keys.NOTIFICATOR_FIREBASE_SERVICE_ACCOUNT).getBytes());
-
-        FirebaseOptions options = FirebaseOptions.builder()
-                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                .build();
-
-        FirebaseApp.initializeApp(options);
     }
 
     @Override
@@ -108,7 +95,7 @@ public class NotificatorFirebase extends Notificator {
             }
 
             try {
-                var result = FirebaseMessaging.getInstance().sendEachForMulticast(messageBuilder.build());
+                var result = firebaseClient.getInstance().sendEachForMulticast(messageBuilder.build());
                 List<String> failedTokens = new LinkedList<>();
                 var iterator = result.getResponses().listIterator();
                 while (iterator.hasNext()) {

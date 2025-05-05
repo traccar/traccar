@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-6.7">
+
+  <changeSet author="author" id="changelog-6.7">
+
+    <createTable tableName="tc_actions">
+      <column autoIncrement="true" name="id" type="INT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="actiontime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="address" type="VARCHAR(48)" />
+      <column name="userid" type="INT" />
+      <column name="actiontype" type="VARCHAR(32)">
+        <constraints nullable="false" />
+      </column>
+      <column name="objecttype" type="VARCHAR(32)" />
+      <column name="objectid" type="INT" />
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+  </changeSet>
+
+</databaseChangeLog>

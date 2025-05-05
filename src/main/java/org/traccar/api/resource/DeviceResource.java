@@ -15,7 +15,9 @@
  */
 package org.traccar.api.resource;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseObjectResource;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.broadcast.BroadcastService;
@@ -83,6 +85,12 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
     @Inject
     private TokenManager tokenManager;
+
+    @Inject
+    private LogAction actionLogger;
+
+    @Context
+    private HttpServletRequest request;
 
     public DeviceResource() {
         super(Device.class);
@@ -172,7 +180,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
             throw new IllegalArgumentException();
         }
 
-        LogAction.resetAccumulators(getUserId(), entity.getDeviceId());
+        actionLogger.resetAccumulators(request, getUserId(), entity.getDeviceId());
         return Response.noContent().build();
     }
 

@@ -28,7 +28,7 @@ public final class SessionHelper {
     private SessionHelper() {
     }
 
-    public static void userLogin(HttpServletRequest request, User user, Date expiration) {
+    public static void userLogin(LogAction actionLogger, HttpServletRequest request, User user, Date expiration) {
         request.getSession().invalidate();
         request.getSession().setAttribute(USER_ID_KEY, user.getId());
 
@@ -36,7 +36,7 @@ public final class SessionHelper {
             request.getSession().setAttribute(EXPIRATION_KEY, expiration);
         }
 
-        LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+        actionLogger.login(request, user.getId());
     }
 
 }

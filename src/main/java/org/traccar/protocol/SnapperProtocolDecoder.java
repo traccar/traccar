@@ -100,7 +100,7 @@ public class SnapperProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case 0x01 -> {
                     position.set("interiorTemp", buf.readByte());
-                    position.set("engineTemp", buf.readByte());
+                    position.set(Position.KEY_ENGINE_TEMP, buf.readByte());
                     buf.readUnsignedByte(); // reserved
                 }
                 default -> buf.skipBytes(3);
