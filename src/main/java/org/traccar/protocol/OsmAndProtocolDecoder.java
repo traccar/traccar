@@ -54,7 +54,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
         FullHttpRequest request = (FullHttpRequest) msg;
         String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
-        if (contentType != null && HttpHeaderValues.APPLICATION_JSON.compareTo(contentType) == 0) {
+        if (contentType != null && contentType.startsWith(HttpHeaderValues.APPLICATION_JSON.toString())) {
             return decodeJson(channel, remoteAddress, request);
         } else {
             return decodeQuery(channel, remoteAddress, request);
@@ -238,8 +238,14 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setLatitude(coordinates.getJsonNumber("latitude").doubleValue());
             position.setLongitude(coordinates.getJsonNumber("longitude").doubleValue());
             position.setAccuracy(coordinates.getJsonNumber("accuracy").doubleValue());
-            position.setSpeed(coordinates.getJsonNumber("speed").doubleValue());
-            position.setCourse(coordinates.getJsonNumber("heading").doubleValue());
+            double speed = coordinates.getJsonNumber("speed").doubleValue();
+            if (speed >= 0) {
+                position.setSpeed(speed);
+            }
+            double heading = coordinates.getJsonNumber("heading").doubleValue();
+            if (heading >= 0) {
+                position.setCourse(heading);
+            }
             position.setAltitude(coordinates.getJsonNumber("altitude").doubleValue());
         }
 
@@ -260,7 +266,10 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
         }
         if (location.containsKey("battery")) {
             JsonObject battery = location.getJsonObject("battery");
-            position.set(Position.KEY_BATTERY_LEVEL, (int) (battery.getJsonNumber("level").doubleValue() * 100));
+            double level = battery.getJsonNumber("level").doubleValue();
+            if (level >= 0) {
+                position.set(Position.KEY_BATTERY_LEVEL, (int) (level * 100));
+            }
             position.set(Position.KEY_CHARGE, battery.getBoolean("is_charging"));
         }
 
