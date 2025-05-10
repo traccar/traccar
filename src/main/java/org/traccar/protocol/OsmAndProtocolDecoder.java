@@ -273,7 +273,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
             position.set(Position.KEY_CHARGE, battery.getBoolean("is_charging"));
         }
 
-        JsonObject extras = root.getJsonObject("extras");
+        JsonObject extras = location.getJsonObject("extras");
         if (extras.containsKey("alarm")) {
             position.set(Position.KEY_ALARM, extras.getString("alarm"));
         }
