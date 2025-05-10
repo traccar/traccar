@@ -352,6 +352,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_TYPE, type);
 
         if (result) {
+            getLastLocation(position, null);
             position.set(Position.KEY_RESULT, String.join(";", Arrays.copyOfRange(values, index, values.length)));
             return position;
         }
