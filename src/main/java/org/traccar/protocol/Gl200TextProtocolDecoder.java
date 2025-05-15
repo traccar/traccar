@@ -1005,7 +1005,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceTime(time);
         }
 
-        if (BitUtil.check(mask, 0)) {
+        if (BitUtil.check(mask, 0) && !model.equals("GV350M")) {
             position.set(Position.KEY_FUEL_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
         }
 
@@ -1024,10 +1024,17 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             return positions; // can data not supported
         }
 
-        if (BitUtil.check(mask, 3) || BitUtil.check(mask, 4)) {
+        if (BitUtil.check(mask, 3) || BitUtil.check(mask, 4)
+                || (BitUtil.check(mask, 0) && model.equals("GV350M"))) {
             int deviceCount = Integer.parseInt(v[index++]);
             for (int i = 1; i <= deviceCount; i++) {
                 index += 1; // type
+                if (model.equals("GV350M")) {
+                    index += 1; // uart id
+                    if (BitUtil.check(mask, 0)) {
+                        position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(v[index++], 16));
+                    }
+                }
                 if (BitUtil.check(mask, 3)) {
                     position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(v[index++]));
                 }
