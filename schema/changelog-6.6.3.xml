@@ -4,10 +4,26 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
-        logicalFilePath="changelog-6.6">
+        logicalFilePath="changelog-6.6.3">
+
+    <changeSet author="author" id="changelog-6.6.3">
+
+        <createTable tableName="tc_organisation">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="name" type="VARCHAR(4000)">
+                <constraints nullable="false" />
+            </column>
+            <column name="attribute" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
 
     <!-- Add fk_organisation_id column to tc_users -->
-    <changeSet author="author" id="changelog-6.6.4">
+    <changeSet author="author" id="changelog-6.6.3-fk-user-org">
 
         <addColumn tableName="tc_users">
             <column name="fk_organisation_id" type="INT"/>
@@ -19,12 +35,13 @@
                 baseColumnNames="fk_organisation_id"
                 referencedTableName="tc_organisation"
                 referencedColumnNames="id"
+                onDelete="SET NULL"
                 constraintName="fk_tc_users_organisation"/>
 
     </changeSet>
 
     <!-- Add fk_organisation_id column to tc_devices -->
-    <changeSet author="author" id="changelog-6.6.4-add-fk-to-devices">
+    <changeSet author="author" id="changelog-6.6.3-add-fk-to-devices">
 
         <addColumn tableName="tc_devices">
             <column name="fk_organisation_id" type="INT"/>
@@ -36,6 +53,7 @@
                 baseColumnNames="fk_organisation_id"
                 referencedTableName="tc_organisation"
                 referencedColumnNames="id"
+                onDelete="SET NULL"
                 constraintName="fk_tc_devices_organisation"/>
 
     </changeSet>
