@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2021 Subodh Ranadive (subodhranadive3103@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
