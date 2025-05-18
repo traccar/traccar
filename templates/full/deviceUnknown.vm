@@ -4,7 +4,7 @@
 <body>
 Device: $device.name<br>
 Status is unknown<br>
-Time: $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
+Time: $dateTool.format("yyyy-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)<br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
 </body>
