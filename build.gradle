@@ -18,7 +18,7 @@ compileJava.options.encoding = "UTF-8"
 jar.destinationDirectory = file("$projectDir/target")
 
 checkstyle {
-    toolVersion = "10.21.1"
+    toolVersion = "10.23.1"
     configFile = file("gradle/checkstyle.xml")
     checkstyleTest.enabled = false
 }
