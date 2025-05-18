@@ -1,4 +1,5 @@
 /*
+ * Copyright 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2023 Daniel Raper (me@danr.uk)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,15 +16,43 @@
  */
 package org.traccar.database;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Inject;
+import com.nimbusds.oauth2.sdk.AuthorizationCode;
+import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
+import com.nimbusds.oauth2.sdk.AuthorizationGrant;
+import com.nimbusds.oauth2.sdk.AuthorizationResponse;
+import com.nimbusds.oauth2.sdk.ParseException;
+import com.nimbusds.oauth2.sdk.ResponseType;
+import com.nimbusds.oauth2.sdk.Scope;
+import com.nimbusds.oauth2.sdk.TokenRequest;
+import com.nimbusds.oauth2.sdk.TokenResponse;
+import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
+import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
+import com.nimbusds.oauth2.sdk.auth.Secret;
+import com.nimbusds.oauth2.sdk.http.HTTPResponse;
+import com.nimbusds.oauth2.sdk.id.ClientID;
+import com.nimbusds.oauth2.sdk.id.State;
+import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import com.nimbusds.oauth2.sdk.util.URLUtils;
+import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
+import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
+import com.nimbusds.openid.connect.sdk.UserInfoRequest;
+import com.nimbusds.openid.connect.sdk.UserInfoResponse;
+import com.nimbusds.openid.connect.sdk.claims.UserInfo;
+import jakarta.servlet.http.HttpServletRequest;
+import org.traccar.api.security.LoginService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.api.security.LoginService;
 import org.traccar.helper.LogAction;
-import org.traccar.model.User;
-import org.traccar.storage.StorageException;
 import org.traccar.helper.SessionHelper;
 import org.traccar.helper.WebHelper;
+import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -32,36 +61,6 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.security.GeneralSecurityException;
 import java.util.List;
 import java.util.Map;
-import java.io.IOException;
-
-import jakarta.servlet.http.HttpServletRequest;
-
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.inject.Inject;
-
-import com.nimbusds.oauth2.sdk.http.HTTPResponse;
-import com.nimbusds.oauth2.sdk.AuthorizationCode;
-import com.nimbusds.oauth2.sdk.ResponseType;
-import com.nimbusds.oauth2.sdk.Scope;
-import com.nimbusds.oauth2.sdk.AuthorizationGrant;
-import com.nimbusds.oauth2.sdk.TokenRequest;
-import com.nimbusds.oauth2.sdk.TokenResponse;
-import com.nimbusds.oauth2.sdk.AuthorizationCodeGrant;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.AuthorizationResponse;
-import com.nimbusds.oauth2.sdk.auth.Secret;
-import com.nimbusds.oauth2.sdk.auth.ClientSecretBasic;
-import com.nimbusds.oauth2.sdk.auth.ClientAuthentication;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
-import com.nimbusds.oauth2.sdk.id.State;
-import com.nimbusds.oauth2.sdk.id.ClientID;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponse;
-import com.nimbusds.openid.connect.sdk.OIDCTokenResponseParser;
-import com.nimbusds.openid.connect.sdk.UserInfoResponse;
-import com.nimbusds.openid.connect.sdk.UserInfoRequest;
-import com.nimbusds.openid.connect.sdk.AuthenticationRequest;
-import com.nimbusds.openid.connect.sdk.claims.UserInfo;
 
 public class OpenIdProvider {
     private final Boolean force;
@@ -139,10 +138,11 @@ public class OpenIdProvider {
                 .toURI();
     }
 
-    private OIDCTokenResponse getToken(AuthorizationCode code)
-            throws IOException, ParseException, GeneralSecurityException {
-        AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, callbackUrl);
-        TokenRequest tokenRequest = new TokenRequest(tokenUrl, clientAuth, codeGrant);
+    private OIDCTokenResponse getToken(
+            URI redirectUri, AuthorizationCode code) throws IOException, ParseException, GeneralSecurityException {
+
+        AuthorizationGrant codeGrant = new AuthorizationCodeGrant(code, redirectUri);
+        TokenRequest tokenRequest = new TokenRequest(tokenUrl, clientAuth, codeGrant, null);
 
         HTTPResponse tokenResponse = tokenRequest.toHTTPRequest().send();
         TokenResponse token = OIDCTokenResponseParser.parse(tokenResponse);
@@ -153,7 +153,9 @@ public class OpenIdProvider {
         return (OIDCTokenResponse) token.toSuccessResponse();
     }
 
-    private UserInfo getUserInfo(BearerAccessToken token) throws IOException, ParseException, GeneralSecurityException {
+    private UserInfo getUserInfo(
+            BearerAccessToken token) throws IOException, ParseException, GeneralSecurityException {
+
         HTTPResponse httpResponse = new UserInfoRequest(userInfoUrl, token)
                 .toHTTPRequest()
                 .send();
@@ -168,10 +170,11 @@ public class OpenIdProvider {
         return userInfoResponse.toSuccessResponse().getUserInfo();
     }
 
-    public URI handleCallback(URI requestUri, HttpServletRequest request)
+    public URI handleCallback(URI redirectUri, String queryParameters, HttpServletRequest request)
             throws StorageException, ParseException, IOException, GeneralSecurityException {
 
-        AuthorizationResponse response = AuthorizationResponse.parse(requestUri);
+        AuthorizationResponse response = AuthorizationResponse.parse(
+                redirectUri, URLUtils.parseParameters(queryParameters));
 
         if (!response.indicatesSuccess()) {
             throw new GeneralSecurityException(response.toErrorResponse().getErrorObject().getDescription());
@@ -183,7 +186,7 @@ public class OpenIdProvider {
             throw new GeneralSecurityException("Malformed OpenID callback.");
         }
 
-        OIDCTokenResponse tokens = getToken(authCode);
+        OIDCTokenResponse tokens = getToken(redirectUri, authCode);
 
         BearerAccessToken bearerToken = tokens.getOIDCTokens().getBearerAccessToken();
 
