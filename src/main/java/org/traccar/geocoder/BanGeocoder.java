@@ -1,6 +1,6 @@
 /*
  * Copyright 2018 Olivier Girondel (olivier@biniou.info)
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
  */
 package org.traccar.geocoder;
 
-/*
- * API documentation: https://adresse.data.gouv.fr/api
- */
 
 import jakarta.json.JsonObject;
 import jakarta.ws.rs.client.Client;
 
+/**
+ * [API documentation](https://adresse.data.gouv.fr/api)
+ */
 public class BanGeocoder extends GeocodeJsonGeocoder {
 
     public BanGeocoder(Client client, int cacheSize, AddressFormat addressFormat) {
@@ -31,14 +31,11 @@ public class BanGeocoder extends GeocodeJsonGeocoder {
 
     @Override
     public Address parseAddress(JsonObject json) {
-        Address geodecoded = super.parseAddress(json);
-        if (geodecoded != null) {
-            geodecoded.setCountry("FR");
-
-            return geodecoded;
+        Address address = super.parseAddress(json);
+        if (address != null) {
+            address.setCountry("FR");
         }
-
-        return null;
+        return address;
     }
 
 }
