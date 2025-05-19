@@ -8,7 +8,7 @@
 
     <changeSet author="author" id="changelog-6.6.3">
 
-        <createTable tableName="tc_organisation">
+        <createTable tableName="tc_organization">
             <column autoIncrement="true" name="id" type="INT">
                 <constraints primaryKey="true" />
             </column>
@@ -22,39 +22,39 @@
     </changeSet>
 
 
-    <!-- Add fk_organisation_id column to tc_users -->
+    <!-- Add fk_organization_id column to tc_users -->
     <changeSet author="author" id="changelog-6.6.3-fk-user-org">
 
         <addColumn tableName="tc_users">
-            <column name="fk_organisation_id" type="INT"/>
+            <column name="fk_organization_id" type="INT"/>
         </addColumn>
 
         <!-- Add foreign key constraint for tc_users -->
         <addForeignKeyConstraint
                 baseTableName="tc_users"
-                baseColumnNames="fk_organisation_id"
-                referencedTableName="tc_organisation"
+                baseColumnNames="fk_organization_id"
+                referencedTableName="tc_organization"
                 referencedColumnNames="id"
                 onDelete="SET NULL"
-                constraintName="fk_tc_users_organisation"/>
+                constraintName="fk_tc_users_organization"/>
 
     </changeSet>
 
-    <!-- Add fk_organisation_id column to tc_devices -->
+    <!-- Add fk_organization_id column to tc_devices -->
     <changeSet author="author" id="changelog-6.6.3-add-fk-to-devices">
 
         <addColumn tableName="tc_devices">
-            <column name="fk_organisation_id" type="INT"/>
+            <column name="fk_organization_id" type="INT"/>
         </addColumn>
 
         <!-- Add foreign key constraint for tc_devices -->
         <addForeignKeyConstraint
                 baseTableName="tc_devices"
-                baseColumnNames="fk_organisation_id"
-                referencedTableName="tc_organisation"
+                baseColumnNames="fk_organization_id"
+                referencedTableName="tc_organization"
                 referencedColumnNames="id"
                 onDelete="SET NULL"
-                constraintName="fk_tc_devices_organisation"/>
+                constraintName="fk_tc_devices_organization"/>
 
     </changeSet>
 
