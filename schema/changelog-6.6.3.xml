@@ -15,7 +15,7 @@
             <column name="name" type="VARCHAR(4000)">
                 <constraints nullable="false" />
             </column>
-            <column name="attribute" type="VARCHAR(128)">
+            <column name="attributes" type="VARCHAR(128)">
                 <constraints nullable="false" />
             </column>
         </createTable>
@@ -24,6 +24,18 @@
 
     <!-- Add fk_organization_id column to tc_users -->
     <changeSet author="author" id="changelog-6.6.3-fk-user-org">
+        <createTable tableName="tc_user_organization">
+            <column name="userid" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="organizationid" type="INT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="tc_user_organization" baseColumnNames="organizationid" constraintName="fk_user_organization_organizationid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_organization" />
+        <addForeignKeyConstraint baseTableName="tc_user_organization" baseColumnNames="userid" constraintName="fk_user_organization_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+
 
         <addColumn tableName="tc_users">
             <column name="fk_organization_id" type="INT"/>
@@ -37,6 +49,8 @@
                 referencedColumnNames="id"
                 onDelete="SET NULL"
                 constraintName="fk_tc_users_organization"/>
+
+
 
     </changeSet>
 
