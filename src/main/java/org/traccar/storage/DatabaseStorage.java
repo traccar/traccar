@@ -30,6 +30,7 @@ import org.traccar.storage.query.Request;
 import jakarta.inject.Inject;
 import javax.sql.DataSource;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -225,6 +226,17 @@ public class DatabaseStorage extends Storage {
         } else if (genericCondition instanceof Condition.LatestPositions condition) {
             if (condition.getDeviceId() > 0) {
                 results.put("deviceId", condition.getDeviceId());
+            } else if (condition.getDeviceIds() != null) {
+                int paramMultiple = (condition.getDeviceIds().size() / 10) + 1;
+                List<Long> deviceList = new ArrayList<>(condition.getDeviceIds());
+                for (int i = 0; i < paramMultiple * 10; i++) {
+                    String key = String.format("deviceId%s", i);
+                    if (i < deviceList.size()) {
+                        results.put(key, deviceList.get(i));
+                    } else {
+                        results.put(key, 0L);
+                    }
+                }
             }
         }
         return results;
@@ -281,6 +293,18 @@ public class DatabaseStorage extends Storage {
                 result.append(getStorageName(Device.class));
                 if (condition.getDeviceId() > 0) {
                     result.append(" WHERE id = :deviceId");
+                } else if (condition.getDeviceIds() != null) {
+                    result.append(" WHERE id IN ( ");
+                    int paramMultiple = (condition.getDeviceIds().size() / 10) + 1;
+                    for (int i = 0; i < paramMultiple; i++) {
+                        for (int j = 0; j < 10; j++) {
+                            result.append(String.format(":deviceId%s", j + (10 * i)));
+                            if (i != (paramMultiple - 1) || j != 9) {
+                                result.append(", ");
+                            }
+                        }
+                    }
+                    result.append(" )");
                 }
                 result.append(")");
 
