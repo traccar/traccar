@@ -35,6 +35,7 @@ ext {
     jettyVersion = "11.0.25"
     jerseyVersion = "3.1.10"
     jacksonVersion = "2.18.2" // same version as jersey-media-json-jackson dependency
+    nettyVersion = "4.2.1.Final"
     protobufVersion = "4.31.0"
     jxlsVersion = "2.14.0" // version 3 has breaking changes
 }
@@ -53,7 +54,14 @@ dependencies {
     implementation "org.postgresql:postgresql:42.7.5"
     implementation "com.microsoft.sqlserver:mssql-jdbc:12.10.0.jre11"
     implementation "com.zaxxer:HikariCP:6.3.0"
-    implementation "io.netty:netty-all:4.2.1.Final"
+    implementation "io.netty:netty-buffer:$nettyVersion"
+    implementation "io.netty:netty-codec:$nettyVersion"
+    implementation "io.netty:netty-codec-http:$nettyVersion"
+    implementation "io.netty:netty-codec-mqtt:$nettyVersion"
+    implementation "io.netty:netty-handler:$nettyVersion"
+    implementation "io.netty:netty-resolver:$nettyVersion"
+    implementation "io.netty:netty-resolver-dns:$nettyVersion"
+    implementation "io.netty:netty-transport:$nettyVersion"
     implementation "org.slf4j:slf4j-jdk14:2.0.17"
     implementation "com.google.inject:guice:$guiceVersion"
     implementation "com.google.inject.extensions:guice-servlet:$guiceVersion"
