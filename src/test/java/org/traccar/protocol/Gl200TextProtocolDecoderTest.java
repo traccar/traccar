@@ -12,6 +12,10 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
         verifyAttribute(decoder, buffer(
+                "+RESP:GTPNA,710402,867292060140006,,2,20250516120427,0121$"),
+                Position.KEY_BATTERY_LEVEL, null);
+
+        verifyAttribute(decoder, buffer(
                 "+RESP:GTERI,F10415,862599050680717,GV350M,00000001,,50,1,1,0.0,274,2963.1,-78.691767,-0.951295,20250512214226,,,,,,0.0,,,100,210100,,1,1,1,01DF,20250512214226,009D$"),
                 Position.KEY_FUEL_LEVEL, 479);
 

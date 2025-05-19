@@ -1648,7 +1648,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 position.setDeviceTime(dateFormat.parse(v[index]));
             }
 
-            if (v[index - 1].matches("\\d{1,3}")) {
+            if (position.hasAttribute(Position.KEY_HDOP) && v[index - 1].matches("\\d{1,3}")) {
                 position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(v[index - 1]));
             }
         }
