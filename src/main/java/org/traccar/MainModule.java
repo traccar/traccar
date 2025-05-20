@@ -70,6 +70,7 @@ import org.traccar.geocoder.PositionStackGeocoder;
 import org.traccar.geocoder.PlusCodesGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geocoder.GeocodeJsonGeocoder;
+import org.traccar.geocoder.ForwardGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
@@ -411,6 +412,13 @@ public class MainModule extends AbstractModule {
             return new PushCommandManager(firebaseClient);
         }
         return null;
+    }
+
+    @Singleton
+    @Provides
+    public static ForwardGeocoder provideForwardGeocoder(Config config, Client client) {
+        String apiKey = config.getString("geocoder.google.key");
+        return new ForwardGeocoder(client, apiKey);
     }
 
 }
