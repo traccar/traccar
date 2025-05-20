@@ -15,7 +15,7 @@
     -->
 
     <entry key='database.driver'>org.postgresql.Driver</entry>
-    <entry key='database.url'>jdbc:postgresql://localhost/trakino</entry>
+    <entry key='database.url'>jdbc:postgresql://87.98.138.220/trakino</entry>
     <entry key='database.user'>postgres</entry>
     <entry key='database.password'>GeniLogic*59610</entry>
 

@@ -1,0 +1,693 @@
+2025-05-20 15:09:23  INFO: Operating system name: Windows 11 version: 10.0 architecture: amd64
+2025-05-20 15:09:23  INFO: Java runtime name: Java HotSpot(TM) 64-Bit Server VM vendor: Oracle Corporation version: 24.0.1+9-30
+2025-05-20 15:09:23  INFO: Memory limit heap: 2988mb non-heap: 0mb
+2025-05-20 15:09:23  INFO: Character encoding: UTF-8
+2025-05-20 15:09:23  INFO: Version: 6.6
+2025-05-20 15:09:23  INFO: Starting server...
+2025-05-20 15:09:24  INFO: HikariPool-1 - Starting...
+2025-05-20 15:09:25 ERROR: Main method error - 
+com.zaxxer.hikari.pool.HikariPool$PoolInitializationException: Failed to initialize pool: FATAL: authentification par mot de passe �chou�e pour l'utilisateur  � postgres �
+	at com.zaxxer.hikari.pool.HikariPool.throwPoolInitializationException(HikariPool.java:605)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:592)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:101)
+	at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+	at org.traccar.storage.DatabaseModule.provideDataSource(DatabaseModule.java:80)
+	at org.traccar.storage.DatabaseModule$$FastClassByGuice$$162a7f.GUICE$TRAMPOLINE(<generated>)
+	at org.traccar.storage.DatabaseModule$$FastClassByGuice$$162a7f.apply(<generated>)
+	at com.google.inject.internal.ProviderMethod$FastClassProviderMethod.doProvision(ProviderMethod.java:260)
+	at com.google.inject.internal.ProviderMethod.doProvision(ProviderMethod.java:171)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.provision(InternalProviderInstanceBindingImpl.java:185)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.get(InternalProviderInstanceBindingImpl.java:162)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.InjectorImpl$1.get(InjectorImpl.java:1148)
+	at com.google.inject.internal.InjectorImpl.getInstance(InjectorImpl.java:1186)
+	at org.traccar.MainModule.provideStorage(MainModule.java:142)
+	at org.traccar.MainModule$$FastClassByGuice$$a209c.GUICE$TRAMPOLINE(<generated>)
+	at org.traccar.MainModule$$FastClassByGuice$$a209c.apply(<generated>)
+	at com.google.inject.internal.ProviderMethod$FastClassProviderMethod.doProvision(ProviderMethod.java:260)
+	at com.google.inject.internal.ProviderMethod.doProvision(ProviderMethod.java:171)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.provision(InternalProviderInstanceBindingImpl.java:185)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.get(InternalProviderInstanceBindingImpl.java:162)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.InjectorImpl$1.get(InjectorImpl.java:1148)
+	at com.google.inject.internal.InjectorImpl.getInstance(InjectorImpl.java:1186)
+	at org.traccar.schedule.ScheduleManager.lambda$start$0(ScheduleManager.java:55)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEachOrdered(ReferencePipeline.java:817)
+	at org.traccar.schedule.ScheduleManager.start(ScheduleManager.java:54)
+	at org.traccar.Main.run(Main.java:127)
+	at org.traccar.Main.main(Main.java:111)
+Caused by: org.postgresql.util.PSQLException: FATAL: authentification par mot de passe �chou�e pour l'utilisateur  � postgres �
+	at org.postgresql.core.v3.ConnectionFactoryImpl.doAuthentication(ConnectionFactoryImpl.java:704)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:213)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:268)
+	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:54)
+	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:273)
+	at org.postgresql.Driver.makeConnection(Driver.java:446)
+	at org.postgresql.Driver.connect(Driver.java:298)
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:139)
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:368)
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:205)
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:483)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:571)
+	... 50 more
+
+2025-05-20 15:09:51  INFO: Operating system name: Windows 11 version: 10.0 architecture: amd64
+2025-05-20 15:09:51  INFO: Java runtime name: Java HotSpot(TM) 64-Bit Server VM vendor: Oracle Corporation version: 24.0.1+9-30
+2025-05-20 15:09:51  INFO: Memory limit heap: 2988mb non-heap: 0mb
+2025-05-20 15:09:51  INFO: Character encoding: UTF-8
+2025-05-20 15:09:51  INFO: Version: 6.6
+2025-05-20 15:09:51  INFO: Starting server...
+2025-05-20 15:09:51  INFO: HikariPool-1 - Starting...
+2025-05-20 15:09:53 ERROR: Main method error - 
+com.zaxxer.hikari.pool.HikariPool$PoolInitializationException: Failed to initialize pool: FATAL: authentification par mot de passe �chou�e pour l'utilisateur  � postgres �
+	at com.zaxxer.hikari.pool.HikariPool.throwPoolInitializationException(HikariPool.java:605)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:592)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:101)
+	at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+	at org.traccar.storage.DatabaseModule.provideDataSource(DatabaseModule.java:80)
+	at org.traccar.storage.DatabaseModule$$FastClassByGuice$$162a7f.GUICE$TRAMPOLINE(<generated>)
+	at org.traccar.storage.DatabaseModule$$FastClassByGuice$$162a7f.apply(<generated>)
+	at com.google.inject.internal.ProviderMethod$FastClassProviderMethod.doProvision(ProviderMethod.java:260)
+	at com.google.inject.internal.ProviderMethod.doProvision(ProviderMethod.java:171)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.provision(InternalProviderInstanceBindingImpl.java:185)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.get(InternalProviderInstanceBindingImpl.java:162)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.InjectorImpl$1.get(InjectorImpl.java:1148)
+	at com.google.inject.internal.InjectorImpl.getInstance(InjectorImpl.java:1186)
+	at org.traccar.MainModule.provideStorage(MainModule.java:142)
+	at org.traccar.MainModule$$FastClassByGuice$$a209c.GUICE$TRAMPOLINE(<generated>)
+	at org.traccar.MainModule$$FastClassByGuice$$a209c.apply(<generated>)
+	at com.google.inject.internal.ProviderMethod$FastClassProviderMethod.doProvision(ProviderMethod.java:260)
+	at com.google.inject.internal.ProviderMethod.doProvision(ProviderMethod.java:171)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.provision(InternalProviderInstanceBindingImpl.java:185)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.get(InternalProviderInstanceBindingImpl.java:162)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.InjectorImpl$1.get(InjectorImpl.java:1148)
+	at com.google.inject.internal.InjectorImpl.getInstance(InjectorImpl.java:1186)
+	at org.traccar.schedule.ScheduleManager.lambda$start$0(ScheduleManager.java:55)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEachOrdered(ReferencePipeline.java:817)
+	at org.traccar.schedule.ScheduleManager.start(ScheduleManager.java:54)
+	at org.traccar.Main.run(Main.java:127)
+	at org.traccar.Main.main(Main.java:111)
+Caused by: org.postgresql.util.PSQLException: FATAL: authentification par mot de passe �chou�e pour l'utilisateur  � postgres �
+	at org.postgresql.core.v3.ConnectionFactoryImpl.doAuthentication(ConnectionFactoryImpl.java:704)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:213)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:268)
+	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:54)
+	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:273)
+	at org.postgresql.Driver.makeConnection(Driver.java:446)
+	at org.postgresql.Driver.connect(Driver.java:298)
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:139)
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:368)
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:205)
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:483)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:571)
+	... 50 more
+
+2025-05-20 15:10:13  INFO: Operating system name: Windows 11 version: 10.0 architecture: amd64
+2025-05-20 15:10:13  INFO: Java runtime name: Java HotSpot(TM) 64-Bit Server VM vendor: Oracle Corporation version: 24.0.1+9-30
+2025-05-20 15:10:13  INFO: Memory limit heap: 2988mb non-heap: 0mb
+2025-05-20 15:10:13  INFO: Character encoding: UTF-8
+2025-05-20 15:10:13  INFO: Version: 6.6
+2025-05-20 15:10:13  INFO: Starting server...
+2025-05-20 15:10:13  INFO: HikariPool-1 - Starting...
+2025-05-20 15:10:15 ERROR: Main method error - 
+com.zaxxer.hikari.pool.HikariPool$PoolInitializationException: Failed to initialize pool: FATAL: authentification par mot de passe �chou�e pour l'utilisateur  � postgres �
+	at com.zaxxer.hikari.pool.HikariPool.throwPoolInitializationException(HikariPool.java:605)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:592)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:101)
+	at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+	at org.traccar.storage.DatabaseModule.provideDataSource(DatabaseModule.java:80)
+	at org.traccar.storage.DatabaseModule$$FastClassByGuice$$162a7f.GUICE$TRAMPOLINE(<generated>)
+	at org.traccar.storage.DatabaseModule$$FastClassByGuice$$162a7f.apply(<generated>)
+	at com.google.inject.internal.ProviderMethod$FastClassProviderMethod.doProvision(ProviderMethod.java:260)
+	at com.google.inject.internal.ProviderMethod.doProvision(ProviderMethod.java:171)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.provision(InternalProviderInstanceBindingImpl.java:185)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.get(InternalProviderInstanceBindingImpl.java:162)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.InjectorImpl$1.get(InjectorImpl.java:1148)
+	at com.google.inject.internal.InjectorImpl.getInstance(InjectorImpl.java:1186)
+	at org.traccar.MainModule.provideStorage(MainModule.java:142)
+	at org.traccar.MainModule$$FastClassByGuice$$a209c.GUICE$TRAMPOLINE(<generated>)
+	at org.traccar.MainModule$$FastClassByGuice$$a209c.apply(<generated>)
+	at com.google.inject.internal.ProviderMethod$FastClassProviderMethod.doProvision(ProviderMethod.java:260)
+	at com.google.inject.internal.ProviderMethod.doProvision(ProviderMethod.java:171)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.provision(InternalProviderInstanceBindingImpl.java:185)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.get(InternalProviderInstanceBindingImpl.java:162)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.InjectorImpl$1.get(InjectorImpl.java:1148)
+	at com.google.inject.internal.InjectorImpl.getInstance(InjectorImpl.java:1186)
+	at org.traccar.schedule.ScheduleManager.lambda$start$0(ScheduleManager.java:55)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEachOrdered(ReferencePipeline.java:817)
+	at org.traccar.schedule.ScheduleManager.start(ScheduleManager.java:54)
+	at org.traccar.Main.run(Main.java:127)
+	at org.traccar.Main.main(Main.java:111)
+Caused by: org.postgresql.util.PSQLException: FATAL: authentification par mot de passe �chou�e pour l'utilisateur  � postgres �
+	at org.postgresql.core.v3.ConnectionFactoryImpl.doAuthentication(ConnectionFactoryImpl.java:704)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:213)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:268)
+	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:54)
+	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:273)
+	at org.postgresql.Driver.makeConnection(Driver.java:446)
+	at org.postgresql.Driver.connect(Driver.java:298)
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:139)
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:368)
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:205)
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:483)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:571)
+	... 50 more
+
+2025-05-20 15:31:05  INFO: Operating system name: Windows 11 version: 10.0 architecture: amd64
+2025-05-20 15:31:06  INFO: Java runtime name: Java HotSpot(TM) 64-Bit Server VM vendor: Oracle Corporation version: 24.0.1+9-30
+2025-05-20 15:31:06  INFO: Memory limit heap: 2988mb non-heap: 0mb
+2025-05-20 15:31:06  INFO: Character encoding: UTF-8
+2025-05-20 15:31:06  INFO: Version: 6.6
+2025-05-20 15:31:06  INFO: Starting server...
+2025-05-20 15:31:06  INFO: HikariPool-1 - Starting...
+2025-05-20 15:31:07 ERROR: Main method error - 
+com.zaxxer.hikari.pool.HikariPool$PoolInitializationException: Failed to initialize pool: FATAL: authentification par mot de passe �chou�e pour l'utilisateur  � postgres �
+	at com.zaxxer.hikari.pool.HikariPool.throwPoolInitializationException(HikariPool.java:605)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:592)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:101)
+	at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+	at org.traccar.storage.DatabaseModule.provideDataSource(DatabaseModule.java:80)
+	at org.traccar.storage.DatabaseModule$$FastClassByGuice$$162a7f.GUICE$TRAMPOLINE(<generated>)
+	at org.traccar.storage.DatabaseModule$$FastClassByGuice$$162a7f.apply(<generated>)
+	at com.google.inject.internal.ProviderMethod$FastClassProviderMethod.doProvision(ProviderMethod.java:260)
+	at com.google.inject.internal.ProviderMethod.doProvision(ProviderMethod.java:171)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.provision(InternalProviderInstanceBindingImpl.java:185)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.get(InternalProviderInstanceBindingImpl.java:162)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.InjectorImpl$1.get(InjectorImpl.java:1148)
+	at com.google.inject.internal.InjectorImpl.getInstance(InjectorImpl.java:1186)
+	at org.traccar.MainModule.provideStorage(MainModule.java:142)
+	at org.traccar.MainModule$$FastClassByGuice$$a209c.GUICE$TRAMPOLINE(<generated>)
+	at org.traccar.MainModule$$FastClassByGuice$$a209c.apply(<generated>)
+	at com.google.inject.internal.ProviderMethod$FastClassProviderMethod.doProvision(ProviderMethod.java:260)
+	at com.google.inject.internal.ProviderMethod.doProvision(ProviderMethod.java:171)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.provision(InternalProviderInstanceBindingImpl.java:185)
+	at com.google.inject.internal.InternalProviderInstanceBindingImpl$CyclicFactory.get(InternalProviderInstanceBindingImpl.java:162)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.ProviderToInternalFactoryAdapter.get(ProviderToInternalFactoryAdapter.java:40)
+	at com.google.inject.internal.SingletonScope$1.get(SingletonScope.java:169)
+	at com.google.inject.internal.InternalFactoryToProviderAdapter.get(InternalFactoryToProviderAdapter.java:45)
+	at com.google.inject.internal.SingleParameterInjector.inject(SingleParameterInjector.java:40)
+	at com.google.inject.internal.SingleParameterInjector.getAll(SingleParameterInjector.java:60)
+	at com.google.inject.internal.ConstructorInjector.provision(ConstructorInjector.java:113)
+	at com.google.inject.internal.ConstructorInjector.construct(ConstructorInjector.java:91)
+	at com.google.inject.internal.ConstructorBindingImpl$Factory.get(ConstructorBindingImpl.java:300)
+	at com.google.inject.internal.InjectorImpl$1.get(InjectorImpl.java:1148)
+	at com.google.inject.internal.InjectorImpl.getInstance(InjectorImpl.java:1186)
+	at org.traccar.schedule.ScheduleManager.lambda$start$0(ScheduleManager.java:55)
+	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:1024)
+	at java.base/java.util.stream.ReferencePipeline$Head.forEachOrdered(ReferencePipeline.java:817)
+	at org.traccar.schedule.ScheduleManager.start(ScheduleManager.java:54)
+	at org.traccar.Main.run(Main.java:127)
+	at org.traccar.Main.main(Main.java:111)
+Caused by: org.postgresql.util.PSQLException: FATAL: authentification par mot de passe �chou�e pour l'utilisateur  � postgres �
+	at org.postgresql.core.v3.ConnectionFactoryImpl.doAuthentication(ConnectionFactoryImpl.java:704)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.tryConnect(ConnectionFactoryImpl.java:213)
+	at org.postgresql.core.v3.ConnectionFactoryImpl.openConnectionImpl(ConnectionFactoryImpl.java:268)
+	at org.postgresql.core.ConnectionFactory.openConnection(ConnectionFactory.java:54)
+	at org.postgresql.jdbc.PgConnection.<init>(PgConnection.java:273)
+	at org.postgresql.Driver.makeConnection(Driver.java:446)
+	at org.postgresql.Driver.connect(Driver.java:298)
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:139)
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:368)
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:205)
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:483)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:571)
+	... 50 more
+
+2025-05-20 15:33:19  INFO: Operating system name: Windows 11 version: 10.0 architecture: amd64
+2025-05-20 15:33:19  INFO: Java runtime name: Java HotSpot(TM) 64-Bit Server VM vendor: Oracle Corporation version: 24.0.1+9-30
+2025-05-20 15:33:19  INFO: Memory limit heap: 2988mb non-heap: 0mb
+2025-05-20 15:33:19  INFO: Character encoding: UTF-8
+2025-05-20 15:33:19  INFO: Version: 6.6
+2025-05-20 15:33:19  INFO: Starting server...
+2025-05-20 15:33:19  INFO: HikariPool-1 - Starting...
+2025-05-20 15:33:19  INFO: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7a56812e
+2025-05-20 15:33:19  INFO: HikariPool-1 - Start completed.
+2025-05-20 15:33:20  INFO: Set default schema name to public
+2025-05-20 15:33:20  INFO: Clearing database change log checksums
+2025-05-20 15:33:20  INFO: Successfully acquired change log lock
+2025-05-20 15:33:20  INFO: Successfully released change log lock
+2025-05-20 15:33:21  INFO: Reading from public.databasechangelog
+2025-05-20 15:33:23  INFO: Reading from public.databasechangelog
+2025-05-20 15:33:23  INFO: Successfully acquired change log lock
+2025-05-20 15:33:23  INFO: Using deploymentId: 7748003373
+2025-05-20 15:33:23  INFO: Reading from public.databasechangelog
+2025-05-20 15:33:23  INFO: Table tc_actions created
+2025-05-20 15:33:23  INFO: ChangeSet changelog-6.7::changelog-6.7::author ran successfully in 62ms
+2025-05-20 15:33:23  INFO: UPDATE SUMMARY
+2025-05-20 15:33:23  INFO: Run:                          1
+2025-05-20 15:33:23  INFO: Previously run:              50
+2025-05-20 15:33:23  INFO: Filtered out:                 0
+2025-05-20 15:33:23  INFO: -------------------------------
+2025-05-20 15:33:23  INFO: Total change sets:           51
+
+2025-05-20 15:33:23  INFO: Update summary generated
+2025-05-20 15:33:23  INFO: Update command completed successfully.
+2025-05-20 15:33:23  INFO: Successfully released change log lock
+2025-05-20 15:33:23  INFO: Command execution complete
+2025-05-20 15:33:24  WARN: Port disabled due to conflict - 
+java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:511)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:335)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:297)
+	at io.netty.channel.socket.nio.NioServerSocketChannel.doBind(NioServerSocketChannel.java:148)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.bind(AbstractChannel.java:434)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.bind(DefaultChannelPipeline.java:1353)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeBind(AbstractChannelHandlerContext.java:495)
+	at io.netty.channel.AbstractChannelHandlerContext.bind(AbstractChannelHandlerContext.java:474)
+	at io.netty.channel.DefaultChannelPipeline.bind(DefaultChannelPipeline.java:994)
+	at io.netty.channel.Channel.bind(Channel.java:302)
+	at io.netty.bootstrap.AbstractBootstrap$2.run(AbstractBootstrap.java:380)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:148)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:141)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:507)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:180)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1073)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+	Suppressed: java.util.concurrent.CompletionException: Rethrowing promise failure cause
+		at io.netty.util.concurrent.DefaultPromise.rethrowIfFailed(DefaultPromise.java:685)
+		at io.netty.util.concurrent.DefaultPromise.syncUninterruptibly(DefaultPromise.java:426)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:125)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:30)
+		at org.traccar.TrackerServer.start(TrackerServer.java:120)
+		at org.traccar.ServerManager.start(ServerManager.java:74)
+		at org.traccar.Main.run(Main.java:127)
+		at org.traccar.Main.main(Main.java:111)
+
+2025-05-20 15:33:25  INFO: jetty-11.0.25; built: 2025-03-13T00:15:57.301Z; git: a2e9fae3ad8320f2a713d4fa29bba356a99d1295; jvm 24.0.1+9-30
+2025-05-20 15:33:25  INFO: Started o.t.w.@247159fb{/,null,AVAILABLE}
+2025-05-20 15:33:25  INFO: Session workerName=node0
+2025-05-20 15:33:25  INFO: Started o.e.j.s.ServletContextHandler@4d0fd498{/,null,AVAILABLE}
+2025-05-20 15:33:25  INFO: Started ServerConnector@1a5e3df0{HTTP/1.1, (http/1.1)}{0.0.0.0:8082}
+2025-05-20 15:33:25  INFO: Started Server@41fffaea{STARTING}[11.0.25,sto=0] @7579ms
+2025-05-20 15:33:45  INFO: Operating system name: Windows 11 version: 10.0 architecture: amd64
+2025-05-20 15:33:45  INFO: Java runtime name: Java HotSpot(TM) 64-Bit Server VM vendor: Oracle Corporation version: 24.0.1+9-30
+2025-05-20 15:33:45  INFO: Memory limit heap: 2988mb non-heap: 0mb
+2025-05-20 15:33:45  INFO: Character encoding: UTF-8
+2025-05-20 15:33:45  INFO: Version: 6.6
+2025-05-20 15:33:45  INFO: Starting server...
+2025-05-20 15:33:45  INFO: HikariPool-1 - Starting...
+2025-05-20 15:33:45  INFO: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7a56812e
+2025-05-20 15:33:45  INFO: HikariPool-1 - Start completed.
+2025-05-20 15:33:46  INFO: Set default schema name to public
+2025-05-20 15:33:46  INFO: Clearing database change log checksums
+2025-05-20 15:33:46  INFO: Successfully acquired change log lock
+2025-05-20 15:33:46  INFO: Successfully released change log lock
+2025-05-20 15:33:48  INFO: Reading from public.databasechangelog
+2025-05-20 15:33:49  INFO: Reading from public.databasechangelog
+2025-05-20 15:33:49  INFO: Reading from public.databasechangelog
+2025-05-20 15:33:49  INFO: UPDATE SUMMARY
+2025-05-20 15:33:49  INFO: Run:                          0
+2025-05-20 15:33:49  INFO: Previously run:              51
+2025-05-20 15:33:49  INFO: Filtered out:                 0
+2025-05-20 15:33:49  INFO: -------------------------------
+2025-05-20 15:33:49  INFO: Total change sets:           51
+
+2025-05-20 15:33:49  INFO: Update summary generated
+2025-05-20 15:33:49  INFO: Successfully released change log lock
+2025-05-20 15:33:49  INFO: Command execution complete
+2025-05-20 15:33:51  WARN: Port disabled due to conflict - 
+java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:511)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:335)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:297)
+	at io.netty.channel.socket.nio.NioServerSocketChannel.doBind(NioServerSocketChannel.java:148)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.bind(AbstractChannel.java:434)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.bind(DefaultChannelPipeline.java:1353)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeBind(AbstractChannelHandlerContext.java:495)
+	at io.netty.channel.AbstractChannelHandlerContext.bind(AbstractChannelHandlerContext.java:474)
+	at io.netty.channel.DefaultChannelPipeline.bind(DefaultChannelPipeline.java:994)
+	at io.netty.channel.Channel.bind(Channel.java:302)
+	at io.netty.bootstrap.AbstractBootstrap$2.run(AbstractBootstrap.java:380)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:148)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:141)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:507)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:180)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1073)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+	Suppressed: java.util.concurrent.CompletionException: Rethrowing promise failure cause
+		at io.netty.util.concurrent.DefaultPromise.rethrowIfFailed(DefaultPromise.java:685)
+		at io.netty.util.concurrent.DefaultPromise.syncUninterruptibly(DefaultPromise.java:426)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:125)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:30)
+		at org.traccar.TrackerServer.start(TrackerServer.java:120)
+		at org.traccar.ServerManager.start(ServerManager.java:74)
+		at org.traccar.Main.run(Main.java:127)
+		at org.traccar.Main.main(Main.java:111)
+
+2025-05-20 15:33:51  INFO: jetty-11.0.25; built: 2025-03-13T00:15:57.301Z; git: a2e9fae3ad8320f2a713d4fa29bba356a99d1295; jvm 24.0.1+9-30
+2025-05-20 15:33:51  INFO: Started o.t.w.@5878bb7b{/,null,AVAILABLE}
+2025-05-20 15:33:51  INFO: Session workerName=node0
+2025-05-20 15:33:52  INFO: Started o.e.j.s.ServletContextHandler@49f7bf63{/,null,AVAILABLE}
+2025-05-20 15:33:52  INFO: Started ServerConnector@6e0e186d{HTTP/1.1, (http/1.1)}{0.0.0.0:8082}
+2025-05-20 15:33:52  INFO: Started Server@4978dbee{STARTING}[11.0.25,sto=0] @7334ms
+2025-05-20 15:41:59  INFO: Operating system name: Windows 11 version: 10.0 architecture: amd64
+2025-05-20 15:41:59  INFO: Java runtime name: Java HotSpot(TM) 64-Bit Server VM vendor: Oracle Corporation version: 24.0.1+9-30
+2025-05-20 15:41:59  INFO: Memory limit heap: 2988mb non-heap: 0mb
+2025-05-20 15:41:59  INFO: Character encoding: UTF-8
+2025-05-20 15:41:59  INFO: Version: 6.6
+2025-05-20 15:41:59  INFO: Starting server...
+2025-05-20 15:41:59  INFO: HikariPool-1 - Starting...
+2025-05-20 15:41:59  INFO: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7a56812e
+2025-05-20 15:41:59  INFO: HikariPool-1 - Start completed.
+2025-05-20 15:42:00  INFO: Set default schema name to public
+2025-05-20 15:42:00  INFO: Clearing database change log checksums
+2025-05-20 15:42:00  INFO: Successfully acquired change log lock
+2025-05-20 15:42:00  INFO: Successfully released change log lock
+2025-05-20 15:42:02  INFO: Reading from public.databasechangelog
+2025-05-20 15:42:03  INFO: Reading from public.databasechangelog
+2025-05-20 15:42:03  INFO: Reading from public.databasechangelog
+2025-05-20 15:42:03  INFO: UPDATE SUMMARY
+2025-05-20 15:42:03  INFO: Run:                          0
+2025-05-20 15:42:03  INFO: Previously run:              51
+2025-05-20 15:42:03  INFO: Filtered out:                 0
+2025-05-20 15:42:03  INFO: -------------------------------
+2025-05-20 15:42:03  INFO: Total change sets:           51
+
+2025-05-20 15:42:03  INFO: Update summary generated
+2025-05-20 15:42:03  INFO: Successfully released change log lock
+2025-05-20 15:42:03  INFO: Command execution complete
+2025-05-20 15:42:04  WARN: Port disabled due to conflict - 
+java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:511)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:335)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:297)
+	at io.netty.channel.socket.nio.NioServerSocketChannel.doBind(NioServerSocketChannel.java:148)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.bind(AbstractChannel.java:434)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.bind(DefaultChannelPipeline.java:1353)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeBind(AbstractChannelHandlerContext.java:495)
+	at io.netty.channel.AbstractChannelHandlerContext.bind(AbstractChannelHandlerContext.java:474)
+	at io.netty.channel.DefaultChannelPipeline.bind(DefaultChannelPipeline.java:994)
+	at io.netty.channel.Channel.bind(Channel.java:302)
+	at io.netty.bootstrap.AbstractBootstrap$2.run(AbstractBootstrap.java:380)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:148)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:141)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:507)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:180)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1073)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+	Suppressed: java.util.concurrent.CompletionException: Rethrowing promise failure cause
+		at io.netty.util.concurrent.DefaultPromise.rethrowIfFailed(DefaultPromise.java:685)
+		at io.netty.util.concurrent.DefaultPromise.syncUninterruptibly(DefaultPromise.java:426)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:125)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:30)
+		at org.traccar.TrackerServer.start(TrackerServer.java:120)
+		at org.traccar.ServerManager.start(ServerManager.java:74)
+		at org.traccar.Main.run(Main.java:127)
+		at org.traccar.Main.main(Main.java:111)
+
+2025-05-20 15:42:04  INFO: jetty-11.0.25; built: 2025-03-13T00:15:57.301Z; git: a2e9fae3ad8320f2a713d4fa29bba356a99d1295; jvm 24.0.1+9-30
+2025-05-20 15:42:04  INFO: Started o.t.w.@5878bb7b{/,null,AVAILABLE}
+2025-05-20 15:42:04  INFO: Session workerName=node0
+2025-05-20 15:42:05  INFO: Started o.e.j.s.ServletContextHandler@49f7bf63{/,null,AVAILABLE}
+2025-05-20 15:42:05  INFO: Started ServerConnector@6e0e186d{HTTP/1.1, (http/1.1)}{0.0.0.0:8082}
+2025-05-20 15:42:05  INFO: Started Server@4978dbee{STARTING}[11.0.25,sto=0] @6602ms
+2025-05-20 16:12:15  INFO: Operating system name: Windows 11 version: 10.0 architecture: amd64
+2025-05-20 16:12:15  INFO: Java runtime name: Java HotSpot(TM) 64-Bit Server VM vendor: Oracle Corporation version: 24.0.1+9-30
+2025-05-20 16:12:15  INFO: Memory limit heap: 2988mb non-heap: 0mb
+2025-05-20 16:12:15  INFO: Character encoding: UTF-8
+2025-05-20 16:12:15  INFO: Version: 6.6
+2025-05-20 16:12:15  INFO: Starting server...
+2025-05-20 16:12:15  INFO: HikariPool-1 - Starting...
+2025-05-20 16:12:15  INFO: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7a56812e
+2025-05-20 16:12:15  INFO: HikariPool-1 - Start completed.
+2025-05-20 16:12:16  INFO: Set default schema name to public
+2025-05-20 16:12:16  INFO: Clearing database change log checksums
+2025-05-20 16:12:16  INFO: Successfully acquired change log lock
+2025-05-20 16:12:16  INFO: Successfully released change log lock
+2025-05-20 16:12:18  INFO: Reading from public.databasechangelog
+2025-05-20 16:12:19  INFO: Reading from public.databasechangelog
+2025-05-20 16:12:19  INFO: Reading from public.databasechangelog
+2025-05-20 16:12:19  INFO: UPDATE SUMMARY
+2025-05-20 16:12:19  INFO: Run:                          0
+2025-05-20 16:12:19  INFO: Previously run:              51
+2025-05-20 16:12:19  INFO: Filtered out:                 0
+2025-05-20 16:12:19  INFO: -------------------------------
+2025-05-20 16:12:19  INFO: Total change sets:           51
+
+2025-05-20 16:12:19  INFO: Update summary generated
+2025-05-20 16:12:19  INFO: Successfully released change log lock
+2025-05-20 16:12:19  INFO: Command execution complete
+2025-05-20 16:12:20  WARN: Port disabled due to conflict - 
+java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:511)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:335)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:297)
+	at io.netty.channel.socket.nio.NioServerSocketChannel.doBind(NioServerSocketChannel.java:148)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.bind(AbstractChannel.java:434)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.bind(DefaultChannelPipeline.java:1353)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeBind(AbstractChannelHandlerContext.java:495)
+	at io.netty.channel.AbstractChannelHandlerContext.bind(AbstractChannelHandlerContext.java:474)
+	at io.netty.channel.DefaultChannelPipeline.bind(DefaultChannelPipeline.java:994)
+	at io.netty.channel.Channel.bind(Channel.java:302)
+	at io.netty.bootstrap.AbstractBootstrap$2.run(AbstractBootstrap.java:380)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:148)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:141)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:507)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:180)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1073)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+	Suppressed: java.util.concurrent.CompletionException: Rethrowing promise failure cause
+		at io.netty.util.concurrent.DefaultPromise.rethrowIfFailed(DefaultPromise.java:685)
+		at io.netty.util.concurrent.DefaultPromise.syncUninterruptibly(DefaultPromise.java:426)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:125)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:30)
+		at org.traccar.TrackerServer.start(TrackerServer.java:120)
+		at org.traccar.ServerManager.start(ServerManager.java:74)
+		at org.traccar.Main.run(Main.java:127)
+		at org.traccar.Main.main(Main.java:111)
+
+2025-05-20 16:12:20  INFO: jetty-11.0.25; built: 2025-03-13T00:15:57.301Z; git: a2e9fae3ad8320f2a713d4fa29bba356a99d1295; jvm 24.0.1+9-30
+2025-05-20 16:12:20  INFO: Started o.t.w.@5878bb7b{/,null,AVAILABLE}
+2025-05-20 16:12:20  INFO: Session workerName=node0
+2025-05-20 16:12:21  INFO: Started o.e.j.s.ServletContextHandler@49f7bf63{/,null,AVAILABLE}
+2025-05-20 16:12:21  INFO: Started ServerConnector@6e0e186d{HTTP/1.1, (http/1.1)}{0.0.0.0:8082}
+2025-05-20 16:12:21  INFO: Started Server@4978dbee{STARTING}[11.0.25,sto=0] @6642ms
+2025-05-20 16:49:49  INFO: Operating system name: Windows 11 version: 10.0 architecture: amd64
+2025-05-20 16:49:49  INFO: Java runtime name: Java HotSpot(TM) 64-Bit Server VM vendor: Oracle Corporation version: 24.0.1+9-30
+2025-05-20 16:49:49  INFO: Memory limit heap: 2988mb non-heap: 0mb
+2025-05-20 16:49:49  INFO: Character encoding: UTF-8
+2025-05-20 16:49:49  INFO: Version: 6.6
+2025-05-20 16:49:49  INFO: Starting server...
+2025-05-20 16:49:50  INFO: HikariPool-1 - Starting...
+2025-05-20 16:49:50  INFO: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7a56812e
+2025-05-20 16:49:50  INFO: HikariPool-1 - Start completed.
+2025-05-20 16:49:50  INFO: Set default schema name to public
+2025-05-20 16:49:50  INFO: Clearing database change log checksums
+2025-05-20 16:49:51  INFO: Successfully acquired change log lock
+2025-05-20 16:49:51  INFO: Successfully released change log lock
+2025-05-20 16:49:52  INFO: Reading from public.databasechangelog
+2025-05-20 16:49:53  INFO: Reading from public.databasechangelog
+2025-05-20 16:49:54  INFO: Reading from public.databasechangelog
+2025-05-20 16:49:54  INFO: UPDATE SUMMARY
+2025-05-20 16:49:54  INFO: Run:                          0
+2025-05-20 16:49:54  INFO: Previously run:              51
+2025-05-20 16:49:54  INFO: Filtered out:                 0
+2025-05-20 16:49:54  INFO: -------------------------------
+2025-05-20 16:49:54  INFO: Total change sets:           51
+
+2025-05-20 16:49:54  INFO: Update summary generated
+2025-05-20 16:49:54  INFO: Successfully released change log lock
+2025-05-20 16:49:54  INFO: Command execution complete
+2025-05-20 16:49:54  WARN: Port disabled due to conflict - 
+java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:511)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:335)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:297)
+	at io.netty.channel.socket.nio.NioServerSocketChannel.doBind(NioServerSocketChannel.java:148)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.bind(AbstractChannel.java:434)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.bind(DefaultChannelPipeline.java:1353)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeBind(AbstractChannelHandlerContext.java:495)
+	at io.netty.channel.AbstractChannelHandlerContext.bind(AbstractChannelHandlerContext.java:474)
+	at io.netty.channel.DefaultChannelPipeline.bind(DefaultChannelPipeline.java:994)
+	at io.netty.channel.Channel.bind(Channel.java:302)
+	at io.netty.bootstrap.AbstractBootstrap$2.run(AbstractBootstrap.java:380)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:148)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:141)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:507)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:180)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1073)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+	Suppressed: java.util.concurrent.CompletionException: Rethrowing promise failure cause
+		at io.netty.util.concurrent.DefaultPromise.rethrowIfFailed(DefaultPromise.java:685)
+		at io.netty.util.concurrent.DefaultPromise.syncUninterruptibly(DefaultPromise.java:426)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:125)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:30)
+		at org.traccar.TrackerServer.start(TrackerServer.java:120)
+		at org.traccar.ServerManager.start(ServerManager.java:74)
+		at org.traccar.Main.run(Main.java:127)
+		at org.traccar.Main.main(Main.java:111)
+
+2025-05-20 16:49:55  INFO: jetty-11.0.25; built: 2025-03-13T00:15:57.301Z; git: a2e9fae3ad8320f2a713d4fa29bba356a99d1295; jvm 24.0.1+9-30
+2025-05-20 16:49:55  INFO: Started o.t.w.@5878bb7b{/,null,AVAILABLE}
+2025-05-20 16:49:55  INFO: Session workerName=node0
+2025-05-20 16:49:56  INFO: Started o.e.j.s.ServletContextHandler@49f7bf63{/,null,AVAILABLE}
+2025-05-20 16:49:56  INFO: Started ServerConnector@6e0e186d{HTTP/1.1, (http/1.1)}{0.0.0.0:8082}
+2025-05-20 16:49:56  INFO: Started Server@4978dbee{STARTING}[11.0.25,sto=0] @6875ms
+2025-05-20 16:59:41  INFO: Operating system name: Windows 11 version: 10.0 architecture: amd64
+2025-05-20 16:59:42  INFO: Java runtime name: Java HotSpot(TM) 64-Bit Server VM vendor: Oracle Corporation version: 24.0.1+9-30
+2025-05-20 16:59:42  INFO: Memory limit heap: 2988mb non-heap: 0mb
+2025-05-20 16:59:42  INFO: Character encoding: UTF-8
+2025-05-20 16:59:42  INFO: Version: 6.6
+2025-05-20 16:59:42  INFO: Starting server...
+2025-05-20 16:59:42  INFO: HikariPool-1 - Starting...
+2025-05-20 16:59:42  INFO: HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@7a56812e
+2025-05-20 16:59:42  INFO: HikariPool-1 - Start completed.
+2025-05-20 16:59:42  INFO: Set default schema name to public
+2025-05-20 16:59:42  INFO: Clearing database change log checksums
+2025-05-20 16:59:43  INFO: Successfully acquired change log lock
+2025-05-20 16:59:43  INFO: Successfully released change log lock
+2025-05-20 16:59:45  INFO: Reading from public.databasechangelog
+2025-05-20 16:59:47  INFO: Reading from public.databasechangelog
+2025-05-20 16:59:47  INFO: Reading from public.databasechangelog
+2025-05-20 16:59:47  INFO: UPDATE SUMMARY
+2025-05-20 16:59:47  INFO: Run:                          0
+2025-05-20 16:59:47  INFO: Previously run:              51
+2025-05-20 16:59:47  INFO: Filtered out:                 0
+2025-05-20 16:59:47  INFO: -------------------------------
+2025-05-20 16:59:47  INFO: Total change sets:           51
+
+2025-05-20 16:59:47  INFO: Update summary generated
+2025-05-20 16:59:47  INFO: Successfully released change log lock
+2025-05-20 16:59:47  INFO: Command execution complete
+2025-05-20 16:59:48  WARN: Port disabled due to conflict - 
+java.net.BindException: Address already in use: bind
+	at java.base/sun.nio.ch.Net.bind0(Native Method)
+	at java.base/sun.nio.ch.Net.bind(Net.java:511)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.netBind(ServerSocketChannelImpl.java:335)
+	at java.base/sun.nio.ch.ServerSocketChannelImpl.bind(ServerSocketChannelImpl.java:297)
+	at io.netty.channel.socket.nio.NioServerSocketChannel.doBind(NioServerSocketChannel.java:148)
+	at io.netty.channel.AbstractChannel$AbstractUnsafe.bind(AbstractChannel.java:434)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.bind(DefaultChannelPipeline.java:1353)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeBind(AbstractChannelHandlerContext.java:495)
+	at io.netty.channel.AbstractChannelHandlerContext.bind(AbstractChannelHandlerContext.java:474)
+	at io.netty.channel.DefaultChannelPipeline.bind(DefaultChannelPipeline.java:994)
+	at io.netty.channel.Channel.bind(Channel.java:302)
+	at io.netty.bootstrap.AbstractBootstrap$2.run(AbstractBootstrap.java:380)
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:148)
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:141)
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:507)
+	at io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:180)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1073)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:1447)
+	Suppressed: java.util.concurrent.CompletionException: Rethrowing promise failure cause
+		at io.netty.util.concurrent.DefaultPromise.rethrowIfFailed(DefaultPromise.java:685)
+		at io.netty.util.concurrent.DefaultPromise.syncUninterruptibly(DefaultPromise.java:426)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:125)
+		at io.netty.channel.DefaultChannelPromise.syncUninterruptibly(DefaultChannelPromise.java:30)
+		at org.traccar.TrackerServer.start(TrackerServer.java:120)
+		at org.traccar.ServerManager.start(ServerManager.java:74)
+		at org.traccar.Main.run(Main.java:127)
+		at org.traccar.Main.main(Main.java:111)
+
+2025-05-20 16:59:48  INFO: jetty-11.0.25; built: 2025-03-13T00:15:57.301Z; git: a2e9fae3ad8320f2a713d4fa29bba356a99d1295; jvm 24.0.1+9-30
+2025-05-20 16:59:48  INFO: Started o.t.w.@5878bb7b{/,null,AVAILABLE}
+2025-05-20 16:59:48  INFO: Session workerName=node0
+2025-05-20 16:59:49  INFO: Started o.e.j.s.ServletContextHandler@49f7bf63{/,null,AVAILABLE}
+2025-05-20 16:59:49  INFO: Started ServerConnector@6e0e186d{HTTP/1.1, (http/1.1)}{0.0.0.0:8082}
+2025-05-20 16:59:49  INFO: Started Server@4978dbee{STARTING}[11.0.25,sto=0] @7814ms
