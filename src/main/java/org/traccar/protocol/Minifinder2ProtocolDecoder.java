@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     int endIndex = buf.readUnsignedByte() + buf.readerIndex();
                     int key = buf.readUnsignedByte();
                     switch (key) {
-                        case 0x11, 0x21, 0x22 -> {
+                        case 0x11 -> {
                             body.writeByte(9 + 1); // length
                             body.writeByte(key);
                             body.writeIntLE(0); // latitude
@@ -78,13 +78,16 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     buf.readerIndex(endIndex);
                 }
-            } else {
-                body.writeByte(1); // key length
-                body.writeByte(0); // success
             }
 
             ByteBuf content = Unpooled.buffer();
-            content.writeByte(type == MSG_SERVICES ? type : MSG_RESPONSE);
+            if (body.isReadable()) {
+                content.writeByte(MSG_SERVICES);
+            } else {
+                content.writeByte(MSG_RESPONSE);
+                body.writeByte(1); // key length
+                body.writeByte(0); // success
+            }
             content.writeBytes(body);
             body.release();
 
