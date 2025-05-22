@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,14 +80,15 @@ public abstract class TrackerServer implements TrackerConnector {
         };
 
         this.datagram = datagram;
+        var eventLoopGroupFactory = Main.getInjector().getInstance(EventLoopGroupFactory.class);
         if (datagram) {
             bootstrap = new Bootstrap()
-                    .group(EventLoopGroupFactory.getWorkerGroup())
+                    .group(eventLoopGroupFactory.getWorkerGroup())
                     .channel(NioDatagramChannel.class)
                     .handler(pipelineFactory);
         } else {
             bootstrap = new ServerBootstrap()
-                    .group(EventLoopGroupFactory.getBossGroup(), EventLoopGroupFactory.getWorkerGroup())
+                    .group(eventLoopGroupFactory.getBossGroup(), eventLoopGroupFactory.getWorkerGroup())
                     .channel(NioServerSocketChannel.class)
                     .childHandler(pipelineFactory);
         }
