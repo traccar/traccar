@@ -102,7 +102,7 @@ public class BufferingManager {
                 Holder holder = new Holder(context, position);
                 holder.timeout = scheduleTimeout(holder);
                 queue.add(holder);
-                queue.tailSet(holder).forEach(h -> {
+                queue.tailSet(holder, false).forEach(h -> {
                     h.timeout.cancel();
                     h.timeout = scheduleTimeout(h);
                 });
