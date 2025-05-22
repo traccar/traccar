@@ -7,6 +7,11 @@
   logicalFilePath="changelog-6.7.0">
 
   <changeSet author="author" id="changelog-6.7.0">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_actions"/>
+      </not>
+    </preConditions>
 
     <createTable tableName="tc_actions">
       <column autoIncrement="true" name="id" type="INT">
