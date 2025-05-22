@@ -440,7 +440,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_RPM, Integer.parseInt(values[index++]));
             }
 
-            if ((values.length - index >= 2 && !protocol.startsWith("ST3")) 
+            if ((values.length - index >= 2 && !protocol.startsWith("ST3"))
                     || (protocol.startsWith("ST3") && model == 45)) {
                 String driverUniqueId = values[index++];
                 if (!driverUniqueId.isEmpty()) {
