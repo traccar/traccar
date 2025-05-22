@@ -162,10 +162,9 @@ public class SessionResource extends BaseResource {
     @Path("openid/callback")
     @GET
     public Response requestToken() throws IOException, StorageException, ParseException, GeneralSecurityException {
-        StringBuilder requestUrl = new StringBuilder(request.getRequestURL().toString());
-        String queryString = request.getQueryString();
-        String requestUri = requestUrl.append('?').append(queryString).toString();
-
-        return Response.seeOther(openIdProvider.handleCallback(URI.create(requestUri), request)).build();
+        String redirectUriOverride = request.getParameter("redirect_uri");
+        String redirectUri = redirectUriOverride != null ? redirectUriOverride : request.getRequestURL().toString();
+        return Response.seeOther(openIdProvider.handleCallback(
+                URI.create(redirectUri), request.getQueryString(), request)).build();
     }
 }

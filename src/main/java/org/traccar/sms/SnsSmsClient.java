@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2021 Subodh Ranadive (subodhranadive3103@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,19 +16,17 @@
  */
 package org.traccar.sms;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.handlers.AsyncHandler;
-import com.amazonaws.services.sns.AmazonSNSAsync;
-import com.amazonaws.services.sns.AmazonSNSAsyncClientBuilder;
-import com.amazonaws.services.sns.model.MessageAttributeValue;
-import com.amazonaws.services.sns.model.PublishRequest;
-
-import com.amazonaws.services.sns.model.PublishResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sns.SnsClient;
+import software.amazon.awssdk.services.sns.model.MessageAttributeValue;
+import software.amazon.awssdk.services.sns.model.PublishRequest;
+import software.amazon.awssdk.services.sns.model.SnsException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,14 +34,15 @@ import java.util.Map;
 public class SnsSmsClient implements SmsManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(SnsSmsClient.class);
 
-    private final AmazonSNSAsync snsClient;
+    private final SnsClient snsClient;
 
     public SnsSmsClient(Config config) {
-        BasicAWSCredentials awsCredentials = new BasicAWSCredentials(
+        AwsBasicCredentials awsCredentials = AwsBasicCredentials.create(
                 config.getString(Keys.SMS_AWS_ACCESS), config.getString(Keys.SMS_AWS_SECRET));
-        snsClient = AmazonSNSAsyncClientBuilder.standard()
-                .withRegion(config.getString(Keys.SMS_AWS_REGION))
-                .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)).build();
+        snsClient = SnsClient.builder()
+                .region(Region.of(config.getString(Keys.SMS_AWS_REGION)))
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                .build();
     }
 
     @Override
@@ -51,25 +50,27 @@ public class SnsSmsClient implements SmsManager {
         Map<String, MessageAttributeValue> smsAttributes = new HashMap<>();
         smsAttributes.put(
                 "AWS.SNS.SMS.SenderID",
-                new MessageAttributeValue().withStringValue("SNS").withDataType("String"));
+                MessageAttributeValue.builder()
+                        .stringValue("SNS")
+                        .dataType("String")
+                        .build());
         smsAttributes.put(
                 "AWS.SNS.SMS.SMSType",
-                new MessageAttributeValue().withStringValue("Transactional").withDataType("String"));
+                MessageAttributeValue.builder()
+                        .stringValue("Transactional")
+                        .dataType("String")
+                        .build());
 
-        PublishRequest publishRequest = new PublishRequest()
-                .withMessage(message)
-                .withPhoneNumber(phone)
-                .withMessageAttributes(smsAttributes);
+        PublishRequest publishRequest = PublishRequest.builder()
+                .message(message)
+                .phoneNumber(phone)
+                .messageAttributes(smsAttributes)
+                .build();
 
-        snsClient.publishAsync(publishRequest, new AsyncHandler<>() {
-            @Override
-            public void onError(Exception exception) {
-                LOGGER.error("SMS send failed", exception);
-            }
-
-            @Override
-            public void onSuccess(PublishRequest request, PublishResult result) {
-            }
-        });
+        try {
+            snsClient.publish(publishRequest);
+        } catch (SnsException e) {
+            LOGGER.error("SMS send failed", e);
+        }
     }
 }
