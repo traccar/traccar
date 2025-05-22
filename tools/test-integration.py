@@ -128,6 +128,7 @@ messages = {
     'teratrack': '{"MDeviceID":"022043756090","DiviceType":"1","DataType":"1","DataLength":"69","DateTime":"2022-03-09 10:56:01","Latitude":"-6.846451","Longitude":"39.316324","LongitudeState":"1","LatitudeState":"0","Speed":"90","Mileage":"0","FenceAlarm":"0","AreaAlarmID":"0","LockCutOff":"0","SealTampered":"0","MessageAck":"1","LockRope":"1","LockStatus":"1","LockOpen":"0","PasswordError":"0","CardNo":"60000644","IllegalCard":"0","LowPower":"0","UnCoverBack":"0","CoverStatus":"1","LockStuck":"0","Power":"79","GSM":"16","IMEI":"123456789012345","Index":"20","Slave":[]}',
     'envotech': '$80SLM,02,F,123456,130410155921,431750216,000040,0000,,00000000,\'13041015592110476673N10111459E001281*2A#',
     'bstpl': 'BSTPL$1,123456789012345,V,200722,045113,00.000000,0,00.00000,0,0,0,000,00,0,17,1,1,0,0,00.01,0,04.19,15B_190821,8991000907387031196F,12.27#',
+    'nto': '^NB,123456789012345,N00,050923,233519,V,N,2236.1994,E,11315.4645,5,0,000000000000,460:00:0:75217090,-04:00,,1693971319,31,2DA5&',
 }
 
 baseUrl = 'http://localhost:8082'
