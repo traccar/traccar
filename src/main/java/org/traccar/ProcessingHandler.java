@@ -167,14 +167,21 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
         iterator.next().handlePosition(position, new BasePositionHandler.Callback() {
             @Override
             public void processed(boolean filtered) {
-                if (!filtered) {
-                    if (iterator.hasNext()) {
-                        iterator.next().handlePosition(position, this);
+                Runnable continuation = () -> {
+                    if (!filtered) {
+                        if (iterator.hasNext()) {
+                            iterator.next().handlePosition(position, this);
+                        } else {
+                            processEventHandlers(ctx, position);
+                        }
                     } else {
-                        processEventHandlers(ctx, position);
+                        finishedProcessing(ctx, position, true);
                     }
+                };
+                if (ctx.executor().inEventLoop()) {
+                    continuation.run();
                 } else {
-                    finishedProcessing(ctx, position, true);
+                    ctx.executor().execute(continuation);
                 }
             }
         });
