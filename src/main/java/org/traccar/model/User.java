@@ -68,14 +68,14 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
         this.phone = phone != null ? phone.trim() : null;
     }
 
-    private long fk_organization_id;
+    private long organizationid;
 
-    public long getFk_organization_id() {
-        return this.fk_organization_id;
+    public long getOrganizationId() {
+        return this.organizationid;
     }
 
-    public void setFk_organization_id(long fk_organization_id){
-        this.fk_organization_id = fk_organization_id;
+    public void setOrganizationId(long organizationid) {
+        this.organizationid = organizationid;
     }
 
     private boolean readonly;

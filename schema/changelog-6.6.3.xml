@@ -22,7 +22,7 @@
     </changeSet>
 
 
-    <!-- Add fk_organization_id column to tc_users -->
+    <!-- Add organizationid column to tc_users -->
     <changeSet author="author" id="changelog-6.6.3-fk-user-org">
         <createTable tableName="tc_user_organization">
             <column name="userid" type="INT">
@@ -38,13 +38,13 @@
 
 
         <addColumn tableName="tc_users">
-            <column name="fk_organization_id" type="INT"/>
+            <column name="organizationid" type="INT"/>
         </addColumn>
 
         <!-- Add foreign key constraint for tc_users -->
         <addForeignKeyConstraint
                 baseTableName="tc_users"
-                baseColumnNames="fk_organization_id"
+                baseColumnNames="organizationid"
                 referencedTableName="tc_organization"
                 referencedColumnNames="id"
                 onDelete="SET NULL"
@@ -54,21 +54,33 @@
 
     </changeSet>
 
-    <!-- Add fk_organization_id column to tc_devices -->
+    <!-- Add organizationid column to tc_devices -->
     <changeSet author="author" id="changelog-6.6.3-add-fk-to-devices">
 
         <addColumn tableName="tc_devices">
-            <column name="fk_organization_id" type="INT"/>
+            <column name="organizationid" type="INT"/>
         </addColumn>
 
         <!-- Add foreign key constraint for tc_devices -->
         <addForeignKeyConstraint
                 baseTableName="tc_devices"
-                baseColumnNames="fk_organization_id"
+                baseColumnNames="organizationid"
                 referencedTableName="tc_organization"
                 referencedColumnNames="id"
                 onDelete="SET NULL"
                 constraintName="fk_tc_devices_organization"/>
+
+    </changeSet>
+
+    <changeSet author="author" id="changelog-6.6.3-index_org_user_device">
+
+        <createIndex tableName="tc_users" indexName="users_organizationid">
+            <column name="organizationid" />
+        </createIndex>
+
+        <createIndex tableName="tc_devices" indexName="devices_organizationid">
+            <column name="organizationid" />
+        </createIndex>
 
     </changeSet>
 
