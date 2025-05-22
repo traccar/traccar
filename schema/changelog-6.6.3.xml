@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+        logicalFilePath="changelog-6.6.3">
+
+    <changeSet author="author" id="changelog-6.6.3">
+
+        <createTable tableName="tc_organization">
+            <column autoIncrement="true" name="id" type="INT">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="name" type="VARCHAR(4000)">
+                <constraints nullable="false" />
+            </column>
+            <column name="attributes" type="VARCHAR(128)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <!-- Add organizationid column to tc_users -->
+    <changeSet author="author" id="changelog-6.6.3-fk-user-org">
+        <createTable tableName="tc_user_organization">
+            <column name="userid" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="organizationid" type="INT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint baseTableName="tc_user_organization" baseColumnNames="organizationid" constraintName="fk_user_organization_organizationid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_organization" />
+        <addForeignKeyConstraint baseTableName="tc_user_organization" baseColumnNames="userid" constraintName="fk_user_organization_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+
+
+        <addColumn tableName="tc_users">
+            <column name="organizationid" type="INT"/>
+        </addColumn>
+
+        <!-- Add foreign key constraint for tc_users -->
+        <addForeignKeyConstraint
+                baseTableName="tc_users"
+                baseColumnNames="organizationid"
+                referencedTableName="tc_organization"
+                referencedColumnNames="id"
+                onDelete="SET NULL"
+                constraintName="fk_tc_users_organization"/>
+
+
+
+    </changeSet>
+
+    <!-- Add organizationid column to tc_devices -->
+    <changeSet author="author" id="changelog-6.6.3-add-fk-to-devices">
+
+        <addColumn tableName="tc_devices">
+            <column name="organizationid" type="INT"/>
+        </addColumn>
+
+        <!-- Add foreign key constraint for tc_devices -->
+        <addForeignKeyConstraint
+                baseTableName="tc_devices"
+                baseColumnNames="organizationid"
+                referencedTableName="tc_organization"
+                referencedColumnNames="id"
+                onDelete="SET NULL"
+                constraintName="fk_tc_devices_organization"/>
+
+    </changeSet>
+
+    <changeSet author="author" id="changelog-6.6.3-index_org_user_device">
+
+        <createIndex tableName="tc_users" indexName="users_organizationid">
+            <column name="organizationid" />
+        </createIndex>
+
+        <createIndex tableName="tc_devices" indexName="devices_organizationid">
+            <column name="organizationid" />
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog>

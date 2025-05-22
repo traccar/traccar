@@ -94,6 +94,16 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
         this.status = status != null ? status.trim() : null;
     }
 
+    private long organizationid;
+
+    public long getOrganizationId() {
+        return this.organizationid;
+    }
+
+    public void setOrganizationId(long organizationid) {
+        this.organizationid = organizationid;
+    }
+
     private Date lastUpdate;
 
     @QueryIgnore
