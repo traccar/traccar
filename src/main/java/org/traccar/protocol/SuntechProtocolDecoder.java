@@ -361,9 +361,11 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 && !type.equals("ALT") && !type.equals("UEX")) {
             return null;
         }
-        Integer model = null;
+        Integer model;
         if (protocol.startsWith("ST3") || protocol.equals("ST500") || protocol.equals("ST600")) {
-           model = Integer.parseInt(values[index++]);
+            model = Integer.parseInt(values[index++]);
+        } else {
+            model = null;
         }
 
         position.set(Position.KEY_VERSION_FW, values[index++]);
@@ -413,8 +415,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             case "ALT" -> position.addAlarm(decodeAlert(Integer.parseInt(values[index++])));
             case "UEX" -> index = decodeSerialData(position, values, index);
         }
-
-        if (getHbm(deviceSession.getDeviceId()) >= 1) {
+        int hbm = getHbm(deviceSession.getDeviceId());
+        if (hbm >= 1) {
 
             if (index < values.length) {
                 position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(Integer.parseInt(values[index++])));
@@ -436,12 +438,15 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (isIncludeRpm(deviceSession.getDeviceId()) && index < values.length) {
-                position.set(Position.KEY_RPM, Integer.parseInt(values[index++]));
-            }
-
-            if ((values.length - index >= 2 && !protocol.startsWith("ST3"))
-                    || (protocol.startsWith("ST3") && model == 45)) {
+            if (protocol.startsWith("ST3")) {
+                if(model == 45) {
+                    String driverUniqueId = values[index++];
+                    if (!driverUniqueId.isEmpty()) {
+                        position.set(Position.KEY_DRIVER_UNIQUE_ID, driverUniqueId);
+                    }
+                    index += 1; // registered
+                } 
+            } else if (values.length - index >= 2 ) {
                 String driverUniqueId = values[index++];
                 if (!driverUniqueId.isEmpty()) {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, driverUniqueId);
@@ -460,7 +465,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
             }
 
-            if (getHbm(deviceSession.getDeviceId()) >= 2) {
+            if (hbm >= 2) {
                 if (index + 5 <= values.length) {
                     int cid = Integer.parseInt(values[index++]);
                     int mcc = Integer.parseInt(values[index++]);
@@ -468,7 +473,6 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                     int rssi = Integer.parseInt(values[index++]);
                     int lac = Integer.parseInt(values[index++]);
                     position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
-                    position.set(Position.KEY_RSSI, rssi);
                 }
             }
 
