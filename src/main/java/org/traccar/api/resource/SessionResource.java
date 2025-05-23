@@ -154,6 +154,9 @@ public class SessionResource extends BaseResource {
     @Path("openid/auth")
     @GET
     public Response openIdAuth() {
+        if (openIdProvider == null) {
+            throw new UnsupportedOperationException("OpenID not enabled");
+        }
         return Response.seeOther(openIdProvider.createAuthUri()).build();
     }
 
@@ -161,7 +164,10 @@ public class SessionResource extends BaseResource {
     @Path("openid/callback")
     @GET
     public Response requestToken() throws IOException, StorageException, ParseException, GeneralSecurityException {
-        String redirectUriOverride = request.getParameter("redirect_uri");
+        if (openIdProvider == null) {
+            throw new UnsupportedOperationException("OpenID not enabled");
+        }
         return Response.seeOther(openIdProvider.handleCallback(request.getQueryString(), request)).build();
     }
+
 }
