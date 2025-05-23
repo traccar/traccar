@@ -228,10 +228,6 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         decoder.setHbm(2);
 
-        verifyAttribute(decoder, buffer(
-                "ST300STT;007878646;40;319H;20250521;21:52:14;54728;-30.021829;-051.204818;000.000;077.61;0;0;35310247;14.33;000000;1;1306;069596;4.1;1;23675;724;5;-75;1351;1"), 
-                Position.KEY_RSSI, -75);
-
         verifyPosition(decoder, buffer(
                 "ST300STT;007878646;40;319H;20250521;21:52:14;54728;-30.021829;-051.204818;000.000;077.61;0;0;35310247;14.33;000000;1;1306;069596;4.1;1;23675;724;5;-75;1351;1")); 
 
@@ -323,6 +319,8 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, buffer(
                 "ST300STT;807469112;45;315;20231215;15:25:03;104147;-16.030168;-047.989150;000.000;000.00;19;1;8600;12.14;000010;1;0456;000373;4.1;1;01B54221010000;0"),
                 Position.KEY_DRIVER_UNIQUE_ID, "01B54221010000");
+
+        decoder.setHbm(2);
 
         verifyAttribute(decoder, buffer(
                 "ST300STT;007878646;40;319H;20250521;21:52:14;54728;-30.021829;-051.204818;000.000;077.61;0;0;35310247;14.33;000000;1;1306;069596;4.1;1;23675;724;5;-75;1351;1"), 

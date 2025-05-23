@@ -361,9 +361,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 && !type.equals("ALT") && !type.equals("UEX")) {
             return null;
         }
-        Integer model = null;
+
         if (protocol.startsWith("ST3") || protocol.equals("ST500") || protocol.equals("ST600")) {
-           model = Integer.parseInt(values[index++]);
+            index += 1; // model
         }
 
         position.set(Position.KEY_VERSION_FW, values[index++]);
@@ -414,7 +414,8 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             case "UEX" -> index = decodeSerialData(position, values, index);
         }
 
-        if (getHbm(deviceSession.getDeviceId()) >= 1) {
+        int hbm = getHbm(deviceSession.getDeviceId());
+        if (hbm >= 1) {
 
             if (index < values.length) {
                 position.set(Position.KEY_HOURS, UnitsConverter.msFromMinutes(Integer.parseInt(values[index++])));
@@ -440,8 +441,9 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_RPM, Integer.parseInt(values[index++]));
             }
 
-            if ((values.length - index >= 2 && !protocol.startsWith("ST3"))
-                    || (protocol.startsWith("ST3") && model == 45)) {
+            int need = hbm == 1 ? 2 : 7;
+
+            if (values.length - index >= need) {
                 String driverUniqueId = values[index++];
                 if (!driverUniqueId.isEmpty()) {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, driverUniqueId);
@@ -460,15 +462,14 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
 
             }
 
-            if (getHbm(deviceSession.getDeviceId()) >= 2) {
-                if (index + 5 <= values.length) {
+            if (hbm >= 2) {
+                if (values.length - index >= 5) {
                     int cid = Integer.parseInt(values[index++]);
                     int mcc = Integer.parseInt(values[index++]);
                     int mnc = Integer.parseInt(values[index++]);
                     int rssi = Integer.parseInt(values[index++]);
                     int lac = Integer.parseInt(values[index++]);
                     position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
-                    position.set(Position.KEY_RSSI, rssi);
                 }
             }
 
