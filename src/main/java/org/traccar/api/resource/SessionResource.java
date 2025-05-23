@@ -163,8 +163,6 @@ public class SessionResource extends BaseResource {
     @GET
     public Response requestToken() throws IOException, StorageException, ParseException, GeneralSecurityException {
         String redirectUriOverride = request.getParameter("redirect_uri");
-        String redirectUri = redirectUriOverride != null ? redirectUriOverride : request.getRequestURL().toString();
-        return Response.seeOther(openIdProvider.handleCallback(
-                URI.create(redirectUri), request.getQueryString(), request)).build();
+        return Response.seeOther(openIdProvider.handleCallback(request.getQueryString(), request)).build();
     }
 }
