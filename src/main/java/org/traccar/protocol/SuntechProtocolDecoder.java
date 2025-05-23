@@ -441,9 +441,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_RPM, Integer.parseInt(values[index++]));
             }
 
-            int need = hbm == 1 ? 2 : 7;
-
-            if (values.length - index >= need) {
+            if (values.length - index >= (hbm == 1 ? 2 : 7)) {
                 String driverUniqueId = values[index++];
                 if (!driverUniqueId.isEmpty()) {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, driverUniqueId);
