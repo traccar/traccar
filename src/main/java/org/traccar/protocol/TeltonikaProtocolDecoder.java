@@ -278,8 +278,11 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 break;
             case 37:
             case 81:
-                position.set("gpsSpeed", position.getSpeed());
-                position.setSpeed(readValue(buf, length, false) / 1.852);
+                long canSpeed = readValue(buf, length, false);
+                if (canSpeed > 0) {
+                    position.set("gpsSpeed", position.getSpeed());
+                    position.setSpeed(canSpeed / 1.852);
+                }
                 break;
             case 82:
                 position.set(Position.KEY_THROTTLE, readValue(buf, length, false));
