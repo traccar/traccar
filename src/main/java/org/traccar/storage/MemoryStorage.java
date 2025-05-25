@@ -105,7 +105,13 @@ public class MemoryStorage extends Storage {
 
             return false;
 
-        }
+        } else if (genericCondition instanceof Condition.IsNull condition) {
+
+            Object value = retrieveValue(object, condition.getColumn());
+            boolean isNotNull = condition instanceof Condition.IsNotNull;
+            return isNotNull ? value != null : value == null;
+
+        } 
 
         return false;
     }

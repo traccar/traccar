@@ -284,7 +284,16 @@ public class DatabaseStorage extends Storage {
                 }
                 result.append(")");
 
-            }
+            } else if (genericCondition instanceof Condition.IsNull condition) {
+
+                result.append(condition.getColumn());
+                result.append(" IS");
+                if (condition instanceof Condition.IsNotNull) {
+                    result.append(" NOT");
+                }
+                result.append(" NULL");
+
+            } 
         }
         return result.toString();
     }
