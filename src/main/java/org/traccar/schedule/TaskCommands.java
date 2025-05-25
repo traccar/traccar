@@ -44,7 +44,7 @@ import java.util.List;
 public class TaskCommands extends SingleScheduleTask {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskCommands.class);
 
-    private static final long CHECK_PERIOD_MINUTES = 5;
+    private static final long CHECK_PERIOD_MINUTES = 15;
 
     private final Storage storage;
 
