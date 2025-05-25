@@ -26,6 +26,7 @@ import com.google.inject.Inject;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
+import org.traccar.model.Calendar;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
@@ -35,7 +36,8 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -64,71 +66,74 @@ public class TaskCommands extends SingleScheduleTask {
 
     @Override
     public void run() {
-        Calendar currentCheck = Calendar.getInstance();
-        currentCheck.setTime(new Date());
-        currentCheck.set(Calendar.SECOND, 0);
-        Calendar lastCheck = Calendar.getInstance();
-        lastCheck.setTime(new Date());
-        lastCheck.add(java.util.Calendar.MINUTE, (int) -CHECK_PERIOD_MINUTES);
+        final LocalDateTime currentCheck = LocalDateTime.now().withSecond(0).withNano(0);
+        final LocalDateTime lastCheck = currentCheck.minusMinutes(CHECK_PERIOD_MINUTES);
         try {
-            List<Command> commands = storage.getObjects(Command.class, new Request(
-                    new Columns.All(), new Condition.IsNotNull("calendarid")));
+            List<Command> commands = storage.getObjects(Command.class, new Request(new Columns.All(),
+                    new Condition.Compare("calendarid", ">", "calendarid", 0)));
 
             for (Command command : commands) {
-                var calendar = storage.getObject(org.traccar.model.Calendar.class, new Request(
+                var calendar = storage.getObject(Calendar.class, new Request(
                         new Columns.All(), new Condition.Equals("id", command.getCalendarId())));
-                if (calendar == null || calendar.checkMoment(lastCheck.getTime())) {
-                    continue; // this command already executed
+
+                if (calendar == null || calendar.checkMoment(toDate(lastCheck))) {
+                    continue; // already executed
                 }
-                if (calendar.checkMomentBetween(lastCheck.getTime(), currentCheck.getTime())) {
+
+                if (calendar.checkMomentBetween(toDate(lastCheck), toDate(currentCheck))) {
                     executeCommand(command);
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Scheduled commands error", e);
+            LOGGER.error("Error while executing scheduled commands", e);
         }
 
     }
 
-    private void executeCommand(Command command) throws Exception {
-        var deviceIds = storage.getObjects(Device.class, new Request(
+    private void executeCommand(final Command command) throws Exception {
+        List<Device> devices = storage.getObjects(Device.class, new Request(
                 new Columns.Include("id"),
-                new Condition.Permission(Device.class, Command.class, command.getId())))
-                .stream()
-                .map(BaseModel::getId)
-                .toList();
+                new Condition.Permission(Device.class, Command.class, command.getId())));
 
-        var groupIds = storage.getObjects(Group.class, new Request(
+        List<Long> groupIds = storage.getObjects(Group.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(Group.class, Command.class, command.getId())))
                 .stream().map(BaseModel::getId).toList();
 
-        for (long groupId : groupIds) {
-            var devices = storage.getObjects(Device.class, new Request(
-                    new Columns.Include("id"),
-                    new Condition.Equals("groupId", groupId)));
-            for (Device device : devices) {
-                try {
-                    Command newCmd = QueuedCommand.fromCommand(command).toCommand();
-                    newCmd.setDeviceId(device.getId());
-                    commandsManager.sendCommand(newCmd);
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to send command to group {} device {}", groupId, device.getId(), e);
-                }
-            }
-            actionLogger.command(null, 0, groupId, 0, command.getType(), true);
+        for (final long groupId : groupIds) {
+            sendCommandToGroup(command, groupId);
         }
-        for (long deviceId : deviceIds) {
-            try {
-                Command newCmd = QueuedCommand.fromCommand(command).toCommand();
-                newCmd.setDeviceId(deviceId);
-                commandsManager.sendCommand(newCmd);
-                actionLogger.command(null, 0, 0, deviceId, command.getType(), true);
-            } catch (Exception e) {
-                LOGGER.warn("Failed to send command to device {}", deviceId, e);
-            }
 
+        for (final Device device : devices) {
+            sendCommandToDevice(command, device);
         }
+    }
+
+    private void sendCommandToGroup(final Command command, final long groupId) throws Exception {
+        final List<Device> devices = storage.getObjects(Device.class, new Request(
+                new Columns.Include("id"),
+                new Condition.Permission(Group.class, groupId, Device.class)));
+
+        for (final Device device : devices) {
+            sendCommandToDevice(command, device);
+        }
+        actionLogger.command(null, 0, groupId, 0, command.getType(), true);
+    }
+
+    private void sendCommandToDevice(final Command command, final Device device) {
+        try {
+            final Command newCmd = QueuedCommand.fromCommand(command).toCommand();
+            newCmd.setDeviceId(device.getId());
+            commandsManager.sendCommand(newCmd);
+            actionLogger.command(null, 0, 0, device.getId(), command.getType(), true);
+            LOGGER.info("Command '{}' sent to device '{}'", command.getType(), device.getUniqueId());
+        } catch (Exception e) {
+            LOGGER.warn("Failed to send command '{}' to device '{}'", command.getType(), device.getUniqueId(), e);
+        }
+    }
+
+    private static Date toDate(LocalDateTime dateTime) {
+        return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
 }
