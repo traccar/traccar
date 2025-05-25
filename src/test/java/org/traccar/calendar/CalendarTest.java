@@ -15,32 +15,32 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CalendarTest {
-    
+
     @Test
     public void testCalendar() throws IOException, ParserException, ParseException {
-        String calendarString = "BEGIN:VCALENDAR\n" + 
-                "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" + 
-                "VERSION:2.0\n" + 
-                "BEGIN:VTIMEZONE\n" + 
-                "TZID:Asia/Yekaterinburg\n" + 
-                "BEGIN:STANDARD\n" + 
-                "TZOFFSETFROM:+0500\n" + 
-                "TZOFFSETTO:+0500\n" + 
-                "TZNAME:YEKT\n" + 
-                "DTSTART:19700101T000000\n" + 
-                "END:STANDARD\n" + 
-                "END:VTIMEZONE\n" + 
-                "BEGIN:VEVENT\n" + 
-                "CREATED:20161213T045151Z\n" + 
-                "LAST-MODIFIED:20161213T045242Z\n" + 
-                "DTSTAMP:20161213T045242Z\n" + 
-                "UID:9d000df0-6354-479d-a407-218dac62c7c9\n" + 
-                "SUMMARY:Every night\n" + 
-                "RRULE:FREQ=DAILY\n" + 
-                "DTSTART;TZID=Asia/Yekaterinburg:20161130T230000\n" + 
-                "DTEND;TZID=Asia/Yekaterinburg:20161201T070000\n" + 
-                "TRANSP:OPAQUE\n" + 
-                "END:VEVENT\n" + 
+        String calendarString = "BEGIN:VCALENDAR\n" +
+                "PRODID:-//Mozilla.org/NONSGML Mozilla Calendar V1.1//EN\n" +
+                "VERSION:2.0\n" +
+                "BEGIN:VTIMEZONE\n" +
+                "TZID:Asia/Yekaterinburg\n" +
+                "BEGIN:STANDARD\n" +
+                "TZOFFSETFROM:+0500\n" +
+                "TZOFFSETTO:+0500\n" +
+                "TZNAME:YEKT\n" +
+                "DTSTART:19700101T000000\n" +
+                "END:STANDARD\n" +
+                "END:VTIMEZONE\n" +
+                "BEGIN:VEVENT\n" +
+                "CREATED:20161213T045151Z\n" +
+                "LAST-MODIFIED:20161213T045242Z\n" +
+                "DTSTAMP:20161213T045242Z\n" +
+                "UID:9d000df0-6354-479d-a407-218dac62c7c9\n" +
+                "SUMMARY:Every night\n" +
+                "RRULE:FREQ=DAILY\n" +
+                "DTSTART;TZID=Asia/Yekaterinburg:20161130T230000\n" +
+                "DTEND;TZID=Asia/Yekaterinburg:20161201T070000\n" +
+                "TRANSP:OPAQUE\n" +
+                "END:VEVENT\n" +
                 "END:VCALENDAR";
         Calendar calendar = new Calendar();
         calendar.setData(calendarString.getBytes());
@@ -85,5 +85,40 @@ public class CalendarTest {
         assertNotEquals(periods0, periods1);
         assertNotEquals(periods1, periods2);
         assertEquals(periods2, periods3);
+    }
+
+    @Test
+    public void testCalendarBetween() throws IOException, ParserException, ParseException {
+        String calendarString = "BEGIN:VCALENDAR\n" +
+                "VERSION:2.0\n" +
+                "PRODID:-//Traccar//NONSGML Traccar//EN\n" +
+                "BEGIN:VEVENT\n" +
+                "UID:00000000-0000-0000-0000-000000000000\n" +
+                "DTSTART;TZID=America/Fortaleza:20250523T180000\n" +
+                "DTEND;TZID=America/Fortaleza:20250523T180000\n" +
+                "RRULE:FREQ=DAILY\n" +
+                "SUMMARY:Event\n" +
+                "END:VEVENT\n" +
+                "END:VCALENDAR";
+        Calendar calendar = new Calendar();
+        calendar.setData(calendarString.getBytes());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+
+        var periods0 = calendar.findPeriodsBetween(format.parse("2015-05-25 18:00:00-03"),
+                format.parse("2015-05-25 18:00:00-03"));
+        var periods1 = calendar.findPeriodsBetween(format.parse("2025-05-25 17:55:00-03"),
+                format.parse("2025-05-25 18:00:00-03"));
+        var periods2 = calendar.findPeriodsBetween(format.parse("2025-05-25 18:00:00-03"),
+                format.parse("2025-05-25 18:05:00-03"));
+        var periods3 = calendar.findPeriodsBetween(format.parse("2025-05-26 17:58:00-03"),
+                format.parse("2025-05-26 18:03:00-03"));
+
+        assertEquals(periods0.size(), 0);
+        assertEquals(periods1.size(), 1);
+        assertEquals(periods2.size(), 1);
+        assertEquals(periods3.size(), 1);
+
+        assertEquals(periods1, periods2);
+        assertNotEquals(periods2, periods3);
     }
 }

@@ -110,7 +110,7 @@ public class MemoryStorage extends Storage {
             Object value = retrieveValue(object, condition.getColumn());
             return condition instanceof Condition.IsNotNull ? value != null : value == null;
 
-        } 
+        }
 
         return false;
     }

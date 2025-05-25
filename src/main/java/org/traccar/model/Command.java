@@ -22,7 +22,7 @@ import org.traccar.storage.StorageName;
 
 @StorageName("tc_commands")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Command extends BaseCommand implements Schedulable{
+public class Command extends BaseCommand implements Schedulable {
 
     public static final String TYPE_CUSTOM = "custom";
     public static final String TYPE_IDENTIFICATION = "deviceIdentification";
@@ -116,7 +116,7 @@ public class Command extends BaseCommand implements Schedulable{
 
     @Override
     public void setCalendarId(long calendarId) {
-       this.calendarId = calendarId;
+        this.calendarId = calendarId;
     }
 
 }

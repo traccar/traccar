@@ -224,7 +224,6 @@ public interface Condition {
         public IsNotNull(String column) {
             super(column);
         }
-        
     }
 
 }

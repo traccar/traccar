@@ -293,7 +293,7 @@ public class DatabaseStorage extends Storage {
                 }
                 result.append(" NULL");
 
-            } 
+            }
         }
         return result.toString();
     }
