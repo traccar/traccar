@@ -108,8 +108,7 @@ public class MemoryStorage extends Storage {
         } else if (genericCondition instanceof Condition.IsNull condition) {
 
             Object value = retrieveValue(object, condition.getColumn());
-            boolean isNotNull = condition instanceof Condition.IsNotNull;
-            return isNotNull ? value != null : value == null;
+            return condition instanceof Condition.IsNotNull ? value != null : value == null;
 
         } 
 
