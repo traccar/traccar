@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -283,15 +283,6 @@ public class DatabaseStorage extends Storage {
                     result.append(" WHERE id = :deviceId");
                 }
                 result.append(")");
-
-            } else if (genericCondition instanceof Condition.IsNull condition) {
-
-                result.append(condition.getColumn());
-                result.append(" IS");
-                if (condition instanceof Condition.IsNotNull) {
-                    result.append(" NOT");
-                }
-                result.append(" NULL");
 
             }
         }

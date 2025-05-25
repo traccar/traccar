@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,11 +104,6 @@ public class MemoryStorage extends Storage {
         } else if (genericCondition instanceof Condition.LatestPositions) {
 
             return false;
-
-        } else if (genericCondition instanceof Condition.IsNull condition) {
-
-            Object value = retrieveValue(object, condition.getColumn());
-            return condition instanceof Condition.IsNotNull ? value != null : value == null;
 
         }
 
