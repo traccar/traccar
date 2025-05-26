@@ -15,6 +15,8 @@
  */
 package org.traccar.config;
 
+import org.apache.kafka.common.protocol.types.Field;
+
 import java.util.List;
 
 public final class Keys {
@@ -1988,4 +1990,52 @@ public final class Keys {
             "broadcast.secondary",
             List.of(KeyType.CONFIG));
 
+    /**
+     * API Key for Amap Open Platform.
+     * @see <a href="https://lbs.amap.com/">高德开放平台</a>
+     */
+    public static final ConfigKey<String> API_AUTONAVI_KEY = new StringConfigKey(
+            "api.autonavi.key",
+            List.of(KeyType.CONFIG));
+
+
+    /**
+     * Secret Key for Amap Open Platform.
+     * @see <a href="https://lbs.amap.com/">高德开放平台</a>
+     */
+    public static final ConfigKey<String> API_AUTONAVI_SECRET = new StringConfigKey(
+            "api.autonavi.secret",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * API key for Tencent Location Service.
+     * @see <a href="https://lbs.qq.com/">Tencent Location Service</a>
+     */
+    public static final ConfigKey<String> API_TENCENT_KEY = new StringConfigKey(
+            "api.tencent.key",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Secret key for Tencent Location Service.
+     * @see <a href="https://lbs.qq.com/">Tencent Location Service</a>
+     */
+    public static final ConfigKey<String> API_TENCENT_SECRET = new StringConfigKey(
+            "api.tencent.secret",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * API key for Baidu Maps Open Platform.
+     * @see <a href="https://lbsyun.baidu.com/">Baidu Maps Open Platform</a>
+     */
+    public static final ConfigKey<String> API_BAIDU_KEY = new StringConfigKey(
+            "api.baidu.key",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Secret key for Baidu Maps Open Platform.
+     * @see <a href="https://lbsyun.baidu.com/">Baidu Maps Open Platform</a>
+     */
+    public static final ConfigKey<String> API_BAIDU_SECRET = new StringConfigKey(
+            "api.baidu.secret",
+            List.of(KeyType.CONFIG));
 }

@@ -208,4 +208,16 @@ public interface Condition {
         }
     }
 
+    class NotConvertedPositions implements Condition {
+        private final String platform;
+
+        public NotConvertedPositions(String platform) {
+            this.platform = platform;
+        }
+
+        public String getPlatform() {
+            return platform;
+        }
+    }
+
 }

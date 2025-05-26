@@ -20,17 +20,22 @@ import java.util.Objects;
 
 /**
  * Coordinate system conversion related toolkits, mainstream coordinate systems include:
- * WGS84 coordinate system: colloquially Earth coordinate system, used by Maps outside China.
- * GCJ02 coordinate system: colloquially Mars coordinate system, used by Gaode, Tencent, Ali and so on.
- * <p>
- * Reference：<a href="https://en.wikipedia.org/wiki/Restrictions_on_geographic_data_in_China">...</a>
- * Reference: <a href="https://github.com/dromara/hutool">...</a>
+ * <br/>WGS84 coordinate system: colloquially Earth coordinate system, used by Maps outside China.
+ * <br/>GCJ02 coordinate system: colloquially Mars coordinate system, used by Gaode, Tencent, Ali and so on.
+ * <br/>BD09 coordinate system: colloquially Baidu coordinate system, used by Baidu.
+ * @see <a href="https://en.wikipedia.org/wiki/Restrictions_on_geographic_data_in_China">Restrictions on geographic data in China - Wikipedia</a>
+ * @see <a href="https://github.com/chinabugotech/hutool/blob/abbe51447992ed968d1de4956fa9d88dc581bab3/hutool-core/src/main/java/cn/hutool/core/util/CoordinateUtil.java">CoordinateUtil.java - chinabugotech/hutool</a>
  */
 public final class CoordinateUtil {
 
     private CoordinateUtil() {
 
     }
+
+    /**
+     * Coordinate conversion parameters (intermediate quantities between the GCJ02 and the BD09)
+     */
+    public static final double X_PI = 3.1415926535897932384626433832795 * 3000.0 / 180.0;
 
     /**
      * Earth radius（Krasovsky 1940）
@@ -42,6 +47,11 @@ public final class CoordinateUtil {
      */
     public static final double CORRECTION_PARAM = 0.00669342162296594323D;
 
+
+    public static final double CHINA_LATITUDE_MIN = 0.8293D;
+    public static final double CHINA_LATITUDE_MAX = 55.8271D;
+    public static final double CHINA_LONGITUDE_MIN = 72.0040D;
+    public static final double CHINA_LONGITUDE_MAX = 137.8347D;
     /**
      * Determine whether the coordinates are in non-China range
      * GCJ-02 coordinate system is only valid for China, no conversion is needed for non-Chinese areas.
@@ -51,11 +61,11 @@ public final class CoordinateUtil {
      * @return Whether the coordinates are in non-China area
      */
     public static boolean outOfChina(double latitude, double longitude) {
-        return (latitude < 0.8293 || latitude > 55.8271) || (longitude < 72.004 || longitude > 137.8347);
+        return (latitude < CHINA_LATITUDE_MIN || latitude > CHINA_LATITUDE_MAX) || (longitude < CHINA_LONGITUDE_MIN || longitude > CHINA_LONGITUDE_MAX);
     }
 
     /**
-     * Convert WGS84 to GCJ-02
+     * Convert WGS-84 to GCJ-02
      *
      * @param latitude Latitude
      * @param longitude Longitude
@@ -66,14 +76,30 @@ public final class CoordinateUtil {
     }
 
     /**
-     * Convert GCJ-02 to WGS84
+     * Convert WGS-84 to BD-09
      *
      * @param latitude Latitude
      * @param longitude Longitude
-     * @return WGS84 coordinate
+     * @return BD-09 coordinate
      */
-    public static Coordinate gcj02ToWgs84(double latitude, double longitude) {
-        return new Coordinate(latitude, longitude).offset(offset(latitude, longitude, false));
+    public static Coordinate wgs84ToBd09(double latitude, double longitude) {
+        final Coordinate gcj02 = wgs84ToGcj02(longitude, latitude);
+        return gcj02ToBd09(gcj02.getLongitude(), gcj02.getLatitude());
+    }
+
+    /**
+     * Convert GCJ-02 to BD-09
+     *
+     * @param latitude Latitude
+     * @param longitude Longitude
+     * @return BD-09 coordinate
+     */
+    public static Coordinate gcj02ToBd09(double latitude, double longitude) {
+        double z = Math.sqrt(longitude * longitude + latitude * latitude) + 0.00002 * Math.sin(latitude * X_PI);
+        double theta = Math.atan2(latitude, longitude) + 0.000003 * Math.cos(longitude * X_PI);
+        double bd_lng = z * Math.cos(theta) + 0.0065;
+        double bd_lat = z * Math.sin(theta) + 0.006;
+        return new Coordinate(bd_lng, bd_lat);
     }
 
     /**
