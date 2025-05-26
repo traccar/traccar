@@ -1,5 +1,6 @@
 /*
  * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2025 Gerrit Maus (funk@maus.xyz)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,17 +72,21 @@ public abstract class BaseMqttProtocolDecoder extends BaseProtocolDecoder {
             }
 
             Object result = decode(deviceSession, message);
-
-            MqttMessage response = MqttMessageBuilders.pubAck()
-                    .packetId(message.variableHeader().packetId())
-                    .build();
-
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+            
+            /* Acknowledge this publish request only if QoS > 0, i.e. if
+             * the `packetId` is valid (> 0).
+             */
+            int packetId = message.variableHeader().packetId();
+            if (packetId > 0) {
+                MqttMessage response = MqttMessageBuilders.pubAck()
+                        .packetId(packetId)
+                        .build();
+                if (channel != null) {
+                    channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+                }
             }
 
             return result;
-
         }
 
         return null;
