@@ -713,6 +713,40 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         position.set("humidity" + sensorIndex, decodeCustomDouble(buf));
                     }
                     break;
+                case 0xEA:
+                    if (length > 2) {
+                        buf.readUnsignedByte(); // extended info type
+                        while (buf.readerIndex() < endIndex) {
+                            int extendedType = buf.readUnsignedByte();
+                            int extendedLength = buf.readUnsignedByte();
+                            int extendedEndIndex = buf.readerIndex() + extendedLength;
+                            switch (extendedType) {
+                                case 0x11:
+                                    position.set("externalAlarms", buf.readUnsignedShort());
+                                    position.set("alarmThresholdType", buf.readUnsignedByte());
+                                    buf.readUnsignedInt(); // upper threshold
+                                    buf.readUnsignedInt(); // current value
+                                    buf.readUnsignedInt(); // lower threshold
+                                    break;
+                                case 0x13:
+                                    position.set("externalIlluminance", buf.readUnsignedShort());
+                                    break;
+                                case 0x14:
+                                    position.set("externalAirPressure", buf.readUnsignedShort());
+                                    break;
+                                case 0x15:
+                                    position.set("externalHumidity", buf.readUnsignedShort() / 10.0);
+                                    break;
+                                case 0x16:
+                                    position.set("externalTemp", buf.readUnsignedShort() / 10.0 - 50);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            buf.readerIndex(extendedEndIndex);
+                        }
+                    }
+                    break;
                 case 0xEB:
                     if (buf.getUnsignedShort(buf.readerIndex()) > 200) {
                         int mcc = buf.readUnsignedShort();
@@ -823,34 +857,56 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                 mac.substring(0, mac.length() - 1), buf.readByte()));
                     }
                     break;
+                case 0xF5:
+                    if (length == 2) {
+                        position.set("illuminance", buf.readUnsignedShort());
+                    }
+                    break;
                 case 0xF6:
-                    event = buf.readUnsignedByte();
-                    position.set(Position.KEY_EVENT, event);
-                    if (event == 2) {
-                        position.set(Position.KEY_MOTION, true);
-                    }
-                    int fieldMask = buf.readUnsignedByte();
-                    if (BitUtil.check(fieldMask, 0)) {
-                        position.set("lightSensor", buf.readUnsignedShort());
-                    }
-                    if (BitUtil.check(fieldMask, 1)) {
-                        position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
-                    }
-                    if (BitUtil.check(fieldMask, 2)) {
-                        position.set(Position.KEY_HUMIDITY, buf.readShort() * 0.1);
+                    if (length == 2) {
+                        position.set("airPressure", buf.readUnsignedShort());
+                    } else {
+                        event = buf.readUnsignedByte();
+                        position.set(Position.KEY_EVENT, event);
+                        if (event == 2) {
+                            position.set(Position.KEY_MOTION, true);
+                        }
+                        int fieldMask = buf.readUnsignedByte();
+                        if (BitUtil.check(fieldMask, 0)) {
+                            position.set("lightSensor", buf.readUnsignedShort());
+                        }
+                        if (BitUtil.check(fieldMask, 1)) {
+                            position.set(Position.PREFIX_TEMP + 1, buf.readShort() * 0.1);
+                        }
+                        if (BitUtil.check(fieldMask, 2)) {
+                            position.set(Position.KEY_HUMIDITY, buf.readShort() * 0.1);
+                        }
                     }
                     break;
                 case 0xF7:
-                    position.set(Position.KEY_BATTERY, buf.readUnsignedInt() * 0.001);
-                    if (length >= 5) {
-                        short batteryStatus = buf.readUnsignedByte();
-                        if (batteryStatus == 2 || batteryStatus == 3) {
-                            position.set(Position.KEY_CHARGE, true);
+                    if (length == 2) {
+                        position.set(Position.KEY_HUMIDITY, buf.readUnsignedShort() / 10.0);
+                    } else {
+                        position.set(Position.KEY_BATTERY, buf.readUnsignedInt() * 0.001);
+                        if (length >= 5) {
+                            short batteryStatus = buf.readUnsignedByte();
+                            if (batteryStatus == 2 || batteryStatus == 3) {
+                                position.set(Position.KEY_CHARGE, true);
+                            }
+                        }
+                        if (length >= 6) {
+                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                         }
                     }
-                    if (length >= 6) {
-                        position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                    }
+                    break;
+                case 0xF8:
+                    position.set(Position.PREFIX_TEMP + 2, buf.readUnsignedShort() / 10.0 - 50);
+                    break;
+                case 0xFB:
+                    position.set("container", buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                    break;
+                case 0xFC:
+                    position.set(Position.KEY_GEOFENCE, buf.readUnsignedByte());
                     break;
                 case 0xFE:
                     if (length == 1) {

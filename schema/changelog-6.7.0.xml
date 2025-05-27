@@ -4,9 +4,14 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
-  logicalFilePath="changelog-6.7">
+  logicalFilePath="changelog-6.7.0">
 
-  <changeSet author="author" id="changelog-6.7">
+  <changeSet author="author" id="changelog-6.7.0">
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_actions"/>
+      </not>
+    </preConditions>
 
     <createTable tableName="tc_actions">
       <column autoIncrement="true" name="id" type="INT">
