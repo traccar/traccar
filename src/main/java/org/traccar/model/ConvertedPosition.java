@@ -20,9 +20,10 @@ import org.traccar.storage.StorageName;
 
 @StorageName("tc_converted_positions")
 public class ConvertedPosition extends ExtendedModel {
-    public static final String PLATFORM_AUTONAVI = "AutoNavi";
-    public static final String PLATFORM_BAIDU = "Baidu";
-    public static final String PLATFORM_TENCENT = "Tencent";
+    // these keys should match the map id in the front-end source code
+    public static final String PLATFORM_AUTONAVI = "autoNavi";
+    public static final String PLATFORM_BAIDU = "baidu";
+    public static final String PLATFORM_TENCENT = "tencent";
 
     public static final String CRS_GCJ_02 = "GCJ_02";
     public static final String CRS_BD_09 = "BD_09";
@@ -41,10 +42,28 @@ public class ConvertedPosition extends ExtendedModel {
         return platform;
     }
 
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
     private String crs;
 
     public String getCrs() {
         return crs;
+    }
+
+    public void setCrs(String crs) {
+        this.crs = crs;
+    }
+
+    private long deviceId;
+
+    public long getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(long deviceId) {
+        this.deviceId = deviceId;
     }
 
     private double latitude;

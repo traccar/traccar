@@ -32,8 +32,10 @@ import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.ConvertedPosition;
 import org.traccar.model.Position;
 import org.traccar.schedule.ScheduleTask;
+import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import java.time.Duration;
@@ -47,6 +49,7 @@ import java.util.stream.Stream;
 public abstract class PositionConverter extends BasePositionHandler implements ScheduleTask {
     private static final Logger LOGGER = LoggerFactory.getLogger(PositionConverter.class);
 
+    private final ConnectionManager connectionManager;
     private final Storage storage;
     private final Client client;
     protected final ConverterInfo info;
@@ -55,7 +58,8 @@ public abstract class PositionConverter extends BasePositionHandler implements S
 
     private final BlockingBucket rateLimiter;
 
-    protected PositionConverter(Storage storage, ConverterInfo info, Client client, @Nullable String apiKey, @Nullable String secretKey) {
+    protected PositionConverter(ConnectionManager connectionManager, Storage storage, ConverterInfo info, Client client, @Nullable String apiKey, @Nullable String secretKey) {
+        this.connectionManager = connectionManager;
         this.storage = storage;
         this.info = info;
         this.client = client;
@@ -118,6 +122,7 @@ public abstract class PositionConverter extends BasePositionHandler implements S
         List<ConvertedPosition> result = parseConvertedPosition(resp.readEntity(JsonObject.class));
         for (int i = 0; i < positions.size(); i++) {
             result.get(i).setId(positions.get(i).getId());
+            result.get(i).setDeviceId(positions.get(i).getDeviceId());
         }
         return result;
     }
@@ -153,6 +158,7 @@ public abstract class PositionConverter extends BasePositionHandler implements S
             }
             for (ConvertedPosition position : convertedPositions) {
                 save(position);
+                connectionManager.updateConvertedPosition(false, position);
             }
         }
     }
@@ -187,6 +193,17 @@ public abstract class PositionConverter extends BasePositionHandler implements S
 
     private void save(ConvertedPosition convertedPosition) {
         try {
+            synchronized (PositionConverter.class) {
+                Position position = storage.getObject(Position.class, new Request(
+                        new Columns.All(),
+                        new Condition.Equals("id", convertedPosition.getId())));
+                Map<String, Object> allConvertedPosition = position.getMap(Position.KEY_CONVERTED_POSITIONS);
+                allConvertedPosition.put(convertedPosition.getPlatform(), convertedPosition);
+                position.set(Position.KEY_CONVERTED_POSITIONS, allConvertedPosition);
+                storage.updateObject(position, new Request(
+                        new Columns.Include("attributes"),
+                        new Condition.Equals("id", position.getId())));
+            }
             storage.addObject(convertedPosition, new Request(new Columns.All()));
             LOGGER.debug("Converted position stored, id: {}", convertedPosition.getId());
         } catch (Exception error) {

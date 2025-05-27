@@ -40,11 +40,7 @@ public class TaskPositionConvertService implements LifecycleObject {
     @Override
     public void start() throws Exception {
         PositionConverter.ConverterInfo[] converters = PositionConverter.ConverterInfo.values();
-        executor = Executors.newScheduledThreadPool(converters.length, r -> {
-            Thread t = new Thread(r);
-            t.setDaemon(true);  // 守护线程
-            return t;
-        });
+        executor = Executors.newScheduledThreadPool(converters.length);
 
         for (PositionConverter.ConverterInfo info : converters) {
             PositionConverter converter = injector.getInstance(info.getClazz());

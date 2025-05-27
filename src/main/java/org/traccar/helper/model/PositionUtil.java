@@ -16,10 +16,7 @@
 package org.traccar.helper.model;
 
 import org.traccar.helper.CoordinateUtil;
-import org.traccar.model.BaseModel;
-import org.traccar.model.Device;
-import org.traccar.model.Position;
-import org.traccar.model.User;
+import org.traccar.model.*;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -28,8 +25,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class PositionUtil {

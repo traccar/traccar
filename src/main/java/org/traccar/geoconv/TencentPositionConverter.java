@@ -26,6 +26,7 @@ import org.traccar.config.Keys;
 import org.traccar.helper.SignedRequestProvider;
 import org.traccar.model.ConvertedPosition;
 import org.traccar.model.Position;
+import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 
 import java.util.LinkedList;
@@ -47,8 +48,8 @@ public class TencentPositionConverter extends PositionConverter {
     private static final int DAY_LIMIT = 8000;
 
     @Inject
-    public TencentPositionConverter(Storage storage, Config config, Client client) {
-        super(storage, ConverterInfo.Tencent, client,
+    public TencentPositionConverter(ConnectionManager connectionManager, Storage storage, Config config, Client client) {
+        super(connectionManager, storage, ConverterInfo.Tencent, client,
                 config.getString(Keys.API_TENCENT_KEY), config.getString(Keys.API_TENCENT_SECRET));
     }
 

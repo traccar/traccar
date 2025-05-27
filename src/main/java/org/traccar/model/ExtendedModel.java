@@ -83,6 +83,12 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
+    public void set(String key, Map<String, Object> value) {
+        if (value != null && !value.isEmpty()) {
+            attributes.put(key, value);
+        }
+    }
+
     public void add(Map.Entry<String, Object> entry) {
         if (entry != null && entry.getValue() != null) {
             attributes.put(entry.getKey(), entry.getValue());
@@ -113,6 +119,10 @@ public class ExtendedModel extends BaseModel {
         return parseAsLong(attributes.get(key), 0L);
     }
 
+    public Map<String, Object> getMap(String key) {
+        return parseAsMap(attributes.get(key), new LinkedHashMap<>());
+    }
+
     public Object removeAttribute(String key) {
         return attributes.remove(key);
     }
@@ -135,6 +145,10 @@ public class ExtendedModel extends BaseModel {
 
     public Long removeLong(String key) {
         return parseAsLong(attributes.remove(key), null);
+    }
+
+    public Map<String, Object> removeMap(String key) {
+        return parseAsMap(attributes.remove(key), new LinkedHashMap<>());
     }
 
     private String parseAsString(Object value, String defaultValue) {
@@ -182,6 +196,14 @@ public class ExtendedModel extends BaseModel {
             return numberValue.longValue();
         } else {
             return Long.parseLong(value.toString());
+        }
+    }
+
+    private static Map<String, Object> parseAsMap(Object value, Map<String, Object> defaultValue) {
+        if (value instanceof Map<?, ?> mapValue) {
+            return (Map<String, Object>) mapValue;
+        } else  {
+            return defaultValue;
         }
     }
 }

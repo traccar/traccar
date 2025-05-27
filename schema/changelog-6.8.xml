@@ -21,6 +21,9 @@
       <column name="crs" type="VARCHAR(10)">
         <constraints nullable="false" checkConstraint="${tc_converted_positions.crs}" />
       </column>
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
       <column name="latitude" type="DOUBLE">
         <constraints nullable="false" />
       </column>

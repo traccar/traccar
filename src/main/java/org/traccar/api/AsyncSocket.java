@@ -22,10 +22,7 @@ import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.helper.model.PositionUtil;
-import org.traccar.model.Device;
-import org.traccar.model.Event;
-import org.traccar.model.LogRecord;
-import org.traccar.model.Position;
+import org.traccar.model.*;
 import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -63,9 +60,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
         super.onWebSocketConnect(session);
 
         try {
-            Map<String, Collection<?>> data = new HashMap<>();
-            data.put(KEY_POSITIONS, PositionUtil.getLatestPositions(storage, userId));
-            sendData(data);
+            sendData(Map.of(KEY_POSITIONS, PositionUtil.getLatestPositions(storage, userId)));
             connectionManager.addListener(userId, this);
         } catch (StorageException e) {
             throw new RuntimeException(e);
@@ -103,6 +98,11 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     @Override
     public void onUpdatePosition(Position position) {
         sendData(Map.of(KEY_POSITIONS, List.of(position)));
+    }
+
+    @Override
+    public void onUpdateConvertedPosition(ConvertedPosition convertedPosition) {
+        sendData(Map.of(Position.KEY_CONVERTED_POSITIONS, List.of(convertedPosition)));
     }
 
     @Override

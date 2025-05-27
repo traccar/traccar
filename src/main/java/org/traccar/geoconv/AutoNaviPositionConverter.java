@@ -27,6 +27,7 @@ import org.traccar.config.Keys;
 import org.traccar.helper.SignedRequestProvider;
 import org.traccar.model.ConvertedPosition;
 import org.traccar.model.Position;
+import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 
 import java.util.LinkedList;
@@ -49,8 +50,8 @@ public class AutoNaviPositionConverter extends PositionConverter {
     private static final int DAY_LIMIT = 5000;
 
     @Inject
-    public AutoNaviPositionConverter(Storage storage, Config config, Client client) {
-        super(storage, ConverterInfo.AutoNavi, client,
+    public AutoNaviPositionConverter(ConnectionManager connectionManager, Storage storage, Config config, Client client) {
+        super(connectionManager, storage, ConverterInfo.AutoNavi, client,
                 config.getString(Keys.API_AUTONAVI_KEY), config.getString(Keys.API_AUTONAVI_SECRET));
     }
 
