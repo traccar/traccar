@@ -36,11 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -987,7 +983,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_ADC + 3, v[index++]);
         position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
 
-        decodeStatus(position, Long.parseLong(v[index]));
+        try {
+            decodeStatus(position, Long.parseLong(v[index]));
+        } catch (Exception e) {
+            LOGGER.error("gl200 deviceId: {}, message: {}", position.getDeviceId(), Arrays.toString(v), e);
+        }
 
         return setPositionTime(v, positions, position);
     }
