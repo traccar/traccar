@@ -2019,14 +2019,15 @@ components:
           type: integer
         type:
           type: string
+        description:
+          type: string
+          nullable: true
         always:
           type: boolean
-        web:
-          type: boolean
-        mail:
-          type: boolean
-        sms:
-          type: boolean
+        commandId:
+          type: integer
+        notificators:
+          type: string
         calendarId:
           type: integer
         attributes:
