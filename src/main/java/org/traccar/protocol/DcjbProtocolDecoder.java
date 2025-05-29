@@ -45,7 +45,7 @@ public class DcjbProtocolDecoder extends BaseMqttProtocolDecoder {
         position.setLatitude(latdeg);
         position.setLongitude(londeg);
 
-        // TODO: continue decoding other GNSS fields when protocol definition is extended
+        //continue decoding other GNSS fields when protocol definition is extended
         return position;
     }
 
@@ -138,7 +138,7 @@ public class DcjbProtocolDecoder extends BaseMqttProtocolDecoder {
         if (packetVersion == null) {
             throw new Exception("Obligatory version field does not exist.");
         }
-        int[] version = { -1, -1, -1 };
+        int[] version = {-1, -1, -1};
         int i = 0;
         for (JsonNode ver : packetVersion) {
             version[i] = ver.asInt();
