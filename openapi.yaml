@@ -9,7 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: '6.6'
+  version: '6.7.1'
 servers:
   - url: https://demo.traccar.org/api
     description: Demo Server 1
@@ -531,13 +531,13 @@ paths:
             type: integer
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           schema:
             type: string
             format: date-time
@@ -581,14 +581,14 @@ paths:
           required: true
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           schema:
             type: string
             format: date-time
           required: true
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           schema:
             type: string
             format: date-time
@@ -1076,14 +1076,14 @@ paths:
               type: integer
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1136,14 +1136,14 @@ paths:
               type: string
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1189,14 +1189,14 @@ paths:
               type: integer
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1242,14 +1242,14 @@ paths:
               type: integer
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1295,14 +1295,14 @@ paths:
               type: integer
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1329,14 +1329,14 @@ paths:
       parameters:
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1743,21 +1743,23 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         deviceId:
           type: integer
+          format: int64
         protocol:
           type: string
         deviceTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         fixTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         serverTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         outdated:
           type: boolean
@@ -1793,6 +1795,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         name:
           type: string
         email:
@@ -1822,7 +1825,7 @@ components:
           type: boolean
         expirationTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
           nullable: true
         deviceLimit:
@@ -1846,6 +1849,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         registration:
           type: boolean
         readonly:
@@ -1886,8 +1890,10 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         deviceId:
           type: integer
+          format: int64
         description:
           type: string
         type:
@@ -1900,6 +1906,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         name:
           type: string
         uniqueId:
@@ -1910,14 +1917,16 @@ components:
           type: boolean
         lastUpdate:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
           nullable: true
         positionId:
           type: integer
+          format: int64
           nullable: true
         groupId:
           type: integer
+          format: int64
           nullable: true
         phone:
           type: string
@@ -1939,10 +1948,12 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         name:
           type: string
         groupId:
           type: integer
+          format: int64
         attributes:
           type: object
           properties: {}
@@ -1951,41 +1962,51 @@ components:
       properties:
         userId:
           type: integer
+          format: int64
           description: User id, can be only first parameter
         deviceId:
           type: integer
+          format: int64
           description: >-
             Device id, can be first parameter or second only in combination with
             userId
         groupId:
           type: integer
+          format: int64
           description: >-
             Group id, can be first parameter or second only in combination with
             userId
         geofenceId:
           type: integer
+          format: int64
           description: Geofence id, can be second parameter only
         notificationId:
           type: integer
+          format: int64
           description: Notification id, can be second parameter only
         calendarId:
           type: integer
+          format: int64
           description: >-
             Calendar id, can be second parameter only and only in combination
             with userId
         attributeId:
           type: integer
+          format: int64
           description: Computed attribute id, can be second parameter only
         driverId:
           type: integer
+          format: int64
           description: Driver id, can be second parameter only
         managedUserId:
           type: integer
+          format: int64
           description: >-
             User id, can be second parameter only and only in combination with
             userId
         commandId:
           type: integer
+          format: int64
           description: Saved command id, can be second parameter only
       description: >-
         This is a permission map that contain two object indexes. It is used to
@@ -2001,6 +2022,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         name:
           type: string
         description:
@@ -2009,6 +2031,7 @@ components:
           type: string
         calendarId:
           type: integer
+          format: int64
         attributes:
           type: object
           properties: {}
@@ -2017,18 +2040,22 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         type:
           type: string
+        description:
+          type: string
+          nullable: true
         always:
           type: boolean
-        web:
-          type: boolean
-        mail:
-          type: boolean
-        sms:
-          type: boolean
+        commandId:
+          type: integer
+          format: int64
+        notificators:
+          type: string
         calendarId:
           type: integer
+          format: int64
         attributes:
           type: object
           properties: {}
@@ -2042,18 +2069,22 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         type:
           type: string
         eventTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         deviceId:
           type: integer
+          format: int64
         positionId:
           type: integer
+          format: int64
         geofenceId:
           type: integer
+          format: int64
         maintenanceId:
           type: integer
         attributes:
@@ -2064,6 +2095,7 @@ components:
       properties:
         deviceId:
           type: integer
+          format: int64
         deviceName:
           type: string
         maxSpeed:
@@ -2085,6 +2117,7 @@ components:
       properties:
         deviceId:
           type: integer
+          format: int64
         deviceName:
           type: string
         maxSpeed:
@@ -2103,7 +2136,7 @@ components:
           type: integer
         startTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         startAddress:
           type: string
@@ -2113,7 +2146,7 @@ components:
           type: number
         endTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         endAddress:
           type: string
@@ -2122,7 +2155,7 @@ components:
         endLon:
           type: number
         driverUniqueId:
-          type: integer
+          type: string
         driverName:
           type: string
     ReportStops:
@@ -2130,13 +2163,14 @@ components:
       properties:
         deviceId:
           type: integer
+          format: int64
         deviceName:
           type: string
         duration:
           type: integer
         startTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         address:
           type: string
@@ -2146,7 +2180,7 @@ components:
           type: number
         endTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         spentFuel:
           type: number
@@ -2158,7 +2192,7 @@ components:
       properties:
         captureTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         activeUsers:
           type: integer
@@ -2175,6 +2209,7 @@ components:
       properties:
         deviceId:
           type: integer
+          format: int64
         totalDistance:
           type: number
           description: in meters
@@ -2185,6 +2220,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         name:
           type: string
         data:
@@ -2198,6 +2234,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         description:
           type: string
         attribute:
@@ -2212,6 +2249,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         name:
           type: string
         uniqueId:
@@ -2224,6 +2262,7 @@ components:
       properties:
         id:
           type: integer
+          format: int64
         name:
           type: string
         type:
@@ -2242,6 +2281,7 @@ components:
       required: true
       schema:
         type: integer
+        format: int64
     all:
       name: all
       in: query
@@ -2259,18 +2299,21 @@ components:
       description: Standard users can use this only with their own _userId_
       schema:
         type: integer
+        format: int64
     deviceId:
       name: deviceId
       in: query
       description: Standard users can use this only with _deviceId_s, they have access to
       schema:
         type: integer
+        format: int64
     groupId:
       name: groupId
       in: query
       description: Standard users can use this only with _groupId_s, they have access to
       schema:
         type: integer
+        format: int64
     deviceIdArray:
       name: deviceId
       in: query
@@ -2280,6 +2323,7 @@ components:
         type: array
         items:
           type: integer
+          format: int64
     groupIdArray:
       name: groupId
       in: query
@@ -2289,10 +2333,11 @@ components:
         type: array
         items:
           type: integer
+          format: int64
     fromTime:
       name: from
       in: query
-      description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+      description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
       required: true
       schema:
         type: string
@@ -2300,7 +2345,7 @@ components:
     toTime:
       name: to
       in: query
-      description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+      description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
       required: true
       schema:
         type: string

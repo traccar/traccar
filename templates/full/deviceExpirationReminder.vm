@@ -2,6 +2,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-Your device $device.name will expire on $dateTool.format("YYYY-MM-dd", $expiration, $locale, $timezone).
+Your device $device.name will expire on $dateTool.format("yyyy-MM-dd", $expiration, $locale, $timezone).
 </body>
 </html>

@@ -77,4 +77,4 @@
 #elseif($alarmName == "removing")
 	#set($alarmName = "Removing")
 #end
-$device.name alarm: $alarmName at $dateTool.format("YYYY-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)
+$device.name alarm: $alarmName at $dateTool.format("yyyy-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)
