@@ -72,7 +72,7 @@ public abstract class BaseMqttProtocolDecoder extends BaseProtocolDecoder {
             }
 
             Object result = decode(deviceSession, message);
-            
+
             /* Acknowledge this publish request only if QoS > 0, i.e. if
              * the `packetId` is valid (> 0).
              */
@@ -91,5 +91,4 @@ public abstract class BaseMqttProtocolDecoder extends BaseProtocolDecoder {
 
         return null;
     }
-
 }
