@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private boolean longDate;
     private boolean decimalFuel;
     private boolean custom;
+    private int frameMask;
     private String form;
 
     private ByteBuf photo;
@@ -71,6 +72,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         decimalFuel = getConfig().getBoolean(Keys.PROTOCOL_DECIMAL_FUEL.withPrefix(getProtocolName()));
 
         custom = getConfig().getBoolean(Keys.PROTOCOL_CUSTOM.withPrefix(getProtocolName()));
+        frameMask = getConfig().getInteger(Keys.PROTOCOL_FRAME_MASK.withPrefix(getProtocolName()));
         form = getConfig().getString(Keys.PROTOCOL_FORM.withPrefix(getProtocolName()));
         if (form != null) {
             custom = true;
@@ -94,6 +96,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     public void setCustom(boolean custom) {
         this.custom = custom;
+    }
+
+    public void setFrameMask(int frameMask) {
+        this.frameMask = frameMask;
     }
 
     public void setForm(String form) {
@@ -241,10 +247,27 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case "MT" -> position.set(Position.KEY_MOTION, Integer.parseInt(values[i]) > 0);
                 case "BC" -> {
-                    String[] beaconValues = values[i].split(":");
-                    decodeBeaconData(
-                            position, Integer.parseInt(beaconValues[0]), Integer.parseInt(beaconValues[1]),
-                            Unpooled.wrappedBuffer(DataConverter.parseHex(beaconValues[2])));
+                    if (frameMask == 1) {
+                        ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(values[i]));
+                        int index = 1;
+                        while (buf.isReadable()) {
+                            int length = buf.readUnsignedByte();
+                            int id = buf.readUnsignedByte();
+                            buf.skipBytes(6); // mac
+                            if (id == 0xE0) {
+                                position.set("tag" + index + "Temp", buf.readShort() / 100.0);
+                                buf.skipBytes(length - 1 - 6 - 2);
+                            } else {
+                                buf.skipBytes(length - 1 - 6);
+                            }
+                            index += 1;
+                        }
+                    } else {
+                        String[] beaconValues = values[i].split(":");
+                        decodeBeaconData(
+                                position, Integer.parseInt(beaconValues[0]), Integer.parseInt(beaconValues[1]),
+                                Unpooled.wrappedBuffer(DataConverter.parseHex(beaconValues[2])));
+                    }
                 }
                 default -> {
                 }

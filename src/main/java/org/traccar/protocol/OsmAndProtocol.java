@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,14 @@ import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
 import jakarta.inject.Inject;
+import org.traccar.model.Command;
 
 public class OsmAndProtocol extends BaseProtocol {
 
     @Inject
     public OsmAndProtocol(Config config) {
+        setSupportedPushCommands(
+                Command.TYPE_POSITION_SINGLE);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {

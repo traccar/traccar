@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,5 +34,7 @@ public interface Protocol {
     Collection<String> getSupportedTextCommands();
 
     void sendTextCommand(String destAddress, Command command) throws Exception;
+
+    Collection<String> getSupportedPushCommands();
 
 }

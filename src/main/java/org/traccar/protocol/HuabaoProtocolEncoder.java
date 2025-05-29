@@ -50,7 +50,8 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
 
             switch (command.getType()) {
                 case Command.TYPE_CUSTOM:
-                    if (Set.of("AL300", "GL100", "VL300").contains(getDeviceModel(command.getDeviceId()))) {
+                    String model = getDeviceModel(command.getDeviceId());
+                    if (model != null && Set.of("AL300", "GL100", "VL300").contains(model)) {
                         data.writeByte(1); // number of parameters
                         data.writeInt(0xF030); // AT command transparent transmission
                         int length = command.getString(Command.KEY_DATA).length();
@@ -58,7 +59,7 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                         data.writeCharSequence(command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII);
                         return HuabaoProtocolDecoder.formatMessage(
                                 0x7e, HuabaoProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
-                    } else if ("BSJ".equals(getDeviceModel(command.getDeviceId()))) {
+                    } else if ("BSJ".equals(model)) {
                         data.writeByte(1); // flag
                         var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
                         data.writeCharSequence(command.getString(Command.KEY_DATA), charset);

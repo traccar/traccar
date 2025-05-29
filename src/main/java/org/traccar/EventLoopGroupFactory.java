@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,34 @@
 package org.traccar;
 
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 
-public final class EventLoopGroupFactory {
+@Singleton
+public class EventLoopGroupFactory {
 
-    private static final EventLoopGroup BOSS_GROUP = new NioEventLoopGroup();
-    private static final EventLoopGroup WORKER_GROUP = new NioEventLoopGroup();
+    private final EventLoopGroup bossGroup;
+    private final EventLoopGroup workerGroup;
 
-    private EventLoopGroupFactory() {
+    @Inject
+    public EventLoopGroupFactory(Config config) {
+        var ioHandlerFactory = NioIoHandler.newFactory();
+        bossGroup = new MultiThreadIoEventLoopGroup(
+                config.getInteger(Keys.SERVER_NETTY_BOSS_THREADS), ioHandlerFactory);
+        workerGroup = new MultiThreadIoEventLoopGroup(
+                config.getInteger(Keys.SERVER_NETTY_WORKER_THREADS), ioHandlerFactory);
     }
 
-    public static EventLoopGroup getBossGroup() {
-        return BOSS_GROUP;
+    public EventLoopGroup getBossGroup() {
+        return bossGroup;
     }
 
-    public static EventLoopGroup getWorkerGroup() {
-        return WORKER_GROUP;
+    public EventLoopGroup getWorkerGroup() {
+        return workerGroup;
     }
 
 }

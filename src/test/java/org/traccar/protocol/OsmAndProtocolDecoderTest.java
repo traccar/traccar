@@ -1,12 +1,27 @@
 package org.traccar.protocol;
 
+import io.netty.handler.codec.http.HttpMethod;
+import io.netty.handler.codec.http.ReadOnlyHttpHeaders;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class OsmAndProtocolDecoderTest extends ProtocolTest {
 
     @Test
-    public void testDecode() throws Exception {
+    public void testDecodeJson() throws Exception {
+
+        var decoder = inject(new OsmAndProtocolDecoder(null));
+
+        verifyPosition(decoder, request(HttpMethod.POST, "/", new ReadOnlyHttpHeaders(true, "Content-Type", "application/json"), buffer(
+                "{\"location\":{\"extras\":{},\"mock\":true,\"coords\":{\"speed_accuracy\":-1,\"speed\":-1,\"longitude\":-122.406417,\"ellipsoidal_altitude\":0,\"floor\":null,\"heading_accuracy\":-1,\"latitude\":37.785834000000001,\"accuracy\":5,\"altitude_accuracy\":-1,\"altitude\":0,\"heading\":-1},\"is_moving\":false,\"age\":188,\"odometer\":0,\"uuid\":\"2FB04C65-99CF-42AB-8DD3-EBCB4B108BF8\",\"event\":\"motionchange\",\"battery\":{\"level\":-1,\"is_charging\":false},\"activity\":{\"type\":\"unknown\",\"confidence\":100},\"timestamp\":\"2025-05-09T04:11:30.579Z\"},\"device_id\":\"658765\"}")));
+
+        verifyPosition(decoder, request(HttpMethod.POST, "/", new ReadOnlyHttpHeaders(true, "Content-Type", "application/json"), buffer(
+                "{\"location\":{\"event\":\"motionchange\",\"is_moving\":false,\"uuid\":\"0e9a2473-a9a7-4c00-997b-fb97d2154e75\",\"timestamp\":\"2021-07-21T08:06:34.444Z\",\"odometer\":0,\"coords\":{\"latitude\":-6.1148096,\"longitude\":106.6837015,\"accuracy\":3.8,\"speed\":18.67,\"speed_accuracy\":0.26,\"heading\":63,\"heading_accuracy\":0.28,\"altitude\":35.7,\"altitude_accuracy\":3.8},\"activity\":{\"type\":\"still\",\"confidence\":100},\"battery\":{\"is_charging\":false,\"level\":0.79},\"extras\":{}},\"device_id\":\"8737767034\"}")));
+
+    }
+
+    @Test
+    public void testDecodeQuery() throws Exception {
 
         var decoder = inject(new OsmAndProtocolDecoder(null));
 

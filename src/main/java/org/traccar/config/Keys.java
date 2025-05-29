@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,6 +171,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Frame mask for Atrack protocol.
+     */
+    public static final ConfigSuffix<Integer> PROTOCOL_FRAME_MASK = new IntegerConfigSuffix(
+            ".frameMask",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Protocol configuration. Required for some devices for decoding incoming data.
      */
     public static final ConfigSuffix<String> PROTOCOL_CONFIG = new StringConfigSuffix(
@@ -313,6 +320,22 @@ public final class Keys {
     public static final ConfigKey<Boolean> SERVER_INSTANT_ACKNOWLEDGEMENT = new BooleanConfigKey(
             "server.instantAcknowledgement",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Number of Netty boss threads. If not specified or zero, Netty default value is used.
+     */
+    public static final ConfigKey<Integer> SERVER_NETTY_BOSS_THREADS = new IntegerConfigKey(
+            "server.nettyBossThreads",
+            List.of(KeyType.CONFIG),
+            0);
+
+    /**
+     * Number of Netty worker threads. If not specified or zero, Netty default value is used.
+     */
+    public static final ConfigKey<Integer> SERVER_NETTY_WORKER_THREADS = new IntegerConfigKey(
+            "server.nettyThreads",
+            List.of(KeyType.CONFIG),
+            0);
 
     /**
      * Address for uploading aggregated anonymous usage statistics. Uploaded information is the same you can see on the
