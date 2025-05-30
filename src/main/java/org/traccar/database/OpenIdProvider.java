@@ -91,9 +91,8 @@ public class OpenIdProvider {
         callbackUrl = URI.create(WebHelper.retrieveWebUrl(config) + "/api/session/openid/callback");
 
         if (config.hasKey(Keys.OPENID_ISSUER_URL)) {
-            String issuer = config.getString(Keys.OPENID_ISSUER_URL);
             OIDCProviderMetadata meta = OIDCProviderMetadata.resolve(
-                    new Issuer(issuer.endsWith("/") ? issuer : issuer + '/'));
+                    new Issuer(config.getString(Keys.OPENID_ISSUER_URL)));
             authUrl = meta.getAuthorizationEndpointURI();
             tokenUrl = meta.getTokenEndpointURI();
             userInfoUrl = meta.getUserInfoEndpointURI();
