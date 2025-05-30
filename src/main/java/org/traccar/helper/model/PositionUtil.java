@@ -15,10 +15,8 @@
  */
 package org.traccar.helper.model;
 
-import org.traccar.model.BaseModel;
-import org.traccar.model.Device;
-import org.traccar.model.Position;
-import org.traccar.model.User;
+import org.traccar.helper.CoordinateUtil;
+import org.traccar.model.*;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -27,8 +25,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class PositionUtil {
@@ -77,4 +74,16 @@ public final class PositionUtil {
                 .collect(Collectors.toList());
     }
 
+    public static List<Position> getLatestUnconvertedPositions(Storage storage, String platform, int limit) throws StorageException {
+        return storage.getObjects(Position.class, new Request(
+                new Columns.All(),
+                Condition.merge(List.of(
+                        new Condition.Compare("latitude", "<", "latitude_max", CoordinateUtil.CHINA_LATITUDE_MAX),
+                        new Condition.Compare("latitude", ">", "latitude_min", CoordinateUtil.CHINA_LATITUDE_MIN),
+                        new Condition.Compare("longitude", "<", "longitude_max", CoordinateUtil.CHINA_LONGITUDE_MAX),
+                        new Condition.Compare("longitude", ">", "longitude_min", CoordinateUtil.CHINA_LONGITUDE_MIN),
+                        new Condition.NotConvertedPositions(platform)
+                )),
+                new Order("fixTime", true, limit)));
+    }
 }

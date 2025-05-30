@@ -17,11 +17,7 @@ package org.traccar.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.traccar.config.Config;
-import org.traccar.model.BaseModel;
-import org.traccar.model.Device;
-import org.traccar.model.Group;
-import org.traccar.model.GroupedModel;
-import org.traccar.model.Permission;
+import org.traccar.model.*;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
@@ -226,6 +222,8 @@ public class DatabaseStorage extends Storage {
             if (condition.getDeviceId() > 0) {
                 results.put("deviceId", condition.getDeviceId());
             }
+        } else if (genericCondition instanceof Condition.NotConvertedPositions condition) {
+            results.put("platform", condition.getPlatform());
         }
         return results;
     }
@@ -282,6 +280,14 @@ public class DatabaseStorage extends Storage {
                 if (condition.getDeviceId() > 0) {
                     result.append(" WHERE id = :deviceId");
                 }
+                result.append(")");
+
+            } else if (genericCondition instanceof Condition.NotConvertedPositions condition) {
+
+                result.append("id NOT IN (");
+                result.append("SELECT id FROM ");
+                result.append(getStorageName(ConvertedPosition.class));
+                result.append(formatCondition(new Condition.Equals("platform", condition.getPlatform())));
                 result.append(")");
 
             }

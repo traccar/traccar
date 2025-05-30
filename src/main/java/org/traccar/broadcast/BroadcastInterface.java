@@ -15,11 +15,7 @@
  */
 package org.traccar.broadcast;
 
-import org.traccar.model.BaseModel;
-import org.traccar.model.Device;
-import org.traccar.model.Event;
-import org.traccar.model.ObjectOperation;
-import org.traccar.model.Position;
+import org.traccar.model.*;
 
 public interface BroadcastInterface {
 
@@ -27,6 +23,9 @@ public interface BroadcastInterface {
     }
 
     default void updatePosition(boolean local, Position position) {
+    }
+
+    default void updateConvertedPosition(boolean local, ConvertedPosition convertedPosition) {
     }
 
     default void updateEvent(boolean local, long userId, Event event) {

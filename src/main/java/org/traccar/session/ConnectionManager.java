@@ -27,12 +27,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.DeviceLookupService;
 import org.traccar.database.NotificationManager;
-import org.traccar.model.BaseModel;
-import org.traccar.model.Device;
-import org.traccar.model.Event;
-import org.traccar.model.LogRecord;
-import org.traccar.model.Position;
-import org.traccar.model.User;
+import org.traccar.model.*;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -319,6 +314,20 @@ public class ConnectionManager implements BroadcastInterface {
     }
 
     @Override
+    public synchronized void updateConvertedPosition(boolean local, ConvertedPosition convertedPosition) {
+        if (local) {
+            broadcastService.updateConvertedPosition(true, convertedPosition);
+        }
+        for (long userId : deviceUsers.getOrDefault(convertedPosition.getDeviceId(), Collections.emptySet())) {
+            if (listeners.containsKey(userId)) {
+                for (UpdateListener listener : listeners.get(userId)) {
+                    listener.onUpdateConvertedPosition(convertedPosition);
+                }
+            }
+        }
+    }
+
+    @Override
     public synchronized void updateEvent(boolean local, long userId, Event event) {
         if (local) {
             broadcastService.updateEvent(true, userId, event);
@@ -367,6 +376,7 @@ public class ConnectionManager implements BroadcastInterface {
         void onKeepalive();
         void onUpdateDevice(Device device);
         void onUpdatePosition(Position position);
+        void onUpdateConvertedPosition(ConvertedPosition convertedPosition);
         void onUpdateEvent(Event event);
         void onUpdateLog(LogRecord record);
     }

@@ -24,6 +24,7 @@ import jakarta.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.database.BufferingManager;
 import org.traccar.database.NotificationManager;
+import org.traccar.geoconv.PositionConverter;
 import org.traccar.handler.BasePositionHandler;
 import org.traccar.handler.ComputedAttributesHandler;
 import org.traccar.handler.CopyAttributesHandler;
@@ -94,7 +95,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
         this.positionLogger = positionLogger;
         bufferingManager = new BufferingManager(config, this);
 
-        positionHandlers = Stream.of(
+        positionHandlers = Stream.concat(Stream.of(
                 ComputedAttributesHandler.Early.class,
                 OutdatedHandler.class,
                 TimeHandler.class,
@@ -111,7 +112,8 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
                 DriverHandler.class,
                 CopyAttributesHandler.class,
                 PositionForwardingHandler.class,
-                DatabaseHandler.class)
+                DatabaseHandler.class),
+                PositionConverter.all())
                 .map((clazz) -> (BasePositionHandler) injector.getInstance(clazz))
                 .filter(Objects::nonNull)
                 .toList();

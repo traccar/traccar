@@ -105,6 +105,10 @@ public class MemoryStorage extends Storage {
 
             return false;
 
+        } else if (genericCondition instanceof Condition.NotConvertedPositions) {
+
+            return false;
+
         }
 
         return false;
