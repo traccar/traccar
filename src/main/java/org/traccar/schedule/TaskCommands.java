@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
@@ -36,15 +38,13 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
 public class TaskCommands extends SingleScheduleTask {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskCommands.class);
 
-    private static final long CHECK_PERIOD_MINUTES = 15;
+    private final long checkPeriodMinutes;
 
     private final Storage storage;
 
@@ -53,21 +53,24 @@ public class TaskCommands extends SingleScheduleTask {
     private final LogAction actionLogger;
 
     @Inject
-    public TaskCommands(Storage storage, CommandsManager commandsManager, LogAction actionLogger) {
+    public TaskCommands(Storage storage, CommandsManager commandsManager, LogAction actionLogger, Config config) {
         this.storage = storage;
         this.commandsManager = commandsManager;
         this.actionLogger = actionLogger;
+        this.checkPeriodMinutes = config.getInteger(Keys.TASK_COMMAND_INTERVAL_MINUTES, 15);
+
     }
 
     @Override
     public void schedule(ScheduledExecutorService executor) {
-        executor.scheduleAtFixedRate(this, CHECK_PERIOD_MINUTES, CHECK_PERIOD_MINUTES, TimeUnit.MINUTES);
+        executor.scheduleAtFixedRate(this, checkPeriodMinutes, checkPeriodMinutes, TimeUnit.MINUTES);
     }
 
     @Override
     public void run() {
-        final LocalDateTime currentCheck = LocalDateTime.now().withSecond(0).withNano(0);
-        final LocalDateTime lastCheck = currentCheck.minusMinutes(CHECK_PERIOD_MINUTES);
+        final Date currentCheck = new Date();
+        final Date lastCheck = new Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(checkPeriodMinutes));
+
         try {
             List<Command> commands = storage.getObjects(Command.class, new Request(new Columns.All(),
                     new Condition.Compare("calendarid", ">", "calendarid", 0)));
@@ -76,11 +79,11 @@ public class TaskCommands extends SingleScheduleTask {
                 var calendar = storage.getObject(Calendar.class, new Request(
                         new Columns.All(), new Condition.Equals("id", command.getCalendarId())));
 
-                if (calendar == null || calendar.checkMoment(toDate(lastCheck))) {
+                if (calendar == null || calendar.checkMoment(lastCheck)) {
                     continue; // already executed
                 }
 
-                if (calendar.checkMomentBetween(toDate(lastCheck), toDate(currentCheck))) {
+                if (calendar.checkMoment(currentCheck)) {
                     executeCommand(command);
                 }
             }
@@ -130,10 +133,6 @@ public class TaskCommands extends SingleScheduleTask {
         } catch (Exception e) {
             LOGGER.warn("Failed to send command '{}' to device '{}'", command.getType(), device.getUniqueId(), e);
         }
-    }
-
-    private static Date toDate(LocalDateTime dateTime) {
-        return Date.from(dateTime.atZone(ZoneId.systemDefault()).toInstant());
     }
 
 }
