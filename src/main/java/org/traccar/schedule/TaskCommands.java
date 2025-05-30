@@ -97,7 +97,7 @@ public class TaskCommands extends SingleScheduleTask {
     private void executeCommand(Command command) throws Exception {
         List<Device> devices = storage.getObjects(Device.class, new Request(
                 new Columns.Include("id"),
-                new Condition.Permission(Device.class, Command.class, command.getId())));
+                new Condition.Permission(Device.class, Command.class, command.getId()).excludeGroups()));
 
         List<Long> groupIds = storage.getObjects(Group.class, new Request(
                 new Columns.Include("id"),
@@ -109,12 +109,14 @@ public class TaskCommands extends SingleScheduleTask {
         }
 
         for (Device device : devices) {
-            sendCommandToDevice(command, device);
+            if (sendCommandToDevice(command, device)) {
+                actionLogger.command(null, 0, 0, device.getId(), command.getType(), true);
+            }
         }
     }
 
     private void sendCommandToGroup(Command command, long groupId) throws Exception {
-        var devices = DeviceUtil.getAccessibleDevices(storage, 0, List.of(), List.of(groupId)); 
+        var devices = DeviceUtil.getAccessibleDevices(storage, 0, List.of(), List.of(groupId));
 
         for (Device device : devices) {
             sendCommandToDevice(command, device);
@@ -122,15 +124,15 @@ public class TaskCommands extends SingleScheduleTask {
         actionLogger.command(null, 0, groupId, 0, command.getType(), true);
     }
 
-    private void sendCommandToDevice(Command command, Device device) {
+    private boolean sendCommandToDevice(Command command, Device device) {
         try {
             Command newCmd = QueuedCommand.fromCommand(command).toCommand();
             newCmd.setDeviceId(device.getId());
             commandsManager.sendCommand(newCmd);
-            actionLogger.command(null, 0, 0, device.getId(), command.getType(), true);
-            LOGGER.info("Command '{}' sent to device '{}'", command.getType(), device.getUniqueId());
+            return true;
         } catch (Exception e) {
             LOGGER.warn("Failed to send command '{}' to device '{}'", command.getType(), device.getUniqueId(), e);
+            return false;
         }
     }
 
