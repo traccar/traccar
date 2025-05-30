@@ -68,8 +68,8 @@ public class TaskCommands extends SingleScheduleTask {
 
     @Override
     public void run() {
-        final Date currentCheck = new Date();
-        final Date lastCheck = new Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(checkPeriodMinutes));
+        Date currentCheck = new Date();
+        Date lastCheck = new Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(checkPeriodMinutes));
 
         try {
             List<Command> commands = storage.getObjects(Command.class, new Request(new Columns.All(),
@@ -93,7 +93,7 @@ public class TaskCommands extends SingleScheduleTask {
 
     }
 
-    private void executeCommand(final Command command) throws Exception {
+    private void executeCommand(Command command) throws Exception {
         List<Device> devices = storage.getObjects(Device.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(Device.class, Command.class, command.getId())));
@@ -103,29 +103,29 @@ public class TaskCommands extends SingleScheduleTask {
                 new Condition.Permission(Group.class, Command.class, command.getId())))
                 .stream().map(BaseModel::getId).toList();
 
-        for (final long groupId : groupIds) {
+        for (long groupId : groupIds) {
             sendCommandToGroup(command, groupId);
         }
 
-        for (final Device device : devices) {
+        for (Device device : devices) {
             sendCommandToDevice(command, device);
         }
     }
 
-    private void sendCommandToGroup(final Command command, final long groupId) throws Exception {
-        final List<Device> devices = storage.getObjects(Device.class, new Request(
+    private void sendCommandToGroup(Command command, long groupId) throws Exception {
+        List<Device> devices = storage.getObjects(Device.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(Group.class, groupId, Device.class)));
 
-        for (final Device device : devices) {
+        for (Device device : devices) {
             sendCommandToDevice(command, device);
         }
         actionLogger.command(null, 0, groupId, 0, command.getType(), true);
     }
 
-    private void sendCommandToDevice(final Command command, final Device device) {
+    private void sendCommandToDevice(Command command, Device device) {
         try {
-            final Command newCmd = QueuedCommand.fromCommand(command).toCommand();
+            Command newCmd = QueuedCommand.fromCommand(command).toCommand();
             newCmd.setDeviceId(device.getId());
             commandsManager.sendCommand(newCmd);
             actionLogger.command(null, 0, 0, device.getId(), command.getType(), true);
