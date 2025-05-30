@@ -32,7 +32,6 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAmount;
 import java.util.Date;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,9 +69,9 @@ public class Calendar extends ExtendedModel {
         return calendar;
     }
 
-    private Set<Period<Instant>> findPeriods(Instant instant, TemporalAmount duration) {
+    public Set<Period<Instant>> findPeriods(Date date) {
         if (calendar != null) {
-            var period = new Period<>(instant, duration);
+            var period = new Period<>(date.toInstant(), Duration.ZERO);
             return calendar.<VEvent>getComponents(CalendarComponent.VEVENT).stream()
                     .flatMap(c -> c.calculateRecurrenceSet(period).stream())
                     .map(p -> new Period<>(temporalToInstant(p.getStart()), temporalToInstant(p.getEnd())))
@@ -82,20 +81,8 @@ public class Calendar extends ExtendedModel {
         }
     }
 
-    public Set<Period<Instant>> findPeriods(Date date) {
-        return findPeriods(date.toInstant(), Duration.ZERO);
-    }
-
     public boolean checkMoment(Date date) {
         return !findPeriods(date).isEmpty();
-    }
-
-    public Set<Period<Instant>> findPeriodsBetween(Date from, Date to) {
-        return findPeriods(from.toInstant(), Duration.between(from.toInstant(), to.toInstant()));
-    }
-
-    public boolean checkMomentBetween(Date from, Date to) {
-        return !findPeriodsBetween(from, to).isEmpty();
     }
 
     private static Instant temporalToInstant(Temporal temporal) {
