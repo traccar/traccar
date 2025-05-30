@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.traccar.config.Keys;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.SessionHelper;
 import org.traccar.helper.model.UserUtil;
+import org.traccar.model.Action;
 import org.traccar.model.Device;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Permission;
@@ -47,6 +48,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 
 @Path("users")
@@ -151,4 +153,24 @@ public class UserResource extends BaseObjectResource<User> {
         return new GoogleAuthenticator().createCredentials().getKey();
     }
 
+    @Path("{id}/actions")
+    @GET
+    public Collection<Action> getActions(
+            @PathParam("id") long userId,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkUser(getUserId(), userId);
+
+        var conditions = new LinkedList<Condition>();
+        conditions.add(new Condition.Equals("userId", userId));
+        if (from != null && to != null) {
+            conditions.add(new Condition.Between("actionTime", "from", from, "to", to));
+        } else if (from != null) {
+            conditions.add(new Condition.Compare("actionTime", ">=", "actionTime", from));
+        } else if (to != null) {
+            conditions.add(new Condition.Compare("actionTime", "<=", "actionTime", to));
+        }
+        return storage.getObjects(Action.class, new Request(new Columns.All(),
+                Condition.merge(conditions), new Order("actionTime")));
+    }
 }

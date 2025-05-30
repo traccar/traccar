@@ -18,9 +18,16 @@ package org.traccar.api;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
+
+import java.beans.Introspector;
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedList;
+
 import org.traccar.api.security.ServiceAccountUser;
 import org.traccar.model.ObjectOperation;
 import org.traccar.helper.LogAction;
+import org.traccar.model.Action;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Group;
 import org.traccar.model.Permission;
@@ -30,6 +37,7 @@ import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
@@ -39,6 +47,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Response;
 
 public abstract class BaseObjectResource<T extends BaseModel> extends BaseResource {
@@ -139,6 +148,28 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         actionLogger.remove(request, getUserId(), baseClass, id);
 
         return Response.noContent().build();
+    }
+
+    @Path("{id}/history")
+    @GET
+    public Collection<Action> getHistory(
+            @PathParam("id") long id,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkPermission(baseClass, getUserId(), id);
+
+        var conditions = new LinkedList<Condition>();
+        conditions.add(new Condition.Equals("objectId", id));
+        conditions.add(new Condition.Equals("objectType", Introspector.decapitalize(baseClass.getSimpleName())));
+        if (from != null && to != null) {
+            conditions.add(new Condition.Between("actionTime", "from", from, "to", to));
+        } else if (from != null) {
+            conditions.add(new Condition.Compare("actionTime", ">=", "actionTime", from));
+        } else if (to != null) {
+            conditions.add(new Condition.Compare("actionTime", "<=", "actionTime", to));
+        }
+        return storage.getObjects(Action.class, new Request(new Columns.All(),
+                Condition.merge(conditions), new Order("actionTime")));
     }
 
 }
