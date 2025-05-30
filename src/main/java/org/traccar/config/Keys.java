@@ -2011,4 +2011,10 @@ public final class Keys {
             "broadcast.secondary",
             List.of(KeyType.CONFIG));
 
+    /**
+     * Set the number of minutes between executions of the TaskCommand.
+     */
+    public static final ConfigKey<Integer> TASK_COMMAND_INTERVAL_MINUTES = new IntegerConfigKey(
+            "task.command.intervalMinutes",
+            List.of(KeyType.CONFIG), 15);
 }
