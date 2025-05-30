@@ -121,9 +121,7 @@ public final class LogAction {
             boolean scheduled) {
         Action action = new Action();
         action.setAddress(WebHelper.retrieveRemoteAddress(request));
-        if (userId > 0) {
-            action.setUserId(userId);
-        }
+        action.setUserId(userId);
         action.setActionType(ACTION_COMMAND);
         action.set("scheduled", scheduled ? true : null);
         if (groupId > 0) {
