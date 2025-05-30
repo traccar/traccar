@@ -27,6 +27,7 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
 import org.traccar.model.Command;
@@ -113,9 +114,7 @@ public class TaskCommands extends SingleScheduleTask {
     }
 
     private void sendCommandToGroup(Command command, long groupId) throws Exception {
-        List<Device> devices = storage.getObjects(Device.class, new Request(
-                new Columns.Include("id"),
-                new Condition.Permission(Group.class, groupId, Device.class)));
+        var devices = DeviceUtil.getAccessibleDevices(storage, 0, List.of(), List.of(groupId)); 
 
         for (Device device : devices) {
             sendCommandToDevice(command, device);

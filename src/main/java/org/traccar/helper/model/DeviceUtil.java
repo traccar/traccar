@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,7 @@ public final class DeviceUtil {
 
         var devices = storage.getObjects(Device.class, new Request(
                 new Columns.All(),
-                new Condition.Permission(User.class, userId, Device.class)));
+                userId > 0 ? new Condition.Permission(User.class, userId, Device.class) : null));
         var deviceById = devices.stream()
                 .collect(Collectors.toUnmodifiableMap(Device::getId, x -> x));
         var devicesByGroup = devices.stream()
@@ -55,7 +55,7 @@ public final class DeviceUtil {
 
         var groups = storage.getObjects(Group.class, new Request(
                 new Columns.All(),
-                new Condition.Permission(User.class, userId, Group.class)));
+                userId > 0 ? new Condition.Permission(User.class, userId, Group.class) : null));
         var groupsByGroup = groups.stream()
                 .filter(x -> x.getGroupId() > 0)
                 .collect(Collectors.groupingBy(Group::getGroupId));
