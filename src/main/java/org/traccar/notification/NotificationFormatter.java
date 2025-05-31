@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -74,7 +74,8 @@ public class NotificationFormatter {
                     .filter(driver -> driver.getUniqueId().equals(driverUniqueId)).findFirst().orElse(null));
         }
 
-        return textTemplateFormatter.formatMessage(velocityContext, event.getType(), templatePath);
+        return textTemplateFormatter.formatMessage(
+                velocityContext, event.getType(), templatePath, notification.getBoolean("priority"));
     }
 
 }

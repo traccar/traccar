@@ -78,7 +78,8 @@ public class TextTemplateFormatter {
         return velocityEngine.getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
     }
 
-    public NotificationMessage formatMessage(VelocityContext velocityContext, String name, String templatePath) {
+    public NotificationMessage formatMessage(
+            VelocityContext velocityContext, String name, String templatePath, boolean priority) {
         StringWriter writer = new StringWriter();
         getTemplate(name, templatePath).merge(velocityContext, writer);
         return new NotificationMessage((String) velocityContext.get("subject"), writer.toString());

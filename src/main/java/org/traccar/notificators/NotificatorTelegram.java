@@ -91,7 +91,7 @@ public class NotificatorTelegram extends Notificator {
         if (message.chatId == null) {
             message.chatId = chatId;
         }
-        message.text = shortMessage.getBody();
+        message.text = shortMessage.body();
         client.target(urlSendText).request().post(Entity.json(message)).close();
         if (sendLocation && position != null) {
             client.target(urlSendLocation).request().post(

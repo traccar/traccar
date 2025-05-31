@@ -53,7 +53,7 @@ public final class NotificatorWeb extends Notificator {
         copy.getAttributes().putAll(event.getAttributes());
 
         var message = notificationFormatter.formatMessage(notification, user, event, position, "short");
-        copy.set("message", message.getBody());
+        copy.set("message", message.body());
 
         connectionManager.updateEvent(true, user.getId(), copy);
     }

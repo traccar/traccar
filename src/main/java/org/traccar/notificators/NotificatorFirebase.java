@@ -73,21 +73,24 @@ public class NotificatorFirebase extends Notificator {
             List<String> registrationTokens = new ArrayList<>(
                     Arrays.asList(user.getString("notificationTokens").split("[, ]")));
 
+            var androidConfig = AndroidConfig.builder()
+                    .setNotification(AndroidNotification.builder().setSound("default").build());
+
+            var apnsConfig = ApnsConfig.builder()
+                    .setAps(Aps.builder().setSound("default").build());
+
+            if (message.priority()) {
+                androidConfig.setPriority(AndroidConfig.Priority.HIGH);
+                apnsConfig.putHeader("apns-priority", "10");
+            }
+
             var messageBuilder = MulticastMessage.builder()
                     .setNotification(com.google.firebase.messaging.Notification.builder()
-                            .setTitle(message.getSubject())
-                            .setBody(message.getBody())
+                            .setTitle(message.subject())
+                            .setBody(message.body())
                             .build())
-                    .setAndroidConfig(AndroidConfig.builder()
-                            .setNotification(AndroidNotification.builder()
-                                    .setSound("default")
-                                    .build())
-                            .build())
-                    .setApnsConfig(ApnsConfig.builder()
-                            .setAps(Aps.builder()
-                                    .setSound("default")
-                                    .build())
-                            .build())
+                    .setAndroidConfig(androidConfig.build())
+                    .setApnsConfig(apnsConfig.build())
                     .addAllTokens(registrationTokens);
 
             if (event != null) {

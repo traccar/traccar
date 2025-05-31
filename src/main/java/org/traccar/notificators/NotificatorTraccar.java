@@ -88,8 +88,8 @@ public class NotificatorTraccar extends Notificator {
         if (user.hasAttribute("notificationTokens")) {
 
             NotificationObject item = new NotificationObject();
-            item.title = shortMessage.getSubject();
-            item.body = shortMessage.getBody();
+            item.title = shortMessage.subject();
+            item.body = shortMessage.body();
             item.sound = "default";
 
             String[] tokenArray = user.getString("notificationTokens").split("[, ]");
