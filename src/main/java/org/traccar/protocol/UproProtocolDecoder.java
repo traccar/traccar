@@ -281,7 +281,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                         break;
                     case 'X':
                         String x = data.toString(StandardCharsets.US_ASCII);
-                        LOGGER.error("upro x " + x);
+                        LOGGER.error("upro x deviceId: {}, {}", position.getDeviceId(), x);
                         Pattern pattern = Pattern.compile("\\((.+?)\\)");
                         Matcher matcher = pattern.matcher(x);
                         if (matcher.matches()) {
