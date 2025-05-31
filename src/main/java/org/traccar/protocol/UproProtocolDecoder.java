@@ -37,6 +37,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static io.netty.buffer.ByteBufUtil.decodeHexDump;
+import static io.netty.buffer.ByteBufUtil.hexDump;
+
 public class UproProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UproProtocolDecoder.class);
@@ -112,7 +115,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             ByteBuf buf = (ByteBuf) msg;
 
             if (buf.getByte(buf.readerIndex()) != '*') {
-                LOGGER.error("upro ignoring " + ByteBufUtil.hexDump(buf));
+                LOGGER.error("upro ignoring " + hexDump(buf));
                 return null;
             }
 
@@ -139,7 +142,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             Network network = new Network();
-            position.set("raw", buf.toString(StandardCharsets.US_ASCII).trim());
+            position.set(Position.KEY_ORIGINAL, hexDump(buf));
 
             String type = parser.next();
             String subtype = parser.next();
@@ -260,11 +263,11 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                             position.set(Position.KEY_SATELLITES,
                                     Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
                         } else {
-                            position.set("odbTravel", ByteBufUtil.hexDump(data));
+                            position.set("odbTravel", hexDump(data));
                         }
                         break;
                     case 'S':
-                        position.set("obdTraffic", ByteBufUtil.hexDump(data));
+                        position.set("obdTraffic", hexDump(data));
                         break;
                     case 'T':
                         if (data.readableBytes() == 2) {
