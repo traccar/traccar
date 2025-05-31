@@ -139,6 +139,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
             Network network = new Network();
+            position.set("raw", buf.toString(StandardCharsets.US_ASCII).trim());
 
             String type = parser.next();
             String subtype = parser.next();
