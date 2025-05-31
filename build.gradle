@@ -3,6 +3,7 @@ plugins {
     id "checkstyle"
     id "com.google.protobuf" version "0.9.4"
     id "org.kordamp.gradle.project-enforcer" version "0.14.0"
+    id "com.github.ben-manes.versions" version "0.52.0"
 }
 
 repositories {
@@ -21,6 +22,12 @@ checkstyle {
     toolVersion = "10.23.1"
     configFile = file("gradle/checkstyle.xml")
     checkstyleTest.enabled = false
+}
+
+dependencyUpdates {
+    rejectVersionIf {[
+        it.candidate.group == 'io.netty' && it.candidate.version ==~ /^5\..*/,
+    ].any { it }}
 }
 
 enforce {
