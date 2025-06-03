@@ -74,8 +74,8 @@ public class NotificationFormatter {
                     .filter(driver -> driver.getUniqueId().equals(driverUniqueId)).findFirst().orElse(null));
         }
 
-        return textTemplateFormatter.formatMessage(
-                velocityContext, event.getType(), templatePath, notification.getBoolean("priority"));
+        boolean priority = notification != null && notification.getBoolean("priority");
+        return textTemplateFormatter.formatMessage(velocityContext, event.getType(), templatePath, priority);
     }
 
 }
