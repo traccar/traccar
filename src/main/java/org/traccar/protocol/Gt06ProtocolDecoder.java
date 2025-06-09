@@ -427,6 +427,19 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             default:
                 break;
         }
+        int ext_battery_voltage = buf.readUnsignedByte();
+        if ( BitUtil.check(ext_battery_voltage, 7)==true &&    BitUtil.check(ext_battery_voltage, 6)==true && BitUtil.check(ext_battery_voltage, 5)==true && BitUtil.check(ext_battery_voltage, 4)==true ){         
+            int voltage_1=0;
+            if ( BitUtil.check(ext_battery_voltage, 3)==true) voltage_1+=8;
+            if ( BitUtil.check(ext_battery_voltage, 2)==true) voltage_1+=4;
+            if ( BitUtil.check(ext_battery_voltage, 1)==true) voltage_1+=2;
+            if ( BitUtil.check(ext_battery_voltage, 0)==true) voltage_1+=1;
+            buf.readUnsignedByte();  // gsm strength
+            ext_battery_voltage=buf.readUnsignedByte();
+            ext_battery_voltage+=voltage_1;
+            double result=(double)ext_battery_voltage/10;
+            position.set(Position.KEY_BATTERY, result);
+        }
     }
 
     private String decodeAlarm(short value, boolean modelLW, boolean modelSW, boolean modelVL) {
