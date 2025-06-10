@@ -427,18 +427,19 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             default:
                 break;
         }
+        // conversion of given bytes f027 
         int ext_battery_voltage = buf.readUnsignedByte();
-        if ( BitUtil.check(ext_battery_voltage, 7)==true &&    BitUtil.check(ext_battery_voltage, 6)==true && BitUtil.check(ext_battery_voltage, 5)==true && BitUtil.check(ext_battery_voltage, 4)==true ){         
+        if ( BitUtil.check(ext_battery_voltage, 7)==true &&    BitUtil.check(ext_battery_voltage, 6)==true && BitUtil.check(ext_battery_voltage, 5)==true && BitUtil.check(ext_battery_voltage, 4)==true ){    //check for 'f' or in binary 1111, whether it is giving external voltage data or not  
             int voltage_1=0;
-            if ( BitUtil.check(ext_battery_voltage, 3)==true) voltage_1+=8;
-            if ( BitUtil.check(ext_battery_voltage, 2)==true) voltage_1+=4;
-            if ( BitUtil.check(ext_battery_voltage, 1)==true) voltage_1+=2;
-            if ( BitUtil.check(ext_battery_voltage, 0)==true) voltage_1+=1;
+            if ( BitUtil.check(ext_battery_voltage, 3)==true) voltage_1+=8;  // converting hex 0
+            if ( BitUtil.check(ext_battery_voltage, 2)==true) voltage_1+=4;  // or any other value to decimal
+            if ( BitUtil.check(ext_battery_voltage, 1)==true) voltage_1+=2;  // through binary for example
+            if ( BitUtil.check(ext_battery_voltage, 0)==true) voltage_1+=1;  // hex(a)=bin(1010)=dec(8+0+2+0)=dec(10)
             buf.readUnsignedByte();  // gsm strength
-            ext_battery_voltage=buf.readUnsignedByte();
-            ext_battery_voltage+=voltage_1;
-            double result=(double)ext_battery_voltage/10;
-            position.set(Position.KEY_BATTERY, result);
+            ext_battery_voltage=buf.readUnsignedByte();  //read the remaining voltage data (27) in decimal. 
+            ext_battery_voltage=voltage_1*16*16+ext_battery_voltage;  //f027 here 0 has the value of 0*16^2 in decimal for its position. //only works above 25.5 volt
+            double result=(double)ext_battery_voltage/10;  // according to documentation
+            position.set(Position.KEY_BATTERY, result);  // would be more appropriate if power key was used
         }
     }
 
