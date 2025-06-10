@@ -94,14 +94,14 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(status0, 6));
         position.set(Position.PREFIX_IN + 3, BitUtil.check(status0, 5));
         if (BitUtil.check(status0, 4)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
+            position.addAlarm(Position.ALARM_POWER_OFF);
         }
         position.set(Position.KEY_IGNITION, BitUtil.check(status0, 3));
 
         buf.readUnsignedByte(); // reserved
 
         int event = buf.readUnsignedByte();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
 
         int status3 = buf.readUnsignedByte();
@@ -109,7 +109,7 @@ public class TranSyncProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ARCHIVE, true);
         }
         if (BitUtil.check(status3, 5)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
+            position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
         }
 
         int rssi = buf.readUnsignedByte();

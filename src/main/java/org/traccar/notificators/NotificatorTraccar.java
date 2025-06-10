@@ -88,8 +88,8 @@ public class NotificatorTraccar extends Notificator {
         if (user.hasAttribute("notificationTokens")) {
 
             NotificationObject item = new NotificationObject();
-            item.title = shortMessage.getSubject();
-            item.body = shortMessage.getBody();
+            item.title = shortMessage.subject();
+            item.body = shortMessage.body();
             item.sound = "default";
 
             String[] tokenArray = user.getString("notificationTokens").split("[, ]");
@@ -119,7 +119,7 @@ public class NotificatorTraccar extends Notificator {
                 if (!failedTokens.isEmpty()) {
                     registrationTokens.removeAll(failedTokens);
                     if (registrationTokens.isEmpty()) {
-                        user.getAttributes().remove("notificationTokens");
+                        user.removeAttribute("notificationTokens");
                     } else {
                         user.set("notificationTokens", String.join(",", registrationTokens));
                     }

@@ -93,6 +93,10 @@ public class ProtocolTest extends BaseTest {
         return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, Unpooled.buffer(), headers, new DefaultHttpHeaders());
     }
 
+    protected DefaultFullHttpRequest request(HttpMethod method, String url, HttpHeaders headers, ByteBuf data) {
+        return new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, method, url, data, headers, new DefaultHttpHeaders());
+    }
+
     protected DefaultFullHttpResponse response(ByteBuf data) {
         return new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, data);
     }
@@ -121,6 +125,8 @@ public class ProtocolTest extends BaseTest {
             case "speed" -> assertEquals(expected, position.getSpeed());
             case "course" -> assertEquals(expected, position.getCourse());
             case "altitude" -> assertEquals(expected, position.getAltitude());
+            case "network" -> assertEquals(expected, position.getNetwork());
+
             default -> assertEquals(expected, position.getAttributes().get(key));
         }
     }

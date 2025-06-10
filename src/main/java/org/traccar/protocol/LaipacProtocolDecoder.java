@@ -218,7 +218,7 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(dateBuilder.getDate());
 
         String event = parser.next();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, decodeEvent(event, position, model));
         position.set(Position.KEY_BATTERY, Double.parseDouble(parser.next().replaceAll("\\.", "")) * 0.001);
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);

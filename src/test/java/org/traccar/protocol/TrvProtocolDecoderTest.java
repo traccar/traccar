@@ -12,6 +12,9 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new TrvProtocolDecoder(null));
 
         verifyNull(decoder, text(
+                "IWAP00355932600077007,8901240204123656505f,310240202365650#"));
+
+        verifyNull(decoder, text(
                 "TRVAP00352121088015548"));
 
         verifyNull(decoder, text(
@@ -101,6 +104,9 @@ public class TrvProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, text(
                 "IWAP12,080835,+491773329827,+491773329826,+49306618438"));
+
+        verifyNull(decoder, text(
+                "IWAP14,080835,004e0069006b00750054005200410058|+4952032960728,004600720061006e006b|+4952034488,00480061006e00640079|+491725244115,,,,,,,#"));
 
     }
 

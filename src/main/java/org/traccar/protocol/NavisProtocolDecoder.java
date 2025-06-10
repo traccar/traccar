@@ -98,12 +98,12 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
         if (isFormat(format, F10, F20, F30, F40, F50, F51, F52)) {
             position.set(Position.KEY_ARMED, BitUtil.to(armedStatus, 7));
             if (BitUtil.check(armedStatus, 7)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                position.addAlarm(Position.ALARM_GENERAL);
             }
         } else if (isFormat(format, F60)) {
             position.set(Position.KEY_ARMED, BitUtil.check(armedStatus, 0));
             if (BitUtil.check(armedStatus, 1)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                position.addAlarm(Position.ALARM_GENERAL);
             }
         }
 
@@ -323,7 +323,7 @@ public class NavisProtocolDecoder extends BaseProtocolDecoder {
                     short armedStatus = buf.readUnsignedByte();
                     position.set(Position.KEY_ARMED, BitUtil.check(armedStatus, 0));
                     if (BitUtil.check(armedStatus, 1)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                        position.addAlarm(Position.ALARM_GENERAL);
                     }
                 }
                 case 4 -> {

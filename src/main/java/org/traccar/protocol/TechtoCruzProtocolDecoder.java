@@ -99,7 +99,7 @@ public class TechtoCruzProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
 
         if (parser.nextInt() > 0) {
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            position.addAlarm(Position.ALARM_OVERSPEED);
         }
 
         return position;

@@ -58,11 +58,13 @@ public class TaskReports extends SingleScheduleTask {
 
     private static final long CHECK_PERIOD_MINUTES = 15;
 
+    private final LogAction actionLogger;
     private final Storage storage;
     private final Injector injector;
 
     @Inject
-    public TaskReports(Storage storage, Injector injector) {
+    public TaskReports(LogAction actionLogger, Storage storage, Injector injector) {
+        this.actionLogger = actionLogger;
         this.storage = storage;
         this.injector = injector;
     }
@@ -94,7 +96,7 @@ public class TaskReports extends SingleScheduleTask {
                     }
                 }
             }
-        } catch (StorageException e) {
+        } catch (Exception e) {
             LOGGER.warn("Scheduled reports error", e);
         }
     }
@@ -116,12 +118,12 @@ public class TaskReports extends SingleScheduleTask {
         ReportMailer reportMailer = injector.getInstance(ReportMailer.class);
 
         for (User user : users) {
-            LogAction.report(user.getId(), true, report.getType(), from, to, deviceIds, groupIds);
+            actionLogger.report(null, user.getId(), true, report.getType(), from, to, deviceIds, groupIds);
             switch (report.getType()) {
                 case "events" -> {
                     var eventsReportProvider = injector.getInstance(EventsReportProvider.class);
                     reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, List.of(), from, to));
+                            stream, user.getId(), deviceIds, groupIds, List.of(), List.of(), from, to));
                 }
                 case "route" -> {
                     var routeReportProvider = injector.getInstance(RouteReportProvider.class);

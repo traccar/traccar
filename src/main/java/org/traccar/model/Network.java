@@ -27,12 +27,16 @@ public class Network {
     public Network() {
     }
 
-    public Network(CellTower cellTower) {
-        addCellTower(cellTower);
+    public Network(CellTower... cellTowers) {
+        for (var tower : cellTowers) {
+            addCellTower(tower);
+        }
     }
 
-    public Network(WifiAccessPoint wifiAccessPoint) {
-        addWifiAccessPoint(wifiAccessPoint);
+    public Network(WifiAccessPoint... wifiAccessPoints) {
+        for (var accessPoint : wifiAccessPoints) {
+            addWifiAccessPoint(accessPoint);
+        }
     }
 
     private Integer homeMobileCountryCode;

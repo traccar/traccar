@@ -74,8 +74,8 @@ public class NotificatorPushover extends Notificator {
             message.device = user.getString("pushoverDeviceNames").replaceAll(" *, *", ",");
         }
 
-        message.title = shortMessage.getSubject();
-        message.message = shortMessage.getBody();
+        message.title = shortMessage.subject();
+        message.message = shortMessage.body();
 
         client.target(url).request().post(Entity.json(message)).close();
     }

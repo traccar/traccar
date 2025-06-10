@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BufferUtil;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -64,22 +65,22 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BLOCKED, BitUtil.check(value, 1));
 
         if (BitUtil.check(value, 2)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         }
         if (BitUtil.check(value, 3) || BitUtil.check(value, 4)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GPS_ANTENNA_CUT);
+            position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
         }
         if (BitUtil.check(value, 4)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            position.addAlarm(Position.ALARM_OVERSPEED);
         }
 
         value = buf.readUnsignedByte();
 
         if (BitUtil.check(value, 2)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+            position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
         }
         if (BitUtil.check(value, 3)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+            position.addAlarm(Position.ALARM_TOW);
         }
 
         buf.readUnsignedByte(); // reserved
@@ -152,16 +153,16 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedInt(); // vehicle id combined
 
                 int status = buf.readUnsignedShort();
-                position.set(Position.KEY_ALARM, BitUtil.check(status, 1) ? Position.ALARM_GEOFENCE_ENTER : null);
-                position.set(Position.KEY_ALARM, BitUtil.check(status, 2) ? Position.ALARM_GEOFENCE_EXIT : null);
-                position.set(Position.KEY_ALARM, BitUtil.check(status, 3) ? Position.ALARM_POWER_CUT : null);
-                position.set(Position.KEY_ALARM, BitUtil.check(status, 4) ? Position.ALARM_VIBRATION : null);
+                position.addAlarm(BitUtil.check(status, 1) ? Position.ALARM_GEOFENCE_ENTER : null);
+                position.addAlarm(BitUtil.check(status, 2) ? Position.ALARM_GEOFENCE_EXIT : null);
+                position.addAlarm(BitUtil.check(status, 3) ? Position.ALARM_POWER_CUT : null);
+                position.addAlarm(BitUtil.check(status, 4) ? Position.ALARM_VIBRATION : null);
                 if (BitUtil.check(status, 5)) {
                     responseRequired = true;
                 }
                 position.set(Position.KEY_BLOCKED, BitUtil.check(status, 7));
-                position.set(Position.KEY_ALARM, BitUtil.check(status, 8 + 3) ? Position.ALARM_LOW_BATTERY : null);
-                position.set(Position.KEY_ALARM, BitUtil.check(status, 8 + 6) ? Position.ALARM_FAULT : null);
+                position.addAlarm(BitUtil.check(status, 8 + 3) ? Position.ALARM_LOW_BATTERY : null);
+                position.addAlarm(BitUtil.check(status, 8 + 6) ? Position.ALARM_FAULT : null);
                 position.set(Position.KEY_STATUS, status);
 
                 int battery = buf.readUnsignedByte();
@@ -385,7 +386,7 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // rfid
             .number("d+,")                       // password verification
             .number("d+,")                       // incorrect password count
-            .number("(d+),")                     // index
+            .number("(d+)")                      // index
             .any()
             .compile();
 
@@ -429,6 +430,54 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodePeripherals(ByteBuf buf, Channel channel, SocketAddress remoteAddress) {
+
+        String deviceId = buf.getCharSequence(1, 10, StandardCharsets.US_ASCII).toString();
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        int startIndex = 0;
+        for (int i = 0; i < 6; i++) {
+            startIndex = buf.indexOf(startIndex + 1, buf.writerIndex(), (byte) ',');
+        }
+        buf.readerIndex(startIndex + 1);
+
+        decodeBinaryLocation(buf, position);
+
+        buf.skipBytes(6); // sensor time
+        buf.skipBytes(5); // sensor id
+        buf.readUnsignedByte(); // sensor index
+        position.set("sensorBattery", buf.readUnsignedShort() / 100.0);
+        position.set("sensorBatteryLevel", buf.readUnsignedByte());
+        position.set("sensorRssi", -buf.readUnsignedByte());
+
+        int type = buf.readUnsignedByte();
+
+        if (type == 1) {
+
+            int temperature = buf.readUnsignedShort();
+            if (temperature != 0xffff) {
+                int value = temperature & 0xfff;
+                if ((temperature & 0xf000) > 0) {
+                    value = -value;
+                }
+                position.set(Position.PREFIX_TEMP + 1, value / 10.0);
+            }
+
+            position.set(Position.KEY_HUMIDITY, buf.readUnsignedByte());
+            buf.readUnsignedShort(); // data count
+            buf.readUnsignedByte(); // status
+
+        }
+
+        return position;
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -439,6 +488,9 @@ public class Jt600ProtocolDecoder extends BaseProtocolDecoder {
         if (first == '$') {
             return decodeBinary(buf, channel, remoteAddress);
         } else if (first == '(') {
+            if (BufferUtil.indexOf("WLNET,5,", buf) > 0) {
+                return decodePeripherals(buf, channel, remoteAddress);
+            }
             String sentence = buf.toString(StandardCharsets.US_ASCII);
             if (sentence.contains("W01")) {
                 return decodeW01(sentence, channel, remoteAddress);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,9 +79,11 @@ public class Position extends Message {
     public static final String KEY_ARMED = "armed";
     public static final String KEY_GEOFENCE = "geofence";
     public static final String KEY_ACCELERATION = "acceleration";
+    public static final String KEY_HUMIDITY = "humidity";
     public static final String KEY_DEVICE_TEMP = "deviceTemp"; // celsius
     public static final String KEY_COOLANT_TEMP = "coolantTemp"; // celsius
     public static final String KEY_ENGINE_LOAD = "engineLoad";
+    public static final String KEY_ENGINE_TEMP = "engineTemp";
     public static final String KEY_OPERATOR = "operator";
     public static final String KEY_COMMAND = "command";
     public static final String KEY_BLOCKED = "blocked";
@@ -322,6 +324,16 @@ public class Position extends Message {
             this.geofenceIds = geofenceIds.stream().map(Number::longValue).collect(Collectors.toList());
         } else {
             this.geofenceIds = null;
+        }
+    }
+
+    public void addAlarm(String alarm) {
+        if (alarm != null) {
+            if (hasAttribute(KEY_ALARM)) {
+                set(KEY_ALARM, getAttributes().get(KEY_ALARM) + "," + alarm);
+            } else {
+                set(KEY_ALARM, alarm);
+            }
         }
     }
 

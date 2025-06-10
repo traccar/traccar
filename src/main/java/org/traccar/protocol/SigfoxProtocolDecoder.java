@@ -203,7 +203,7 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
                 int event = buf.readUnsignedByte();
                 position.set(Position.KEY_EVENT, event);
                 if (event == 0x22 || event == 0x62) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    position.addAlarm(Position.ALARM_SOS);
                 }
 
                 while (buf.isReadable()) {

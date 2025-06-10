@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,27 @@ public class HuabaoFrameDecoder extends BaseFrameDecoder {
 
         } else {
 
-            int index = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) 0x7e);
+            int delimiter = buf.getUnsignedByte(buf.readerIndex());
+            boolean alternative = delimiter == 0xe7;
+
+            int index = buf.indexOf(buf.readerIndex() + 1, buf.writerIndex(), (byte) delimiter);
             if (index >= 0) {
                 ByteBuf result = Unpooled.buffer(index + 1 - buf.readerIndex());
 
                 while (buf.readerIndex() <= index) {
                     int b = buf.readUnsignedByte();
-                    if (b == 0x7d) {
+                    if (alternative && (b == 0xe6 || b == 0x3e)) {
+                        int ext = buf.readUnsignedByte();
+                        if (b == 0xe6 && ext == 0x01) {
+                            result.writeByte(0xe6);
+                        } else if (b == 0xe6 && ext == 0x02) {
+                            result.writeByte(0xe7);
+                        } else if (b == 0x3e && ext == 0x01) {
+                            result.writeByte(0x3e);
+                        } else if (b == 0x3e && ext == 0x02) {
+                            result.writeByte(0x3d);
+                        }
+                    } else if (!alternative && b == 0x7d) {
                         int ext = buf.readUnsignedByte();
                         if (ext == 0x01) {
                             result.writeByte(0x7d);

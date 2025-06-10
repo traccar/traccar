@@ -74,13 +74,13 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     private void processStatus(Position position, long status) {
 
         if (!BitUtil.check(status, 0)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+            position.addAlarm(Position.ALARM_VIBRATION);
         } else if (!BitUtil.check(status, 1) || !BitUtil.check(status, 18)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         } else if (!BitUtil.check(status, 2)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            position.addAlarm(Position.ALARM_OVERSPEED);
         } else if (!BitUtil.check(status, 19)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+            position.addAlarm(Position.ALARM_POWER_CUT);
         }
 
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 10));

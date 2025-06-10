@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,22 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import jakarta.inject.Inject;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
-import jakarta.inject.Inject;
-
-public class LacakProtocol extends BaseProtocol {
+public class Gl601Protocol extends BaseProtocol {
 
     @Inject
-    public LacakProtocol(Config config) {
+    public Gl601Protocol(Config config) {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new HttpResponseEncoder());
-                pipeline.addLast(new HttpRequestDecoder());
-                pipeline.addLast(new HttpObjectAggregator(16384));
-                pipeline.addLast(new LacakProtocolDecoder(LacakProtocol.this));
+                pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 2, 2, -4, 0));
+                pipeline.addLast(new Gl601ProtocolDecoder(Gl601Protocol.this));
             }
         });
     }

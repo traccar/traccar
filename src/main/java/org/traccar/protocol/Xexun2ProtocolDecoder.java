@@ -139,7 +139,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
                 int mask = buf.readUnsignedByte();
 
                 if (BitUtil.check(mask, 0)) {
-                    position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedInt()));
+                    position.addAlarm(decodeAlarm(buf.readUnsignedInt()));
                 }
                 if (BitUtil.check(mask, 1)) {
                     int positionMask = buf.readUnsignedByte();

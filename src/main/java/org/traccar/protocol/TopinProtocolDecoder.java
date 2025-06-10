@@ -176,7 +176,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             if (buf.readableBytes() >= 5) {
                 position.setAltitude(buf.readShort());
-                position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
             }
 
             ByteBuf content = Unpooled.buffer();
@@ -256,7 +256,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (buf.readableBytes() > 2) {
-                position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+                position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
             }
 
             position.setNetwork(network);
@@ -274,7 +274,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+            position.addAlarm(Position.ALARM_VIBRATION);
 
             return position;
 

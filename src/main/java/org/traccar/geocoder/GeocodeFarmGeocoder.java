@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import jakarta.ws.rs.client.Client;
 public class GeocodeFarmGeocoder extends JsonGeocoder {
 
     private static String formatUrl(String key, String language) {
-        String url = "https://www.geocode.farm/v3/json/reverse/";
-        url += "?lat=%f&lon=%f&country=us&count=1";
+        String url = "https://api.geocode.farm/reverse/?lat=%f&lon=%f";
         if (key != null) {
             url += "&key=" + key;
         }
@@ -31,6 +30,7 @@ public class GeocodeFarmGeocoder extends JsonGeocoder {
         }
         return url;
     }
+
     public GeocodeFarmGeocoder(
             Client client, String key, String language, int cacheSize, AddressFormat addressFormat) {
         super(client, formatUrl(key, language), cacheSize, addressFormat);
@@ -40,30 +40,28 @@ public class GeocodeFarmGeocoder extends JsonGeocoder {
     public Address parseAddress(JsonObject json) {
         Address address = new Address();
 
-        JsonObject result = json
-                .getJsonObject("geocoding_results")
-                .getJsonArray("RESULTS")
-                .getJsonObject(0);
-
-        JsonObject resultAddress = result.getJsonObject("ADDRESS");
+        JsonObject result = json.getJsonObject("RESULTS").getJsonObject("result").getJsonObject("0");
 
         if (result.containsKey("formatted_address")) {
             address.setFormattedAddress(result.getString("formatted_address"));
         }
-        if (resultAddress.containsKey("street_number")) {
-            address.setStreet(resultAddress.getString("street_number"));
+        if (result.containsKey("house_number")) {
+            address.setHouse(result.getString("house_number"));
         }
-        if (resultAddress.containsKey("street_name")) {
-            address.setStreet(resultAddress.getString("street_name"));
+        if (result.containsKey("street_name")) {
+            address.setStreet(result.getString("street_name"));
         }
-        if (resultAddress.containsKey("locality")) {
-            address.setSettlement(resultAddress.getString("locality"));
+        if (result.containsKey("locality")) {
+            address.setSettlement(result.getString("locality"));
         }
-        if (resultAddress.containsKey("admin_1")) {
-            address.setState(resultAddress.getString("admin_1"));
+        if (result.containsKey("admin_1")) {
+            address.setState(result.getString("admin_1"));
         }
-        if (resultAddress.containsKey("country")) {
-            address.setCountry(resultAddress.getString("country"));
+        if (result.containsKey("country")) {
+            address.setCountry(result.getString("country"));
+        }
+        if (result.containsKey("postal_code")) {
+            address.setPostcode(result.getString("postal_code"));
         }
 
         return address;

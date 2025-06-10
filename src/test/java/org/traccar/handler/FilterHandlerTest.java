@@ -91,7 +91,7 @@ public class FilterHandlerTest extends BaseTest {
     public void testSkipAttributes() {
 
         Position position = createPosition(new Date(), true, 0);
-        position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+        position.addAlarm(Position.ALARM_GENERAL);
 
         assertFalse(filteringHandler.filter(position));
 

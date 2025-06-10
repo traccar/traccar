@@ -2,6 +2,9 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
+import org.traccar.model.Position;
 
 public class WialonProtocolDecoderTest extends ProtocolTest {
 
@@ -12,6 +15,9 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
 
         verifyNull(decoder, text(
                 "#L#2.0;42001300083;;CE45"));
+
+        verifyPosition(decoder, text(
+                "#SD#300924;154245;5554.350052;N;3644.670410;E;2.92;NA;NA;NA;7A01"));
 
         verifyAttribute(decoder, text(
                 "#D#220323;114150;2234.80479;N;11354.87786;E;0;NA;59;11;NA;NA;NA;;NA;d_battr:1:94,d_csq:1:21,di_light:1:1;E7C9"),
@@ -36,7 +42,7 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
                 "#D#101118;061143;0756.0930;N;12338.6403;E;18.223;99.766;-4.000;10;0.800;NA;NA;NA;NA;101_521347:1:521249,101_521126:1:6593598,101_521127:1:774780,101_521072_21.1:1:0,101_521072_21.2:1:71353;F24A"));
 
         verifyPosition(decoder, text(
-                "99999999#D#101118;061143;0756.0930;N;12338.6403;E;18.223;99.766;-4.000;10;0.800;NA;NA;NA;NA;101_521347:1:521249,101_521126:1:6593598,101_521127:1:774780,101_521072_21.1:1:0,101_521072_21.2:1:71353;F24A"));
+                "2.0;99999999#D#101118;061143;0756.0930;N;12338.6403;E;18.223;99.766;-4.000;10;0.800;NA;NA;NA;NA;101_521347:1:521249,101_521126:1:6593598,101_521127:1:774780,101_521072_21.1:1:0,101_521072_21.2:1:71353;F24A"));
 
         verifyPosition(decoder, text(
                 "#D#151216;135910;5321.1466;N;04441.7929;E;87;156;265.000000;12;1.000000;241;NA;NA;NA;odo:2:0.000000,total_fuel:1:430087,can_fls:1:201,can_taho:1:11623,can_mileage:1:140367515"));
@@ -82,6 +88,23 @@ public class WialonProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, text(
                 "#D#120319;112003;NA;NA;NA;NA;0.000;NA;NA;0;NA;NA;NA;NA;NA;motion:3:false"),
                 "motion", false);
+
+        verifyAttribute(
+                decoder,
+                text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;mnc1:1:02,mcc1:1:250,lac1:1:5901,cell_id1:1:45542,mnc2:1:22,mcc2:1:222,lac2:1:2222,cell_id2:1:22222,mcc3:1:333"),
+                "network", new Network(
+                        CellTower.from(250, 2, 5901, 45542),
+                        CellTower.from(222, 22, 2222, 22222)));
+
+        verifyAttribute(
+                decoder,
+                text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;SOS:1:0,temp:3:18,bat:3:99"),
+                Position.KEY_DEVICE_TEMP, 18);
+
+        verifyAttribute(
+                decoder,
+                text("#D#NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;NA;;NA;SOS:1:0,temp:3:18,bat:3:99"),
+                Position.KEY_BATTERY_LEVEL, 99);
     }
 
 }

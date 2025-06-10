@@ -161,7 +161,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             Parser parser = new Parser(PATTERN_SIMPLE, status);
             if (parser.matches()) {
 
-                position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+                position.addAlarm(decodeAlarm(parser.next()));
 
                 DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next(), id);
                 if (deviceSession == null) {
@@ -223,7 +223,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.PREFIX_ADC + 1, parser.next());
                 position.set(Position.PREFIX_ADC + 2, parser.next());
                 position.set(Position.PREFIX_ADC + 3, parser.next());
-                position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+                position.addAlarm(decodeAlarm(parser.next()));
 
             }
         }
@@ -378,7 +378,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+            position.addAlarm(decodeAlarm(parser.next()));
         }
 
         return position;

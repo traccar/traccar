@@ -266,7 +266,7 @@ public class FilterHandler extends BasePositionHandler {
             }
         }
 
-        if (filterType.length() > 0) {
+        if (!filterType.isEmpty()) {
             LOGGER.info("Position filtered by {}filters from device: {}", filterType, device.getUniqueId());
             return true;
         }
@@ -275,7 +275,7 @@ public class FilterHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         callback.processed(filter(position));
     }
 

@@ -230,9 +230,9 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         if (event != null) {
             position.set(Position.KEY_EVENT, event);
             if (sentence.charAt(5) == ',') {
-                position.set(Position.KEY_ALARM, decodeAlarm2(event));
+                position.addAlarm(decodeAlarm2(event));
             } else {
-                position.set(Position.KEY_ALARM, decodeAlarm(event));
+                position.addAlarm(decodeAlarm(event));
             }
         }
 
@@ -301,11 +301,14 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                         response = ">SAK;ID=" + uniqueId + ";" + messageIndex + "<";
                     } else {
                         if (indexFirst) {
-                            response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";*";
+                            response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";";
                         } else {
-                            response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
+                            response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";";
                         }
-                        response += String.format("%02X", Checksum.xor(response)) + "<";
+                        String model = getDeviceModel(deviceSession);
+                        boolean lantrix = model != null && model.toUpperCase().startsWith("LANTRIX");
+                        int checksum = Checksum.xor(lantrix ? response : response + "*");
+                        response += String.format("*%02X", checksum) + "<";
                     }
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 } else {

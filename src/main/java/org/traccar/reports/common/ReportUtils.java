@@ -302,7 +302,7 @@ public class ReportUtils {
         List<T> result = new ArrayList<>();
         TripsConfig tripsConfig = new TripsConfig(
                 new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
-        boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
+        boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
 
         var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
         if (!positions.isEmpty()) {
@@ -363,7 +363,9 @@ public class ReportUtils {
             Device device, Date from, Date to, Class<T> reportClass) throws StorageException {
 
         List<T> result = new ArrayList<>();
-        boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
+        TripsConfig tripsConfig = new TripsConfig(
+                new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
+        boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
         boolean trips = reportClass.equals(TripReportItem.class);
         Set<String> filter = Set.of(Event.TYPE_DEVICE_MOVING, Event.TYPE_DEVICE_STOPPED);
 

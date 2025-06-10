@@ -124,7 +124,7 @@ public class PositionForwardingHandler extends BasePositionHandler {
     }
 
     @Override
-    public void handlePosition(Position position, Callback callback) {
+    public void onPosition(Position position, Callback callback) {
         if (positionForwarder != null) {
             PositionData positionData = new PositionData();
             positionData.setPosition(position);

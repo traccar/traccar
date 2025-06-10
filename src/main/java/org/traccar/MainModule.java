@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.name.Names;
+import com.nimbusds.oauth2.sdk.GeneralException;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.apache.velocity.app.VelocityEngine;
@@ -80,11 +81,14 @@ import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
 import org.traccar.handler.TimeHandler;
+import org.traccar.helper.LogAction;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
 import org.traccar.mail.SmtpMailManager;
+import org.traccar.push.FirebaseClient;
+import org.traccar.push.PushCommandManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
@@ -103,7 +107,6 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -187,10 +190,10 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static OpenIdProvider provideOpenIDProvider(
-        Config config, LoginService loginService, ObjectMapper objectMapper
-        ) throws InterruptedException, IOException, URISyntaxException {
+            Config config, LoginService loginService, LogAction actionLogger)
+            throws IOException, URISyntaxException, GeneralException {
         if (config.hasKey(Keys.OPENID_CLIENT_ID)) {
-            return new OpenIdProvider(config, loginService, HttpClient.newHttpClient(), objectMapper);
+            return new OpenIdProvider(config, loginService, actionLogger);
         }
         return null;
     }
@@ -363,15 +366,16 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static PositionForwarder providePositionForwarder(
-            Config config, Client client, ExecutorService executorService, ObjectMapper objectMapper) {
+            Config config, Client client, ExecutorService executorService,
+            ObjectMapper objectMapper, CacheManager cacheManager) {
         if (config.hasKey(Keys.FORWARD_URL)) {
             return switch (config.getString(Keys.FORWARD_TYPE)) {
-                case "json" -> new PositionForwarderJson(config, client, objectMapper);
+                case "json" -> new PositionForwarderJson(config, client, objectMapper, cacheManager);
                 case "amqp" -> new PositionForwarderAmqp(config, objectMapper);
                 case "kafka" -> new PositionForwarderKafka(config, objectMapper);
                 case "mqtt" -> new PositionForwarderMqtt(config, objectMapper);
                 case "redis" -> new PositionForwarderRedis(config, objectMapper);
-                case "wialon" -> new PositionForwarderWialon(config, executorService, "1.0");
+                case "wialon" -> new PositionForwarderWialon(config, executorService, "1.0", false);
                 default -> new PositionForwarderUrl(config, client, objectMapper);
             };
         }
@@ -388,6 +392,25 @@ public class MainModule extends AbstractModule {
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.init(properties);
         return velocityEngine;
+    }
+
+    @Singleton
+    @Provides
+    public static FirebaseClient provideFirebaseClient(Config config) throws IOException {
+        if (config.hasKey(Keys.NOTIFICATOR_FIREBASE_SERVICE_ACCOUNT)) {
+            return new FirebaseClient(config);
+        }
+        return null;
+    }
+
+    @Singleton
+    @Provides
+    public static PushCommandManager providePushCommandManager(
+            @Nullable FirebaseClient firebaseClient) throws IOException {
+        if (firebaseClient != null) {
+            return new PushCommandManager(firebaseClient);
+        }
+        return null;
     }
 
 }

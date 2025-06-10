@@ -71,7 +71,7 @@ public class Dsf22ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
             position.set(Position.PREFIX_IN + 1, BitUtil.check(status, 1));
             position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 4));
-            position.set(Position.KEY_ALARM, BitUtil.check(status, 6) ? Position.ALARM_JAMMING : null);
+            position.addAlarm(BitUtil.check(status, 6) ? Position.ALARM_JAMMING : null);
             position.set(Position.KEY_STATUS, status);
 
             positions.add(position);

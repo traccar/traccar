@@ -106,7 +106,7 @@ public class AnytrekProtocolDecoder extends BaseProtocolDecoder {
         flags = buf.readUnsignedByte();
         position.set(Position.KEY_CHARGE, BitUtil.check(flags, 0));
         position.set(Position.KEY_IGNITION, BitUtil.check(flags, 1));
-        position.set(Position.KEY_ALARM, BitUtil.check(flags, 4) ? Position.ALARM_GENERAL : null);
+        position.addAlarm(BitUtil.check(flags, 4) ? Position.ALARM_GENERAL : null);
 
         buf.readUnsignedShortLE(); // charge current
 

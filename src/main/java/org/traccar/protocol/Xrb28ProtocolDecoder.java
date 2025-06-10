@@ -132,13 +132,13 @@ public class Xrb28ProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case "W0" -> {
                     switch (Integer.parseInt(values[index++])) {
-                        case 1 -> position.set(Position.KEY_ALARM, Position.ALARM_MOVEMENT);
-                        case 2 -> position.set(Position.KEY_ALARM, Position.ALARM_FALL_DOWN);
-                        case 3 -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                        case 1 -> position.addAlarm(Position.ALARM_MOVEMENT);
+                        case 2 -> position.addAlarm(Position.ALARM_FALL_DOWN);
+                        case 3 -> position.addAlarm(Position.ALARM_LOW_BATTERY);
                     }
                 }
                 case "E0" -> {
-                    position.set(Position.KEY_ALARM, Position.ALARM_FAULT);
+                    position.addAlarm(Position.ALARM_FAULT);
                     position.set("error", Integer.parseInt(values[index++]));
                 }
                 case "S1" -> position.set(Position.KEY_EVENT, Integer.parseInt(values[index++]));

@@ -103,7 +103,7 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextDouble());
 
         position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt()));
+        position.addAlarm(decodeAlarm(parser.nextHexInt()));
 
         if (parser.hasNext()) {
             position.set(Position.KEY_ARMED, parser.nextInt() > 0);

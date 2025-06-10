@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.traccar.api.security.LoginService;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.database.OpenIdProvider;
 import org.traccar.helper.LogAction;
-import org.traccar.helper.WebHelper;
+import org.traccar.helper.SessionHelper;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -50,15 +50,11 @@ import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Date;
-import java.net.URI;
 
 @Path("session")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class SessionResource extends BaseResource {
-
-    public static final String USER_ID_KEY = "userId";
-    public static final String EXPIRATION_KEY = "expiration";
 
     @Inject
     private LoginService loginService;
@@ -69,6 +65,9 @@ public class SessionResource extends BaseResource {
 
     @Inject
     private TokenManager tokenManager;
+
+    @Inject
+    private LogAction actionLogger;
 
     @Context
     private HttpServletRequest request;
@@ -81,14 +80,12 @@ public class SessionResource extends BaseResource {
             LoginResult loginResult = loginService.login(token);
             if (loginResult != null) {
                 User user = loginResult.getUser();
-                request.getSession().setAttribute(USER_ID_KEY, user.getId());
-                request.getSession().setAttribute(EXPIRATION_KEY, loginResult.getExpiration());
-                LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+                SessionHelper.userLogin(actionLogger, request, user, loginResult.getExpiration());
                 return user;
             }
         }
 
-        Long userId = (Long) request.getSession().getAttribute(USER_ID_KEY);
+        Long userId = (Long) request.getSession().getAttribute(SessionHelper.USER_ID_KEY);
         if (userId != null) {
             User user = permissionsService.getUser(userId);
             if (user != null) {
@@ -105,8 +102,7 @@ public class SessionResource extends BaseResource {
         permissionsService.checkUser(getUserId(), userId);
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(), new Condition.Equals("id", userId)));
-        request.getSession().setAttribute(USER_ID_KEY, user.getId());
-        LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+        SessionHelper.userLogin(actionLogger, request, user, null);
         return user;
     }
 
@@ -128,19 +124,18 @@ public class SessionResource extends BaseResource {
         }
         if (loginResult != null) {
             User user = loginResult.getUser();
-            request.getSession().setAttribute(USER_ID_KEY, user.getId());
-            LogAction.login(user.getId(), WebHelper.retrieveRemoteAddress(request));
+            SessionHelper.userLogin(actionLogger, request, user, null);
             return user;
         } else {
-            LogAction.failedLogin(WebHelper.retrieveRemoteAddress(request));
+            actionLogger.failedLogin(request);
             throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
         }
     }
 
     @DELETE
     public Response remove() {
-        LogAction.logout(getUserId(), WebHelper.retrieveRemoteAddress(request));
-        request.getSession().removeAttribute(USER_ID_KEY);
+        actionLogger.logout(request, getUserId());
+        request.getSession().removeAttribute(SessionHelper.USER_ID_KEY);
         return Response.noContent().build();
     }
 
@@ -148,7 +143,7 @@ public class SessionResource extends BaseResource {
     @POST
     public String requestToken(
             @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-        Date currentExpiration = (Date) request.getSession().getAttribute(EXPIRATION_KEY);
+        Date currentExpiration = (Date) request.getSession().getAttribute(SessionHelper.EXPIRATION_KEY);
         if (currentExpiration != null && currentExpiration.before(expiration)) {
             expiration = currentExpiration;
         }
@@ -159,6 +154,9 @@ public class SessionResource extends BaseResource {
     @Path("openid/auth")
     @GET
     public Response openIdAuth() {
+        if (openIdProvider == null) {
+            throw new UnsupportedOperationException("OpenID not enabled");
+        }
         return Response.seeOther(openIdProvider.createAuthUri()).build();
     }
 
@@ -166,10 +164,10 @@ public class SessionResource extends BaseResource {
     @Path("openid/callback")
     @GET
     public Response requestToken() throws IOException, StorageException, ParseException, GeneralSecurityException {
-        StringBuilder requestUrl = new StringBuilder(request.getRequestURL().toString());
-        String queryString = request.getQueryString();
-        String requestUri = requestUrl.append('?').append(queryString).toString();
-
-        return Response.seeOther(openIdProvider.handleCallback(URI.create(requestUri), request)).build();
+        if (openIdProvider == null) {
+            throw new UnsupportedOperationException("OpenID not enabled");
+        }
+        return Response.seeOther(openIdProvider.handleCallback(request.getQueryString(), request)).build();
     }
+
 }

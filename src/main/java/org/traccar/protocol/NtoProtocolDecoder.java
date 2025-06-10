@@ -77,14 +77,14 @@ public class NtoProtocolDecoder extends BaseProtocolDecoder {
 
         long status = parser.nextHexLong();
         position.set(Position.KEY_STATUS, status);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 1) ? Position.ALARM_JAMMING : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 3 * 8 + 1) ? Position.ALARM_POWER_CUT : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 3 * 8 + 2) ? Position.ALARM_OVERSPEED : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 3 * 8 + 3) ? Position.ALARM_VIBRATION : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 3 * 8 + 4) ? Position.ALARM_GEOFENCE_ENTER : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 3 * 8 + 5) ? Position.ALARM_GEOFENCE_EXIT : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 4 * 8) ? Position.ALARM_LOW_BATTERY : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 4 * 8 + 4) ? Position.ALARM_DOOR : null);
+        position.addAlarm(BitUtil.check(status, 1) ? Position.ALARM_JAMMING : null);
+        position.addAlarm(BitUtil.check(status, 3 * 8 + 1) ? Position.ALARM_POWER_CUT : null);
+        position.addAlarm(BitUtil.check(status, 3 * 8 + 2) ? Position.ALARM_OVERSPEED : null);
+        position.addAlarm(BitUtil.check(status, 3 * 8 + 3) ? Position.ALARM_VIBRATION : null);
+        position.addAlarm(BitUtil.check(status, 3 * 8 + 4) ? Position.ALARM_GEOFENCE_ENTER : null);
+        position.addAlarm(BitUtil.check(status, 3 * 8 + 5) ? Position.ALARM_GEOFENCE_EXIT : null);
+        position.addAlarm(BitUtil.check(status, 4 * 8) ? Position.ALARM_LOW_BATTERY : null);
+        position.addAlarm(BitUtil.check(status, 4 * 8 + 4) ? Position.ALARM_DOOR : null);
 
         return position;
     }

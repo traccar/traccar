@@ -103,15 +103,15 @@ public class Tlt2hProtocolDecoder extends BaseProtocolDecoder {
         switch (status) {
             case "AUTOSTART", "AUTO" -> position.set(Position.KEY_IGNITION, true);
             case "AUTOSTOP", "AUTOLOW" -> position.set(Position.KEY_IGNITION, false);
-            case "TOWED" -> position.set(Position.KEY_ALARM, Position.ALARM_TOW);
-            case "SHAKE" -> position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
-            case "SOS" -> position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-            case "DEF" -> position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
-            case "BLP" -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-            case "CLP" -> position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
-            case "OS" -> position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
-            case "RS" -> position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
-            case "OVERSPEED" -> position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            case "TOWED" -> position.addAlarm(Position.ALARM_TOW);
+            case "SHAKE" -> position.addAlarm(Position.ALARM_VIBRATION);
+            case "SOS" -> position.addAlarm(Position.ALARM_SOS);
+            case "DEF" -> position.addAlarm(Position.ALARM_POWER_CUT);
+            case "BLP" -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+            case "CLP" -> position.addAlarm(Position.ALARM_LOW_POWER);
+            case "OS" -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+            case "RS" -> position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+            case "OVERSPEED" -> position.addAlarm(Position.ALARM_OVERSPEED);
         }
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,6 +171,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Frame mask for Atrack protocol.
+     */
+    public static final ConfigSuffix<Integer> PROTOCOL_FRAME_MASK = new IntegerConfigSuffix(
+            ".frameMask",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Protocol configuration. Required for some devices for decoding incoming data.
      */
     public static final ConfigSuffix<String> PROTOCOL_CONFIG = new StringConfigSuffix(
@@ -208,7 +215,7 @@ public final class Keys {
     /**
      * Suntech HBM configuration value.
      */
-    public static final ConfigKey<Boolean> PROTOCOL_HBM = new BooleanConfigKey(
+    public static final ConfigKey<Integer> PROTOCOL_HBM = new IntegerConfigKey(
             "suntech.hbm",
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
@@ -313,6 +320,22 @@ public final class Keys {
     public static final ConfigKey<Boolean> SERVER_INSTANT_ACKNOWLEDGEMENT = new BooleanConfigKey(
             "server.instantAcknowledgement",
             List.of(KeyType.CONFIG));
+
+    /**
+     * Number of Netty boss threads. If not specified or zero, Netty default value is used.
+     */
+    public static final ConfigKey<Integer> SERVER_NETTY_BOSS_THREADS = new IntegerConfigKey(
+            "server.nettyBossThreads",
+            List.of(KeyType.CONFIG),
+            0);
+
+    /**
+     * Number of Netty worker threads. If not specified or zero, Netty default value is used.
+     */
+    public static final ConfigKey<Integer> SERVER_NETTY_WORKER_THREADS = new IntegerConfigKey(
+            "server.nettyThreads",
+            List.of(KeyType.CONFIG),
+            0);
 
     /**
      * Address for uploading aggregated anonymous usage statistics. Uploaded information is the same you can see on the
@@ -699,6 +722,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * OpenID Connect group scope claim name.
+     * If this is not provided, Traccar will use name "groups" scope.
+     */
+    public static final ConfigKey<String> OPENID_GROUPS_CLAIM_NAME = new StringConfigKey(
+            "openid.groupsClaimName",
+            List.of(KeyType.CONFIG),
+            "groups");
+
+    /**
      * OpenID Connect group to restrict access to.
      * If this is not provided, all OpenID users will have access to Traccar.
      * This option will only work if your OpenID provider supports the groups scope.
@@ -894,7 +926,7 @@ public final class Keys {
      */
     public static final ConfigKey<String> FORWARD_URL = new StringConfigKey(
             "forward.url",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Additional HTTP header, can be used for authorization.
@@ -1330,7 +1362,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> REPORT_IGNORE_ODOMETER = new BooleanConfigKey(
             "report.ignoreOdometer",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             false);
 
     /**
@@ -1537,6 +1569,13 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> PROCESSING_REMOTE_ADDRESS_ENABLE = new BooleanConfigKey(
             "processing.remoteAddress.enable",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Use linked driver id for positions if a device does not send driver id.
+     */
+    public static final ConfigKey<Boolean> PROCESSING_USE_LINKED_DRIVER = new BooleanConfigKey(
+            "processing.useLinkedDriver",
             List.of(KeyType.CONFIG));
 
     /**

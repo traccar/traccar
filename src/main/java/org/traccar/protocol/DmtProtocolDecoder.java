@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
@@ -152,7 +153,7 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceTime(new Date(1356998400000L + buf.readUnsignedIntLE() * 1000)); // since 1 Jan 2013
 
             int event = buf.readUnsignedByte();
-            position.set(Position.KEY_ALARM, decodeAlarm(event));
+            position.addAlarm(decodeAlarm(event));
             position.set(Position.KEY_EVENT, event);
 
             while (buf.readerIndex() < recordEnd) {
@@ -187,14 +188,28 @@ public class DmtProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_IGNITION, BitUtil.check(input, 0));
 
                     if (!BitUtil.check(status, 1)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                        position.addAlarm(Position.ALARM_LOW_BATTERY);
                     } else if (BitUtil.check(status, 6)) {
-                        position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                        position.addAlarm(Position.ALARM_TAMPERING);
                     }
 
                     position.set(Position.KEY_INPUT, input);
                     position.set(Position.KEY_OUTPUT, output);
                     position.set(Position.KEY_STATUS, status);
+
+                } else if (fieldId == 3) {
+
+                    int driverIdType = buf.readUnsignedByte();
+                    String driverId = switch (driverIdType) {
+                        case 1 -> ByteBufUtil.hexDump(buf.readSlice(5));
+                        case 2 -> ByteBufUtil.hexDump(buf.readSlice(6));
+                        case 3 -> buf.readCharSequence(4, StandardCharsets.US_ASCII).toString();
+                        case 4 -> buf.readCharSequence(5, StandardCharsets.US_ASCII).toString();
+                        case 5, 6 -> buf.readCharSequence(fieldLength - 1, StandardCharsets.US_ASCII).toString();
+                        case 7 -> ByteBufUtil.hexDump(buf.readSlice(fieldLength - 1));
+                        default -> null;
+                    };
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, driverId);
 
                 } else if (fieldId == 6) {
 

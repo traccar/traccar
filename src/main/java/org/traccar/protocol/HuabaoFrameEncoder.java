@@ -24,14 +24,22 @@ public class HuabaoFrameEncoder extends MessageToByteEncoder<ByteBuf> {
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, ByteBuf out) {
 
+        boolean alternative = msg.getUnsignedByte(msg.readerIndex()) == 0xe7;
+
         int startIndex = msg.readerIndex();
         while (msg.isReadable()) {
             int index = msg.readerIndex();
             int b = msg.readUnsignedByte();
-            if (b == 0x7d) {
+            if (alternative && (b == 0xe6 || b == 0x3d || b == 0x3e)) {
+                out.writeByte(b == 0xe6 ? 0xe6 : 0x3e);
+                out.writeByte(b == 0x3d ? 0x02 : 0x01);
+            } else if (alternative && b == 0xe7 && index != startIndex && msg.isReadable()) {
+                out.writeByte(0xe6);
+                out.writeByte(0x02);
+            } else if (!alternative && b == 0x7d) {
                 out.writeByte(0x7d);
                 out.writeByte(0x01);
-            } else if (b == 0x7e && index != startIndex && msg.isReadable()) {
+            } else if (!alternative && b == 0x7e && index != startIndex && msg.isReadable()) {
                 out.writeByte(0x7d);
                 out.writeByte(0x02);
             } else {
