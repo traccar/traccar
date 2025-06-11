@@ -34,7 +34,6 @@ import org.traccar.model.WifiAccessPoint;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -457,8 +456,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         int alarmProtocol = buf.readUnsignedByte();
                         position.set("alarmType", buf.readUnsignedByte());
                         if (alarmProtocol == 0x02 && length > 3) {
-                            String folder = new SimpleDateFormat("yyyy-MM-dd").format(position.getDeviceTime());
                             String file = buf.readCharSequence(length - 2, StandardCharsets.US_ASCII).toString();
+                            String folder = file.substring(0, 8).replaceAll("(\\d{4})(\\d{2})(\\d{2})", "$1-$2-$3");
                             position.set(Position.KEY_IMAGE, folder + "/" + file);
                         } else {
                             buf.skipBytes(length - 2);
