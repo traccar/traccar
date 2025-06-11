@@ -430,12 +430,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         int readerindex = buf.readerIndex();
         int extvoltage = buf.readUnsignedByte();
         if ((extvoltage & 0xf0) >> 4 == 15) {
-          int voltage1 = extvoltage & 0x0f;
-          buf.readUnsignedByte();
-          extvoltage = buf.readUnsignedByte();
-          extvoltage = voltage1 * 16 * 16 + extvoltage;
-          double result = (double) extvoltage / 10;
-          position.set(Position.KEY_BATTERY, result);
+            int voltage1 = extvoltage & 0x0f;
+            buf.readUnsignedByte();
+            extvoltage = buf.readUnsignedByte();
+            extvoltage = voltage1 * 16 * 16 + extvoltage;
+            double result = (double) extvoltage / 10;
+            position.set(Position.KEY_BATTERY, result);
         }
         buf.readerIndex(readerindex);
     }
