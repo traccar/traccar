@@ -236,6 +236,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
         if (location.containsKey("coords")) {
             JsonObject coordinates = location.getJsonObject("coords");
+            position.setValid(true);
             position.setLatitude(coordinates.getJsonNumber("latitude").doubleValue());
             position.setLongitude(coordinates.getJsonNumber("longitude").doubleValue());
             position.setAccuracy(coordinates.getJsonNumber("accuracy").doubleValue());
@@ -248,6 +249,8 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.setCourse(heading);
             }
             position.setAltitude(coordinates.getJsonNumber("altitude").doubleValue());
+        } else {
+            getLastLocation(position, null);
         }
 
         if (location.containsKey("event")) {
