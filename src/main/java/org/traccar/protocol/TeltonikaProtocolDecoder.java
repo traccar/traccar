@@ -574,7 +574,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         }
                         index += 1;
                     }
-                } else if (id == 548 || id == 10828 || id == 10829 || id == 10831) {
+                } else if (id == 548 || id == 10828 || id == 10829 || id == 10831 || id == 11317) {
                     ByteBuf data = buf.readSlice(length);
                     data.readUnsignedByte(); // header
                     for (int i = 1; data.isReadable(); i++) {
@@ -598,8 +598,21 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                                         position.set("tag" + i + "Voltage", beaconData.readUnsignedByte() * 10 + 2000);
                                     }
                                 }
+                                case 5 -> {
+                                    String name = beacon.readCharSequence(
+                                            parameterLength, StandardCharsets.UTF_8).toString();
+                                    position.set("tag" + i + "Name", name);
+                                }
+                                case 6 -> position.set("tag" + i + "Temp", beacon.readShort());
+                                case 7 -> position.set("tag" + i + "Humidity", beacon.readUnsignedByte());
+                                case 8 -> position.set("tag" + i + "Magnet", beacon.readUnsignedByte() > 0);
+                                case 9 -> position.set("tag" + i + "Motion", beacon.readUnsignedByte() > 0);
+                                case 10 -> position.set("tag" + i + "MotionCount", beacon.readUnsignedShort());
+                                case 11 -> position.set("tag" + i + "Pitch", (int) beacon.readByte());
+                                case 12 -> position.set("tag" + i + "AngleRoll", (int) beacon.readShort());
                                 case 13 -> position.set("tag" + i + "LowBattery", beacon.readUnsignedByte());
                                 case 14 -> position.set("tag" + i + "Battery", beacon.readUnsignedShort());
+                                case 15 -> position.set("tag" + i + "Mac", ByteBufUtil.hexDump(beacon.readSlice(6)));
                                 default -> beacon.skipBytes(parameterLength);
                             }
                         }
