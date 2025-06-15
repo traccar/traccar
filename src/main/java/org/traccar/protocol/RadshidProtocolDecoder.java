@@ -144,12 +144,12 @@ public class RadshidProtocolDecoder extends BaseProtocolDecoder {
             packetData.readUnsignedShort(); // Engine RPM
             packetData.readUnsignedInt();   // Total Traveled Distance (GPS)
             packetData.readUnsignedInt();   // otal Traveled Distance (Vehicle Sensor)
-            byte ioStatus = packetData.readByte();  // IO Status
-            byte gpsStatus = packetData.readByte(); // GPS Status
-            long latitude = packetData.readInt();   // Latitude
-            long longitude = packetData.readInt();   // Longitude
-            int altitude = packetData.readShort();  //Altitude
-            int bearing = packetData.readShort();   //Bearing
+            byte ioStatus = packetData.readByte();
+            byte gpsStatus = packetData.readByte();
+            long latitude = packetData.readInt();
+            long longitude = packetData.readInt();
+            int altitude = packetData.readShort();
+            int bearing = packetData.readShort();
             byte numberOfSatellites = packetData.readByte(); // Number Of Satellites
             byte pdop = packetData.readByte(); // PDOP
             byte xLen = packetData.readByte(); // Extra Data Length
