@@ -507,6 +507,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x06:
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     break;
+                case 0x14:
+                    position.set("videoAlarm", buf.readUnsignedInt());
+                    break;
                 case 0x25:
                     position.set(Position.KEY_INPUT, buf.readUnsignedInt());
                     break;
