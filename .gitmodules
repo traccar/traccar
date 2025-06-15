@@ -1,5 +1,5 @@
 [submodule "traccar-web"]
 	path = traccar-web
-	url = https://github.com/traccar/traccar-web.git
+	url = ../traccar-web.git
 	branch = master
 	ignore = all
