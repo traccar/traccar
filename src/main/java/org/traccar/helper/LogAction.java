@@ -114,10 +114,16 @@ public final class LogAction {
     }
 
     public void command(HttpServletRequest request, long userId, long groupId, long deviceId, String type) {
+        command(request, userId, groupId, deviceId, type, false);
+    }
+
+    public void command(HttpServletRequest request, long userId, long groupId, long deviceId, String type,
+            boolean scheduled) {
         Action action = new Action();
         action.setAddress(WebHelper.retrieveRemoteAddress(request));
         action.setUserId(userId);
         action.setActionType(ACTION_COMMAND);
+        action.set("scheduled", scheduled ? true : null);
         if (groupId > 0) {
             action.setObjectType(Introspector.decapitalize(Group.class.getSimpleName()));
             action.setObjectId(groupId);
