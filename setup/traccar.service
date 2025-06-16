@@ -8,7 +8,7 @@ WantedBy=multi-user.target
 [Service]
 Type=simple
 WorkingDirectory=/opt/traccar
-ExecStart=/opt/traccar/jre/bin/java -Xms8g -Xmx24g -jar tracker-server.jar conf/traccar.xml
+ExecStart=/opt/traccar/jre/bin/java -Xms8g -Xmx28g -jar tracker-server.jar conf/traccar.xml
 SyslogIdentifier=traccar
 SuccessExitStatus=143
 Restart=on-failure
