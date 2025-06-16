@@ -32,6 +32,7 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Pagination;
 import org.traccar.storage.query.Request;
 
 import java.util.Date;
@@ -93,7 +94,8 @@ public class FilterHandler extends BasePositionHandler {
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Compare("fixTime", "<=", "time", date)),
-                new Order("fixTime", true, 1)));
+                new Order("fixTime", true),
+                new Pagination(0, 1)));
     }
 
     private boolean filterInvalid(Position position) {
