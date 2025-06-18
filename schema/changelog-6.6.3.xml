@@ -84,4 +84,8 @@
 
     </changeSet>
 
+    <changeSet author="author" id="changelog-6.6.3-update-area-column-longtext">
+        <modifyDataType tableName="tc_geofences" columnName="area" newDataType="LONGTEXT"/>
+    </changeSet>
+
 </databaseChangeLog>

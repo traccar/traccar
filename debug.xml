@@ -23,10 +23,16 @@
 <!--    <entry key='database.password'></entry>-->
 
     <!-- Updated MySQL connection details -->
+<!--    <entry key='database.driver'>com.mysql.cj.jdbc.Driver</entry>-->
+<!--    <entry key='database.url'>jdbc:mysql://localhost/traccar?zeroDateTimeBehavior=round&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true&amp;useSSL=false&amp;allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>-->
+<!--    <entry key='database.user'>root</entry>-->
+<!--    <entry key='database.password'>root</entry>-->
+
+
     <entry key='database.driver'>com.mysql.cj.jdbc.Driver</entry>
-    <entry key='database.url'>jdbc:mysql://localhost/traccar?zeroDateTimeBehavior=round&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true&amp;useSSL=false&amp;allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>
+    <entry key='database.url'>jdbc:mysql://localhost:3306/traccar</entry>
     <entry key='database.user'>root</entry>
-    <entry key='database.password'>root</entry>
+    <entry key='database.password'>root123</entry>
 
     <entry key='notificator.types'>web,mail</entry>
 
