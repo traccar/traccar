@@ -204,7 +204,7 @@ public final class Checksum {
         int sum = 0;
         while (data.remaining() > 0) {
             sum += data.get() & 0xff;
-            if ((sum & 0x80000000) > 0) {
+            if ((sum & 0x80000000) != 0) {
                 sum = (sum & 0xffff) + (sum >> 16);
             }
         }
