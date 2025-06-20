@@ -210,7 +210,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
         Queue<Position> queue = getQueue(deviceId);
         Position nextPosition;
         synchronized (queue) {
-            queue.poll(); // remove current position
+            queue.remove(); // remove current position
             nextPosition = queue.peek();
         }
         if (nextPosition != null) {
@@ -219,5 +219,4 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
             cacheManager.removeDevice(deviceId, deviceId);
         }
     }
-
 }
