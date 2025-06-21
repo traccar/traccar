@@ -142,6 +142,25 @@
       <column name="fixtime" />
     </createIndex>
 
+    <createIndex tableName="devices" indexName="idx_devices_vin">
+      <column name="vin" />
+    </createIndex>
+
+    <createIndex tableName="devices" indexName="idx_devices_uniqueid">
+      <column name="uniqueid" />
+    </createIndex>
+
+    <createIndex tableName="devices" indexName="idx_devices_organizationid">
+      <column name="organizationid" />
+    </createIndex>
+
+    <createIndex tableName="users" indexName="idx_users_email">
+      <column name="email" />
+    </createIndex>
+
+
+
+
     <createTable tableName="server">
       <column name="id" type="INT" autoIncrement="true">
         <constraints primaryKey="true" />
