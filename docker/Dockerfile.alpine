@@ -1,0 +1,14 @@
+FROM alpine:3.22
+
+ARG VERSION
+COPY installers/traccar-other-$VERSION.zip /tmp/traccar.zip
+
+WORKDIR /opt/traccar
+
+RUN set -ex; \
+    apk add --no-cache --no-progress openjdk17-jre-headless; \
+    unzip -qo /tmp/traccar.zip -d .; \
+    rm /tmp/traccar.zip
+
+ENTRYPOINT ["java"]
+CMD ["-jar", "tracker-server.jar", "conf/traccar.xml"]
