@@ -16,88 +16,71 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.ByteToMessageDecoder;
 import io.netty.handler.codec.TooLongFrameException;
+import org.traccar.BaseFrameDecoder;
 
-import java.util.List;
+public class JmakFrameDecoder extends BaseFrameDecoder {
 
-public class JmakFrameDecoder extends ByteToMessageDecoder {
+    private static final int DEFAULT_MAX_FRAME_LENGTH = 2000;
 
     private final int maxFrameLength;
+    private final JsonFrameDecoder jsonDecoder;
+
+    public JmakFrameDecoder() {
+        this(DEFAULT_MAX_FRAME_LENGTH);
+    }
 
     public JmakFrameDecoder(int maxFrameLength) {
         this.maxFrameLength = maxFrameLength;
+        this.jsonDecoder = new JsonFrameDecoder();
     }
 
     @Override
-    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        if (in.readableBytes() == 0) {
-            return;
+    protected Object decode(ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
+        if (buf.readableBytes() == 0) {
+            return null;
         }
-        in.markReaderIndex();
-        byte first = in.readByte();
-        in.resetReaderIndex();
+        buf.markReaderIndex();
+        byte first = buf.readByte();
+        buf.resetReaderIndex();
 
         if (first == '{') {
-            int endIndex = findJsonEnd(in);
-            if (endIndex < 0) {
-                if (in.readableBytes() > maxFrameLength) {
-                    in.clear();
-                    throw new TooLongFrameException("JSON object length exceeds " + maxFrameLength);
+            Object frame = jsonDecoder.decode(ctx, channel, buf);
+            if (frame == null) {
+                if (buf.readableBytes() > maxFrameLength) {
+                    buf.clear();
+                    throw new TooLongFrameException(
+                            "JSON object length exceeds " + maxFrameLength);
                 }
-                return;
+                return null;
             }
-            if (endIndex + 1 > maxFrameLength) {
-                in.clear();
-                throw new TooLongFrameException("JSON object length exceeds " + maxFrameLength);
-            }
-            ByteBuf frame = in.readRetainedSlice(endIndex + 1);
-            out.add(frame);
+            return frame;
+        }
 
-        } else if (first == '~' || first == '^') { // STRING || ZIP
-            int readerIndex = in.readerIndex();
-            int writerIndex = in.writerIndex();
-            int delimiterIndex = in.indexOf(readerIndex, writerIndex, (byte) '$');
+        int readerIndex = buf.readerIndex();
+        int writerIndex = buf.writerIndex();
+        if (first == '~' || first == '^') {
+            int delimiterIndex = buf.indexOf(readerIndex, writerIndex, (byte) '$');
             if (delimiterIndex < 0) {
-                if (in.readableBytes() > maxFrameLength) {
-                    in.clear();
-                    throw new TooLongFrameException("JMAK frame length exceeds " + maxFrameLength);
+                if (buf.readableBytes() > maxFrameLength) {
+                    buf.clear();
+                    throw new TooLongFrameException(
+                            "JMAK frame length exceeds " + maxFrameLength);
                 }
-                return;
+                return null;
             }
             int frameLength = delimiterIndex - readerIndex + 1;
             if (frameLength > maxFrameLength) {
-                in.clear();
-                throw new TooLongFrameException("JMAK frame length exceeds " + maxFrameLength);
+                buf.clear();
+                throw new TooLongFrameException(
+                        "JMAK frame length exceeds " + maxFrameLength);
             }
-            ByteBuf frame = in.readRetainedSlice(frameLength);
-            out.add(frame);
-
-        } else {
-            // Skip unknown data
-            in.readByte();
+            return buf.readRetainedSlice(frameLength);
         }
-    }
 
-    private int findJsonEnd(ByteBuf buf) {
-        int reader = buf.readerIndex();
-        int writer = buf.writerIndex();
-        int depth = 0;
-        for (int i = reader; i < writer; i++) {
-            byte b = buf.getByte(i);
-            if (b == '{') {
-                depth++;
-            } else if (b == '}') {
-                depth--;
-                if (depth == 0) {
-                    return i - reader;
-                }
-            }
-            if (i - reader + 1 > maxFrameLength) {
-                return -1;
-            }
-        }
-        return -1;
+        buf.readByte();
+        return null;
     }
 }

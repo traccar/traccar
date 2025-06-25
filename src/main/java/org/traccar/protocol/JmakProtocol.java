@@ -15,22 +15,23 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.string.StringDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
+import io.netty.handler.codec.string.StringDecoder;
+
 import jakarta.inject.Inject;
 
-public class JmakProtocol extends BaseProtocol { // JMAK 0.0.2
+public class JmakProtocol extends BaseProtocol {
 
     @Inject
     public JmakProtocol(Config config) {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new JmakFrameDecoder(3072));
+                pipeline.addLast(new JmakFrameDecoder());
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new JmakProtocolDecoder(JmakProtocol.this));
             }
