@@ -1102,7 +1102,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        buf.readUnsignedShort(); // length
+        int length = buf.readUnsignedShort();
         int type = buf.readUnsignedByte();
 
         if (type == MSG_STRING_INFO) {
@@ -1185,7 +1185,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (subType == 0x0b) {
 
-                position.set("networkTechnology", buf.readByte() > 0 ? "4G" : "2G");
+                int dataLength = length - 6;
+                if (dataLength == 1) {
+                    position.set("networkTechnology", buf.readByte() > 0 ? "4G" : "2G");
+                } else if (dataLength == 2) {
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
+                }
                 return position;
 
             } else if (subType == 0x0d) {
