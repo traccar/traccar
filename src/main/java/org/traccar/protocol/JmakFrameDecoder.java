@@ -23,17 +23,9 @@ import org.traccar.BaseFrameDecoder;
 
 public class JmakFrameDecoder extends BaseFrameDecoder {
 
-    private static final int DEFAULT_MAX_FRAME_LENGTH = 2000;
-
-    private final int maxFrameLength;
     private final JsonFrameDecoder jsonDecoder;
 
     public JmakFrameDecoder() {
-        this(DEFAULT_MAX_FRAME_LENGTH);
-    }
-
-    public JmakFrameDecoder(int maxFrameLength) {
-        this.maxFrameLength = maxFrameLength;
         this.jsonDecoder = new JsonFrameDecoder();
     }
 
@@ -47,16 +39,7 @@ public class JmakFrameDecoder extends BaseFrameDecoder {
         buf.resetReaderIndex();
 
         if (first == '{') {
-            Object frame = jsonDecoder.decode(ctx, channel, buf);
-            if (frame == null) {
-                if (buf.readableBytes() > maxFrameLength) {
-                    buf.clear();
-                    throw new TooLongFrameException(
-                            "JSON object length exceeds " + maxFrameLength);
-                }
-                return null;
-            }
-            return frame;
+            return jsonDecoder.decode(ctx, channel, buf);
         }
 
         int readerIndex = buf.readerIndex();
@@ -64,19 +47,9 @@ public class JmakFrameDecoder extends BaseFrameDecoder {
         if (first == '~' || first == '^') {
             int delimiterIndex = buf.indexOf(readerIndex, writerIndex, (byte) '$');
             if (delimiterIndex < 0) {
-                if (buf.readableBytes() > maxFrameLength) {
-                    buf.clear();
-                    throw new TooLongFrameException(
-                            "JMAK frame length exceeds " + maxFrameLength);
-                }
                 return null;
             }
             int frameLength = delimiterIndex - readerIndex + 1;
-            if (frameLength > maxFrameLength) {
-                buf.clear();
-                throw new TooLongFrameException(
-                        "JMAK frame length exceeds " + maxFrameLength);
-            }
             return buf.readRetainedSlice(frameLength);
         }
 

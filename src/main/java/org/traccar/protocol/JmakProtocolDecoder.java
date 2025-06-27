@@ -1,18 +1,3 @@
-/*
- * Copyright 2025 Anton Tananaev (anton@traccar.org)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package org.traccar.protocol;
 
 import io.netty.buffer.Unpooled;
@@ -31,63 +16,6 @@ import java.util.Map;
 import java.math.BigInteger;
 
 public class JmakProtocolDecoder extends BaseProtocolDecoder {
-
-    private static final Map<Integer, String> STANDARD_DATA_MAP = new HashMap<>();
-    private static final Map<Integer, String> CAN_DATA_MAP = new HashMap<>();
-
-    static {
-        STANDARD_DATA_MAP.put(1, "J_SERIAL_NUMBER");                      
-        STANDARD_DATA_MAP.put(2, "J_IMEI");                               
-        STANDARD_DATA_MAP.put(3, "J_COUNT");                              
-        STANDARD_DATA_MAP.put(4, "J_NICKNAME");                           
-        STANDARD_DATA_MAP.put(5, "J_TIMESTAMP");                          
-        STANDARD_DATA_MAP.put(6, "J_LATITUDE");                           
-        STANDARD_DATA_MAP.put(7, "J_LONGITUDE");                          
-        STANDARD_DATA_MAP.put(8, "J_ALTITUDE");                           
-        STANDARD_DATA_MAP.put(9, "J_SIGNAL_LAT_LONG_ALT_REAL_TIME");      
-        STANDARD_DATA_MAP.put(10, "J_SPEED");                             
-        STANDARD_DATA_MAP.put(11, "J_NUM_SAT");                           
-        STANDARD_DATA_MAP.put(12, "J_RSSI");                              
-        STANDARD_DATA_MAP.put(13, "J_HDOP");                              
-        STANDARD_DATA_MAP.put(14, "J_AZIMUTE");                           
-        STANDARD_DATA_MAP.put(15, "J_IVE");                               
-        STANDARD_DATA_MAP.put(16, "J_BACKUP");                            
-        STANDARD_DATA_MAP.put(17, "J_HOURMETER");                         
-        STANDARD_DATA_MAP.put(18, "J_ODOMETER");                          
-        STANDARD_DATA_MAP.put(19, "J_EVENT_ID");                          
-        STANDARD_DATA_MAP.put(20, "J_EVENT_STATUS");                      
-        STANDARD_DATA_MAP.put(21, "J_EVENT_NAME");                        
-        STANDARD_DATA_MAP.put(22, "J_VIN");                               
-        STANDARD_DATA_MAP.put(23, "J_BAT");                               
-        STANDARD_DATA_MAP.put(24, "J_OPE");                               
-        STANDARD_DATA_MAP.put(25, "J_TEC");                               
-        STANDARD_DATA_MAP.put(26, "J_TIMESTAMP_SEND");                    
-        STANDARD_DATA_MAP.put(27, "J_GNSS_FIX");                          
-        STANDARD_DATA_MAP.put(28, "J_IOS");                               
-        STANDARD_DATA_MAP.put(29, "J_TAG");                               
-        STANDARD_DATA_MAP.put(30, "J_TRP_SIZE");                          
-        STANDARD_DATA_MAP.put(31, "J_TRP_MSG");                           
-        STANDARD_DATA_MAP.put(35, "J_AIN");                               
-
-        
-        CAN_DATA_MAP.put(1, "J_CAN_ODOMETER");                    
-        CAN_DATA_MAP.put(2, "J_CAN_HOURMETER");                   
-        CAN_DATA_MAP.put(3, "J_CAN_SPEED");                       
-        CAN_DATA_MAP.put(4, "J_CAN_RPM");                         
-        CAN_DATA_MAP.put(5, "J_CAN_PARKING_BRAKE");               
-        CAN_DATA_MAP.put(6, "J_CAN_BRAKE");                       
-        CAN_DATA_MAP.put(7, "J_CAN_PEDAL_PRESSURE");              
-        CAN_DATA_MAP.put(8, "J_CAN_UNIT_FUEL_LEVEL");             
-        CAN_DATA_MAP.put(9, "J_CAN_FUEL_LEVEL");                  
-        CAN_DATA_MAP.put(10, "J_CAN_CLUTCH");                     
-        CAN_DATA_MAP.put(11, "J_CAN_AUTONOMY");                   
-        CAN_DATA_MAP.put(12, "J_CAN_UNIT_FUEL_CONSUMPTION");      
-        CAN_DATA_MAP.put(13, "J_CAN_FUEL_CONSUMPTION");           
-        CAN_DATA_MAP.put(14, "J_CAN_FUEL_USED");                  
-        CAN_DATA_MAP.put(15, "J_CAN_OIL_TEMPERATURE");            
-        CAN_DATA_MAP.put(16, "J_CAN_AIR_CONDITIONING");           
-        CAN_DATA_MAP.put(17, "J_CAN_SEAT_BELT");                  
-    }
 
     public JmakProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -118,15 +46,14 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
     private static Map<String, Integer> parseOnOffCan(String decimal) {
         int value = Integer.parseInt(decimal);
         String bin6 = new StringBuilder(
-                String.format("%6s", Integer.toBinaryString(value))
-                        .replace(' ', '0')
+                String.format("%6s", Integer.toBinaryString(value)).replace(' ', '0')
         ).reverse().toString();
         Map<String, Integer> info = new HashMap<>();
-        info.put("J_CAN_PARKING_BRAKE_ID", bin6.charAt(0) == '1' ? 1 : 0);
-        info.put("J_CAN_BRAKE_ID",         bin6.charAt(1) == '1' ? 1 : 0);
-        info.put("J_CAN_CLUTCH_ID",        bin6.charAt(2) == '1' ? 1 : 0);
-        info.put("J_CAN_AIR_CONDITIONING", bin6.charAt(3) == '1' ? 1 : 0);
-        info.put("J_CAN_SEAT_BELT",        bin6.charAt(4) == '1' ? 1 : 0);
+        info.put("canParkingBrake", bin6.charAt(0) == '1' ? 1 : 0);
+        info.put("canBrake",         bin6.charAt(1) == '1' ? 1 : 0);
+        info.put("canClutch",        bin6.charAt(2) == '1' ? 1 : 0);
+        info.put("canAirConditioning", bin6.charAt(3) == '1' ? 1 : 0);
+        info.put("canSeatBelt",        bin6.charAt(4) == '1' ? 1 : 0);
         return info;
     }
 
@@ -136,10 +63,10 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                 String.format("%4s", Integer.toBinaryString(value)).replace(' ', '0')
         ).reverse().toString();
         Map<String, Integer> info = new HashMap<>();
-        info.put("J_INPUT_1", bin4.charAt(0) == '1' ? 1 : 0);
-        info.put("J_INPUT_2", bin4.charAt(1) == '1' ? 1 : 0);
-        info.put("J_OUTPUT_1", bin4.charAt(2) == '1' ? 1 : 0);
-        info.put("J_OUTPUT_2", bin4.charAt(3) == '1' ? 1 : 0);
+        info.put("input1", bin4.charAt(0) == '1' ? 1 : 0);
+        info.put("input2", bin4.charAt(1) == '1' ? 1 : 0);
+        info.put("output1", bin4.charAt(2) == '1' ? 1 : 0);
+        info.put("output2", bin4.charAt(3) == '1' ? 1 : 0);
         return info;
     }
 
@@ -162,32 +89,34 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         sentence = sentence.substring(1, sentence.length() - 1);
 
         String[] parts = sentence.split("\\|", 2);
-        String[] standardParts = parts[0].split(";");
-        if (standardParts.length < 3) {
-            return null;
-        }
-
-        DeviceSession deviceSession = getDeviceSession(
-                channel, remoteAddress, standardParts[2]
-        );
-        if (deviceSession == null) {
+        String[] standard = parts[0].split(";");
+        DeviceSession session = getDeviceSession(channel, remoteAddress, standard[2]);
+        if (session == null) {
             return null;
         }
 
         Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
+        position.setDeviceId(session.getDeviceId());
 
+        Map<Integer, String> data = parseFlaggedData(standard[0], standard);
         int eventId = 0;
         int eventStatus = 0;
-        String eventName = "";
-        Map<Integer, String> stdMap = parseFlaggedData(standardParts[0], standardParts);
-        for (Map.Entry<Integer, String> e : stdMap.entrySet()) {
-            int key = e.getKey();
-            String value = e.getValue();
-            String name = STANDARD_DATA_MAP.get(key);
+        String eventName = null;
+        for (Map.Entry<Integer, String> entry : data.entrySet()) {
+            int key = entry.getKey();
+            String value = entry.getValue();
             switch (key) {
+                case 1:
+                    position.set("serialNumber", value);
+                    break;
+                case 2:
+                    position.set("imei", value);
+                    break;
                 case 3:
                     position.set(Position.PREFIX_COUNT, Long.parseLong(value));
+                    break;
+                case 4:
+                    position.set("nickname", value);
                     break;
                 case 5:
                     position.setTime(new Date(Long.parseLong(value)));
@@ -220,21 +149,26 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                 case 15:
                     position.set(Position.KEY_IGNITION, Integer.parseInt(value) == 1);
                     break;
+                case 16:
+                    position.set("backup", Integer.parseInt(value) == 1);
+                    break;
+                case 17:
+                    position.set("hourmeter", Double.parseDouble(value));
+                    break;
                 case 18:
                     position.set(Position.KEY_ODOMETER, Double.parseDouble(value) * 1000);
                     break;
                 case 19:
                     eventId = Integer.parseInt(value);
                     position.set(Position.KEY_EVENT, eventId);
-                    position.set(name, eventId);
                     break;
                 case 20:
                     eventStatus = Integer.parseInt(value);
-                    position.set(name, eventStatus);
+                    position.set("eventStatus", eventStatus);
                     break;
                 case 21:
                     eventName = value;
-                    position.set(name, value);
+                    position.set("eventName", value);
                     break;
                 case 22:
                     position.set(Position.KEY_VIN, Integer.parseInt(value));
@@ -245,68 +179,81 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                 case 24:
                     position.set(Position.KEY_OPERATOR, value);
                     break;
+                case 25:
+                    position.set("tec", value);
+                    break;
+                case 26:
+                    long tsSend = Long.parseLong(value);
+                    position.set("tsSend", tsSend);
+                    break;
                 case 27:
                     position.setValid(Integer.parseInt(value) >= 1);
                     break;
                 case 28:
-                    for (Map.Entry<String, Integer> sub : parseEstadoIo(value).entrySet()) {
-                        position.set(sub.getKey(), sub.getValue());
-                    }
+                    parseEstadoIo(value).forEach(position::set);
                     break;
                 case 29:
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
                     break;
+                case 30:
+                    position.set("trpSize", Integer.parseInt(value));
+                    break;
+                case 31:
+                    position.set("trpMsg", value);
+                    break;
                 case 35:
                     double ain = Double.parseDouble(value);
-                    position.set(name, ain);
-                    position.set("J_DISCHARGE", ain >= 5.8 ? 1 : 0);
+                    position.set("ain", ain);
+                    position.set("discharge", ain >= 5.8 ? 1 : 0);
                     break;
                 default:
-                    if (name != null) {
-                        position.set(name, value);
-                    }
                     break;
             }
         }
-
-        if (eventId == 126 && eventStatus == 4) {
+        if (eventId == 126 && eventStatus == 4 && eventName != null) {
             position.set(Position.KEY_CARD, eventName);
         }
 
         if (parts.length > 1) {
-            String[] canParts = parts[1].split(";");
-            Map<Integer, String> canMap = parseFlaggedData(canParts[0], canParts);
-            for (Map.Entry<Integer, String> e : canMap.entrySet()) {
-                int key = e.getKey();
-                String value = e.getValue();
-                String name = CAN_DATA_MAP.get(key);
+            String[] can = parts[1].split(";");
+            Map<Integer, String> canData = parseFlaggedData(can[0], can);
+            for (Map.Entry<Integer, String> entry : canData.entrySet()) {
+                int key = entry.getKey();
+                String value = entry.getValue();
                 switch (key) {
                     case 1:
                         position.set(Position.KEY_ODOMETER, Double.parseDouble(value) * 1000);
                         break;
-                    case 2, 3, 4, 9, 13, 14, 15:
-                        position.set(name, Double.parseDouble(value));
+                    case 2:
+                        position.set("hourmeter", Double.parseDouble(value));
+                        break;
+                    case 3:
+                        position.set("canSpeed", Double.parseDouble(value));
+                        break;
+                    case 4:
+                        position.set("canRpm", Double.parseDouble(value));
                         break;
                     case 5:
-                        for (Map.Entry<String, Integer> sub : parseOnOffCan(value).entrySet()) {
-                            position.set(sub.getKey(), sub.getValue());
-                        }
+                        parseOnOffCan(value).forEach(position::set);
+                        break;
+                    case 7:
+                    case 9:
+                    case 13:
+                    case 14:
+                    case 15:
+                        position.set(key, Double.parseDouble(value));
+                        break;
                     default:
-                        if (name != null) {
-                            position.set(name, value);
-                        }
                         break;
                 }
             }
         }
 
         position.setNetwork(new org.traccar.model.Network());
-
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(
                     Unpooled.copiedBuffer("ACK", StandardCharsets.US_ASCII), remoteAddress));
         }
-
         return position;
     }
 }
