@@ -36,57 +36,57 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
     private static final Map<Integer, String> CAN_DATA_MAP = new HashMap<>();
 
     static {
-        STANDARD_DATA_MAP.put(1, "J_SERIAL_NUMBER");                      // serial number
-        STANDARD_DATA_MAP.put(2, "J_IMEI");                               // IMEI
-        STANDARD_DATA_MAP.put(3, "J_COUNT");                              // count
-        STANDARD_DATA_MAP.put(4, "J_NICKNAME");                           // nickname
-        STANDARD_DATA_MAP.put(5, "J_TIMESTAMP");                          // timestamp
-        STANDARD_DATA_MAP.put(6, "J_LATITUDE");                           // latitude
-        STANDARD_DATA_MAP.put(7, "J_LONGITUDE");                          // longitude
-        STANDARD_DATA_MAP.put(8, "J_ALTITUDE");                           // altitude
-        STANDARD_DATA_MAP.put(9, "J_SIGNAL_LAT_LONG_ALT_REAL_TIME");      // latitude, longitude, altitude signal
-        STANDARD_DATA_MAP.put(10, "J_SPEED");                             // speed
-        STANDARD_DATA_MAP.put(11, "J_NUM_SAT");                           // number of satellites
-        STANDARD_DATA_MAP.put(12, "J_RSSI");                              // rssi
-        STANDARD_DATA_MAP.put(13, "J_HDOP");                              // hdop
-        STANDARD_DATA_MAP.put(14, "J_AZIMUTE");                           // azimuth
-        STANDARD_DATA_MAP.put(15, "J_IVE");                               // vehicle ignition
-        STANDARD_DATA_MAP.put(16, "J_BACKUP");                            // backup
-        STANDARD_DATA_MAP.put(17, "J_HOURMETER");                         // hourmeter
-        STANDARD_DATA_MAP.put(18, "J_ODOMETER");                          // odometer
-        STANDARD_DATA_MAP.put(19, "J_EVENT_ID");                          // event id
-        STANDARD_DATA_MAP.put(20, "J_EVENT_STATUS");                      // event status
-        STANDARD_DATA_MAP.put(21, "J_EVENT_NAME");                        // event name
-        STANDARD_DATA_MAP.put(22, "J_VIN");                               // VIN supply voltage
-        STANDARD_DATA_MAP.put(23, "J_BAT");                               // Internal battery voltage
-        STANDARD_DATA_MAP.put(24, "J_OPE");                               // Operator
-        STANDARD_DATA_MAP.put(25, "J_TEC");                               // Cellular technology
-        STANDARD_DATA_MAP.put(26, "J_TIMESTAMP_SEND");                    // Timestamp send
-        STANDARD_DATA_MAP.put(27, "J_GNSS_FIX");                          // GNSS fix
-        STANDARD_DATA_MAP.put(28, "J_IOS");                               // I/O status
-        STANDARD_DATA_MAP.put(29, "J_TAG");                               // Tag
-        STANDARD_DATA_MAP.put(30, "J_TRP_SIZE");                          // Transparent msg size
-        STANDARD_DATA_MAP.put(31, "J_TRP_MSG");                           // Transparent msg
-        STANDARD_DATA_MAP.put(35, "J_AIN");                               // Analog input (mA)
+        STANDARD_DATA_MAP.put(1, "J_SERIAL_NUMBER");                      
+        STANDARD_DATA_MAP.put(2, "J_IMEI");                               
+        STANDARD_DATA_MAP.put(3, "J_COUNT");                              
+        STANDARD_DATA_MAP.put(4, "J_NICKNAME");                           
+        STANDARD_DATA_MAP.put(5, "J_TIMESTAMP");                          
+        STANDARD_DATA_MAP.put(6, "J_LATITUDE");                           
+        STANDARD_DATA_MAP.put(7, "J_LONGITUDE");                          
+        STANDARD_DATA_MAP.put(8, "J_ALTITUDE");                           
+        STANDARD_DATA_MAP.put(9, "J_SIGNAL_LAT_LONG_ALT_REAL_TIME");      
+        STANDARD_DATA_MAP.put(10, "J_SPEED");                             
+        STANDARD_DATA_MAP.put(11, "J_NUM_SAT");                           
+        STANDARD_DATA_MAP.put(12, "J_RSSI");                              
+        STANDARD_DATA_MAP.put(13, "J_HDOP");                              
+        STANDARD_DATA_MAP.put(14, "J_AZIMUTE");                           
+        STANDARD_DATA_MAP.put(15, "J_IVE");                               
+        STANDARD_DATA_MAP.put(16, "J_BACKUP");                            
+        STANDARD_DATA_MAP.put(17, "J_HOURMETER");                         
+        STANDARD_DATA_MAP.put(18, "J_ODOMETER");                          
+        STANDARD_DATA_MAP.put(19, "J_EVENT_ID");                          
+        STANDARD_DATA_MAP.put(20, "J_EVENT_STATUS");                      
+        STANDARD_DATA_MAP.put(21, "J_EVENT_NAME");                        
+        STANDARD_DATA_MAP.put(22, "J_VIN");                               
+        STANDARD_DATA_MAP.put(23, "J_BAT");                               
+        STANDARD_DATA_MAP.put(24, "J_OPE");                               
+        STANDARD_DATA_MAP.put(25, "J_TEC");                               
+        STANDARD_DATA_MAP.put(26, "J_TIMESTAMP_SEND");                    
+        STANDARD_DATA_MAP.put(27, "J_GNSS_FIX");                          
+        STANDARD_DATA_MAP.put(28, "J_IOS");                               
+        STANDARD_DATA_MAP.put(29, "J_TAG");                               
+        STANDARD_DATA_MAP.put(30, "J_TRP_SIZE");                          
+        STANDARD_DATA_MAP.put(31, "J_TRP_MSG");                           
+        STANDARD_DATA_MAP.put(35, "J_AIN");                               
 
-        // CAN data fields
-        CAN_DATA_MAP.put(1, "J_CAN_ODOMETER");                    // odometer
-        CAN_DATA_MAP.put(2, "J_CAN_HOURMETER");                   // hourmeter
-        CAN_DATA_MAP.put(3, "J_CAN_SPEED");                       // speed
-        CAN_DATA_MAP.put(4, "J_CAN_RPM");                         // rpm
-        CAN_DATA_MAP.put(5, "J_CAN_PARKING_BRAKE");               // parking brake
-        CAN_DATA_MAP.put(6, "J_CAN_BRAKE");                       // brake
-        CAN_DATA_MAP.put(7, "J_CAN_PEDAL_PRESSURE");              // pressão do pedal
-        CAN_DATA_MAP.put(8, "J_CAN_UNIT_FUEL_LEVEL");             // fuel level unit
-        CAN_DATA_MAP.put(9, "J_CAN_FUEL_LEVEL");                  // fuel level
-        CAN_DATA_MAP.put(10, "J_CAN_CLUTCH");                     // clutch
-        CAN_DATA_MAP.put(11, "J_CAN_AUTONOMY");                   // autonomy
-        CAN_DATA_MAP.put(12, "J_CAN_UNIT_FUEL_CONSUMPTION");      // fuel consumption unit
-        CAN_DATA_MAP.put(13, "J_CAN_FUEL_CONSUMPTION");           // fuel consumption
-        CAN_DATA_MAP.put(14, "J_CAN_FUEL_USED");                  // fuel used
-        CAN_DATA_MAP.put(15, "J_CAN_OIL_TEMPERATURE");            // oil temperature
-        CAN_DATA_MAP.put(16, "J_CAN_AIR_CONDITIONING");           // air conditioning
-        CAN_DATA_MAP.put(17, "J_CAN_SEAT_BELT");                  // seat belt
+        
+        CAN_DATA_MAP.put(1, "J_CAN_ODOMETER");                    
+        CAN_DATA_MAP.put(2, "J_CAN_HOURMETER");                   
+        CAN_DATA_MAP.put(3, "J_CAN_SPEED");                       
+        CAN_DATA_MAP.put(4, "J_CAN_RPM");                         
+        CAN_DATA_MAP.put(5, "J_CAN_PARKING_BRAKE");               
+        CAN_DATA_MAP.put(6, "J_CAN_BRAKE");                       
+        CAN_DATA_MAP.put(7, "J_CAN_PEDAL_PRESSURE");              
+        CAN_DATA_MAP.put(8, "J_CAN_UNIT_FUEL_LEVEL");             
+        CAN_DATA_MAP.put(9, "J_CAN_FUEL_LEVEL");                  
+        CAN_DATA_MAP.put(10, "J_CAN_CLUTCH");                     
+        CAN_DATA_MAP.put(11, "J_CAN_AUTONOMY");                   
+        CAN_DATA_MAP.put(12, "J_CAN_UNIT_FUEL_CONSUMPTION");      
+        CAN_DATA_MAP.put(13, "J_CAN_FUEL_CONSUMPTION");           
+        CAN_DATA_MAP.put(14, "J_CAN_FUEL_USED");                  
+        CAN_DATA_MAP.put(15, "J_CAN_OIL_TEMPERATURE");            
+        CAN_DATA_MAP.put(16, "J_CAN_AIR_CONDITIONING");           
+        CAN_DATA_MAP.put(17, "J_CAN_SEAT_BELT");                  
     }
 
     public JmakProtocolDecoder(Protocol protocol) {
@@ -127,9 +127,6 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         info.put("J_CAN_CLUTCH_ID",        bin6.charAt(2) == '1' ? 1 : 0);
         info.put("J_CAN_AIR_CONDITIONING", bin6.charAt(3) == '1' ? 1 : 0);
         info.put("J_CAN_SEAT_BELT",        bin6.charAt(4) == '1' ? 1 : 0);
-        // EN: If you eventually want to include the cleaner, just uncomment it:
-        // PT: Se eventualmente quiser incluir o limpador, basta descomentar:
-        // info.put("J_CAN_WIPER_ID",      bin6.charAt(5) == '1' ? 1 : 0); // Limpador de para-brisa
         return info;
     }
 
@@ -149,8 +146,6 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
         String sentence = ((String) msg).trim();
-        // EN: It only returns ACK, for now the JSON and ZIP protocols are not implemented!
-        // PT: Apenas retorna ACK, por enquanto não está implementado o protocolo JSON e ZIP!
         if (sentence.startsWith("{") || sentence.startsWith("^")) {
             if (channel != null) {
                 channel.writeAndFlush(new NetworkMessage(
