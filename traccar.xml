@@ -86,10 +86,23 @@
   <entry key='forward.json'>true</entry>
   <entry key='forward.retry.enable'>true</entry>
 
-  <entry key='falcom.port'>5195</entry>
-  <entry key='falcom.timeout'>120</entry>
-  <entry key='mobilogix.port'>5216</entry>
+  <entry key='gps103.port'>5001</entry>
+  <entry key='gl200.port'>5004</entry>
+  <entry key='suntech.port'>5011</entry>
+  <entry key='h02.port'>5013</entry>
+  <entry key='huabao.port'>5015</entry>
+  <entry key='gt06.port'>5023</entry>
+  <entry key='teltonika.port'>5027</entry>
+  <entry key='taip.port'>5031</entry>
+  <entry key='ruptela.port'>5046</entry>
+  <entry key='osmand.port'>5055</entry>
+  <entry key='eelink.port'>5064</entry>
+  <entry key='xirgo.port'>5081</entry>
+  <entry key='calamp.port'>5082</entry>
+  <entry key='upro.port'>5095</entry>
   <entry key='rst.port'>5196</entry>
+  <entry key='mobilogix.port'>5216</entry>
+  <entry key='startek.port'>5222</entry>
   <entry key='dualcam.port'>5232</entry>
 
   <entry key='processing.digitalPortTime.enable'>true</entry>
