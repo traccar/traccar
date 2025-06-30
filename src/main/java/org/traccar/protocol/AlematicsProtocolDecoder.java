@@ -147,7 +147,8 @@ public class AlematicsProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             position.set("text", parser.next());
-        } else if (parser.hasNext()) {
+        }
+        if (parser.hasNext()) {
             decodeExtras(position, parser);
         }
 
