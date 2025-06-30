@@ -209,7 +209,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
                     if (buf.getUnsignedByte(buf.readerIndex()) != 0xFE) {
                         Position position = new Position(getProtocolName());
                         position.setDeviceId(deviceSession.getDeviceId());
-                        position.setTime(new Date((unixTime + i * timeIncrement) * 1000));
+                        position.setTime(new Date((unixTime + (long) i * timeIncrement) * 1000));
                         decodeStructure(buf, position);
                         position.set(Position.KEY_ARCHIVE, true);
                         positions.add(position);

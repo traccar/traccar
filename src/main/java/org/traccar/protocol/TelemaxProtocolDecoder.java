@@ -97,7 +97,7 @@ public class TelemaxProtocolDecoder extends BaseProtocolDecoder {
                 time = new SimpleDateFormat("yyMMddHHmmss").parse(readValue(sentence, index, 12));
                 position.set(Position.KEY_STATUS, readValue(sentence, index, 8));
             } else {
-                time = new Date(time.getTime() + interval * 1000);
+                time = new Date(time.getTime() + interval * 1000L);
             }
 
             position.setTime(time);

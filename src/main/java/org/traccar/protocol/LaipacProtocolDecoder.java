@@ -103,16 +103,16 @@ public class LaipacProtocolDecoder extends BaseProtocolDecoder {
             char inputStatus = event.charAt(0);
             if (inputStatus >= 'A' && inputStatus <= 'D') {
                 int inputStatusInt = inputStatus - 'A';
-                position.set(Position.PREFIX_IN + 1, (boolean) BitUtil.check(inputStatusInt, 0));
-                position.set(Position.PREFIX_IN + 2, (boolean) BitUtil.check(inputStatusInt, 1));
+                position.set(Position.PREFIX_IN + 1, BitUtil.check(inputStatusInt, 0));
+                position.set(Position.PREFIX_IN + 2, BitUtil.check(inputStatusInt, 1));
                 if ("SF-Lite".equals(model)) {
                     position.set(Position.PREFIX_IN + 3, false);
                 }
                 return null;
             } else if (inputStatus >= 'O' && inputStatus <= 'R') {
                 int inputStatusInt = inputStatus - 'O';
-                position.set(Position.PREFIX_IN + 1, (boolean) BitUtil.check(inputStatusInt, 0));
-                position.set(Position.PREFIX_IN + 2, (boolean) BitUtil.check(inputStatusInt, 1));
+                position.set(Position.PREFIX_IN + 1, BitUtil.check(inputStatusInt, 0));
+                position.set(Position.PREFIX_IN + 2, BitUtil.check(inputStatusInt, 1));
                 if ("SF-Lite".equals(model)) {
                     position.set(Position.PREFIX_IN + 3, true);
                 }
