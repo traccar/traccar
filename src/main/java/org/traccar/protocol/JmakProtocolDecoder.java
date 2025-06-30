@@ -116,7 +116,8 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.PREFIX_COUNT, Long.parseLong(value));
                     break;
                 case 4:
-                    position.set("nickname", value);
+                    if(!value.equals("NULL"))
+                        position.set("nickname", value);
                     break;
                 case 5:
                     position.setTime(new Date(Long.parseLong(value)));
@@ -237,11 +238,22 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                         parseOnOffCan(value).forEach(position::set);
                         break;
                     case 7:
+                        position.set("canPedalPressure", Double.parseDouble(value));
+                        break;
                     case 9:
+                        position.set("canFuelLevel", Double.parseDouble(value));
+                        break;
+                    case 11:
+                        position.set("canAutonomy", Double.parseDouble(value));
+                        break;
                     case 13:
+                        position.set("canFuelConsumption", Double.parseDouble(value));
+                        break;
                     case 14:
+                        position.set("canFuelUsed", Double.parseDouble(value));
+                        break;
                     case 15:
-                        position.set(key, Double.parseDouble(value));
+                        position.set("canOilTemperature", Double.parseDouble(value));
                         break;
                     default:
                         break;
