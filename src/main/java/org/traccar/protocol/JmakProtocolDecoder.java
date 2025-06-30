@@ -20,6 +20,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BitUtil;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -56,33 +57,6 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
             }
         }
         return map;
-    }
-
-    private static Map<String, Integer> parseOnOffCan(String decimal) {
-        int value = Integer.parseInt(decimal);
-        String bin6 = new StringBuilder(
-                String.format("%6s", Integer.toBinaryString(value)).replace(' ', '0')
-        ).reverse().toString();
-        Map<String, Integer> info = new HashMap<>();
-        info.put("canParkingBrake", bin6.charAt(0) == '1' ? 1 : 0);
-        info.put("canBrake",         bin6.charAt(1) == '1' ? 1 : 0);
-        info.put("canClutch",        bin6.charAt(2) == '1' ? 1 : 0);
-        info.put("canAirConditioning", bin6.charAt(3) == '1' ? 1 : 0);
-        info.put("canSeatBelt",        bin6.charAt(4) == '1' ? 1 : 0);
-        return info;
-    }
-
-    private static Map<String, Integer> parseEstadoIo(String decimal) {
-        int value = Integer.parseInt(decimal);
-        String bin4 = new StringBuilder(
-                String.format("%4s", Integer.toBinaryString(value)).replace(' ', '0')
-        ).reverse().toString();
-        Map<String, Integer> info = new HashMap<>();
-        info.put("input1", bin4.charAt(0) == '1' ? 1 : 0);
-        info.put("input2", bin4.charAt(1) == '1' ? 1 : 0);
-        info.put("output1", bin4.charAt(2) == '1' ? 1 : 0);
-        info.put("output2", bin4.charAt(3) == '1' ? 1 : 0);
-        return info;
     }
 
     @Override
@@ -206,7 +180,11 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                     position.setValid(Integer.parseInt(value) >= 1);
                     break;
                 case 28:
-                    parseEstadoIo(value).forEach(position::set);
+                    int iosValue = Integer.parseInt(value);
+                    position.set("input1", BitUtil.check(iosValue, 0) ? 1 : 0);
+                    position.set("input2", BitUtil.check(iosValue, 1) ? 1 : 0);
+                    position.set("output1", BitUtil.check(iosValue, 2) ? 1 : 0);
+                    position.set("output2", BitUtil.check(iosValue, 3) ? 1 : 0);
                     break;
                 case 29:
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
@@ -238,19 +216,25 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                 String value = entry.getValue();
                 switch (key) {
                     case 1:
-                        position.set(Position.KEY_ODOMETER, Double.parseDouble(value) * 1000);
+                        position.set(Position.KEY_OBD_ODOMETER, Double.parseDouble(value) * 1000);
                         break;
                     case 2:
                         position.set("hourmeter", Double.parseDouble(value));
                         break;
                     case 3:
-                        position.set("canSpeed", Double.parseDouble(value));
+                        position.set(Position.KEY_OBD_SPEED, Double.parseDouble(value));
                         break;
                     case 4:
-                        position.set("canRpm", Double.parseDouble(value));
+                        int rpmInt = (int) Math.round(Double.parseDouble(value));
+                        position.set(Position.KEY_RPM, rpmInt);
                         break;
                     case 5:
-                        parseOnOffCan(value).forEach(position::set);
+                        int canVal = Integer.parseInt(value);
+                        position.set("canParkingBrake", BitUtil.check(canVal, 0) ? 1 : 0);
+                        position.set("canBrake", BitUtil.check(canVal, 1) ? 1 : 0);
+                        position.set("canClutch", BitUtil.check(canVal, 2) ? 1 : 0);
+                        position.set("canAirConditioning", BitUtil.check(canVal, 3) ? 1 : 0);
+                        position.set("canSeatBelt", BitUtil.check(canVal, 4) ? 1 : 0);
                         break;
                     case 7:
                         position.set("canPedalPressure", Double.parseDouble(value));
@@ -275,8 +259,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
         }
-
-        position.setNetwork(new org.traccar.model.Network());
+        
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(
                     Unpooled.copiedBuffer("ACK", StandardCharsets.US_ASCII), remoteAddress));
