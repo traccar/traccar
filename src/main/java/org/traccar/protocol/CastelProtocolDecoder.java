@@ -583,7 +583,7 @@ public class CastelProtocolDecoder extends BaseProtocolDecoder {
 
         if (type == 0x4001) {
 
-            sendResponse(channel, remoteAddress, version, id, (short) type, null);
+            sendResponse(channel, remoteAddress, version, id, type, null);
 
             return readPosition(deviceSession, buf);
 
