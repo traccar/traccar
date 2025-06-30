@@ -46,7 +46,7 @@ public class PushCommandManager {
 
         var result = firebaseClient.getInstance().sendEachForMulticast(message);
         if (result.getFailureCount() > 0) {
-            throw new RuntimeException("Failed to send device push");
+            throw result.getResponses().iterator().next().getException();
         }
     }
 
