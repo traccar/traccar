@@ -159,7 +159,7 @@ public class CommandsManager implements BroadcastInterface {
             cacheManager.addDevice(deviceId, key);
             Device device = cacheManager.getObject(Device.class, deviceId);
             device.set("notificationTokens", token);
-            storage.updateObject(Device.class, new Request(
+            storage.updateObject(device, new Request(
                     new Columns.Include("attributes"),
                     new Condition.Equals("id", deviceId)));
             cacheManager.invalidateObject(true, Device.class, deviceId, ObjectOperation.UPDATE);
