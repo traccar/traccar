@@ -56,6 +56,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Path("commands")
 @Produces(MediaType.APPLICATION_JSON)
@@ -166,7 +167,9 @@ public class CommandResource extends ExtendedObjectResource<Command> {
                 if (textChannel) {
                     return protocol.getSupportedTextCommands().stream().map(Typed::new).collect(Collectors.toList());
                 } else {
-                    return protocol.getSupportedDataCommands().stream().map(Typed::new).collect(Collectors.toList());
+                    return Stream.concat(
+                            protocol.getSupportedDataCommands().stream(),
+                            protocol.getSupportedPushCommands().stream()).map(Typed::new).collect(Collectors.toList());
                 }
             } else {
                 return Collections.singletonList(new Typed(Command.TYPE_CUSTOM));
