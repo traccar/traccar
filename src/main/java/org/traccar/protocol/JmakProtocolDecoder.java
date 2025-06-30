@@ -219,7 +219,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_OBD_ODOMETER, Double.parseDouble(value) * 1000);
                         break;
                     case 2:
-                        position.set("hourmeter", Double.parseDouble(value));
+                        position.set("canHourmeter", Double.parseDouble(value));
                         break;
                     case 3:
                         position.set(Position.KEY_OBD_SPEED, Double.parseDouble(value));
@@ -259,7 +259,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
         }
-        
+
         if (channel != null) {
             channel.writeAndFlush(new NetworkMessage(
                     Unpooled.copiedBuffer("ACK", StandardCharsets.US_ASCII), remoteAddress));
