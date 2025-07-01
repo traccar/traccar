@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.traccar.storage.StorageName;
 
 @StorageName("tc_commands")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Command extends BaseCommand {
+public class Command extends BaseCommand implements Schedulable {
 
     public static final String TYPE_CUSTOM = "custom";
     public static final String TYPE_IDENTIFICATION = "deviceIdentification";
@@ -105,6 +105,18 @@ public class Command extends BaseCommand {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    private long calendarId;
+
+    @Override
+    public long getCalendarId() {
+        return calendarId;
+    }
+
+    @Override
+    public void setCalendarId(long calendarId) {
+        this.calendarId = calendarId;
     }
 
 }
