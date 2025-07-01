@@ -27,36 +27,11 @@ import org.traccar.session.DeviceSession;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.math.BigInteger;
 
 public class JmakProtocolDecoder extends BaseProtocolDecoder {
 
     public JmakProtocolDecoder(Protocol protocol) {
         super(protocol);
-    }
-
-    private static String hexToBinString(String hex) {
-        BigInteger value = new BigInteger(hex, 16);
-        String bin = value.toString(2);
-        int numBits = hex.length() * 4;
-        if (bin.length() < numBits) {
-            bin = String.format("%" + numBits + "s", bin).replace(' ', '0');
-        }
-        return bin;
-    }
-
-    private static Map<Integer, String> parseFlaggedData(String hex, String[] parts) {
-        String bin = hexToBinString(hex);
-        Map<Integer, String> map = new HashMap<>();
-        int index = 1;
-        for (int i = 0; i < bin.length(); i++) {
-            if (bin.charAt(bin.length() - 1 - i) == '1' && index < parts.length) {
-                map.put(i + 1, parts[index++]);
-            }
-        }
-        return map;
     }
 
     @Override
@@ -87,176 +62,237 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(session.getDeviceId());
 
-        Map<Integer, String> data = parseFlaggedData(standard[0], standard);
+        int index = 0;
         int eventId = 0;
         int eventStatus = 0;
         String eventName = null;
-        for (Map.Entry<Integer, String> entry : data.entrySet()) {
-            int key = entry.getKey();
-            String value = entry.getValue();
-            switch (key) {
-                case 1:
-                    position.set("serialNumber", value);
-                    break;
-                case 2:
-                    position.set("imei", value);
-                    break;
-                case 3:
-                    position.set(Position.PREFIX_COUNT, Long.parseLong(value));
-                    break;
-                case 4:
-                    if(!value.equals("NULL"))
-                        position.set("nickname", value);
-                    break;
-                case 5:
-                    position.setTime(new Date(Long.parseLong(value)));
-                    break;
-                case 6:
-                    position.setLatitude(Double.parseDouble(value));
-                    break;
-                case 7:
-                    position.setLongitude(Double.parseDouble(value));
-                    break;
-                case 8:
-                    position.setAltitude(Double.parseDouble(value));
-                    break;
-                case 10:
-                    double speedKnots = Double.parseDouble(value) * 0.5399568;
-                    position.setSpeed(speedKnots);
-                    break;
-                case 11:
-                    position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
-                    break;
-                case 12:
-                    position.set(Position.KEY_RSSI, Integer.parseInt(value));
-                    break;
-                case 13:
-                    position.set(Position.KEY_HDOP, Double.parseDouble(value));
-                    break;
-                case 14:
-                    position.setCourse(Double.parseDouble(value));
-                    break;
-                case 15:
-                    position.set(Position.KEY_IGNITION, Integer.parseInt(value) == 1);
-                    break;
-                case 16:
-                    position.set("backup", Integer.parseInt(value) == 1);
-                    break;
-                case 17:
-                    position.set("hourmeter", Double.parseDouble(value));
-                    break;
-                case 18:
-                    position.set(Position.KEY_ODOMETER, Double.parseDouble(value) * 1000);
-                    break;
-                case 19:
-                    eventId = Integer.parseInt(value);
-                    position.set(Position.KEY_EVENT, eventId);
-                    break;
-                case 20:
-                    eventStatus = Integer.parseInt(value);
-                    position.set("eventStatus", eventStatus);
-                    break;
-                case 21:
-                    eventName = value;
-                    position.set("eventName", value);
-                    break;
-                case 22:
-                    position.set(Position.KEY_VIN, Integer.parseInt(value));
-                    break;
-                case 23:
-                    position.set(Position.KEY_BATTERY, Integer.parseInt(value));
-                    break;
-                case 24:
-                    position.set(Position.KEY_OPERATOR, value);
-                    break;
-                case 25:
-                    position.set("tec", value);
-                    break;
-                case 26:
-                    long tsSend = Long.parseLong(value);
-                    position.set("tsSend", tsSend);
-                    break;
-                case 27:
-                    position.setValid(Integer.parseInt(value) >= 1);
-                    break;
-                case 28:
-                    int iosValue = Integer.parseInt(value);
-                    position.set("input1", BitUtil.check(iosValue, 0) ? 1 : 0);
-                    position.set("input2", BitUtil.check(iosValue, 1) ? 1 : 0);
-                    position.set("output1", BitUtil.check(iosValue, 2) ? 1 : 0);
-                    position.set("output2", BitUtil.check(iosValue, 3) ? 1 : 0);
-                    break;
-                case 29:
-                    position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
-                    break;
-                case 30:
-                    position.set("trpSize", Integer.parseInt(value));
-                    break;
-                case 31:
-                    position.set("trpMsg", value);
-                    break;
-                case 35:
-                    double ain = Double.parseDouble(value);
-                    position.set("ain", ain);
-                    position.set("discharge", ain >= 5.8 ? 1 : 0);
-                    break;
-                default:
-                    break;
-            }
+        long mask = Long.parseLong(standard[index++], 16);
+
+        if (BitUtil.check(mask, 0)) {
+            position.set("serialNumber", standard[index++]);
         }
+
+        if (BitUtil.check(mask, 1)) {
+            position.set("imei", standard[index++]);
+        }
+
+        if (BitUtil.check(mask, 2)) {
+            position.set(Position.PREFIX_COUNT, Long.parseLong(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 3)) {
+            if(!standard[index].equals("NULL"))
+                position.set("nickname", standard[index]);
+            index++;
+        }
+
+        if (BitUtil.check(mask, 4)) {
+            position.setTime(new Date(Long.parseLong(standard[index++])));
+        }
+
+        if (BitUtil.check(mask, 5)) {
+            position.setLatitude(Double.parseDouble(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 6)) {
+            position.setLongitude(Double.parseDouble(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 7)) {
+            position.setAltitude(Double.parseDouble(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 8)) {
+            index++;
+        }
+
+        if (BitUtil.check(mask, 9)) {
+            double speedKnots = Double.parseDouble(standard[index++]) * 0.5399568;
+            position.setSpeed(speedKnots);
+        }
+
+        if (BitUtil.check(mask, 10)) {
+            position.set(Position.KEY_SATELLITES, Integer.parseInt(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 11)) {
+            position.set(Position.KEY_RSSI, Integer.parseInt(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 12)) {
+            position.set(Position.KEY_HDOP, Double.parseDouble(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 13)) {
+            position.setCourse(Double.parseDouble(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 14)) {
+            position.set(Position.KEY_IGNITION, Integer.parseInt(standard[index++]) == 1);
+        }
+
+        if (BitUtil.check(mask, 15)) {
+            position.set("backup", Integer.parseInt(standard[index++]) == 1);
+        }
+
+        if (BitUtil.check(mask, 16)) {
+            position.set("hourmeter", Double.parseDouble(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 17)) {
+            position.set(Position.KEY_ODOMETER, Double.parseDouble(standard[index++]) * 1000);
+        }
+
+        if (BitUtil.check(mask, 18)) {
+            eventId = Integer.parseInt(standard[index++]);
+            position.set(Position.KEY_EVENT, eventId);
+        }
+
+        if (BitUtil.check(mask, 19)) {
+            eventStatus = Integer.parseInt(standard[index++]);
+            position.set("eventStatus", eventStatus);
+        }
+
+        if (BitUtil.check(mask, 20)) {
+            eventName = standard[index++];
+            position.set("eventName", eventName);
+        }
+
+        if (BitUtil.check(mask, 21)) {
+            position.set(Position.KEY_VIN, Integer.parseInt(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 22)) {
+            position.set(Position.KEY_BATTERY, Integer.parseInt(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 23)) {
+            position.set(Position.KEY_OPERATOR, standard[index++]);
+        }
+
+        if (BitUtil.check(mask, 24)) {
+            position.set("tec", standard[index++]);
+        }
+
+        if (BitUtil.check(mask, 25)) {
+            long tsSend = Long.parseLong(standard[index++]);
+            position.set("tsSend", tsSend);
+        }
+
+        if (BitUtil.check(mask, 26)) {
+            position.setValid(Integer.parseInt(standard[index++]) >= 1);
+        }
+
+        if (BitUtil.check(mask, 27)) {
+            int iosBits = Integer.parseInt(standard[index++]);
+            position.set("input1", BitUtil.check(iosBits, 0) ? 1 : 0);
+            position.set("input2", BitUtil.check(iosBits, 1) ? 1 : 0);
+            position.set("output1", BitUtil.check(iosBits, 2) ? 1 : 0);
+            position.set("output2", BitUtil.check(iosBits, 3) ? 1 : 0);
+        }
+
+        if (BitUtil.check(mask, 28)) {
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, standard[index++]);
+        }
+
+        if (BitUtil.check(mask, 29)) {
+            position.set("trpSize", Integer.parseInt(standard[index++]));
+        }
+
+        if (BitUtil.check(mask, 30)) {
+            position.set("trpMsg", standard[index++]);
+        }
+
+        if (BitUtil.check(mask, 31)) {
+            index++;
+        }
+
+        if (BitUtil.check(mask, 32)) {
+            index++;
+        }
+
+        if (BitUtil.check(mask, 33)) {
+            index++;
+        }
+
+        if (BitUtil.check(mask, 34)) {
+            double ain = Double.parseDouble(standard[index++]);
+            position.set("ain", ain);
+            position.set("discharge", ain >= 5.8 ? 1 : 0);
+        }
+
         if (eventId == 126 && eventStatus == 4 && eventName != null) {
             position.set(Position.KEY_CARD, eventName);
         }
 
         if (parts.length > 1) {
             String[] can = parts[1].split(";");
-            Map<Integer, String> canData = parseFlaggedData(can[0], can);
-            for (Map.Entry<Integer, String> entry : canData.entrySet()) {
-                int key = entry.getKey();
-                String value = entry.getValue();
-                switch (key) {
-                    case 1:
-                        position.set(Position.KEY_OBD_ODOMETER, Double.parseDouble(value) * 1000);
-                        break;
-                    case 2:
-                        position.set("canHourmeter", Double.parseDouble(value));
-                        break;
-                    case 3:
-                        position.set(Position.KEY_OBD_SPEED, Double.parseDouble(value));
-                        break;
-                    case 4:
-                        int rpmInt = (int) Math.round(Double.parseDouble(value));
-                        position.set(Position.KEY_RPM, rpmInt);
-                        break;
-                    case 5:
-                        int canVal = Integer.parseInt(value);
-                        position.set("canParkingBrake", BitUtil.check(canVal, 0) ? 1 : 0);
-                        position.set("canBrake", BitUtil.check(canVal, 1) ? 1 : 0);
-                        position.set("canClutch", BitUtil.check(canVal, 2) ? 1 : 0);
-                        position.set("canAirConditioning", BitUtil.check(canVal, 3) ? 1 : 0);
-                        position.set("canSeatBelt", BitUtil.check(canVal, 4) ? 1 : 0);
-                        break;
-                    case 7:
-                        position.set("canPedalPressure", Double.parseDouble(value));
-                        break;
-                    case 9:
-                        position.set("canFuelLevel", Double.parseDouble(value));
-                        break;
-                    case 11:
-                        position.set("canAutonomy", Double.parseDouble(value));
-                        break;
-                    case 13:
-                        position.set("canFuelConsumption", Double.parseDouble(value));
-                        break;
-                    case 14:
-                        position.set("canFuelUsed", Double.parseDouble(value));
-                        break;
-                    case 15:
-                        position.set("canOilTemperature", Double.parseDouble(value));
-                        break;
-                    default:
-                        break;
-                }
+            index = 0;
+            mask = Long.parseLong(can[index++], 16);
+
+            if (BitUtil.check(mask, 0)) {
+                position.set(Position.KEY_OBD_ODOMETER, Double.parseDouble(can[index++]) * 1000);
+            }
+
+            if (BitUtil.check(mask, 1)) {
+                position.set("canHourmeter", Double.parseDouble(can[index++]));
+            }
+
+            if (BitUtil.check(mask, 2)) {
+                position.set(Position.KEY_OBD_SPEED, Double.parseDouble(can[index++]));
+            }
+
+            if (BitUtil.check(mask, 3)) {
+                position.set(Position.KEY_RPM, Double.parseDouble(can[index++]));
+            }
+
+            if (BitUtil.check(mask, 4)) {
+                int canOnOffBits = Integer.parseInt(can[index++]);
+                position.set("canParkingBrake", BitUtil.check(canOnOffBits, 0) ? 1 : 0);
+                position.set("canBrake", BitUtil.check(canOnOffBits, 1) ? 1 : 0);
+                position.set("canClutch", BitUtil.check(canOnOffBits, 2) ? 1 : 0);
+                position.set("canAirConditioning", BitUtil.check(canOnOffBits, 3) ? 1 : 0);
+                position.set("canSeatBelt", BitUtil.check(canOnOffBits, 4) ? 1 : 0);
+            }
+
+            if (BitUtil.check(mask, 5)) {
+                index++;
+            }
+
+            if (BitUtil.check(mask, 6)) {
+                position.set("canPedalPressure", Double.parseDouble(can[index++]));
+            }
+
+            if (BitUtil.check(mask, 7)) {
+                index++;
+            }
+
+            if (BitUtil.check(mask, 8)) {
+                position.set("canFuelLevel", Double.parseDouble(can[index++]));
+            }
+
+            if (BitUtil.check(mask, 9)) {
+                index++;
+            }
+
+            if (BitUtil.check(mask, 10)) {
+                position.set("canAutonomy", Double.parseDouble(can[index++]));
+            }
+
+            if (BitUtil.check(mask, 11)) {
+                index++;
+            }
+
+            if (BitUtil.check(mask, 12)) {
+                position.set("canFuelConsumption", Double.parseDouble(can[index++]));
+            }
+
+            if (BitUtil.check(mask, 13)) {
+                position.set("canFuelUsed", Double.parseDouble(can[index++]));
+            }
+
+            if (BitUtil.check(mask, 14)) {
+                position.set("canOilTemperature", Double.parseDouble(can[index++]));
             }
         }
 

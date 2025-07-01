@@ -18,16 +18,8 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.TooLongFrameException;
-import org.traccar.BaseFrameDecoder;
 
-public class JmakFrameDecoder extends BaseFrameDecoder {
-
-    private final JsonFrameDecoder jsonDecoder;
-
-    public JmakFrameDecoder() {
-        this.jsonDecoder = new JsonFrameDecoder();
-    }
+public class JmakFrameDecoder extends JsonFrameDecoder {
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
@@ -39,7 +31,7 @@ public class JmakFrameDecoder extends BaseFrameDecoder {
         buf.resetReaderIndex();
 
         if (first == '{') {
-            return jsonDecoder.decode(ctx, channel, buf);
+            return super.decode(ctx, channel, buf);
         }
 
         int readerIndex = buf.readerIndex();
