@@ -26,26 +26,19 @@ public class JmakFrameDecoder extends JsonFrameDecoder {
         if (buf.readableBytes() == 0) {
             return null;
         }
-        buf.markReaderIndex();
-        byte first = buf.readByte();
-        buf.resetReaderIndex();
+        byte first = buf.getByte(buf.readerIndex());
 
         if (first == '{') {
             return super.decode(ctx, channel, buf);
         }
 
-        int readerIndex = buf.readerIndex();
-        int writerIndex = buf.writerIndex();
         if (first == '~' || first == '^') {
-            int delimiterIndex = buf.indexOf(readerIndex, writerIndex, (byte) '$');
-            if (delimiterIndex < 0) {
-                return null;
+            int delimiterIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '$');
+            if (delimiterIndex > 0) {
+                return buf.readRetainedSlice(delimiterIndex - buf.readerIndex() + 1);
             }
-            int frameLength = delimiterIndex - readerIndex + 1;
-            return buf.readRetainedSlice(frameLength);
         }
 
-        buf.readByte();
         return null;
     }
 }
