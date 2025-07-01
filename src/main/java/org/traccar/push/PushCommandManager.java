@@ -15,20 +15,37 @@
  */
 package org.traccar.push;
 
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MulticastMessage;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class PushCommandManager {
 
-    private final FirebaseClient firebaseClient;
+    private final FirebaseMessaging firebaseMessaging;
 
-    public PushCommandManager(FirebaseClient firebaseClient) {
-        this.firebaseClient = firebaseClient;
+    public PushCommandManager(Config config) throws IOException {
+        InputStream serviceAccount = new ByteArrayInputStream(
+                config.getString(Keys.COMMAND_FIREBASE_SERVICE_ACCOUNT).getBytes());
+
+        FirebaseOptions options = FirebaseOptions.builder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .build();
+
+        firebaseMessaging = FirebaseMessaging.getInstance(
+                FirebaseApp.initializeApp(options, "client"));
     }
 
     public void sendCommand(Device device, Command command) throws Exception {
@@ -44,7 +61,7 @@ public class PushCommandManager {
                 .addAllTokens(registrationTokens)
                 .build();
 
-        var result = firebaseClient.getInstance().sendEachForMulticast(message);
+        var result = firebaseMessaging.sendEachForMulticast(message);
         if (result.getFailureCount() > 0) {
             throw result.getResponses().iterator().next().getException();
         }

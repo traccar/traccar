@@ -87,7 +87,6 @@ import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
 import org.traccar.mail.SmtpMailManager;
-import org.traccar.push.FirebaseClient;
 import org.traccar.push.PushCommandManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.HttpSmsClient;
@@ -396,19 +395,9 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static FirebaseClient provideFirebaseClient(Config config) throws IOException {
-        if (config.hasKey(Keys.NOTIFICATOR_FIREBASE_SERVICE_ACCOUNT)) {
-            return new FirebaseClient(config);
-        }
-        return null;
-    }
-
-    @Singleton
-    @Provides
-    public static PushCommandManager providePushCommandManager(
-            @Nullable FirebaseClient firebaseClient) throws IOException {
-        if (firebaseClient != null) {
-            return new PushCommandManager(firebaseClient);
+    public static PushCommandManager providePushCommandManager(Config config) throws IOException {
+        if (config.hasKey(Keys.COMMAND_FIREBASE_SERVICE_ACCOUNT)) {
+            return new PushCommandManager(config);
         }
         return null;
     }
