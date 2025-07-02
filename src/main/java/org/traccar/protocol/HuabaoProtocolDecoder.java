@@ -300,6 +300,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             if (position != null) {
                 position.setType(String.valueOf(type));
             }
+            return position;
         }
 
         return null;
