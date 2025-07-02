@@ -423,6 +423,16 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         String model = getDeviceModel(deviceSession);
 
+        // handling door alarm for micodus MV810G and MV710G, bit is set on status field
+        // (undocumented?)
+        if (model != null && Set.of("MV810G", "MV710G").contains(model)) {
+            if (BitUtil.check(status, 16)) {
+                position.addAlarm(Position.ALARM_DOOR);
+            }
+            position.set(Position.KEY_DOOR, BitUtil.check(status, 16));
+        }
+
+
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
         if ("G1C Pro".equals(model)) {
             position.set(Position.KEY_MOTION, BitUtil.check(status, 4));
@@ -622,6 +632,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // content
                     endIndex = buf.writerIndex() - 2;
                     decodeExtension(position, buf, endIndex);
+                    break;
+                case 0x82:
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
                     break;
                 case 0x91:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
