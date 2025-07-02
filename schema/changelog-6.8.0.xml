@@ -18,7 +18,10 @@
       CREATE EXTENSION IF NOT EXISTS timescaledb;
 
       ALTER TABLE tc_positions DROP CONSTRAINT IF EXISTS tc_positions_pkey;
+      ALTER TABLE tc_events DROP CONSTRAINT IF EXISTS tc_events_pkey;
+
       DROP INDEX IF EXISTS position_deviceid_fixtime;
+      DROP INDEX IF EXISTS event_deviceid_servertime;
 
       SELECT create_hypertable(
         'tc_positions',
@@ -28,7 +31,16 @@
         migrate_data => TRUE
       );
 
+      SELECT create_hypertable(
+        'tc_events',
+        'eventtime',
+        partitioning_column => 'deviceid',
+        number_partitions => 8,
+        migrate_data => TRUE
+      );
+
       CREATE INDEX IF NOT EXISTS tc_positions_id_idx ON tc_positions(id);
+      CREATE INDEX IF NOT EXISTS tc_events_id_idx ON tc_events(id);
     </sql>
 
   </changeSet>
