@@ -423,12 +423,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
         String model = getDeviceModel(deviceSession);
 
-        // handling door alarm for micodus MV810G and MV710G, bit is set on status field
-        // (undocumented?)
+        // handling door status for micodus MV810G and MV710G
         if (model != null && Set.of("MV810G", "MV710G").contains(model)) {
-            if (BitUtil.check(status, 16)) {
-                position.addAlarm(Position.ALARM_DOOR);
-            }
             position.set(Position.KEY_DOOR, BitUtil.check(status, 16));
         }
 
@@ -569,7 +565,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.addAlarm(BitUtil.check(alarm, 9) ? Position.ALARM_BRAKING : null);
                     position.addAlarm(BitUtil.check(alarm, 10) ? Position.ALARM_CORNERING : null);
                     buf.readUnsignedShort(); // external switch state
-                    buf.skipBytes(4); // reserved
+                    if (model != null && Set.of("MV810G", "MV710G").contains(model)) {
+                        int reserved = buf.readInt();
+                        position.addAlarm(BitUtil.check(reserved, 16) ? Position.ALARM_DOOR : null);
+                    } else {
+                        buf.skipBytes(4); // reserved
+                    }
                     break;
                 case 0x60:
                     event = buf.readUnsignedShort();
