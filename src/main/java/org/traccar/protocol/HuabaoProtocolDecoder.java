@@ -141,9 +141,6 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(value, 28)) {
             return Position.ALARM_MOVEMENT;
         }
-        if (BitUtil.check(value, 29) || BitUtil.check(value, 30)) {
-            return Position.ALARM_ACCIDENT;
-        }
         return null;
     }
 
