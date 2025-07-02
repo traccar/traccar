@@ -19,8 +19,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -64,9 +62,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_LOCATION_REPORT_2 = 0x5501;
     public static final int MSG_LOCATION_REPORT_BLIND = 0x5502;
     public static final int MSG_LOCATION_BATCH = 0x0704;
-    public static final int MSG_OIL_CONTROL = 0XA006;
     public static final int MSG_TIME_SYNC_REQUEST = 0x0109;
-    public static final int MSG_TIME_SYNC_RESPONSE = 0x8109;
     public static final int MSG_PHOTO = 0x8888;
     public static final int MSG_TRANSPARENT = 0x0900;
 
@@ -300,9 +296,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_TRANSPARENT) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
-
-            return decodeTransparent(deviceSession, buf);
-
+            Position  position = decodeTransparent(deviceSession, buf);
+            if (position != null) {
+                position.setType(String.valueOf(type));
+            }
         }
 
         return null;
