@@ -155,10 +155,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         processStatus(position, buf.readUnsignedInt());
 
-        if (channel != null) {
-            sendResponse(channel, remoteAddress, id, "R12");
-        }
-        
+        sendResponse(channel, remoteAddress, id, "R12");
+
         return position;
     }
 
