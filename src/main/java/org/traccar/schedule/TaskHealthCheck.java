@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,7 @@ public class TaskHealthCheck implements ScheduleTask {
         this.config = config;
         this.client = client;
         this.statisticsManager = statisticsManager;
-        if (!config.getBoolean(Keys.WEB_DISABLE_HEALTH_CHECK)
-                && System.getProperty("os.name").toLowerCase().startsWith("linux")) {
+        if (!config.getBoolean(Keys.WEB_DISABLE_HEALTH_CHECK) && System.getenv("NOTIFY_SOCKET") != null) {
             try {
                 systemD = Native.load("systemd", SystemD.class);
                 String watchdogTimer = System.getenv("WATCHDOG_USEC");
