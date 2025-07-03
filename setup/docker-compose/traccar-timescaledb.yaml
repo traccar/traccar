@@ -1,0 +1,31 @@
+services:
+
+  database:
+    image: timescale/timescaledb:latest-pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: traccar
+      POSTGRES_USER: traccar
+      POSTGRES_PASSWORD: traccar
+      TIMESCALEDB_TELEMETRY: "off"
+    volumes:
+      - /opt/traccar/data:/var/lib/postgresql/data
+
+  traccar:
+    image: traccar/traccar:latest
+    restart: unless-stopped
+    depends_on:
+      - database
+    environment:
+      CONFIG_USE_ENVIRONMENT_VARIABLES: "true"
+      WEB_DISABLE_HEALTH_CHECK: "true"
+      WEB_MAX_REQUESTS_PER_SECOND: 1000
+      DATABASE_DRIVER: org.postgresql.Driver
+      DATABASE_URL: jdbc:postgresql://database:5432/traccar
+      DATABASE_USER: traccar
+      DATABASE_PASSWORD: traccar
+    ports:
+      - "8082:8082"
+      - "5000-5500:5000-5500"
+    volumes:
+      - /opt/traccar/logs:/opt/traccar/logs

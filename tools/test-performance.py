@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 BASE_URL = "http://localhost:8082"
 SERVER_HOST = "localhost:5055"
 USER = {"email": "admin", "password": "admin"}
-DEVICES = 10
+DEVICES = 200
 CREATE_WORKERS = 32
 SEND_INTERVAL = 1.0
 
