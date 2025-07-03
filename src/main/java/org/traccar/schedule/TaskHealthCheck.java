@@ -24,7 +24,6 @@ import org.traccar.config.Keys;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
-import org.traccar.database.StatisticsManager;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +34,6 @@ public class TaskHealthCheck implements ScheduleTask {
 
     private final Config config;
     private final Client client;
-    private final StatisticsManager statisticsManager;
 
     private final long gracePeriod = System.currentTimeMillis() + TimeUnit.HOURS.toMillis(1);
 
@@ -43,16 +41,11 @@ public class TaskHealthCheck implements ScheduleTask {
 
     private boolean enabled;
     private long period;
-    private double dropThreshold;
-
-    private int messageLastTotal;
-    private int messageLastPeriod;
 
     @Inject
-    public TaskHealthCheck(Config config, Client client, StatisticsManager statisticsManager) {
+    public TaskHealthCheck(Config config, Client client) {
         this.config = config;
         this.client = client;
-        this.statisticsManager = statisticsManager;
         if (!config.getBoolean(Keys.WEB_DISABLE_HEALTH_CHECK) && System.getenv("NOTIFY_SOCKET") != null) {
             try {
                 systemD = Native.load("systemd", SystemD.class);
@@ -62,7 +55,6 @@ public class TaskHealthCheck implements ScheduleTask {
                 }
                 if (period > 0) {
                     LOGGER.info("Health check enabled with period {}", period);
-                    dropThreshold = config.getDouble(Keys.WEB_HEALTH_CHECK_DROP_THRESHOLD);
                     enabled = true;
                 }
             } catch (UnsatisfiedLinkError e) {
@@ -74,7 +66,7 @@ public class TaskHealthCheck implements ScheduleTask {
     private String getUrl() {
         String address = config.getString(Keys.WEB_ADDRESS, "localhost");
         int port = config.getInteger(Keys.WEB_PORT);
-        return "http://" + address + ":" + port + "/api/server";
+        return "http://" + address + ":" + port + "/api/health";
     }
 
     @Override
@@ -88,38 +80,12 @@ public class TaskHealthCheck implements ScheduleTask {
     public void run() {
         LOGGER.debug("Health check running");
         if (System.currentTimeMillis() > gracePeriod) {
-            boolean success = true;
-
             int status = client.target(getUrl()).request().get().getStatus();
-            if (status != 200) {
-                success = false;
-                LOGGER.warn("Web health check failed with status {}", status);
-            }
-
-            int messageCurrentTotal = statisticsManager.messageStoredCount();
-            int messageCurrentPeriod = messageCurrentTotal - messageLastTotal;
-            if (dropThreshold > 0 && messageLastPeriod > 0 && messageCurrentPeriod > 0) {
-                double drop = messageCurrentPeriod / (double) messageLastPeriod;
-                if (drop < dropThreshold) {
-                    success = false;
-                    LOGGER.warn("Message health check failed with drop {}", drop);
-                }
-            }
-            messageLastTotal = messageCurrentTotal;
-            messageLastPeriod = messageCurrentPeriod;
-
-            if (success) {
-                notifyWatchdog();
+            if (status == 200) {
+                systemD.sd_notify(0, "WATCHDOG=1");
             }
         } else {
-            notifyWatchdog();
-        }
-    }
-
-    private void notifyWatchdog() {
-        int result = systemD.sd_notify(0, "WATCHDOG=1");
-        if (result < 0) {
-            LOGGER.warn("Health check notify error {}", result);
+            systemD.sd_notify(0, "WATCHDOG=1");
         }
     }
 
