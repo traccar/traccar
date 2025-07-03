@@ -23,6 +23,12 @@ services:
       DATABASE_URL: jdbc:postgresql://database:5432/traccar
       DATABASE_USER: traccar
       DATABASE_PASSWORD: traccar
+    healthcheck:
+      test: [ "CMD", "curl", "-fsS", "http://localhost:8082/api/health" ]
+      interval: 2m
+      timeout: 5s
+      start_period: 1h
+      retries: 3
     ports:
       - "8082:8082"
       - "5000-5500:5000-5500"
