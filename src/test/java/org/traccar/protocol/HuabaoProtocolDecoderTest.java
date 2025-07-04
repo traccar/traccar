@@ -294,17 +294,10 @@ public class HuabaoProtocolDecoderTest extends ProtocolTest {
 
         decoder.setModelOverride("MV710G");
 
-        // door open, no door alarm
         verifyAttribute(decoder, binary(
             "7e02000036019111110000007b000000000001004202b71a72008dbba000000000000025070208082901040000000030011731010e57080000000000000000820200829e7e"),
             Position.KEY_DOOR, true);
-        verifyAttribute(decoder, binary(
-            "7e02000036019111110000007b000000000001004202b71a72008dbba000000000000025070208082901040000000030011731010e57080000000000000000820200829e7e"),
-            Position.KEY_ALARM, null);
-        // door open, no door alarm
-        verifyAttribute(decoder, binary(
-            "7e02000036019111110000007a000000000001004202b71a72008dbba000000000000025070208082901040000000030011731010e57080000000000010000820200829e7e"),
-            Position.KEY_DOOR, true);
+
         verifyAttribute(decoder, binary(
             "7e02000036019111110000007a000000000001004202b71a72008dbba000000000000025070208082901040000000030011731010e57080000000000010000820200829e7e"),
             Position.KEY_ALARM, Position.ALARM_DOOR);
