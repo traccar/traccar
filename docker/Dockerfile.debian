@@ -1,19 +1,16 @@
-FROM debian:12-slim
-
+FROM alpine AS package
 ARG VERSION
 COPY installers/traccar-other-$VERSION.zip /tmp/traccar.zip
+RUN unzip -qo /tmp/traccar.zip -d /traccar
 
+FROM eclipse-temurin:21 AS jdk
+RUN jlink --module-path $JAVA_HOME/jmods \
+    --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported \
+    --strip-debug --no-header-files --no-man-pages --compress=2 --output /jre
+
+FROM debian:12-slim
+COPY --from=package /traccar /opt/traccar
+COPY --from=jdk /jre /opt/traccar/jre
 WORKDIR /opt/traccar
-
-RUN set -ex; \
-    apt-get update; \
-    TERM=xterm DEBIAN_FRONTEND=noninteractive apt-get install --yes --no-install-recommends \
-      openjdk-17-jre-headless \
-      unzip; \
-    unzip -qo /tmp/traccar.zip -d .; \
-    apt-get autoremove --yes unzip; \
-    apt-get clean; \
-    rm -rf /var/lib/apt/lists/* /tmp/*
-
-ENTRYPOINT ["java"]
+ENTRYPOINT ["/opt/traccar/jre/bin/java"]
 CMD ["-jar", "tracker-server.jar", "conf/traccar.xml"]

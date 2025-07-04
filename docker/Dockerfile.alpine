@@ -1,14 +1,16 @@
-FROM alpine:3.22
-
+FROM alpine AS package
 ARG VERSION
 COPY installers/traccar-other-$VERSION.zip /tmp/traccar.zip
+RUN unzip -qo /tmp/traccar.zip -d /traccar
 
+FROM eclipse-temurin:21-alpine AS jdk
+RUN jlink --module-path $JAVA_HOME/jmods \
+    --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported \
+    --strip-debug --no-header-files --no-man-pages --compress=2 --output /jre
+
+FROM alpine:3.22
+COPY --from=package /traccar /opt/traccar
+COPY --from=jdk /jre /opt/traccar/jre
 WORKDIR /opt/traccar
-
-RUN set -ex; \
-    apk add --no-cache --no-progress openjdk17-jre-headless; \
-    unzip -qo /tmp/traccar.zip -d .; \
-    rm /tmp/traccar.zip
-
-ENTRYPOINT ["java"]
+ENTRYPOINT ["/opt/traccar/jre/bin/java"]
 CMD ["-jar", "tracker-server.jar", "conf/traccar.xml"]
