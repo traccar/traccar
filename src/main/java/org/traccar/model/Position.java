@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
@@ -349,6 +351,12 @@ public class Position extends Message {
     @Override
     public void setType(String type) {
         super.setType(type);
+    }
+
+    @Override
+    @JsonProperty("id")
+    public long getId() {
+        return super.getId();
     }
 
 }
