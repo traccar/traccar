@@ -18,8 +18,13 @@ package org.traccar.command;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MulticastMessage;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Command;
@@ -33,10 +38,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+@Singleton
 public class ClientCommandSender implements CommandSender {
 
     private final FirebaseMessaging firebaseMessaging;
 
+    @Inject
     public ClientCommandSender(Config config) throws IOException {
         InputStream serviceAccount = new ByteArrayInputStream(
                 config.getString(Keys.COMMAND_CLIENT_SERVICE_ACCOUNT).getBytes());
@@ -66,8 +73,20 @@ public class ClientCommandSender implements CommandSender {
         List<String> registrationTokens = new ArrayList<>(
                 Arrays.asList(device.getString("notificationTokens").split("[, ]")));
 
+        AndroidConfig androidConfig = AndroidConfig.builder()
+                .setPriority(AndroidConfig.Priority.HIGH)
+                .build();
+
+        ApnsConfig apnsConfig = ApnsConfig.builder()
+                .setAps(Aps.builder().setContentAvailable(true).build())
+                .putHeader("apns-push-type", "background")
+                .putHeader("apns-priority", "10")
+                .build();
+
         MulticastMessage message = MulticastMessage.builder()
                 .putData("command", command.getType())
+                .setAndroidConfig(androidConfig)
+                .setApnsConfig(apnsConfig)
                 .addAllTokens(registrationTokens)
                 .build();
 
