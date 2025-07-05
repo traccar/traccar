@@ -26,7 +26,7 @@ import org.traccar.model.Event;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
 import org.traccar.model.QueuedCommand;
-import org.traccar.push.PushCommandManager;
+import org.traccar.command.ClientCommandSender;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
 import org.traccar.session.cache.CacheManager;
@@ -56,14 +56,14 @@ public class CommandsManager implements BroadcastInterface {
     private final BroadcastService broadcastService;
     private final NotificationManager notificationManager;
     private final CacheManager cacheManager;
-    private final PushCommandManager pushCommandManager;
+    private final ClientCommandSender clientCommandSender;
 
     @Inject
     public CommandsManager(
             Storage storage, ServerManager serverManager, @Nullable SmsManager smsManager,
             ConnectionManager connectionManager, BroadcastService broadcastService,
             NotificationManager notificationManager, CacheManager cacheManager,
-            @Nullable PushCommandManager pushCommandManager) {
+            @Nullable ClientCommandSender clientCommandSender) {
         this.storage = storage;
         this.serverManager = serverManager;
         this.smsManager = smsManager;
@@ -71,7 +71,7 @@ public class CommandsManager implements BroadcastInterface {
         this.broadcastService = broadcastService;
         this.notificationManager = notificationManager;
         this.cacheManager = cacheManager;
-        this.pushCommandManager = pushCommandManager;
+        this.clientCommandSender = clientCommandSender;
         broadcastService.registerListener(this);
     }
 
@@ -95,9 +95,9 @@ public class CommandsManager implements BroadcastInterface {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }
         } else {
-            if (pushCommandManager != null && protocol != null
+            if (clientCommandSender != null && protocol != null
                     && protocol.getSupportedPushCommands().contains(command.getType())) {
-                pushCommandManager.sendCommand(device, command);
+                clientCommandSender.sendCommand(device, command);
             } else {
                 DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
                 if (deviceSession != null && deviceSession.supportsLiveCommands()) {

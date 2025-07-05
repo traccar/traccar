@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.traccar.push;
+package org.traccar.command;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
@@ -32,11 +32,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PushCommandManager {
+public class ClientCommandSender {
 
     private final FirebaseMessaging firebaseMessaging;
 
-    public PushCommandManager(Config config) throws IOException {
+    public ClientCommandSender(Config config) throws IOException {
         InputStream serviceAccount = new ByteArrayInputStream(
                 config.getString(Keys.COMMAND_FIREBASE_SERVICE_ACCOUNT).getBytes());
 
