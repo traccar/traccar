@@ -25,7 +25,8 @@ import java.util.Map;
 public class CommandSenderManager {
 
     private static final Map<String, Class<? extends CommandSender>> SENDERS_ALL = Map.of(
-            "client", ClientCommandSender.class);
+            "client", ClientCommandSender.class,
+            "findHub", FindHubCommandSender.class);
 
     private final Injector injector;
 

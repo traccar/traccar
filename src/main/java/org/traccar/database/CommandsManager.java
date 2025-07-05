@@ -79,7 +79,7 @@ public class CommandsManager implements BroadcastInterface {
     public QueuedCommand sendCommand(Command command) throws Exception {
         long deviceId = command.getDeviceId();
         Device device = storage.getObject(Device.class, new Request(
-                new Columns.Include("positionId", "phone", "attributes"), new Condition.Equals("id", deviceId)));
+                new Columns.All(), new Condition.Equals("id", deviceId)));
         Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(), new Condition.Equals("id", device.getPositionId())));
         BaseProtocol protocol = position != null ? serverManager.getProtocol(position.getProtocol()) : null;

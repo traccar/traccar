@@ -1213,6 +1213,20 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Google Find Hub service URL.
+     */
+    public static final ConfigKey<String> COMMAND_FIND_HUB_URL = new StringConfigKey(
+            "command.findHub.url",
+            List.of(KeyType.DEVICE));
+
+    /**
+     * Google Find Hub service API key.
+     */
+    public static final ConfigKey<String> COMMAND_FIND_HUB_KEY = new StringConfigKey(
+            "command.findHub.key",
+            List.of(KeyType.DEVICE));
+
+    /**
      * Enabled notification options. Comma-separated string is expected.
      * Example: web,mail,sms
      */
