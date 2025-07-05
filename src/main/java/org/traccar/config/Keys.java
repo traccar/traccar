@@ -1198,10 +1198,18 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Command sender type for the device. This overrides standard data or text commands with an API-based commands.
+     * For example, it can be Traccar Client push commands.
+     */
+    public static final ConfigKey<String> COMMAND_SENDER = new StringConfigKey(
+            "command.sender",
+            List.of(KeyType.DEVICE));
+
+    /**
      * Firebase service account JSON for push commands.
      */
-    public static final ConfigKey<String> COMMAND_FIREBASE_SERVICE_ACCOUNT = new StringConfigKey(
-            "command.firebase.serviceAccount",
+    public static final ConfigKey<String> COMMAND_CLIENT_SERVICE_ACCOUNT = new StringConfigKey(
+            "command.client.serviceAccount",
             List.of(KeyType.CONFIG));
 
     /**

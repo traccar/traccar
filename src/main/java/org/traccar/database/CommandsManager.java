@@ -20,13 +20,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
+import org.traccar.command.CommandSenderManager;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
 import org.traccar.model.QueuedCommand;
-import org.traccar.command.ClientCommandSender;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
 import org.traccar.session.cache.CacheManager;
@@ -56,14 +57,14 @@ public class CommandsManager implements BroadcastInterface {
     private final BroadcastService broadcastService;
     private final NotificationManager notificationManager;
     private final CacheManager cacheManager;
-    private final ClientCommandSender clientCommandSender;
+    private final CommandSenderManager commandSenderManager;
 
     @Inject
     public CommandsManager(
             Storage storage, ServerManager serverManager, @Nullable SmsManager smsManager,
             ConnectionManager connectionManager, BroadcastService broadcastService,
             NotificationManager notificationManager, CacheManager cacheManager,
-            @Nullable ClientCommandSender clientCommandSender) {
+            CommandSenderManager commandSenderManager) {
         this.storage = storage;
         this.serverManager = serverManager;
         this.smsManager = smsManager;
@@ -71,7 +72,7 @@ public class CommandsManager implements BroadcastInterface {
         this.broadcastService = broadcastService;
         this.notificationManager = notificationManager;
         this.cacheManager = cacheManager;
-        this.clientCommandSender = clientCommandSender;
+        this.commandSenderManager = commandSenderManager;
         broadcastService.registerListener(this);
     }
 
@@ -95,9 +96,9 @@ public class CommandsManager implements BroadcastInterface {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }
         } else {
-            if (clientCommandSender != null && protocol != null
-                    && protocol.getSupportedPushCommands().contains(command.getType())) {
-                clientCommandSender.sendCommand(device, command);
+            String sender = device.getString(Keys.COMMAND_SENDER.getKey());
+            if (sender != null) {
+                commandSenderManager.getSender(sender).sendCommand(device, command);
             } else {
                 DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
                 if (deviceSession != null && deviceSession.supportsLiveCommands()) {

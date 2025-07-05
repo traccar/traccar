@@ -30,15 +30,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
-public class ClientCommandSender {
+public class ClientCommandSender implements CommandSender {
 
     private final FirebaseMessaging firebaseMessaging;
 
     public ClientCommandSender(Config config) throws IOException {
         InputStream serviceAccount = new ByteArrayInputStream(
-                config.getString(Keys.COMMAND_FIREBASE_SERVICE_ACCOUNT).getBytes());
+                config.getString(Keys.COMMAND_CLIENT_SERVICE_ACCOUNT).getBytes());
 
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
@@ -48,6 +49,15 @@ public class ClientCommandSender {
                 FirebaseApp.initializeApp(options, "client"));
     }
 
+    @Override
+    public Collection<String> getSupportedCommands() {
+        return List.of(
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_POSITION_PERIODIC,
+                Command.TYPE_POSITION_STOP);
+    }
+
+    @Override
     public void sendCommand(Device device, Command command) throws Exception {
         if (!device.hasAttribute("notificationTokens")) {
             throw new RuntimeException("Missing device notification tokens");
