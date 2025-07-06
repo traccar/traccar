@@ -22,9 +22,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - uses: cli/gh-action@v2
       - name: Download artifact from previous run
         run: |
-          gh run download 16101836490 -n installers -D docker
+          gh run download 16101836490 -n installers -D docker/installers
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/setup-qemu-action@v3
