@@ -16,6 +16,7 @@
 package org.traccar.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.WebSocketAdapter;
@@ -82,9 +83,11 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     @Override
     public void onWebSocketText(String message) {
         super.onWebSocketText(message);
-
         try {
-            includeLogs = objectMapper.readTree(message).get("logs").asBoolean();
+            JsonNode json = objectMapper.readTree(message);
+            if (json.hasNonNull("logs")) {
+                includeLogs = json.get("logs").asBoolean();
+            }
         } catch (JsonProcessingException e) {
             LOGGER.warn("Socket JSON parsing error", e);
         }
