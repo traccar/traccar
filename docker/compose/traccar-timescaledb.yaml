@@ -18,7 +18,6 @@ services:
       - database
     environment:
       CONFIG_USE_ENVIRONMENT_VARIABLES: "true"
-      WEB_MAX_REQUESTS_PER_SECOND: 1000
       DATABASE_DRIVER: org.postgresql.Driver
       DATABASE_URL: jdbc:postgresql://database:5432/traccar
       DATABASE_USER: traccar
