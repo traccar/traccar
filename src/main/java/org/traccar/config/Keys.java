@@ -305,7 +305,8 @@ public final class Keys {
      */
     public static final ConfigKey<Long> SERVER_BUFFERING_THRESHOLD = new LongConfigKey(
             "server.buffering.threshold",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            5000L);
 
     /**
      * Server wide connection timeout value in seconds. See protocol timeout for more information.
@@ -317,8 +318,8 @@ public final class Keys {
     /**
      * Send device responses immediately before writing it in the database.
      */
-    public static final ConfigKey<Boolean> SERVER_INSTANT_ACKNOWLEDGEMENT = new BooleanConfigKey(
-            "server.instantAcknowledgement",
+    public static final ConfigKey<Boolean> SERVER_DELAY_ACKNOWLEDGEMENT = new BooleanConfigKey(
+            "server.delayAcknowledgement",
             List.of(KeyType.CONFIG));
 
     /**
