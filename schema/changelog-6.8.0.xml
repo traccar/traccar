@@ -10,7 +10,7 @@
     <preConditions onFail="MARK_RAN">
       <dbms type="postgresql"/>
       <sqlCheck expectedResult="1">
-        SELECT 1 FROM pg_available_extensions WHERE name = 'timescaledb';
+        SELECT COUNT(*) FROM pg_available_extensions WHERE name = 'timescaledb';
       </sqlCheck>
     </preConditions>
 
