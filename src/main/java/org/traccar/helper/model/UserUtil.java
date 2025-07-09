@@ -34,9 +34,11 @@ public final class UserUtil {
     }
 
     public static boolean isEmpty(Storage storage) throws StorageException {
-        return storage.getObjects(User.class, new Request(
+        try (var users = storage.getObjects(User.class, new Request(
                 new Columns.Include("id"),
-                new Order("id", false, 1))).isEmpty();
+                new Order("id", false, 1)))) {
+            return users.findFirst().isEmpty();
+        }
     }
 
     public static String getDistanceUnit(Server server, User user) {

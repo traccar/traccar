@@ -79,8 +79,8 @@ public class TaskReports extends SingleScheduleTask {
         Date currentCheck = new Date();
         Date lastCheck = new Date(System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(CHECK_PERIOD_MINUTES));
 
-        try {
-            for (Report report : storage.getObjects(Report.class, new Request(new Columns.All()))) {
+        try (var stream = storage.getObjects(Report.class, new Request(new Columns.All()))) {
+            for (Report report : stream.collect(Collectors.toList())) {
                 Calendar calendar = storage.getObject(Calendar.class, new Request(
                         new Columns.All(), new Condition.Equals("id", report.getCalendarId())));
 
@@ -103,49 +103,52 @@ public class TaskReports extends SingleScheduleTask {
 
     private void executeReport(Report report, Date from, Date to) throws StorageException {
 
-        var deviceIds = storage.getObjects(Device.class, new Request(
+        try (var deviceStream = storage.getObjects(Device.class, new Request(
                 new Columns.Include("id"),
-                new Condition.Permission(Device.class, Report.class, report.getId())))
-                .stream().map(BaseModel::getId).collect(Collectors.toList());
-        var groupIds = storage.getObjects(Group.class, new Request(
-                new Columns.Include("id"),
-                new Condition.Permission(Group.class, Report.class, report.getId())))
-                .stream().map(BaseModel::getId).collect(Collectors.toList());
-        var users = storage.getObjects(User.class, new Request(
-                new Columns.Include("id"),
-                new Condition.Permission(User.class, Report.class, report.getId())));
+                new Condition.Permission(Device.class, Report.class, report.getId())));
+             var groupStream = storage.getObjects(Group.class, new Request(
+                     new Columns.Include("id"),
+                     new Condition.Permission(Group.class, Report.class, report.getId())));
+             var userStream = storage.getObjects(User.class, new Request(
+                     new Columns.Include("id"),
+                     new Condition.Permission(User.class, Report.class, report.getId())))) {
 
-        ReportMailer reportMailer = injector.getInstance(ReportMailer.class);
+            var deviceIds = deviceStream.map(BaseModel::getId).collect(Collectors.toList());
+            var groupIds = groupStream.map(BaseModel::getId).collect(Collectors.toList());
+            var users = userStream.collect(Collectors.toList());
 
-        for (User user : users) {
-            actionLogger.report(null, user.getId(), true, report.getType(), from, to, deviceIds, groupIds);
-            switch (report.getType()) {
-                case "events" -> {
-                    var eventsReportProvider = injector.getInstance(EventsReportProvider.class);
-                    reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, List.of(), List.of(), from, to));
+            ReportMailer reportMailer = injector.getInstance(ReportMailer.class);
+
+            for (User user : users) {
+                actionLogger.report(null, user.getId(), true, report.getType(), from, to, deviceIds, groupIds);
+                switch (report.getType()) {
+                    case "events" -> {
+                        var eventsReportProvider = injector.getInstance(EventsReportProvider.class);
+                        reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
+                                stream, user.getId(), deviceIds, groupIds, List.of(), List.of(), from, to));
+                    }
+                    case "route" -> {
+                        var routeReportProvider = injector.getInstance(RouteReportProvider.class);
+                        reportMailer.sendAsync(user.getId(), stream -> routeReportProvider.getExcel(
+                                stream, user.getId(), deviceIds, groupIds, from, to));
+                    }
+                    case "summary" -> {
+                        var summaryReportProvider = injector.getInstance(SummaryReportProvider.class);
+                        reportMailer.sendAsync(user.getId(), stream -> summaryReportProvider.getExcel(
+                                stream, user.getId(), deviceIds, groupIds, from, to, false));
+                    }
+                    case "trips" -> {
+                        var tripsReportProvider = injector.getInstance(TripsReportProvider.class);
+                        reportMailer.sendAsync(user.getId(), stream -> tripsReportProvider.getExcel(
+                                stream, user.getId(), deviceIds, groupIds, from, to));
+                    }
+                    case "stops" -> {
+                        var stopsReportProvider = injector.getInstance(StopsReportProvider.class);
+                        reportMailer.sendAsync(user.getId(), stream -> stopsReportProvider.getExcel(
+                                stream, user.getId(), deviceIds, groupIds, from, to));
+                    }
+                    default -> LOGGER.warn("Unsupported report type {}", report.getType());
                 }
-                case "route" -> {
-                    var routeReportProvider = injector.getInstance(RouteReportProvider.class);
-                    reportMailer.sendAsync(user.getId(), stream -> routeReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
-                }
-                case "summary" -> {
-                    var summaryReportProvider = injector.getInstance(SummaryReportProvider.class);
-                    reportMailer.sendAsync(user.getId(), stream -> summaryReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to, false));
-                }
-                case "trips" -> {
-                    var tripsReportProvider = injector.getInstance(TripsReportProvider.class);
-                    reportMailer.sendAsync(user.getId(), stream -> tripsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
-                }
-                case "stops" -> {
-                    var stopsReportProvider = injector.getInstance(StopsReportProvider.class);
-                    reportMailer.sendAsync(user.getId(), stream -> stopsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
-                }
-                default -> LOGGER.warn("Unsupported report type {}", report.getType());
             }
         }
     }

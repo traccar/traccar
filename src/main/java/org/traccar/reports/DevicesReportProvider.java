@@ -58,11 +58,12 @@ public class DevicesReportProvider {
         var positions = PositionUtil.getLatestPositions(storage, userId).stream()
                 .collect(Collectors.toMap(Message::getDeviceId, p -> p));
 
-        return storage.getObjects(Device.class, new Request(
+        try (var stream = storage.getObjects(Device.class, new Request(
                 new Columns.All(),
-                new Condition.Permission(User.class, userId, Device.class))).stream()
-                .map(device -> new DeviceReportItem(device, positions.get(device.getId())))
-                .toList();
+                new Condition.Permission(User.class, userId, Device.class)))
+                .map(device -> new DeviceReportItem(device, positions.get(device.getId())))) {
+            return stream.collect(Collectors.toList());
+        }
     }
 
     public void getExcel(OutputStream outputStream, long userId) throws StorageException, IOException {

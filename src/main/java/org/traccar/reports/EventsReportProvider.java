@@ -48,6 +48,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EventsReportProvider {
 
@@ -63,12 +64,14 @@ public class EventsReportProvider {
     }
 
     private List<Event> getEvents(long deviceId, Date from, Date to) throws StorageException {
-        return storage.getObjects(Event.class, new Request(
+        try (var events = storage.getObjects(Event.class, new Request(
                 new Columns.All(),
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("eventTime", "from", from, "to", to)),
-                new Order("eventTime")));
+                new Order("eventTime")))) {
+            return events.collect(Collectors.toList());
+        }
     }
 
     private boolean filterType(Collection<String> types, Collection<String> alarms, Event event) {

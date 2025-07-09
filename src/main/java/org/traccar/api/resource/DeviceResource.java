@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -106,18 +107,23 @@ public class DeviceResource extends BaseObjectResource<Device> {
 
             List<Device> result = new LinkedList<>();
             for (String uniqueId : uniqueIds) {
-                result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
-                        new Condition.And(
-                                new Condition.Equals("uniqueId", uniqueId),
-                                new Condition.Permission(User.class, getUserId(), Device.class)))));
+                try (var devices = storage.getObjects(Device.class, new Request(
+                                new Columns.All(),
+                                new Condition.And(
+                                        new Condition.Equals("uniqueId", uniqueId),
+                                        new Condition.Permission(User.class, getUserId(), Device.class))))
+                        ) {
+                    result.addAll(devices.collect(Collectors.toList()));
+                }
             }
             for (Long deviceId : deviceIds) {
-                result.addAll(storage.getObjects(Device.class, new Request(
+                try (var devices = storage.getObjects(Device.class, new Request(
                         new Columns.All(),
                         new Condition.And(
                                 new Condition.Equals("id", deviceId),
-                                new Condition.Permission(User.class, getUserId(), Device.class)))));
+                                new Condition.Permission(User.class, getUserId(), Device.class))))) {
+                    result.addAll(devices.collect(Collectors.toList()));
+                }
             }
             return result;
 
@@ -138,8 +144,10 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 }
             }
 
-            return storage.getObjects(baseClass, new Request(
-                    new Columns.All(), Condition.merge(conditions), new Order("name")));
+            try (var result = storage.getObjects(baseClass, new Request(
+                    new Columns.All(), Condition.merge(conditions), new Order("name")))) {
+                return result.collect(Collectors.toList());
+            }
 
         }
     }

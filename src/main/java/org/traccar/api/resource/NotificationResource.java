@@ -118,10 +118,14 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
         List<User> users;
         if (userIds.isEmpty()) {
             if (permissionsService.notAdmin(getUserId())) {
-                users = storage.getObjects(User.class, new Request(new Columns.All(),
-                        new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()));
+                try (var stream = storage.getObjects(User.class, new Request(new Columns.All(),
+                        new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()))) {
+                    users = stream.collect(Collectors.toUnmodifiableList());
+                }
             } else {
-                users = storage.getObjects(User.class, new Request(new Columns.All()));
+                try (var stream = storage.getObjects(User.class, new Request(new Columns.All()))) {
+                    users = stream.collect(Collectors.toUnmodifiableList());
+                }
             }
         } else {
             users = new ArrayList<>();

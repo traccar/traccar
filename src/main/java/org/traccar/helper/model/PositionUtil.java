@@ -56,25 +56,27 @@ public final class PositionUtil {
 
     public static List<Position> getPositions(
             Storage storage, long deviceId, Date from, Date to) throws StorageException {
-        return storage.getObjects(Position.class, new Request(
+        try (var positions = storage.getObjects(Position.class, new Request(
                 new Columns.All(),
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("fixTime", "from", from, "to", to)),
-                new Order("fixTime")));
+                new Order("fixTime")))) {
+            return positions.collect(Collectors.toList());
+        }
     }
 
     public static List<Position> getLatestPositions(Storage storage, long userId) throws StorageException {
-        var devices = storage.getObjects(Device.class, new Request(
+        try (var devices = storage.getObjects(Device.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(User.class, userId, Device.class)));
-        var deviceIds = devices.stream().map(BaseModel::getId).collect(Collectors.toUnmodifiableSet());
-
-        var positions = storage.getObjects(Position.class, new Request(
-                new Columns.All(), new Condition.LatestPositions()));
-        return positions.stream()
-                .filter(position -> deviceIds.contains(position.getDeviceId()))
-                .collect(Collectors.toList());
+            var positions = storage.getObjects(Position.class, new Request(
+                        new Columns.All(), new Condition.LatestPositions()))) {
+            var deviceIds = devices.map(BaseModel::getId).collect(Collectors.toUnmodifiableSet());
+            return positions
+                    .filter(position -> deviceIds.contains(position.getDeviceId()))
+                    .collect(Collectors.toList());
+        }
     }
 
 }
