@@ -1,12 +1,21 @@
 package org.traccar.session.state;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.util.*;
 
+import static org.traccar.handler.events.TollEventHandler.LOGGER;
+
 public class TollRouteState {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TollRouteState.class);
+
 
     public void fromDevice(Device device) {
         if (device.hasAttribute(Position.KEY_TOLL_NAME)) {
@@ -44,39 +53,76 @@ public class TollRouteState {
 
     }
 
+    @JsonProperty
     private long id;
-    public long getid() {
+    public long getId() {
         return id;
     }
+    public void setId(long id) {
+        this.id = id;
+    }
 
+    @JsonProperty
     private boolean changed;
 
     public boolean isChanged() {
         return changed;
     }
+    public void setChanged(boolean changed) {
+        this.changed = changed;
+    }
+
+    @JsonProperty
+    public List<Boolean> getTollWindow() {
+        return tollWindow;
+    }
+
+    public void setTollWindow(List<Boolean> tollWindow) {
+        this.tollWindow = tollWindow;
+    }
 
 
-    private List<Boolean> tollWindow;
 
+    // private List<Boolean> tollWindow;
+   @JsonProperty
+   private List<Boolean> tollWindow = new ArrayList<>();
+
+/*
     public void addOnToll(Boolean isToll, int duration) {
         if (this.tollWindow == null) {
             this.tollWindow = new ArrayList<Boolean>();
         }
         this.tollWindow.add(isToll);
+        LOGGER.info("TollWindow added value: {}, current size: {}, values: {}", isToll, this.tollWindow.size(), this.tollWindow);
         if (this.tollWindow.size() > duration) {
             this.tollWindow.remove(0);
         }
     }
+*/
+
+    public void addOnToll(Boolean isToll, int duration) {
+        if (isToll != null) {
+            this.tollWindow.add(isToll);
+            if (this.tollWindow.size() > duration) {
+                this.tollWindow.remove(0);
+            }
+            LOGGER.info("TollWindow added value: {}, current size: {}, values: {}", isToll, this.tollWindow.size(), this.tollWindow);
+        }
+    }
+
 
     public Boolean isOnToll(int duration) {
         Set<Boolean> tollWindowSet = null;
         if (this.tollWindow != null) {
             tollWindowSet = new HashSet<>(this.tollWindow);
+            LOGGER.info("TollWindow current size: {}, values: {}", this.tollWindow.size(), this.tollWindow);
         }
         if (tollWindowSet != null && tollWindowSet.size() == 1) {
             if (this.tollWindow.size() == (int) duration) {
+                LOGGER.info("TollWindow reached required size {} with same value: {}", duration, tollWindowSet.iterator().next());
                 return tollWindowSet.iterator().next();
             } else if (this.tollWindow.size() < duration && tollWindowSet.contains(false)) {
+                LOGGER.info("TollWindow not yet at required size {}, but contains false", duration);
                 return false;
             }
         }
@@ -85,6 +131,7 @@ public class TollRouteState {
 
 
 
+    @JsonProperty
     private double tollStartDistance;
 
     public double getTollStartDistance() {
@@ -96,6 +143,7 @@ public class TollRouteState {
         this.tollStartDistance = tollStartDistance;
     }
 
+    @JsonProperty
     private double tollExitDistance;
 
     public double getTollExitDistance() {
@@ -107,6 +155,7 @@ public class TollRouteState {
         this.tollExitDistance = tollExitDistance;
     }
 
+    @JsonProperty
     private Date tollrouteTime;
 
     public Date getTollrouteTime() {
@@ -118,6 +167,7 @@ public class TollRouteState {
         this.tollrouteTime = tollrouteTime;
     }
 
+    @JsonIgnore
     private Event event;
 
     public Event getEvent() {
@@ -128,6 +178,7 @@ public class TollRouteState {
         this.event = event;
     }
 
+    @JsonProperty
     private String tollRef;
 
     public String getTollRef() {
@@ -143,17 +194,27 @@ public class TollRouteState {
         }
     }
 
+    @JsonProperty
     private String tollName;
 
     public String getTollName() {
         return tollName;
     }
-
+/*
     public void setTollName(String tollName) {
         this.changed = true;
         this.tollName = tollName;
     }
+*/
 
+    public void setTollName(String tollName) {
+        if (tollName != null) {
+            if (this.tollName == null || !tollName.equals(this.tollName)) {
+                this.changed = true;
+                this.tollName = tollName;
+            }
+        }
+    }
 
 
 

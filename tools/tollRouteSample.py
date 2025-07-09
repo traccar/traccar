@@ -54,7 +54,10 @@ import datetime
 #     ("2025-02-02 12:46:54",43.519173333333335,-79.70774222222222,68.0346,123),
 
 id = '1234567890123456'
-server = 'data.iotrides.com:5055'
+# server = 'data.iotrides.com:5055'
+server = 'localhost:5055'
+
+
 
 points = [
     ("2025-02-11 07:12:37",43.59919555555555,-79.79541333333333,61.0151,246),
@@ -353,7 +356,7 @@ for i in range(0, len(points)):
     (momentOld,latOld, lonOld, speedOld,headingOld) = points[i-1]
 
     time_dif = time.mktime(datetime.datetime.strptime(moment, "%Y-%m-%d %H:%M:%S").timetuple()) - time.mktime(datetime.datetime.strptime(momentOld, "%Y-%m-%d %H:%M:%S").timetuple())
-    time.sleep(5)
+    time.sleep(2)
 #     if i-1 >= 0:
 #         time.sleep(2)
 

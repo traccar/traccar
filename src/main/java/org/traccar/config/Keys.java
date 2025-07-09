@@ -674,7 +674,7 @@ public final class Keys {
     /**
      * OpenID Connect Authorization URL.
      * This can usually be found in the documentation of your identity provider or by using the well-known
-     * configuration endpoint, e.g. https://auth.example.com/.well-known/openid-configuration
+     * configuration endpoint, e.g. <a href="https://auth.example.com/.well-known/openid-configuration">...</a>
      * Required to enable SSO if openid.issuerUrl is not set.
      */
     public static final ConfigKey<String> OPENID_AUTH_URL = new StringConfigKey(
@@ -2022,6 +2022,21 @@ public static final ConfigKey<Integer> TOLL_ROUTE_ACCURACY = new IntegerConfigKe
 public static final ConfigKey<Integer> EVENT_TOLL_ROUTE_MINIMAL_DURATION = new IntegerConfigKey(
         "event.tollRoute.minimalDuration",
         List.of(KeyType.CONFIG));
+
+
+    public static final ConfigKey<String> REDIS_HOST = new StringConfigKey(
+            "redis.host", List.of(KeyType.CONFIG));
+
+    public static final ConfigKey<Integer> REDIS_PORT = new IntegerConfigKey(
+            "redis.port", List.of(KeyType.CONFIG));
+
+    public static final ConfigKey<String> REDIS_USERNAME = new StringConfigKey(
+            "redis.username", List.of(KeyType.CONFIG));
+
+    public static final ConfigKey<String> REDIS_PASSWORD = new StringConfigKey(
+            "redis.password", List.of(KeyType.CONFIG));
+
+
 
 
 }

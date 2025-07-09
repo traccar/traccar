@@ -5,9 +5,13 @@ import http.client as httplib
 import time
 import datetime
 
-id = '123456789012345'
-server = 'localhost:5055'
+# id = '12345678901234'
+# # server = 'localhost:5055'
 # server = 'data.iotrides.com:5055'
+
+id = '12345678901234'
+# server = 'data.staging.iotrides.com:5055'
+server = 'localhost:5055'
 
 points = [("2025-03-20 09:32:29",41.978698,-87.878196,31.3175,32),
           ("2025-03-20 09:32:33",41.97905,-87.877835,32.3974,43),
@@ -1013,9 +1017,12 @@ points = [("2025-03-20 09:32:29",41.978698,-87.878196,31.3175,32),
 
 
 ]
+log_file = open("sent_points.log", "w")
 
 def send(conn, time, lat, lon, speed, heading):
     params = (('id', id), ('timestamp', int(time)), ('lat', lat), ('lon', lon), ('speed', speed), ('heading', heading))
+    log_file.write(f"Sending: {params}\n")
+    print(f"Sending: {params}")
     conn.request('POST', '?' + urllib.parse.urlencode(params))
     conn.getresponse().read()
 

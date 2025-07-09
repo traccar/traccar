@@ -13,6 +13,7 @@
     <entry key='logger.console'>true</entry>
     <entry key='logger.queries'>true</entry>
     <entry key='logger.fullStackTraces'>true</entry>
+    <entry key='logger.level'>fine</entry>
 
     <entry key='mail.debug'>true</entry>
 
@@ -62,5 +63,11 @@
     deviceOnline,deviceOffline,deviceUnknown,deviceInactive,deviceMoving,deviceStopped,
     deviceOverspeed,deviceFuelDrop,deviceFuelIncrease,tollRoute
     </entry>
+
+    <entry key='redis.host'>db-valkey-tor1-cache-do-user-18454848-0.g.db.ondigitalocean.com</entry>
+    <entry key='redis.port'>25061</entry>
+    <entry key='redis.username'>default</entry>
+
+
 
 </properties>
