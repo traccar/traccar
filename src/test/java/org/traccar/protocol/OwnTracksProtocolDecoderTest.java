@@ -22,6 +22,12 @@ public class OwnTracksProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, request(HttpMethod.POST, "/",
                 buffer("{\"lat\":48.85,\"lon\":2.295,\"_type\":\"location\",\"tid\":\"JJ\",\"tst\":1497476456}")));
+
+        verifyPosition(decoder, request(HttpMethod.POST, "/",
+                buffer("{\"lon\":-122,\"acc\":5,\"created_at\":1736161415,\"lat\":37,\"topic\":\"owntracks/ckrey/22A67880-15C3-41A6-9157-25545C7993AC\",\"t\":\"u\",\"m\":1,\"tst\":1736161169,\"conn\":\"w\",\"alt\":0,\"_type\":\"location\",\"tid\":\"AC\"}")));
+
+        verifyPosition(decoder, request(HttpMethod.POST, "/",
+                buffer("{\"topic\":\"owntracks/qtripp/865284041968706\",\"lat\":47.420051,\"lon\":13.654704,\"vel\":0,\"cog\":113,\"tst\":1736519167,\"mcc\":232,\"mnc\":1,\"lac\":\"4F4D\",\"cid\":\"673A\",\"_type\":\"location\",\"acc\":10,\"alt\":1113,\"t\":\"I\",\"don\":105,\"tid\":\"CS\"}")));
     }
 
 }
