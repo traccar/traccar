@@ -46,6 +46,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 @Path("positions")
 @Produces(MediaType.APPLICATION_JSON)
@@ -81,8 +82,10 @@ public class PositionResource extends BaseResource {
                 permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
                 return PositionUtil.getPositions(storage, deviceId, from, to);
             } else {
-                return storage.getObjects(Position.class, new Request(
-                        new Columns.All(), new Condition.LatestPositions(deviceId)));
+                try (var positions = storage.getObjects(Position.class, new Request(
+                        new Columns.All(), new Condition.LatestPositions(deviceId)))) {
+                    return positions.collect(Collectors.toList());
+                }
             }
         } else {
             return PositionUtil.getLatestPositions(storage, getUserId());

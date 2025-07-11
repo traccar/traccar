@@ -30,6 +30,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.QueryParam;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResource<T> {
 
@@ -69,8 +70,10 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             conditions.add(new Condition.Permission(Device.class, deviceId, baseClass).excludeGroups());
         }
 
-        return storage.getObjects(baseClass, new Request(
-                new Columns.All(), Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
+        try (var result = storage.getObjects(baseClass, new Request(
+                new Columns.All(), Condition.merge(conditions), sortField != null ? new Order(sortField) : null))) {
+            return result.collect(Collectors.toList());
+        }
     }
 
 }

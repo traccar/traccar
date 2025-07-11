@@ -122,21 +122,23 @@ public class CommandsManager implements BroadcastInterface {
 
     public Collection<Command> readQueuedCommands(long deviceId, int count) {
         try {
-            var commands = storage.getObjects(QueuedCommand.class, new Request(
+            try (var stream = storage.getObjects(QueuedCommand.class, new Request(
                     new Columns.All(),
                     new Condition.Equals("deviceId", deviceId),
-                    new Order("id", false, count)));
-            Map<Event, Position> events = new HashMap<>();
-            for (var command : commands) {
-                storage.removeObject(QueuedCommand.class, new Request(
-                        new Condition.Equals("id", command.getId())));
+                    new Order("id", false, count)));) {
+                var commands = stream.collect(Collectors.toList());
+                Map<Event, Position> events = new HashMap<>();
+                for (var command : commands) {
+                    storage.removeObject(QueuedCommand.class, new Request(
+                            new Condition.Equals("id", command.getId())));
 
-                Event event = new Event(Event.TYPE_QUEUED_COMMAND_SENT, command.getDeviceId());
-                event.set("id", command.getId());
-                events.put(event, null);
+                    Event event = new Event(Event.TYPE_QUEUED_COMMAND_SENT, command.getDeviceId());
+                    event.set("id", command.getId());
+                    events.put(event, null);
+                }
+                notificationManager.updateEvents(events);
+                return commands.stream().map(QueuedCommand::toCommand).collect(Collectors.toList());
             }
-            notificationManager.updateEvents(events);
-            return commands.stream().map(QueuedCommand::toCommand).collect(Collectors.toList());
         } catch (StorageException e) {
             throw new RuntimeException(e);
         }

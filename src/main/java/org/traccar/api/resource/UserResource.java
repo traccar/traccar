@@ -48,6 +48,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -81,8 +82,10 @@ public class UserResource extends BaseObjectResource<User> {
             permissionsService.checkManager(getUserId());
             conditions.add(new Condition.Permission(User.class, Device.class, deviceId).excludeGroups());
         }
-        return storage.getObjects(baseClass, new Request(
-                new Columns.All(), Condition.merge(conditions), new Order("name")));
+        try (var users = storage.getObjects(baseClass, new Request(
+                new Columns.All(), Condition.merge(conditions), new Order("name")))) {
+            return users.collect(Collectors.toList());
+        }
     }
 
     @Override
@@ -95,10 +98,12 @@ public class UserResource extends BaseObjectResource<User> {
             if (currentUser != null && currentUser.getUserLimit() != 0) {
                 int userLimit = currentUser.getUserLimit();
                 if (userLimit > 0) {
-                    int userCount = storage.getObjects(baseClass, new Request(
+                    int userCount;
+                    try (var users = storage.getObjects(baseClass, new Request(
                             new Columns.All(),
-                            new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()))
-                            .size();
+                            new Condition.Permission(User.class, getUserId(), ManagedUser.class).excludeGroups()))) {
+                        userCount = (int) users.count();
+                    }
                     if (userCount >= userLimit) {
                         throw new SecurityException("Manager user limit reached");
                     }

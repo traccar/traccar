@@ -109,9 +109,12 @@ public class PermissionsService {
                 denied = getServer().getDeviceReadonly() || getUser(userId).getDeviceReadonly()
                         || addition && getUser(userId).getDeviceLimit() == 0;
                 if (!denied && addition && getUser(userId).getDeviceLimit() > 0) {
-                    int deviceCount = storage.getObjects(Device.class, new Request(
+                    int deviceCount;
+                    try (var stream = storage.getObjects(Device.class, new Request(
                             new Columns.Include("id"),
-                            new Condition.Permission(User.class, userId, Device.class))).size();
+                            new Condition.Permission(User.class, userId, Device.class)))) {
+                        deviceCount = (int) stream.count();
+                    }
                     denied = deviceCount >= getUser(userId).getDeviceLimit();
                 }
             } else if (clazz.equals(Command.class)) {

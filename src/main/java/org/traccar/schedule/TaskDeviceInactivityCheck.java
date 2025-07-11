@@ -65,10 +65,10 @@ public class TaskDeviceInactivityCheck extends SingleScheduleTask {
 
         Map<Event, Position> events = new HashMap<>();
 
-        try {
-            Map<Long, Group> groups = storage.getObjects(Group.class, new Request(new Columns.All()))
-                    .stream().collect(Collectors.toMap(Group::getId, group -> group));
-            for (Device device : storage.getObjects(Device.class, new Request(new Columns.All()))) {
+        try (var groupStream = storage.getObjects(Group.class, new Request(new Columns.All()));
+             var deviceStream = storage.getObjects(Device.class, new Request(new Columns.All()))) {
+            Map<Long, Group> groups = groupStream.collect(Collectors.toMap(Group::getId, group -> group));
+            for (Device device : deviceStream.collect(Collectors.toList())) {
                 if (device.getLastUpdate() != null && checkDevice(device, groups, currentTime, checkPeriod)) {
                     Event event = new Event(Event.TYPE_DEVICE_INACTIVE, device.getId());
                     event.set(ATTRIBUTE_LAST_UPDATE, device.getLastUpdate().getTime());

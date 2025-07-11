@@ -35,6 +35,7 @@ import org.traccar.storage.query.Request;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class TaskExpirations extends SingleScheduleTask {
 
@@ -80,14 +81,16 @@ public class TaskExpirations extends SingleScheduleTask {
 
     private void sendDeviceExpiration(
             Server server, Device device, String template) throws MessagingException, StorageException {
-        var users = storage.getObjects(User.class, new Request(
-                new Columns.All(), new Condition.Permission(User.class, Device.class, device.getId())));
-        for (User user : users) {
-            var velocityContext = textTemplateFormatter.prepareContext(server, user);
-            velocityContext.put("expiration", device.getExpirationTime());
-            velocityContext.put("device", device);
-            var fullMessage = textTemplateFormatter.formatMessage(velocityContext, template, "full", false);
-            mailManager.sendMessage(user, true, fullMessage.subject(), fullMessage.body());
+        try (var stream = storage.getObjects(User.class, new Request(
+                new Columns.All(), new Condition.Permission(User.class, Device.class, device.getId())))) {
+            var users = stream.collect(Collectors.toList());
+            for (User user : users) {
+                var velocityContext = textTemplateFormatter.prepareContext(server, user);
+                velocityContext.put("expiration", device.getExpirationTime());
+                velocityContext.put("device", device);
+                var fullMessage = textTemplateFormatter.formatMessage(velocityContext, template, "full", false);
+                mailManager.sendMessage(user, true, fullMessage.subject(), fullMessage.body());
+            }
         }
     }
 
@@ -100,24 +103,28 @@ public class TaskExpirations extends SingleScheduleTask {
 
             if (config.getBoolean(Keys.NOTIFICATION_EXPIRATION_USER)) {
                 long reminder = config.getLong(Keys.NOTIFICATION_EXPIRATION_USER_REMINDER);
-                var users = storage.getObjects(User.class, new Request(new Columns.All()));
-                for (User user : users) {
-                    if (checkTimeTrigger(user, currentTime, 0)) {
-                        sendUserExpiration(server, user, "userExpiration");
-                    } else if (reminder > 0 && checkTimeTrigger(user, currentTime, -reminder)) {
-                        sendUserExpiration(server, user, "userExpirationReminder");
+                try (var stream = storage.getObjects(User.class, new Request(new Columns.All()))) {
+                    var users = stream.collect(Collectors.toList());
+                    for (User user : users) {
+                        if (checkTimeTrigger(user, currentTime, 0)) {
+                            sendUserExpiration(server, user, "userExpiration");
+                        } else if (reminder > 0 && checkTimeTrigger(user, currentTime, -reminder)) {
+                            sendUserExpiration(server, user, "userExpirationReminder");
+                        }
                     }
                 }
             }
 
             if (config.getBoolean(Keys.NOTIFICATION_EXPIRATION_DEVICE)) {
                 long reminder = config.getLong(Keys.NOTIFICATION_EXPIRATION_DEVICE_REMINDER);
-                var devices = storage.getObjects(Device.class, new Request(new Columns.All()));
-                for (Device device : devices) {
-                    if (checkTimeTrigger(device, currentTime, 0)) {
-                        sendDeviceExpiration(server, device, "deviceExpiration");
-                    } else if (reminder > 0 && checkTimeTrigger(device, currentTime, -reminder)) {
-                        sendDeviceExpiration(server, device, "deviceExpirationReminder");
+                try (var stream = storage.getObjects(Device.class, new Request(new Columns.All()))) {
+                    var devices = stream.collect(Collectors.toList());
+                    for (Device device : devices) {
+                        if (checkTimeTrigger(device, currentTime, 0)) {
+                            sendDeviceExpiration(server, device, "deviceExpiration");
+                        } else if (reminder > 0 && checkTimeTrigger(device, currentTime, -reminder)) {
+                            sendDeviceExpiration(server, device, "deviceExpirationReminder");
+                        }
                     }
                 }
             }

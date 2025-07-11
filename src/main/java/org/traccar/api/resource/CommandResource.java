@@ -101,22 +101,23 @@ public class CommandResource extends ExtendedObjectResource<Command> {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
         BaseProtocol protocol = getDeviceProtocol(deviceId);
 
-        var commands = storage.getObjects(baseClass, new Request(
+        try (var commands = storage.getObjects(baseClass, new Request(
                 new Columns.All(),
                 Condition.merge(List.of(
                         new Condition.Permission(User.class, getUserId(), baseClass),
                         new Condition.Permission(Device.class, deviceId, baseClass)
-                ))));
+                ))))) {
 
-        return commands.stream().filter(command -> {
-            String type = command.getType();
-            if (protocol != null) {
-                return command.getTextChannel() && protocol.getSupportedTextCommands().contains(type)
-                        || !command.getTextChannel() && protocol.getSupportedDataCommands().contains(type);
-            } else {
-                return type.equals(Command.TYPE_CUSTOM);
-            }
-        }).collect(Collectors.toList());
+            return commands.filter(command -> {
+                String type = command.getType();
+                if (protocol != null) {
+                    return command.getTextChannel() && protocol.getSupportedTextCommands().contains(type)
+                            || !command.getTextChannel() && protocol.getSupportedDataCommands().contains(type);
+                } else {
+                    return type.equals(Command.TYPE_CUSTOM);
+                }
+            }).collect(Collectors.toList());
+        }
     }
 
     @POST

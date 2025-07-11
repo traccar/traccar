@@ -41,6 +41,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @SuppressWarnings("UnusedReturnValue")
 public final class QueryBuilder {
@@ -401,8 +406,8 @@ public final class QueryBuilder {
         }
     }
 
-    public <T> List<T> executeQuery(Class<T> clazz) throws SQLException {
-        List<T> result = new LinkedList<>();
+    public <T> Stream<T> executeQuery(Class<T> clazz) throws SQLException {
+        ResultSet resultSet = null;
 
         if (query != null) {
 
@@ -410,55 +415,77 @@ public final class QueryBuilder {
 
                 logQuery();
 
-                try (ResultSet resultSet = statement.executeQuery()) {
+                resultSet = statement.executeQuery();
 
-                    ResultSetMetaData resultMetaData = resultSet.getMetaData();
+                ResultSetMetaData resultMetaData = resultSet.getMetaData();
 
-                    List<ResultSetProcessor<T>> processors = new LinkedList<>();
+                List<ResultSetProcessor<T>> processors = new LinkedList<>();
 
-                    Method[] methods = clazz.getMethods();
+                Method[] methods = clazz.getMethods();
 
-                    for (final Method method : methods) {
-                        if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
+                for (final Method method : methods) {
+                    if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
 
-                            final String name = method.getName().substring(3);
+                        final String name = method.getName().substring(3);
 
-                            // Check if column exists
-                            boolean column = false;
-                            for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
-                                if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
-                                    column = true;
-                                    break;
-                                }
+                        // Check if column exists
+                        boolean column = false;
+                        for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
+                            if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
+                                column = true;
+                                break;
                             }
-                            if (!column) {
-                                continue;
-                            }
-
-                            addProcessors(processors, method.getParameterTypes()[0], method, name);
                         }
-                    }
-
-                    while (resultSet.next()) {
-                        try {
-                            T object = clazz.getDeclaredConstructor().newInstance();
-                            for (ResultSetProcessor<T> processor : processors) {
-                                processor.process(object, resultSet);
-                            }
-                            result.add(object);
-                        } catch (ReflectiveOperationException e) {
-                            throw new IllegalArgumentException();
+                        if (!column) {
+                            continue;
                         }
+
+                        addProcessors(processors, method.getParameterTypes()[0], method, name);
                     }
                 }
 
-            } finally {
-                statement.close();
-                connection.close();
+                // resultSet is accessed from within inner class so it needs to be final
+                final ResultSet finalResultSet = resultSet;
+                return StreamSupport.stream(
+                        new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
+                    @Override
+                    public boolean tryAdvance(Consumer<? super T> action) {
+                        try {
+                            if (finalResultSet.next()) {
+                                T object = clazz.getDeclaredConstructor().newInstance();
+                                for (ResultSetProcessor<T> processor : processors) {
+                                    processor.process(object, finalResultSet);
+                                }
+                                action.accept(object);
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        } catch (SQLException | ReflectiveOperationException e) {
+                            close(finalResultSet);
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }, false).onClose(() -> close(finalResultSet));
+
+            } catch (SQLException e) {
+                close(resultSet);
+                throw e;
             }
         }
+        return Stream.empty();
+    }
 
-        return result;
+    private void close(ResultSet resultSet) {
+        try {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+            statement.close();
+            connection.close();
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public long executeUpdate() throws SQLException {

@@ -29,6 +29,7 @@ import jakarta.ws.rs.QueryParam;
 
 import java.util.Collection;
 import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResource<T> {
 
@@ -58,8 +59,10 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
 
-        return storage.getObjects(baseClass, new Request(
-                new Columns.All(), Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
+        try (var objects = storage.getObjects(baseClass, new Request(
+                new Columns.All(), Condition.merge(conditions), sortField != null ? new Order(sortField) : null))) {
+            return objects.collect(Collectors.toList());
+        }
     }
 
 }

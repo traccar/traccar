@@ -61,22 +61,24 @@ public class CombinedReportProvider {
             item.setRoute(positions.stream()
                     .map(p -> new double[] {p.getLongitude(), p.getLatitude()})
                     .collect(Collectors.toList()));
-            var events = storage.getObjects(Event.class, new Request(
+            try (var stream = storage.getObjects(Event.class, new Request(
                     new Columns.All(),
                     new Condition.And(
                             new Condition.Equals("deviceId", device.getId()),
                             new Condition.Between("eventTime", "from", from, "to", to)),
-                    new Order("eventTime")));
-            item.setEvents(events.stream()
-                    .filter(e -> e.getPositionId() > 0 && !EXCLUDE_TYPES.contains(e.getType()))
-                    .collect(Collectors.toList()));
-            var eventPositions = events.stream()
-                    .map(Event::getPositionId)
-                    .collect(Collectors.toSet());
-            item.setPositions(positions.stream()
-                    .filter(p -> eventPositions.contains(p.getId()))
-                    .collect(Collectors.toList()));
-            result.add(item);
+                    new Order("eventTime")))) {
+                var events = stream.collect(Collectors.toList());
+                item.setEvents(events.stream()
+                        .filter(e -> e.getPositionId() > 0 && !EXCLUDE_TYPES.contains(e.getType()))
+                        .collect(Collectors.toList()));
+                var eventPositions = events.stream()
+                        .map(Event::getPositionId)
+                        .collect(Collectors.toSet());
+                item.setPositions(positions.stream()
+                        .filter(p -> eventPositions.contains(p.getId()))
+                        .collect(Collectors.toList()));
+                result.add(item);
+            }
         }
         return result;
     }
