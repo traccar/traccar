@@ -20,14 +20,19 @@ import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
+import org.traccar.model.Command;
 
 public class BwsProtocol extends BaseProtocol {
 
     @Inject
     public BwsProtocol(Config config) {
+        setSupportedDataCommands(
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_ENGINE_RESUME);
         addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new BwsProtocolEncoder(BwsProtocol.this));
                 pipeline.addLast(new BwsProtocolDecoder(BwsProtocol.this));
             }
         });

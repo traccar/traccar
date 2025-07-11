@@ -33,8 +33,11 @@ import java.util.Date;
 public class BwsProtocolDecoder extends BaseProtocolDecoder {
 
     public static final int MSG_KEEP_ALIVE = 0x3f;
-    public static final int MSG_ACK = 0X40;
-    public static final int MSG_NACK = 0X41;
+    public static final int MSG_ACK = 0x40;
+    public static final int MSG_NACK = 0x41;
+    public static final int MSG_ACTION = 0x42;
+    public static final int MSG_CHECK = 0x43;
+    public static final int MSG_DEFINE = 0x44;
 
     public BwsProtocolDecoder(Protocol protocol) {
         super(protocol);
