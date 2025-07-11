@@ -17,10 +17,13 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.Checksum;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
@@ -29,8 +32,25 @@ import java.util.Date;
 
 public class BwsProtocolDecoder extends BaseProtocolDecoder {
 
+    public static final int MSG_KEEP_ALIVE = 0x3f;
+    public static final int MSG_ACK = 0X40;
+    public static final int MSG_NACK = 0X41;
+
     public BwsProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    private void sendResponse(
+            Channel channel, SocketAddress remoteAddress, int deviceType, ByteBuf id, int type, int index) {
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(deviceType);
+            response.writeBytes(id);
+            response.writeByte(type);
+            response.writeByte(index);
+            response.writeByte(Checksum.crc8(Checksum.CRC8_DALLAS, response.nioBuffer()));
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
     }
 
     @Override
@@ -39,15 +59,16 @@ public class BwsProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        buf.readUnsignedByte(); // device type
+        int deviceType = buf.readUnsignedByte();
+        ByteBuf id = buf.readSlice(4);
+        buf.readUnsignedByte(); // message type
+        int index = buf.readUnsignedByte();
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(buf.readSlice(4)));
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(id));
+        sendResponse(channel, remoteAddress, deviceType, id, deviceSession != null ? MSG_ACK : MSG_NACK, index);
         if (deviceSession == null) {
             return null;
         }
-
-        buf.readUnsignedByte(); // message type
-        buf.readUnsignedByte(); // index
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
