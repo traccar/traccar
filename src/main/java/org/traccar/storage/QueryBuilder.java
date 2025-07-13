@@ -227,8 +227,12 @@ public final class QueryBuilder {
         } else if (parameterType.equals(String.class)) {
             processors.add((object, resultSet) -> method.invoke(object, resultSet.getString(name)));
         } else if (parameterType.equals(Date.class)) {
-            processors.add((object, resultSet) ->
-                    method.invoke(object, new Date(resultSet.getTimestamp(name).getTime())));
+            processors.add((object, resultSet) -> {
+                Timestamp timestamp = resultSet.getTimestamp(name);
+                if (timestamp != null) {
+                    method.invoke(object, new Date(timestamp.getTime()));
+                }
+            });
         } else if (parameterType.equals(byte[].class)) {
             processors.add((object, resultSet) -> method.invoke(object, (Object) resultSet.getBytes(name)));
         } else {
