@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -407,112 +407,66 @@ public final class QueryBuilder {
     }
 
     public <T> List<T> executeQuery(Class<T> clazz) throws SQLException {
-        List<T> result = new LinkedList<>();
-
-        if (query != null) {
-
-            try {
-
-                logQuery();
-
-                try (ResultSet resultSet = statement.executeQuery()) {
-
-                    ResultSetMetaData resultMetaData = resultSet.getMetaData();
-
-                    List<ResultSetProcessor<T>> processors = getResultSetProcessors(resultMetaData, clazz.getMethods());
-
-                    while (resultSet.next()) {
-                        try {
-                            T object = clazz.getDeclaredConstructor().newInstance();
-                            for (ResultSetProcessor<T> processor : processors) {
-                                processor.process(object, resultSet);
-                            }
-                            result.add(object);
-                        } catch (ReflectiveOperationException e) {
-                            throw new IllegalArgumentException();
-                        }
-                    }
-                }
-
-            } finally {
-                statement.close();
-                connection.close();
-            }
+        try (var stream = executeQueryStreamed(clazz)) {
+            return stream.toList();
         }
-
-        return result;
-    }
-
-    private <T> List<ResultSetProcessor<T>> getResultSetProcessors(
-            ResultSetMetaData resultMetaData, Method[] methods) throws SQLException {
-        List<ResultSetProcessor<T>> processors = new LinkedList<>();
-
-        for (final Method method : methods) {
-            if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
-
-                final String name = method.getName().substring(3);
-
-                // Check if column exists
-                boolean column = false;
-                for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
-                    if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
-                        column = true;
-                        break;
-                    }
-                }
-                if (!column) {
-                    continue;
-                }
-
-                addProcessors(processors, method.getParameterTypes()[0], method, name);
-            }
-        }
-        return processors;
     }
 
     public <T> Stream<T> executeQueryStreamed(Class<T> clazz) throws SQLException {
-        ResultSet resultSet = null;
-
-        if (query != null) {
-
-            try {
-
-                logQuery();
-
-                resultSet = statement.executeQuery();
-
-                ResultSetMetaData resultMetaData = resultSet.getMetaData();
-
-                List<ResultSetProcessor<T>> processors = getResultSetProcessors(resultMetaData, clazz.getMethods());
-
-                // resultSet is accessed from within inner class so it needs to be final
-                final ResultSet finalResultSet = resultSet;
-                return StreamSupport.stream(
-                        new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
-                            @Override
-                            public boolean tryAdvance(Consumer<? super T> action) {
-                                try {
-                                    if (finalResultSet.next()) {
-                                        T object = clazz.getDeclaredConstructor().newInstance();
-                                        for (ResultSetProcessor<T> processor : processors) {
-                                            processor.process(object, finalResultSet);
-                                        }
-                                        action.accept(object);
-                                        return true;
-                                    } else {
-                                        return false;
-                                    }
-                                } catch (Exception e) {
-                                    throw new RuntimeException(e);
-                                }
-                            }
-                        }, false).onClose(() -> close(finalResultSet));
-            } catch (Exception e) {
-                close(resultSet);
-                throw e;
-            }
+        if (query == null) {
+            return Stream.empty();
         }
-        return Stream.empty();
+        ResultSet resultSet = null;
+        try {
+            logQuery();
+
+            resultSet = statement.executeQuery();
+            ResultSetMetaData resultMetaData = resultSet.getMetaData();
+
+            List<ResultSetProcessor<T>> processors = new LinkedList<>();
+            for (final Method method : clazz.getMethods()) {
+                if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
+                    final String name = method.getName().substring(3);
+                    boolean column = false;
+                    for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
+                        if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
+                            column = true;
+                            break;
+                        }
+                    }
+                    if (!column) {
+                        continue;
+                    }
+                    addProcessors(processors, method.getParameterTypes()[0], method, name);
+                }
+            }
+
+            final ResultSet retainedResultSet = resultSet;
+            return StreamSupport.stream(
+                    new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
+                        @Override
+                        public boolean tryAdvance(Consumer<? super T> action) {
+                            try {
+                                if (retainedResultSet.next()) {
+                                    T object = clazz.getDeclaredConstructor().newInstance();
+                                    for (ResultSetProcessor<T> processor : processors) {
+                                        processor.process(object, retainedResultSet);
+                                    }
+                                    action.accept(object);
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            } catch (SQLException | ReflectiveOperationException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }, false)
+                    .onClose(() -> close(retainedResultSet));
+        } catch (Exception e) {
+            close(resultSet);
+            throw e;
+        }
     }
 
     private void close(ResultSet resultSet) {
