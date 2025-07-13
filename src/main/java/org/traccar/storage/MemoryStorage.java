@@ -56,7 +56,7 @@ public class MemoryStorage extends Storage {
     }
 
     @Override
-    public <T> Stream<T> getObjectsStreamed(Class<T> clazz, Request request) {
+    public <T> Stream<T> getObjectsStream(Class<T> clazz, Request request) {
         return objects.computeIfAbsent(clazz, key -> new HashMap<>()).values().stream()
                 .filter(object -> checkCondition(request.getCondition(), object))
                 .map(object -> (T) object);

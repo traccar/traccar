@@ -65,7 +65,7 @@ public class DatabaseStorage extends Storage {
     }
 
     @Override
-    public <T> Stream<T> getObjectsStreamed(Class<T> clazz, Request request) throws StorageException {
+    public <T> Stream<T> getObjectsStream(Class<T> clazz, Request request) throws StorageException {
         StringBuilder query = new StringBuilder("SELECT ");
         if (request.getColumns() instanceof Columns.All) {
             query.append('*');
