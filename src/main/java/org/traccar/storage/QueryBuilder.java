@@ -106,11 +106,11 @@ public final class QueryBuilder {
     }
 
     public QueryBuilder setBoolean(int index, boolean value) throws SQLException {
-        return setValue(() -> statement.setBoolean(index, value));
+        return setValue(() -> statement.setBoolean(index + 1, value));
     }
 
     public QueryBuilder setInteger(int index, int value) throws SQLException {
-        return setValue(() -> statement.setInt(index, value));
+        return setValue(() -> statement.setInt(index + 1, value));
     }
 
     public QueryBuilder setLong(int index, long value) throws SQLException {
@@ -120,23 +120,23 @@ public final class QueryBuilder {
     public QueryBuilder setLong(int index, long value, boolean nullIfZero) throws SQLException {
         return setValue(() -> {
             if (value == 0 && nullIfZero) {
-                statement.setNull(index, Types.INTEGER);
+                statement.setNull(index + 1, Types.INTEGER);
             } else {
-                statement.setLong(index, value);
+                statement.setLong(index + 1, value);
             }
         });
     }
 
     public QueryBuilder setDouble(int index, double value) throws SQLException {
-        return setValue(() -> statement.setDouble(index, value));
+        return setValue(() -> statement.setDouble(index + 1, value));
     }
 
     public QueryBuilder setString(int index, String value) throws SQLException {
         return setValue(() -> {
             if (value == null) {
-                statement.setNull(index, Types.VARCHAR);
+                statement.setNull(index + 1, Types.VARCHAR);
             } else {
-                statement.setString(index, value);
+                statement.setString(index + 1, value);
             }
         });
     }
@@ -144,9 +144,9 @@ public final class QueryBuilder {
     public QueryBuilder setDate(int index, Date value) throws SQLException {
         return setValue(() -> {
             if (value == null) {
-                statement.setNull(index, Types.TIMESTAMP);
+                statement.setNull(index + 1, Types.TIMESTAMP);
             } else {
-                statement.setTimestamp(index, new Timestamp(value.getTime()));
+                statement.setTimestamp(index + 1, new Timestamp(value.getTime()));
             }
         });
     }
@@ -154,9 +154,9 @@ public final class QueryBuilder {
     public QueryBuilder setBlob(int index, byte[] value) throws SQLException {
         return setValue(() -> {
             if (value == null) {
-                statement.setNull(index, Types.BLOB);
+                statement.setNull(index + 1, Types.BLOB);
             } else {
-                statement.setBytes(index, value);
+                statement.setBytes(index + 1, value);
             }
         });
     }

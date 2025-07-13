@@ -49,8 +49,8 @@ public class DatabaseStorage extends Storage {
         this.dataSource = dataSource;
         this.objectMapper = objectMapper;
 
-        try {
-            databaseType = dataSource.getConnection().getMetaData().getDatabaseProductName();
+        try (var connection = dataSource.getConnection()) {
+            databaseType = connection.getMetaData().getDatabaseProductName();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
