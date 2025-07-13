@@ -41,6 +41,11 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @SuppressWarnings("UnusedReturnValue")
 public final class QueryBuilder {
@@ -414,30 +419,7 @@ public final class QueryBuilder {
 
                     ResultSetMetaData resultMetaData = resultSet.getMetaData();
 
-                    List<ResultSetProcessor<T>> processors = new LinkedList<>();
-
-                    Method[] methods = clazz.getMethods();
-
-                    for (final Method method : methods) {
-                        if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
-
-                            final String name = method.getName().substring(3);
-
-                            // Check if column exists
-                            boolean column = false;
-                            for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
-                                if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
-                                    column = true;
-                                    break;
-                                }
-                            }
-                            if (!column) {
-                                continue;
-                            }
-
-                            addProcessors(processors, method.getParameterTypes()[0], method, name);
-                        }
-                    }
+                    List<ResultSetProcessor<T>> processors = getResultSetProcessors(resultMetaData, clazz.getMethods());
 
                     while (resultSet.next()) {
                         try {
@@ -459,6 +441,90 @@ public final class QueryBuilder {
         }
 
         return result;
+    }
+
+    private <T> List<ResultSetProcessor<T>> getResultSetProcessors(
+            ResultSetMetaData resultMetaData, Method[] methods) throws SQLException {
+        List<ResultSetProcessor<T>> processors = new LinkedList<>();
+
+        for (final Method method : methods) {
+            if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
+
+                final String name = method.getName().substring(3);
+
+                // Check if column exists
+                boolean column = false;
+                for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
+                    if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
+                        column = true;
+                        break;
+                    }
+                }
+                if (!column) {
+                    continue;
+                }
+
+                addProcessors(processors, method.getParameterTypes()[0], method, name);
+            }
+        }
+        return processors;
+    }
+
+    public <T> Stream<T> executeQueryStreamed(Class<T> clazz) throws SQLException {
+        ResultSet resultSet = null;
+
+        if (query != null) {
+
+            try {
+
+                logQuery();
+
+                resultSet = statement.executeQuery();
+
+                ResultSetMetaData resultMetaData = resultSet.getMetaData();
+
+                List<ResultSetProcessor<T>> processors = getResultSetProcessors(resultMetaData, clazz.getMethods());
+
+                // resultSet is accessed from within inner class so it needs to be final
+                final ResultSet finalResultSet = resultSet;
+                return StreamSupport.stream(
+                        new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
+                            @Override
+                            public boolean tryAdvance(Consumer<? super T> action) {
+                                try {
+                                    if (finalResultSet.next()) {
+                                        T object = clazz.getDeclaredConstructor().newInstance();
+                                        for (ResultSetProcessor<T> processor : processors) {
+                                            processor.process(object, finalResultSet);
+                                        }
+                                        action.accept(object);
+                                        return true;
+                                    } else {
+                                        return false;
+                                    }
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                        }, false).onClose(() -> close(finalResultSet));
+            } catch (Exception e) {
+                close(resultSet);
+                throw e;
+            }
+        }
+        return Stream.empty();
+    }
+
+    private void close(ResultSet resultSet) {
+        try {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public long executeUpdate() throws SQLException {
