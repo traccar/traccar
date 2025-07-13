@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.ReflectionCache;
 import org.traccar.model.Permission;
 
 import javax.sql.DataSource;
@@ -34,6 +35,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -182,8 +184,7 @@ public final class QueryBuilder {
         try {
             for (int index = 0; index < columns.size(); index++) {
                 String column = columns.get(index);
-                Method method = object.getClass().getMethod(
-                        "get" + Character.toUpperCase(column.charAt(0)) + column.substring(1));
+                Method method = ReflectionCache.getProperties(object.getClass(), "get").get(column).method();
                 if (method.getReturnType().equals(boolean.class)) {
                     setBoolean(index, (Boolean) method.invoke(object));
                 } else if (method.getReturnType().equals(int.class)) {
@@ -268,20 +269,18 @@ public final class QueryBuilder {
             resultSet = statement.executeQuery();
             ResultSetMetaData resultMetaData = resultSet.getMetaData();
 
-            List<ResultSetProcessor<T>> processors = new LinkedList<>();
-            for (final Method method : clazz.getMethods()) {
-                if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
-                    final String name = method.getName().substring(3);
-                    boolean column = false;
-                    for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
-                        if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
-                            column = true;
-                            break;
-                        }
+            List<ResultSetProcessor<T>> processors = new ArrayList<>();
+            for (var entry : ReflectionCache.getProperties(clazz, "set").entrySet()) {
+                final String name = entry.getKey();
+                boolean column = false;
+                for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
+                    if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
+                        column = true;
+                        break;
                     }
-                    if (!column) {
-                        continue;
-                    }
+                }
+                if (column) {
+                    Method method = entry.getValue().method();
                     addProcessors(processors, method.getParameterTypes()[0], method, name);
                 }
             }

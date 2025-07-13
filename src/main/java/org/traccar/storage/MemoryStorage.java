@@ -15,6 +15,7 @@
  */
 package org.traccar.storage;
 
+import org.traccar.helper.ReflectionCache;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Pair;
 import org.traccar.model.Permission;
@@ -22,7 +23,6 @@ import org.traccar.model.Server;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import java.beans.Introspector;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
@@ -112,8 +112,7 @@ public class MemoryStorage extends Storage {
 
     private Object retrieveValue(Object object, String key) {
         try {
-            Method method = object.getClass().getMethod(
-                    "get" + Character.toUpperCase(key.charAt(0)) + key.substring(1));
+            Method method = ReflectionCache.getProperties(object.getClass(), "get").get(key).method();
             return method.invoke(object);
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
@@ -129,7 +128,6 @@ public class MemoryStorage extends Storage {
 
     @Override
     public <T> void updateObject(T entity, Request request) {
-        Set<String> columns = new HashSet<>(request.getColumns().getColumns(entity.getClass(), "get"));
         Collection<Object> items;
         if (request.getCondition() != null) {
             long id = (Long) ((Condition.Equals) request.getCondition()).getValue();
@@ -137,18 +135,17 @@ public class MemoryStorage extends Storage {
         } else {
             items = objects.computeIfAbsent(entity.getClass(), key -> new HashMap<>()).values();
         }
-        for (Method setter : entity.getClass().getMethods()) {
-            if (setter.getName().startsWith("set") && setter.getParameterCount() == 1
-                    && columns.contains(Introspector.decapitalize(setter.getName()))) {
-                try {
-                    Method getter = entity.getClass().getMethod(setter.getName().replaceFirst("set", "get"));
-                    Object value = getter.invoke(entity);
-                    for (Object object : items) {
-                        setter.invoke(object, value);
-                    }
-                } catch (ReflectiveOperationException e) {
-                    throw new RuntimeException(e);
+        var getters = ReflectionCache.getProperties(entity.getClass(), "get");
+        var setters = ReflectionCache.getProperties(entity.getClass(), "set");
+        for (String column : request.getColumns().getColumns(entity.getClass(), "get")) {
+            try {
+                Method setter = setters.get(column).method();
+                Object value = getters.get(column).method().invoke(entity);
+                for (Object object : items) {
+                    setter.invoke(object, value);
                 }
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException(e);
             }
         }
     }
