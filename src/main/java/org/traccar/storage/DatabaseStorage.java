@@ -219,10 +219,10 @@ public class DatabaseStorage extends Storage {
             results.addAll(getConditionVariables(condition.getFirst()));
             results.addAll(getConditionVariables(condition.getSecond()));
         } else if (genericCondition instanceof Condition.Permission condition) {
-            if (condition.getOwnerId() > 0) {
-                results.add(condition.getOwnerId());
-            } else {
-                results.add(condition.getPropertyId());
+            long conditionId = condition.getOwnerId() > 0 ? condition.getOwnerId() : condition.getPropertyId();
+            results.add(conditionId);
+            if (condition.getIncludeGroups()) {
+                results.add(conditionId);
             }
         } else if (genericCondition instanceof Condition.LatestPositions condition) {
             if (condition.getDeviceId() > 0) {
