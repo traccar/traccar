@@ -44,10 +44,10 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -69,8 +69,8 @@ public class CacheManager implements BroadcastInterface {
     private final CacheGraph graph = new CacheGraph();
 
     private volatile Server server;
-    private final Map<Long, Position> devicePositions = new HashMap<>();
-    private final Map<Long, HashSet<Object>> deviceReferences = new HashMap<>();
+    private final Map<Long, Position> devicePositions = new ConcurrentHashMap<>();
+    private final Map<Long, HashSet<Object>> deviceReferences = new ConcurrentHashMap<>();
 
     @Inject
     public CacheManager(Config config, Storage storage, BroadcastService broadcastService) throws StorageException {
@@ -110,12 +110,7 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public Position getPosition(long deviceId) {
-        try {
-            lock.readLock().lock();
-            return devicePositions.get(deviceId);
-        } finally {
-            lock.readLock().unlock();
-        }
+        return devicePositions.get(deviceId);
     }
 
     public Server getServer() {
@@ -186,14 +181,10 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public void updatePosition(Position position) {
-        try {
-            lock.writeLock().lock();
-            if (deviceReferences.containsKey(position.getDeviceId())) {
-                devicePositions.put(position.getDeviceId(), position);
-            }
-        } finally {
-            lock.writeLock().unlock();
-        }
+        deviceReferences.computeIfPresent(position.getDeviceId(), (key, oldValue) -> {
+            devicePositions.put(key, position);
+            return oldValue;
+        });
     }
 
     @Override
