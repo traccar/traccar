@@ -65,7 +65,7 @@ public class CombinedReportProvider {
                     new Columns.All(),
                     new Condition.And(
                             new Condition.Equals("deviceId", device.getId()),
-                            new Condition.Between("eventTime", "from", from, "to", to)),
+                            new Condition.Between("eventTime", from, to)),
                     new Order("eventTime")));
             item.setEvents(events.stream()
                     .filter(e -> e.getPositionId() > 0 && !EXCLUDE_TYPES.contains(e.getType()))

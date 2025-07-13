@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,20 +35,18 @@ public interface Condition {
 
     class Equals extends Compare {
         public Equals(String column, Object value) {
-            super(column, "=", column, value);
+            super(column, "=", value);
         }
     }
 
     class Compare implements Condition {
         private final String column;
         private final String operator;
-        private final String variable;
         private final Object value;
 
-        public Compare(String column, String operator, String variable, Object value) {
+        public Compare(String column, String operator, Object value) {
             this.column = column;
             this.operator = operator;
-            this.variable = variable;
             this.value = value;
         }
 
@@ -60,10 +58,6 @@ public interface Condition {
             return operator;
         }
 
-        public String getVariable() {
-            return variable;
-        }
-
         public Object getValue() {
             return value;
         }
@@ -71,16 +65,12 @@ public interface Condition {
 
     class Between implements Condition {
         private final String column;
-        private final String fromVariable;
         private final Object fromValue;
-        private final String toVariable;
         private final Object toValue;
 
-        public Between(String column, String fromVariable, Object fromValue, String toVariable, Object toValue) {
+        public Between(String column, Object fromValue, Object toValue) {
             this.column = column;
-            this.fromVariable = fromVariable;
             this.fromValue = fromValue;
-            this.toVariable = toVariable;
             this.toValue = toValue;
         }
 
@@ -88,16 +78,8 @@ public interface Condition {
             return column;
         }
 
-        public String getFromVariable() {
-            return fromVariable;
-        }
-
         public Object getFromValue() {
             return fromValue;
-        }
-
-        public String getToVariable() {
-            return toVariable;
         }
 
         public Object getToValue() {

@@ -67,7 +67,7 @@ public class EventsReportProvider {
                 new Columns.All(),
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
-                        new Condition.Between("eventTime", "from", from, "to", to)),
+                        new Condition.Between("eventTime", from, to)),
                 new Order("eventTime")));
     }
 

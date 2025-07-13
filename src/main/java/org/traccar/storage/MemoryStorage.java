@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ public class MemoryStorage extends Storage {
 
         if (genericCondition instanceof Condition.Compare condition) {
 
-            Object value = retrieveValue(object, condition.getVariable());
+            Object value = retrieveValue(object, condition.getColumn());
             int result = ((Comparable) value).compareTo(condition.getValue());
             return switch (condition.getOperator()) {
                 case "<" -> result < 0;
@@ -75,9 +75,9 @@ public class MemoryStorage extends Storage {
 
         } else if (genericCondition instanceof Condition.Between condition) {
 
-            Object fromValue = retrieveValue(object, condition.getFromVariable());
+            Object fromValue = retrieveValue(object, condition.getColumn());
             int fromResult = ((Comparable) fromValue).compareTo(condition.getFromValue());
-            Object toValue = retrieveValue(object, condition.getToVariable());
+            Object toValue = retrieveValue(object, condition.getColumn());
             int toResult = ((Comparable) toValue).compareTo(condition.getToValue());
             return fromResult >= 0 && toResult <= 0;
 

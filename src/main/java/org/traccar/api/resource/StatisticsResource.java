@@ -43,7 +43,7 @@ public class StatisticsResource extends BaseResource {
         permissionsService.checkAdmin(getUserId());
         return storage.getObjects(Statistics.class, new Request(
                 new Columns.All(),
-                new Condition.Between("captureTime", "from", from, "to", to),
+                new Condition.Between("captureTime", from, to),
                 new Order("captureTime")));
     }
 

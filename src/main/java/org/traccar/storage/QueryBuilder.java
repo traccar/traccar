@@ -35,11 +35,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.function.Consumer;
@@ -54,7 +52,6 @@ public final class QueryBuilder {
     private final Config config;
     private final ObjectMapper objectMapper;
 
-    private final Map<String, List<Integer>> indexMap = new HashMap<>();
     private Connection connection;
     private PreparedStatement statement;
     private final String query;
@@ -69,74 +66,17 @@ public final class QueryBuilder {
         this.returnGeneratedKeys = returnGeneratedKeys;
         if (query != null) {
             connection = dataSource.getConnection();
-            String parsedQuery = parse(query.trim(), indexMap);
             try {
                 if (returnGeneratedKeys) {
-                    statement = connection.prepareStatement(parsedQuery, Statement.RETURN_GENERATED_KEYS);
+                    statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
                 } else {
-                    statement = connection.prepareStatement(parsedQuery);
+                    statement = connection.prepareStatement(query);
                 }
             } catch (SQLException error) {
                 connection.close();
                 throw error;
             }
         }
-    }
-
-    private static String parse(String query, Map<String, List<Integer>> paramMap) {
-
-        int length = query.length();
-        StringBuilder parsedQuery = new StringBuilder(length);
-        boolean inSingleQuote = false;
-        boolean inDoubleQuote = false;
-        int index = 1;
-
-        for (int i = 0; i < length; i++) {
-
-            char c = query.charAt(i);
-
-            // String end
-            if (inSingleQuote) {
-                if (c == '\'') {
-                    inSingleQuote = false;
-                }
-            } else if (inDoubleQuote) {
-                if (c == '"') {
-                    inDoubleQuote = false;
-                }
-            } else {
-
-                // String begin
-                if (c == '\'') {
-                    inSingleQuote = true;
-                } else if (c == '"') {
-                    inDoubleQuote = true;
-                } else if (c == ':' && i + 1 < length
-                        && Character.isJavaIdentifierStart(query.charAt(i + 1))) {
-
-                    // Identifier name
-                    int j = i + 2;
-                    while (j < length && Character.isJavaIdentifierPart(query.charAt(j))) {
-                        j++;
-                    }
-
-                    String name = query.substring(i + 1, j);
-                    c = '?';
-                    i += name.length();
-                    name = name.toLowerCase();
-
-                    // Add to list
-                    List<Integer> indexList = paramMap.computeIfAbsent(name, k -> new LinkedList<>());
-                    indexList.add(index);
-
-                    index++;
-                }
-            }
-
-            parsedQuery.append(c);
-        }
-
-        return parsedQuery.toString();
     }
 
     public static QueryBuilder create(
@@ -150,101 +90,90 @@ public final class QueryBuilder {
         return new QueryBuilder(config, dataSource, objectMapper, query, returnGeneratedKeys);
     }
 
-    private List<Integer> indexes(String name) {
-        name = name.toLowerCase();
-        List<Integer> result = indexMap.get(name);
-        if (result == null) {
-            result = new LinkedList<>();
-        }
-        return result;
-    }
-
     private interface ValueSetter {
-        void invoke(int i) throws SQLException;
+        void invoke() throws SQLException;
     }
 
-    private QueryBuilder setValue(String name, ValueSetter setter) throws SQLException {
-        for (int i : indexes(name)) {
-            try {
-                setter.invoke(i);
-            } catch (SQLException error) {
-                statement.close();
-                connection.close();
-                throw error;
-            }
+    private QueryBuilder setValue(ValueSetter setter) throws SQLException {
+        try {
+            setter.invoke();
+        } catch (SQLException error) {
+            statement.close();
+            connection.close();
+            throw error;
         }
         return this;
     }
 
-    public QueryBuilder setBoolean(String name, boolean value) throws SQLException {
-        return setValue(name, i -> statement.setBoolean(i, value));
+    public QueryBuilder setBoolean(int index, boolean value) throws SQLException {
+        return setValue(() -> statement.setBoolean(index, value));
     }
 
-    public QueryBuilder setInteger(String name, int value) throws SQLException {
-        return setValue(name, i -> statement.setInt(i, value));
+    public QueryBuilder setInteger(int index, int value) throws SQLException {
+        return setValue(() -> statement.setInt(index, value));
     }
 
-    public QueryBuilder setLong(String name, long value) throws SQLException {
-        return setLong(name, value, false);
+    public QueryBuilder setLong(int index, long value) throws SQLException {
+        return setLong(index, value, false);
     }
 
-    public QueryBuilder setLong(String name, long value, boolean nullIfZero) throws SQLException {
-        return setValue(name, i -> {
+    public QueryBuilder setLong(int index, long value, boolean nullIfZero) throws SQLException {
+        return setValue(() -> {
             if (value == 0 && nullIfZero) {
-                statement.setNull(i, Types.INTEGER);
+                statement.setNull(index, Types.INTEGER);
             } else {
-                statement.setLong(i, value);
+                statement.setLong(index, value);
             }
         });
     }
 
-    public QueryBuilder setDouble(String name, double value) throws SQLException {
-        return setValue(name, i -> statement.setDouble(i, value));
+    public QueryBuilder setDouble(int index, double value) throws SQLException {
+        return setValue(() -> statement.setDouble(index, value));
     }
 
-    public QueryBuilder setString(String name, String value) throws SQLException {
-        return setValue(name, i -> {
+    public QueryBuilder setString(int index, String value) throws SQLException {
+        return setValue(() -> {
             if (value == null) {
-                statement.setNull(i, Types.VARCHAR);
+                statement.setNull(index, Types.VARCHAR);
             } else {
-                statement.setString(i, value);
+                statement.setString(index, value);
             }
         });
     }
 
-    public QueryBuilder setDate(String name, Date value) throws SQLException {
-        return setValue(name, i -> {
+    public QueryBuilder setDate(int index, Date value) throws SQLException {
+        return setValue(() -> {
             if (value == null) {
-                statement.setNull(i, Types.TIMESTAMP);
+                statement.setNull(index, Types.TIMESTAMP);
             } else {
-                statement.setTimestamp(i, new Timestamp(value.getTime()));
+                statement.setTimestamp(index, new Timestamp(value.getTime()));
             }
         });
     }
 
-    public QueryBuilder setBlob(String name, byte[] value) throws SQLException {
-        return setValue(name, i -> {
+    public QueryBuilder setBlob(int index, byte[] value) throws SQLException {
+        return setValue(() -> {
             if (value == null) {
-                statement.setNull(i, Types.BLOB);
+                statement.setNull(index, Types.BLOB);
             } else {
-                statement.setBytes(i, value);
+                statement.setBytes(index, value);
             }
         });
     }
 
-    public QueryBuilder setValue(String name, Object value) throws SQLException {
+    public QueryBuilder setValue(int index, Object value) throws SQLException {
         if (value instanceof Boolean booleanValue) {
-            setBoolean(name, booleanValue);
+            setBoolean(index, booleanValue);
         } else if (value instanceof Integer integerValue) {
-            setInteger(name, integerValue);
+            setInteger(index, integerValue);
         } else if (value instanceof Long longValue) {
-            setLong(name, longValue);
+            setLong(index, longValue);
         } else if (value instanceof Double doubleValue) {
-            setDouble(name, doubleValue);
+            setDouble(index, doubleValue);
         } else if (value instanceof String stringValue) {
-            setString(name, stringValue);
+            setString(index, stringValue);
         } else if (value instanceof Date dateValue) {
-            setDate(name, dateValue);
+            setDate(index, dateValue);
         }
         return this;
     }
@@ -252,25 +181,26 @@ public final class QueryBuilder {
     public QueryBuilder setObject(Object object, List<String> columns) throws SQLException {
 
         try {
-            for (String column : columns) {
+            for (int index = 0; index < columns.size(); index++) {
+                String column = columns.get(index);
                 Method method = object.getClass().getMethod(
                         "get" + Character.toUpperCase(column.charAt(0)) + column.substring(1));
                 if (method.getReturnType().equals(boolean.class)) {
-                    setBoolean(column, (Boolean) method.invoke(object));
+                    setBoolean(index, (Boolean) method.invoke(object));
                 } else if (method.getReturnType().equals(int.class)) {
-                    setInteger(column, (Integer) method.invoke(object));
+                    setInteger(index, (Integer) method.invoke(object));
                 } else if (method.getReturnType().equals(long.class)) {
-                    setLong(column, (Long) method.invoke(object), column.endsWith("Id"));
+                    setLong(index, (Long) method.invoke(object), column.endsWith("Id"));
                 } else if (method.getReturnType().equals(double.class)) {
-                    setDouble(column, (Double) method.invoke(object));
+                    setDouble(index, (Double) method.invoke(object));
                 } else if (method.getReturnType().equals(String.class)) {
-                    setString(column, (String) method.invoke(object));
+                    setString(index, (String) method.invoke(object));
                 } else if (method.getReturnType().equals(Date.class)) {
-                    setDate(column, (Date) method.invoke(object));
+                    setDate(index, (Date) method.invoke(object));
                 } else if (method.getReturnType().equals(byte[].class)) {
-                    setBlob(column, (byte[]) method.invoke(object));
+                    setBlob(index, (byte[]) method.invoke(object));
                 } else {
-                    setString(column, objectMapper.writeValueAsString(method.invoke(object)));
+                    setString(index, objectMapper.writeValueAsString(method.invoke(object)));
                 }
             }
         } catch (ReflectiveOperationException | JsonProcessingException e) {
@@ -301,7 +231,7 @@ public final class QueryBuilder {
             processors.add((object, resultSet) ->
                     method.invoke(object, new Date(resultSet.getTimestamp(name).getTime())));
         } else if (parameterType.equals(byte[].class)) {
-            processors.add((object, resultSet) -> method.invoke(object, resultSet.getBytes(name)));
+            processors.add((object, resultSet) -> method.invoke(object, (Object) resultSet.getBytes(name)));
         } else {
             processors.add((object, resultSet) -> {
                 String value = resultSet.getString(name);

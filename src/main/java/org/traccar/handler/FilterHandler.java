@@ -92,7 +92,7 @@ public class FilterHandler extends BasePositionHandler {
                 new Columns.All(),
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
-                        new Condition.Compare("fixTime", "<=", "time", date)),
+                        new Condition.Compare("fixTime", "<=", date)),
                 new Order("fixTime", true, 1)));
     }
 
