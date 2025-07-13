@@ -68,7 +68,7 @@ public class CacheManager implements BroadcastInterface {
 
     private final CacheGraph graph = new CacheGraph();
 
-    private Server server;
+    private volatile Server server;
     private final Map<Long, Position> devicePositions = new HashMap<>();
     private final Map<Long, HashSet<Object>> deviceReferences = new HashMap<>();
 
@@ -119,12 +119,7 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public Server getServer() {
-        try {
-            lock.readLock().lock();
-            return server;
-        } finally {
-            lock.readLock().unlock();
-        }
+        return server;
     }
 
     public Set<User> getNotificationUsers(long notificationId, long deviceId) {
