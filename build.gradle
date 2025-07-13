@@ -91,6 +91,7 @@ dependencies {
     implementation "org.glassfish.hk2:guice-bridge:3.1.1" // same version as jersey-hk2
     implementation "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
     implementation "com.fasterxml.jackson.datatype:jackson-datatype-jakarta-jsonp:$jacksonVersion"
+    implementation "com.fasterxml.jackson.module:jackson-module-blackbird:$jacksonVersion"
     implementation "org.liquibase:liquibase-core:4.23.2" // upgrade has issues
     implementation "org.apache.commons:commons-jexl3:3.5.0"
     implementation "org.jxls:jxls:$jxlsVersion"
