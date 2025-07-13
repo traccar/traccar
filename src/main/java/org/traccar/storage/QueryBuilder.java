@@ -120,7 +120,7 @@ public final class QueryBuilder {
     public QueryBuilder setLong(int index, long value, boolean nullIfZero) throws SQLException {
         return setValue(() -> {
             if (value == 0 && nullIfZero) {
-                statement.setNull(index + 1, Types.INTEGER);
+                statement.setNull(index + 1, Types.BIGINT);
             } else {
                 statement.setLong(index + 1, value);
             }
@@ -179,7 +179,6 @@ public final class QueryBuilder {
     }
 
     public QueryBuilder setObject(Object object, List<String> columns) throws SQLException {
-
         try {
             for (int index = 0; index < columns.size(); index++) {
                 String column = columns.get(index);
@@ -328,15 +327,15 @@ public final class QueryBuilder {
     }
 
     public long executeUpdate() throws SQLException {
-
         if (query != null) {
             try {
                 logQuery();
                 statement.execute();
                 if (returnGeneratedKeys) {
-                    ResultSet resultSet = statement.getGeneratedKeys();
-                    if (resultSet.next()) {
-                        return resultSet.getLong(1);
+                    try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                        if (resultSet.next()) {
+                            return resultSet.getLong(1);
+                        }
                     }
                 }
             } finally {
