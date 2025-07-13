@@ -173,7 +173,7 @@ public class CacheManager implements BroadcastInterface {
                 return;
             }
 
-            var after = storage.getObject(clazz,new Request(
+            var after = storage.getObject(clazz, new Request(
                     new Columns.All(), new Condition.Equals("id", id)));
             if (after == null) {
                 return;
