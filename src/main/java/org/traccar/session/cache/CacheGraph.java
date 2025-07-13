@@ -15,17 +15,18 @@
  */
 package org.traccar.session.cache;
 
+import org.traccar.helper.ConcurrentWeakValueMap;
 import org.traccar.model.BaseModel;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class CacheGraph {
 
-    private final Map<CacheKey, CacheNode> roots = new HashMap<>();
-    private final WeakValueMap<CacheKey, CacheNode> nodes = new WeakValueMap<>();
+    private final Map<CacheKey, CacheNode> roots = new ConcurrentHashMap<>();
+    private final ConcurrentWeakValueMap<CacheKey, CacheNode> nodes = new ConcurrentWeakValueMap<>();
 
     void addObject(BaseModel value) {
         CacheKey key = new CacheKey(value);
@@ -87,8 +88,7 @@ public class CacheGraph {
     }
 
     boolean addLink(
-            Class<? extends BaseModel> fromClazz, long fromId,
-            BaseModel toValue) {
+            Class<? extends BaseModel> fromClazz, long fromId, BaseModel toValue) {
         boolean stop = true;
         CacheNode fromNode = nodes.get(new CacheKey(fromClazz, fromId));
         if (fromNode != null) {
@@ -106,8 +106,7 @@ public class CacheGraph {
     }
 
     void removeLink(
-            Class<? extends BaseModel> fromClazz, long fromId,
-            Class<? extends BaseModel> toClazz, long toId) {
+            Class<? extends BaseModel> fromClazz, long fromId, Class<? extends BaseModel> toClazz, long toId) {
         CacheNode fromNode = nodes.get(new CacheKey(fromClazz, fromId));
         if (fromNode != null) {
             CacheNode toNode = nodes.get(new CacheKey(toClazz, toId));
