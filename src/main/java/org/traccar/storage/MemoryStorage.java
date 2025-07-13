@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class MemoryStorage extends Storage {
 
@@ -49,10 +50,16 @@ public class MemoryStorage extends Storage {
 
     @Override
     public <T> List<T> getObjects(Class<T> clazz, Request request) {
+        try (var objects = getObjectsStreamed(clazz, request)) {
+            return objects.collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    public <T> Stream<T> getObjectsStreamed(Class<T> clazz, Request request) {
         return objects.computeIfAbsent(clazz, key -> new HashMap<>()).values().stream()
                 .filter(object -> checkCondition(request.getCondition(), object))
-                .map(object -> (T) object)
-                .collect(Collectors.toList());
+                .map(object -> (T) object);
     }
 
     private boolean checkCondition(Condition genericCondition, Object object) {

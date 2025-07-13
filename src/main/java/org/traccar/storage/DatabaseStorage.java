@@ -35,6 +35,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class DatabaseStorage extends Storage {
 
@@ -57,7 +58,7 @@ public class DatabaseStorage extends Storage {
     }
 
     @Override
-    public <T> List<T> getObjects(Class<T> clazz, Request request) throws StorageException {
+    public <T> Stream<T> getObjectsStreamed(Class<T> clazz, Request request) throws StorageException {
         StringBuilder query = new StringBuilder("SELECT ");
         if (request.getColumns() instanceof Columns.All) {
             query.append('*');
@@ -73,9 +74,16 @@ public class DatabaseStorage extends Storage {
             for (int index = 0; index < values.size(); index++) {
                 builder.setValue(index, values.get(index));
             }
-            return builder.executeQuery(clazz);
+            return builder.executeQueryStreamed(clazz);
         } catch (SQLException e) {
             throw new StorageException(e);
+        }
+    }
+
+    @Override
+    public <T> List<T> getObjects(Class<T> clazz, Request request) throws StorageException {
+        try (var objects = getObjectsStreamed(clazz, request)) {
+            return objects.collect(Collectors.toList());
         }
     }
 
