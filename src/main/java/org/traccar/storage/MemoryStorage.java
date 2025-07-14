@@ -50,7 +50,7 @@ public class MemoryStorage extends Storage {
 
     @Override
     public <T> List<T> getObjects(Class<T> clazz, Request request) {
-        try (var objects = getObjectsStreamed(clazz, request)) {
+        try (var objects = getObjectsStream(clazz, request)) {
             return objects.collect(Collectors.toList());
         }
     }
