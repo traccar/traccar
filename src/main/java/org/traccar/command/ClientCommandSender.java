@@ -61,7 +61,8 @@ public class ClientCommandSender implements CommandSender {
         return List.of(
                 Command.TYPE_POSITION_SINGLE,
                 Command.TYPE_POSITION_PERIODIC,
-                Command.TYPE_POSITION_STOP);
+                Command.TYPE_POSITION_STOP,
+                Command.TYPE_FACTORY_RESET);
     }
 
     @Override
