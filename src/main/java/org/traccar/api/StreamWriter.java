@@ -31,16 +31,16 @@ public class StreamWriter implements MessageBodyWriter<Stream<?>> {
                         MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException {
         try (stream;
-             JsonGenerator g = objectMapper.createGenerator(entityStream)) {
-            g.writeStartArray();
-            stream.forEach(o -> {
+             JsonGenerator jsonGenerator = objectMapper.createGenerator(entityStream)) {
+            jsonGenerator.writeStartArray();
+            stream.forEach(object -> {
                 try {
-                    objectMapper.writeValue(g, o);
+                    objectMapper.writeValue(jsonGenerator, object);
                 } catch (IOException io) {
                     throw new UncheckedIOException(io);
                 }
             });
-            g.writeEndArray();
+            jsonGenerator.writeEndArray();
         }
     }
 }
