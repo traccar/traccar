@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,9 @@ public abstract class Storage {
     }
 
     public <T> T getObject(Class<T> clazz, Request request) throws StorageException {
-        var objects = getObjects(clazz, request);
-        return objects.isEmpty() ? null : objects.get(0);
+        try (var objects = getObjectsStream(clazz, request)) {
+            return objects.findFirst().orElse(null);
+        }
     }
 
 }
