@@ -136,7 +136,7 @@ public class CommandsManager implements BroadcastInterface {
                 events.put(event, null);
             }
             notificationManager.updateEvents(events);
-            return commands.stream().map(QueuedCommand::toCommand).collect(Collectors.toList());
+            return commands.stream().map(QueuedCommand::toCommand).toList();
         } catch (StorageException e) {
             throw new RuntimeException(e);
         }

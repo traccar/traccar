@@ -60,7 +60,7 @@ public class DatabaseStorage extends Storage {
     @Override
     public <T> List<T> getObjects(Class<T> clazz, Request request) throws StorageException {
         try (var objects = getObjectsStream(clazz, request)) {
-            return objects.collect(Collectors.toList());
+            return objects.toList();
         }
     }
 

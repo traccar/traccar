@@ -116,7 +116,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
             } else {
                 return type.equals(Command.TYPE_CUSTOM);
             }
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     @POST
@@ -172,15 +172,15 @@ public class CommandResource extends ExtendedObjectResource<Command> {
             String sender = device.getString(Keys.COMMAND_SENDER.getKey());
             if (sender != null) {
                 return commandSenderManager.getSender(sender).getSupportedCommands()
-                        .stream().map(Typed::new).collect(Collectors.toList());
+                        .stream().map(Typed::new).toList();
             }
 
             BaseProtocol protocol = getDeviceProtocol(deviceId);
             if (protocol != null) {
                 if (textChannel) {
-                    return protocol.getSupportedTextCommands().stream().map(Typed::new).collect(Collectors.toList());
+                    return protocol.getSupportedTextCommands().stream().map(Typed::new).toList();
                 } else {
-                    return protocol.getSupportedDataCommands().stream().map(Typed::new).collect(Collectors.toList());
+                    return protocol.getSupportedDataCommands().stream().map(Typed::new).toList();
                 }
             } else {
                 return Collections.singletonList(new Typed(Command.TYPE_CUSTOM));

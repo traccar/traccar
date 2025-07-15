@@ -51,7 +51,7 @@ public class MemoryStorage extends Storage {
     @Override
     public <T> List<T> getObjects(Class<T> clazz, Request request) {
         try (var objects = getObjectsStream(clazz, request)) {
-            return objects.collect(Collectors.toList());
+            return objects.toList();
         }
     }
 
@@ -175,7 +175,7 @@ public class MemoryStorage extends Storage {
                 .filter(pair -> ownerId == 0 || pair.first().equals(ownerId))
                 .filter(pair -> propertyId == 0 || pair.second().equals(propertyId))
                 .map(pair -> new Permission(ownerClass, pair.first(), propertyClass, pair.second()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

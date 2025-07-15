@@ -58,7 +58,7 @@ public final class PositionUtil {
     public static List<Position> getPositions(
             Storage storage, long deviceId, Date from, Date to) throws StorageException {
         try (var positions = getPositionsStream(storage, deviceId, from, to)) {
-            return positions.collect(Collectors.toList());
+            return positions.toList();
         }
     }
 
@@ -82,7 +82,7 @@ public final class PositionUtil {
                 new Columns.All(), new Condition.LatestPositions()));
         return positions.stream()
                 .filter(position -> deviceIds.contains(position.getDeviceId()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }

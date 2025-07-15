@@ -377,7 +377,7 @@ public class ReportUtils {
                 new Order("eventTime")));
         var filteredEvents = events.stream()
                 .filter(event -> filter.contains(event.getType()))
-                .collect(Collectors.toList());
+                .toList();
 
         Event startEvent = null;
         for (Event event : filteredEvents) {

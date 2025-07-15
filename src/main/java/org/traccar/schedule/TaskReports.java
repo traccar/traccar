@@ -106,11 +106,11 @@ public class TaskReports extends SingleScheduleTask {
         var deviceIds = storage.getObjects(Device.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(Device.class, Report.class, report.getId())))
-                .stream().map(BaseModel::getId).collect(Collectors.toList());
+                .stream().map(BaseModel::getId).toList();
         var groupIds = storage.getObjects(Group.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(Group.class, Report.class, report.getId())))
-                .stream().map(BaseModel::getId).collect(Collectors.toList());
+                .stream().map(BaseModel::getId).toList();
         var users = storage.getObjects(User.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(User.class, Report.class, report.getId())));
