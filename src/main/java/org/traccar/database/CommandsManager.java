@@ -45,7 +45,6 @@ import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Singleton
 public class CommandsManager implements BroadcastInterface {
