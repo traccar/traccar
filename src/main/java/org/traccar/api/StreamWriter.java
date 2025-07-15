@@ -30,8 +30,7 @@ public class StreamWriter implements MessageBodyWriter<Stream<?>> {
     public void writeTo(Stream<?> stream, Class<?> type, Type genericType, Annotation[] annotations,
                         MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException {
-        try (stream;
-             JsonGenerator jsonGenerator = objectMapper.createGenerator(entityStream)) {
+        try (stream; var generator = objectMapper.createGenerator(entityStream)) {
             jsonGenerator.writeStartArray();
             stream.forEach(object -> {
                 try {
