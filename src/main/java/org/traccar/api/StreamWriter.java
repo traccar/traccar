@@ -1,6 +1,5 @@
 package org.traccar.api;
 
-import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
@@ -10,9 +9,9 @@ import jakarta.ws.rs.ext.Provider;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UncheckedIOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Iterator;
 import java.util.stream.Stream;
 
 @Provider
@@ -31,15 +30,11 @@ public class StreamWriter implements MessageBodyWriter<Stream<?>> {
                         MediaType mediaType, MultivaluedMap<String, Object> httpHeaders, OutputStream entityStream)
             throws IOException {
         try (stream; var generator = objectMapper.createGenerator(entityStream)) {
-            jsonGenerator.writeStartArray();
-            stream.forEach(object -> {
-                try {
-                    objectMapper.writeValue(jsonGenerator, object);
-                } catch (IOException io) {
-                    throw new UncheckedIOException(io);
-                }
-            });
-            jsonGenerator.writeEndArray();
+            generator.writeStartArray();
+            for (Iterator<?> it = stream.iterator(); it.hasNext();) {
+                objectMapper.writeValue(generator, it.next());
+            }
+            generator.writeEndArray();
         }
     }
 }
