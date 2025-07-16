@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.protobuf.omnicomm.OmnicommMessageOuterClass.OmnicommMessage.LOG;
 
 import java.util.Properties;
 
