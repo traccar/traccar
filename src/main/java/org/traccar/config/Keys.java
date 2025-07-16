@@ -524,6 +524,13 @@ public final class Keys {
             "database.saveOriginal",
             List.of(KeyType.CONFIG));
 
+   /**
+     * Store  position.
+     */
+    public static final ConfigKey<Boolean> DATABASE_SAVE_POSITION = new BooleanConfigKey(
+            "database.savePosition",
+            List.of(KeyType.CONFIG),
+            false);
     /**
      * Throttle unknown device database queries when it sends repeated requests.
      */
@@ -2039,6 +2046,15 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> BROADCAST_SECONDARY = new BooleanConfigKey(
             "broadcast.secondary",
+            List.of(KeyType.CONFIG));
+
+    /** Shapfile path for the server.
+     * The path must include the string "yyyy_mm_dd", which is replaced with the actual date when creating and rolling
+     * over the file.
+     * Example: ./shapefiles/roads-yyyy_mm_dd.shp
+     */
+    public static final ConfigKey<String> SHAPEFILE_PATH = new StringConfigKey(
+            "geocoder.shapefile",
             List.of(KeyType.CONFIG));
 
 }

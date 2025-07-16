@@ -8,6 +8,27 @@ plugins {
 
 repositories {
     mavenCentral()
+
+     // For GeoTools
+    maven {
+        url "https://repo.osgeo.org/repository/release/"
+        content {
+            includeGroup "org.geotools"
+        }
+    }
+     maven {
+        url "https://jitpack.io/"
+        content {
+            includeGroup "com.github.geotools.geotools"
+        }
+    }
+    maven {
+        url "https://maven.artifacts.atlassian.com/"
+        
+    }
+    
+    
+    // สำหรับ jgridshift-core
 }
 
 java {
@@ -116,6 +137,8 @@ dependencies {
     testImplementation "org.mockito:mockito-core:5.18.0"
     testImplementation "org.junit.jupiter:junit-jupiter:5.13.3"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    
 }
 
 test {

@@ -69,6 +69,7 @@ import org.traccar.geocoder.NominatimGeocoder;
 import org.traccar.geocoder.OpenCageGeocoder;
 import org.traccar.geocoder.PositionStackGeocoder;
 import org.traccar.geocoder.PlusCodesGeocoder;
+import org.traccar.geocoder.ShapeFileGeocoder;
 import org.traccar.geocoder.TomTomGeocoder;
 import org.traccar.geocoder.GeocodeJsonGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
@@ -236,6 +237,7 @@ public class MainModule extends AbstractModule {
                 case "maptiler" -> new MapTilerGeocoder(client, key, cacheSize, addressFormat);
                 case "geoapify" -> new GeoapifyGeocoder(client, key, language, cacheSize, addressFormat);
                 case "geocodejson" -> new GeocodeJsonGeocoder(client, url, key, language, cacheSize, addressFormat);
+                case "shapefile" -> new ShapeFileGeocoder(config);
                 default -> new GoogleGeocoder(client, url, key, language, cacheSize, addressFormat);
             };
             geocoder.setStatisticsManager(statisticsManager);

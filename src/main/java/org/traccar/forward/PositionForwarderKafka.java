@@ -21,6 +21,8 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
@@ -32,6 +34,8 @@ public class PositionForwarderKafka implements PositionForwarder {
     private final ObjectMapper objectMapper;
 
     private final String topic;
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventForwarderKafka.class);
+
 
     public PositionForwarderKafka(Config config, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -48,7 +52,11 @@ public class PositionForwarderKafka implements PositionForwarder {
     public void forward(PositionData positionData, ResultHandler resultHandler) {
         try {
             String key = Long.toString(positionData.getDevice().getId());
-            String value = objectMapper.writeValueAsString(positionData);
+            String value = objectMapper.writeValueAsString(positionData)
+                    .replaceAll("\"\\{", "\\{")
+                    .replaceAll("}\"", "}")
+                    .replaceAll("\\\\", "");
+            LOGGER.debug("Forwarding position to Kafka topic {}: key={}, value={}", topic, key, value);
             producer.send(new ProducerRecord<>(topic, key, value));
             resultHandler.onResult(true, null);
         } catch (JsonProcessingException e) {

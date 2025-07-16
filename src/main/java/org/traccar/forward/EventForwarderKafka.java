@@ -20,8 +20,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.protobuf.omnicomm.OmnicommMessageOuterClass.OmnicommMessage.LOG;
 
 import java.util.Properties;
 
@@ -31,6 +34,7 @@ public class EventForwarderKafka implements EventForwarder {
     private final ObjectMapper objectMapper;
 
     private final String topic;
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventForwarderKafka.class);
 
     public EventForwarderKafka(Config config, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
@@ -47,7 +51,11 @@ public class EventForwarderKafka implements EventForwarder {
     public void forward(EventData eventData, ResultHandler resultHandler) {
         try {
             String key = Long.toString(eventData.getDevice().getId());
-            String value = objectMapper.writeValueAsString(eventData);
+            String value = objectMapper.writeValueAsString(eventData)
+                    .replaceAll("\"\\{", "\\{")
+                    .replaceAll("}\"", "}")
+                    .replaceAll("\\\\", "");
+            LOGGER.debug("Forwarding event to Kafka topic {}: key={}, value={}", topic, key, value);
             producer.send(new ProducerRecord<>(topic, key, value));
             resultHandler.onResult(true, null);
         } catch (JsonProcessingException e) {
