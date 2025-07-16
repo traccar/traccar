@@ -299,7 +299,7 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             if (value.matches("\\p{XDigit}+")) {
                 position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(Integer.parseInt(value, 16)));
             } else {
-                position.set(Position.KEY_CARD, value);
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, value.trim());
             }
         }
 
