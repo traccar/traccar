@@ -54,7 +54,7 @@ public class LocaleManager {
             Path file = Files.exists(targetFile) ? targetFile : path.resolve(DEFAULT_LANGUAGE + ".json");
             if (Files.exists(file)) {
                 try (InputStream in = Files.newInputStream(file)) {
-                    return objectMapper.readValue(in, new TypeReference<>() {});
+                    return objectMapper.readValue(in, new TypeReference<>() { });
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
