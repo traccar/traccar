@@ -19,10 +19,14 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.database.NotificationManager;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DataConverter;
 import org.traccar.helper.UnitsConverter;
@@ -56,6 +60,10 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_SET_IO = 17;
     public static final int MSG_FILES = 37;
     public static final int MSG_EXTENDED_RECORDS = 68;
+    public static final int MSG_DRIVER_DLT = 36;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationManager.class);
+
 
     private Position decodeCommandResponse(DeviceSession deviceSession, int type, ByteBuf buf) {
         Position position = new Position(getProtocolName());
@@ -367,6 +375,58 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
 
             return null;
 
+        } else if (type == MSG_DRIVER_DLT) {
+            LOGGER.info("MSG_DRIVER_DLT imei : " + imei);
+            try {
+                List<Position> positions = new LinkedList<>();
+                    Position position = new Position(getProtocolName());
+                    position.setDeviceId(deviceSession.getDeviceId());
+                    getLastLocation(position, null);
+                    int subCommandID = buf.readUnsignedByte(); //SubCommandID
+                    position.setTime(new Date(buf.readUnsignedInt() * 1000));
+                    int dRegStatus = buf.readUnsignedByte(); //  Driver registration status
+                    int cardStatus = buf.readUnsignedByte(); // Card status
+                    int trackID = buf.readUnsignedByte(); // Track identifier
+                    LOGGER.info("MSG_DRIVER_DLT imei : " + imei
+                            + ", getDeviceTime : " + position.getDeviceTime()
+                            + ", Sub Command ID : " + subCommandID
+                            + ", Driver registration status : " + dRegStatus
+                            + ", Card status : " + cardStatus + ", cardStatus : " + cardStatus
+                            + ", Track identifier : " + trackID);
+
+                    int t1Length = buf.readUnsignedShort(); // Track 1 length
+                    String t1Data =  buf.readSlice(t1Length).toString(StandardCharsets.US_ASCII); // Track 1 data
+
+                    int t2Length = buf.readUnsignedShort(); // Track 2 length
+                    String t2Data =  buf.readSlice(t2Length).toString(StandardCharsets.US_ASCII); // Track 2 data
+
+                    int t3Length = buf.readUnsignedShort(); // Track 3 length
+                    String t3Data =  buf.readSlice(t3Length).toString(StandardCharsets.US_ASCII); // Track 3 data
+                    LOGGER.info("MSG_DRIVER_DLT imei : " + imei
+                            + ", Track 1 length : " + t1Length
+                            + ", Track 1 data : " + t1Data
+                            + ", Track 2 length : " + t2Length
+                            + ", Track 2 data : " + t2Data
+                            + ", Track 3 length : " + t3Length
+                            + ", Track 3 data : " + t3Data);
+                    String driverCardMsg = buf.toString(StandardCharsets.US_ASCII);
+                    LOGGER.info("MSG_DRIVER_DLT imei : " + imei + ", bufStr US_ASCII : " + driverCardMsg);
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, t1Data + "|" + t2Data + "|" + t3Data);
+                    positions.add(position);
+                if (channel != null) {
+                    channel.writeAndFlush(new NetworkMessage(
+                            Unpooled.wrappedBuffer(DataConverter.parseHex("000288015385")), remoteAddress));
+                }
+                return positions;
+            } catch (Exception e) {
+                if (channel != null) {
+                    channel.writeAndFlush(new NetworkMessage(
+                            Unpooled.wrappedBuffer(DataConverter.parseHex("000288015385")), remoteAddress));
+                }
+                LOGGER.warn("MSG_DRIVER_DLT imei : " + imei + " error msg : " + e.getMessage());
+                e.printStackTrace();
+                return null;
+            }
         } else {
 
             return decodeCommandResponse(deviceSession, type, buf);

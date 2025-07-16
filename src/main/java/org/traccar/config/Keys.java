@@ -531,6 +531,14 @@ public final class Keys {
             "database.savePosition",
             List.of(KeyType.CONFIG),
             false);
+
+    /**
+     * Store  event.
+     */
+    public static final ConfigKey<Boolean> DATABASE_SAVE_EVENT = new BooleanConfigKey(
+            "database.saveEvent",
+            List.of(KeyType.CONFIG),
+            false);
     /**
      * Throttle unknown device database queries when it sends repeated requests.
      */

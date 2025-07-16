@@ -62,6 +62,8 @@ public class NotificationManager {
     private final long timeThreshold;
     private final Set<Long> blockedUsers = new HashSet<>();
 
+    private final boolean saveEvents;
+
     @Inject
     public NotificationManager(
             Config config, Storage storage, CacheManager cacheManager, @Nullable EventForwarder eventForwarder,
@@ -71,6 +73,7 @@ public class NotificationManager {
         this.eventForwarder = eventForwarder;
         this.notificatorManager = notificatorManager;
         this.geocoder = geocoder;
+        this.saveEvents = config.getBoolean(Keys.DATABASE_SAVE_EVENT);
         geocodeOnRequest = config.getBoolean(Keys.GEOCODER_ON_REQUEST);
         timeThreshold = config.getLong(Keys.NOTIFICATOR_TIME_THRESHOLD);
         String blockedUsersString = config.getString(Keys.NOTIFICATION_BLOCK_USERS);
@@ -83,7 +86,9 @@ public class NotificationManager {
 
     private void updateEvent(Event event, Position position) {
         try {
-            event.setId(storage.addObject(event, new Request(new Columns.Exclude("id"))));
+            if(saveEvents) {
+                event.setId(storage.addObject(event, new Request(new Columns.Exclude("id"))));
+            }
         } catch (StorageException error) {
             LOGGER.warn("Event save error", error);
         }
