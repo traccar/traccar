@@ -306,7 +306,7 @@ public final class Keys {
     public static final ConfigKey<Long> SERVER_BUFFERING_THRESHOLD = new LongConfigKey(
             "server.buffering.threshold",
             List.of(KeyType.CONFIG),
-            2500L);
+            3000L);
 
     /**
      * Server wide connection timeout value in seconds. See protocol timeout for more information.

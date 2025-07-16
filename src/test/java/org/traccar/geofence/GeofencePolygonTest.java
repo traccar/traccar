@@ -20,7 +20,7 @@ public class GeofencePolygonTest {
     public void testPolygonWkt() throws ParseException {
         String test = "POLYGON ((55.75474 37.61823, 55.75513 37.61888, 55.7535 37.6222, 55.75315 37.62165))";
         GeofenceGeometry geofenceGeometry = new GeofencePolygon(test);
-        assertEquals(geofenceGeometry.toWkt(), test);
+        assertEquals(test, geofenceGeometry.toWkt());
     }
 
     @Test

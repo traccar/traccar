@@ -63,7 +63,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class ReportUtils {
 
@@ -373,11 +372,11 @@ public class ReportUtils {
                 new Columns.All(),
                 new Condition.And(
                         new Condition.Equals("deviceId", device.getId()),
-                        new Condition.Between("eventTime", "from", from, "to", to)),
+                        new Condition.Between("eventTime", from, to)),
                 new Order("eventTime")));
         var filteredEvents = events.stream()
                 .filter(event -> filter.contains(event.getType()))
-                .collect(Collectors.toList());
+                .toList();
 
         Event startEvent = null;
         for (Event event : filteredEvents) {

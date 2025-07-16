@@ -29,8 +29,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import java.util.Collection;
+
 import java.util.Date;
+import java.util.stream.Stream;
 
 @Path("statistics")
 @Produces(MediaType.APPLICATION_JSON)
@@ -38,12 +39,12 @@ import java.util.Date;
 public class StatisticsResource extends BaseResource {
 
     @GET
-    public Collection<Statistics> get(
+    public Stream<Statistics> get(
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkAdmin(getUserId());
-        return storage.getObjects(Statistics.class, new Request(
+        return storage.getObjectsStream(Statistics.class, new Request(
                 new Columns.All(),
-                new Condition.Between("captureTime", "from", from, "to", to),
+                new Condition.Between("captureTime", from, to),
                 new Order("captureTime")));
     }
 
