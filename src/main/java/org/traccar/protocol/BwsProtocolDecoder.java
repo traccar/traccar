@@ -64,7 +64,7 @@ public class BwsProtocolDecoder extends BaseProtocolDecoder {
 
         int deviceType = buf.readUnsignedByte();
         ByteBuf id = buf.readSlice(4);
-        buf.readUnsignedByte(); // message type
+        int messageType = buf.readUnsignedByte();
         int index = buf.readUnsignedByte();
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, ByteBufUtil.hexDump(id));
@@ -75,6 +75,8 @@ public class BwsProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        position.set(Position.KEY_EVENT, messageType);
 
         position.setTime(new Date(buf.readUnsignedInt() * 1000));
         position.setLatitude(buf.readInt() / 360000.0);
