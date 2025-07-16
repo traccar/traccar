@@ -19,6 +19,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import org.traccar.helper.UnitsConverter;
 import org.traccar.storage.QueryIgnore;
 import org.traccar.storage.StorageName;
 
@@ -269,7 +271,7 @@ public class Position extends Message {
     }
 
     public void setSpeed(double speed) {
-        this.speed = speed;
+        this.speed = Math.round(UnitsConverter.kphFromKnots(speed));
     }
 
     private double course;
@@ -279,7 +281,7 @@ public class Position extends Message {
     }
 
     public void setCourse(double course) {
-        this.course = course;
+        this.course = Math.round(course);
     }
 
     private String address;
