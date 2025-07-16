@@ -5,6 +5,7 @@
     <entry key='web.path'>./traccar-web/simple</entry>
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
+    <entry key='web.localizationPath'>./traccar-web/src/resources/l10n</entry>
 
     <entry key='geocoder.type'>pluscodes</entry>
 

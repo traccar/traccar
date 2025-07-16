@@ -44,7 +44,7 @@ public class MediaManager {
 
     @Inject
     public MediaManager(Config config) {
-        this.path = config.getString(Keys.MEDIA_PATH);
+        path = config.getString(Keys.MEDIA_PATH);
     }
 
     private File createFile(String uniqueId, String name) throws IOException {
