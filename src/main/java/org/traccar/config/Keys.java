@@ -881,7 +881,8 @@ public final class Keys {
      */
     public static final ConfigKey<String> WEB_LOCALIZATION_PATH = new StringConfigKey(
             "web.localizationPath",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            "./templates/translations");
 
     /**
      * Enable TOTP authentication on the server.
