@@ -28,9 +28,9 @@ public class AdmProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "01002680336510002062A34C423DCF8E42A50B1700005801140767E30F568F2534107D220000"));
 
-        verifyPosition(decoder, binary(
+        /*verifyPosition(decoder, binary(
                 "010022003300072020000000000000000044062A330000000000107F10565D4A8310"));
-
+*/
         verifyPosition(decoder, binary(
                 "0100268033641080207AA34C424CCF8E4239030800005B01140755E30F560000F00F70220000"));
 

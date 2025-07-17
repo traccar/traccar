@@ -4,7 +4,10 @@ import org.geotools.api.data.FileDataStore;
 import org.geotools.api.data.FileDataStoreFinder;
 import org.geotools.api.data.SimpleFeatureSource;
 import org.geotools.data.simple.SimpleFeatureIterator;
-import org.locationtech.jts.geom.*;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.index.strtree.STRtree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,21 +27,21 @@ public class ShapeFileGeocoder implements Geocoder {
     private STRtree spatialIndex;
 
     static class PolygonEntry {
-        Geometry geometry;
-        Long id;
-        String name_en;
-        String name_local;
-        String country;
+        private Geometry geometry;
+        private Long id;
+        private String nameEn;
+        private String nameLocal;
+        private String country;
 
         PolygonEntry(Geometry geometry,
                 Long id,
-                String name_en,
-                String name_local,
+                String nameEn,
+                String nameLocal,
                 String country) {
             this.geometry = geometry;
             this.id = id;
-            this.name_en = name_en;
-            this.name_local = name_local;
+            this.nameEn = nameEn;
+            this.nameLocal = nameLocal;
             this.country = country;
         }
     }
@@ -67,11 +70,11 @@ public class ShapeFileGeocoder implements Geocoder {
                         }
 
                         Long id = (Long) feature.getAttribute("POSITION_I"); // ID
-                        String name_en = (String) feature.getAttribute("POSITION_N"); // Eng
-                        String name_local = (String) feature.getAttribute("POSITIO_01"); // TH COUNTRY
+                        String nameEn = (String) feature.getAttribute("POSITION_N"); // Eng
+                        String nameLocal = (String) feature.getAttribute("POSITIO_01"); // TH COUNTRY
                         String country = (String) feature.getAttribute("COUNTRY");
 
-                        PolygonEntry entry = new PolygonEntry(geom, id, name_en, name_local, country);
+                        PolygonEntry entry = new PolygonEntry(geom, id, nameEn, nameLocal, country);
                         allPolygons.add(entry);
                         spatialIndex.insert(geom.getEnvelopeInternal(), entry);
                     } catch (Exception e) {
@@ -109,8 +112,8 @@ public class ShapeFileGeocoder implements Geocoder {
                 {"placeId":%s,"nameEnglish":"%s","nameLocale":"%s","countryCode":"%s"}
                 """,
                         entry.id,
-                        entry.name_en,
-                        entry.name_local,
+                        entry.nameEn,
+                        entry.nameLocal,
                         entry.country.toUpperCase()).replaceAll("\n", "");
                 LOGGER.debug("Address found:{}", address);
                 found = true;

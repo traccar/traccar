@@ -33,7 +33,7 @@ public class DatabaseHandler extends BasePositionHandler {
     private final Storage storage;
     private final StatisticsManager statisticsManager;
     private final boolean savePositions;
-    
+
     @Inject
     public DatabaseHandler(Config config, Storage storage, StatisticsManager statisticsManager) {
         this.storage = storage;
@@ -45,7 +45,7 @@ public class DatabaseHandler extends BasePositionHandler {
     public void onPosition(Position position, Callback callback) {
 
         try {
-            if(savePositions) {
+            if (savePositions) {
                 position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
             }
             statisticsManager.registerMessageStored(position.getDeviceId(), position.getProtocol());

@@ -86,7 +86,7 @@ public class NotificationManager {
 
     private void updateEvent(Event event, Position position) {
         try {
-            if(saveEvents) {
+            if (saveEvents) {
                 event.setId(storage.addObject(event, new Request(new Columns.Exclude("id"))));
             }
         } catch (StorageException error) {
