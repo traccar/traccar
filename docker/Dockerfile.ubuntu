@@ -9,8 +9,14 @@ RUN jlink --module-path $JAVA_HOME/jmods \
     --strip-debug --no-header-files --no-man-pages --compress=2 --output /jre
 
 FROM ubuntu:24.04
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 COPY --from=package /traccar /opt/traccar
 COPY --from=jdk /jre /opt/traccar/jre
+
 WORKDIR /opt/traccar
 ENTRYPOINT ["/opt/traccar/jre/bin/java"]
 CMD ["-jar", "tracker-server.jar", "conf/traccar.xml"]
