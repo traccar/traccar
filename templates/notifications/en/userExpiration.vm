@@ -1,5 +1,5 @@
 #set($subject = "Account expiration")
-#set($short = "Account expired")
+#set($digest = "Account expired")
 <!DOCTYPE html>
 <html>
 <body>

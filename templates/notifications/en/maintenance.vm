@@ -1,5 +1,5 @@
 #set($subject = "$device.name: maintenance is required")
-#set($short = "$device.name maintenance $maintenance.name is required at $dateTool.format("yyyy-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name maintenance $maintenance.name is required at $dateTool.format("yyyy-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

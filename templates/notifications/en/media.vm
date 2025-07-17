@@ -1,5 +1,5 @@
 #set($subject = "$device.name: media file received")
-#set($short = "$device.name $event.getString("media") received: $event.getString("file") at $dateTool.format("yyyy-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name $event.getString("media") received: $event.getString("file") at $dateTool.format("yyyy-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

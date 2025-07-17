@@ -1,5 +1,5 @@
 #set($subject = "Device expiration")
-#set($short = "Device $device.name expired")
+#set($digest = "Device $device.name expired")
 <!DOCTYPE html>
 <html>
 <body>

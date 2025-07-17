@@ -1,5 +1,5 @@
 #set($subject = "$device.name: queued command sent")
-#set($short = "Queued command sent to $device.name at $dateTool.format("yyyy-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)")
+#set($digest = "Queued command sent to $device.name at $dateTool.format("yyyy-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
