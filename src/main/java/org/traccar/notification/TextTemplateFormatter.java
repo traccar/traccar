@@ -20,6 +20,7 @@ import jakarta.inject.Singleton;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
@@ -33,8 +34,6 @@ import org.traccar.storage.StorageException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.Locale;
@@ -78,12 +77,12 @@ public class TextTemplateFormatter {
     public NotificationMessage formatMessage(
             VelocityContext velocityContext, String name, String templatePath, boolean priority) {
         StringWriter writer = new StringWriter();
-        Path templateFilePath = Paths.get(templatePath, name + ".vm");
-        if (Files.exists(templateFilePath)) {
-            Template template = velocityEngine.getTemplate(templateFilePath.toString(), StandardCharsets.UTF_8.name());
+        try {
+            Template template = velocityEngine.getTemplate(
+                    Paths.get(templatePath, name + ".vm").toString(), StandardCharsets.UTF_8.name());
             template.merge(velocityContext, writer);
             return new NotificationMessage((String) velocityContext.get("subject"), writer.toString(), priority);
-        } else {
+        } catch (ResourceNotFoundException e) {
             return new NotificationMessage("undefined", "undefined", priority);
         }
     }
