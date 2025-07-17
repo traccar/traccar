@@ -17,3 +17,40 @@ jobs:
         java-version: 21
         cache: gradle
     - run: ./gradlew build --no-daemon --stacktrace
+
+    - name: Set current date
+        run: echo "CURRENT_DATE=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+        
+    - name: Set unique tag name
+        run: echo "TAG_NAME=v${{ env.CURRENT_DATE }}${{ github.sha }}" >> $GITHUB_ENV
+        
+    # Create a Release with proper permissions
+    - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}  # Use PAT instead of default token if needed
+        with:
+          tag_name: "${{ env.TAG_NAME }}"
+          release_name: "Release ${{ env.TAG_NAME }}"
+          draft: false
+          prerelease: false
+
+      # Upload JAR as a release asset
+    - name: Upload JAR to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          zip -r traccar-${{env.CURRENT_DATE}}.zip target/
+          JAR_FILE="traccar-${{env.CURRENT_DATE}}.zip"
+          UPLOAD_URL="${{ steps.create_release.outputs.upload_url }}"
+      
+          # Correcting the URL format
+          UPLOAD_URL="${UPLOAD_URL%\{*}?name=$(basename $JAR_FILE)" # Adjusts the URL correctly
+      
+          # Upload the JAR file as a release asset
+          curl -X POST \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @$JAR_FILE \
+            "$UPLOAD_URL"
