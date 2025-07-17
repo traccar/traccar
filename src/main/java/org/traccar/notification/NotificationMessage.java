@@ -17,7 +17,4 @@
 package org.traccar.notification;
 
 public record NotificationMessage(String subject, String body, boolean priority) {
-    public NotificationMessage(String subject, String body) {
-        this(subject, body, false);
-    }
 }
