@@ -24,7 +24,6 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
@@ -61,7 +60,7 @@ public class NotificatorPushover extends Notificator {
     }
 
     @Override
-    public void send(Server server, User user, NotificationMessage shortMessage, Event event, Position position) {
+    public void send(User user, NotificationMessage shortMessage, Event event, Position position) {
 
         Message message = new Message();
         message.token = token;

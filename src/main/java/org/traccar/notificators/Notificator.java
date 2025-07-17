@@ -19,7 +19,6 @@ package org.traccar.notificators;
 import org.traccar.model.Event;
 import org.traccar.model.Notification;
 import org.traccar.model.Position;
-import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
@@ -35,16 +34,12 @@ public abstract class Notificator {
         this.templatePath = templatePath;
     }
 
-    public void send(
-            Notification notification, Server server, User user,
-            Event event, Position position) throws MessageException {
+    public void send(Notification notification, User user, Event event, Position position) throws MessageException {
         var message = notificationFormatter.formatMessage(notification, user, event, position, templatePath);
-        send(server, user, message, event, position);
+        send(user, message, event, position);
     }
 
-    public void send(
-            Server server, User user, NotificationMessage message,
-            Event event, Position position) throws MessageException {
+    public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
         throw new UnsupportedOperationException();
     }
 

@@ -30,7 +30,6 @@ import org.traccar.model.Event;
 import org.traccar.model.Geofence;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Position;
-import org.traccar.model.Server;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificatorManager;
 import org.traccar.session.cache.CacheManager;
@@ -116,7 +115,6 @@ public class NotificationManager {
                 })
                 .toList();
 
-        Server server = cacheManager.getServer();
         Device device = cacheManager.getObject(Device.class, event.getDeviceId());
         LOGGER.info(
                 "Event id: {}, time: {}, type: {}, notifications: {}",
@@ -138,8 +136,7 @@ public class NotificationManager {
                     }
                     for (String notificator : notification.getNotificatorsTypes()) {
                         try {
-                            notificatorManager.getNotificator(notificator).send(
-                                    notification, server, user, event, position);
+                            notificatorManager.getNotificator(notificator).send(notification, user, event, position);
                         } catch (MessageException exception) {
                             LOGGER.warn("Notification failed", exception);
                         }
