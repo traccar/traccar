@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import org.traccar.storage.StorageException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.Locale;
@@ -73,16 +75,17 @@ public class TextTemplateFormatter {
         return velocityContext;
     }
 
-    public Template getTemplate(String name, String path) {
-        String templateFilePath = Paths.get(path, name + ".vm").toString();
-        return velocityEngine.getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
-    }
-
     public NotificationMessage formatMessage(
             VelocityContext velocityContext, String name, String templatePath, boolean priority) {
         StringWriter writer = new StringWriter();
-        getTemplate(name, templatePath).merge(velocityContext, writer);
-        return new NotificationMessage((String) velocityContext.get("subject"), writer.toString(), priority);
+        Path templateFilePath = Paths.get(templatePath, name + ".vm");
+        if (Files.exists(templateFilePath)) {
+            Template template = velocityEngine.getTemplate(templateFilePath.toString(), StandardCharsets.UTF_8.name());
+            template.merge(velocityContext, writer);
+            return new NotificationMessage((String) velocityContext.get("subject"), writer.toString(), priority);
+        } else {
+            return new NotificationMessage("undefined", "undefined", priority);
+        }
     }
 
 }
