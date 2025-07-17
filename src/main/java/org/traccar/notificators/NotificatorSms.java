@@ -21,6 +21,7 @@ import jakarta.inject.Singleton;
 import org.traccar.database.StatisticsManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.model.Server;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
@@ -42,7 +43,9 @@ public class NotificatorSms extends Notificator {
     }
 
     @Override
-    public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
+    public void send(
+            Server server, User user, NotificationMessage message,
+            Event event, Position position) throws MessageException {
         if (user.getPhone() != null) {
             statisticsManager.registerSms();
             smsManager.sendMessage(user.getPhone(), message.body(), false);

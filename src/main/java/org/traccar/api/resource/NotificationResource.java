@@ -31,6 +31,7 @@ import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Event;
 import org.traccar.model.ManagedUser;
 import org.traccar.model.Notification;
+import org.traccar.model.Server;
 import org.traccar.model.Typed;
 import org.traccar.model.User;
 import org.traccar.notification.MessageException;
@@ -93,9 +94,10 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @POST
     @Path("test")
     public Response testMessage() throws MessageException, StorageException {
+        Server server = permissionsService.getServer();
         User user = permissionsService.getUser(getUserId());
         for (Typed method : notificatorManager.getAllNotificatorTypes()) {
-            notificatorManager.getNotificator(method.type()).send(null, user, new Event("test", 0), null);
+            notificatorManager.getNotificator(method.type()).send(null, server, user, new Event("test", 0), null);
         }
         return Response.noContent().build();
     }
@@ -104,8 +106,9 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     @Path("test/{notificator}")
     public Response testMessage(@PathParam("notificator") String notificator)
             throws MessageException, StorageException {
+        Server server = permissionsService.getServer();
         User user = permissionsService.getUser(getUserId());
-        notificatorManager.getNotificator(notificator).send(null, user, new Event("test", 0), null);
+        notificatorManager.getNotificator(notificator).send(null, server, user, new Event("test", 0), null);
         return Response.noContent().build();
     }
 
@@ -136,9 +139,10 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
                         User.class, new Request(new Columns.All(), Condition.merge(conditions))));
             }
         }
+        Server server = permissionsService.getServer();
         for (User user : users) {
             if (!user.getTemporary()) {
-                notificatorManager.getNotificator(notificator).send(user, message, null, null);
+                notificatorManager.getNotificator(notificator).send(server, user, message, null, null);
             }
         }
         return Response.noContent().build();
