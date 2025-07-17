@@ -62,7 +62,7 @@ public class PasswordResource extends BaseResource {
                 new Columns.All(), new Condition.Equals("email", email)));
         if (user != null) {
             var velocityContext = textTemplateFormatter.prepareContext(permissionsService.getServer(), user);
-            var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "passwordReset", "full", false);
+            var fullMessage = textTemplateFormatter.formatMessage(velocityContext, "passwordReset", false);
             mailManager.sendMessage(user, true, fullMessage.subject(), fullMessage.body());
         }
         return Response.ok().build();

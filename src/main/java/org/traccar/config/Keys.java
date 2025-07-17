@@ -884,12 +884,20 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Cache control header value. By default resources are cached for one hour.
+     * Cache control header value. By default, resources are cached for one hour.
      */
     public static final ConfigKey<String> WEB_CACHE_CONTROL = new StringConfigKey(
             "web.cacheControl",
             List.of(KeyType.CONFIG),
             "max-age=3600,public");
+
+    /**
+     * Path to localization files.
+     */
+    public static final ConfigKey<String> WEB_LOCALIZATION_PATH = new StringConfigKey(
+            "web.localizationPath",
+            List.of(KeyType.CONFIG),
+            "./templates/translations");
 
     /**
      * Enable TOTP authentication on the server.

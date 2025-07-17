@@ -27,15 +27,13 @@ import org.traccar.notification.NotificationMessage;
 public abstract class Notificator {
 
     private final NotificationFormatter notificationFormatter;
-    private final String templatePath;
 
-    public Notificator(NotificationFormatter notificationFormatter, String templatePath) {
+    public Notificator(NotificationFormatter notificationFormatter) {
         this.notificationFormatter = notificationFormatter;
-        this.templatePath = templatePath;
     }
 
     public void send(Notification notification, User user, Event event, Position position) throws MessageException {
-        var message = notificationFormatter.formatMessage(notification, user, event, position, templatePath);
+        var message = notificationFormatter.formatMessage(notification, user, event, position);
         send(user, message, event, position);
     }
 

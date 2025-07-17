@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class NotificatorTraccar extends Notificator {
     public NotificatorTraccar(
             Config config, NotificationFormatter notificationFormatter, Client client,
             Storage storage, CacheManager cacheManager) {
-        super(notificationFormatter, "short");
+        super(notificationFormatter);
         this.client = client;
         this.storage = storage;
         this.cacheManager = cacheManager;
@@ -89,7 +89,7 @@ public class NotificatorTraccar extends Notificator {
 
             NotificationObject item = new NotificationObject();
             item.title = shortMessage.subject();
-            item.body = shortMessage.body();
+            item.body = shortMessage.digest();
             item.sound = "default";
 
             String[] tokenArray = user.getString("notificationTokens").split("[, ]");

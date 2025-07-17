@@ -63,7 +63,7 @@ public class NotificatorTelegram extends Notificator {
 
     @Inject
     public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter, Client client) {
-        super(notificationFormatter, "short");
+        super(notificationFormatter);
         this.client = client;
         urlSendText = String.format(
                 "https://api.telegram.org/bot%s/sendMessage", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
@@ -91,7 +91,7 @@ public class NotificatorTelegram extends Notificator {
         if (message.chatId == null) {
             message.chatId = chatId;
         }
-        message.text = shortMessage.body();
+        message.text = shortMessage.digest();
         client.target(urlSendText).request().post(Entity.json(message)).close();
         if (sendLocation && position != null) {
             client.target(urlSendLocation).request().post(

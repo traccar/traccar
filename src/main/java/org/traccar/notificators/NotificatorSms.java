@@ -36,7 +36,7 @@ public class NotificatorSms extends Notificator {
     @Inject
     public NotificatorSms(
             SmsManager smsManager, NotificationFormatter notificationFormatter, StatisticsManager statisticsManager) {
-        super(notificationFormatter, "short");
+        super(notificationFormatter);
         this.smsManager = smsManager;
         this.statisticsManager = statisticsManager;
     }
@@ -45,7 +45,7 @@ public class NotificatorSms extends Notificator {
     public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
         if (user.getPhone() != null) {
             statisticsManager.registerSms();
-            smsManager.sendMessage(user.getPhone(), message.body(), false);
+            smsManager.sendMessage(user.getPhone(), message.digest(), false);
         }
     }
 
