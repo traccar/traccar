@@ -28,8 +28,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Singleton
 public class LocaleManager {
@@ -39,7 +39,7 @@ public class LocaleManager {
     private final Path path;
     private final ObjectMapper objectMapper;
 
-    private final Map<String, Map<String, String>> languageBundles = new HashMap<>();
+    private final Map<String, Map<String, String>> languageBundles = new ConcurrentHashMap<>();
 
     @Inject
     public LocaleManager(Config config, ObjectMapper objectMapper) {
