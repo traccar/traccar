@@ -1,4 +1,0 @@
-#set($subject = "$device.name: alarm!")
-#set($alarmKey = $event.getString("alarm"))
-#set($alarmName = $translations.get("alarm${alarmKey.substring(0, 1).toUpperCase()}${alarmKey.substring(1)}"))
-$device.name alarm: $alarmName at $dateTool.format("yyyy-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)
