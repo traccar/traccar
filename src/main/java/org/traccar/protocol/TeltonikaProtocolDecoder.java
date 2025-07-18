@@ -296,6 +296,9 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         });
         register(636, fmbXXX, (p, b) -> p.set("cid4g", b.readUnsignedInt()));
         register(662, fmbXXX, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedByte() > 0));
+        register(132,null , (p, b) -> interpretParam132(p, b));
+        register(123, null, (p, b) -> interpretParam123(p, b));
+        
         register(10800, fmbXXX, (p, b) -> p.set("eyeTemp1", b.readShort() / 100.0));
         register(10801, fmbXXX, (p, b) -> p.set("eyeTemp2", b.readShort() / 100.0));
         register(10802, fmbXXX, (p, b) -> p.set("eyeTemp3", b.readShort() / 100.0));
@@ -304,6 +307,202 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(10833, fmbXXX, (p, b) -> p.set("eyeRoll2", b.readShort()));
         register(10834, fmbXXX, (p, b) -> p.set("eyeRoll3", b.readShort()));
         register(10835, fmbXXX, (p, b) -> p.set("eyeRoll4", b.readShort()));
+    }
+    public static void interpretParam123(Position p, ByteBuf b) {
+        long decimalValue = b.readLong();
+        Map<String, Object> parsedFlags = parseControlStateFlags(decimalValue);
+        parseFlags(p, parsedFlags);
+    }
+
+     public static void interpretParam132(Position p, ByteBuf b) {
+        long decimalValue = b.readLong();
+        Map<String, Object> parsedFlags = parseSecurityState(decimalValue);
+        parseFlags(p, parsedFlags);
+    }
+   public static Map<String, Object> parseControlStateFlags(long decimalValue) {
+        byte[] bytes = new byte[4];
+        for (int i = 0; i < 4; i++) {
+            bytes[i] = (byte) (decimalValue >> (i * 8));
+        }
+
+        Map<String, Object> controlStateFlags = new HashMap<>();
+
+        int byte0 = bytes[0] & 0xFF;
+        controlStateFlags.put("STOP", (byte0 & 0x01) != 0);
+        controlStateFlags.put("Oil", (byte0 & 0x02) != 0);
+        controlStateFlags.put("CoolantLiquid", (byte0 & 0x04) != 0);
+        controlStateFlags.put("HandbrakeSystem", (byte0 & 0x08) != 0);
+        controlStateFlags.put("BatteryNotCharging", (byte0 & 0x10) != 0);
+        controlStateFlags.put("AIRBAG", (byte0 & 0x20) != 0);
+        controlStateFlags.put("EPS", (byte0 & 0x40) != 0);
+        controlStateFlags.put("ESP", (byte0 & 0x80) != 0);
+
+        int byte1 = bytes[1] & 0xFF;
+        controlStateFlags.put("CHECKENGINE", (byte1 & 0x01) != 0);
+        controlStateFlags.put("LightsFailure", (byte1 & 0x02) != 0);
+        controlStateFlags.put("LowTirePressure", (byte1 & 0x04) != 0);
+        controlStateFlags.put("WearofBrakePads", (byte1 & 0x08) != 0);
+        controlStateFlags.put("Warning", (byte1 & 0x10) != 0);
+        controlStateFlags.put("ABS", (byte1 & 0x20) != 0);
+        controlStateFlags.put("LowFuel", (byte1 & 0x40) != 0);
+        controlStateFlags.put("MaintenanceRequired", (byte1 & 0x80) != 0);
+
+        int byte2 = bytes[2] & 0xFF;
+        controlStateFlags.put("ESP Indicator", (byte2 & 0x01) != 0);
+        controlStateFlags.put("GlowPlugIndicator", (byte2 & 0x02) != 0);
+        controlStateFlags.put("FAP", (byte2 & 0x04) != 0);
+        controlStateFlags.put("EPC", (byte2 & 0x08) != 0);
+        controlStateFlags.put("ParkingLights", (byte2 & 0x10) != 0);
+        controlStateFlags.put("DippedHeadlights", (byte2 & 0x20) != 0);
+        controlStateFlags.put("FullBeamHeadlights", (byte2 & 0x40) != 0);
+        controlStateFlags.put("FrontFoglights", (byte2 & 0x80) != 0);
+
+        int byte3 = bytes[3] & 0xFF;
+        controlStateFlags.put("ReadytoDrive", (byte3 & 0x01) != 0);
+        controlStateFlags.put("CruiseControl", (byte3 & 0x02) != 0);
+        controlStateFlags.put("AutomaticRetarder", (byte3 & 0x04) != 0);
+        controlStateFlags.put("ManualRetarder", (byte3 & 0x08) != 0);
+        controlStateFlags.put("AirConditioning", (byte3 & 0x10) != 0);
+        controlStateFlags.put("RearFoglights", (byte3 & 0x20) != 0);
+        controlStateFlags.put("PassengerSeatBelt", (byte3 & 0x40) != 0);
+        controlStateFlags.put("DriverSeatBelt", (byte3 & 0x80) != 0);
+
+        return controlStateFlags;
+    }
+       private static void parseFlags(Position p, Map<String, Object> parsedFlags) {
+        parsedFlags.forEach((key, value) -> {
+            if (value instanceof Boolean) {
+                p.set(key, (Boolean) value); 
+            } else if (value instanceof String) {
+                p.set(key, (String) value); 
+            } else if (value instanceof Double) {
+                p.set(key, (Double) value); 
+            } else if (value instanceof Integer) {
+                p.set(key, (Integer) value);
+            } else {  }
+        });
+    }
+
+     public  static  Map<String, Object> parseSecurityState(long decimalValue) {
+        String binaryString = Long.toBinaryString(decimalValue & 0xFFFFFFFFFFFFFFFFL); // Ensure 64-bit representation
+        binaryString = String.format("%64s", binaryString).replace(' ', '0'); // Pad with leading zeros if necessary
+
+        Map<String, Object> securityStateFlags = new HashMap<>();
+
+        int byte0 = Integer.parseInt(binaryString.substring(56, 64), 2);
+        int can1 = byte0 & 0x03;
+        int can2 = (byte0 >> 2) & 0x03;
+        int can3 = (byte0 >> 4) & 0x03;
+
+        String[] canMapping = {
+                "CAN not connected connection not required",
+                "CAN connected but currently module not receiving data",
+                "CAN not connected require connection",
+                "CAN connected"
+        };
+
+        securityStateFlags.put("CAN1", canMapping[can1]);
+        securityStateFlags.put("CAN2", canMapping[can2]);
+        securityStateFlags.put("CAN3", canMapping[can3]);
+
+        int byte1 = Integer.parseInt(binaryString.substring(48, 56), 2);
+        boolean engineLockRequest = (byte1 & 0x01) != 0;
+        boolean hazardLightsActive = (byte1 & 0x02) != 0;
+        boolean factoryArmed = (byte1 & 0x04) != 0;
+
+        securityStateFlags.put("EngineLockRequest", engineLockRequest);
+        securityStateFlags.put("HazardWarningLightsActive", hazardLightsActive);
+        securityStateFlags.put("FactoryArmed", factoryArmed);
+
+        int byte2 = Integer.parseInt(binaryString.substring(40, 48), 2);
+        boolean electricEngineWorking = (byte2 & 0x02) != 0;
+        boolean batteryChargingOn = (byte2 & 0x04) != 0;
+        boolean chargingWirePlugged = (byte2 & 0x08) != 0;
+        boolean vehicleWorkingMode = (byte2 & 0x10) != 0;
+        boolean operateButton = (byte2 & 0x20) != 0;
+        boolean immobilizerServiceMode = (byte2 & 0x40) != 0;
+        boolean programmedKeys = (byte2 & 0x80) != 0;
+
+        securityStateFlags.put("ElectricEngineWorking", electricEngineWorking);
+        securityStateFlags.put("BatteryChargingOn", batteryChargingOn);
+        securityStateFlags.put("ChargingWirePlugged", chargingWirePlugged);
+        securityStateFlags.put("VehicleWorkingMode", vehicleWorkingMode ? "Business" : "Private");
+        securityStateFlags.put("OperateButtoninCar", operateButton);
+        securityStateFlags.put("ImmobilizerServiceMode", immobilizerServiceMode);
+        securityStateFlags.put("ProgrammedSequenceofKeys", programmedKeys);
+
+        int byte3 = Integer.parseInt(binaryString.substring(32, 40), 2);
+        boolean keyInIgnition = (byte3 & 0x01) != 0;
+        boolean ignitionOn = (byte3 & 0x02) != 0;
+        boolean dynamicIgnitionOn = (byte3 & 0x04) != 0;
+        boolean webasto = (byte3 & 0x08) != 0;
+        boolean carClosed = (byte3 & 0x10) != 0;
+        boolean carClosedByRemote = (byte3 & 0x20) != 0;
+        boolean alarmActuated = (byte3 & 0x40) != 0;
+        boolean alarmEmulated = (byte3 & 0x80) != 0;
+
+        securityStateFlags.put("KeyinIgnitionLock", keyInIgnition);
+        securityStateFlags.put("IgnitionOn", ignitionOn);
+        securityStateFlags.put("DynamicIgnitionOn", dynamicIgnitionOn);
+        securityStateFlags.put("Webasto", webasto);
+        securityStateFlags.put("CarClosed", carClosed);
+        securityStateFlags.put("CarClosedRemoteControl", carClosedByRemote);
+        securityStateFlags.put("FactoryAlarmSystemActuated", alarmActuated);
+        securityStateFlags.put("FactoryAlarmSystemEmulated", alarmEmulated);
+
+        int byte4 = Integer.parseInt(binaryString.substring(24, 32), 2);
+        boolean parkingActivated = (byte4 & 0x01) != 0;
+        boolean neutralActivated = (byte4 & 0x04) != 0;
+        boolean driveActivated = (byte4 & 0x08) != 0;
+        boolean handbrakeActuated = (byte4 & 0x10) != 0;
+        boolean footbrakeActuated = (byte4 & 0x20) != 0;
+        boolean engineWorking = (byte4 & 0x40) != 0;
+        boolean reverseGearOn = (byte4 & 0x80) != 0;
+
+        securityStateFlags.put("ParkingActivated", parkingActivated);
+        securityStateFlags.put("NeutralActivated", neutralActivated);
+        securityStateFlags.put("DriveActivated", driveActivated);
+        securityStateFlags.put("HandbrakeActuated", handbrakeActuated);
+        securityStateFlags.put("FootbrakeActuated", footbrakeActuated);
+        securityStateFlags.put("EngineWorking", engineWorking);
+        securityStateFlags.put("ReverseGearOn", reverseGearOn);
+
+        int byte5 = Integer.parseInt(binaryString.substring(16, 24), 2);
+        boolean frontLeftDoorOpened = (byte5 & 0x01) != 0;
+        boolean frontRightDoorOpened = (byte5 & 0x02) != 0;
+        boolean rearLeftDoorOpened = (byte5 & 0x04) != 0;
+        boolean rearRightDoorOpened = (byte5 & 0x08) != 0;
+        boolean engineCoverOpened = (byte5 & 0x10) != 0;
+        boolean trunkDoorOpened = (byte5 & 0x20) != 0;
+        boolean roofOpened = (byte5 & 0x40) != 0;
+
+        securityStateFlags.put("FrontLeftDoorOpened", frontLeftDoorOpened);
+        securityStateFlags.put("FrontRightDoorOpened", frontRightDoorOpened);
+        securityStateFlags.put("RearLeftDoorOpened", rearLeftDoorOpened);
+        securityStateFlags.put("RearRightDoorOpened", rearRightDoorOpened);
+        securityStateFlags.put("EngineCoverOpened", engineCoverOpened);
+        securityStateFlags.put("TrunkDoorOpened", trunkDoorOpened);
+        securityStateFlags.put("RoofOpened", roofOpened);
+
+        int byte6 = Integer.parseInt(binaryString.substring(8, 16), 2);
+        int lowNibble = byte6 & 0x0F;
+        int highNibble = byte6 & 0xF0;
+
+        String[] remoteControlActionMapping = {
+                "Car Closed",
+                "Car Opened",
+                "Trunk Cover Opened",
+                "ModuleHasSentaRearmingSignal",
+                "Car was closed three times by factory's remote control"
+        };
+
+        String factoryRemoteControlAction = (lowNibble <= 4) ? remoteControlActionMapping[lowNibble] : "Unknown";
+        boolean canModuleSleepMode = (highNibble & 0x80) != 0;
+
+        securityStateFlags.put("RemoteControlAction", factoryRemoteControlAction);
+        securityStateFlags.put("CANModuleSleepMode", canModuleSleepMode);
+
+        return securityStateFlags;
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
