@@ -33,7 +33,7 @@ services:
       DATABASE_USER: traccar
       DATABASE_PASSWORD: traccar
     healthcheck:
-      test: [ "CMD", "curl", "-fsS", "http://localhost:8082/api/health" ]
+      test: [ "CMD", "wget", "-q", "-s", "http://localhost:8082/api/health" ]
       interval: 2m
       timeout: 5s
       start_period: 1h
