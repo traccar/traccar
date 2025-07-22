@@ -100,7 +100,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 4)) {
-            position.setFixTime(new Date(Long.parseLong(values[index++])));
+            position.setTime(new Date(Long.parseLong(values[index++])));
         }
 
         if (BitUtil.check(mask, 5)) {
