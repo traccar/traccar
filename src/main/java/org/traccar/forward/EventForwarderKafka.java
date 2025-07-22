@@ -54,12 +54,28 @@ public class EventForwarderKafka implements EventForwarder {
                     .replaceAll("\"\\{", "\\{")
                     .replaceAll("}\"", "}")
                     .replaceAll("\\\\", "");
-            LOGGER.debug("Forwarding event to Kafka topic {}: key={}, value={}", topic, key, value);
-            producer.send(new ProducerRecord<>(topic, key, value));
+            String topicNew = topic + "-" + getEventTopic(eventData);
+            LOGGER.debug("Forwarding event to Kafka topic {}: key={}, value={}", topicNew, key, value);
+            producer.send(new ProducerRecord<>(topicNew, key, value));
             resultHandler.onResult(true, null);
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);
         }
+    }
+
+    protected String getEventTopic(EventData eventData) {
+        String topic = camelToKebabCase(eventData.getEvent().getType());
+        if (eventData.getEvent().getType() == "alarm") {
+            String alarm = (String) eventData.getEvent().getAttributes().get("alarm");
+            if (alarm != null) {
+                topic = topic + "-" + camelToKebabCase(alarm);
+            }
+        }
+        return topic;
+    }
+
+    protected String camelToKebabCase(String str) {
+        return str.replaceAll("([a-z0-9])([A-Z])", "$1-$2").toLowerCase();
     }
 
 }
