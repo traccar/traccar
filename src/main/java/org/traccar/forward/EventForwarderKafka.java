@@ -54,9 +54,8 @@ public class EventForwarderKafka implements EventForwarder {
                     .replaceAll("\"\\{", "\\{")
                     .replaceAll("}\"", "}")
                     .replaceAll("\\\\", "");
-            String topicNew = topic + "-" + getEventTopic(eventData);
-            LOGGER.debug("Forwarding event to Kafka topic {}: key={}, value={}", topicNew, key, value);
-            producer.send(new ProducerRecord<>(topicNew, key, value));
+            LOGGER.debug("Forwarding event to Kafka topic {}: key={}, value={}", topic, key, value);
+            producer.send(new ProducerRecord<>(topic, key, value));
             resultHandler.onResult(true, null);
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);
