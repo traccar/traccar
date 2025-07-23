@@ -1,0 +1,36 @@
+ <?xml version='1.0' encoding='UTF-8'?>
+    <!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
+    <properties>
+        <entry key='config.default'>./conf/default.xml</entry>
+        <entry key='config.useEnvironmentVariables'>true</entry>
+        <entry key='filter.enable'>false</entry>
+        <entry key='logger.enable'>true</entry>
+        <entry key='logger.level'>info</entry>
+        <entry key='logger.file'>/dev/stdout</entry>
+        <entry key='logger.rotate'>false</entry>
+
+        <entry key='database.driver'>com.mysql.cj.jdbc.Driver</entry>
+        <entry key='database.url'>jdbc:mysql://traccar-v6-mysql:3306/traccar?serverTimezone=UTC&amp;useSSL=false&amp;allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>
+
+        <entry key='database.ignoreUnknown'>false</entry>
+        <entry key='database.registerUnknown'>true</entry>
+
+        <entry key='database.saveEmpty'>true</entry>
+
+        <entry key='forward.type'>kafka</entry>
+        <entry key='forward.topic'>traccar6-position</entry>
+        <entry key='forward.url'>b-1.tracking-plus-pro.2ptml9.c2.kafka.ap-southeast-1.amazonaws.com:9092,b-2.tracking-plus-pro.2ptml9.c2.kafka.ap-southeast-1.amazonaws.com:9092,b-3.tracking-plus-pro.2ptml9.c2.kafka.ap-southeast-1.amazonaws.com:9092,b-4.tracking-plus-pro.2ptml9.c2.kafka.ap-southeast-1.amazonaws.com:9092,b-5.tracking-plus-pro.2ptml9.c2.kafka.ap-southeast-1.amazonaws.com:9092</entry>   
+
+        <entry key='event.forward.url'>b-1.tracking-plus-pro.2ptml9.c2.kafka.ap-southeast-1.amazonaws.com:9092,b-2.tracking-plus-pro.2ptml9.c2.kafka.ap-southeast-1.amazonaws.com:9092,b-3.tracking-plus-pro.2ptml9.c2.kafka.ap-southeast-1.amazonaws.com:9092,b-4.tracking-plus-pro.2ptml9.c2.kafka.ap-southeast-1.amazonaws.com:9092,b-5.tracking-plus-pro.2ptml9.c2.kafka.ap-southeast-1.amazonaws.com:9092</entry>
+        <entry key='event.forward.type'>kafka</entry>
+        <entry key='event.forward.topic'>traccar6-event</entry>
+
+        <entry key='geocoder.shapefile'>data/shapefile/positions.shp</entry>
+        <entry key='geocoder.enable'>true</entry>
+        <entry key='geocoder.type'>shapefile</entry>
+        <entry key='geocoder.ignorePositions'>false</entry>
+        <entry key='geocoder.processInvalidPositions'>false</entry>
+        <entry key='geocoder.reuseDistance'>10</entry>
+
+        <entry key='ruptela.timeout'>60</entry>
+    </properties>
