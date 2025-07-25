@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,8 +60,10 @@ import java.io.OutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 public class ReportUtils {
@@ -302,57 +304,57 @@ public class ReportUtils {
         TripsConfig tripsConfig = new TripsConfig(
                 new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
+        boolean trips = reportClass.equals(TripReportItem.class);
 
+        List<Event> filteredEvents = new ArrayList<>();
+        Map<Long, Position> positionMap = new HashMap<>();
+        Position startPosition = null;
+        double maxSpeed = 0;
         var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
         if (!positions.isEmpty()) {
-            boolean trips = reportClass.equals(TripReportItem.class);
-
             MotionState motionState = new MotionState();
-            boolean initialValue = isMoving(positions, 0, tripsConfig);
+            boolean initialValue = positions.get(0).getBoolean(Position.KEY_MOTION);
             motionState.setMotionStreak(initialValue);
             motionState.setMotionState(initialValue);
+            if (initialValue == trips) {
+                startPosition = positions.get(0);
+                maxSpeed = startPosition.getSpeed();
+            }
 
-            boolean detected = trips == motionState.getMotionState();
-            double maxSpeed = 0;
-            int startEventIndex = detected ? 0 : -1;
-            int startNoEventIndex = -1;
             for (int i = 0; i < positions.size(); i++) {
-                boolean motion = isMoving(positions, i, tripsConfig);
-                if (motionState.getMotionState() != motion) {
-                    if (motion == trips) {
-                        if (!detected) {
-                            startEventIndex = i;
-                            maxSpeed = positions.get(i).getSpeed();
-                        }
-                        startNoEventIndex = -1;
-                    } else {
-                        startNoEventIndex = i;
-                    }
-                } else {
-                    maxSpeed = Math.max(maxSpeed, positions.get(i).getSpeed());
-                }
-
-                MotionProcessor.updateState(motionState, positions.get(i), motion, tripsConfig);
+                Position last = i > 0 ? positions.get(i - 1) : null;
+                Position position = positions.get(i);
+                maxSpeed = Math.max(maxSpeed, position.getSpeed());
+                positionMap.put(position.getId(), position);
+                boolean motion = position.getBoolean(Position.KEY_MOTION);
+                MotionProcessor.updateState(motionState, last, positions.get(i), motion, tripsConfig);
                 if (motionState.getEvent() != null) {
-                    if (motion == trips) {
-                        detected = true;
-                        startNoEventIndex = -1;
-                    } else if (startEventIndex >= 0 && startNoEventIndex >= 0) {
-                        result.add(calculateTripOrStop(
-                                device, positions.get(startEventIndex), positions.get(startNoEventIndex),
-                                maxSpeed, ignoreOdometer, reportClass));
-                        detected = false;
-                        startEventIndex = -1;
-                        startNoEventIndex = -1;
-                    }
+                    motionState.getEvent().set("maxSpeed", maxSpeed);
+                    filteredEvents.add(motionState.getEvent());
+                    maxSpeed = 0;
                 }
             }
-            if (detected & startEventIndex >= 0 && startEventIndex < positions.size() - 1) {
-                int endIndex = startNoEventIndex >= 0 ? startNoEventIndex : positions.size() - 1;
-                result.add(calculateTripOrStop(
-                        device, positions.get(startEventIndex), positions.get(endIndex),
-                        maxSpeed, ignoreOdometer, reportClass));
+        }
+
+        for (Event event : filteredEvents) {
+            boolean motion = event.getType().equals(Event.TYPE_DEVICE_MOVING);
+            if (motion == trips) {
+                startPosition = positionMap.get(event.getPositionId());
+            } else if (startPosition != null) {
+                Position endPosition = positionMap.get(event.getPositionId());
+                if (endPosition != null) {
+                    result.add(calculateTripOrStop(
+                            device, startPosition, endPosition,
+                            event.getDouble("maxSpeed"), ignoreOdometer, reportClass));
+                }
+                startPosition = null;
             }
+        }
+
+        if (startPosition != null) {
+            Position endPosition = positions.get(positions.size() - 1);
+            result.add(calculateTripOrStop(
+                    device, startPosition, endPosition, maxSpeed, ignoreOdometer, reportClass));
         }
 
         return result;
@@ -378,22 +380,31 @@ public class ReportUtils {
                 .filter(event -> filter.contains(event.getType()))
                 .toList();
 
-        Event startEvent = null;
+        Position startPosition = PositionUtil.getEdgePosition(storage, device.getId(), from, to, false);
+        if (startPosition != null && !startPosition.getBoolean(Position.KEY_MOTION)) {
+            startPosition = null;
+        }
+
         for (Event event : filteredEvents) {
             boolean motion = event.getType().equals(Event.TYPE_DEVICE_MOVING);
             if (motion == trips) {
-                startEvent = event;
-            } else if (startEvent != null) {
-                Position startPosition = storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", startEvent.getPositionId())));
+                startPosition = storage.getObject(Position.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", event.getPositionId())));
+            } else if (startPosition != null) {
                 Position endPosition = storage.getObject(Position.class, new Request(
                         new Columns.All(), new Condition.Equals("id", event.getPositionId())));
-                if (startPosition != null && endPosition != null) {
+                if (endPosition != null) {
                     result.add(calculateTripOrStop(
                             device, startPosition, endPosition, 0, ignoreOdometer, reportClass));
                 }
-                startEvent = null;
+                startPosition = null;
             }
+        }
+
+        if (startPosition != null) {
+            Position endPosition = PositionUtil.getEdgePosition(storage, device.getId(), from, to, true);
+            result.add(calculateTripOrStop(
+                    device, startPosition, endPosition, 0, ignoreOdometer, reportClass));
         }
 
         return result;

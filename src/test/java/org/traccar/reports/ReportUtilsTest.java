@@ -52,10 +52,11 @@ public class ReportUtilsTest extends BaseTest {
         return dateFormat.parse(time);
     }
 
-    private Position position(String time, double speed, double totalDistance) throws ParseException {
+    private Position position(long id, String time, double speed, double totalDistance) throws ParseException {
 
         Position position = new Position();
 
+        position.setId(id);
         position.setTime(date(time));
         position.setValid(true);
         position.setSpeed(speed);
@@ -106,14 +107,14 @@ public class ReportUtilsTest extends BaseTest {
     public void testDetectTripsSimple() throws Exception {
 
         Stream<Position> data = Stream.of(
-                position("2016-01-01 00:00:00.000", 0, 0),
-                position("2016-01-01 00:01:00.000", 0, 0),
-                position("2016-01-01 00:02:00.000", 10, 0),
-                position("2016-01-01 00:03:00.000", 10, 1000),
-                position("2016-01-01 00:04:00.000", 10, 2000),
-                position("2016-01-01 00:05:00.000", 0, 3000),
-                position("2016-01-01 00:15:00.000", 0, 3000),
-                position("2016-01-01 00:25:00.000", 0, 3000));
+                position(1, "2016-01-01 00:00:00.000", 0, 0),
+                position(2, "2016-01-01 00:01:00.000", 0, 0),
+                position(3, "2016-01-01 00:02:00.000", 10, 0),
+                position(4, "2016-01-01 00:03:00.000", 10, 1000),
+                position(5, "2016-01-01 00:04:00.000", 10, 2000),
+                position(6, "2016-01-01 00:05:00.000", 0, 3000),
+                position(7, "2016-01-01 00:15:00.000", 0, 3000),
+                position(8, "2016-01-01 00:25:00.000", 0, 3000));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
 
         Device device = mockDevice(500, 300, 180, 900, false);
@@ -138,14 +139,14 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testDetectStopsSimple() throws Exception {
         Stream<Position> data = Stream.of(
-                position("2016-01-01 00:00:00.000", 0, 0),
-                position("2016-01-01 00:01:00.000", 0, 0),
-                position("2016-01-01 00:02:00.000", 10, 0),
-                position("2016-01-01 00:03:00.000", 10, 1000),
-                position("2016-01-01 00:04:00.000", 10, 2000),
-                position("2016-01-01 00:05:00.000", 0, 3000),
-                position("2016-01-01 00:15:00.000", 0, 3000),
-                position("2016-01-01 00:25:00.000", 0, 3000));
+                position(1, "2016-01-01 00:00:00.000", 0, 0),
+                position(2, "2016-01-01 00:01:00.000", 0, 0),
+                position(3, "2016-01-01 00:02:00.000", 10, 0),
+                position(4, "2016-01-01 00:03:00.000", 10, 1000),
+                position(5, "2016-01-01 00:04:00.000", 10, 2000),
+                position(6, "2016-01-01 00:05:00.000", 0, 3000),
+                position(7, "2016-01-01 00:15:00.000", 0, 3000),
+                position(8, "2016-01-01 00:25:00.000", 0, 3000));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
 
         Device device = mockDevice(500, 300, 180, 900, false);
@@ -176,14 +177,14 @@ public class ReportUtilsTest extends BaseTest {
     public void testDetectTripsSimpleWithIgnition() throws Exception {
 
         List<Position> data = Arrays.asList(
-                position("2016-01-01 00:00:00.000", 0, 0),
-                position("2016-01-01 00:01:00.000", 0, 0),
-                position("2016-01-01 00:02:00.000", 10, 0),
-                position("2016-01-01 00:03:00.000", 10, 1000),
-                position("2016-01-01 00:04:00.000", 10, 2000),
-                position("2016-01-01 00:05:00.000", 0, 3000),
-                position("2016-01-01 00:15:00.000", 0, 3000),
-                position("2016-01-01 00:25:00.000", 0, 3000));
+                position(1, "2016-01-01 00:00:00.000", 0, 0),
+                position(2, "2016-01-01 00:01:00.000", 0, 0),
+                position(3, "2016-01-01 00:02:00.000", 10, 0),
+                position(4, "2016-01-01 00:03:00.000", 10, 1000),
+                position(5, "2016-01-01 00:04:00.000", 10, 2000),
+                position(6, "2016-01-01 00:05:00.000", 0, 3000),
+                position(7, "2016-01-01 00:15:00.000", 0, 3000),
+                position(8, "2016-01-01 00:25:00.000", 0, 3000));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data.stream());
 
         data.get(5).set(Position.KEY_IGNITION, false);
@@ -210,14 +211,14 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testDetectStopsSimpleWithIgnition() throws Exception {
         List<Position> data = Arrays.asList(
-                position("2016-01-01 00:00:00.000", 0, 0),
-                position("2016-01-01 00:01:00.000", 0, 0),
-                position("2016-01-01 00:02:00.000", 10, 0),
-                position("2016-01-01 00:03:00.000", 10, 1000),
-                position("2016-01-01 00:04:00.000", 10, 2000),
-                position("2016-01-01 00:05:00.000", 0, 3000),
-                position("2016-01-01 00:15:00.000", 0, 3000),
-                position("2016-01-01 00:25:00.000", 0, 3000));
+                position(1, "2016-01-01 00:00:00.000", 0, 0),
+                position(2, "2016-01-01 00:01:00.000", 0, 0),
+                position(3, "2016-01-01 00:02:00.000", 10, 0),
+                position(4, "2016-01-01 00:03:00.000", 10, 1000),
+                position(5, "2016-01-01 00:04:00.000", 10, 2000),
+                position(6, "2016-01-01 00:05:00.000", 0, 3000),
+                position(7, "2016-01-01 00:15:00.000", 0, 3000),
+                position(8, "2016-01-01 00:25:00.000", 0, 3000));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data.stream());
 
         data.get(5).set(Position.KEY_IGNITION, false);
@@ -250,18 +251,18 @@ public class ReportUtilsTest extends BaseTest {
     public void testDetectTripsWithFluctuation() throws Exception {
 
         Stream<Position> data = Stream.of(
-                position("2016-01-01 00:00:00.000", 0, 0),
-                position("2016-01-01 00:01:00.000", 0, 0),
-                position("2016-01-01 00:02:00.000", 10, 0),
-                position("2016-01-01 00:03:00.000", 10, 1000),
-                position("2016-01-01 00:04:00.000", 10, 2000),
-                position("2016-01-01 00:05:00.000", 10, 3000),
-                position("2016-01-01 00:06:00.000", 10, 4000),
-                position("2016-01-01 00:07:00.000", 0, 5000),
-                position("2016-01-01 00:08:00.000", 10, 6000),
-                position("2016-01-01 00:09:00.000", 0, 7000),
-                position("2016-01-01 00:19:00.000", 0, 7000),
-                position("2016-01-01 00:29:00.000", 0, 7000));
+                position(1, "2016-01-01 00:00:00.000", 0, 0),
+                position(2, "2016-01-01 00:01:00.000", 0, 0),
+                position(3, "2016-01-01 00:02:00.000", 10, 0),
+                position(4, "2016-01-01 00:03:00.000", 10, 1000),
+                position(5, "2016-01-01 00:04:00.000", 10, 2000),
+                position(6, "2016-01-01 00:05:00.000", 10, 3000),
+                position(7, "2016-01-01 00:06:00.000", 10, 4000),
+                position(8, "2016-01-01 00:07:00.000", 0, 5000),
+                position(9, "2016-01-01 00:08:00.000", 10, 6000),
+                position(10, "2016-01-01 00:09:00.000", 0, 7000),
+                position(11, "2016-01-01 00:19:00.000", 0, 7000),
+                position(12, "2016-01-01 00:29:00.000", 0, 7000));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
 
         Device device = mockDevice(500, 300, 180, 900, false);
@@ -286,18 +287,18 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testDetectStopsWithFluctuation() throws Exception {
         Stream<Position> data = Stream.of(
-            position("2016-01-01 00:00:00.000", 0, 0),
-            position("2016-01-01 00:01:00.000", 0, 0),
-            position("2016-01-01 00:02:00.000", 10, 0),
-            position("2016-01-01 00:03:00.000", 10, 1000),
-            position("2016-01-01 00:04:00.000", 10, 2000),
-            position("2016-01-01 00:05:00.000", 10, 3000),
-            position("2016-01-01 00:06:00.000", 10, 4000),
-            position("2016-01-01 00:07:00.000", 0, 5000),
-            position("2016-01-01 00:08:00.000", 10, 6000),
-            position("2016-01-01 00:09:00.000", 0, 7000),
-            position("2016-01-01 00:19:00.000", 0, 7000),
-            position("2016-01-01 00:29:00.000", 0, 7000));
+            position(1, "2016-01-01 00:00:00.000", 0, 0),
+            position(2, "2016-01-01 00:01:00.000", 0, 0),
+            position(3, "2016-01-01 00:02:00.000", 10, 0),
+            position(4, "2016-01-01 00:03:00.000", 10, 1000),
+            position(5, "2016-01-01 00:04:00.000", 10, 2000),
+            position(6, "2016-01-01 00:05:00.000", 10, 3000),
+            position(7, "2016-01-01 00:06:00.000", 10, 4000),
+            position(8, "2016-01-01 00:07:00.000", 0, 5000),
+            position(9, "2016-01-01 00:08:00.000", 10, 6000),
+            position(10, "2016-01-01 00:09:00.000", 0, 7000),
+            position(11, "2016-01-01 00:19:00.000", 0, 7000),
+            position(12, "2016-01-01 00:29:00.000", 0, 7000));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
         Device device = mockDevice(500, 300, 180, 900, false);
         ReportUtils reportUtils = new ReportUtils(
@@ -328,12 +329,12 @@ public class ReportUtilsTest extends BaseTest {
     public void testDetectStopsOnly() throws Exception {
 
         var data = Stream.of(
-                position("2016-01-01 00:00:00.000", 0, 0),
-                position("2016-01-01 00:01:00.000", 0, 0),
-                position("2016-01-01 00:02:00.000", 1, 0),
-                position("2016-01-01 00:03:00.000", 0, 0),
-                position("2016-01-01 00:04:00.000", 1, 0),
-                position("2016-01-01 00:05:00.000", 0, 0));
+                position(1, "2016-01-01 00:00:00.000", 0, 0),
+                position(2, "2016-01-01 00:01:00.000", 0, 0),
+                position(3, "2016-01-01 00:02:00.000", 1, 0),
+                position(4, "2016-01-01 00:03:00.000", 0, 0),
+                position(5, "2016-01-01 00:04:00.000", 1, 0),
+                position(6, "2016-01-01 00:05:00.000", 0, 0));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
 
         Device device = mockDevice(500, 300, 200, 900, false);
@@ -357,12 +358,12 @@ public class ReportUtilsTest extends BaseTest {
     public void testDetectStopsWithTripCut() throws Exception {
 
         var data = Stream.of(
-                position("2016-01-01 00:00:00.000", 0, 0),
-                position("2016-01-01 00:01:00.000", 0, 0),
-                position("2016-01-01 00:02:00.000", 0, 0),
-                position("2016-01-01 00:03:00.000", 0, 0),
-                position("2016-01-01 00:04:00.000", 1, 0),
-                position("2016-01-01 00:05:00.000", 2, 0));
+                position(1, "2016-01-01 00:00:00.000", 0, 0),
+                position(2, "2016-01-01 00:01:00.000", 0, 0),
+                position(3, "2016-01-01 00:02:00.000", 0, 0),
+                position(4, "2016-01-01 00:03:00.000", 0, 0),
+                position(5, "2016-01-01 00:04:00.000", 1, 0),
+                position(6, "2016-01-01 00:05:00.000", 2, 0));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
 
         Device device = mockDevice(500, 300, 200, 900, false);
@@ -377,8 +378,8 @@ public class ReportUtilsTest extends BaseTest {
         StopReportItem itemStop = result.iterator().next();
 
         assertEquals(date("2016-01-01 00:00:00.000"), itemStop.getStartTime());
-        assertEquals(date("2016-01-01 00:04:00.000"), itemStop.getEndTime());
-        assertEquals(240000, itemStop.getDuration());
+        assertEquals(date("2016-01-01 00:05:00.000"), itemStop.getEndTime());
+        assertEquals(300000, itemStop.getDuration());
 
     }
 
@@ -386,12 +387,12 @@ public class ReportUtilsTest extends BaseTest {
     public void testDetectStopsStartedFromTrip() throws Exception {
 
         var data = Stream.of(
-                position("2016-01-01 00:00:00.000", 2, 0),
-                position("2016-01-01 00:01:00.000", 1, 0),
-                position("2016-01-01 00:02:00.000", 0, 0),
-                position("2016-01-01 00:12:00.000", 0, 0),
-                position("2016-01-01 00:22:00.000", 0, 0),
-                position("2016-01-01 00:32:00.000", 0, 0));
+                position(1, "2016-01-01 00:00:00.000", 2, 0),
+                position(2, "2016-01-01 00:01:00.000", 1, 0),
+                position(3, "2016-01-01 00:02:00.000", 0, 0),
+                position(4, "2016-01-01 00:12:00.000", 0, 0),
+                position(5, "2016-01-01 00:22:00.000", 0, 0),
+                position(6, "2016-01-01 00:32:00.000", 0, 0));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
 
         Device device = mockDevice(500, 300, 200, 900, false);
@@ -415,12 +416,12 @@ public class ReportUtilsTest extends BaseTest {
     public void testDetectStopsMoving() throws Exception {
 
         var data = Arrays.asList(
-                position("2016-01-01 00:00:00.000", 5, 0),
-                position("2016-01-01 00:01:00.000", 5, 0),
-                position("2016-01-01 00:02:00.000", 3, 0),
-                position("2016-01-01 00:03:00.000", 5, 0),
-                position("2016-01-01 00:04:00.000", 5, 0),
-                position("2016-01-01 00:05:00.000", 5, 0));
+                position(1, "2016-01-01 00:00:00.000", 5, 0),
+                position(2, "2016-01-01 00:01:00.000", 5, 0),
+                position(3, "2016-01-01 00:02:00.000", 3, 0),
+                position(4, "2016-01-01 00:03:00.000", 5, 0),
+                position(5, "2016-01-01 00:04:00.000", 5, 0),
+                position(6, "2016-01-01 00:05:00.000", 5, 0));
         when(storage.getObjects(eq(Position.class), any())).thenReturn(data);
 
         Device device = mockDevice(500, 300, 200, 900, false);
@@ -438,14 +439,14 @@ public class ReportUtilsTest extends BaseTest {
     public void testDetectTripByGap() throws Exception {
 
         var data = Stream.of(
-                position("2016-01-01 00:00:00.000", 7, 100),
-                position("2016-01-01 00:01:00.000", 7, 300),
-                position("2016-01-01 00:02:00.000", 5, 500),
-                position("2016-01-01 00:03:00.000", 5, 600),
-                position("2016-01-01 00:04:00.000", 3, 700),
-                position("2016-01-01 00:23:00.000", 2, 700),
-                position("2016-01-01 00:24:00.000", 5, 800),
-                position("2016-01-01 00:25:00.000", 5, 900));
+                position(1, "2016-01-01 00:00:00.000", 7, 100),
+                position(2, "2016-01-01 00:01:00.000", 7, 300),
+                position(3, "2016-01-01 00:02:00.000", 5, 500),
+                position(4, "2016-01-01 00:03:00.000", 5, 600),
+                position(5, "2016-01-01 00:04:00.000", 3, 700),
+                position(6, "2016-01-01 00:23:00.000", 2, 700),
+                position(7, "2016-01-01 00:24:00.000", 5, 800),
+                position(8, "2016-01-01 00:25:00.000", 5, 900));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
 
         Device device = mockDevice(500, 200, 200, 900, false);
@@ -470,14 +471,14 @@ public class ReportUtilsTest extends BaseTest {
     @Test
     public void testDetectStopByGap() throws Exception {
         var data = Stream.of(
-                position("2016-01-01 00:00:00.000", 7, 100),
-                position("2016-01-01 00:01:00.000", 7, 300),
-                position("2016-01-01 00:02:00.000", 5, 500),
-                position("2016-01-01 00:03:00.000", 5, 600),
-                position("2016-01-01 00:04:00.000", 3, 700),
-                position("2016-01-01 00:23:00.000", 2, 700),
-                position("2016-01-01 00:24:00.000", 5, 800),
-                position("2016-01-01 00:25:00.000", 5, 900));
+                position(1, "2016-01-01 00:00:00.000", 7, 100),
+                position(2, "2016-01-01 00:01:00.000", 7, 300),
+                position(3, "2016-01-01 00:02:00.000", 5, 500),
+                position(4, "2016-01-01 00:03:00.000", 5, 600),
+                position(5, "2016-01-01 00:04:00.000", 3, 700),
+                position(6, "2016-01-01 00:23:00.000", 2, 700),
+                position(7, "2016-01-01 00:24:00.000", 5, 800),
+                position(8, "2016-01-01 00:25:00.000", 5, 900));
         when(storage.getObjectsStream(eq(Position.class), any())).thenReturn(data);
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
@@ -490,8 +491,8 @@ public class ReportUtilsTest extends BaseTest {
         StopReportItem itemStop = stops.iterator().next();
 
         assertEquals(date("2016-01-01 00:04:00.000"), itemStop.getStartTime());
-        assertEquals(date("2016-01-01 00:24:00.000"), itemStop.getEndTime());
-        assertEquals(1200000, itemStop.getDuration());
+        assertEquals(date("2016-01-01 00:25:00.000"), itemStop.getEndTime());
+        assertEquals(1260000, itemStop.getDuration());
     }
 
 }
