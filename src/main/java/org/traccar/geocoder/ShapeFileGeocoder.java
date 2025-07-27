@@ -8,6 +8,8 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.index.strtree.STRtree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,22 +29,22 @@ public class ShapeFileGeocoder implements Geocoder {
     private STRtree spatialIndex;
 
     static class PolygonEntry {
-        private Geometry geometry;
         private Long id;
         private String nameEn;
         private String nameLocal;
         private String country;
+        private PreparedGeometry preparedGeometry;
 
         PolygonEntry(Geometry geometry,
                 Long id,
                 String nameEn,
                 String nameLocal,
                 String country) {
-            this.geometry = geometry;
             this.id = id;
             this.nameEn = nameEn;
             this.nameLocal = nameLocal;
             this.country = country;
+            this.preparedGeometry = PreparedGeometryFactory.prepare(geometry);
         }
     }
 
@@ -68,6 +70,7 @@ public class ShapeFileGeocoder implements Geocoder {
                         if (geom == null || geom.isEmpty()) {
                             continue; // Skip empty geometries
                         }
+                        //Geometry simplifiedGeom = TopologyPreservingSimplifier.simplify(geom, 0.0001);
 
                         Long id = (Long) feature.getAttribute("POSITION_I"); // ID
                         String nameEn = (String) feature.getAttribute("POSITION_N"); // Eng
@@ -94,32 +97,43 @@ public class ShapeFileGeocoder implements Geocoder {
     @Override
     public String getAddress(double latitude, double longitude, ReverseGeocoderCallback callback) {
         LOGGER.debug("Finding address for coordinates: {}, {}", latitude, longitude);
+        long startAll = System.nanoTime();
+
         Coordinate testCoord = new Coordinate(longitude, latitude);
         GeometryFactory geometryFactory = new GeometryFactory();
         Point testPoint = geometryFactory.createPoint(testCoord);
 
+        long startQuery = System.nanoTime();
+
         // Fast spatial query using bounding box
         @SuppressWarnings("unchecked")
         List<PolygonEntry> candidates = spatialIndex.query(testPoint.getEnvelopeInternal());
+        long endQuery = System.nanoTime();
+        LOGGER.debug("Candidates count: {}", candidates.size());
 
+        long startCheck = System.nanoTime();
         boolean found = false;
         String address = "No address found";
         for (PolygonEntry entry : candidates) {
-            if (entry.geometry.contains(testPoint)) {
+            if (entry.preparedGeometry.contains(testPoint)) {
                 LOGGER.debug("Point ({}, {}) is inside polygon with ID: {}", longitude, latitude, entry.id);
                 address = String.format(
                         """
-                {"placeId":%s,"nameEnglish":"%s","nameLocale":"%s","countryCode":"%s"}
-                """,
+                {"placeId":%s,"nameEnglish":"%s","nameLocale":"%s","countryCode":"%s"}""",
                         entry.id,
                         entry.nameEn,
                         entry.nameLocal,
-                        entry.country.toUpperCase()).replaceAll("\n", "");
+                        entry.country.toUpperCase());
                 LOGGER.debug("Address found:{}", address);
                 found = true;
                 break;
             }
         }
+        long endCheck = System.nanoTime();
+        LOGGER.debug("Time - total: {}ms, spatial query: {}ms, contains check: {}ms",
+        (endCheck - startAll) / 1_000_000,
+        (endQuery - startQuery) / 1_000_000,
+        (endCheck - startCheck) / 1_000_000);
 
         if (!found) {
             LOGGER.info("Point ({}, {}) is NOT inside any polygon.", longitude, latitude);
