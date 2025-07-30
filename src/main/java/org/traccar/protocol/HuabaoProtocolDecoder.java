@@ -1162,12 +1162,25 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             position.setDeviceId(deviceSession.getDeviceId());
 
             getLastLocation(position, null);
-            String data = buf.readCharSequence(buf.readableBytes(), StandardCharsets.US_ASCII).toString().trim();
+
+            // Capture the remaining bytes from the buffer BEFORE attempting to convert them to String
+            int readableBytes = buf.readableBytes();
+            byte[] rawBytes = new byte[readableBytes];
+            buf.readBytes(rawBytes);
+
+            String data = new String(rawBytes, StandardCharsets.US_ASCII).trim();
             if (data.startsWith("GTSL")) {
                 String[] values = data.split("\\|");
                 if (values.length > 4) {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, values[4]);
                 }
+            }else{
+                StringBuilder hexStringBuilder = new StringBuilder();
+                for (byte b : rawBytes) {
+                    hexStringBuilder.append(String.format("%02X", b));
+                }
+                String hexData = hexStringBuilder.toString();
+                position.set(Position.KEY_HEX_DATA, hexData);
             }
 
             return position.getAttributes().isEmpty() ? null : position;

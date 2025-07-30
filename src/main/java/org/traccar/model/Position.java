@@ -103,6 +103,7 @@ public class Position extends Message {
 
     public static final String KEY_DRIVER_UNIQUE_ID = "driverUniqueId";
     public static final String KEY_CARD = "card";
+    public static final String KEY_HEX_DATA = "hexData";
 
     // Start with 1 not 0
     public static final String PREFIX_TEMP = "temp";
