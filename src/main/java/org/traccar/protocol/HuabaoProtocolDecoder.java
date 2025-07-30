@@ -205,6 +205,48 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeObdRt(Position position, String data) {
+        String[] values = data.split(",");
+        int index = 1; // skip header
+
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_POWER, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_RPM, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_OBD_SPEED, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_THROTTLE, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_ENGINE_LOAD, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1])); // instant
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1])); // average
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_ODOMETER_TRIP, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_OBD_ODOMETER, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set("tripFuelUsed", Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index - 1]));
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -718,11 +760,17 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     break;
                 case 0xE6:
-                    while (buf.readerIndex() < endIndex) {
-                        int sensorIndex = buf.readUnsignedByte();
-                        buf.skipBytes(6); // mac
-                        position.set(Position.PREFIX_TEMP + sensorIndex, decodeCustomDouble(buf));
-                        position.set("humidity" + sensorIndex, decodeCustomDouble(buf));
+                    String header = buf.getCharSequence(buf.readerIndex(), 7, StandardCharsets.UTF_8).toString();
+                    if (header.equals("$OBD-RT")) {
+                        String data = buf.readCharSequence(length, StandardCharsets.UTF_8).toString();
+                        decodeObdRt(position, data);
+                    } else {
+                        while (buf.readerIndex() < endIndex) {
+                            int sensorIndex = buf.readUnsignedByte();
+                            buf.skipBytes(6); // mac
+                            position.set(Position.PREFIX_TEMP + sensorIndex, decodeCustomDouble(buf));
+                            position.set("humidity" + sensorIndex, decodeCustomDouble(buf));
+                        }
                     }
                     break;
                 case 0xEA:
@@ -1132,45 +1180,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             String data = buf.readCharSequence(buf.readableBytes() - 2, StandardCharsets.US_ASCII).toString().trim();
-            String[] values = data.split(",");
-            int index = 1; // skip header
-
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_POWER, Double.parseDouble(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_RPM, Integer.parseInt(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_THROTTLE, Double.parseDouble(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_ENGINE_LOAD, Double.parseDouble(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1])); // instant
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1])); // average
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_ODOMETER_TRIP, Double.parseDouble(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_OBD_ODOMETER, Integer.parseInt(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set("tripFuelUsed", Double.parseDouble(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index - 1]));
-            }
+            decodeObdRt(position, data);
 
             return position;
 
