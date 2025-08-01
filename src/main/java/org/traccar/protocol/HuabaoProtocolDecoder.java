@@ -1176,11 +1176,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 }
             }else{
                 StringBuilder hexStringBuilder = new StringBuilder();
+                hexStringBuilder.append(String.format("%02X", type));
                 for (byte b : rawBytes) {
                     hexStringBuilder.append(String.format("%02X", b));
                 }
                 String hexData = hexStringBuilder.toString();
-                position.set(Position.KEY_HEX_DATA, hexData);
+                position.set(Position.KEY_DATA, hexData);
             }
 
             return position.getAttributes().isEmpty() ? null : position;
