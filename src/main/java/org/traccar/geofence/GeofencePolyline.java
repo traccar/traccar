@@ -36,8 +36,8 @@ public class GeofencePolyline extends GeofenceGeometry {
     public boolean containsPoint(double latitude, double longitude) {
         for (int i = 1; i < coordinates.size(); i++) {
             if (DistanceCalculator.distanceToLine(
-                    latitude, longitude, coordinates.get(i - 1).getLat(), coordinates.get(i - 1).getLon(),
-                    coordinates.get(i).getLat(), coordinates.get(i).getLon()) <= polylineDistance) {
+                    latitude, longitude, coordinates.get(i - 1).lat(), coordinates.get(i - 1).lon(),
+                    coordinates.get(i).lat(), coordinates.get(i).lon()) <= polylineDistance) {
                 return true;
             }
         }
@@ -54,9 +54,9 @@ public class GeofencePolyline extends GeofenceGeometry {
         StringBuilder buf = new StringBuilder();
         buf.append("LINESTRING (");
         for (Coordinate coordinate : coordinates) {
-            buf.append(coordinate.getLat());
+            buf.append(coordinate.lat());
             buf.append(" ");
-            buf.append(coordinate.getLon());
+            buf.append(coordinate.lon());
             buf.append(", ");
         }
         return buf.substring(0, buf.length() - 2) + ")";
@@ -82,18 +82,19 @@ public class GeofencePolyline extends GeofenceGeometry {
             if (tokens.length != 2) {
                 throw new ParseException("Here must be two coordinates: " + commaToken, 0);
             }
-            Coordinate coordinate = new Coordinate();
+            double lat;
             try {
-                coordinate.setLat(Double.parseDouble(tokens[0]));
+                lat = Double.parseDouble(tokens[0]);
             } catch (NumberFormatException e) {
                 throw new ParseException(tokens[0] + " is not a double", 0);
             }
+            double lon;
             try {
-                coordinate.setLon(Double.parseDouble(tokens[1]));
+                lon = Double.parseDouble(tokens[1]);
             } catch (NumberFormatException e) {
                 throw new ParseException(tokens[1] + " is not a double", 0);
             }
-            coordinates.add(coordinate);
+            coordinates.add(new Coordinate(lat, lon));
         }
 
         return coordinates;
