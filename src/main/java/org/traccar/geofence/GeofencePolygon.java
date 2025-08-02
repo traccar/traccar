@@ -20,8 +20,6 @@ import org.locationtech.spatial4j.context.jts.JtsSpatialContextFactory;
 import org.locationtech.spatial4j.distance.DistanceUtils;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 import org.locationtech.spatial4j.shape.jts.JtsShapeFactory;
-import org.traccar.config.Config;
-import org.traccar.model.Geofence;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -81,7 +79,7 @@ public class GeofencePolygon extends GeofenceGeometry {
     }
 
     @Override
-    public boolean containsPoint(Config config, Geofence geofence, double latitude, double longitude) {
+    public boolean containsPoint(double latitude, double longitude) {
 
         int polyCorners = coordinates.size();
         int i;

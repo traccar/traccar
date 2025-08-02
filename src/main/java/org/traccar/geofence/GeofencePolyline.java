@@ -20,9 +20,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.traccar.config.Config;
 import org.traccar.helper.DistanceCalculator;
-import org.traccar.model.Geofence;
 
 public class GeofencePolyline extends GeofenceGeometry {
 
@@ -35,7 +33,7 @@ public class GeofencePolyline extends GeofenceGeometry {
     }
 
     @Override
-    public boolean containsPoint(Config config, Geofence geofence, double latitude, double longitude) {
+    public boolean containsPoint(double latitude, double longitude) {
         for (int i = 1; i < coordinates.size(); i++) {
             if (DistanceCalculator.distanceToLine(
                     latitude, longitude, coordinates.get(i - 1).getLat(), coordinates.get(i - 1).getLon(),
