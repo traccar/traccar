@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,33 +18,28 @@ package org.traccar.geofence;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Geofence;
 
 public class GeofencePolyline extends GeofenceGeometry {
 
-    private ArrayList<Coordinate> coordinates;
+    private final List<Coordinate> coordinates;
+    private final double polylineDistance;
 
-    public GeofencePolyline() {
-    }
-
-    public GeofencePolyline(String wkt) throws ParseException {
-        fromWkt(wkt);
+    public GeofencePolyline(String wkt, double polylineDistance) throws ParseException {
+        coordinates = fromWkt(wkt);
+        this.polylineDistance = polylineDistance;
     }
 
     @Override
     public boolean containsPoint(Config config, Geofence geofence, double latitude, double longitude) {
-        double distance = geofence.getDouble("polylineDistance");
-        if (distance == 0) {
-            distance = config.getDouble(Keys.GEOFENCE_POLYLINE_DISTANCE);
-        }
         for (int i = 1; i < coordinates.size(); i++) {
             if (DistanceCalculator.distanceToLine(
                     latitude, longitude, coordinates.get(i - 1).getLat(), coordinates.get(i - 1).getLon(),
-                    coordinates.get(i).getLat(), coordinates.get(i).getLon()) <= distance) {
+                    coordinates.get(i).getLat(), coordinates.get(i).getLon()) <= polylineDistance) {
                 return true;
             }
         }
@@ -69,13 +64,8 @@ public class GeofencePolyline extends GeofenceGeometry {
         return buf.substring(0, buf.length() - 2) + ")";
     }
 
-    @Override
-    public void fromWkt(String wkt) throws ParseException {
-        if (coordinates == null) {
-            coordinates = new ArrayList<>();
-        } else {
-            coordinates.clear();
-        }
+    private List<Coordinate> fromWkt(String wkt) throws ParseException {
+        List<Coordinate> coordinates = new ArrayList<>();
 
         if (!wkt.startsWith("LINESTRING")) {
             throw new ParseException("Mismatch geometry type", 0);
@@ -108,6 +98,7 @@ public class GeofencePolyline extends GeofenceGeometry {
             coordinates.add(coordinate);
         }
 
+        return coordinates;
     }
 
 }

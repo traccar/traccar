@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.traccar.geofence;
 
 import org.locationtech.spatial4j.context.SpatialContext;
 import org.locationtech.spatial4j.context.jts.JtsSpatialContextFactory;
+import org.locationtech.spatial4j.distance.DistanceUtils;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 import org.locationtech.spatial4j.shape.jts.JtsShapeFactory;
 import org.traccar.config.Config;
@@ -24,40 +25,23 @@ import org.traccar.model.Geofence;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-
-import static org.locationtech.spatial4j.distance.DistanceUtils.DEG_TO_KM;
+import java.util.List;
 
 public class GeofencePolygon extends GeofenceGeometry {
 
-    public GeofencePolygon() {
-    }
+    private final List<Coordinate> coordinates;
+
+    private final double[] constant;
+    private final double[] multiple;
+
+    private final boolean needNormalize;
 
     public GeofencePolygon(String wkt) throws ParseException {
-        fromWkt(wkt);
-    }
-
-    private ArrayList<Coordinate> coordinates;
-
-    private double[] constant;
-    private double[] multiple;
-
-    private boolean needNormalize = false;
-
-    private void preCalculate() {
-        if (coordinates == null) {
-            return;
-        }
+        coordinates = fromWkt(wkt);
 
         int polyCorners = coordinates.size();
         int i;
         int j = polyCorners - 1;
-
-        if (constant != null) {
-            constant = null;
-        }
-        if (multiple != null) {
-            multiple = null;
-        }
 
         constant = new double[polyCorners];
         multiple = new double[polyCorners];
@@ -123,7 +107,7 @@ public class GeofencePolygon extends GeofenceGeometry {
         for (Coordinate coordinate : coordinates) {
             polygonBuilder.pointXY(coordinate.getLon(), coordinate.getLat());
         }
-        return polygonBuilder.build().getArea(SpatialContext.GEO) * DEG_TO_KM * DEG_TO_KM;
+        return polygonBuilder.build().getArea(SpatialContext.GEO) * DistanceUtils.DEG_TO_KM * DistanceUtils.DEG_TO_KM;
     }
 
     @Override
@@ -139,13 +123,8 @@ public class GeofencePolygon extends GeofenceGeometry {
         return buf.substring(0, buf.length() - 2) + "))";
     }
 
-    @Override
-    public void fromWkt(String wkt) throws ParseException {
-        if (coordinates == null) {
-            coordinates = new ArrayList<>();
-        } else {
-            coordinates.clear();
-        }
+    public List<Coordinate> fromWkt(String wkt) throws ParseException {
+        List<Coordinate> coordinates = new ArrayList<>();
 
         if (!wkt.startsWith("POLYGON")) {
             throw new ParseException("Mismatch geometry type", 0);
@@ -178,7 +157,7 @@ public class GeofencePolygon extends GeofenceGeometry {
             coordinates.add(coordinate);
         }
 
-        preCalculate();
+        return coordinates;
     }
 
 }

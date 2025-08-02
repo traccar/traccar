@@ -448,7 +448,7 @@ public final class Keys {
     public static final ConfigKey<Double> GEOFENCE_POLYLINE_DISTANCE = new DoubleConfigKey(
             "geofence.polylineDistance",
             List.of(KeyType.CONFIG),
-            25.0);
+            25.0); //TODO()
 
     /**
      * Enable in-memory database instead of an SQL database.

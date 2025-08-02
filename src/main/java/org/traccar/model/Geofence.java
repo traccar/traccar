@@ -73,7 +73,7 @@ public class Geofence extends ExtendedModel implements Schedulable {
         } else if (area.startsWith("POLYGON")) {
             geometry = new GeofencePolygon(area);
         } else if (area.startsWith("LINESTRING")) {
-            geometry = new GeofencePolyline(area);
+            geometry = new GeofencePolyline(area, 0);
         } else {
             throw new ParseException("Unknown geometry type", 0);
         }

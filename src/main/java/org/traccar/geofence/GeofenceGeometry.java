@@ -28,8 +28,6 @@ public abstract class GeofenceGeometry {
 
     public abstract String toWkt();
 
-    public abstract void fromWkt(String wkt) throws ParseException;
-
     public static class Coordinate {
 
         private double lat;
