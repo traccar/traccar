@@ -36,6 +36,7 @@ public class GeofencePolygon extends GeofenceGeometry {
 
     public GeofencePolygon(String wkt) throws ParseException {
         coordinates = fromWkt(wkt);
+        calculateBoundary(coordinates, 0);
 
         int polyCorners = coordinates.size();
         int i;
@@ -79,7 +80,7 @@ public class GeofencePolygon extends GeofenceGeometry {
     }
 
     @Override
-    public boolean containsPoint(double latitude, double longitude) {
+    protected boolean containsPointInternal(double latitude, double longitude) {
 
         int polyCorners = coordinates.size();
         int i;

@@ -31,16 +31,12 @@ public class GeofenceCircle extends GeofenceGeometry {
         centerLatitude = decoded.latitude;
         centerLongitude = decoded.longitude;
         radius = decoded.radius;
-    }
-
-    public GeofenceCircle(double latitude, double longitude, double radius) {
-        this.centerLatitude = latitude;
-        this.centerLongitude = longitude;
-        this.radius = radius;
+        setMin(new Coordinate(centerLatitude - radius, centerLongitude - radius));
+        setMax(new Coordinate(centerLatitude + radius, centerLongitude + radius));
     }
 
     @Override
-    public boolean containsPoint(double latitude, double longitude) {
+    protected boolean containsPointInternal(double latitude, double longitude) {
         return DistanceCalculator.distance(centerLatitude, centerLongitude, latitude, longitude) <= radius;
     }
 

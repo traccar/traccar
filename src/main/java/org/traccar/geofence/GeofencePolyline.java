@@ -29,11 +29,12 @@ public class GeofencePolyline extends GeofenceGeometry {
 
     public GeofencePolyline(String wkt, double polylineDistance) throws ParseException {
         coordinates = fromWkt(wkt);
+        calculateBoundary(coordinates, polylineDistance);
         this.polylineDistance = polylineDistance;
     }
 
     @Override
-    public boolean containsPoint(double latitude, double longitude) {
+    protected boolean containsPointInternal(double latitude, double longitude) {
         for (int i = 1; i < coordinates.size(); i++) {
             if (DistanceCalculator.distanceToLine(
                     latitude, longitude, coordinates.get(i - 1).lat(), coordinates.get(i - 1).lon(),
