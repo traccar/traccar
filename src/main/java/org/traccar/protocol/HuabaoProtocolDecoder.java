@@ -1181,7 +1181,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     hexStringBuilder.append(String.format("%02X", b));
                 }
                 String hexData = hexStringBuilder.toString();
-                position.set(Position.KEY_DATA, hexData);
+                position.set("data", hexData);
             }
 
             return position.getAttributes().isEmpty() ? null : position;
