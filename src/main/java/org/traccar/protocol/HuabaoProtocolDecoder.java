@@ -1163,25 +1163,25 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
-            // Capture the remaining bytes from the buffer BEFORE attempting to convert them to String
-            int readableBytes = buf.readableBytes();
-            byte[] rawBytes = new byte[readableBytes];
-            buf.readBytes(rawBytes);
-
-            String data = new String(rawBytes, StandardCharsets.US_ASCII).trim();
+            String data = buf.readCharSequence(buf.readableBytes(), StandardCharsets.US_ASCII).toString().trim();
             if (data.startsWith("GTSL")) {
                 String[] values = data.split("\\|");
                 if (values.length > 4) {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, values[4]);
                 }
             }else{
+                buf.resetReaderIndex();
+
+                int readableBytes = buf.readableBytes();
+                byte[] rawBytes = new byte[readableBytes];
+                buf.readBytes(rawBytes);
+
                 StringBuilder hexStringBuilder = new StringBuilder();
-                hexStringBuilder.append(String.format("%02X", type));
                 for (byte b : rawBytes) {
                     hexStringBuilder.append(String.format("%02X", b));
                 }
-                String hexData = hexStringBuilder.toString();
-                position.set("data", hexData);
+
+                position.set("data", hexStringBuilder.toString());
             }
 
             return position.getAttributes().isEmpty() ? null : position;
