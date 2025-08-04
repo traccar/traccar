@@ -1172,16 +1172,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             }else{
                 buf.resetReaderIndex();
 
-                int readableBytes = buf.readableBytes();
-                byte[] rawBytes = new byte[readableBytes];
-                buf.readBytes(rawBytes);
-
-                StringBuilder hexStringBuilder = new StringBuilder();
-                for (byte b : rawBytes) {
-                    hexStringBuilder.append(String.format("%02X", b));
-                }
-
-                position.set("data", hexStringBuilder.toString());
+                String hexData = ByteBufUtil.hexDump(buf.readSlice(buf.readableBytes()));
+                position.set("data", hexData);
             }
 
             return position.getAttributes().isEmpty() ? null : position;
