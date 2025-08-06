@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,16 @@ public final class PositionUtil {
                         new Condition.Equals("deviceId", deviceId),
                         new Condition.Between("fixTime", from, to)),
                 new Order("fixTime")));
+    }
+
+    public static Position getEdgePosition(
+            Storage storage, long deviceId, Date from, Date to, boolean end) throws StorageException {
+        return storage.getObject(Position.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("deviceId", deviceId),
+                        new Condition.Between("fixTime", from, to)),
+                new Order("fixTime", end, 1)));
     }
 
     public static List<Position> getLatestPositions(Storage storage, long userId) throws StorageException {

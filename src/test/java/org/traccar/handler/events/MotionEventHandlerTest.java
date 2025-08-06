@@ -40,23 +40,23 @@ public class MotionEventHandlerTest extends BaseTest {
 
         MotionState state = new MotionState();
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:00:00", false, 0, null), false, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:00:00", false, 0, null), false, tripsConfig);
         assertNull(state.getEvent());
         verifyState(state, false, 0);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:02:00", true, 100, null), true, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:02:00", true, 100, null), true, tripsConfig);
         assertNull(state.getEvent());
         verifyState(state, true, 100);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:02:00", true, 700, null), true, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:02:00", true, 700, null), true, tripsConfig);
         assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvent().getType());
         verifyState(state, true, 0);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:03:00", false, 700, null), false, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:03:00", false, 700, null), false, tripsConfig);
         assertNull(state.getEvent());
         verifyState(state, false, 700);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:10:00", false, 700, null), false, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:10:00", false, 700, null), false, tripsConfig);
         assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvent().getType());
         verifyState(state, false, 0);
     }
@@ -67,27 +67,27 @@ public class MotionEventHandlerTest extends BaseTest {
 
         MotionState state = new MotionState();
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:00:00", false, 0, null), false, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:00:00", false, 0, null), false, tripsConfig);
         assertNull(state.getEvent());
         verifyState(state, false, 0);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:02:00", true, 100, null), true, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:02:00", true, 100, null), true, tripsConfig);
         assertNull(state.getEvent());
         verifyState(state, true, 100);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:02:00", true, 700, null), true, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:02:00", true, 700, null), true, tripsConfig);
         assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvent().getType());
         verifyState(state, true, 0);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:03:00", false, 700, null), false, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:03:00", false, 700, null), false, tripsConfig);
         assertNull(state.getEvent());
         verifyState(state, false, 700);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:04:00", true, 1000, null), true, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:04:00", true, 1000, null), true, tripsConfig);
         assertNull(state.getEvent());
         verifyState(state, true, 0);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:06:00", true, 2000, null), true, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:06:00", true, 2000, null), true, tripsConfig);
         assertNull(state.getEvent());
         verifyState(state, true, 0);
     }
@@ -100,11 +100,11 @@ public class MotionEventHandlerTest extends BaseTest {
         state.setMotionStreak(true);
         state.setMotionState(true);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:00:00", false, 100, true), false, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:00:00", false, 100, true), false, tripsConfig);
         assertNull(state.getEvent());
         verifyState(state, false, 100);
 
-        MotionProcessor.updateState(state, position("2017-01-01 00:02:00", false, 100, false), false, tripsConfig);
+        MotionProcessor.updateState(state, null, position("2017-01-01 00:02:00", false, 100, false), false, tripsConfig);
         assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvent().getType());
         verifyState(state, false, 0);
     }

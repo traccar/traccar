@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,19 +66,9 @@ public class Geofence extends ExtendedModel implements Schedulable {
         return area;
     }
 
-    public void setArea(String area) throws ParseException {
-
-        if (area.startsWith("CIRCLE")) {
-            geometry = new GeofenceCircle(area);
-        } else if (area.startsWith("POLYGON")) {
-            geometry = new GeofencePolygon(area);
-        } else if (area.startsWith("LINESTRING")) {
-            geometry = new GeofencePolyline(area);
-        } else {
-            throw new ParseException("Unknown geometry type", 0);
-        }
-
+    public void setArea(String area) {
         this.area = area;
+        geometry = null;
     }
 
     private GeofenceGeometry geometry;
@@ -86,14 +76,28 @@ public class Geofence extends ExtendedModel implements Schedulable {
     @QueryIgnore
     @JsonIgnore
     public GeofenceGeometry getGeometry() {
+        if (geometry == null) {
+            try {
+                if (area.startsWith("CIRCLE")) {
+                    geometry = new GeofenceCircle(area);
+                } else if (area.startsWith("POLYGON")) {
+                    geometry = new GeofencePolygon(area);
+                } else if (area.startsWith("LINESTRING")) {
+                    geometry = new GeofencePolyline(area, getDouble("polylineDistance", 25.0));
+                } else {
+                    throw new IllegalArgumentException("Unknown geometry type");
+                }
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return geometry;
     }
 
     @QueryIgnore
     @JsonIgnore
     public void setGeometry(GeofenceGeometry geometry) {
-        area = geometry.toWkt();
-        this.geometry = geometry;
+        setArea(geometry.toWkt());
     }
 
 }

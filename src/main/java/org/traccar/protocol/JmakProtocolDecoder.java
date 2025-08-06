@@ -100,7 +100,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 4)) {
-            position.setFixTime(new Date(Long.parseLong(values[index++])));
+            position.setTime(new Date(Long.parseLong(values[index++])));
         }
 
         if (BitUtil.check(mask, 5)) {
@@ -148,7 +148,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 16)) {
-            position.set(Position.KEY_HOURS, Double.parseDouble(values[index++]));
+            position.set(Position.KEY_HOURS, Double.parseDouble(values[index++]) * 3600000);
         }
 
         if (BitUtil.check(mask, 17)) {
@@ -253,7 +253,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 1)) {
-            position.set(Position.KEY_HOURS, Double.parseDouble(values[index++]));
+            position.set(Position.KEY_HOURS, Double.parseDouble(values[index++]) * 3600000);
         }
 
         if (BitUtil.check(mask, 2)) {

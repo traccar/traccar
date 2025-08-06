@@ -59,7 +59,16 @@ public class FindHubCommandSender implements CommandSender {
 
         String commandType = Pattern.compile("(?<=[a-z0-9])(?=[A-Z])")
                 .matcher(command.getType()).replaceAll("-").toLowerCase();
-        WebTarget target = client.target(url).path("devices").path(device.getUniqueId()).path(commandType);
+
+        WebTarget target = client.target(url)
+                .path("devices")
+                .path(device.getUniqueId())
+                .path(commandType);
+
+        if (Command.TYPE_POSITION_PERIODIC.equals(command.getType())) {
+            int interval = command.getInteger(Command.KEY_FREQUENCY);
+            target = target.queryParam("interval", interval);
+        }
 
         try (Response response = target.request(MediaType.APPLICATION_JSON)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + key).post(null)) {
