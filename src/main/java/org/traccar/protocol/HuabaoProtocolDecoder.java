@@ -902,7 +902,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 0x0050 -> position.set(Position.KEY_VIN, BufferUtil.readString(buf, 17));
                             case 0x0051 -> {
                                 if (extendedLength > 0) {
-                                    position.set("cvn", BufferUtil.readString(buf, extendedLength));
+                                    position.set("cvn", ByteBufUtil.hexDump(buf.readSlice(extendedLength)));
                                 }
                             }
                             case 0x0052 -> {
