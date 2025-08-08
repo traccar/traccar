@@ -268,11 +268,17 @@ public class DatabaseStorage extends Storage {
 
             } else if (genericCondition instanceof Condition.Binary condition) {
 
+                if (genericCondition instanceof Condition.Or) {
+                    result.append('(');
+                }
                 result.append(formatCondition(condition.getFirst(), false));
                 result.append(" ");
                 result.append(condition.getOperator());
                 result.append(" ");
                 result.append(formatCondition(condition.getSecond(), false));
+                if (genericCondition instanceof Condition.Or) {
+                    result.append(')');
+                }
 
             } else if (genericCondition instanceof Condition.Permission condition) {
 

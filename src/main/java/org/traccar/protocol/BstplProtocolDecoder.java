@@ -46,6 +46,7 @@ public class BstplProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // odometer
             .number("(d+),")                     // course
             .number("(d+),")                     // satellites
+            .groupBegin()
             .number("([01]),")                   // box open
             .number("(d+),")                     // rssi
             .number("([01]),")                   // charge
@@ -58,6 +59,26 @@ public class BstplProtocolDecoder extends BaseProtocolDecoder {
             .expression("([^,]+),")              // firmware
             .number("([^,]+),")                  // iccid
             .number("(d+.d+)")                   // power
+            .or()
+            .number("(d+),")                     // rssi
+            .number("([01]),")                   // box open
+            .number("(d+.d+),")                  // battery
+            .number("([01]),")                   // charge
+            .number("([01]),")                   // ignition
+            .number("(d+.d+),")                  // power
+            .number("(d+),")                     // altitude
+            .number("[01],")                     // reserved
+            .expression("([^,]+),")              // firmware
+            .number("([^,]+),")                  // iccid
+            .text("{")
+            .number("(d+),")                     // rpm
+            .number("(d+),")                     // can odometer
+            .number("(d+),")                     // fuel
+            .number("(d+),")                     // gear
+            .number("(d+.d+),")                  // engine temperature
+            .number("(d+.d+)")                   // coolant temperature
+            .text("}")
+            .groupEnd()
             .compile();
 
     private String decodeAlarm(int value) {
@@ -103,27 +124,51 @@ public class BstplProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_SATELLITES, parser.nextInt());
 
-        boolean boxOpen = parser.nextInt() > 0;
-        if (type == 8 && boxOpen) {
-            position.addAlarm(Position.ALARM_TAMPERING);
+        if (parser.hasNext(11)) {
+
+            boolean boxOpen = parser.nextInt() > 0;
+            if (type == 8 && boxOpen) {
+                position.addAlarm(Position.ALARM_TAMPERING);
+            }
+            position.set("boxOpen", boxOpen);
+
+            position.set(Position.KEY_RSSI, parser.nextInt());
+
+            boolean charge = parser.nextInt() > 0;
+            if (type == 3) {
+                position.addAlarm(charge ? Position.ALARM_POWER_RESTORED : Position.ALARM_POWER_CUT);
+            }
+            position.set(Position.KEY_CHARGE, charge);
+
+            position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+            position.set("engine", parser.nextInt() > 0);
+            position.set(Position.KEY_BLOCKED, parser.nextInt() > 0);
+            position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
+            position.set(Position.KEY_VERSION_FW, parser.next());
+            position.set(Position.KEY_ICCID, parser.next());
+            position.set(Position.KEY_POWER, parser.nextDouble());
+
+        } else {
+
+            position.set(Position.KEY_RSSI, parser.nextInt());
+            position.set("boxOpen", parser.nextInt() > 0);
+            position.set(Position.KEY_BATTERY, parser.nextDouble());
+            position.set(Position.KEY_CHARGE, parser.nextInt() > 0);
+            position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+            position.set(Position.KEY_POWER, parser.nextDouble());
+            position.setAltitude(parser.nextInt());
+            position.set(Position.KEY_VERSION_FW, parser.next());
+            position.set(Position.KEY_ICCID, parser.next());
+
+            position.set(Position.KEY_RPM, parser.nextInt());
+            position.set(Position.KEY_OBD_ODOMETER, parser.nextInt());
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+            position.set("gear", parser.nextInt());
+            position.set(Position.KEY_ENGINE_TEMP, parser.nextDouble());
+            position.set(Position.KEY_COOLANT_TEMP, parser.nextDouble());
+
         }
-        position.set("boxOpen", boxOpen);
-
-        position.set(Position.KEY_RSSI, parser.nextInt());
-
-        boolean charge = parser.nextInt() > 0;
-        if (type == 3) {
-            position.addAlarm(charge ? Position.ALARM_POWER_RESTORED : Position.ALARM_POWER_CUT);
-        }
-        position.set(Position.KEY_CHARGE, charge);
-
-        position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
-        position.set("engine", parser.nextInt() > 0);
-        position.set(Position.KEY_BLOCKED, parser.nextInt() > 0);
-        position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
-        position.set(Position.KEY_BATTERY, parser.nextDouble());
-        position.set(Position.KEY_ICCID, parser.next());
-        position.set(Position.KEY_POWER, parser.nextDouble());
 
         return position;
     }

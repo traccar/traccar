@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BufferUtil;
 import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -898,8 +899,16 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 0x000C -> position.set("intakeTemp", buf.readUnsignedShort() - 40);
                             case 0x000D -> position.set("intakeFlow", buf.readUnsignedShort());
                             case 0x000E -> position.set(Position.KEY_THROTTLE, buf.readUnsignedShort() * 100 / 255);
-                            case 0x0050 -> {
-                                position.set(Position.KEY_VIN, buf.readSlice(17).toString(StandardCharsets.US_ASCII));
+                            case 0x0050 -> position.set(Position.KEY_VIN, BufferUtil.readString(buf, 17));
+                            case 0x0051 -> {
+                                if (extendedLength > 0) {
+                                    position.set("cvn", ByteBufUtil.hexDump(buf.readSlice(extendedLength)));
+                                }
+                            }
+                            case 0x0052 -> {
+                                if (extendedLength > 0) {
+                                    position.set("calid", BufferUtil.readString(buf, extendedLength));
+                                }
                             }
                             case 0x0100 -> position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort() * 0.1);
                             case 0x0102 -> position.set("tripFuel", buf.readUnsignedShort() * 0.1);
