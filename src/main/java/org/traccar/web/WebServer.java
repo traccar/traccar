@@ -21,8 +21,8 @@ import jakarta.servlet.DispatcherType;
 import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.ee10.proxy.AsyncProxyServlet;
-import org.eclipse.jetty.ee10.servlet.DefaultServlet;
 import org.eclipse.jetty.ee10.servlet.ErrorHandler;
+import org.eclipse.jetty.ee10.servlet.ResourceServlet;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.ee10.servlet.SessionHandler;
@@ -61,6 +61,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
 import java.util.EnumSet;
 
 public class WebServer implements LifecycleObject {
@@ -159,8 +160,8 @@ public class WebServer implements LifecycleObject {
     private void initApi(ServletContextHandler servletHandler) {
         String mediaPath = config.getString(Keys.MEDIA_PATH);
         if (mediaPath != null) {
-            ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
-            servletHolder.setInitParameter("baseResource", new File(mediaPath).getAbsolutePath());
+            ServletHolder servletHolder = new ServletHolder(ResourceServlet.class);
+            servletHolder.setInitParameter("baseResource", Path.of(mediaPath).toUri().toString());
             servletHolder.setInitParameter("dirAllowed", "false");
             servletHolder.setInitParameter("pathInfoOnly", "true");
             servletHandler.addServlet(servletHolder, "/api/media/*");
