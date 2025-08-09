@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,31 @@ package org.traccar.web;
 
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.SessionCookieConfig;
+import jakarta.servlet.http.HttpServletRequest;
+import org.eclipse.jetty.ee10.proxy.AsyncProxyServlet;
+import org.eclipse.jetty.ee10.servlet.DefaultServlet;
+import org.eclipse.jetty.ee10.servlet.ErrorHandler;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.SessionHandler;
+import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.http.HttpCookie;
-import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
-import org.eclipse.jetty.proxy.AsyncProxyServlet;
+import org.eclipse.jetty.http.pathmap.PathSpec;
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.RequestLogWriter;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ErrorHandler;
-import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ConditionalHandler;
 import org.eclipse.jetty.server.handler.gzip.GzipHandler;
-import org.eclipse.jetty.server.session.DatabaseAdaptor;
-import org.eclipse.jetty.server.session.DefaultSessionCache;
-import org.eclipse.jetty.server.session.JDBCSessionDataStoreFactory;
-import org.eclipse.jetty.server.session.SessionCache;
-import org.eclipse.jetty.server.session.SessionHandler;
-import org.eclipse.jetty.servlet.DefaultServlet;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.websocket.server.config.JettyWebSocketServletContainerInitializer;
+import org.eclipse.jetty.session.DatabaseAdaptor;
+import org.eclipse.jetty.session.DefaultSessionCache;
+import org.eclipse.jetty.session.JDBCSessionDataStoreFactory;
+import org.eclipse.jetty.session.SessionCache;
+import org.eclipse.jetty.util.Callback;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -52,11 +58,6 @@ import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.ObjectMapperContextResolver;
 
-import jakarta.servlet.DispatcherType;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.SessionCookieConfig;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.IOException;
@@ -105,7 +106,7 @@ public class WebServer implements LifecycleObject {
             }
         });
 
-        HandlerList handlers = new HandlerList();
+        Handler.Sequence handlers = new Handler.Sequence();
         initClientProxy(handlers);
         handlers.addHandler(servletHandler);
         handlers.addHandler(new GzipHandler());
@@ -119,29 +120,31 @@ public class WebServer implements LifecycleObject {
         }
     }
 
-    private void initClientProxy(HandlerList handlers) {
+    private void initClientProxy(Handler.Sequence handlers) {
         int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix("osmand"));
         if (port != 0) {
-            ServletContextHandler servletHandler = new ServletContextHandler() {
-                @Override
-                public void doScope(
-                        String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
-                        throws IOException, ServletException {
-                    if (target.equals("/") && request.getMethod().equals(HttpMethod.POST.asString())) {
-                        super.doScope(target, baseRequest, request, response);
-                    }
-                }
-            };
+            ServletContextHandler servletHandler = new ServletContextHandler();
             ServletHolder servletHolder = new ServletHolder(AsyncProxyServlet.Transparent.class);
             servletHolder.setInitParameter("proxyTo", "http://localhost:" + port);
+            Handler.Wrapper gate = new Handler.Wrapper() {
+                @Override
+                public boolean handle(Request request, Response response, Callback callback) throws Exception {
+                    if ("POST".equals(request.getMethod())
+                            && "/".equals(Request.getPathInContext(request))) {
+                        return getHandler().handle(request, response, callback);
+                    }
+                    return false;
+                }
+            };
+            gate.setHandler(servletHandler);
             servletHandler.addServlet(servletHolder, "/");
-            handlers.addHandler(servletHandler);
+            handlers.addHandler(gate);
         }
     }
 
     private void initWebApp(ServletContextHandler servletHandler) {
         ServletHolder servletHolder = new ServletHolder(new DefaultOverrideServlet(config));
-        servletHolder.setInitParameter("resourceBase", new File(config.getString(Keys.WEB_PATH)).getAbsolutePath());
+        servletHolder.setInitParameter("baseResource", new File(config.getString(Keys.WEB_PATH)).getAbsolutePath());
         servletHolder.setInitParameter("dirAllowed", "false");
         if (config.getBoolean(Keys.WEB_DEBUG)) {
             servletHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
@@ -159,7 +162,7 @@ public class WebServer implements LifecycleObject {
         String mediaPath = config.getString(Keys.MEDIA_PATH);
         if (mediaPath != null) {
             ServletHolder servletHolder = new ServletHolder(DefaultServlet.class);
-            servletHolder.setInitParameter("resourceBase", new File(mediaPath).getAbsolutePath());
+            servletHolder.setInitParameter("baseResource", new File(mediaPath).getAbsolutePath());
             servletHolder.setInitParameter("dirAllowed", "false");
             servletHolder.setInitParameter("pathInfoOnly", "true");
             servletHandler.addServlet(servletHolder, "/api/media/*");
@@ -183,12 +186,13 @@ public class WebServer implements LifecycleObject {
     }
 
     private void initSessionConfig(ServletContextHandler servletHandler) {
+        SessionHandler sessionHandler = servletHandler.getSessionHandler();
+
         if (config.getBoolean(Keys.WEB_PERSIST_SESSION)) {
             DatabaseAdaptor databaseAdaptor = new DatabaseAdaptor();
             databaseAdaptor.setDatasource(injector.getInstance(DataSource.class));
             JDBCSessionDataStoreFactory jdbcSessionDataStoreFactory = new JDBCSessionDataStoreFactory();
             jdbcSessionDataStoreFactory.setDatabaseAdaptor(databaseAdaptor);
-            SessionHandler sessionHandler = servletHandler.getSessionHandler();
             SessionCache sessionCache = new DefaultSessionCache(sessionHandler);
             sessionCache.setSessionDataStore(jdbcSessionDataStoreFactory.getSessionDataStore(sessionHandler));
             sessionHandler.setSessionCache(sessionCache);
@@ -206,14 +210,14 @@ public class WebServer implements LifecycleObject {
         if (sameSiteCookie != null) {
             switch (sameSiteCookie.toLowerCase()) {
                 case "lax":
-                    sessionCookieConfig.setComment(HttpCookie.SAME_SITE_LAX_COMMENT);
+                    sessionHandler.setSameSite(HttpCookie.SameSite.LAX);
                     break;
                 case "strict":
-                    sessionCookieConfig.setComment(HttpCookie.SAME_SITE_STRICT_COMMENT);
+                    sessionHandler.setSameSite(HttpCookie.SameSite.STRICT);
                     break;
                 case "none":
                     sessionCookieConfig.setSecure(true);
-                    sessionCookieConfig.setComment(HttpCookie.SAME_SITE_NONE_COMMENT);
+                    sessionHandler.setSameSite(HttpCookie.SameSite.NONE);
                     break;
                 default:
                     break;

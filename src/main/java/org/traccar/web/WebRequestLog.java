@@ -40,16 +40,16 @@ public class WebRequestLog extends ContainerLifeCycle implements RequestLog {
     @Override
     public void log(Request request, Response response) {
         try {
-            Long userId = (Long) request.getSession().getAttribute(SessionHelper.USER_ID_KEY);
+            Long userId = (Long) request.getSession(true).getAttribute(SessionHelper.USER_ID_KEY);
             writer.write(String.format("%s - %s [%s] \"%s %s %s\" %d %d",
-                    request.getRemoteHost(),
+                    Request.getRemoteAddr(request),
                     userId != null ? String.valueOf(userId) : "-",
-                    dateCache.format(request.getTimeStamp()),
+                    dateCache.format(Request.getTimeStamp(request)),
                     request.getMethod(),
-                    request.getOriginalURI(),
-                    request.getProtocol(),
-                    response.getCommittedMetaData().getStatus(),
-                    response.getHttpChannel().getBytesWritten()));
+                    request.getHttpURI().toString(),
+                    request.getConnectionMetaData().getProtocol(),
+                    response.getStatus(),
+                    Response.getContentBytesWritten(response)));
         } catch (Throwable ignored) {
         }
     }

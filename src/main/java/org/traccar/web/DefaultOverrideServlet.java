@@ -15,14 +15,19 @@
  */
 package org.traccar.web;
 
-import org.eclipse.jetty.servlet.DefaultServlet;
+import org.eclipse.jetty.ee10.servlet.DefaultServlet;
+import org.eclipse.jetty.http.MimeTypes;
+import org.eclipse.jetty.http.content.HttpContent;
+import org.eclipse.jetty.http.content.ResourceHttpContentFactory;
+import org.eclipse.jetty.server.ResourceService;
 import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import jakarta.inject.Inject;
 import java.io.File;
-import java.io.IOException;
+import java.nio.file.Path;
 
 public class DefaultOverrideServlet extends DefaultServlet {
 
@@ -32,28 +37,23 @@ public class DefaultOverrideServlet extends DefaultServlet {
     public DefaultOverrideServlet(Config config) {
         String override = config.getString(Keys.WEB_OVERRIDE);
         if (override != null) {
-            overrideResource = Resource.newResource(new File(override));
+            overrideResource = ResourceFactory.root().newResource(Path.of(new File(override).getPath()));
         }
     }
 
     @Override
-    public Resource getResource(String pathInContext) {
+    public ResourceService getResourceService() {
+        ResourceService service = super.getResourceService();
         if (overrideResource != null) {
-            try {
-                Resource override = overrideResource.addPath(pathInContext);
-                if (override.exists()) {
-                    return override;
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            HttpContent.Factory base = service.getHttpContentFactory();
+            HttpContent.Factory first = new ResourceHttpContentFactory(overrideResource, new MimeTypes());
+            service.setHttpContentFactory(path -> {
+                String p = path.indexOf('.') < 0 ? "/" : path;
+                HttpContent content = first.getContent(p);
+                return content != null ? content : base.getContent(p);
+            });
         }
-        return super.getResource(pathInContext.indexOf('.') < 0 ? "/" : pathInContext);
-    }
-
-    @Override
-    public String getWelcomeFile(String pathInContext) {
-        return super.getWelcomeFile("/");
+        return service;
     }
 
 }
