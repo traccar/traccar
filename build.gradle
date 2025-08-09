@@ -81,7 +81,6 @@ dependencies {
     implementation "org.eclipse.jetty:jetty-server:$jettyVersion"
     implementation "org.eclipse.jetty.ee10:jetty-ee10-servlet:$jettyVersion"
     implementation "org.eclipse.jetty.ee10:jetty-ee10-servlets:$jettyVersion"
-    implementation "org.eclipse.jetty.ee10:jetty-ee10-webapp:$jettyVersion"
     implementation "org.eclipse.jetty.ee10:jetty-ee10-proxy:$jettyVersion"
     implementation "org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jetty-server:$jettyVersion"
     implementation "org.eclipse.jetty.ee10.websocket:jetty-ee10-websocket-jakarta-server:$jettyVersion"
