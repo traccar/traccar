@@ -300,6 +300,29 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_SMS_ST906_V2 = new PatternBuilder()
+            .text("*HQ,")
+            .number("(d+),")                // id
+            .text("SMS,ST906")
+            .expression("[^ ]+ \\d+/\\d+/\\d+")                 // firmware/version (e.g. (70SACD)_TQ_V_2.0 2024/06/07)
+            .text("\\nID:")
+            .number("d+")                      // id (again)
+            .text("\\nIP:") 
+            .expression("[^ ]+")                // IP address
+            .number(" d+")                      // port
+            .text("\\nUT:")
+            .number("d+,d+,d+")             // UT values
+            .text("\\nVOLT:")
+            .number("(d+.d+)V")                   // voltage
+            .text("\\nAPN:")
+            .expression("([^\\n]+)")              // APN
+            .text("\\nGPS:")
+            .expression("([AB])-(\\d+)-(\\d+)")       // GPS validity, lat, lon
+            .text("\\nGSM:")
+            .number("(d+)")                       // GSM value
+            .any()
+            .compile();
+ 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
         if (channel != null && id != null) {
             String response;
@@ -525,6 +548,26 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeSms(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_SMS_ST906_V2, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+        position.set(Position.KEY_POWER, parser.nextDouble());
+        getLastLocation(position, null);
+        return position;
+    }
+
+
     private Position decodeVp1(String sentence, Channel channel, SocketAddress remoteAddress) {
 
         Parser parser = new Parser(PATTERN_VP1, sentence);
@@ -623,6 +666,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                         case "LINK" -> decodeLink(sentence, channel, remoteAddress);
                         case "V3" -> decodeV3(sentence, channel, remoteAddress);
                         case "VP1" -> decodeVp1(sentence, channel, remoteAddress);
+                        case "SMS" -> decodeSms(sentence, channel, remoteAddress);
                         default -> decodeText(sentence, channel, remoteAddress);
                     };
                 } else {
