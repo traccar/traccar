@@ -102,45 +102,81 @@ public class DeviceResource extends BaseObjectResource<Device> {
             @QueryParam("uniqueId") List<String> uniqueIds,
             @QueryParam("id") List<Long> deviceIds) throws StorageException {
 
-        if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
-
-            List<Device> result = new LinkedList<>();
-            for (String uniqueId : uniqueIds) {
-                result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
-                        new Condition.And(
-                                new Condition.Equals("uniqueId", uniqueId),
-                                new Condition.Permission(User.class, getUserId(), Device.class)))));
-            }
-            for (Long deviceId : deviceIds) {
-                result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
-                        new Condition.And(
-                                new Condition.Equals("id", deviceId),
-                                new Condition.Permission(User.class, getUserId(), Device.class)))));
-            }
-            return result;
-
+        var conditions = new LinkedList<Condition>();
+        //determine whether to limit the userId
+        if (permissionsService.notAdmin(getUserId())) {
+            conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
         } else {
-
-            var conditions = new LinkedList<Condition>();
-
-            if (all) {
-                if (permissionsService.notAdmin(getUserId())) {
+            if (userId == 0) {
+                if (!all) {
                     conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
                 }
             } else {
-                if (userId == 0) {
-                    conditions.add(new Condition.Permission(User.class, getUserId(), baseClass));
-                } else {
-                    permissionsService.checkUser(getUserId(), userId);
-                    conditions.add(new Condition.Permission(User.class, userId, baseClass).excludeGroups());
-                }
+                conditions.add(new Condition.Permission(User.class, userId, baseClass).excludeGroups());
             }
+        }
 
+        //when neither the device id nor the device identifier condition exists, query directly
+        if (uniqueIds.isEmpty() && deviceIds.isEmpty()) {
             return storage.getObjects(baseClass, new Request(
                     new Columns.All(), Condition.merge(conditions), new Order("name")));
+        } else {
+            //At this point, only the query condition of the userId is available in the conditions
+            if (!conditions.isEmpty()) {
+                List<Device> result = new LinkedList<>();
+                for (String uniqueId : uniqueIds) {
+                    result.addAll(storage.getObjects(Device.class, new Request(
+                            new Columns.All(),
+                            new Condition.And(
+                                    new Condition.Equals("uniqueId", uniqueId),
+                                    Condition.merge(conditions)))));
+                }
+                for (Long deviceId : deviceIds) {
+                    result.addAll(storage.getObjects(Device.class, new Request(
+                            new Columns.All(),
+                            new Condition.And(
+                                    new Condition.Equals("id", deviceId),
+                                    Condition.merge(conditions)))));
+                }
+                return result;
+            } else {
+                //when there is no query condition for the userId, directly use the OR relationship for the query
+                Condition uniqueIdsCondition = null;
+                for (int i = 0; i < uniqueIds.size(); i++) {
+                    String uniqueId = uniqueIds.get(i);
+                    if (uniqueIdsCondition == null) {
+                        uniqueIdsCondition = new Condition.Compare("uniqueId", "=", "uniqueId" + i, uniqueId);
+                    } else {
+                        uniqueIdsCondition = new Condition.Or(
+                                uniqueIdsCondition,
+                                new Condition.Compare("uniqueId", "=", "uniqueId" + i, uniqueId));
+                    }
+                }
 
+                Condition deviceIdsCondition = null;
+                for (int i = 0; i < deviceIds.size(); i++) {
+                    Long deviceId = deviceIds.get(i);
+                    if (deviceIdsCondition == null) {
+                        deviceIdsCondition = new Condition.Compare("id", "=", "id" + i, deviceId);
+                    } else {
+                        deviceIdsCondition = new Condition.Or(
+                                deviceIdsCondition,
+                                new Condition.Compare("id", "=", "id" + i, deviceId));
+                    }
+                }
+
+                Condition finalCondition = null;
+                if (uniqueIdsCondition != null && deviceIdsCondition != null) {
+                    finalCondition = new Condition.Or(uniqueIdsCondition, deviceIdsCondition);
+                } else if (uniqueIdsCondition != null) {
+                    finalCondition = uniqueIdsCondition;
+                } else if (deviceIdsCondition != null) {
+                    finalCondition = deviceIdsCondition;
+                }
+
+                return storage.getObjects(baseClass, new Request(
+                        new Columns.All(), finalCondition, new Order("name")));
+            }
         }
     }
 
