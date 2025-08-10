@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,9 @@ public class OverrideFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        if (((HttpServletRequest) request).getServletPath().startsWith("/api")) {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+        if (httpRequest.getServletPath() != null && httpRequest.getServletPath().startsWith("/api")) {
             chain.doFilter(request, response);
             return;
         }
@@ -57,9 +59,12 @@ public class OverrideFilter implements Filter {
 
         byte[] bytes = wrappedResponse.getCapture();
         if (bytes != null) {
-            if (wrappedResponse.getContentType() != null && wrappedResponse.getContentType().contains("text/html")
-                    || ((HttpServletRequest) request).getPathInfo().endsWith("manifest.webmanifest")) {
+            String contentType = wrappedResponse.getContentType();
+            String pathInfo = httpRequest.getPathInfo();
+            boolean isHtml = contentType != null && contentType.contains("text/html");
+            boolean isManifest = pathInfo != null && pathInfo.endsWith("manifest.webmanifest");
 
+            if (isHtml || isManifest) {
                 Server server;
                 try {
                     server = permissionsServiceProvider.get().getServer();
