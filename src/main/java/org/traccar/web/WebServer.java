@@ -106,7 +106,7 @@ public class WebServer implements LifecycleObject {
         });
 
         Handler.Sequence handlers = new Handler.Sequence();
-        initClientProxy(handlers);
+        initClientProxy(servletHandler);
         handlers.addHandler(servletHandler);
         handlers.addHandler(new GzipHandler());
         server.setHandler(handlers);
@@ -119,25 +119,20 @@ public class WebServer implements LifecycleObject {
         }
     }
 
-    private void initClientProxy(Handler.Sequence handlers) {
+    private void initClientProxy(ServletContextHandler servletHandler) {
         int port = config.getInteger(Keys.PROTOCOL_PORT.withPrefix("osmand"));
-        if (port != 0) {
-            ServletContextHandler servletHandler = new ServletContextHandler();
-            ServletHolder servletHolder = new ServletHolder(AsyncProxyServlet.Transparent.class);
-            servletHolder.setInitParameter("proxyTo", "http://localhost:" + port);
-            Handler.Wrapper gate = new Handler.Wrapper() {
-                @Override
-                public boolean handle(Request request, Response response, Callback callback) throws Exception {
-                    if ("POST".equals(request.getMethod())
-                            && "/".equals(Request.getPathInContext(request))) {
-                        return getHandler().handle(request, response, callback);
-                    }
-                    return false;
+        if (port > 0) {
+            ServletHolder proxy = new ServletHolder(AsyncProxyServlet.Transparent.class);
+            proxy.setInitParameter("proxyTo", "http://localhost:" + port);
+            servletHandler.addServlet(proxy, "/client-proxy/*");
+            servletHandler.addFilter((request, response, chain) -> {
+                HttpServletRequest r = (HttpServletRequest) request;
+                if ("POST".equals(r.getMethod()) && "/".equals(r.getRequestURI())) {
+                    request.getRequestDispatcher("/client-proxy/").forward(request, response);
+                    return;
                 }
-            };
-            gate.setHandler(servletHandler);
-            servletHandler.addServlet(servletHolder, "/");
-            handlers.addHandler(gate);
+                chain.doFilter(request, response);
+            }, "/*", EnumSet.allOf(DispatcherType.class));
         }
     }
 
