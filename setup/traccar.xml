@@ -1,12 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
 <properties>
-
     <!-- Documentation: https://www.traccar.org/configuration-file/ -->
+    <entry key='database.driver'>com.mysql.cj.jdbc.Driver</entry>
+    <entry key='database.url'>jdbc:mysql://mariadb:3306/traccar?serverTimezone=UTC&amp;useSSL=false&amp;allowPublicKeyRetrieval=true&amp;allowMultiQueries=true&amp;useUnicode=true&amp;characterEncoding=UTF-8</entry>
+    <entry key='database.user'>traccar</entry>
+    <entry key='database.password'>traccar_password</entry>
 
-    <entry key='database.driver'>org.h2.Driver</entry>
-    <entry key='database.url'>jdbc:h2:./data/database</entry>
-    <entry key='database.user'>sa</entry>
-    <entry key='database.password'></entry>
+    <entry key='dcjb.port'>1883</entry>
 
+    <entry key='mail.smtp.host'>smtp.strato.de</entry>
+    <entry key='mail.smtp.port'>587</entry>
+    <entry key='mail.smtp.starttls.enable'>true</entry>
+    <entry key='mail.smtp.ssl.enable'>false</entry>
+    <entry key='mail.smtp.from'>smc@socratec.gmbh</entry>
+    <entry key='mail.smtp.auth'>true</entry>
+    <entry key='mail.smtp.username'>smc@socratec.gmbh</entry>
+    <entry key='mail.smtp.password'>Traccar321$%&amp;</entry>
 </properties>
