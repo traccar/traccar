@@ -15,7 +15,7 @@
  */
 package org.traccar.web;
 
-import org.eclipse.jetty.ee10.servlet.DefaultServlet;
+import org.eclipse.jetty.ee10.servlet.ResourceServlet;
 import org.eclipse.jetty.http.MimeTypes;
 import org.eclipse.jetty.http.content.HttpContent;
 import org.eclipse.jetty.http.content.ResourceHttpContentFactory;
@@ -29,7 +29,7 @@ import jakarta.inject.Inject;
 import java.io.File;
 import java.nio.file.Path;
 
-public class DefaultOverrideServlet extends DefaultServlet {
+public class DefaultOverrideServlet extends ResourceServlet {
 
     private Resource overrideResource;
 
