@@ -42,20 +42,41 @@ public class OverrideFileFilter implements Filter {
     @Override
     public void doFilter(
             ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        if (overrideBase != null) {
-            HttpServletRequest httpRequest = (HttpServletRequest) request;
-            if ("GET".equals(httpRequest.getMethod()) || "HEAD".equals(httpRequest.getMethod())) {
-                String path = httpRequest.getRequestURI().substring(httpRequest.getContextPath().length());
-                if (path.isEmpty()) {
-                    path = "/";
-                }
-                Resource candidate = overrideBase.resolve(path);
-                if (candidate != null && candidate.exists() && !candidate.isDirectory()) {
-                    request.getRequestDispatcher("/override" + path).forward(request, response);
-                    return;
-                }
-            }
+
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+
+        if (!("GET".equals(httpRequest.getMethod()) || "HEAD".equals(httpRequest.getMethod()))) {
+            chain.doFilter(request, response);
+            return;
         }
+
+        String uri = httpRequest.getRequestURI();
+        if (uri.startsWith("/api/") || uri.startsWith("/console/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        String path = uri.substring(httpRequest.getContextPath().length());
+        if (path.isEmpty()) {
+            path = "/";
+        }
+
+        Resource candidate = overrideBase.resolve(path);
+        if (candidate != null && candidate.exists() && !candidate.isDirectory()) {
+            request.getRequestDispatcher("/override" + path).forward(request, response);
+            return;
+        }
+
+        String accept = httpRequest.getHeader("Accept");
+        boolean acceptHtml = accept != null && accept.contains("text/html");
+        String last = path.endsWith("/") ? "" : path.substring(path.lastIndexOf('/') + 1);
+        boolean appRoute = path.endsWith("/") || !last.contains(".");
+
+        if (acceptHtml && appRoute) {
+            request.getRequestDispatcher("/index.html").forward(request, response);
+            return;
+        }
+
         chain.doFilter(request, response);
     }
 
