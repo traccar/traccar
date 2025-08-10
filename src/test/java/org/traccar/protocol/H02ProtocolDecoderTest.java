@@ -268,6 +268,9 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "24971305007205201916101533335008000073206976000000effffbffff000252776566060000000000000000000049"));
 
+        verifyAttribute(decoder, buffer(
+                "*HQ,135790246811220,HTBT,100#"),
+                Position.KEY_BATTERY_LEVEL, 100);                
     }
 
     @Test
@@ -284,8 +287,22 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
                 Position.KEY_STATUS, 0xFFFFFBFFL);
 
         verifyAttribute(decoder, buffer(
-                "*HQ,4210051415,V1,164549,A,0956.3869,N,08406.7068,W,000.00,000,221215,FFFFFBFF,712,01,0,0,6#"),
-                Position.KEY_STATUS, 0xFFFFFBFFL);
+                "*HQ,5226073533,SMS,ST906(70SACD)_TQ_V_2.0 2024/06/07\\n" + //
+                                                "ID:5226073533\\n" + //
+                                                "IP:1.2.3.4 5013\\n" + //
+                                                "UT:30,30,300\\n" + //
+                                                "VOLT:12.9V\\n" + //
+                                                "APN:internet.example.com\\n" + //
+                                                "GPS:A-24-23\\n" + //
+                                                "GSM:26#"),
+                Position.KEY_RESULT, "ST906(70SACD)_TQ_V_2.0 2024/06/07\\n" + //
+                                                "ID:5226073533\\n" + //
+                                                "IP:1.2.3.4 5013\\n" + //
+                                                "UT:30,30,300\\n" + //
+                                                "VOLT:12.9V\\n" + //
+                                                "APN:internet.example.com\\n" + //
+                                                "GPS:A-24-23\\n" + //
+                                                "GSM:26");
 
     }
 
