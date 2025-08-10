@@ -58,6 +58,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.EnumSet;
 
@@ -97,6 +98,17 @@ public class WebServer implements LifecycleObject {
             @Override
             protected void handleErrorPage(
                     HttpServletRequest request, Writer writer, int code, String message) throws IOException {
+                String uri = request.getRequestURI();
+                String accept = request.getHeader("Accept");
+                if (code == 404 && "GET".equals(request.getMethod())
+                        && accept != null && accept.contains("text/html")
+                        && !uri.startsWith("/api/") && !uri.startsWith("/console/")) {
+                    var index = new File(config.getString(Keys.WEB_PATH), "index.html");
+                    if (index.isFile()) {
+                        writer.write(Files.readString(index.toPath()));
+                        return;
+                    }
+                }
                 writer.write("<!DOCTYPE><html><head><title>Error</title></head><html><body>"
                         + code + " - " + HttpStatus.getMessage(code) + "</body></html>");
             }
