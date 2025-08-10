@@ -300,29 +300,30 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    /* reply to CXZT command on ST906 V2 tracker */
     private static final Pattern PATTERN_SMS_ST906_V2 = new PatternBuilder()
             .text("*HQ,")
-            .number("(d+),")                // id
+            .number("(d+),")                     // id
             .text("SMS,ST906")
-            .expression("[^ ]+ \\d+/\\d+/\\d+")                 // firmware/version (e.g. (70SACD)_TQ_V_2.0 2024/06/07)
+            .expression("[^ ]+ \\d+/\\d+/\\d+")  // firmware/version (e.g. (70SACD)_TQ_V_2.0 2024/06/07)
             .text("\\nID:")
-            .number("d+")                      // id (again)
-            .text("\\nIP:") 
-            .expression("[^ ]+")                // IP address
-            .number(" d+")                      // port
+            .number("d+")                        // id (again)
+            .text("\\nIP:")
+            .expression("[^ ]+")                 // IP address
+            .number(" d+")                       // port
             .text("\\nUT:")
-            .number("d+,d+,d+")             // UT values
+            .number("d+,d+,d+")                  // UT values
             .text("\\nVOLT:")
-            .number("(d+.d+)V")                   // voltage
+            .number("(d+.d+)V")                  // voltage
             .text("\\nAPN:")
             .expression("([^\\n]+)")              // APN
             .text("\\nGPS:")
-            .expression("([AB])-(\\d+)-(\\d+)")       // GPS validity, lat, lon
+            .expression("([AB])-(\\d+)-(\\d+)")   // GPS validity, lat, lon
             .text("\\nGSM:")
             .number("(d+)")                       // GSM value
             .any()
             .compile();
- 
+
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
         if (channel != null && id != null) {
             String response;
