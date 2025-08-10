@@ -15,6 +15,9 @@ public class S5lProtocol extends BaseProtocol {
         setSupportedDataCommands(
                 Command.TYPE_ENGINE_STOP,
                 Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_REBOOT_DEVICE,
+                Command.TYPE_FACTORY_RESET,
                 Command.TYPE_CUSTOM);
         addServer(new TrackerServer(config, getName(), false) {
             @Override
