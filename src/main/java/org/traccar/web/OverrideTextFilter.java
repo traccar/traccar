@@ -33,12 +33,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Singleton
-public class OverrideFilter implements Filter {
+public class OverrideTextFilter implements Filter {
 
     private final Provider<PermissionsService> permissionsServiceProvider;
 
     @Inject
-    public OverrideFilter(Provider<PermissionsService> permissionsServiceProvider) {
+    public OverrideTextFilter(Provider<PermissionsService> permissionsServiceProvider) {
         this.permissionsServiceProvider = permissionsServiceProvider;
     }
 
@@ -47,15 +47,20 @@ public class OverrideFilter implements Filter {
             throws IOException, ServletException {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         if (httpRequest.getServletPath() != null && httpRequest.getServletPath().startsWith("/api")) {
             chain.doFilter(request, response);
             return;
         }
 
-        ResponseWrapper wrappedResponse = new ResponseWrapper((HttpServletResponse) response);
+        ResponseWrapper wrappedResponse = new ResponseWrapper(httpResponse);
 
         chain.doFilter(request, wrappedResponse);
+
+        if (response.isCommitted() || httpResponse.getStatus() >= 300 || "HEAD".equals(httpRequest.getMethod())) {
+            return;
+        }
 
         byte[] bytes = wrappedResponse.getCapture();
         if (bytes != null) {

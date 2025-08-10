@@ -22,6 +22,7 @@ import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.ee10.proxy.AsyncProxyServlet;
 import org.eclipse.jetty.ee10.servlet.ErrorHandler;
+import org.eclipse.jetty.ee10.servlet.FilterHolder;
 import org.eclipse.jetty.ee10.servlet.ResourceServlet;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
@@ -37,6 +38,7 @@ import org.eclipse.jetty.session.DatabaseAdaptor;
 import org.eclipse.jetty.session.DefaultSessionCache;
 import org.eclipse.jetty.session.JDBCSessionDataStoreFactory;
 import org.eclipse.jetty.session.SessionCache;
+import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
@@ -59,7 +61,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.EnumSet;
 
 public class WebServer implements LifecycleObject {
@@ -70,7 +74,7 @@ public class WebServer implements LifecycleObject {
     private final Config config;
     private final Server server;
 
-    public WebServer(Injector injector, Config config) {
+    public WebServer(Injector injector, Config config) throws IOException {
         this.injector = injector;
         this.config = config;
         String address = config.getString(Keys.WEB_ADDRESS);
@@ -145,20 +149,36 @@ public class WebServer implements LifecycleObject {
         }
     }
 
-    private void initWebApp(ServletContextHandler servletHandler) {
-        ServletHolder servletHolder = new ServletHolder(new DefaultOverrideServlet(config));
-        servletHolder.setInitParameter("baseResource", new File(config.getString(Keys.WEB_PATH)).getAbsolutePath());
-        servletHolder.setInitParameter("dirAllowed", "false");
+    private void initWebApp(ServletContextHandler servletHandler) throws IOException {
+        String cache = config.getString(Keys.WEB_CACHE_CONTROL);
+
+        Path baseReal = Paths.get(config.getString(Keys.WEB_PATH)).toRealPath(LinkOption.NOFOLLOW_LINKS);
+        servletHandler.setBaseResource(ResourceFactory.of(servletHandler).newResource(baseReal));
+
+        ServletHolder baseHolder = new ServletHolder(ResourceServlet.class);
+        baseHolder.setInitParameter("dirAllowed", "false");
+        baseHolder.setInitParameter("cacheControl", cache);
+        servletHandler.addServlet(baseHolder, "/");
+
+        String override = config.getString(Keys.WEB_OVERRIDE);
+        Path overrideReal = Paths.get(override).toRealPath(LinkOption.NOFOLLOW_LINKS);
+
+        ServletHolder overrideHolder = new ServletHolder(ResourceServlet.class);
+        overrideHolder.setInitParameter("baseResource", overrideReal.toString());
+        overrideHolder.setInitParameter("pathInfoOnly", "true");
+        overrideHolder.setInitParameter("dirAllowed", "false");
+        overrideHolder.setInitParameter("cacheControl", cache);
+        servletHandler.addServlet(overrideHolder, "/override/*");
+
+        FilterHolder filterHolder = new FilterHolder(new OverrideFileFilter());
+        filterHolder.setInitParameter("overridePath", overrideReal.toString());
+        servletHandler.addFilter(filterHolder, "/*", EnumSet.of(DispatcherType.REQUEST));
+
         if (config.getBoolean(Keys.WEB_DEBUG)) {
             servletHandler.setWelcomeFiles(new String[] {"debug.html", "index.html"});
         } else {
-            String cache = config.getString(Keys.WEB_CACHE_CONTROL);
-            if (cache != null && !cache.isEmpty()) {
-                servletHolder.setInitParameter("cacheControl", cache);
-            }
             servletHandler.setWelcomeFiles(new String[] {"release.html", "index.html"});
         }
-        servletHandler.addServlet(servletHolder, "/*");
     }
 
     private void initApi(ServletContextHandler servletHandler) {
