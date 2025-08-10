@@ -306,7 +306,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // id
             .text("SMS,")
             .expression("(.+)")
-            .text("#").optional()
+            .text("#")
             .compile();
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
