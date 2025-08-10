@@ -97,6 +97,10 @@ public class ExtendedModel extends BaseModel {
         return parseAsString(attributes.get(key), null);
     }
 
+    public double getDouble(String key, double defaultValue) {
+        return parseAsDouble(attributes.get(key), defaultValue);
+    }
+
     public double getDouble(String key) {
         return parseAsDouble(attributes.get(key), 0.0);
     }

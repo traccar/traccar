@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,36 +18,26 @@ package org.traccar.geofence;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
-import org.traccar.config.Config;
 import org.traccar.helper.DistanceCalculator;
-import org.traccar.model.Geofence;
 
 public class GeofenceCircle extends GeofenceGeometry {
 
-    private double centerLatitude;
-    private double centerLongitude;
-    private double radius;
-
-    public GeofenceCircle() {
-    }
+    private final double centerLatitude;
+    private final double centerLongitude;
+    private final double radius;
 
     public GeofenceCircle(String wkt) throws ParseException {
-        fromWkt(wkt);
-    }
-
-    public GeofenceCircle(double latitude, double longitude, double radius) {
-        this.centerLatitude = latitude;
-        this.centerLongitude = longitude;
-        this.radius = radius;
-    }
-
-    public double distanceFromCenter(double latitude, double longitude) {
-        return DistanceCalculator.distance(centerLatitude, centerLongitude, latitude, longitude);
+        DecodedCircle decoded = fromWkt(wkt);
+        centerLatitude = decoded.latitude;
+        centerLongitude = decoded.longitude;
+        radius = decoded.radius;
+        setMin(new Coordinate(centerLatitude - radius, centerLongitude - radius));
+        setMax(new Coordinate(centerLatitude + radius, centerLongitude + radius));
     }
 
     @Override
-    public boolean containsPoint(Config config, Geofence geofence, double latitude, double longitude) {
-        return distanceFromCenter(latitude, longitude) <= radius;
+    protected boolean containsPointInternal(double latitude, double longitude) {
+        return DistanceCalculator.distance(centerLatitude, centerLongitude, latitude, longitude) <= radius;
     }
 
     @Override
@@ -69,13 +59,15 @@ public class GeofenceCircle extends GeofenceGeometry {
         return wkt;
     }
 
-    @Override
-    public void fromWkt(String wkt) throws ParseException {
+    public record DecodedCircle(double latitude, double longitude, double radius) {
+    }
+
+    public DecodedCircle fromWkt(String wkt) throws ParseException {
         if (!wkt.startsWith("CIRCLE")) {
             throw new ParseException("Mismatch geometry type", 0);
         }
         String content = wkt.substring(wkt.indexOf("(") + 1, wkt.indexOf(")"));
-        if (content.equals("")) {
+        if (content.isEmpty()) {
             throw new ParseException("No content", 0);
         }
         String[] commaTokens = content.split(",");
@@ -86,20 +78,25 @@ public class GeofenceCircle extends GeofenceGeometry {
         if (tokens.length != 2) {
             throw new ParseException("Too much or less coordinates", 0);
         }
+        double centerLatitude;
         try {
             centerLatitude = Double.parseDouble(tokens[0]);
         } catch (NumberFormatException e) {
             throw new ParseException(tokens[0] + " is not a double", 0);
         }
+        double centerLongitude;
         try {
             centerLongitude = Double.parseDouble(tokens[1]);
         } catch (NumberFormatException e) {
             throw new ParseException(tokens[1] + " is not a double", 0);
         }
+        double radius;
         try {
             radius = Double.parseDouble(commaTokens[1]);
         } catch (NumberFormatException e) {
             throw new ParseException(commaTokens[1] + " is not a double", 0);
         }
+        return new DecodedCircle(centerLatitude, centerLongitude, radius);
     }
+
 }

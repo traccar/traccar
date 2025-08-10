@@ -15,7 +15,7 @@
  */
 package org.traccar.web;
 
-import org.eclipse.jetty.servlets.DoSFilter;
+import org.eclipse.jetty.ee10.servlets.DoSFilter;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 

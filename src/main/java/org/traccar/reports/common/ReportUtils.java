@@ -64,7 +64,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 public class ReportUtils {
 
@@ -306,7 +305,7 @@ public class ReportUtils {
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
         boolean trips = reportClass.equals(TripReportItem.class);
 
-        List<Event> filteredEvents = new ArrayList<>();
+        List<Event> events = new ArrayList<>();
         Map<Long, Position> positionMap = new HashMap<>();
         Position startPosition = null;
         double maxSpeed = 0;
@@ -330,13 +329,13 @@ public class ReportUtils {
                 MotionProcessor.updateState(motionState, last, positions.get(i), motion, tripsConfig);
                 if (motionState.getEvent() != null) {
                     motionState.getEvent().set("maxSpeed", maxSpeed);
-                    filteredEvents.add(motionState.getEvent());
+                    events.add(motionState.getEvent());
                     maxSpeed = 0;
                 }
             }
         }
 
-        for (Event event : filteredEvents) {
+        for (Event event : events) {
             boolean motion = event.getType().equals(Event.TYPE_DEVICE_MOVING);
             if (motion == trips) {
                 startPosition = positionMap.get(event.getPositionId());
@@ -368,24 +367,23 @@ public class ReportUtils {
                 new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
         boolean trips = reportClass.equals(TripReportItem.class);
-        Set<String> filter = Set.of(Event.TYPE_DEVICE_MOVING, Event.TYPE_DEVICE_STOPPED);
 
         var events = storage.getObjects(Event.class, new Request(
                 new Columns.All(),
-                new Condition.And(
+                Condition.merge(List.of(
                         new Condition.Equals("deviceId", device.getId()),
-                        new Condition.Between("eventTime", from, to)),
+                        new Condition.Between("eventTime", from, to),
+                        new Condition.Or(
+                                new Condition.Equals("type", Event.TYPE_DEVICE_MOVING),
+                                new Condition.Equals("type", Event.TYPE_DEVICE_STOPPED)))),
                 new Order("eventTime")));
-        var filteredEvents = events.stream()
-                .filter(event -> filter.contains(event.getType()))
-                .toList();
 
         Position startPosition = PositionUtil.getEdgePosition(storage, device.getId(), from, to, false);
         if (startPosition != null && !startPosition.getBoolean(Position.KEY_MOTION)) {
             startPosition = null;
         }
 
-        for (Event event : filteredEvents) {
+        for (Event event : events) {
             boolean motion = event.getType().equals(Event.TYPE_DEVICE_MOVING);
             if (motion == trips) {
                 startPosition = storage.getObject(Position.class, new Request(

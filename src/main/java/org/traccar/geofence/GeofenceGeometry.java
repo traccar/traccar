@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,41 +15,69 @@
  */
 package org.traccar.geofence;
 
-import org.traccar.config.Config;
-import org.traccar.model.Geofence;
+import org.traccar.helper.DistanceCalculator;
 
-import java.text.ParseException;
+import java.util.List;
 
 public abstract class GeofenceGeometry {
 
-    public abstract boolean containsPoint(Config config, Geofence geofence, double latitude, double longitude);
+    private Coordinate min;
+    private Coordinate max;
+
+    protected void setMin(Coordinate min) {
+        this.min = min;
+    }
+
+    protected void setMax(Coordinate max) {
+        this.max = max;
+    }
+
+    protected void calculateBoundary(List<Coordinate> coordinates, double padding) {
+        var iterator = coordinates.iterator();
+        Coordinate current = iterator.next();
+        double minLat = current.lat();
+        double minLon = current.lon();
+        double maxLat = current.lat();
+        double maxLon = current.lon();
+        while (iterator.hasNext()) {
+            current = iterator.next();
+            minLat = Math.min(minLat, current.lat());
+            minLon = Math.min(minLon, current.lon());
+            maxLat = Math.max(maxLat, current.lat());
+            maxLon = Math.max(maxLon, current.lon());
+        }
+        if (padding > 0) {
+            double latPadding = DistanceCalculator.getLatitudeDelta(padding);
+            double lonPadding = Math.max(
+                    DistanceCalculator.getLongitudeDelta(padding, minLat),
+                    DistanceCalculator.getLongitudeDelta(padding, maxLat));
+            setMin(new Coordinate(minLat - latPadding, minLon - lonPadding));
+            setMax(new Coordinate(maxLat + latPadding, maxLon + lonPadding));
+        } else {
+            setMin(new Coordinate(minLat, minLon));
+            setMax(new Coordinate(maxLat, maxLon));
+        }
+    }
+
+    public boolean containsPoint(double latitude, double longitude) {
+        if (min.lon >= 0 || max.lon < 0) {
+            if (latitude < min.lat || latitude > max.lat) {
+                return false;
+            }
+            if (longitude < min.lon || longitude > max.lon) {
+                return false;
+            }
+        }
+        return containsPointInternal(latitude, longitude);
+    }
+
+    protected abstract boolean containsPointInternal(double latitude, double longitude);
 
     public abstract double calculateArea();
 
     public abstract String toWkt();
 
-    public abstract void fromWkt(String wkt) throws ParseException;
-
-    public static class Coordinate {
-
-        private double lat;
-        private double lon;
-
-        public double getLat() {
-            return lat;
-        }
-
-        public void setLat(double lat) {
-            this.lat = lat;
-        }
-
-        public double getLon() {
-            return lon;
-        }
-
-        public void setLon(double lon) {
-            this.lon = lon;
-        }
+    public record Coordinate(double lat, double lon) {
     }
 
 }
