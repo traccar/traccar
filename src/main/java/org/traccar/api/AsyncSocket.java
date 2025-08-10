@@ -31,6 +31,7 @@ import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
+import java.nio.channels.ClosedChannelException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -88,6 +89,13 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
             }
         } catch (JsonProcessingException e) {
             LOGGER.warn("Socket JSON parsing error", e);
+        }
+    }
+
+    @Override
+    public void onWebSocketError(Throwable cause) {
+        if (!(cause instanceof ClosedChannelException)) {
+            LOGGER.warn("WebSocket error", cause);
         }
     }
 
