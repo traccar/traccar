@@ -301,27 +301,12 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     /* reply to CXZT command on ST906 V2 tracker */
-    private static final Pattern PATTERN_SMS_ST906_V2 = new PatternBuilder()
+    private static final Pattern PATTERN_SMS = new PatternBuilder()
             .text("*HQ,")
             .number("(d+),")                     // id
-            .text("SMS,ST906")
-            .expression("[^ ]+ \\d+/\\d+/\\d+")  // firmware/version (e.g. (70SACD)_TQ_V_2.0 2024/06/07)
-            .text("\\nID:")
-            .number("d+")                        // id (again)
-            .text("\\nIP:")
-            .expression("[^ ]+")                 // IP address
-            .number(" d+")                       // port
-            .text("\\nUT:")
-            .number("d+,d+,d+")                  // UT values
-            .text("\\nVOLT:")
-            .number("(d+.d+)V")                  // voltage
-            .text("\\nAPN:")
-            .expression("([^\\n]+)")              // APN
-            .text("\\nGPS:")
-            .expression("([AB])-(\\d+)-(\\d+)")   // GPS validity, lat, lon
-            .text("\\nGSM:")
-            .number("(d+)")                       // GSM value
-            .any()
+            .text("SMS,")
+            .expression("(.+)")
+            .text("#").optional()
             .compile();
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
@@ -551,7 +536,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeSms(String sentence, Channel channel, SocketAddress remoteAddress) {
 
-        Parser parser = new Parser(PATTERN_SMS_ST906_V2, sentence);
+        Parser parser = new Parser(PATTERN_SMS, sentence);
         if (!parser.matches()) {
             return null;
         }
@@ -563,7 +548,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.set(Position.KEY_POWER, parser.nextDouble());
+        position.set(Position.KEY_RESULT, parser.next());
         getLastLocation(position, null);
         return position;
     }
