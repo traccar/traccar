@@ -401,7 +401,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, status);
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 1));
         position.set(Position.KEY_CHARGE, BitUtil.check(status, 2));
-        position.set(Position.KEY_BLOCKED, !BitUtil.check(status, 6)); // GPS Signal OK
+        position.set(Position.KEY_GPS, BitUtil.check(status, 6)); // GPS Signal OK
+        position.set(Position.KEY_BLOCKED, BitUtil.check(status, 7));
 
         switch (BitUtil.between(status, 3, 6)) {
             case 1:
