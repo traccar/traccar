@@ -300,7 +300,6 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    /* reply to CXZT command on ST906 V2 tracker */
     private static final Pattern PATTERN_SMS = new PatternBuilder()
             .text("*HQ,")
             .number("(d+),")                     // id
@@ -548,11 +547,13 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.set(Position.KEY_RESULT, parser.next());
+
         getLastLocation(position, null);
+
+        position.set(Position.KEY_RESULT, parser.next());
+
         return position;
     }
-
 
     private Position decodeVp1(String sentence, Channel channel, SocketAddress remoteAddress) {
 

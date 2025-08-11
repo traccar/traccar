@@ -267,23 +267,11 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         
         verifyPosition(decoder, binary(
                 "24971305007205201916101533335008000073206976000000effffbffff000252776566060000000000000000000049"));
+
         verifyAttribute(decoder, buffer(
-                "*HQ,5226073533,SMS,ST906(70SACD)_TQ_V_2.0 2024/06/07\\n" + //
-                                                "ID:5226073533\\n" + //
-                                                "IP:1.2.3.4 5013\\n" + //
-                                                "UT:30,30,300\\n" + //
-                                                "VOLT:12.9V\\n" + //
-                                                "APN:internet.example.com\\n" + //
-                                                "GPS:A-24-23\\n" + //
-                                                "GSM:26#"),
-                Position.KEY_RESULT, "ST906(70SACD)_TQ_V_2.0 2024/06/07\\n" + //
-                                                "ID:5226073533\\n" + //
-                                                "IP:1.2.3.4 5013\\n" + //
-                                                "UT:30,30,300\\n" + //
-                                                "VOLT:12.9V\\n" + //
-                                                "APN:internet.example.com\\n" + //
-                                                "GPS:A-24-23\\n" + //
-                                                "GSM:26");
+                "*HQ,5226073533,SMS,ST906(70SACD)_TQ_V_2.0 2024/06/07\nID:5226073533\nIP:1.2.3.4 5013\nUT:30,30,300\nVOLT:12.9V\nAPN:internet.example.com\nGPS:A-24-23\nGSM:26#"),
+                Position.KEY_RESULT, "ST906(70SACD)_TQ_V_2.0 2024/06/07\nID:5226073533\nIP:1.2.3.4 5013\nUT:30,30,300\nVOLT:12.9V\nAPN:internet.example.com\nGPS:A-24-23\nGSM:26");
+
     }
 
     @Test
