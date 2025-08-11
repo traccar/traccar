@@ -399,9 +399,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_STATUS, status);
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 1));
         position.set(Position.KEY_CHARGE, BitUtil.check(status, 2));
-        position.set(Position.KEY_BLOCKED, BitUtil.check(status, 7));
+        position.set(Position.KEY_BLOCKED, BitUtil.check(status, 6)); // GPS Signal Blocked
 
-        switch (BitUtil.between(status, 3, 6)) {
+        switch (BitUtil.between(status, 3, 5)) {
             case 1:
                 position.addAlarm(Position.ALARM_VIBRATION);
                 break;
@@ -418,7 +418,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.addAlarm(Position.ALARM_GEOFENCE);
                 break;
             case 7:
-                if (variant == Variant.VXT01) {
+                if (variant == Variant.VXT01 || variant == Variant.S5) {
                     position.addAlarm(Position.ALARM_OVERSPEED);
                 } else {
                     position.addAlarm(Position.ALARM_REMOVING);
