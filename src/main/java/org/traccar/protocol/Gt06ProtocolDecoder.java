@@ -862,7 +862,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, modelVL));
 
-                    if(type != MSG_STATUS){ // Expansion information does not exist in MSG_STATUS
+                    if (type != MSG_STATUS) { // Expansion information does not exist in MSG_STATUS
                         position.set("oil", buf.readUnsignedShort());
                         int temperature = buf.readUnsignedByte();
                         if (BitUtil.check(temperature, 7)) {
