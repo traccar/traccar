@@ -32,6 +32,7 @@ import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
+import org.traccar.model.Device;
 import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
@@ -879,7 +880,20 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, modelVL));
-                    position.set("oil", buf.readUnsignedShort());
+
+                    // decode Oil Data (Fuel Information)
+                    int oilData = buf.readUnsignedShort();
+                    position.set("oil", oilData);
+
+                    // get device
+                    Device device = getCacheManager().getObject(Device.class, position.getDeviceId());
+                    if (device != null) {
+                        int fuelMax = device.getInteger("FuelMax");
+                        if (fuelMax > 0) {
+                            position.set("FuelLevel", String.valueOf(oilData / (double) fuelMax * 100) + "%");
+                        }
+                    }
+
                     int temperature = buf.readUnsignedByte();
                     if (BitUtil.check(temperature, 7)) {
                         temperature = -BitUtil.to(temperature, 7);
