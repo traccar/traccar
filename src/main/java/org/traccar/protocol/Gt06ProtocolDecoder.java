@@ -804,6 +804,25 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             double temperature = BitUtil.to(value, 15) * 0.1;
             position.set(Position.PREFIX_TEMP + 1, BitUtil.check(value, 15) ? temperature : -temperature);
 
+        } else if (type == MSG_STATUS && variant == Variant.S5) {
+            
+            getLastLocation(position, null);
+
+            // decode Terminal Information
+            int terminalInfo = buf.readUnsignedByte();
+            position.set(Position.KEY_STATUS, terminalInfo);
+            position.set(Position.KEY_IGNITION, BitUtil.check(terminalInfo, 1));
+            position.set(Position.KEY_CHARGE, BitUtil.check(terminalInfo, 2));
+            position.set(Position.KEY_BLOCKED, BitUtil.check(terminalInfo, 7));
+
+            // decode Power Information
+            int powerInfo = buf.readUnsignedShort();
+            position.set(Position.KEY_POWER, powerInfo / 100.0);
+
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte()); // decode GSM SIGNAL
+
+            buf.readUnsignedByte(); // Alarm Expansion bit
+
         } else if (isSupported(type, model)) {
 
             if (type == MSG_LBS_STATUS && variant == Variant.SPACE10X) {
@@ -1532,6 +1551,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x21) {
             variant = Variant.BENWAY;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x2b) {
+            variant = Variant.S5;
+        } else if (header == 0x7878 && type == MSG_STATUS && length == 0x0a) {
             variant = Variant.S5;
         } else if (header == 0x7878 && type == MSG_LBS_STATUS && length >= 0x17) {
             variant = Variant.SPACE10X;
