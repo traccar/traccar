@@ -807,25 +807,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             double temperature = BitUtil.to(value, 15) * 0.1;
             position.set(Position.PREFIX_TEMP + 1, BitUtil.check(value, 15) ? temperature : -temperature);
 
-        } else if (type == MSG_STATUS && variant == Variant.S5) {
-            
-            getLastLocation(position, null);
-
-            // decode Terminal Information
-            int terminalInfo = buf.readUnsignedByte();
-            position.set(Position.KEY_STATUS, terminalInfo);
-            position.set(Position.KEY_IGNITION, BitUtil.check(terminalInfo, 1));
-            position.set(Position.KEY_CHARGE, BitUtil.check(terminalInfo, 2));
-            position.set(Position.KEY_BLOCKED, BitUtil.check(terminalInfo, 7));
-
-            // decode Power Information
-            int powerInfo = buf.readUnsignedShort();
-            position.set(Position.KEY_POWER, powerInfo / 100.0);
-
-            position.set(Position.KEY_RSSI, buf.readUnsignedByte()); // decode GSM SIGNAL
-
-            buf.readUnsignedByte(); // Alarm Expansion bit
-
         } else if (isSupported(type, model)) {
 
             if (type == MSG_LBS_STATUS && variant == Variant.SPACE10X) {
@@ -880,13 +861,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, modelVL));
-                    position.set("oil", buf.readUnsignedShort());
-                    int temperature = buf.readUnsignedByte();
-                    if (BitUtil.check(temperature, 7)) {
-                        temperature = -BitUtil.to(temperature, 7);
+
+                    if(type != MSG_STATUS){ // Expansion information does not exist in MSG_STATUS
+                        position.set("oil", buf.readUnsignedShort());
+                        int temperature = buf.readUnsignedByte();
+                        if (BitUtil.check(temperature, 7)) {
+                            temperature = -BitUtil.to(temperature, 7);
+                        }
+                        position.set(Position.PREFIX_TEMP + 1, temperature);
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 10);
                     }
-                    position.set(Position.PREFIX_TEMP + 1, temperature);
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 10);
+
                 } else {
                     if (type == MSG_GPS_LBS_STATUS_5 || (modelNT20 && type == MSG_GPS_LBS_2)) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
