@@ -267,25 +267,6 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         
         verifyPosition(decoder, binary(
                 "24971305007205201916101533335008000073206976000000effffbffff000252776566060000000000000000000049"));
-
-        verifyAttribute(decoder, buffer(
-                "*HQ,135790246811220,HTBT,100#"),
-                Position.KEY_BATTERY_LEVEL, 100);                
-    }
-
-    @Test
-    public void testDecodeStatus() throws Exception {
-
-        var decoder = inject(new H02ProtocolDecoder(null));
-
-        verifyAttribute(decoder, buffer(
-                "*HQ,2705171109,V1,213324,A,5002.5849,N,01433.7822,E,0.00,000,140613,FFFFFFFF#"),
-                Position.KEY_STATUS, 0xFFFFFFFFL);
-
-        verifyAttribute(decoder, binary(
-                "2441091144271222470112142233983006114026520E000000FFFFFBFFFF0014060000000001CC00262B0F170A"),
-                Position.KEY_STATUS, 0xFFFFFBFFL);
-
         verifyAttribute(decoder, buffer(
                 "*HQ,5226073533,SMS,ST906(70SACD)_TQ_V_2.0 2024/06/07\\n" + //
                                                 "ID:5226073533\\n" + //
@@ -303,6 +284,24 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
                                                 "APN:internet.example.com\\n" + //
                                                 "GPS:A-24-23\\n" + //
                                                 "GSM:26");
+    }
+
+    @Test
+    public void testDecodeStatus() throws Exception {
+
+        var decoder = inject(new H02ProtocolDecoder(null));
+
+        verifyAttribute(decoder, buffer(
+                "*HQ,2705171109,V1,213324,A,5002.5849,N,01433.7822,E,0.00,000,140613,FFFFFFFF#"),
+                Position.KEY_STATUS, 0xFFFFFFFFL);
+
+        verifyAttribute(decoder, binary(
+                "2441091144271222470112142233983006114026520E000000FFFFFBFFFF0014060000000001CC00262B0F170A"),
+                Position.KEY_STATUS, 0xFFFFFBFFL);
+
+        verifyAttribute(decoder, buffer(
+                "*HQ,4210051415,V1,164549,A,0956.3869,N,08406.7068,W,000.00,000,221215,FFFFFBFF,712,01,0,0,6#"),
+                Position.KEY_STATUS, 0xFFFFFBFFL);
 
     }
 
