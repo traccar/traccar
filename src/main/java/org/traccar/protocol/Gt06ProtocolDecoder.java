@@ -394,7 +394,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return true;
     }
 
-    private void decodeStatus(Position position, ByteBuf buf) {
+    private void decodeStatus(Position position, ByteBuf buf, int type) {
 
         int status = buf.readUnsignedByte();
 
@@ -404,32 +404,35 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_GPS, BitUtil.check(status, 6)); // GPS Signal OK
         position.set(Position.KEY_BLOCKED, BitUtil.check(status, 7));
 
-        switch (BitUtil.between(status, 3, 6)) {
-            case 1:
-                position.addAlarm(Position.ALARM_VIBRATION);
-                break;
-            case 2:
-                position.addAlarm(Position.ALARM_POWER_CUT);
-                break;
-            case 3:
-                position.addAlarm(Position.ALARM_LOW_BATTERY);
-                break;
-            case 4:
-                position.addAlarm(Position.ALARM_SOS);
-                break;
-            case 6:
-                position.addAlarm(Position.ALARM_GEOFENCE);
-                break;
-            case 7:
-                if (variant == Variant.VXT01 || variant == Variant.S5) {
-                    position.addAlarm(Position.ALARM_OVERSPEED);
-                } else {
-                    position.addAlarm(Position.ALARM_REMOVING);
-                }
-                break;
-            default:
-                break;
+        if( (variant != Variant.S5) || (variant == Variant.S5 && type == MSG_GPS_LBS_STATUS_1)) {
+            switch (BitUtil.between(status, 3, 6)) {
+                case 1:
+                    position.addAlarm(Position.ALARM_VIBRATION);
+                    break;
+                case 2:
+                    position.addAlarm(Position.ALARM_POWER_CUT);
+                    break;
+                case 3:
+                    position.addAlarm(Position.ALARM_LOW_BATTERY);
+                    break;
+                case 4:
+                    position.addAlarm(Position.ALARM_SOS);
+                    break;
+                case 6:
+                    position.addAlarm(Position.ALARM_GEOFENCE);
+                    break;
+                case 7:
+                    if (variant == Variant.VXT01 || variant == Variant.S5) {
+                        position.addAlarm(Position.ALARM_OVERSPEED);
+                    } else {
+                        position.addAlarm(Position.ALARM_REMOVING);
+                    }
+                    break;
+                default:
+                    break;
+            }          
         }
+
     }
 
     private String decodeAlarm(short value, boolean modelLW, boolean modelSW, boolean modelVL) {
@@ -841,7 +844,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 if (type == MSG_GPS_LBS_STATUS_5) {
                     buf.readUnsignedByte(); // network indicator
                 }
-                decodeStatus(position, buf);
+                decodeStatus(position, buf, type);
                 if (variant == Variant.OBD6) {
                     int signal = buf.readUnsignedShort();
                     int satellites = BitUtil.between(signal, 10, 15) + BitUtil.between(signal, 5, 10);
@@ -860,7 +863,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 } else if (variant == Variant.S5) {
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, modelVL));
+
+                    if(type == MSG_GPS_LBS_STATUS_1){
+                        position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, modelVL));
+                    }
 
                     if(type != MSG_STATUS){ // Expansion information does not exist in MSG_STATUS
                         position.set("oil", buf.readUnsignedShort());
@@ -951,7 +957,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
                 } else if (variant == Variant.VXT01) {
-                    decodeStatus(position, buf);
+                    decodeStatus(position, buf, type);
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     buf.readUnsignedByte(); // alarm extension
