@@ -88,4 +88,128 @@ public class CalendarTest {
         assertNotEquals(periods1, periods2);
         assertEquals(periods2, periods3);
     }
+
+    @Test
+    public void testUtcDateTime() throws IOException, ParserException, ParseException {
+        String calendarString = """
+                BEGIN:VCALENDAR
+                VERSION:2.0
+                BEGIN:VEVENT
+                UID:utc1@example.com
+                DTSTART:20250809T100000Z
+                DTEND:20250809T110000Z
+                SUMMARY:UTC Event
+                END:VEVENT
+                END:VCALENDAR""";
+        Calendar calendar = new Calendar();
+        calendar.setData(calendarString.getBytes());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+
+        assertFalse(calendar.checkMoment(format.parse("2025-08-09 09:30:00+00")));
+        assertTrue(calendar.checkMoment(format.parse("2025-08-09 10:30:00+00")));
+    }
+
+    @Test
+    public void testZoneIdDateTime() throws IOException, ParserException, ParseException {
+        String calendarString = """
+                BEGIN:VCALENDAR
+                VERSION:2.0
+                BEGIN:VEVENT
+                UID:tzid1@example.com
+                DTSTART;TZID=Asia/Dubai:20250809T120000
+                DTEND;TZID=Asia/Dubai:20250809T130000
+                SUMMARY:TZID Event
+                END:VEVENT
+                END:VCALENDAR""";
+        Calendar calendar = new Calendar();
+        calendar.setData(calendarString.getBytes());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+
+        assertFalse(calendar.checkMoment(format.parse("2025-08-09 11:30:00+04")));
+        assertTrue(calendar.checkMoment(format.parse("2025-08-09 12:30:00+04")));
+    }
+
+    @Test
+    public void testFloatingDateTime() throws IOException, ParserException, ParseException {
+        String calendarString = """
+                BEGIN:VCALENDAR
+                VERSION:2.0
+                BEGIN:VEVENT
+                UID:floating1@example.com
+                DTSTART:20250809T150000
+                DTEND:20250811T150000
+                SUMMARY:Floating Time Event
+                END:VEVENT
+                END:VCALENDAR""";
+        Calendar calendar = new Calendar();
+        calendar.setData(calendarString.getBytes());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+
+        assertFalse(calendar.checkMoment(format.parse("2025-08-01 12:00:00+00")));
+        assertTrue(calendar.checkMoment(format.parse("2025-08-10 12:00:00+00")));
+    }
+
+    @Test
+    public void testDateOnly() throws IOException, ParserException, ParseException {
+        String calendarString = """
+                BEGIN:VCALENDAR
+                VERSION:2.0
+                BEGIN:VEVENT
+                UID:date1@example.com
+                DTSTART;VALUE=DATE:20250809
+                DTEND;VALUE=DATE:20250811
+                SUMMARY:All-Day Event
+                END:VEVENT
+                END:VCALENDAR""";
+        Calendar calendar = new Calendar();
+        calendar.setData(calendarString.getBytes());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+
+        assertFalse(calendar.checkMoment(format.parse("2025-08-01 12:00:00+00")));
+        assertTrue(calendar.checkMoment(format.parse("2025-08-10 12:00:00+00")));
+    }
+
+    @Test
+    public void testWeekly() throws IOException, ParserException, ParseException {
+        String calendarString = """
+                BEGIN:VCALENDAR
+                VERSION:2.0
+                BEGIN:VEVENT
+                UID:rrule1@example.com
+                DTSTART:20250809T100000Z
+                DTEND:20250809T110000Z
+                RRULE:FREQ=WEEKLY;COUNT=4
+                SUMMARY:Weekly Recurring UTC Event
+                END:VEVENT
+                END:VCALENDAR""";
+        Calendar calendar = new Calendar();
+        calendar.setData(calendarString.getBytes());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+
+        assertFalse(calendar.checkMoment(format.parse("2025-08-16 09:30:00+00")));
+        assertTrue(calendar.checkMoment(format.parse("2025-08-16 10:30:00+00")));
+    }
+
+    @Test
+    public void testMonthly() throws IOException, ParserException, ParseException {
+        String calendarString = """
+                BEGIN:VCALENDAR
+                VERSION:2.0
+                PRODID:-//Example Corp//NONSGML Event//EN
+                BEGIN:VEVENT
+                UID:monthly-tzid@example.com
+                DTSTART;TZID=Asia/Dubai:20250809T093000
+                DTEND;TZID=Asia/Dubai:20250809T103000
+                RRULE:FREQ=MONTHLY;COUNT=6
+                SUMMARY:Monthly Meeting in Rome Time
+                END:VEVENT
+                END:VCALENDAR""";
+        Calendar calendar = new Calendar();
+        calendar.setData(calendarString.getBytes());
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ssX");
+
+        assertFalse(calendar.checkMoment(format.parse("2025-10-09 09:00:00+04")));
+        assertTrue(calendar.checkMoment(format.parse("2025-10-09 10:00:00+04")));
+    }
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 @Singleton
-public class OverrideFilter implements Filter {
+public class OverrideTextFilter implements Filter {
 
     private final Provider<PermissionsService> permissionsServiceProvider;
 
     @Inject
-    public OverrideFilter(Provider<PermissionsService> permissionsServiceProvider) {
+    public OverrideTextFilter(Provider<PermissionsService> permissionsServiceProvider) {
         this.permissionsServiceProvider = permissionsServiceProvider;
     }
 
@@ -46,20 +46,30 @@ public class OverrideFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        if (((HttpServletRequest) request).getServletPath().startsWith("/api")) {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+
+        if (httpRequest.getServletPath() != null && httpRequest.getServletPath().startsWith("/api")) {
             chain.doFilter(request, response);
             return;
         }
 
-        ResponseWrapper wrappedResponse = new ResponseWrapper((HttpServletResponse) response);
+        ResponseWrapper wrappedResponse = new ResponseWrapper(httpResponse);
 
         chain.doFilter(request, wrappedResponse);
 
+        if (response.isCommitted() || httpResponse.getStatus() >= 300 || "HEAD".equals(httpRequest.getMethod())) {
+            return;
+        }
+
         byte[] bytes = wrappedResponse.getCapture();
         if (bytes != null) {
-            if (wrappedResponse.getContentType() != null && wrappedResponse.getContentType().contains("text/html")
-                    || ((HttpServletRequest) request).getPathInfo().endsWith("manifest.webmanifest")) {
+            String contentType = wrappedResponse.getContentType();
+            String pathInfo = httpRequest.getPathInfo();
+            boolean isHtml = contentType != null && contentType.contains("text/html");
+            boolean isManifest = pathInfo != null && pathInfo.endsWith("manifest.webmanifest");
 
+            if (isHtml || isManifest) {
                 Server server;
                 try {
                     server = permissionsServiceProvider.get().getServer();
