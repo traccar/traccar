@@ -117,7 +117,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PERIPHERAL = 0xF2;         // VL842
     public static final int MSG_STATUS_3 = 0xA3;           // GL21L
     public static final int MSG_GPS_LBS_8 = 0x38;
-
+    public static final int MSG_GPS_LBS_STATUS_6 = 0x12;   // SEEWORD S5 Location packet
+    
     private enum Variant {
         VXT01,
         WANWAY_S20,
@@ -239,7 +240,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return "NT20".equalsIgnoreCase(model);
             case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
                 return variant == Variant.SEEWORLD;
-            case MSG_GPS_LBS_1:
+            case MSG_GPS_LBS_STATUS_6:
                 return variant == Variant.S5;
             default:
                 return false;
