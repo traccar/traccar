@@ -1538,7 +1538,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.GT06E_CARD;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x21) {
             variant = Variant.BENWAY;
-        } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x2b) {
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_6 && length == 0x2b) {
             variant = Variant.S5;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x2b) {
             variant = Variant.S5;
