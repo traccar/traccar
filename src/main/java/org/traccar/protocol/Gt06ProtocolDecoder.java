@@ -118,7 +118,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_STATUS_3 = 0xA3;           // GL21L
     public static final int MSG_GPS_LBS_8 = 0x38;
     public static final int MSG_GPS_LBS_STATUS_6 = 0x12;   // SEEWORD S5 Location packet
-    
+
     private enum Variant {
         VXT01,
         WANWAY_S20,
