@@ -401,7 +401,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         int status = buf.readInt();
 
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
-        position.set(Position.KEY_MOTION, BitUtil.check(status, 4));
+        // position.set(Position.KEY_MOTION, BitUtil.check(status, 4));
         position.set(Position.KEY_BLOCKED, BitUtil.check(status, 10));
         position.set(Position.KEY_CHARGE, BitUtil.check(status, 26));
 
@@ -635,7 +635,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedShort(); // string cut count
                     int deviceStatus = buf.readUnsignedByte();
                     position.set("string", BitUtil.check(deviceStatus, 0));
-                    position.set(Position.KEY_MOTION, BitUtil.check(deviceStatus, 2));
+                    // position.set(Position.KEY_MOTION, BitUtil.check(deviceStatus, 2));
                     position.set("cover", BitUtil.check(deviceStatus, 3));
                     break;
                 case 0xE2:
