@@ -29,7 +29,10 @@ dependencyUpdates {
     rejectVersionIf {
         [
             it.candidate.group == 'io.netty' && it.candidate.version ==~ /^5\..*/,
-            it.candidate.version ==~ /(?i).*(alpha|beta|rc|m\d+|preview|snapshot|ea|dev).*/
+            it.candidate.version ==~ /(?i).*(alpha|beta|rc|m\d+|preview|snapshot|ea|dev).*/,
+            it.candidate.group.startsWith('com.fasterxml.jackson.'),
+            it.candidate.group == 'org.glassfish.hk2',
+            it.candidate.group == 'org.jxls',
         ].any { it }
     }
 }
