@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import com.google.inject.servlet.ServletScopes;
 import net.fortuna.ical4j.model.Period;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.helper.DateUtil;
 import org.traccar.helper.LogAction;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
@@ -28,11 +29,6 @@ import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.model.Report;
 import org.traccar.model.User;
-import org.traccar.reports.EventsReportProvider;
-import org.traccar.reports.RouteReportProvider;
-import org.traccar.reports.StopsReportProvider;
-import org.traccar.reports.SummaryReportProvider;
-import org.traccar.reports.TripsReportProvider;
 import org.traccar.reports.common.ReportMailer;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
@@ -42,11 +38,12 @@ import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -106,47 +103,39 @@ public class TaskReports extends SingleScheduleTask {
         var deviceIds = storage.getObjects(Device.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(Device.class, Report.class, report.getId())))
-                .stream().map(BaseModel::getId).collect(Collectors.toList());
+                .stream().map(BaseModel::getId).toList();
+        var deviceIdsPart = deviceIds.stream()
+                .map(id -> "deviceId=" + id)
+                .collect(Collectors.joining("&"));
+
         var groupIds = storage.getObjects(Group.class, new Request(
                 new Columns.Include("id"),
                 new Condition.Permission(Group.class, Report.class, report.getId())))
-                .stream().map(BaseModel::getId).collect(Collectors.toList());
+                .stream().map(BaseModel::getId).toList();
+        var groupIdsPart = groupIds.stream()
+                .map(id -> "groupId=" + id)
+                .collect(Collectors.joining("&"));
+
         var users = storage.getObjects(User.class, new Request(
-                new Columns.Include("id"),
+                new Columns.All(),
                 new Condition.Permission(User.class, Report.class, report.getId())));
 
-        ReportMailer reportMailer = injector.getInstance(ReportMailer.class);
+        StringBuilder url = new StringBuilder("/reports/");
+        url.append(report.getType()).append('?');
+        if (!deviceIdsPart.isEmpty()) {
+            url.append(deviceIdsPart).append('&');
+        }
+        if (!groupIdsPart.isEmpty()) {
+            url.append(groupIdsPart).append('&');
+        }
+        url.append("from=").append(URLEncoder.encode(DateUtil.formatDate(from, true), StandardCharsets.UTF_8));
+        url.append('&');
+        url.append("to=").append(URLEncoder.encode(DateUtil.formatDate(to, true), StandardCharsets.UTF_8));
 
+        ReportMailer reportMailer = injector.getInstance(ReportMailer.class);
         for (User user : users) {
             actionLogger.report(null, user.getId(), true, report.getType(), from, to, deviceIds, groupIds);
-            switch (report.getType()) {
-                case "events" -> {
-                    var eventsReportProvider = injector.getInstance(EventsReportProvider.class);
-                    reportMailer.sendAsync(user.getId(), stream -> eventsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, List.of(), List.of(), from, to));
-                }
-                case "route" -> {
-                    var routeReportProvider = injector.getInstance(RouteReportProvider.class);
-                    reportMailer.sendAsync(user.getId(), stream -> routeReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
-                }
-                case "summary" -> {
-                    var summaryReportProvider = injector.getInstance(SummaryReportProvider.class);
-                    reportMailer.sendAsync(user.getId(), stream -> summaryReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to, false));
-                }
-                case "trips" -> {
-                    var tripsReportProvider = injector.getInstance(TripsReportProvider.class);
-                    reportMailer.sendAsync(user.getId(), stream -> tripsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
-                }
-                case "stops" -> {
-                    var stopsReportProvider = injector.getInstance(StopsReportProvider.class);
-                    reportMailer.sendAsync(user.getId(), stream -> stopsReportProvider.getExcel(
-                            stream, user.getId(), deviceIds, groupIds, from, to));
-                }
-                default -> LOGGER.warn("Unsupported report type {}", report.getType());
-            }
+            reportMailer.sendAsync(user, url.toString());
         }
     }
 

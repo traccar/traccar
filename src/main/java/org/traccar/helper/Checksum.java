@@ -119,6 +119,7 @@ public final class Checksum {
 
     public static final Algorithm CRC8_EGTS = new Algorithm(8, 0x31, 0xFF, false, false, 0x00);
     public static final Algorithm CRC8_ROHC = new Algorithm(8, 0x07, 0xFF, true, true, 0x00);
+    public static final Algorithm CRC8_DALLAS = new Algorithm(8, 0x31, 0x00, true, true, 0x00);
 
     public static final Algorithm CRC16_IBM = new Algorithm(16, 0x8005, 0x0000, true, true, 0x0000);
     public static final Algorithm CRC16_X25 = new Algorithm(16, 0x1021, 0xFFFF, true, true, 0xFFFF);
@@ -204,7 +205,7 @@ public final class Checksum {
         int sum = 0;
         while (data.remaining() > 0) {
             sum += data.get() & 0xff;
-            if ((sum & 0x80000000) > 0) {
+            if ((sum & 0x80000000) != 0) {
                 sum = (sum & 0xffff) + (sum >> 16);
             }
         }

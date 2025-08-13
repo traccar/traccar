@@ -30,7 +30,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class T622IridiumProtocolDecoder extends BaseProtocolDecoder {
 
@@ -45,7 +44,7 @@ public class T622IridiumProtocolDecoder extends BaseProtocolDecoder {
                 getCacheManager(), Keys.PROTOCOL_FORMAT.withPrefix(getProtocolName()), deviceId);
         return Arrays.stream((value != null ? value : format).split(","))
                 .map(s -> Integer.parseInt(s, 16))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void setFormat(String format) {

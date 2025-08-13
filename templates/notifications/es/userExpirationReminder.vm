@@ -1,0 +1,8 @@
+#set($subject = "Recordatorio de vencimiento de la cuenta")
+#set($digest = "La cuenta vence el $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Su cuenta de usuario vencerá el $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+</body>
+</html>

@@ -18,6 +18,7 @@ package org.traccar;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
@@ -87,8 +88,6 @@ import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
 import org.traccar.mail.MailManager;
 import org.traccar.mail.SmtpMailManager;
-import org.traccar.push.FirebaseClient;
-import org.traccar.push.PushCommandManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.sms.HttpSmsClient;
 import org.traccar.sms.SmsManager;
@@ -145,10 +144,10 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static ObjectMapper provideObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JSONPModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        return objectMapper;
+        return new ObjectMapper()
+                .registerModule(new JSONPModule())
+                .registerModule(new BlackbirdModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Singleton
@@ -199,7 +198,7 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
-    public static WebServer provideWebServer(Injector injector, Config config) {
+    public static WebServer provideWebServer(Injector injector, Config config) throws IOException {
         if (config.getInteger(Keys.WEB_PORT) > 0) {
             return new WebServer(injector, config);
         }
@@ -392,25 +391,6 @@ public class MainModule extends AbstractModule {
         VelocityEngine velocityEngine = new VelocityEngine();
         velocityEngine.init(properties);
         return velocityEngine;
-    }
-
-    @Singleton
-    @Provides
-    public static FirebaseClient provideFirebaseClient(Config config) throws IOException {
-        if (config.hasKey(Keys.NOTIFICATOR_FIREBASE_SERVICE_ACCOUNT)) {
-            return new FirebaseClient(config);
-        }
-        return null;
-    }
-
-    @Singleton
-    @Provides
-    public static PushCommandManager providePushCommandManager(
-            @Nullable FirebaseClient firebaseClient) throws IOException {
-        if (firebaseClient != null) {
-            return new PushCommandManager(firebaseClient);
-        }
-        return null;
     }
 
 }

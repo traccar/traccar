@@ -20,13 +20,14 @@ import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
+import org.traccar.command.CommandSenderManager;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
 import org.traccar.model.QueuedCommand;
-import org.traccar.push.PushCommandManager;
 import org.traccar.session.ConnectionManager;
 import org.traccar.session.DeviceSession;
 import org.traccar.session.cache.CacheManager;
@@ -44,7 +45,6 @@ import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Singleton
 public class CommandsManager implements BroadcastInterface {
@@ -56,14 +56,14 @@ public class CommandsManager implements BroadcastInterface {
     private final BroadcastService broadcastService;
     private final NotificationManager notificationManager;
     private final CacheManager cacheManager;
-    private final PushCommandManager pushCommandManager;
+    private final CommandSenderManager commandSenderManager;
 
     @Inject
     public CommandsManager(
             Storage storage, ServerManager serverManager, @Nullable SmsManager smsManager,
             ConnectionManager connectionManager, BroadcastService broadcastService,
             NotificationManager notificationManager, CacheManager cacheManager,
-            @Nullable PushCommandManager pushCommandManager) {
+            CommandSenderManager commandSenderManager) {
         this.storage = storage;
         this.serverManager = serverManager;
         this.smsManager = smsManager;
@@ -71,14 +71,14 @@ public class CommandsManager implements BroadcastInterface {
         this.broadcastService = broadcastService;
         this.notificationManager = notificationManager;
         this.cacheManager = cacheManager;
-        this.pushCommandManager = pushCommandManager;
+        this.commandSenderManager = commandSenderManager;
         broadcastService.registerListener(this);
     }
 
     public QueuedCommand sendCommand(Command command) throws Exception {
         long deviceId = command.getDeviceId();
         Device device = storage.getObject(Device.class, new Request(
-                new Columns.Include("positionId", "phone", "attributes"), new Condition.Equals("id", deviceId)));
+                new Columns.All(), new Condition.Equals("id", deviceId)));
         Position position = storage.getObject(Position.class, new Request(
                 new Columns.All(), new Condition.Equals("id", device.getPositionId())));
         BaseProtocol protocol = position != null ? serverManager.getProtocol(position.getProtocol()) : null;
@@ -95,9 +95,9 @@ public class CommandsManager implements BroadcastInterface {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }
         } else {
-            if (pushCommandManager != null && protocol != null
-                    && protocol.getSupportedPushCommands().contains(command.getType())) {
-                pushCommandManager.sendCommand(device, command);
+            String sender = device.getString(Keys.COMMAND_SENDER.getKey());
+            if (sender != null) {
+                commandSenderManager.getSender(sender).sendCommand(device, command);
             } else {
                 DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
                 if (deviceSession != null && deviceSession.supportsLiveCommands()) {
@@ -135,7 +135,7 @@ public class CommandsManager implements BroadcastInterface {
                 events.put(event, null);
             }
             notificationManager.updateEvents(events);
-            return commands.stream().map(QueuedCommand::toCommand).collect(Collectors.toList());
+            return commands.stream().map(QueuedCommand::toCommand).toList();
         } catch (StorageException e) {
             throw new RuntimeException(e);
         }
@@ -159,7 +159,7 @@ public class CommandsManager implements BroadcastInterface {
             cacheManager.addDevice(deviceId, key);
             Device device = cacheManager.getObject(Device.class, deviceId);
             device.set("notificationTokens", token);
-            storage.updateObject(Device.class, new Request(
+            storage.updateObject(device, new Request(
                     new Columns.Include("attributes"),
                     new Condition.Equals("id", deviceId)));
             cacheManager.invalidateObject(true, Device.class, deviceId, ObjectOperation.UPDATE);

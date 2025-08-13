@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,12 +44,10 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -64,13 +62,11 @@ public class CacheManager implements BroadcastInterface {
     private final Storage storage;
     private final BroadcastService broadcastService;
 
-    private final ReadWriteLock lock = new ReentrantReadWriteLock();
-
     private final CacheGraph graph = new CacheGraph();
 
-    private Server server;
-    private final Map<Long, Position> devicePositions = new HashMap<>();
-    private final Map<Long, HashSet<Object>> deviceReferences = new HashMap<>();
+    private volatile Server server;
+    private final Map<Long, Position> devicePositions = new ConcurrentHashMap<>();
+    private final Map<Long, HashSet<Object>> deviceReferences = new ConcurrentHashMap<>();
 
     @Inject
     public CacheManager(Config config, Storage storage, BroadcastService broadcastService) throws StorageException {
@@ -91,114 +87,70 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public <T extends BaseModel> T getObject(Class<T> clazz, long id) {
-        try {
-            lock.readLock().lock();
-            return graph.getObject(clazz, id);
-        } finally {
-            lock.readLock().unlock();
-        }
+        return graph.getObject(clazz, id);
     }
 
     public <T extends BaseModel> Set<T> getDeviceObjects(long deviceId, Class<T> clazz) {
-        try {
-            lock.readLock().lock();
-            return graph.getObjects(Device.class, deviceId, clazz, Set.of(Group.class), true)
-                    .collect(Collectors.toUnmodifiableSet());
-        } finally {
-            lock.readLock().unlock();
-        }
+        return graph.getObjects(Device.class, deviceId, clazz, Set.of(Group.class), true)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public Position getPosition(long deviceId) {
-        try {
-            lock.readLock().lock();
-            return devicePositions.get(deviceId);
-        } finally {
-            lock.readLock().unlock();
-        }
+        return devicePositions.get(deviceId);
     }
 
     public Server getServer() {
-        try {
-            lock.readLock().lock();
-            return server;
-        } finally {
-            lock.readLock().unlock();
-        }
+        return server;
     }
 
     public Set<User> getNotificationUsers(long notificationId, long deviceId) {
-        try {
-            lock.readLock().lock();
-            Set<User> deviceUsers = getDeviceObjects(deviceId, User.class);
-            return graph.getObjects(Notification.class, notificationId, User.class, Set.of(), false)
-                    .filter(deviceUsers::contains)
-                    .collect(Collectors.toUnmodifiableSet());
-        } finally {
-            lock.readLock().unlock();
-        }
+        Set<User> deviceUsers = getDeviceObjects(deviceId, User.class);
+        return graph.getObjects(Notification.class, notificationId, User.class, Set.of(), false)
+                .filter(deviceUsers::contains)
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public Set<Notification> getDeviceNotifications(long deviceId) {
-        try {
-            lock.readLock().lock();
-            var direct = graph.getObjects(Device.class, deviceId, Notification.class, Set.of(Group.class), true)
-                    .map(BaseModel::getId)
-                    .collect(Collectors.toUnmodifiableSet());
-            return graph.getObjects(Device.class, deviceId, Notification.class, Set.of(Group.class, User.class), true)
-                    .filter(notification -> notification.getAlways() || direct.contains(notification.getId()))
-                    .collect(Collectors.toUnmodifiableSet());
-        } finally {
-            lock.readLock().unlock();
-        }
+        var direct = graph.getObjects(Device.class, deviceId, Notification.class, Set.of(Group.class), true)
+                .map(BaseModel::getId)
+                .collect(Collectors.toUnmodifiableSet());
+        return graph.getObjects(Device.class, deviceId, Notification.class, Set.of(Group.class, User.class), true)
+                .filter(notification -> notification.getAlways() || direct.contains(notification.getId()))
+                .collect(Collectors.toUnmodifiableSet());
     }
 
-    public void addDevice(long deviceId, Object key) throws Exception {
-        try {
-            lock.writeLock().lock();
-            var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
-            if (references.isEmpty()) {
-                Device device = storage.getObject(Device.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", deviceId)));
-                graph.addObject(device);
-                initializeCache(device);
-                if (device.getPositionId() > 0) {
-                    devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
-                            new Columns.All(), new Condition.Equals("id", device.getPositionId()))));
-                }
+    public synchronized void addDevice(long deviceId, Object key) throws Exception {
+        var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
+        if (references.isEmpty()) {
+            Device device = storage.getObject(Device.class, new Request(
+                    new Columns.All(), new Condition.Equals("id", deviceId)));
+            graph.addObject(device);
+            initializeCache(device);
+            if (device.getPositionId() > 0) {
+                devicePositions.put(deviceId, storage.getObject(Position.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", device.getPositionId()))));
             }
-            references.add(key);
-            LOGGER.debug("Cache add device {} references {} key {}", deviceId, references.size(), key);
-        } finally {
-            lock.writeLock().unlock();
         }
+        references.add(key);
+        LOGGER.debug("Cache add device {} references {} key {}", deviceId, references.size(), key);
     }
 
-    public void removeDevice(long deviceId, Object key) {
-        try {
-            lock.writeLock().lock();
-            var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
-            references.remove(key);
-            if (references.isEmpty()) {
-                graph.removeObject(Device.class, deviceId);
-                devicePositions.remove(deviceId);
-                deviceReferences.remove(deviceId);
-            }
-            LOGGER.debug("Cache remove device {} references {} key {}", deviceId, references.size(), key);
-        } finally {
-            lock.writeLock().unlock();
+    public synchronized void removeDevice(long deviceId, Object key) {
+        var references = deviceReferences.computeIfAbsent(deviceId, k -> new HashSet<>());
+        references.remove(key);
+        if (references.isEmpty()) {
+            graph.removeObject(Device.class, deviceId);
+            devicePositions.remove(deviceId);
+            deviceReferences.remove(deviceId);
         }
+        LOGGER.debug("Cache remove device {} references {} key {}", deviceId, references.size(), key);
     }
 
     public void updatePosition(Position position) {
-        try {
-            lock.writeLock().lock();
-            if (deviceReferences.containsKey(position.getDeviceId())) {
-                devicePositions.put(position.getDeviceId(), position);
-            }
-        } finally {
-            lock.writeLock().unlock();
-        }
+        deviceReferences.computeIfPresent(position.getDeviceId(), (key, oldValue) -> {
+            devicePositions.put(key, position);
+            return oldValue;
+        });
     }
 
     @Override
@@ -208,53 +160,56 @@ public class CacheManager implements BroadcastInterface {
             broadcastService.invalidateObject(true, clazz, id, operation);
         }
 
-        if (operation == ObjectOperation.DELETE) {
-            graph.removeObject(clazz, id);
-        }
-        if (operation != ObjectOperation.UPDATE) {
-            return;
-        }
-
-        if (clazz.equals(Server.class)) {
-            server = storage.getObject(Server.class, new Request(new Columns.All()));
-            return;
-        }
-
-        var after = storage.getObject(clazz, new Request(new Columns.All(), new Condition.Equals("id", id)));
-        if (after == null) {
-            return;
-        }
-        var before = getObject(after.getClass(), after.getId());
-        if (before == null) {
-            return;
-        }
-
-        if (after instanceof GroupedModel) {
-            long beforeGroupId = ((GroupedModel) before).getGroupId();
-            long afterGroupId = ((GroupedModel) after).getGroupId();
-            if (beforeGroupId != afterGroupId) {
-                if (beforeGroupId > 0) {
-                    invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
-                }
-                if (afterGroupId > 0) {
-                    invalidatePermission(clazz, id, Group.class, afterGroupId, true);
-                }
+        synchronized (this) {
+            if (operation == ObjectOperation.DELETE) {
+                graph.removeObject(clazz, id);
             }
-        } else if (after instanceof Schedulable) {
-            long beforeCalendarId = ((Schedulable) before).getCalendarId();
-            long afterCalendarId = ((Schedulable) after).getCalendarId();
-            if (beforeCalendarId != afterCalendarId) {
-                if (beforeCalendarId > 0) {
-                    invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
-                }
-                if (afterCalendarId > 0) {
-                    invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
-                }
+            if (operation != ObjectOperation.UPDATE) {
+                return;
             }
-            // TODO handle notification always change
-        }
 
-        graph.updateObject(after);
+            if (clazz.equals(Server.class)) {
+                server = storage.getObject(Server.class, new Request(new Columns.All()));
+                return;
+            }
+
+            var after = storage.getObject(clazz, new Request(
+                    new Columns.All(), new Condition.Equals("id", id)));
+            if (after == null) {
+                return;
+            }
+            var before = getObject(after.getClass(), after.getId());
+            if (before == null) {
+                return;
+            }
+
+            if (after instanceof GroupedModel) {
+                long beforeGroupId = ((GroupedModel) before).getGroupId();
+                long afterGroupId = ((GroupedModel) after).getGroupId();
+                if (beforeGroupId != afterGroupId) {
+                    if (beforeGroupId > 0) {
+                        invalidatePermission(clazz, id, Group.class, beforeGroupId, false);
+                    }
+                    if (afterGroupId > 0) {
+                        invalidatePermission(clazz, id, Group.class, afterGroupId, true);
+                    }
+                }
+            } else if (after instanceof Schedulable) {
+                long beforeCalendarId = ((Schedulable) before).getCalendarId();
+                long afterCalendarId = ((Schedulable) after).getCalendarId();
+                if (beforeCalendarId != afterCalendarId) {
+                    if (beforeCalendarId > 0) {
+                        invalidatePermission(clazz, id, Calendar.class, beforeCalendarId, false);
+                    }
+                    if (afterCalendarId > 0) {
+                        invalidatePermission(clazz, id, Calendar.class, afterCalendarId, true);
+                    }
+                }
+                // TODO handle notification always change
+            }
+
+            graph.updateObject(after);
+        }
     }
 
     @Override
@@ -264,10 +219,12 @@ public class CacheManager implements BroadcastInterface {
             broadcastService.invalidatePermission(true, clazz1, id1, clazz2, id2, link);
         }
 
-        if (clazz1.equals(User.class) && GroupedModel.class.isAssignableFrom(clazz2)) {
-            invalidatePermission(clazz2, id2, clazz1, id1, link);
-        } else {
-            invalidatePermission(clazz1, id1, clazz2, id2, link);
+        synchronized (this) {
+            if (clazz1.equals(User.class) && GroupedModel.class.isAssignableFrom(clazz2)) {
+                invalidatePermission(clazz2, id2, clazz1, id1, link);
+            } else {
+                invalidatePermission(clazz1, id1, clazz2, id2, link);
+            }
         }
     }
 

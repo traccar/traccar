@@ -66,6 +66,17 @@ public class MotionState {
         changed = true;
     }
 
+    private long motionPositionId;
+
+    public long getMotionPositionId() {
+        return motionPositionId;
+    }
+
+    public void setMotionPositionId(long motionPositionId) {
+        this.motionPositionId = motionPositionId;
+        changed = true;
+    }
+
     private Date motionTime;
 
     public Date getMotionTime() {

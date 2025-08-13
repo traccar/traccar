@@ -305,7 +305,8 @@ public final class Keys {
      */
     public static final ConfigKey<Long> SERVER_BUFFERING_THRESHOLD = new LongConfigKey(
             "server.buffering.threshold",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG),
+            3000L);
 
     /**
      * Server wide connection timeout value in seconds. See protocol timeout for more information.
@@ -317,8 +318,8 @@ public final class Keys {
     /**
      * Send device responses immediately before writing it in the database.
      */
-    public static final ConfigKey<Boolean> SERVER_INSTANT_ACKNOWLEDGEMENT = new BooleanConfigKey(
-            "server.instantAcknowledgement",
+    public static final ConfigKey<Boolean> SERVER_DELAY_ACKNOWLEDGEMENT = new BooleanConfigKey(
+            "server.delayAcknowledgement",
             List.of(KeyType.CONFIG));
 
     /**
@@ -439,15 +440,6 @@ public final class Keys {
             "event.motion.speedThreshold",
             List.of(KeyType.CONFIG, KeyType.DEVICE),
             0.01);
-
-    /**
-     * Global polyline geofence distance. Within that distance from the polyline, point is considered within the
-     * geofence. Each individual geofence can also has 'polylineDistance' attribute which will take precedence.
-     */
-    public static final ConfigKey<Double> GEOFENCE_POLYLINE_DISTANCE = new DoubleConfigKey(
-            "geofence.polylineDistance",
-            List.of(KeyType.CONFIG),
-            25.0);
 
     /**
      * Enable in-memory database instead of an SQL database.
@@ -868,12 +860,20 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Cache control header value. By default resources are cached for one hour.
+     * Cache control header value. By default, resources are cached for one hour.
      */
     public static final ConfigKey<String> WEB_CACHE_CONTROL = new StringConfigKey(
             "web.cacheControl",
             List.of(KeyType.CONFIG),
             "max-age=3600,public");
+
+    /**
+     * Path to localization files.
+     */
+    public static final ConfigKey<String> WEB_LOCALIZATION_PATH = new StringConfigKey(
+            "web.localizationPath",
+            List.of(KeyType.CONFIG),
+            "./templates/translations");
 
     /**
      * Enable TOTP authentication on the server.
@@ -1198,6 +1198,35 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Command sender type for the device. This overrides standard data or text commands with an API-based commands.
+     * For example, it can be Traccar Client push commands.
+     */
+    public static final ConfigKey<String> COMMAND_SENDER = new StringConfigKey(
+            "command.sender",
+            List.of(KeyType.DEVICE));
+
+    /**
+     * Firebase service account JSON for push commands.
+     */
+    public static final ConfigKey<String> COMMAND_CLIENT_SERVICE_ACCOUNT = new StringConfigKey(
+            "command.client.serviceAccount",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Google Find Hub service URL.
+     */
+    public static final ConfigKey<String> COMMAND_FIND_HUB_URL = new StringConfigKey(
+            "command.findHub.url",
+            List.of(KeyType.DEVICE));
+
+    /**
+     * Google Find Hub service API key.
+     */
+    public static final ConfigKey<String> COMMAND_FIND_HUB_KEY = new StringConfigKey(
+            "command.findHub.key",
+            List.of(KeyType.DEVICE));
+
+    /**
      * Enabled notification options. Comma-separated string is expected.
      * Example: web,mail,sms
      */
@@ -1223,7 +1252,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Firebase service account JSON.
+     * Firebase service account JSON for push notifications.
      */
     public static final ConfigKey<String> NOTIFICATOR_FIREBASE_SERVICE_ACCOUNT = new StringConfigKey(
             "notificator.firebase.serviceAccount",

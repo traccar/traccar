@@ -38,7 +38,6 @@ public abstract class BaseProtocol implements Protocol {
     private final String name;
     private final Set<String> supportedDataCommands = new HashSet<>();
     private final Set<String> supportedTextCommands = new HashSet<>();
-    private final Set<String> supportedPushCommands = new HashSet<>();
     private final List<TrackerConnector> connectorList = new LinkedList<>();
 
     private SmsManager smsManager;
@@ -85,10 +84,6 @@ public abstract class BaseProtocol implements Protocol {
         supportedTextCommands.addAll(Arrays.asList(commands));
     }
 
-    public void setSupportedPushCommands(String... commands) {
-        supportedPushCommands.addAll(Arrays.asList(commands));
-    }
-
     @Override
     public Collection<String> getSupportedDataCommands() {
         Set<String> commands = new HashSet<>(supportedDataCommands);
@@ -101,11 +96,6 @@ public abstract class BaseProtocol implements Protocol {
         Set<String> commands = new HashSet<>(supportedTextCommands);
         commands.add(Command.TYPE_CUSTOM);
         return commands;
-    }
-
-    @Override
-    public Set<String> getSupportedPushCommands() {
-        return supportedPushCommands;
     }
 
     @Override

@@ -186,6 +186,19 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
         this.motionState = motionState;
     }
 
+    private long motionPositionId;
+
+    @QueryIgnore
+    @JsonIgnore
+    public long getMotionPositionId() {
+        return motionPositionId;
+    }
+
+    @JsonIgnore
+    public void setMotionPositionId(long motionPositionId) {
+        this.motionPositionId = motionPositionId;
+    }
+
     private Date motionTime;
 
     @QueryIgnore

@@ -96,8 +96,8 @@ public class HttpSmsClient implements SmsManager {
 
     @Override
     public void sendMessage(String phone, String message, boolean command) throws MessageException {
-        try (Response response = getRequestBuilder()
-                .post(Entity.entity(preparePayload(phone, message), mediaType))) {
+        try (Response response = getRequestBuilder().post(
+                Entity.entity(preparePayload(phone, message), mediaType.withCharset(StandardCharsets.UTF_8.name())))) {
             if (response.getStatus() / 100 != 2) {
                 throw new MessageException(response.readEntity(String.class));
             }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,15 @@ import jakarta.inject.Singleton;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.api.signature.TokenManager;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.database.LocaleManager;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Server;
 import org.traccar.model.User;
@@ -33,7 +37,6 @@ import org.traccar.storage.StorageException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.util.Locale;
 
@@ -44,11 +47,16 @@ public class TextTemplateFormatter {
 
     private final VelocityEngine velocityEngine;
     private final TokenManager tokenManager;
+    private final LocaleManager localeManager;
+    private final String templatesRoot;
 
     @Inject
-    public TextTemplateFormatter(VelocityEngine velocityEngine, TokenManager tokenManager) {
+    public TextTemplateFormatter(
+            VelocityEngine velocityEngine, TokenManager tokenManager, LocaleManager localeManager, Config config) {
         this.velocityEngine = velocityEngine;
         this.tokenManager = tokenManager;
+        this.localeManager = localeManager;
+        templatesRoot = config.getString(Keys.TEMPLATES_ROOT);
     }
 
     public VelocityContext prepareContext(Server server, User user) {
@@ -69,20 +77,24 @@ public class TextTemplateFormatter {
         velocityContext.put("dateTool", new DateTool());
         velocityContext.put("numberTool", new NumberTool());
         velocityContext.put("locale", Locale.getDefault());
+        velocityContext.put("language", UserUtil.getLanguage(server, user));
 
         return velocityContext;
     }
 
-    public Template getTemplate(String name, String path) {
-        String templateFilePath = Paths.get(path, name + ".vm").toString();
-        return velocityEngine.getTemplate(templateFilePath, StandardCharsets.UTF_8.name());
-    }
-
-    public NotificationMessage formatMessage(
-            VelocityContext velocityContext, String name, String templatePath, boolean priority) {
+    public NotificationMessage formatMessage(VelocityContext velocityContext, String name, boolean priority) {
         StringWriter writer = new StringWriter();
-        getTemplate(name, templatePath).merge(velocityContext, writer);
-        return new NotificationMessage((String) velocityContext.get("subject"), writer.toString());
+        try {
+            String language = (String) velocityContext.get("language");
+            String filePath = localeManager.getTemplateFile(templatesRoot, "notifications", language, name + ".vm");
+            Template template = velocityEngine.getTemplate(filePath, StandardCharsets.UTF_8.name());
+            template.merge(velocityContext, writer);
+            return new NotificationMessage(
+                    (String) velocityContext.get("subject"), (String) velocityContext.get("digest"),
+                    writer.toString(), priority);
+        } catch (ResourceNotFoundException e) {
+            return new NotificationMessage("undefined", "undefined", "undefined", priority);
+        }
     }
 
 }

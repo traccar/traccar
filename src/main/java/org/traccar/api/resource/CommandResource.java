@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.api.ExtendedObjectResource;
+import org.traccar.command.CommandSenderManager;
+import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.model.DeviceUtil;
@@ -55,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Path("commands")
 @Produces(MediaType.APPLICATION_JSON)
@@ -72,6 +73,9 @@ public class CommandResource extends ExtendedObjectResource<Command> {
 
     @Inject
     private LogAction actionLogger;
+
+    @Inject
+    private CommandSenderManager commandSenderManager;
 
     @Context
     private HttpServletRequest request;
@@ -111,7 +115,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
             } else {
                 return type.equals(Command.TYPE_CUSTOM);
             }
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     @POST
@@ -161,12 +165,21 @@ public class CommandResource extends ExtendedObjectResource<Command> {
             @QueryParam("textChannel") boolean textChannel) throws StorageException {
         if (deviceId != 0) {
             permissionsService.checkPermission(Device.class, getUserId(), deviceId);
+
+            Device device = storage.getObject(Device.class, new Request(
+                    new Columns.All(), new Condition.Equals("id", deviceId)));
+            String sender = device.getString(Keys.COMMAND_SENDER.getKey());
+            if (sender != null) {
+                return commandSenderManager.getSender(sender).getSupportedCommands()
+                        .stream().map(Typed::new).toList();
+            }
+
             BaseProtocol protocol = getDeviceProtocol(deviceId);
             if (protocol != null) {
                 if (textChannel) {
-                    return protocol.getSupportedTextCommands().stream().map(Typed::new).collect(Collectors.toList());
+                    return protocol.getSupportedTextCommands().stream().map(Typed::new).toList();
                 } else {
-                    return protocol.getSupportedDataCommands().stream().map(Typed::new).collect(Collectors.toList());
+                    return protocol.getSupportedDataCommands().stream().map(Typed::new).toList();
                 }
             } else {
                 return Collections.singletonList(new Typed(Command.TYPE_CUSTOM));

@@ -63,7 +63,8 @@ public class MotionEventHandler extends BaseEventHandler {
 
         TripsConfig tripsConfig = new TripsConfig(new AttributeUtil.CacheProvider(cacheManager, deviceId));
         MotionState state = MotionState.fromDevice(device);
-        MotionProcessor.updateState(state, position, position.getBoolean(Position.KEY_MOTION), tripsConfig);
+        Position last = cacheManager.getPosition(deviceId);
+        MotionProcessor.updateState(state, last, position, position.getBoolean(Position.KEY_MOTION), tripsConfig);
         if (state.isChanged()) {
             state.toDevice(device);
             try {

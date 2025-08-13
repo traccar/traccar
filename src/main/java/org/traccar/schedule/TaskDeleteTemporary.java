@@ -52,7 +52,7 @@ public class TaskDeleteTemporary extends SingleScheduleTask {
            storage.removeObject(User.class, new Request(
                     new Condition.And(
                             new Condition.Equals("temporary", true),
-                            new Condition.Compare("expirationTime", "<", "time", new Date()))));
+                            new Condition.Compare("expirationTime", "<", new Date()))));
         } catch (StorageException e) {
             LOGGER.warn("Failed to delete temporary users", e);
         }

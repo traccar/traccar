@@ -25,6 +25,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.traccar.BaseHttpProtocolDecoder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.DateUtil;
@@ -235,18 +236,23 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
         if (location.containsKey("coords")) {
             JsonObject coordinates = location.getJsonObject("coords");
+            position.setValid(true);
             position.setLatitude(coordinates.getJsonNumber("latitude").doubleValue());
             position.setLongitude(coordinates.getJsonNumber("longitude").doubleValue());
-            position.setAccuracy(coordinates.getJsonNumber("accuracy").doubleValue());
             double speed = coordinates.getJsonNumber("speed").doubleValue();
             if (speed >= 0) {
-                position.setSpeed(speed);
+                position.setSpeed(UnitsConverter.knotsFromMps(speed));
             }
             double heading = coordinates.getJsonNumber("heading").doubleValue();
             if (heading >= 0) {
                 position.setCourse(heading);
             }
+            if (speed >= 0 || heading >= 0) {
+                position.setAccuracy(coordinates.getJsonNumber("accuracy").doubleValue());
+            }
             position.setAltitude(coordinates.getJsonNumber("altitude").doubleValue());
+        } else {
+            getLastLocation(position, null);
         }
 
         if (location.containsKey("event")) {

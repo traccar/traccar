@@ -1577,6 +1577,40 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Object decodeDat(Channel channel, SocketAddress remoteAddress, String[] v) throws ParseException {
+        int index = 0;
+        index += 1; // header
+
+        String protocolVersion = v[index++];
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, v[index++]);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        String model = getDeviceModel(deviceSession, protocolVersion);
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        index += 1; // device name
+        index += 1; // report type
+        index += 1; // reserved
+        index += 1; // reserved
+
+        position.set("data", v[index++]);
+
+        decodeLocation(position, model, v, index);
+
+        Date time = dateFormat.parse(v[v.length - 2]);
+        if (ignoreFixTime) {
+            position.setTime(time);
+        } else {
+            position.setDeviceTime(time);
+        }
+
+        return position;
+    }
+
     private Object decodeBasic(
             Channel channel, SocketAddress remoteAddress, String[] v, String type) throws ParseException {
 
@@ -1709,6 +1743,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 case "BID" -> decodeBid(channel, remoteAddress, sentence);
                 case "LSA" -> decodeLsa(channel, remoteAddress, sentence);
                 case "LBS" -> decodeLbs(channel, remoteAddress, values);
+                case "DAT" -> decodeDat(channel, remoteAddress, values);
                 default -> null;
             };
 

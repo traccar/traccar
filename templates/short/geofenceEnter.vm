@@ -1,2 +1,0 @@
-#set($subject = "$device.name: has entered geofence")
-$device.name has entered geofence $geofence.name at $dateTool.format("yyyy-MM-dd HH:mm:ss", $event.eventTime, $locale, $timezone)

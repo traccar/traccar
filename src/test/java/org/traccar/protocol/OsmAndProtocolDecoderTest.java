@@ -13,6 +13,9 @@ public class OsmAndProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new OsmAndProtocolDecoder(null));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/", new ReadOnlyHttpHeaders(true, "Content-Type", "application/json"), buffer(
+                "{\"location\":{\"timestamp\":\"2025-06-15T13:45:12.862Z\",\"coords\":{\"latitude\":37.4219983,\"longitude\":-122.084,\"accuracy\":5,\"speed\":0,\"heading\":-1,\"altitude\":5},\"is_moving\":false,\"odometer\":0,\"event\":\"motionchange\",\"battery\":{\"level\":1,\"is_charging\":false},\"activity\":{\"type\":\"still\"},\"extras\":{},\"_\":\"&id=48241179&lat=37.4219983&lon=-122.084&timestamp=2025-06-15T13:45:12.862Z&\"},\"device_id\":\"48241179\"}")));
+
+        verifyPosition(decoder, request(HttpMethod.POST, "/", new ReadOnlyHttpHeaders(true, "Content-Type", "application/json"), buffer(
                 "{\"location\":{\"extras\":{},\"mock\":true,\"coords\":{\"speed_accuracy\":-1,\"speed\":-1,\"longitude\":-122.406417,\"ellipsoidal_altitude\":0,\"floor\":null,\"heading_accuracy\":-1,\"latitude\":37.785834000000001,\"accuracy\":5,\"altitude_accuracy\":-1,\"altitude\":0,\"heading\":-1},\"is_moving\":false,\"age\":188,\"odometer\":0,\"uuid\":\"2FB04C65-99CF-42AB-8DD3-EBCB4B108BF8\",\"event\":\"motionchange\",\"battery\":{\"level\":-1,\"is_charging\":false},\"activity\":{\"type\":\"unknown\",\"confidence\":100},\"timestamp\":\"2025-05-09T04:11:30.579Z\"},\"device_id\":\"658765\"}")));
 
         verifyPosition(decoder, request(HttpMethod.POST, "/", new ReadOnlyHttpHeaders(true, "Content-Type", "application/json"), buffer(

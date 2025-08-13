@@ -35,6 +35,4 @@ public interface Protocol {
 
     void sendTextCommand(String destAddress, Command command) throws Exception;
 
-    Collection<String> getSupportedPushCommands();
-
 }

@@ -300,6 +300,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(10801, fmbXXX, (p, b) -> p.set("eyeTemp2", b.readShort() / 100.0));
         register(10802, fmbXXX, (p, b) -> p.set("eyeTemp3", b.readShort() / 100.0));
         register(10803, fmbXXX, (p, b) -> p.set("eyeTemp4", b.readShort() / 100.0));
+        register(10832, fmbXXX, (p, b) -> p.set("eyeRoll1", b.readShort()));
+        register(10833, fmbXXX, (p, b) -> p.set("eyeRoll2", b.readShort()));
+        register(10834, fmbXXX, (p, b) -> p.set("eyeRoll3", b.readShort()));
+        register(10835, fmbXXX, (p, b) -> p.set("eyeRoll4", b.readShort()));
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
@@ -545,7 +549,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             for (int j = 0; j < cnt; j++) {
                 int id = buf.readUnsignedShort();
                 int length = buf.readUnsignedShort();
-                if (id == 256) {
+                if (id == 256 || id == 325) {
                     position.set(Position.KEY_VIN,
                             buf.readSlice(length).toString(StandardCharsets.US_ASCII));
                 } else if (id == 281) {
@@ -574,7 +578,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                         }
                         index += 1;
                     }
-                } else if (id == 548 || id == 10828 || id == 10829 || id == 10831) {
+                } else if (id == 548 || id == 10828 || id == 10829 || id == 10831 || id == 11317) {
                     ByteBuf data = buf.readSlice(length);
                     data.readUnsignedByte(); // header
                     for (int i = 1; data.isReadable(); i++) {
@@ -598,8 +602,21 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                                         position.set("tag" + i + "Voltage", beaconData.readUnsignedByte() * 10 + 2000);
                                     }
                                 }
+                                case 5 -> {
+                                    String name = beacon.readCharSequence(
+                                            parameterLength, StandardCharsets.UTF_8).toString();
+                                    position.set("tag" + i + "Name", name);
+                                }
+                                case 6 -> position.set("tag" + i + "Temp", beacon.readShort());
+                                case 7 -> position.set("tag" + i + "Humidity", beacon.readUnsignedByte());
+                                case 8 -> position.set("tag" + i + "Magnet", beacon.readUnsignedByte() > 0);
+                                case 9 -> position.set("tag" + i + "Motion", beacon.readUnsignedByte() > 0);
+                                case 10 -> position.set("tag" + i + "MotionCount", beacon.readUnsignedShort());
+                                case 11 -> position.set("tag" + i + "Pitch", (int) beacon.readByte());
+                                case 12 -> position.set("tag" + i + "AngleRoll", (int) beacon.readShort());
                                 case 13 -> position.set("tag" + i + "LowBattery", beacon.readUnsignedByte());
                                 case 14 -> position.set("tag" + i + "Battery", beacon.readUnsignedShort());
+                                case 15 -> position.set("tag" + i + "Mac", ByteBufUtil.hexDump(beacon.readSlice(6)));
                                 default -> beacon.skipBytes(parameterLength);
                             }
                         }

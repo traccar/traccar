@@ -17,6 +17,7 @@
 package org.traccar.notification;
 
 import org.apache.velocity.VelocityContext;
+import org.traccar.database.LocaleManager;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Driver;
@@ -35,18 +36,20 @@ import jakarta.inject.Singleton;
 @Singleton
 public class NotificationFormatter {
 
+    private final LocaleManager localeManager;
     private final CacheManager cacheManager;
     private final TextTemplateFormatter textTemplateFormatter;
 
     @Inject
     public NotificationFormatter(
-            CacheManager cacheManager, TextTemplateFormatter textTemplateFormatter) {
+            LocaleManager localeManager, CacheManager cacheManager, TextTemplateFormatter textTemplateFormatter) {
+        this.localeManager = localeManager;
         this.cacheManager = cacheManager;
         this.textTemplateFormatter = textTemplateFormatter;
     }
 
     public NotificationMessage formatMessage(
-            Notification notification, User user, Event event, Position position, String templatePath) {
+            Notification notification, User user, Event event, Position position) {
 
         Server server = cacheManager.getServer();
         Device device = cacheManager.getObject(Device.class, event.getDeviceId());
@@ -56,6 +59,7 @@ public class NotificationFormatter {
         velocityContext.put("notification", notification);
         velocityContext.put("device", device);
         velocityContext.put("event", event);
+        velocityContext.put("translations", localeManager.getBundle(UserUtil.getLanguage(server, user)));
         if (position != null) {
             velocityContext.put("position", position);
             velocityContext.put("speedUnit", UserUtil.getSpeedUnit(server, user));
@@ -75,7 +79,7 @@ public class NotificationFormatter {
         }
 
         boolean priority = notification != null && notification.getBoolean("priority");
-        return textTemplateFormatter.formatMessage(velocityContext, event.getType(), templatePath, priority);
+        return textTemplateFormatter.formatMessage(velocityContext, event.getType(), priority);
     }
 
 }

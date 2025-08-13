@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.helper.BufferUtil;
 import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -202,6 +203,48 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             long imei = id.getUnsignedShort(0);
             imei = (imei << 32) + id.getUnsignedInt(2);
             return String.valueOf(imei) + Checksum.luhn(imei);
+        }
+    }
+
+    private void decodeObdRt(Position position, String data) {
+        String[] values = data.split(",");
+        int index = 1; // skip header
+
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_POWER, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_RPM, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_OBD_SPEED, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_THROTTLE, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_ENGINE_LOAD, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1])); // instant
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1])); // average
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_ODOMETER_TRIP, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_OBD_ODOMETER, Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set("tripFuelUsed", Double.parseDouble(values[index - 1]));
+        }
+        if (!values[index++].isEmpty()) {
+            position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index - 1]));
         }
     }
 
@@ -428,6 +471,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_MOTION, BitUtil.check(status, 4));
         }
         position.set(Position.KEY_BLOCKED, BitUtil.check(status, 10));
+        if ("MV810G".equals(model) || "MV710G".equals(model)) {
+            position.set(Position.KEY_DOOR, BitUtil.check(status, 16));
+        }
         position.set(Position.KEY_CHARGE, BitUtil.check(status, 26));
 
         position.setValid(BitUtil.check(status, 1));
@@ -507,6 +553,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x06:
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     break;
+                case 0x14:
+                    position.set("videoAlarm", buf.readUnsignedInt());
+                    break;
                 case 0x25:
                     position.set(Position.KEY_INPUT, buf.readUnsignedInt());
                     break;
@@ -556,7 +605,10 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.addAlarm(BitUtil.check(alarm, 9) ? Position.ALARM_BRAKING : null);
                     position.addAlarm(BitUtil.check(alarm, 10) ? Position.ALARM_CORNERING : null);
                     buf.readUnsignedShort(); // external switch state
-                    buf.skipBytes(4); // reserved
+                    long alarm2 = buf.readUnsignedInt();
+                    if ("MV810G".equals(model) || "MV710G".equals(model)) {
+                        position.addAlarm(BitUtil.check(alarm2, 16) ? Position.ALARM_DOOR : null);
+                    }
                     break;
                 case 0x60:
                     event = buf.readUnsignedShort();
@@ -619,6 +671,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // content
                     endIndex = buf.writerIndex() - 2;
                     decodeExtension(position, buf, endIndex);
+                    break;
+                case 0x82:
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() / 10.0);
                     break;
                 case 0x91:
                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
@@ -706,11 +761,17 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     break;
                 case 0xE6:
-                    while (buf.readerIndex() < endIndex) {
-                        int sensorIndex = buf.readUnsignedByte();
-                        buf.skipBytes(6); // mac
-                        position.set(Position.PREFIX_TEMP + sensorIndex, decodeCustomDouble(buf));
-                        position.set("humidity" + sensorIndex, decodeCustomDouble(buf));
+                    String header = buf.getCharSequence(buf.readerIndex(), 7, StandardCharsets.UTF_8).toString();
+                    if (header.equals("$OBD-RT")) {
+                        String data = buf.readCharSequence(length, StandardCharsets.UTF_8).toString();
+                        decodeObdRt(position, data);
+                    } else {
+                        while (buf.readerIndex() < endIndex) {
+                            int sensorIndex = buf.readUnsignedByte();
+                            buf.skipBytes(6); // mac
+                            position.set(Position.PREFIX_TEMP + sensorIndex, decodeCustomDouble(buf));
+                            position.set("humidity" + sensorIndex, decodeCustomDouble(buf));
+                        }
                     }
                     break;
                 case 0xEA:
@@ -838,8 +899,16 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 0x000C -> position.set("intakeTemp", buf.readUnsignedShort() - 40);
                             case 0x000D -> position.set("intakeFlow", buf.readUnsignedShort());
                             case 0x000E -> position.set(Position.KEY_THROTTLE, buf.readUnsignedShort() * 100 / 255);
-                            case 0x0050 -> {
-                                position.set(Position.KEY_VIN, buf.readSlice(17).toString(StandardCharsets.US_ASCII));
+                            case 0x0050 -> position.set(Position.KEY_VIN, BufferUtil.readString(buf, 17));
+                            case 0x0051 -> {
+                                if (extendedLength > 0) {
+                                    position.set("cvn", ByteBufUtil.hexDump(buf.readSlice(extendedLength)));
+                                }
+                            }
+                            case 0x0052 -> {
+                                if (extendedLength > 0) {
+                                    position.set("calid", BufferUtil.readString(buf, extendedLength));
+                                }
                             }
                             case 0x0100 -> position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort() * 0.1);
                             case 0x0102 -> position.set("tripFuel", buf.readUnsignedShort() * 0.1);
@@ -1120,45 +1189,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             getLastLocation(position, null);
 
             String data = buf.readCharSequence(buf.readableBytes() - 2, StandardCharsets.US_ASCII).toString().trim();
-            String[] values = data.split(",");
-            int index = 1; // skip header
-
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_POWER, Double.parseDouble(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_RPM, Integer.parseInt(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_THROTTLE, Double.parseDouble(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_ENGINE_LOAD, Double.parseDouble(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1])); // instant
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_FUEL_CONSUMPTION, Double.parseDouble(values[index - 1])); // average
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_ODOMETER_TRIP, Double.parseDouble(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_OBD_ODOMETER, Integer.parseInt(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set("tripFuelUsed", Double.parseDouble(values[index - 1]));
-            }
-            if (!values[index++].isEmpty()) {
-                position.set(Position.KEY_FUEL_USED, Double.parseDouble(values[index - 1]));
-            }
+            decodeObdRt(position, data);
 
             return position;
 

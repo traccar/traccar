@@ -100,7 +100,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         if (entity instanceof User after) {
             User before = storage.getObject(User.class, new Request(
                     new Columns.All(), new Condition.Equals("id", entity.getId())));
-            permissionsService.checkUserUpdate(getUserId(), before, (User) entity);
+            permissionsService.checkUserUpdate(getUserId(), before, after);
             skipReadonly = permissionsService.getUser(getUserId())
                     .compare(after, "notificationTokens", "termsAccepted");
         } else if (entity instanceof Group group) {
