@@ -452,8 +452,12 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
+            String model = getDeviceModel(deviceSession);
+            if ("TLW2-2BL".equals(model)) {
+                position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 4) / 100.0);
+            }
             if (buf.readableBytes() >= 2) {
-                position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
+                position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) / 100.0);
             }
             if (buf.readableBytes() >= 19) {
                 position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) / 10.0));

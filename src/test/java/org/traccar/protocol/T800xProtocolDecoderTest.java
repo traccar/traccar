@@ -95,6 +95,12 @@ public class T800xProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, binary(
                 "232302004200000357367031063979003c03842307d000008000000501000000010094009400000002a0b90015102814590694015a00620cf698620cf49e620cf498"));
 
+        decoder.setModelOverride("TLW2-2BL");
+
+        verifyAttribute(decoder, binary(
+                "2525140059002d0869084069062093001902581e000000644fc0000500000080010000ffffffffffff000000001300000000160125081006080400000a4317cdf4c20fc73c420000000003630263ffff0000001cffffffffff"),
+                Position.KEY_POWER, 2.63);
+
     }
 
 }
