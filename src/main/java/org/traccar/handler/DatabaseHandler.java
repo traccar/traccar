@@ -41,6 +41,7 @@ public class DatabaseHandler extends BasePositionHandler {
     public void onPosition(Position position, Callback callback) {
 
         try {
+            correctFixTime(position);
             position.setId(storage.addObject(position, new Request(new Columns.Exclude("id"))));
             statisticsManager.registerMessageStored(position.getDeviceId(), position.getProtocol());
         } catch (Exception error) {
@@ -48,6 +49,21 @@ public class DatabaseHandler extends BasePositionHandler {
         }
 
         callback.processed(false);
+    }
+
+    private void correctFixTime(Position position) {
+        try {
+            if (position.getFixTime() != null) {
+                long fixTimeUnix = position.getFixTime().getTime() / 1000;
+
+                if (fixTimeUnix < 1451606400L) {
+                    long corrected = fixTimeUnix + 619315200L;
+                    position.setFixTime(new java.util.Date(corrected * 1000));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to correct fixtime", e);
+        }
     }
 
 }
