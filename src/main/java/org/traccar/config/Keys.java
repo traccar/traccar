@@ -1570,6 +1570,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Time offset in seconds to apply to device time. Can be positive or negative.
+     * Can be configured globally, per device, or per group.
+     */
+    public static final ConfigKey<Integer> TIME_OFFSET = new IntegerConfigKey(
+            "time.offset",
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            0);
+
+    /**
      * Replaces coordinates with last known if change is less than a 'coordinates.minError' meters
      * or more than a 'coordinates.maxError' meters. Helps to avoid coordinates jumps during parking period
      * or jumps to zero coordinates.

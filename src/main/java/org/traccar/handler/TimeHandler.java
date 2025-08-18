@@ -18,9 +18,12 @@ package org.traccar.handler;
 import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,9 +31,11 @@ public class TimeHandler extends BasePositionHandler {
 
     private final boolean useServerTime;
     private final Set<String> protocols;
+    private final CacheManager cacheManager;
 
     @Inject
-    public TimeHandler(Config config) {
+    public TimeHandler(Config config, CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
         useServerTime = config.getString(Keys.TIME_OVERRIDE).equalsIgnoreCase("serverTime");
         String protocolList = config.getString(Keys.TIME_PROTOCOLS);
         if (protocolList != null) {
@@ -51,6 +56,21 @@ public class TimeHandler extends BasePositionHandler {
                 position.setFixTime(position.getDeviceTime());
             }
         }
+
+        // Apply time offset from device/group/global configuration
+        Integer offset = AttributeUtil.lookup(cacheManager, Keys.TIME_OFFSET, position.getDeviceId());
+        if (offset != null && offset != 0) {
+            // Offset is in seconds, convert to milliseconds
+            long offsetMillis = offset * 1000L;
+
+            if (position.getDeviceTime() != null) {
+                position.setDeviceTime(new Date(position.getDeviceTime().getTime() + offsetMillis));
+            }
+            if (position.getFixTime() != null) {
+                position.setFixTime(new Date(position.getFixTime().getTime() + offsetMillis));
+            }
+        }
+
         callback.processed(false);
     }
 

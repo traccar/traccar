@@ -326,9 +326,9 @@ public class MainModule extends AbstractModule {
 
     @Singleton
     @Provides
-    public static TimeHandler provideTimeHandler(Config config) {
-        if (config.hasKey(Keys.TIME_OVERRIDE)) {
-            return new TimeHandler(config);
+    public static TimeHandler provideTimeHandler(Config config, CacheManager cacheManager) {
+        if (config.hasKey(Keys.TIME_OVERRIDE) || config.hasKey(Keys.TIME_OFFSET)) {
+            return new TimeHandler(config, cacheManager);
         }
         return null;
     }
