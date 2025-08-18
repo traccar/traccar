@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
@@ -35,15 +36,35 @@ public class Jt600FrameDecoder extends BaseFrameDecoder {
         char type = (char) buf.getByte(buf.readerIndex());
 
         if (type == '$') {
-            boolean longFormat = Jt600ProtocolDecoder.isLongFormat(buf, buf.readerIndex() + 1);
+            boolean longFormat = Jt600ProtocolDecoder.isLongFormat(buf);
             int length = buf.getUnsignedShort(buf.readerIndex() + (longFormat ? 8 : 7)) + 10;
             if (length <= buf.readableBytes()) {
                 return buf.readRetainedSlice(length);
             }
         } else if (type == '(') {
             int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ')');
-            if (endIndex != -1) {
-                return buf.readRetainedSlice(endIndex + 1);
+            if (endIndex >= 0) {
+                ByteBuf result = Unpooled.buffer(endIndex + 1 - buf.readerIndex());
+
+                while (buf.readerIndex() <= endIndex) {
+                    int b = buf.readUnsignedByte();
+                    if (b == 0x3d) {
+                        int ext = buf.readUnsignedByte();
+                        if (ext == 0x15) {
+                            result.writeByte(0x28);
+                        } else if (ext == 0x14) {
+                            result.writeByte(0x29);
+                        } else if (ext == 0x11) {
+                            result.writeByte(0x2c);
+                        } else if (ext == 0x00) {
+                            result.writeByte(0x3d);
+                        }
+                    } else {
+                        result.writeByte(b);
+                    }
+                }
+
+                return result;
             }
         } else {
             throw new ParseException(null, 0); // unknown message

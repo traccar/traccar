@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +16,39 @@
 package org.traccar.web;
 
 import org.h2.server.web.ConnectionInfo;
-import org.h2.server.web.WebServlet;
+import org.h2.server.web.JakartaWebServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class ConsoleServlet extends WebServlet {
+public class ConsoleServlet extends JakartaWebServlet {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsoleServlet.class);
+
+    private final Config config;
+
+    public ConsoleServlet(Config config) {
+        this.config = config;
+    }
 
     @Override
     public void init() {
         super.init();
 
         try {
-            Field field = WebServlet.class.getDeclaredField("server");
+            Field field = JakartaWebServlet.class.getDeclaredField("server");
             field.setAccessible(true);
             org.h2.server.web.WebServer server = (org.h2.server.web.WebServer) field.get(this);
 
             ConnectionInfo connectionInfo = new ConnectionInfo("Traccar|"
-                    + Context.getConfig().getString(Keys.DATABASE_DRIVER) + "|"
-                    + Context.getConfig().getString(Keys.DATABASE_URL) + "|"
-                    + Context.getConfig().getString(Keys.DATABASE_USER));
+                    + config.getString(Keys.DATABASE_DRIVER) + "|"
+                    + config.getString(Keys.DATABASE_URL) + "|"
+                    + config.getString(Keys.DATABASE_USER));
 
             Method method;
 

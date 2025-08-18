@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
@@ -48,9 +48,18 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS = 0x10;
     public static final int MSG_GPS_OFFLINE = 0x11;
     public static final int MSG_STATUS = 0x13;
+    public static final int MSG_SLEEP = 0x14;
+    public static final int MSG_FACTORY_RESET = 0x15;
     public static final int MSG_WIFI_OFFLINE = 0x17;
+    public static final int MSG_LBS_WIFI = 0x18;
+    public static final int MSG_LBS_WIFI_OFFLINE = 0x19;
+    public static final int MSG_LBS_WIFI_2 = 0x1A;
     public static final int MSG_TIME_UPDATE = 0x30;
+    public static final int MSG_SOS_NUMBER = 0x41;
     public static final int MSG_WIFI = 0x69;
+    public static final int MSG_VIBRATION_ON = 0x92;
+    public static final int MSG_VIBRATION_OFF = 0x93;
+    public static final int MSG_VIBRATION = 0x94;
 
     private void sendResponse(Channel channel, int length, int type, ByteBuf content) {
         if (channel != null) {
@@ -87,6 +96,19 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
         int decimal = buf.readUnsignedMedium() & 0x0fffff;
         double result = degrees + decimal * 0.000001;
         return negative ? -result : result;
+    }
+
+    private String decodeAlarm(int alarms) {
+        if (BitUtil.check(alarms, 0)) {
+            return Position.ALARM_VIBRATION;
+        }
+        if (BitUtil.check(alarms, 1)) {
+            return Position.ALARM_OVERSPEED;
+        }
+        if (BitUtil.check(alarms, 4)) {
+            return Position.ALARM_LOW_POWER;
+        }
+        return null;
     }
 
     @Override
@@ -154,17 +176,7 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             if (buf.readableBytes() >= 5) {
                 position.setAltitude(buf.readShort());
-
-                int alarms = buf.readUnsignedByte();
-                if (BitUtil.check(alarms, 0)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
-                }
-                if (BitUtil.check(alarms, 1)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                }
-                if (BitUtil.check(alarms, 4)) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
-                }
+                position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
             }
 
             ByteBuf content = Unpooled.buffer();
@@ -186,10 +198,12 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
 
             getLastLocation(position, null);
 
+            ByteBuf content = buf.retainedSlice(buf.readerIndex(), buf.readableBytes() - 2);
+
             position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
             position.set(Position.KEY_VERSION_FW, buf.readUnsignedByte());
             buf.readUnsignedByte(); // timezone
-            int interval = buf.readUnsignedByte();
+            buf.readUnsignedByte(); // interval
             if (buf.readableBytes() >= 1 + 2) {
                 position.set(Position.KEY_RSSI, buf.readUnsignedByte());
             }
@@ -203,13 +217,12 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_HEART_RATE, buf.readUnsignedByte());
             }
 
-            ByteBuf content = Unpooled.buffer();
-            content.writeByte(interval);
             sendResponse(channel, length, type, content);
 
             return position;
 
-        } else if (type == MSG_WIFI || type == MSG_WIFI_OFFLINE) {
+        } else if (type == MSG_WIFI || type == MSG_WIFI_OFFLINE
+                || type == MSG_LBS_WIFI || type == MSG_LBS_WIFI_2 || type == MSG_LBS_WIFI_OFFLINE) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
@@ -242,11 +255,26 @@ public class TopinProtocolDecoder extends BaseProtocolDecoder {
                         mcc, mnc, buf.readUnsignedShort(), buf.readUnsignedShort(), buf.readUnsignedByte()));
             }
 
+            if (buf.readableBytes() > 2) {
+                position.addAlarm(decodeAlarm(buf.readUnsignedByte()));
+            }
+
             position.setNetwork(network);
 
             ByteBuf content = Unpooled.buffer();
             content.writeBytes(time);
             sendResponse(channel, length, type, content);
+
+            return position;
+
+        } else if (type == MSG_VIBRATION) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.addAlarm(Position.ALARM_VIBRATION);
 
             return position;
 

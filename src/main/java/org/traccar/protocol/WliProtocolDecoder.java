@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -41,9 +43,9 @@ public class WliProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf buf = (ByteBuf) msg;
 
         buf.readUnsignedByte(); // header
-        int type = buf.readUnsignedByte();
+        int clazz = buf.readUnsignedByte();
 
-        if (type == '1') {
+        if (clazz == '1') {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
             if (deviceSession == null) {
@@ -53,11 +55,13 @@ public class WliProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
+            CellTower cellTower = new CellTower();
+
             position.set(Position.KEY_INDEX, buf.readUnsignedShort());
 
             buf.readUnsignedShort(); // length
             buf.readUnsignedShort(); // checksum
-            buf.readUnsignedByte(); // application message type
+            int type = buf.readUnsignedByte();
             buf.readUnsignedByte(); // delimiter
 
             while (buf.readableBytes() > 1) {
@@ -95,17 +99,29 @@ public class WliProtocolDecoder extends BaseProtocolDecoder {
                     String value = buf.readCharSequence(
                             endIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString();
 
-                    switch (fieldNumber) {
-                        case 246:
-                            String[] values = value.split(",");
-                            position.set(Position.KEY_POWER, Integer.parseInt(values[2]) * 0.01);
-                            position.set(Position.KEY_BATTERY, Integer.parseInt(values[3]) * 0.01);
-                            break;
-                        case 255:
-                            position.setDeviceTime(new Date(Long.parseLong(value) * 1000));
-                            break;
-                        default:
-                            break;
+                    int networkFieldsOffset = switch (type) {
+                        case 0xE4 -> 10;
+                        case 0xCB -> 80;
+                        case 0x1E -> 182;
+                        default -> 35;
+                    };
+                    if (fieldNumber - networkFieldsOffset >= 0 && fieldNumber - networkFieldsOffset < 10) {
+                        switch (fieldNumber - networkFieldsOffset) {
+                            case 0 -> cellTower.setMobileCountryCode(Integer.parseInt(value));
+                            case 1 -> cellTower.setMobileNetworkCode(Integer.parseInt(value));
+                            case 2 -> cellTower.setLocationAreaCode(Integer.parseInt(value));
+                            case 3 -> cellTower.setCellId(Long.parseLong(value));
+                            case 4 -> cellTower.setSignalStrength(Integer.parseInt(value));
+                        }
+                    } else {
+                        switch (fieldNumber) {
+                            case 246 -> {
+                                String[] values = value.split(",");
+                                position.set(Position.KEY_POWER, Integer.parseInt(values[2]) * 0.01);
+                                position.set(Position.KEY_BATTERY, Integer.parseInt(values[3]) * 0.01);
+                            }
+                            case 255 -> position.setDeviceTime(new Date(Long.parseLong(value) * 1000));
+                        }
                     }
 
                 }
@@ -114,13 +130,21 @@ public class WliProtocolDecoder extends BaseProtocolDecoder {
 
             }
 
+            if (type == 0xE4) {
+                getLastLocation(position, position.getDeviceTime());
+            }
+
+            if (cellTower.getCellId() != null) {
+                position.setNetwork(new Network(cellTower));
+            }
+
             if (!position.getValid()) {
                 getLastLocation(position, position.getDeviceTime());
             }
 
             return position;
 
-        } else if (type == '2') {
+        } else if (clazz == '2') {
 
             String id = buf.toString(buf.readerIndex(), buf.readableBytes() - 1, StandardCharsets.US_ASCII);
             getDeviceSession(channel, remoteAddress, id.substring("wli:".length()));

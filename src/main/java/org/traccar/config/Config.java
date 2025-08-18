@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,19 @@
 package org.traccar.config;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.name.Named;
+import org.traccar.helper.Log;
 
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.InvalidPropertiesFormatException;
+import java.util.Objects;
 import java.util.Properties;
 
+@Singleton
 public class Config {
 
     private final Properties properties = new Properties();
@@ -32,26 +38,23 @@ public class Config {
     public Config() {
     }
 
-    public Config(String file) throws IOException {
+    @Inject
+    public Config(@Named("configFile") String file) throws IOException {
         try {
-            Properties mainProperties = new Properties();
             try (InputStream inputStream = new FileInputStream(file)) {
-                mainProperties.loadFromXML(inputStream);
+                properties.loadFromXML(inputStream);
             }
-
-            String defaultConfigFile = mainProperties.getProperty("config.default");
-            if (defaultConfigFile != null) {
-                try (InputStream inputStream = new FileInputStream(defaultConfigFile)) {
-                    properties.loadFromXML(inputStream);
-                }
-            }
-
-            properties.putAll(mainProperties); // override defaults
 
             useEnvironmentVariables = Boolean.parseBoolean(System.getenv("CONFIG_USE_ENVIRONMENT_VARIABLES"))
                     || Boolean.parseBoolean(properties.getProperty("config.useEnvironmentVariables"));
+
+            Log.setupLogger(this);
         } catch (InvalidPropertiesFormatException e) {
+            Log.setupDefaultLogger();
             throw new RuntimeException("Configuration file is not a valid XML document", e);
+        } catch (Exception e) {
+            Log.setupDefaultLogger();
+            throw e;
         }
     }
 
@@ -59,8 +62,7 @@ public class Config {
         return hasKey(key.getKey());
     }
 
-    @Deprecated
-    public boolean hasKey(String key) {
+    private boolean hasKey(String key) {
         return useEnvironmentVariables && System.getenv().containsKey(getEnvironmentVariableName(key))
                 || properties.containsKey(key);
     }
@@ -90,12 +92,13 @@ public class Config {
     }
 
     public boolean getBoolean(ConfigKey<Boolean> key) {
-        return getBoolean(key.getKey());
-    }
-
-    @Deprecated
-    public boolean getBoolean(String key) {
-        return Boolean.parseBoolean(getString(key));
+        String value = getString(key.getKey());
+        if (value != null) {
+            return Boolean.parseBoolean(value);
+        } else {
+            Boolean defaultValue = key.getDefaultValue();
+            return Objects.requireNonNullElse(defaultValue, false);
+        }
     }
 
     public int getInteger(ConfigKey<Integer> key) {
@@ -104,11 +107,7 @@ public class Config {
             return Integer.parseInt(value);
         } else {
             Integer defaultValue = key.getDefaultValue();
-            if (defaultValue != null) {
-                return defaultValue;
-            } else {
-                return 0;
-            }
+            return Objects.requireNonNullElse(defaultValue, 0);
         }
     }
 
@@ -127,11 +126,7 @@ public class Config {
             return Long.parseLong(value);
         } else {
             Long defaultValue = key.getDefaultValue();
-            if (defaultValue != null) {
-                return defaultValue;
-            } else {
-                return 0;
-            }
+            return Objects.requireNonNullElse(defaultValue, 0L);
         }
     }
 
@@ -141,11 +136,7 @@ public class Config {
             return Double.parseDouble(value);
         } else {
             Double defaultValue = key.getDefaultValue();
-            if (defaultValue != null) {
-                return defaultValue;
-            } else {
-                return 0;
-            }
+            return Objects.requireNonNullElse(defaultValue, 0.0);
         }
     }
 

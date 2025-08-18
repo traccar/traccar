@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,11 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -95,16 +96,12 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(short reason) {
-        switch (reason) {
-            case 70:
-                return Position.ALARM_SOS;
-            case 80:
-                return Position.ALARM_POWER_CUT;
-            case 81:
-                return Position.ALARM_LOW_POWER;
-            default:
-                return null;
-        }
+        return switch (reason) {
+            case 70 -> Position.ALARM_SOS;
+            case 80 -> Position.ALARM_POWER_CUT;
+            case 81 -> Position.ALARM_LOW_POWER;
+            default -> null;
+        };
     }
 
     private Position decodeStatus(ByteBuf buf, DeviceSession deviceSession, boolean alternative) {
@@ -120,13 +117,15 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedByte(); // operator / configuration flags
         buf.readUnsignedByte(); // reason data
-        position.set(Position.KEY_ALARM, decodeAlarm(buf.readUnsignedByte()));
+        short event = buf.readUnsignedByte();
+        position.addAlarm(decodeAlarm(event));
+        position.set(Position.KEY_EVENT, event);
 
         position.set("mode", buf.readUnsignedByte());
 
-        long input = buf.readUnsignedIntLE();
+        long input = buf.readUnsignedInt();
+        position.set(Position.KEY_IGNITION, BitUtil.check(input, 3 * 8 + 5));
         position.set(Position.KEY_DOOR, BitUtil.check(input, 3 * 8));
-        position.set(Position.KEY_IGNITION, BitUtil.check(input, 2 * 8 + 7));
         position.set(Position.KEY_CHARGE, BitUtil.check(input, 7));
         position.set(Position.KEY_INPUT, input);
 
@@ -143,8 +142,8 @@ public class CellocatorProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_ODOMETER, buf.readUnsignedMediumLE());
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, ByteBufUtil.hexDump(buf.readSlice(6)));
 
-        buf.skipBytes(6); // multi-purpose data
         buf.readUnsignedShortLE(); // fix time
         buf.readUnsignedByte(); // location status
         buf.readUnsignedByte(); // mode 1

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,24 +21,33 @@ import org.traccar.BaseProtocol;
 import org.traccar.CharacterDelimiterFrameDecoder;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+
+import jakarta.inject.Inject;
+import org.traccar.config.Keys;
 
 public class TaipProtocol extends BaseProtocol {
 
-    public TaipProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public TaipProtocol(Config config) {
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new CharacterDelimiterFrameDecoder(1024, '<'));
-                pipeline.addLast(new TaipPrefixEncoder(TaipProtocol.this));
+                if (config.getBoolean(Keys.PROTOCOL_PREFIX.withPrefix(getName()))) {
+                    pipeline.addLast(new TaipPrefixEncoder());
+                }
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new TaipProtocolDecoder(TaipProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
-                pipeline.addLast(new TaipPrefixEncoder(TaipProtocol.this));
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                if (config.getBoolean(Keys.PROTOCOL_PREFIX.withPrefix(getName()))) {
+                    pipeline.addLast(new TaipPrefixEncoder());
+                }
                 pipeline.addLast(new StringDecoder());
                 pipeline.addLast(new StringEncoder());
                 pipeline.addLast(new TaipProtocolDecoder(TaipProtocol.this));

@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -72,12 +72,9 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_UPLOAD_POSITION || type == MSG_UPLOAD_POSITION_NEW
                 || type == MSG_CONTROL_RESPONSE || type == MSG_ALARM) {
 
-            boolean newFormat = false;
-            if (type == MSG_UPLOAD_POSITION && buf.readableBytes() == 48
+            boolean newFormat = type == MSG_UPLOAD_POSITION && buf.readableBytes() == 48
                     || type == MSG_ALARM && buf.readableBytes() == 48
-                    || type == MSG_CONTROL_RESPONSE && buf.readableBytes() == 57) {
-                newFormat = true;
-            }
+                    || type == MSG_CONTROL_RESPONSE && buf.readableBytes() == 57;
 
             Position position = new Position(getProtocolName());
 
@@ -90,20 +87,10 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             short alarm = buf.readUnsignedByte();
             switch (alarm) {
-                case 1:
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
-                    break;
-                case 2:
-                    position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
-                    break;
-                case 3:
-                    position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
-                    break;
-                case 9:
-                    position.set(Position.KEY_ALARM, Position.ALARM_POWER_OFF);
-                    break;
-                default:
-                    break;
+                case 1 -> position.addAlarm(Position.ALARM_SOS);
+                case 2 -> position.addAlarm(Position.ALARM_OVERSPEED);
+                case 3 -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                case 9 -> position.addAlarm(Position.ALARM_POWER_OFF);
             }
 
             if (newFormat) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,41 +16,39 @@
  */
 package org.traccar.sms;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.traccar.Context;
+import com.fasterxml.jackson.core.io.JsonStringEncoder;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.DataConverter;
 import org.traccar.notification.MessageException;
 
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.InvocationCallback;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 
 public class HttpSmsClient implements SmsManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HttpSmsClient.class);
-
+    private final Client client;
     private final String url;
     private final String authorizationHeader;
     private final String authorization;
     private final String template;
-    private final boolean encode;
     private final MediaType mediaType;
 
-    public HttpSmsClient() {
-        url = Context.getConfig().getString(Keys.SMS_HTTP_URL);
-        authorizationHeader = Context.getConfig().getString(Keys.SMS_HTTP_AUTHORIZATION_HEADER);
-        if (Context.getConfig().hasKey(Keys.SMS_HTTP_AUTHORIZATION)) {
-            authorization = Context.getConfig().getString(Keys.SMS_HTTP_AUTHORIZATION);
+    public HttpSmsClient(Config config, Client client) {
+        this.client = client;
+        url = config.getString(Keys.SMS_HTTP_URL);
+        authorizationHeader = config.getString(Keys.SMS_HTTP_AUTHORIZATION_HEADER);
+        if (config.hasKey(Keys.SMS_HTTP_AUTHORIZATION)) {
+            authorization = config.getString(Keys.SMS_HTTP_AUTHORIZATION);
         } else {
-            String user = Context.getConfig().getString(Keys.SMS_HTTP_USER);
-            String password = Context.getConfig().getString(Keys.SMS_HTTP_PASSWORD);
+            String user = config.getString(Keys.SMS_HTTP_USER);
+            String password = config.getString(Keys.SMS_HTTP_PASSWORD);
             if (user != null && password != null) {
                 authorization = "Basic "
                         + DataConverter.printBase64((user + ":" + password).getBytes(StandardCharsets.UTF_8));
@@ -58,32 +56,38 @@ public class HttpSmsClient implements SmsManager {
                 authorization = null;
             }
         }
-        template = Context.getConfig().getString(Keys.SMS_HTTP_TEMPLATE).trim();
-        if (template.charAt(0) == '{' || template.charAt(0) == '[') {
-            encode = false;
+        template = config.getString(Keys.SMS_HTTP_TEMPLATE).trim();
+        if (template.charAt(0) == '<') {
+            mediaType = MediaType.APPLICATION_XML_TYPE;
+        } else if (template.charAt(0) == '{' || template.charAt(0) == '[') {
             mediaType = MediaType.APPLICATION_JSON_TYPE;
         } else {
-            encode = true;
             mediaType = MediaType.APPLICATION_FORM_URLENCODED_TYPE;
         }
     }
 
     private String prepareValue(String value) throws UnsupportedEncodingException {
-        return encode ? URLEncoder.encode(value, StandardCharsets.UTF_8.name()) : value;
+        if (mediaType == MediaType.APPLICATION_FORM_URLENCODED_TYPE) {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8);
+        }
+        if (mediaType == MediaType.APPLICATION_JSON_TYPE) {
+            return new String(JsonStringEncoder.getInstance().quoteAsString(value));
+        }
+        return value;
     }
 
-    private String preparePayload(String destAddress, String message) {
+    private String preparePayload(String phone, String message) {
         try {
             return template
-                    .replace("{phone}", prepareValue(destAddress))
-                    .replace("{message}", prepareValue(message.trim()));
+                    .replace("{phone}", prepareValue(phone))
+                    .replace("{message}", prepareValue(message));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
 
     private Invocation.Builder getRequestBuilder() {
-        Invocation.Builder builder = Context.getClient().target(url).request();
+        Invocation.Builder builder = client.target(url).request();
         if (authorization != null) {
             builder = builder.header(authorizationHeader, authorization);
         }
@@ -91,26 +95,13 @@ public class HttpSmsClient implements SmsManager {
     }
 
     @Override
-    public void sendMessageSync(String destAddress, String message, boolean command) throws MessageException {
-        Response response = getRequestBuilder().post(Entity.entity(preparePayload(destAddress, message), mediaType));
-        if (response.getStatus() / 100 != 2) {
-            throw new MessageException(response.readEntity(String.class));
+    public void sendMessage(String phone, String message, boolean command) throws MessageException {
+        try (Response response = getRequestBuilder().post(
+                Entity.entity(preparePayload(phone, message), mediaType.withCharset(StandardCharsets.UTF_8.name())))) {
+            if (response.getStatus() / 100 != 2) {
+                throw new MessageException(response.readEntity(String.class));
+            }
         }
-    }
-
-    @Override
-    public void sendMessageAsync(final String destAddress, final String message, final boolean command) {
-        getRequestBuilder().async().post(
-                Entity.entity(preparePayload(destAddress, message), mediaType), new InvocationCallback<String>() {
-            @Override
-            public void completed(String s) {
-            }
-
-            @Override
-            public void failed(Throwable throwable) {
-                LOGGER.warn("SMS send failed", throwable);
-            }
-        });
     }
 
 }

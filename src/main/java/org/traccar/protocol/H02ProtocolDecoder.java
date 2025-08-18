@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -75,13 +74,13 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
     private void processStatus(Position position, long status) {
 
         if (!BitUtil.check(status, 0)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+            position.addAlarm(Position.ALARM_VIBRATION);
         } else if (!BitUtil.check(status, 1) || !BitUtil.check(status, 18)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         } else if (!BitUtil.check(status, 2)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            position.addAlarm(Position.ALARM_OVERSPEED);
         } else if (!BitUtil.check(status, 19)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+            position.addAlarm(Position.ALARM_POWER_CUT);
         }
 
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 10));
@@ -156,6 +155,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         processStatus(position, buf.readUnsignedInt());
 
+        if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+            sendResponse(channel, remoteAddress, id, "R12");
+        }
+
         return position;
     }
 
@@ -176,17 +179,19 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // coding scheme
             .groupEnd()
             .groupBegin()
-            .number("-(d+)-(d+.d+),")            // latitude
+            .number("-(d+)-(d+.d+),([NS]),")     // latitude
             .or()
-            .number("(d+)(dd.d+),")              // latitude
+            .number("(d+)(dd.d+),([NS]),")       // latitude
+            .or()
+            .number("(d+)(dd)(d{4}),([NS]),")    // latitude
             .groupEnd()
-            .expression("([NS]),")
             .groupBegin()
-            .number("-(d+)-(d+.d+),")            // longitude
+            .number("-(d+)-(d+.d+),([EW]),")     // longitude
             .or()
-            .number("(d+)(dd.d+),")              // longitude
+            .number("(d+)(dd.d+),([EW]),")       // longitude
+            .or()
+            .number("(d+)(dd)(d{4}),([EW]),")    // longitude
             .groupEnd()
-            .expression("([EW]),")
             .number(" *(d+.?d*),")               // speed
             .number("(d+.?d*)?,")                // course
             .number("(?:d+,)?")                  // battery
@@ -295,6 +300,14 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_SMS = new PatternBuilder()
+            .text("*HQ,")
+            .number("(d+),")                     // id
+            .text("SMS,")
+            .expression("(.+)")
+            .text("#")
+            .compile();
+
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
         if (channel != null && id != null) {
             String response;
@@ -332,7 +345,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext() && parser.next().equals("V1")) {
             sendResponse(channel, remoteAddress, id, "V1");
-        } else if (Context.getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+        } else if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
             sendResponse(channel, remoteAddress, id, "R12");
         }
 
@@ -349,18 +362,24 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             position.setValid(true);
         }
 
-        if (parser.hasNext(2)) {
-            position.setLatitude(-parser.nextCoordinate());
-        }
-        if (parser.hasNext(2)) {
+        if (parser.hasNext(3)) {
             position.setLatitude(parser.nextCoordinate());
         }
-
-        if (parser.hasNext(2)) {
-            position.setLongitude(-parser.nextCoordinate());
+        if (parser.hasNext(3)) {
+            position.setLatitude(parser.nextCoordinate());
         }
-        if (parser.hasNext(2)) {
+        if (parser.hasNext(4)) {
+            position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
+        }
+
+        if (parser.hasNext(3)) {
             position.setLongitude(parser.nextCoordinate());
+        }
+        if (parser.hasNext(3)) {
+            position.setLongitude(parser.nextCoordinate());
+        }
+        if (parser.hasNext(4)) {
+            position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN_HEM));
         }
 
         position.setSpeed(parser.nextDouble(0));
@@ -384,7 +403,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
             position.setAltitude(parser.nextInt(0));
 
-            position.setNetwork(new Network(CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
+            position.setNetwork(new Network(CellTower.fromLacCid(
+                    getConfig(), parser.nextHexInt(0), parser.nextHexInt(0))));
         }
 
         if (parser.hasNext()) {
@@ -513,6 +533,28 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeSms(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_SMS, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_RESULT, parser.next());
+
+        return position;
+    }
+
     private Position decodeVp1(String sentence, Channel channel, SocketAddress remoteAddress) {
 
         Parser parser = new Parser(PATTERN_VP1, sentence);
@@ -590,7 +632,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         String marker = buf.toString(0, 1, StandardCharsets.US_ASCII);
 
         switch (marker) {
-            case "*":
+            case "*" -> {
                 String sentence = buf.toString(StandardCharsets.US_ASCII).trim();
                 int typeStart = sentence.indexOf(',', sentence.indexOf(',') + 1) + 1;
                 int typeEnd = sentence.indexOf(',', typeStart);
@@ -599,33 +641,31 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                 }
                 if (typeEnd > 0) {
                     String type = sentence.substring(typeStart, typeEnd);
-                    switch (type) {
-                        case "V0":
-                        case "HTBT":
+                    return switch (type) {
+                        case "V0", "HTBT" -> {
                             if (channel != null) {
                                 String response = sentence.substring(0, typeEnd) + "#";
                                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                             }
-                            return decodeHeartbeat(sentence, channel, remoteAddress);
-                        case "NBR":
-                            return decodeLbs(sentence, channel, remoteAddress);
-                        case "LINK":
-                            return decodeLink(sentence, channel, remoteAddress);
-                        case "V3":
-                            return decodeV3(sentence, channel, remoteAddress);
-                        case "VP1":
-                            return decodeVp1(sentence, channel, remoteAddress);
-                        default:
-                            return decodeText(sentence, channel, remoteAddress);
-                    }
+                            yield decodeHeartbeat(sentence, channel, remoteAddress);
+                        }
+                        case "NBR" -> decodeLbs(sentence, channel, remoteAddress);
+                        case "LINK" -> decodeLink(sentence, channel, remoteAddress);
+                        case "V3" -> decodeV3(sentence, channel, remoteAddress);
+                        case "VP1" -> decodeVp1(sentence, channel, remoteAddress);
+                        case "SMS" -> decodeSms(sentence, channel, remoteAddress);
+                        default -> decodeText(sentence, channel, remoteAddress);
+                    };
                 } else {
                     return null;
                 }
-            case "$":
+            }
+            case "$" -> {
                 return decodeBinary(buf, channel, remoteAddress);
-            case "X":
-            default:
+            }
+            default -> {
                 return null;
+            }
         }
     }
 

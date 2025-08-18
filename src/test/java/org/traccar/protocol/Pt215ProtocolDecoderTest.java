@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class Pt215ProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class Pt215ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Pt215ProtocolDecoder(null);
+        var decoder = inject(new Pt215ProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "58580d010359339075435451010d0a"));

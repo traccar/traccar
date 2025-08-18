@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -91,7 +91,7 @@ public class RaveonProtocolDecoder extends BaseProtocolDecoder {
         position.setSpeed(UnitsConverter.knotsFromKph(parser.nextInt(0)));
         position.setCourse(parser.nextInt(0));
 
-        position.set(Position.KEY_ALARM, parser.next());
+        position.addAlarm(parser.next());
 
         return position;
     }

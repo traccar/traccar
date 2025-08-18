@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,49 +15,45 @@
  */
 package org.traccar.handler.events;
 
-import io.netty.channel.ChannelHandler;
+import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
-import org.traccar.database.IdentityManager;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
-import java.util.Collections;
-import java.util.Map;
-
-@ChannelHandler.Sharable
 public class BehaviorEventHandler extends BaseEventHandler {
 
     private final double accelerationThreshold;
     private final double brakingThreshold;
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
 
-    public BehaviorEventHandler(Config config, IdentityManager identityManager) {
+    @Inject
+    public BehaviorEventHandler(Config config, CacheManager cacheManager) {
         accelerationThreshold = config.getDouble(Keys.EVENT_BEHAVIOR_ACCELERATION_THRESHOLD);
         brakingThreshold = config.getDouble(Keys.EVENT_BEHAVIOR_BRAKING_THRESHOLD);
-        this.identityManager = identityManager;
+        this.cacheManager = cacheManager;
     }
 
     @Override
-    protected Map<Event, Position> analyzePosition(Position position) {
+    public void onPosition(Position position, Callback callback) {
 
-        Position lastPosition = identityManager.getLastPosition(position.getDeviceId());
-        if (lastPosition != null && position.getFixTime().equals(lastPosition.getFixTime())) {
+        Position lastPosition = cacheManager.getPosition(position.getDeviceId());
+        if (lastPosition != null && !position.getFixTime().equals(lastPosition.getFixTime())) {
             double acceleration = UnitsConverter.mpsFromKnots(position.getSpeed() - lastPosition.getSpeed()) * 1000
                     / (position.getFixTime().getTime() - lastPosition.getFixTime().getTime());
             if (accelerationThreshold != 0 && acceleration >= accelerationThreshold) {
                 Event event = new Event(Event.TYPE_ALARM, position);
                 event.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                return Collections.singletonMap(event, position);
+                callback.eventDetected(event);
             } else if (brakingThreshold != 0 && acceleration <= -brakingThreshold) {
                 Event event = new Event(Event.TYPE_ALARM, position);
                 event.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                return Collections.singletonMap(event, position);
+                callback.eventDetected(event);
             }
         }
-        return null;
     }
 
 }

@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
@@ -90,13 +90,13 @@ public class MilesmateProtocolDecoder extends BaseProtocolDecoder {
 
         String flags = parser.next();
         position.set(Position.KEY_IGNITION, flags.charAt(0) == '1');
-        position.set(Position.KEY_ALARM, flags.charAt(1) == '1' ? Position.ALARM_SOS : null);
+        position.addAlarm(flags.charAt(1) == '1' ? Position.ALARM_SOS : null);
         position.set(Position.KEY_CHARGE, flags.charAt(5) == '1');
-        position.set(Position.KEY_ALARM, flags.charAt(7) == '1' ? Position.ALARM_OVERSPEED : null);
+        position.addAlarm(flags.charAt(7) == '1' ? Position.ALARM_OVERSPEED : null);
 
         flags = parser.next();
         position.set(Position.KEY_BLOCKED, flags.charAt(0) == '1');
-        position.set(Position.KEY_ALARM, flags.charAt(1) == '1' ? Position.ALARM_TOW : null);
+        position.addAlarm(flags.charAt(1) == '1' ? Position.ALARM_TOW : null);
 
         position.setValid(parser.next().equals("A"));
 

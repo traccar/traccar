@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -135,13 +135,17 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN4 = new PatternBuilder()
             .text("$$")                          // header
             .number("dddd")                      // length
-            .number("(xx)")                      // type
+            .number("xx")                        // type
             .number("(d+)|")                     // imei
             .number("(x{8})")                    // status
             .number("(dd)(dd)(dd)")              // date (yymmdd)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
+            .groupBegin()
             .number("(dd)")                      // battery
             .number("(dd)")                      // external power
+            .or()
+            .number("(ddd)")                     // battery
+            .groupEnd()
             .number("(dddd)")                    // adc 1
             .groupBegin()
             .groupBegin()
@@ -166,12 +170,27 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .number("(d{7})")                    // odometer
             .number("(dd)(dd.dddd)([NS])")       // latitude
             .number("(ddd)(dd.dddd)([EW])")      // longitude
+            .number("dddd").optional()           // temperature
             .number("dddd")                      // serial number
             .number("xx")                        // checksum
             .any()
             .compile();
 
-    private static final Pattern PATTERN_OBD = new PatternBuilder()
+    private static final Pattern PATTERN_E2 = new PatternBuilder()
+            .text("$$")                          // header
+            .number("dddd")                      // length
+            .number("xx")                        // type
+            .number("(d+)|")                     // imei
+            .number("(dd)(dd)(dd)")              // date (yymmdd)
+            .number("(dd)(dd)(dd),")             // time (hhmmss)
+            .number("(-?d+.d+),")                // longitude
+            .number("(-?d+.d+),")                // latitude
+            .expression("(.+)")                  // rfid
+            .number("|xx")                       // checksum
+            .any()
+            .compile();
+
+    private static final Pattern PATTERN_E5 = new PatternBuilder()
             .text("$$")                          // header
             .number("dddd")                      // length
             .number("xx")                        // type
@@ -199,49 +218,54 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm123(int value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x10:
-                return Position.ALARM_LOW_BATTERY;
-            case 0x11:
-                return Position.ALARM_OVERSPEED;
-            case 0x30:
-                return Position.ALARM_PARKING;
-            case 0x42:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 0x43:
-                return Position.ALARM_GEOFENCE_ENTER;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x10 -> Position.ALARM_LOW_BATTERY;
+            case 0x11 -> Position.ALARM_OVERSPEED;
+            case 0x30 -> Position.ALARM_PARKING;
+            case 0x42 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x43 -> Position.ALARM_GEOFENCE_ENTER;
+            default -> null;
+        };
     }
 
     private String decodeAlarm4(int value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x02:
-                return Position.ALARM_OVERSPEED;
-            case 0x04:
-                return Position.ALARM_GEOFENCE_EXIT;
-            case 0x05:
-                return Position.ALARM_GEOFENCE_ENTER;
-            case 0x40:
-                return Position.ALARM_SHOCK;
-            case 0x42:
-                return Position.ALARM_ACCELERATION;
-            case 0x43:
-                return Position.ALARM_BRAKING;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x02 -> Position.ALARM_OVERSPEED;
+            case 0x04 -> Position.ALARM_GEOFENCE_EXIT;
+            case 0x05 -> Position.ALARM_GEOFENCE_ENTER;
+            case 0x06 -> Position.ALARM_TOW;
+            case 0x07 -> Position.ALARM_GPS_ANTENNA_CUT;
+            case 0x10 -> Position.ALARM_POWER_CUT;
+            case 0x11 -> Position.ALARM_POWER_RESTORED;
+            case 0x12 -> Position.ALARM_LOW_POWER;
+            case 0x13 -> Position.ALARM_LOW_BATTERY;
+            case 0x40 -> Position.ALARM_VIBRATION;
+            case 0x41 -> Position.ALARM_IDLE;
+            case 0x42 -> Position.ALARM_ACCELERATION;
+            case 0x43 -> Position.ALARM_BRAKING;
+            default -> null;
+        };
     }
 
-    private boolean decode12(Position position, Parser parser, Pattern pattern) {
+    private Position decode12(Channel channel, SocketAddress remoteAddress, String sentence, Pattern pattern) {
+
+        Parser parser = new Parser(pattern, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm123(Short.parseShort(parser.next(), 16)));
+            position.addAlarm(decodeAlarm123(Short.parseShort(parser.next(), 16)));
         }
         DateBuilder dateBuilder = new DateBuilder();
         int year = 0, month = 0, day = 0;
@@ -264,7 +288,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             year  = parser.nextInt(0);
         }
         if (year == 0) {
-            return false; // ignore invalid data
+            return null; // ignore invalid data
         }
         dateBuilder.setDate(year, month, day);
         position.setTime(dateBuilder.getDate());
@@ -280,7 +304,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         int io = parser.nextBinInt();
         position.set(Position.KEY_STATUS, io);
         if (pattern == PATTERN1) {
-            position.set(Position.KEY_ALARM, BitUtil.check(io, 0) ? Position.ALARM_SOS : null);
+            position.addAlarm(BitUtil.check(io, 0) ? Position.ALARM_SOS : null);
             position.set(Position.PREFIX_IN + 3, BitUtil.check(io, 4));
             position.set(Position.PREFIX_IN + 4, BitUtil.check(io, 5));
             position.set(Position.PREFIX_IN + 1, BitUtil.check(io, 6));
@@ -306,19 +330,32 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         int lac = parser.nextHexInt(0);
         int cid = parser.nextHexInt(0);
         if (lac != 0 && cid != 0) {
-            position.setNetwork(new Network(CellTower.fromLacCid(lac, cid)));
+            position.setNetwork(new Network(CellTower.fromLacCid(getConfig(), lac, cid)));
         }
 
         position.set(Position.PREFIX_TEMP + 1, parser.next());
         position.set(Position.KEY_ODOMETER, parser.nextDouble(0) * 1000);
 
-        return true;
+        return position;
     }
 
-    private boolean decode3(Position position, Parser parser) {
+    private Position decode3(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN3, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         if (parser.hasNext()) {
-            position.set(Position.KEY_ALARM, decodeAlarm123(Short.parseShort(parser.next(), 16)));
+            position.addAlarm(decodeAlarm123(Short.parseShort(parser.next(), 16)));
         }
 
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
@@ -332,7 +369,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 2, parser.next());
 
         position.setNetwork(new Network(
-                CellTower.fromLacCid(parser.nextHexInt(0), parser.nextHexInt(0))));
+                CellTower.fromLacCid(getConfig(), parser.nextHexInt(0), parser.nextHexInt(0))));
 
         position.setValid(parser.next().equals("A"));
         position.set(Position.KEY_SATELLITES, parser.nextInt());
@@ -344,34 +381,60 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        return true;
+        return position;
     }
 
-    private boolean decode4(Position position, Parser parser) {
+    private Position decode4(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        int type = Integer.parseInt(sentence.substring(6, 8), 16);
+
+        switch (type) {
+            case 0xE2:
+                return decodeE2(channel, remoteAddress, sentence);
+            case 0xE5:
+                return decodeE5(channel, remoteAddress, sentence);
+            default:
+                break;
+        }
+
+        Parser parser = new Parser(PATTERN4, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.addAlarm(decodeAlarm4(type));
 
         long status = parser.nextHexLong();
 
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 1) ? Position.ALARM_SOS : null);
+        position.addAlarm(BitUtil.check(status, 32 - 1) ? Position.ALARM_SOS : null);
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 32 - 2));
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 3) ? Position.ALARM_OVERSPEED : null);
+        position.addAlarm(BitUtil.check(status, 32 - 3) ? Position.ALARM_OVERSPEED : null);
         position.set(Position.KEY_CHARGE, BitUtil.check(status, 32 - 4));
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
+        position.addAlarm(BitUtil.check(status, 32 - 5) ? Position.ALARM_GEOFENCE_EXIT : null);
+        position.addAlarm(BitUtil.check(status, 32 - 6) ? Position.ALARM_GEOFENCE_ENTER : null);
+        position.addAlarm(BitUtil.check(status, 32 - 7) ? Position.ALARM_GPS_ANTENNA_CUT : null);
         position.set(Position.PREFIX_OUT + 1, BitUtil.check(status, 32 - 9));
         position.set(Position.PREFIX_OUT + 2, BitUtil.check(status, 32 - 10));
         position.set(Position.PREFIX_OUT + 3, BitUtil.check(status, 32 - 11));
-        position.set(Position.PREFIX_OUT + 4, BitUtil.check(status, 32 - 12));
-        position.set(Position.PREFIX_IN + 2, BitUtil.check(status, 32 - 13));
-        position.set(Position.PREFIX_IN + 3, BitUtil.check(status, 32 - 14));
-        position.set(Position.PREFIX_IN + 4, BitUtil.check(status, 32 - 15));
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 16) ? Position.ALARM_SHOCK : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 18) ? Position.ALARM_LOW_BATTERY : null);
-        position.set(Position.KEY_ALARM, BitUtil.check(status, 32 - 22) ? Position.ALARM_JAMMING : null);
+        position.set(Position.KEY_STATUS, status); // see https://github.com/traccar/traccar/pull/4762
 
         position.setTime(parser.nextDateTime());
 
-        position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
-        position.set(Position.KEY_POWER, parser.nextDouble());
+        if (parser.hasNext(2)) {
+            position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.1);
+            position.set(Position.KEY_POWER, parser.nextDouble());
+        }
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY, parser.nextDouble() * 0.01);
+        }
 
         position.set(Position.PREFIX_ADC + 1, parser.next());
         position.set(Position.PREFIX_ADC + 2, parser.next());
@@ -394,7 +457,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             int mcc = parser.nextInt();
             cellTower = CellTower.from(mcc, mnc, lac, cid);
         } else {
-            cellTower = CellTower.fromLacCid(lac, cid);
+            cellTower = CellTower.fromLacCid(getConfig(), lac, cid);
         }
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         cellTower.setSignalStrength(parser.nextInt());
@@ -408,10 +471,48 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
 
-        return true;
+        return position;
     }
 
-    private boolean decodeObd(Position position, Parser parser) {
+    private Position decodeE2(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_E2, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        position.setValid(true);
+        position.setTime(parser.nextDateTime());
+        position.setLongitude(parser.nextDouble());
+        position.setLatitude(parser.nextDouble());
+
+        position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+
+        return position;
+    }
+
+    private Position decodeE5(Channel channel, SocketAddress remoteAddress, String sentence) {
+
+        Parser parser = new Parser(PATTERN_E5, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
 
         position.setValid(true);
         position.setTime(parser.nextDateTime());
@@ -432,7 +533,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_THROTTLE, parser.nextInt());
         position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
 
-        return true;
+        return position;
     }
 
     @Override
@@ -440,53 +541,24 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-        Pattern pattern = PATTERN3;
-        if (sentence.contains("$Cloud")) {
-            pattern = PATTERN_OBD;
-        } else if (sentence.charAt(2) == '0') {
-            pattern = PATTERN4;
+
+        Position position;
+        if (sentence.charAt(2) == '0') {
+            position = decode4(channel, remoteAddress, sentence);
         } else if (sentence.contains("$GPRMC")) {
-            pattern = PATTERN1;
+            position = decode12(channel, remoteAddress, sentence, PATTERN1);
         } else {
             int index = sentence.indexOf('|');
             if (index != -1 && sentence.indexOf('|', index + 1) != -1) {
-                pattern = PATTERN2;
+                position = decode12(channel, remoteAddress, sentence, PATTERN2);
+            } else {
+                position = decode3(channel, remoteAddress, sentence);
             }
         }
 
-        Parser parser = new Parser(pattern, sentence);
-        if (!parser.matches()) {
-            return null;
-        }
-
-        Position position = new Position(getProtocolName());
-
-        String type = null;
-        if (pattern == PATTERN4) {
-            type = parser.next();
-            position.set(Position.KEY_ALARM, decodeAlarm4(Integer.parseInt(type, 16)));
-        }
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-        position.setDeviceId(deviceSession.getDeviceId());
-
-        boolean result;
-        if (pattern == PATTERN1 || pattern == PATTERN2) {
-            result = decode12(position, parser, pattern);
-        } else if (pattern == PATTERN3) {
-            result = decode3(position, parser);
-        } else if (pattern == PATTERN4) {
-            result = decode4(position, parser);
-        } else {
-            result = decodeObd(position, parser);
-        }
-
         if (channel != null) {
-            if (type != null) {
-                String response = "$$0014" + type + sentence.substring(sentence.length() - 6, sentence.length() - 2);
+            if (sentence.charAt(2) == '0') {
+                String response = "$$0014AA" + sentence.substring(sentence.length() - 6, sentence.length() - 2);
                 response += String.format("%02X", Checksum.xor(response)).toUpperCase();
                 channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
             } else {
@@ -494,7 +566,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        return result ? position : null;
+        return position;
     }
 
 }

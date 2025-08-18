@@ -1,17 +1,17 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PretraceProtocolEncoderTest extends ProtocolTest {
 
     @Test
     public void testEncodePositionPeriodic() throws Exception {
 
-        var encoder = new PretraceProtocolEncoder(null);
+        var encoder = inject(new PretraceProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);
@@ -25,7 +25,7 @@ public class PretraceProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncodeCustom() throws Exception {
 
-        var encoder = new PretraceProtocolEncoder(null);
+        var encoder = inject(new PretraceProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

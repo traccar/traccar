@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,17 @@
  */
 package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
-import org.traccar.BaseDataHandler;
+import jakarta.inject.Inject;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.model.Position;
 
-@ChannelHandler.Sharable
-public class HemisphereHandler extends BaseDataHandler {
+public class HemisphereHandler extends BasePositionHandler {
 
     private int latitudeFactor;
     private int longitudeFactor;
 
+    @Inject
     public HemisphereHandler(Config config) {
         String latitudeHemisphere = config.getString(Keys.LOCATION_LATITUDE_HEMISPHERE);
         if (latitudeHemisphere != null) {
@@ -36,7 +35,7 @@ public class HemisphereHandler extends BaseDataHandler {
                 latitudeFactor = -1;
             }
         }
-        String longitudeHemisphere = config.getString(Keys.LOCATION_LATITUDE_HEMISPHERE);
+        String longitudeHemisphere = config.getString(Keys.LOCATION_LONGITUDE_HEMISPHERE);
         if (longitudeHemisphere != null) {
             if (longitudeHemisphere.equalsIgnoreCase("E")) {
                 longitudeFactor = 1;
@@ -47,14 +46,14 @@ public class HemisphereHandler extends BaseDataHandler {
     }
 
     @Override
-    protected Position handlePosition(Position position) {
+    public void onPosition(Position position, Callback callback) {
         if (latitudeFactor != 0) {
             position.setLatitude(Math.abs(position.getLatitude()) * latitudeFactor);
         }
         if (longitudeFactor != 0) {
             position.setLongitude(Math.abs(position.getLongitude()) * longitudeFactor);
         }
-        return position;
+        callback.processed(false);
     }
 
 }

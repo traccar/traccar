@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,7 +9,13 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new H02ProtocolDecoder(null);
+        var decoder = inject(new H02ProtocolDecoder(null));
+
+        verifyPosition(decoder, buffer(
+                "*HQ,3177718238,V6,002926,V,3514.4088,N,9733.2842,W,0.00,0.00,151222,FFF7FBFF,310,260,32936,13641,8944501311217563382F,#"));
+
+        verifyPosition(decoder, buffer(
+                "*HQ,5905101893,V1,105759,A,37573392,S,145037022,E,000.00,173,280122,FF7FFBFF,,,9059e2c,8232,4#"));
 
         verifyPosition(decoder, buffer(
                 "*HQ,4970105243,V1,104000,A,2235.1777,N,11357.8913,E,000.27,235,130721,FFFFFBFF,460,11,d18e105,7752,6#"));
@@ -262,12 +268,16 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, binary(
                 "24971305007205201916101533335008000073206976000000effffbffff000252776566060000000000000000000049"));
 
+        verifyAttribute(decoder, buffer(
+                "*HQ,5226073533,SMS,ST906(70SACD)_TQ_V_2.0 2024/06/07\nID:5226073533\nIP:1.2.3.4 5013\nUT:30,30,300\nVOLT:12.9V\nAPN:internet.example.com\nGPS:A-24-23\nGSM:26#"),
+                Position.KEY_RESULT, "ST906(70SACD)_TQ_V_2.0 2024/06/07\nID:5226073533\nIP:1.2.3.4 5013\nUT:30,30,300\nVOLT:12.9V\nAPN:internet.example.com\nGPS:A-24-23\nGSM:26");
+
     }
 
     @Test
     public void testDecodeStatus() throws Exception {
 
-        var decoder = new H02ProtocolDecoder(null);
+        var decoder = inject(new H02ProtocolDecoder(null));
 
         verifyAttribute(decoder, buffer(
                 "*HQ,2705171109,V1,213324,A,5002.5849,N,01433.7822,E,0.00,000,140613,FFFFFFFF#"),

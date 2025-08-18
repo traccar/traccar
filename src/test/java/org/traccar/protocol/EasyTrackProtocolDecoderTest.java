@@ -1,14 +1,21 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class EasyTrackProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new EasyTrackProtocolDecoder(null);
+        var decoder = inject(new EasyTrackProtocolDecoder(null));
+
+        verifyAttributes(decoder, text(
+                "*ET,358162092884226,OB,BD$V13.6;R01510;S023;P034.9;O035.2;C085;L000.0;XM035.170;M4.25;F001.197;T0000730;A09;B00;D00;GX0;GY0;GZ0;"));
+
+        verifyAttributes(decoder, text(
+                "*ET,358999999999916,OB,BD$V14.2;R08258;S166;P058.4;O079.2;C025;L081.5;XM091.393;M722379;F352.956;T0037184;A01;B00;D00;GX3;GY-6;GZ-268;@4#"));
 
         verifyNotNull(decoder, text(
                 "*ET,354522180593498,JZ,0,20222,262,724,4#"));
@@ -61,6 +68,15 @@ public class EasyTrackProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "*ET,135790246811221,HB,A,050915,0C2A27,00CE5954,04132263,0000,0000,01000000,20,4,0000,00F123,100,200"));
+
+        decoder.setModelOverride("E3+4G");
+
+        verifyPosition(decoder, text(
+                "*ET,135790246811221,HB,A,050915,0C2A27,00CE5954,04132263,0000,F000,01000000,20,4,000,00F123,100,4845423835,0091564212,0B45,10.00,9"));
+
+        verifyAttribute(decoder, text(
+                "*ET,135790246811221,DW,A,180709,16081C,80D74F8D,81ACFAD6,04B0,1C20,00800000,23,0,0348,004491,725,0000000000,00181A8C,0DAC,13.41,15"),
+                Position.KEY_HOURS, 94779600000L);
 
     }
 

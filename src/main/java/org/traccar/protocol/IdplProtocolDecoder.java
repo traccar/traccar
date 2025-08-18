@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.Parser.CoordinateFormat;
@@ -93,7 +93,7 @@ public class IdplProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_POWER, parser.nextInt(0));
         position.set(Position.KEY_BATTERY, parser.nextDouble(0));
         if (parser.nextInt(0) == 1) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         }
         parser.nextInt(0); // body tamper
         position.set("acStatus", parser.nextInt(0));

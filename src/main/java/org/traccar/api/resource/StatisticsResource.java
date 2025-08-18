@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,19 +15,23 @@
  */
 package org.traccar.api.resource;
 
-import org.traccar.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Statistics;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Request;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import java.sql.SQLException;
-import java.util.Collection;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+
 import java.util.Date;
+import java.util.stream.Stream;
 
 @Path("statistics")
 @Produces(MediaType.APPLICATION_JSON)
@@ -35,10 +39,13 @@ import java.util.Date;
 public class StatisticsResource extends BaseResource {
 
     @GET
-    public Collection<Statistics> get(
-            @QueryParam("from") Date from, @QueryParam("to") Date to) throws SQLException {
-        Context.getPermissionsManager().checkAdmin(getUserId());
-        return Context.getDataManager().getStatistics(from, to);
+    public Stream<Statistics> get(
+            @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkAdmin(getUserId());
+        return storage.getObjectsStream(Statistics.class, new Request(
+                new Columns.All(),
+                new Condition.Between("captureTime", from, to),
+                new Order("captureTime")));
     }
 
 }

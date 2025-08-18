@@ -1,15 +1,34 @@
 package org.traccar.protocol;
 
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
-
-import org.junit.Test;
+import org.traccar.model.Position;
 
 public class Jt600ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Jt600ProtocolDecoder(null);
+        var decoder = inject(new Jt600ProtocolDecoder(null));
+
+        verifyPosition(decoder, binary(
+                "28383035343230313937332c312c3136382c574c4e45542c352c322c28022508595325169288057327940900002802250859551021220618730140644701011d4300000029"));
+
+        verifyAttribute(decoder, binary(
+                "28373530303331333630392C32332C32392C574C4E45542C352C322C22071916311822350966113549495E1F232207191622591190702002FE0117623C0101134700000029"),
+                Position.PREFIX_TEMP + 1, 27.5);
+
+        verifyPosition(decoder, buffer(
+                "(2050018634,P45,051124,204046,9.861502,N,83.950336,W,A,1,0,1,1,0012260888,0,0,0)"));
+
+        verifyPositions(decoder, binary(
+                "2480433966040111002718031919195822424550114158888E15A40000F124080000000000F00F110A24991900000DF0C7"));
+
+        verifyPosition(decoder, buffer(
+                "(8000632862,P45,290322,132412,25.28217,S,57.54683,W,A,0,0,5,0,0000000000,0,0,9,0)"));
+
+        verifyPositions(decoder, binary(
+                "2480413009781914003406102107544354193631006213423b00000000006c070000000020e064f91ea0671d00020f0f0f0f0f0f0f0f0f0f07f100ea0f6e"));
 
         verifyPositions(decoder, binary(
                 "2478807035371711003419081920061851380856003256223b000000000000070000000020c0ff965d54de1800000f0f0f0f0f0f0f0f0f0f02d600ea0a21"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,35 +16,34 @@
  */
 package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
-import org.traccar.BaseDataHandler;
-import org.traccar.database.IdentityManager;
+import jakarta.inject.Inject;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
-@ChannelHandler.Sharable
-public class EngineHoursHandler extends BaseDataHandler {
+public class EngineHoursHandler extends BasePositionHandler {
 
-    private final IdentityManager identityManager;
+    private final CacheManager cacheManager;
 
-    public EngineHoursHandler(IdentityManager identityManager) {
-        this.identityManager = identityManager;
+    @Inject
+    public EngineHoursHandler(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     @Override
-    protected Position handlePosition(Position position) {
-        if (!position.getAttributes().containsKey(Position.KEY_HOURS)) {
-            Position last = identityManager.getLastPosition(position.getDeviceId());
+    public void onPosition(Position position, Callback callback) {
+        if (!position.hasAttribute(Position.KEY_HOURS)) {
+            Position last = cacheManager.getPosition(position.getDeviceId());
             if (last != null) {
                 long hours = last.getLong(Position.KEY_HOURS);
                 if (last.getBoolean(Position.KEY_IGNITION) && position.getBoolean(Position.KEY_IGNITION)) {
-                    hours += position.getFixTime().getTime() - last.getFixTime().getTime();
+                    hours += position.getDeviceTime().getTime() - last.getDeviceTime().getTime();
                 }
                 if (hours != 0) {
                     position.set(Position.KEY_HOURS, hours);
                 }
             }
         }
-        return position;
+        callback.processed(false);
     }
 
 }

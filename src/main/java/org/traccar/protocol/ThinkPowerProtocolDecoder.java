@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.helper.BufferUtil;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
@@ -62,67 +63,43 @@ public class ThinkPowerProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeValue(Position position, int type, ByteBuf buf) {
         switch (type) {
-            case 0x01:
+            case 0x01 -> {
                 position.setValid(true);
-                position.setLatitude(buf.readInt() * 0.0000001);
-                position.setLongitude(buf.readInt() * 0.0000001);
+                position.setLatitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.0000001);
+                position.setLongitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.0000001);
                 position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShort() * 0.1));
                 position.setCourse(buf.readUnsignedShort() * 0.01);
-                break;
-            case 0x02:
-                position.setValid(buf.readUnsignedByte() > 0);
-                break;
-            case 0x03:
-                buf.skipBytes(3); // geofence
-                break;
-            case 0x06:
-            case 0x07:
-            case 0x08:
-                buf.skipBytes(2); // g-sensor x/y/z
-                break;
-            case 0x09:
-                buf.readUnsignedByte(); // collision alarm
-                break;
-            case 0x0A:
-                buf.readUnsignedByte(); // drop alarm
-                break;
-            case 0x10:
+            }
+            case 0x02 -> position.setValid(buf.readUnsignedByte() > 0);
+            case 0x03 -> buf.skipBytes(3); // geofence
+            case 0x06, 0x07, 0x08 -> buf.skipBytes(2); // g-sensor x/y/z
+            case 0x09 -> buf.readUnsignedByte(); // collision alarm
+            case 0x0A -> buf.readUnsignedByte(); // drop alarm
+            case 0x10 -> {
                 if (buf.readUnsignedByte() > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    position.addAlarm(Position.ALARM_SOS);
                 }
-                break;
-            case 0x12:
-                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
-                break;
-            case 0x13:
+            }
+            case 0x12 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.1);
+            case 0x13 -> {
                 if (buf.readUnsignedByte() > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                    position.addAlarm(Position.ALARM_LOW_BATTERY);
                 }
-                break;
-            case 0x16:
-                buf.readUnsignedShort(); // temperature
-                break;
-            case 0x17:
-                buf.readUnsignedByte(); // humidity
-                break;
-            case 0x18:
-                buf.readUnsignedShort(); // high temperature
-                break;
-            case 0x19:
-                buf.readUnsignedByte(); // high humidity
-                break;
-            case 0x50:
+            }
+            case 0x16 -> buf.readUnsignedShort(); // temperature
+            case 0x17 -> buf.readUnsignedByte(); // humidity
+            case 0x18 -> buf.readUnsignedShort(); // high temperature
+            case 0x19 -> buf.readUnsignedByte(); // high humidity
+            case 0x50 -> {
                 if (buf.readUnsignedByte() > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_REMOVING);
+                    position.addAlarm(Position.ALARM_REMOVING);
                 }
-                break;
-            case 0x51:
+            }
+            case 0x51 -> {
                 if (buf.readUnsignedByte() > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+                    position.addAlarm(Position.ALARM_TAMPERING);
                 }
-                break;
-            default:
-                break;
+            }
         }
     }
 

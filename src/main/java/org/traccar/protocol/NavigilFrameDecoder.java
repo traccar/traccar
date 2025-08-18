@@ -35,10 +35,7 @@ public class NavigilFrameDecoder extends BaseFrameDecoder {
         }
 
         // Check for preamble
-        boolean hasPreamble = false;
-        if (buf.getUnsignedIntLE(buf.readerIndex()) == PREAMBLE) {
-            hasPreamble = true;
-        }
+        boolean hasPreamble = buf.getUnsignedIntLE(buf.readerIndex()) == PREAMBLE;
 
         // Check length and return buffer
         int length = buf.getUnsignedShortLE(buf.readerIndex() + 6);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,20 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        int endIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ']') + 1;
+        int brackets = 0;
+        int endIndex = -1;
+        for (int i = buf.readerIndex(); i < buf.writerIndex(); i++) {
+            byte b = buf.getByte(i);
+            switch (b) {
+                case '[' -> brackets += 1;
+                case ']' -> brackets -= 1;
+            }
+            if (brackets == 0 && i > buf.readerIndex()) {
+                endIndex = i + 1;
+                break;
+            }
+        }
+
         if (endIndex > 0) {
             ByteBuf frame = Unpooled.buffer();
             while (buf.readerIndex() < endIndex) {
@@ -35,24 +48,13 @@ public class WatchFrameDecoder extends BaseFrameDecoder {
                 if (b1 == '}') {
                     byte b2 = buf.readByte();
                     switch (b2) {
-                        case 0x01:
-                            frame.writeByte('}');
-                            break;
-                        case 0x02:
-                            frame.writeByte('[');
-                            break;
-                        case 0x03:
-                            frame.writeByte(']');
-                            break;
-                        case 0x04:
-                            frame.writeByte(',');
-                            break;
-                        case 0x05:
-                            frame.writeByte('*');
-                            break;
-                        default:
-                            throw new IllegalArgumentException(String.format(
-                                    "unexpected byte at %d: 0x%02x", buf.readerIndex() - 1, b2));
+                        case 0x01 -> frame.writeByte('}');
+                        case 0x02 -> frame.writeByte('[');
+                        case 0x03 -> frame.writeByte(']');
+                        case 0x04 -> frame.writeByte(',');
+                        case 0x05 -> frame.writeByte('*');
+                        default -> throw new IllegalArgumentException(
+                                String.format("unexpected byte at %d: 0x%02x", buf.readerIndex() - 1, b2));
                     }
                 } else {
                     frame.writeByte(b1);

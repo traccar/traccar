@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
@@ -33,8 +33,12 @@ import java.net.SocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
+import java.util.Set;
 
 public class TrvProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Set<String> IGNORE_RESPONSE = Set.of(
+        "AP12", "AP14", "AP33", "AP34", "AP40", "AP76", "AP77", "AP84", "AP85", "AP86", "AP87");
 
     public TrvProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -59,15 +63,26 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .number("(d)")                       // acc
             .number("(dd)")                      // arm status
             .number("(dd)")                      // working mode
-            .number("(?:[0-2]{3})?,")
+            .number("(?:d{3,5})?,")
             .number("(d+),")                     // mcc
             .number("(d+),")                     // mnc
             .number("(d+),")                     // lac
             .number("(d+)")                      // cell
+            .number(",(dd)").optional()          // alarm
+            .groupBegin()
+            .text(",")
+            .expression("(")
+            .groupBegin()
+            .expression("[^\\|]+")               // name
+            .number("|xx-xx-xx-xx-xx-xx")        // mac
+            .number("|d+&?")                     // signal
+            .groupEnd("+")
+            .expression(")")
+            .groupEnd("?")
             .any()
             .compile();
 
-    private static final Pattern PATTERN_HEATRBEAT = new PatternBuilder()
+    private static final Pattern PATTERN_CP01 = new PatternBuilder()
             .expression("[A-Z]{2,3}")
             .text("CP01,")
             .number("(ddd)")                     // gsm
@@ -89,7 +104,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private static final Pattern PATTERN_LBS = new PatternBuilder()
+    private static final Pattern PATTERN_AP02 = new PatternBuilder()
             .expression("[A-Z]{2,3}")
             .text("AP02,")
             .expression("[^,]+,")                // language
@@ -106,6 +121,19 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             .expression(")")
             .number("d+,")                       // wifi count
             .expression("(.*)")                  // wifi
+            .compile();
+
+    private static final Pattern PATTERN_AP03 = new PatternBuilder()
+            .expression("[A-Z]{2,3}")
+            .text("AP03,")
+            .number("(ddd)")                     // rssi
+            .number("(ddd)")                     // satellites
+            .number("(ddd)")                     // battery level
+            .number("d")                         // space
+            .number("xx")                        // fortification state
+            .number("dd,")                       // working mode
+            .number("(d+),")                     // steps
+            .number("d+")                        // rolls frequency
             .compile();
 
     private Boolean decodeOptionalValue(Parser parser, int activeValue) {
@@ -130,6 +158,16 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void decodeWifi(Network network, String data) {
+        for (String wifi : data.split("&")) {
+            if (!wifi.isEmpty()) {
+                String[] values = wifi.split("\\|");
+                network.addWifiAccessPoint(WifiAccessPoint.from(
+                        values[1].replace('-', ':'), Integer.parseInt(values[2])));
+            }
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -144,15 +182,17 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
             if (type.equals("AP00") && id.equals("IW")) {
                 String time = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
                 channel.writeAndFlush(new NetworkMessage(responseHeader + "," + time + ",0#", remoteAddress));
-            } else if (type.equals("AP14")) {
+            } else if (type.equals("AP14") && !id.equals("IW")) {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + ",0.000,0.000#", remoteAddress));
-            } else {
+            } else if (!IGNORE_RESPONSE.contains(type)
+                    && !sentence.substring(responseHeader.length() + 1).matches("^\\d{6}$")) {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + "#", remoteAddress));
             }
         }
 
         if (type.equals("AP00")) {
-            getDeviceSession(channel, remoteAddress, sentence.substring(id.length() + type.length()));
+            String imei = sentence.split(",")[0].substring(id.length() + type.length());
+            getDeviceSession(channel, remoteAddress, imei);
             return null;
         }
 
@@ -163,7 +203,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
         if (type.equals("CP01")) {
 
-            Parser parser = new Parser(PATTERN_HEATRBEAT, sentence);
+            Parser parser = new Parser(PATTERN_CP01, sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -183,7 +223,7 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
-        } else if (type.equals("AP01") || type.equals("AP10") || type.equals("YP03")) {
+        } else if (type.equals("AP01") || type.equals("AP10") || type.equals("YP03") || type.equals("YP14")) {
 
             Parser parser = new Parser(PATTERN, sentence);
             if (!parser.matches()) {
@@ -208,14 +248,29 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
 
             decodeCommon(position, parser);
 
-            position.setNetwork(new Network(CellTower.from(
-                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt())));
+            Network network = new Network();
+
+            network.addCellTower(CellTower.from(
+                    parser.nextInt(), parser.nextInt(), parser.nextInt(), parser.nextInt()));
+
+            if (parser.hasNext()) {
+                switch (parser.nextInt()) {
+                    case 1 -> position.addAlarm(Position.ALARM_SOS);
+                    case 5, 6 -> position.addAlarm(Position.ALARM_FALL_DOWN);
+                }
+            }
+
+            if (parser.hasNext()) {
+                decodeWifi(network, parser.next());
+            }
+
+            position.setNetwork(network);
 
             return position;
 
         } else if (type.equals("AP02")) {
 
-            Parser parser = new Parser(PATTERN_LBS, sentence);
+            Parser parser = new Parser(PATTERN_AP02, sentence);
             if (!parser.matches()) {
                 return null;
             }
@@ -241,14 +296,60 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            for (String wifi : parser.next().split("&")) {
-                if (!wifi.isEmpty()) {
-                    String[] values = wifi.split("\\|");
-                    network.addWifiAccessPoint(WifiAccessPoint.from(values[1], Integer.parseInt(values[2])));
-                }
-            }
+            decodeWifi(network, parser.next());
 
             position.setNetwork(network);
+
+            return position;
+
+        } else if (type.equals("AP03")) {
+
+            Parser parser = new Parser(PATTERN_AP03, sentence);
+            if (!parser.matches()) {
+                return null;
+            }
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            position.set(Position.KEY_RSSI, parser.nextInt());
+            position.set(Position.KEY_SATELLITES, parser.nextInt());
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+            position.set(Position.KEY_STEPS, parser.nextInt());
+
+            return position;
+
+        } else if (type.equals("AP49") || type.equals("APHT") || type.equals("APHP") || type.equals("AP50")) {
+
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(deviceSession.getDeviceId());
+
+            getLastLocation(position, null);
+
+            String[] values = sentence.split(",");
+
+            switch (type) {
+                case "AP49" -> position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[1]));
+                case "APHT" -> {
+                    position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[1]));
+                    position.set("pressureSystolic", Integer.parseInt(values[2]));
+                    position.set("pressureDiastolic", Integer.parseInt(values[3]));
+                }
+                case "APHP" -> {
+                    position.set(Position.KEY_HEART_RATE, Integer.parseInt(values[1]));
+                    position.set("pressureSystolic", Integer.parseInt(values[2]));
+                    position.set("pressureDiastolic", Integer.parseInt(values[3]));
+                    position.set("spo2", Integer.parseInt(values[4]));
+                    position.set("bloodSugar", Double.parseDouble(values[5]));
+                    position.set("temperature", Double.parseDouble(values[6]));
+                }
+                case "AP50" -> {
+                    position.set("temperature", Double.parseDouble(values[1]));
+                    position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(values[2]));
+                }
+            }
 
             return position;
 

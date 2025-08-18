@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
@@ -146,8 +146,8 @@ public class RaceDynamicsProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
                     position.set(Position.KEY_POWER, parser.nextInt() * 0.01);
                     position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
-                    position.set(Position.KEY_ALARM, parser.nextInt() > 0 ? Position.ALARM_SOS : null);
-                    position.set(Position.KEY_ALARM, parser.nextInt() > 0 ? Position.ALARM_OVERSPEED : null);
+                    position.addAlarm(parser.nextInt() > 0 ? Position.ALARM_SOS : null);
+                    position.addAlarm(parser.nextInt() > 0 ? Position.ALARM_OVERSPEED : null);
 
                     int overDriver = parser.nextInt();
                     if (overDriver > 0) {

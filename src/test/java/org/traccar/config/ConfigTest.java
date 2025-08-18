@@ -1,8 +1,8 @@
 package org.traccar.config;
 
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import org.traccar.config.Config;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ConfigTest {
 

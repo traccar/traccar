@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,27 +16,29 @@
  */
 package org.traccar.notificators;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.model.Event;
+import org.traccar.model.Notification;
 import org.traccar.model.Position;
+import org.traccar.model.User;
 import org.traccar.notification.MessageException;
+import org.traccar.notification.NotificationFormatter;
+import org.traccar.notification.NotificationMessage;
 
 public abstract class Notificator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Notificator.class);
+    private final NotificationFormatter notificationFormatter;
 
-    public void sendAsync(final long userId, final Event event, final Position position) {
-        new Thread(() -> {
-            try {
-                sendSync(userId, event, position);
-            } catch (MessageException | InterruptedException error) {
-                LOGGER.warn("Event send error", error);
-            }
-        }).start();
+    public Notificator(NotificationFormatter notificationFormatter) {
+        this.notificationFormatter = notificationFormatter;
     }
 
-    public abstract void sendSync(long userId, Event event, Position position)
-        throws MessageException, InterruptedException;
+    public void send(Notification notification, User user, Event event, Position position) throws MessageException {
+        var message = notificationFormatter.formatMessage(notification, user, event, position);
+        send(user, message, event, position);
+    }
+
+    public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
+        throw new UnsupportedOperationException();
+    }
 
 }

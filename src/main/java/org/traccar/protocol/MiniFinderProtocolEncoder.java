@@ -29,25 +29,18 @@ public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements 
 
     @Override
     public String formatValue(String key, Object value) {
-        switch (key) {
-            case Command.KEY_ENABLE:
-                return (Boolean) value ? "1" : "0";
-            case Command.KEY_TIMEZONE:
-                return String.format("%+03d", TimeZone.getTimeZone((String) value).getRawOffset() / 3600000);
-            case Command.KEY_INDEX:
-                switch (((Number) value).intValue()) {
-                    case 0:
-                        return "A";
-                    case 1:
-                        return "B";
-                    case 2:
-                        return "C";
-                    default:
-                        return null;
-                }
-            default:
-                return null;
-        }
+        return switch (key) {
+            case Command.KEY_ENABLE -> (Boolean) value ? "1" : "0";
+            case Command.KEY_TIMEZONE -> String.format(
+                    "%+03d", TimeZone.getTimeZone((String) value).getRawOffset() / 3600000);
+            case Command.KEY_INDEX -> switch (((Number) value).intValue()) {
+                case 0 -> "A";
+                case 1 -> "B";
+                case 2 -> "C";
+                default -> null;
+            };
+            default -> null;
+        };
     }
 
     @Override
@@ -55,33 +48,31 @@ public class MiniFinderProtocolEncoder extends StringProtocolEncoder implements 
 
         initDevicePassword(command, "123456");
 
-        switch (command.getType()) {
-            case Command.TYPE_SET_TIMEZONE:
-                return formatCommand(command, "%sL%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_TIMEZONE);
-            case Command.TYPE_VOICE_MONITORING:
-                return formatCommand(command, "%sP%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
-            case Command.TYPE_ALARM_SPEED:
-                return formatCommand(command, "%sJ1%s", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
-            case Command.TYPE_ALARM_GEOFENCE:
-                return formatCommand(command, "%sR1%s", Command.KEY_DEVICE_PASSWORD, Command.KEY_RADIUS);
-            case Command.TYPE_ALARM_VIBRATION:
-                return formatCommand(command, "%sW1,%s", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
-            case Command.TYPE_SET_AGPS:
-                return formatCommand(command, "%sAGPS%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
-            case Command.TYPE_ALARM_FALL:
-                return formatCommand(command, "%sF%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
-            case Command.TYPE_MODE_POWER_SAVING:
-                return formatCommand(command, "%sSP%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
-            case Command.TYPE_MODE_DEEP_SLEEP:
-                return formatCommand(command, "%sDS%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
-            case Command.TYPE_SOS_NUMBER:
-                return formatCommand(command, "%s%s1,%s", this,
-                        Command.KEY_DEVICE_PASSWORD, Command.KEY_INDEX, Command.KEY_PHONE);
-            case Command.TYPE_SET_INDICATOR:
-                return formatCommand(command, "%sLED%s", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_SET_TIMEZONE -> formatCommand(
+                    command, "%sL%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_TIMEZONE);
+            case Command.TYPE_VOICE_MONITORING -> formatCommand(
+                    command, "%sP%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
+            case Command.TYPE_ALARM_SPEED -> formatCommand(
+                    command, "%sJ1%s", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
+            case Command.TYPE_ALARM_GEOFENCE -> formatCommand(
+                    command, "%sR1%s", Command.KEY_DEVICE_PASSWORD, Command.KEY_RADIUS);
+            case Command.TYPE_ALARM_VIBRATION -> formatCommand(
+                    command, "%sW1,%s", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
+            case Command.TYPE_SET_AGPS -> formatCommand(
+                    command, "%sAGPS%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
+            case Command.TYPE_ALARM_FALL -> formatCommand(
+                    command, "%sF%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
+            case Command.TYPE_MODE_POWER_SAVING -> formatCommand(
+                    command, "%sSP%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
+            case Command.TYPE_MODE_DEEP_SLEEP -> formatCommand(
+                    command, "%sDS%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_ENABLE);
+            case Command.TYPE_SOS_NUMBER -> formatCommand(
+                    command, "%s%s1,%s", this, Command.KEY_DEVICE_PASSWORD, Command.KEY_INDEX, Command.KEY_PHONE);
+            case Command.TYPE_SET_INDICATOR -> formatCommand(
+                    command, "%sLED%s", Command.KEY_DEVICE_PASSWORD, Command.KEY_DATA);
+            default -> null;
+        };
     }
 
 }

@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,7 +9,23 @@ public class FifotrackProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new FifotrackProtocolDecoder(null);
+        var decoder = inject(new FifotrackProtocolDecoder(null));
+
+        verifyAttributes(decoder, buffer(
+                "$$159,866344056951341,399D,A03,,230716222659,240|8|2724|20EEF33,4.20,100,003E,1,AE233FC0D2E0:-65|3E286D5FB6E8:-65|28BD890A4A0E:-67|8ED81B5DFC3A:-70|8AD81B5DFC3A:-70*5F"));
+
+        verifyAttribute(decoder, buffer(
+                "$$99,865413050150407,7F,A03,,230626072722,460|0|25FC|AC2AB0B,3.74,52,0019,0,A,0,13,22.643466,114.018211*74"),
+                Position.KEY_SATELLITES, 13);
+
+        verifyPosition(decoder, buffer(
+                "$$95,866104023192332,1,A03,,210414055249,460|0|25FC|104C,4.18,100,000F,0,A,2,9,22.643175,114.018150*75"));
+
+        verifyAttributes(decoder, buffer(
+                "$$136,866104023192332,1,A03,,210414055249,460|0|25FC|104C,4.18,100,000F,1,94D9B377EB53:-60|EC6C9FA4CAD8:-55|CA50E9206252:-61|54E061260A89:-51*3E"));
+
+        verifyPosition(decoder, buffer(
+                "$$274,863003046499158,18D0,A01,,211026081639,A,13.934116,100.000463,0,263,16,366959,345180,80000040,02,0,520|0|FA8|1A9B5B9,9DE|141|2D,%  ^YENSABAICHAI$SONGKRAN$MR.^^?;6007643190300472637=150519870412=?+             14            1            0000155  00103                     ?,*69"));
 
         verifyAttribute(decoder, buffer(
                 "$$25,863003046473534,1,B03,OK*4D"),

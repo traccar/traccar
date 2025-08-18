@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
@@ -39,7 +41,8 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private static final Pattern PATTERN_ANY = new PatternBuilder()
-            .expression("([^#]*)?")              // imei
+            .number("d.d;").optional()
+            .expression("([^#]+)?")              // imei
             .text("#")                           // start byte
             .expression("([^#]+)")               // type
             .text("#")                           // separator
@@ -47,13 +50,13 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private static final Pattern PATTERN = new PatternBuilder()
-            .number("(dd)(dd)(dd);")             // date (ddmmyy)
-            .number("(dd)(dd)(dd);")             // time (hhmmss)
-            .number("(?:NA|(dd)(dd.d+));")       // latitude
+            .number("(?:NA|(dd)(dd)(dd));")      // date (ddmmyy)
+            .number("(?:NA|(dd)(dd)(dd));")      // time (hhmmss)
+            .number("(?:NA|(d+)(dd.d+));")       // latitude
             .expression("(?:NA|([NS]));")
-            .number("(?:NA|(ddd)(dd.d+));")      // longitude
+            .number("(?:NA|(d+)(dd.d+));")       // longitude
             .expression("(?:NA|([EW]));")
-            .number("(d+.?d*)?;")                // speed
+            .number("(?:NA|(d+.?d*))?;")         // speed
             .number("(?:NA|(d+.?d*))?;")         // course
             .number("(?:NA|(-?d+.?d*));")        // altitude
             .number("(?:NA|(d+))")               // satellites
@@ -63,8 +66,9 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             .number("(?:NA|(d+));")              // outputs
             .expression("(?:NA|([^;]*));")       // adc
             .expression("(?:NA|([^;]*));")       // ibutton
-            .expression("(?:NA|(.*))")           // params
+            .expression("(?:NA|([^;]*))")        // params
             .groupEnd("?")
+            .any()
             .compile();
 
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String type, Integer number) {
@@ -95,9 +99,13 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+        if (parser.hasNext(6)) {
+            position.setTime(parser.nextDateTime(Parser.DateTimeFormat.DMY_HMS));
+        } else {
+            position.setTime(new Date());
+        }
 
-        if (parser.hasNext(9)) {
+        if (parser.hasNextAny(9)) {
             position.setLatitude(parser.nextCoordinate());
             position.setLongitude(parser.nextCoordinate());
             position.setSpeed(UnitsConverter.knotsFromKph(parser.nextDouble(0)));
@@ -131,16 +139,63 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
             for (String param : values) {
                 Matcher paramParser = Pattern.compile("(.*):[1-3]:(.*)").matcher(param);
                 if (paramParser.matches()) {
+                    String key = paramParser.group(1).toLowerCase();
+                    String value = paramParser.group(2);
                     try {
-                        position.set(paramParser.group(1).toLowerCase(), Double.parseDouble(paramParser.group(2)));
+                        position.set(key, Double.parseDouble(value));
                     } catch (NumberFormatException e) {
-                        position.set(paramParser.group(1).toLowerCase(), paramParser.group(2));
+                        if (value.equalsIgnoreCase("true")) {
+                            position.set(key, true);
+                        } else if (value.equalsIgnoreCase("false")) {
+                            position.set(key, false);
+                        } else {
+                            position.set(key, value);
+                        }
                     }
                 }
+            }
+
+            if (position.hasAttribute("accuracy")) {
+                position.setAccuracy(position.removeDouble("accuracy"));
+            }
+
+            if (position.hasAttribute("bat")) {
+                position.set(Position.KEY_BATTERY_LEVEL, position.removeInteger("bat"));
+            }
+
+            if (position.hasAttribute("temp")) {
+                position.set(Position.KEY_DEVICE_TEMP, position.removeInteger("temp"));
+            }
+
+            Network network = new Network();
+            decodeCellData(position, network, "");
+            for (int i = 1; i <= 9; i++) {
+                if (!decodeCellData(position, network, String.valueOf(i))) {
+                    break;
+                }
+            }
+
+            if (network.getCellTowers() != null) {
+                position.setNetwork(network);
             }
         }
 
         return position;
+    }
+
+    private static boolean decodeCellData(Position position, Network network, String suffix) {
+        if (position.hasAttribute("mnc" + suffix)
+                && position.hasAttribute("mcc" + suffix)
+                && position.hasAttribute("lac" + suffix)
+                && position.hasAttribute("cell_id" + suffix)) {
+            network.addCellTower(CellTower.from(
+                    position.removeInteger("mcc" + suffix),
+                    position.removeInteger("mnc" + suffix),
+                    position.removeInteger("lac" + suffix),
+                    position.getLong("cell_id" + suffix)));
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -158,12 +213,15 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
         String type = parser.next();
         String data = parser.next();
 
+        DeviceSession deviceSession;
+        Position position;
+
         switch (type) {
 
             case "L":
                 String[] values = data.split(";");
                 String imei = values[0].indexOf('.') >= 0 ? values[1] : values[0];
-                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+                deviceSession = getDeviceSession(channel, remoteAddress, imei);
                 if (deviceSession != null) {
                     sendResponse(channel, remoteAddress, type, 1);
                 }
@@ -175,7 +233,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
 
             case "D":
             case "SD":
-                Position position = decodePosition(channel, remoteAddress, id, data);
+                position = decodePosition(channel, remoteAddress, id, data);
                 if (position != null) {
                     sendResponse(channel, remoteAddress, "D", 1);
                     return position;

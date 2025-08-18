@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -189,23 +189,12 @@ public class LdapProvider {
         for (int i = 0; i < input.length(); i++) {
             char c = input.charAt(i);
             switch (c) {
-                case '\\':
-                    sb.append("\\5c");
-                    break;
-                case '*':
-                    sb.append("\\2a");
-                    break;
-                case '(':
-                    sb.append("\\28");
-                    break;
-                case ')':
-                    sb.append("\\29");
-                    break;
-                case '\0':
-                    sb.append("\\00");
-                    break;
-                default:
-                    sb.append(c);
+                case '\\' -> sb.append("\\5c");
+                case '*' -> sb.append("\\2a");
+                case '(' -> sb.append("\\28");
+                case ')' -> sb.append("\\29");
+                case '\0' -> sb.append("\\00");
+                default -> sb.append(c);
             }
         }
         return sb.toString();

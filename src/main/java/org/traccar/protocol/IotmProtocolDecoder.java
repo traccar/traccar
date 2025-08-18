@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,340 +17,182 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.channel.Channel;
-import io.netty.handler.codec.mqtt.MqttConnectMessage;
-import io.netty.handler.codec.mqtt.MqttConnectReturnCode;
-import io.netty.handler.codec.mqtt.MqttMessage;
-import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
-import io.netty.handler.codec.mqtt.MqttSubscribeMessage;
-import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
-import org.traccar.NetworkMessage;
+import org.traccar.BaseMqttProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
+import org.traccar.session.DeviceSession;
 
-import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class IotmProtocolDecoder extends BaseProtocolDecoder {
+public class IotmProtocolDecoder extends BaseMqttProtocolDecoder {
 
     public IotmProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
     private Object readValue(ByteBuf buf, int sensorType) {
-        switch (sensorType) {
-            case 0:
-                return false;
-            case 1:
-                return true;
-            case 3:
-                return 0;
-            case 4:
-                return buf.readUnsignedByte();
-            case 5:
-                return buf.readUnsignedShortLE();
-            case 6:
-                return buf.readUnsignedIntLE();
-            case 7:
-            case 11:
-                return buf.readLongLE();
-            case 8:
-                return buf.readByte();
-            case 9:
-                return buf.readShortLE();
-            case 10:
-                return buf.readIntLE();
-            case 12:
-                return buf.readFloatLE();
-            case 13:
-                return buf.readDoubleLE();
-            case 32:
-                return buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString();
-            case 33:
-                return ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte()));
-            case 64:
-                return buf.readCharSequence(buf.readUnsignedShortLE(), StandardCharsets.US_ASCII).toString();
-            case 65:
-                return ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedShortLE()));
-            case 2:
-            default:
-                return null;
-        }
+        return switch (sensorType) {
+            case 0 -> false;
+            case 1 -> true;
+            case 3 -> 0;
+            case 4 -> buf.readUnsignedByte();
+            case 5 -> buf.readUnsignedShortLE();
+            case 6 -> buf.readUnsignedIntLE();
+            case 7, 11 -> buf.readLongLE();
+            case 8 -> buf.readByte();
+            case 9 -> buf.readShortLE();
+            case 10 -> buf.readIntLE();
+            case 12 -> buf.readFloatLE();
+            case 13 -> buf.readDoubleLE();
+            case 32 -> buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString();
+            case 33 -> ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedByte()));
+            case 64 -> buf.readCharSequence(buf.readUnsignedShortLE(), StandardCharsets.US_ASCII).toString();
+            case 65 -> ByteBufUtil.hexDump(buf.readSlice(buf.readUnsignedShortLE()));
+            default -> null;
+        };
     }
 
     private void decodeSensor(Position position, ByteBuf record, int sensorType, int sensorId) {
         String key;
         switch (sensorId) {
-            case 0x0002:
-                position.set(Position.KEY_MOTION, sensorType > 0);
-                break;
-            case 0x0008:
-            case 0x009B:
+            case 0x0002 -> position.set(Position.KEY_MOTION, sensorType > 0);
+            case 0x0008, 0x009B -> {
                 if (sensorType > 0) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_JAMMING);
+                    position.addAlarm(Position.ALARM_JAMMING);
                 }
-                break;
-            case 0x0010:
-            case 0x0011:
-            case 0x0012:
-            case 0x0013:
-            case 0x0014:
-            case 0x0015:
+            }
+            case 0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015 -> {
                 key = Position.PREFIX_IN + (sensorId - 0x0010 + 2);
                 position.set(key, sensorType > 0);
-                break;
-            case 0x0062:
-                position.set("doorFL", sensorType > 0);
-                break;
-            case 0x0063:
-                position.set("doorFR", sensorType > 0);
-                break;
-            case 0x0064:
-                position.set("doorRL", sensorType > 0);
-                break;
-            case 0x0065:
-                position.set("doorRR", sensorType > 0);
-                break;
-            case 0x001E:
-                position.set("buttonPresent", sensorType > 0);
-                break;
-            case 0x006D:
-                position.set(Position.KEY_IGNITION, sensorType > 0);
-                break;
-            case 0x008B:
-                position.set("handBrake", sensorType > 0);
-                break;
-            case 0x008C:
-                position.set("footBrake", sensorType > 0);
-                break;
-            case 0x0094:
-            case 0x0095:
-            case 0x0096:
+            }
+            case 0x0062 -> position.set("doorFL", sensorType > 0);
+            case 0x0063 -> position.set("doorFR", sensorType > 0);
+            case 0x0064 -> position.set("doorRL", sensorType > 0);
+            case 0x0065 -> position.set("doorRR", sensorType > 0);
+            case 0x001E -> position.set("buttonPresent", sensorType > 0);
+            case 0x006D -> position.set(Position.KEY_IGNITION, sensorType > 0);
+            case 0x008B -> position.set("handBrake", sensorType > 0);
+            case 0x008C -> position.set("footBrake", sensorType > 0);
+            case 0x0094, 0x0095, 0x0096 -> {
                 key = Position.PREFIX_OUT + (sensorId - 0x0094 + 1);
                 position.set(key, sensorType > 0);
-                break;
-            case 0x009A:
-                position.set(Position.PREFIX_OUT + 4, sensorType > 0);
-                break;
-            case 0x2000:
-                position.set(Position.KEY_OBD_SPEED, record.readUnsignedByte());
-                break;
-            case 0x2001:
-                position.set(Position.KEY_SATELLITES, record.readUnsignedByte());
-                break;
-            case 0x2006:
-                position.set(Position.KEY_THROTTLE, record.readUnsignedByte());
-                break;
-            case 0x2007:
-                position.set(Position.KEY_FUEL_LEVEL, record.readUnsignedByte());
-                break;
-            case 0x2008:
-                position.set(Position.KEY_COOLANT_TEMP, record.readUnsignedByte());
-                break;
-            case 0x2009:
-                position.set("fuel2", record.readUnsignedByte());
-                break;
-            case 0x200A:
-                position.set(Position.KEY_ENGINE_LOAD, record.readUnsignedByte());
-                break;
-            case 0x2041:
-                position.set(Position.KEY_BATTERY_LEVEL, record.readUnsignedByte());
-                break;
-            case 0x3000:
-                position.set(Position.KEY_POWER, record.readUnsignedShortLE() * 0.001);
-                break;
-            case 0x3001:
-            case 0x3002:
-            case 0x3003:
+            }
+            case 0x009A -> position.set(Position.PREFIX_OUT + 4, sensorType > 0);
+            case 0x2000 -> position.set(Position.KEY_OBD_SPEED, record.readUnsignedByte());
+            case 0x2001 -> position.set(Position.KEY_SATELLITES, record.readUnsignedByte());
+            case 0x2006 -> position.set(Position.KEY_THROTTLE, record.readUnsignedByte());
+            case 0x2007 -> position.set(Position.KEY_FUEL_LEVEL, record.readUnsignedByte());
+            case 0x2008 -> position.set(Position.KEY_COOLANT_TEMP, record.readUnsignedByte());
+            case 0x2009 -> position.set("fuel2", record.readUnsignedByte());
+            case 0x200A -> position.set(Position.KEY_ENGINE_LOAD, record.readUnsignedByte());
+            case 0x2041 -> position.set(Position.KEY_BATTERY_LEVEL, record.readUnsignedByte());
+            case 0x3000 -> position.set(Position.KEY_POWER, record.readUnsignedShortLE() * 0.001);
+            case 0x3001, 0x3002, 0x3003 -> {
                 key = Position.PREFIX_ADC + (0x3003 - sensorId + 3);
                 position.set(key, record.readUnsignedShortLE() * 0.001);
-                break;
-            case 0x3004:
-                position.set(Position.KEY_BATTERY, record.readUnsignedShortLE() * 0.001);
-                break;
-            case 0x300C:
-                position.set(Position.KEY_RPM, record.readUnsignedShortLE());
-                break;
-            case 0x3021:
-                position.set(Position.KEY_FUEL_CONSUMPTION, record.readUnsignedShortLE() * 0.05);
-                break;
-            case 0x3037:
-                position.set("cargoWeight", record.readUnsignedShortLE() * 2);
-                break;
-            case 0x4001:
-                position.set(Position.KEY_FUEL_USED, record.readUnsignedIntLE());
-                break;
-            case 0x4002:
-                position.set(Position.KEY_HOURS, record.readUnsignedIntLE());
-                break;
-            case 0x4003:
-                position.set(Position.KEY_ODOMETER, record.readUnsignedIntLE() * 5);
-                break;
-            case 0x4063:
-                position.set(Position.KEY_AXLE_WEIGHT, record.readUnsignedIntLE());
-                break;
-            case 0x5000:
-                position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(record.readLongLE()));
-                break;
-            case 0x5004:
-            case 0x5005:
-            case 0x5006:
-            case 0x5007:
+            }
+            case 0x3004 -> position.set(Position.KEY_BATTERY, record.readUnsignedShortLE() * 0.001);
+            case 0x300C -> position.set(Position.KEY_RPM, record.readUnsignedShortLE());
+            case 0x3021 -> position.set(Position.KEY_FUEL_CONSUMPTION, record.readUnsignedShortLE() * 0.05);
+            case 0x3037 -> position.set("cargoWeight", record.readUnsignedShortLE() * 2);
+            case 0x4001 -> position.set(Position.KEY_FUEL_USED, record.readUnsignedIntLE());
+            case 0x4002 -> position.set(Position.KEY_HOURS, record.readUnsignedIntLE());
+            case 0x4003 -> position.set(Position.KEY_ODOMETER, record.readUnsignedIntLE() * 5);
+            case 0x4063 -> position.set(Position.KEY_AXLE_WEIGHT, record.readUnsignedIntLE());
+            case 0x5000 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(record.readLongLE()));
+            case 0x5004, 0x5005, 0x5006, 0x5007 -> {
                 key = Position.PREFIX_TEMP + (sensorId - 0x5004 + 1);
                 position.set(key, record.readLongLE());
-                break;
-            case 0x500D:
-                position.set("trailerId", String.valueOf(record.readLongLE()));
-                break;
-            case 0xA000:
-                position.set(Position.KEY_DEVICE_TEMP, record.readFloatLE());
-                break;
-            case 0xA001:
-                position.set(Position.KEY_ACCELERATION, record.readFloatLE());
-                break;
-            case 0xA002:
-                position.set("cornering", record.readFloatLE());
-                break;
-            case 0xA017:
-            case 0xA018:
-            case 0xA019:
-            case 0xA01A:
+            }
+            case 0x500D -> position.set("trailerId", String.valueOf(record.readLongLE()));
+            case 0xA000 -> position.set(Position.KEY_DEVICE_TEMP, record.readFloatLE());
+            case 0xA001 -> position.set(Position.KEY_ACCELERATION, record.readFloatLE());
+            case 0xA002 -> position.set("cornering", record.readFloatLE());
+            case 0xA017, 0xA018, 0xA019, 0xA01A -> {
                 key = Position.PREFIX_TEMP + (sensorId - 0xA017 + 1);
                 position.set(key, record.readFloatLE());
-                break;
-            case 0xB002:
-                position.set(Position.KEY_OBD_ODOMETER, record.readDoubleLE());
-                break;
-            default:
+            }
+            case 0xB002 -> position.set(Position.KEY_OBD_ODOMETER, record.readDoubleLE());
+            default -> {
                 key = Position.PREFIX_IO + sensorId;
                 position.getAttributes().put(key, readValue(record, sensorType));
-                break;
+            }
         }
     }
 
     @Override
     protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+            DeviceSession deviceSession, MqttPublishMessage message) throws Exception {
 
-        if (msg instanceof MqttConnectMessage) {
+        List<Position> positions = new LinkedList<>();
 
-            MqttConnectMessage message = (MqttConnectMessage) msg;
+        ByteBuf buf = message.payload();
 
-            DeviceSession deviceSession = getDeviceSession(
-                    channel, remoteAddress, message.payload().clientIdentifier());
+        buf.readUnsignedByte(); // structure version
 
-            MqttConnectReturnCode returnCode = deviceSession != null
-                    ? MqttConnectReturnCode.CONNECTION_ACCEPTED
-                    : MqttConnectReturnCode.CONNECTION_REFUSED_IDENTIFIER_REJECTED;
+        while (buf.readableBytes() > 1) {
+            int type = buf.readUnsignedByte();
+            int length = buf.readUnsignedShortLE();
+            ByteBuf record = buf.readSlice(length);
+            if (type == 1) {
 
-            MqttMessage response = MqttMessageBuilders.connAck().returnCode(returnCode).build();
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                position.setTime(new Date(record.readUnsignedIntLE() * 1000));
 
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-            }
+                while (record.readableBytes() > 0) {
+                    int sensorType = record.readUnsignedByte();
+                    int sensorId = record.readUnsignedShortLE();
+                    if (sensorType == 14) {
 
-        } else if (msg instanceof MqttSubscribeMessage) {
+                        position.setValid(true);
+                        position.setLatitude(record.readFloatLE());
+                        position.setLongitude(record.readFloatLE());
+                        position.setSpeed(UnitsConverter.knotsFromKph(record.readUnsignedShortLE()));
 
-            MqttSubscribeMessage message = (MqttSubscribeMessage) msg;
+                        position.set(Position.KEY_HDOP, record.readUnsignedByte());
+                        position.set(Position.KEY_SATELLITES, record.readUnsignedByte());
 
-            MqttMessage response = MqttMessageBuilders.subAck()
-                    .packetId((short) message.variableHeader().messageId())
-                    .build();
+                        position.setCourse(record.readUnsignedShortLE());
+                        position.setAltitude(record.readShortLE());
 
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-            }
+                    } else {
 
-        } else if (msg instanceof MqttPublishMessage) {
-
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-            if (deviceSession == null) {
-                return null;
-            }
-
-            List<Position> positions = new LinkedList<>();
-
-            MqttPublishMessage message = (MqttPublishMessage) msg;
-            ByteBuf buf = message.payload();
-
-            buf.readUnsignedByte(); // structure version
-
-            while (buf.readableBytes() > 1) {
-                int type = buf.readUnsignedByte();
-                int length = buf.readUnsignedShortLE();
-                ByteBuf record = buf.readSlice(length);
-                if (type == 1) {
-
-                    Position position = new Position(getProtocolName());
-                    position.setDeviceId(deviceSession.getDeviceId());
-                    position.setTime(new Date(record.readUnsignedIntLE() * 1000));
-
-                    while (record.readableBytes() > 0) {
-                        int sensorType = record.readUnsignedByte();
-                        int sensorId = record.readUnsignedShortLE();
-                        if (sensorType == 14) {
-
-                            position.setValid(true);
-                            position.setLatitude(record.readFloatLE());
-                            position.setLongitude(record.readFloatLE());
-                            position.setSpeed(UnitsConverter.knotsFromKph(record.readUnsignedShortLE()));
-
-                            position.set(Position.KEY_HDOP, record.readUnsignedByte());
-                            position.set(Position.KEY_SATELLITES, record.readUnsignedByte());
-
-                            position.setCourse(record.readUnsignedShortLE());
-                            position.setAltitude(record.readShortLE());
-
-                        } else {
-
-                            if (sensorType == 3) {
-                                continue;
-                            }
-
-                            decodeSensor(position, record, sensorType, sensorId);
-
+                        if (sensorType == 3) {
+                            continue;
                         }
+
+                        decodeSensor(position, record, sensorType, sensorId);
+
                     }
-
-                    positions.add(position);
-
-                } else if (type == 3) {
-
-                    Position position = new Position(getProtocolName());
-                    position.setDeviceId(deviceSession.getDeviceId());
-
-                    getLastLocation(position, new Date(record.readUnsignedIntLE() * 1000));
-
-                    record.readUnsignedByte(); // function identifier
-
-                    position.set(Position.KEY_EVENT, record.readUnsignedByte());
-
-                    positions.add(position);
-
                 }
+
+                positions.add(position);
+
+            } else if (type == 3) {
+
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+
+                getLastLocation(position, new Date(record.readUnsignedIntLE() * 1000));
+
+                record.readUnsignedByte(); // function identifier
+
+                position.set(Position.KEY_EVENT, record.readUnsignedByte());
+
+                positions.add(position);
+
             }
-
-            buf.readUnsignedByte(); // checksum
-
-            MqttMessage response = MqttMessageBuilders.pubAck()
-                    .packetId((short) message.variableHeader().packetId())
-                    .build();
-
-            if (channel != null) {
-                channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-            }
-
-            return positions.isEmpty() ? null : positions;
-
         }
 
-        return null;
+        buf.readUnsignedByte(); // checksum
+
+        return positions.isEmpty() ? null : positions;
     }
 
 }

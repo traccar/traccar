@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,27 +15,66 @@
  */
 package org.traccar.api;
 
-import org.eclipse.jetty.websocket.server.JettyWebSocketServlet;
-import org.eclipse.jetty.websocket.server.JettyWebSocketServletFactory;
-import org.traccar.Context;
-import org.traccar.api.resource.SessionResource;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServlet;
+import org.eclipse.jetty.ee10.websocket.server.JettyWebSocketServletFactory;
+import org.traccar.api.security.LoginService;
+import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.SessionHelper;
+import org.traccar.session.ConnectionManager;
+import org.traccar.storage.Storage;
 
-import javax.servlet.http.HttpSession;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.servlet.http.HttpSession;
+import org.traccar.storage.StorageException;
+
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.Duration;
+import java.util.List;
 
+@Singleton
 public class AsyncSocketServlet extends JettyWebSocketServlet {
+
+    private final Config config;
+    private final ObjectMapper objectMapper;
+    private final ConnectionManager connectionManager;
+    private final Storage storage;
+    private final LoginService loginService;
+
+    @Inject
+    public AsyncSocketServlet(
+            Config config, ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage,
+            LoginService loginService) {
+        this.config = config;
+        this.objectMapper = objectMapper;
+        this.connectionManager = connectionManager;
+        this.storage = storage;
+        this.loginService = loginService;
+    }
 
     @Override
     public void configure(JettyWebSocketServletFactory factory) {
-        factory.setIdleTimeout(Duration.ofMillis(Context.getConfig().getLong(Keys.WEB_TIMEOUT)));
+        factory.setIdleTimeout(Duration.ofMillis(config.getLong(Keys.WEB_TIMEOUT)));
         factory.setCreator((req, resp) -> {
-            if (req.getSession() != null) {
-                long userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionResource.USER_ID_KEY);
-                return new AsyncSocket(userId);
-            } else {
-                return null;
+            Long userId = null;
+            List<String> tokens = req.getParameterMap().get("token");
+            if (tokens != null && !tokens.isEmpty()) {
+                String token = tokens.iterator().next();
+                try {
+                    userId = loginService.login(token).getUser().getId();
+                } catch (StorageException | GeneralSecurityException | IOException e) {
+                    throw new RuntimeException(e);
+                }
+            } else if (req.getSession() != null) {
+                userId = (Long) ((HttpSession) req.getSession()).getAttribute(SessionHelper.USER_ID_KEY);
             }
+            if (userId != null) {
+                return new AsyncSocket(objectMapper, connectionManager, storage, userId);
+            }
+            return null;
         });
     }
 

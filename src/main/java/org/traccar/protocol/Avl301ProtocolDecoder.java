@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
@@ -125,9 +125,9 @@ public class Avl301ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             position.setNetwork(new Network(
-                    CellTower.fromLacCid(buf.readUnsignedShort(), buf.readUnsignedMedium())));
+                    CellTower.fromLacCid(getConfig(), buf.readUnsignedShort(), buf.readUnsignedMedium())));
 
-            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            position.addAlarm(Position.ALARM_GENERAL);
             int flags = buf.readUnsignedByte();
             position.set("acc", (flags & 0x2) != 0);
 

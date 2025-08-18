@@ -1,14 +1,15 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class MiniFinderProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new MiniFinderProtocolDecoder(null);
+        var decoder = inject(new MiniFinderProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "!1,867273023933661,V07S.5701.1621,100"));
@@ -19,7 +20,15 @@ public class MiniFinderProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, text(
                 "!1,123456789012345"));
 
-        verifyNull(decoder, text(
+        verifyAttribute(decoder, text(
+                "!4,10,040123,,,1.0,110,0,0S,33"),
+                "phone1", "040123");
+
+        verifyAttribute(decoder, text(
+                "!5,17,V,50"),
+                Position.KEY_BATTERY_LEVEL, 50);
+
+        verifyAttributes(decoder, text(
                 "!5,17,V"));
 
         verifyNull(decoder, text(

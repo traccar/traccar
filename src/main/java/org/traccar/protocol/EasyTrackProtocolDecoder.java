@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -30,6 +30,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
@@ -40,7 +41,7 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("*").expression("..,")         // manufacturer
-            .number("(d+),")                     // imei
+            .number("d+,")                       // imei
             .expression("([^,]{2}),")            // command
             .expression("([AV]),")               // validity
             .number("(xx)(xx)(xx),")             // date (yymmdd)
@@ -52,13 +53,13 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .number("(x{8}),")                   // status
             .number("(x+),")                     // signal
             .number("(d+),")                     // power
-            .number("(x+),")                     // fuel
+            .number("(x+),")                     // fuel / index
             .number("(x+)")                      // odometer
             .groupBegin()
             .number(",(x+)")                     // altitude
             .groupBegin()
             .number(",d+")                       // gps data
-            .number(",(d*)")                     // rfid
+            .number(",(x*)")                     // rfid
             .number(",(x+)")                     // temperature
             .number(",(d+.d+)")                  // adc
             .number(",(d+)")                     // satellites
@@ -69,9 +70,9 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern PATTERN_CELL = new PatternBuilder()
             .text("*").expression("..,")         // manufacturer
-            .number("(d+),")                     // imei
+            .number("d+,")                       // imei
             .text("JZ,")                         // command
-            .number("([01]),")                   // result
+            .number("[01],")                     // result
             .number("(d+),")                     // cid
             .number("(d+),")                     // lac
             .number("(d+),")                     // mcc
@@ -79,29 +80,68 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
-    private String decodeAlarm(long status) {
-        if ((status & 0x02000000) != 0) {
-            return Position.ALARM_GEOFENCE_ENTER;
+    private static final Pattern PATTERN_OBD = new PatternBuilder()
+            .text("*").expression("..,")         // manufacturer
+            .number("d+,")                       // imei
+            .text("OB,")                         // command
+            .text("BD$")
+            .number("V(d+.d);")                  // battery
+            .number("R(d+);")                    // rpm
+            .number("S(d+);")                    // speed
+            .number("P(d+.d);")                  // throttle
+            .number("O(d+.d);")                  // engine load
+            .number("C(d+);")                    // coolant temperature
+            .number("L(d+.d);")                  // fuel level
+            .number("[XY][MH]d+.d+;")
+            .number("Md+.?d*;")                  // mileage
+            .number("F(d+.d+);")                 // fuel consumption
+            .number("T(d+);")                    // engine time
+            .any()
+            .compile();
+
+    private void decodeAlarm(Position position, long status, String model) {
+        if ((status & 0x02000000L) != 0) {
+            position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
         }
-        if ((status & 0x04000000) != 0) {
-            return Position.ALARM_GEOFENCE_EXIT;
+        if ((status & 0x04000000L) != 0) {
+            position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
         }
-        if ((status & 0x08000000) != 0) {
-            return Position.ALARM_LOW_BATTERY;
+        if ((status & 0x08000000L) != 0) {
+            position.addAlarm(Position.ALARM_LOW_BATTERY);
         }
-        if ((status & 0x20000000) != 0) {
-            return Position.ALARM_VIBRATION;
+        if ((status & 0x10000000L) != 0 || (status & 0x00000008L) != 0) {
+            position.addAlarm(Position.ALARM_JAMMING);
         }
-        if ((status & 0x80000000) != 0) {
-            return Position.ALARM_OVERSPEED;
+        if ((status & 0x20000000L) != 0) {
+            position.addAlarm(Position.ALARM_VIBRATION);
         }
-        if ((status & 0x00010000) != 0) {
-            return Position.ALARM_SOS;
+        if ((status & 0x80000000L) != 0) {
+            position.addAlarm(Position.ALARM_OVERSPEED);
         }
-        if ((status & 0x00040000) != 0) {
-            return Position.ALARM_POWER_CUT;
+        if ((status & 0x00010000L) != 0 || (status & 0x00000400L) != 0) {
+            position.addAlarm(Position.ALARM_SOS);
         }
-        return null;
+        if ((status & 0x00040000L) != 0) {
+            position.addAlarm("E3+4G".equals(model) ? Position.ALARM_TAMPERING : Position.ALARM_POWER_CUT);
+        }
+        if ((status & 0x00040000L) != 0) {
+            position.addAlarm(Position.ALARM_POWER_CUT);
+        }
+        if ((status & 0x00004000L) != 0) {
+            position.addAlarm(Position.ALARM_LOW_POWER);
+        }
+        if ((status & 0x00008000L) != 0) {
+            position.addAlarm(Position.ALARM_TEMPERATURE);
+        }
+        if ((status & 0x00000100L) != 0) {
+            position.addAlarm(Position.ALARM_REMOVING);
+        }
+        if ((status & 0x00000001L) != 0) {
+            position.addAlarm(Position.ALARM_BRAKING);
+        }
+        if ((status & 0x00000002L) != 0) {
+            position.addAlarm(Position.ALARM_ACCELERATION);
+        }
     }
 
     @Override
@@ -109,30 +149,44 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
-        String type = sentence.substring(20, 22);
+        int typeIndex = sentence.indexOf(',', 4) + 1;
+        String imei = sentence.substring(4, typeIndex - 1);
+        String type = sentence.substring(typeIndex, typeIndex + 2);
 
-        if (channel != null && (type.equals("TX") || type.equals("MQ"))) {
-            channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
+        if (deviceSession == null) {
+            return null;
         }
 
-        if (type.equals("JZ")) {
-            return decodeCell(channel, remoteAddress, sentence);
+        if (channel != null) {
+            if (type.equals("TX") || type.equals("MQ")) {
+                channel.writeAndFlush(new NetworkMessage(sentence + "#", remoteAddress));
+            } else if ("E3+4G".equals(getDeviceModel(deviceSession))
+                    && Set.of("HB", "CC", "AM", "DW", "JZ").contains(type)) {
+                channel.writeAndFlush(new NetworkMessage(sentence.substring(0, typeIndex + 3) + "ACK#", remoteAddress));
+            }
+        }
+
+        if (type.equals("OB")) {
+            return decodeObd(deviceSession, sentence);
+        } else if (type.equals("JZ")) {
+            if (channel != null && Integer.parseInt(sentence.substring(typeIndex + 3, typeIndex + 4)) > 0) {
+                channel.writeAndFlush(new NetworkMessage(String.format("*ET,%s,JZ,undefined#", imei), remoteAddress));
+            }
+            return decodeCell(deviceSession, sentence);
         } else {
-            return decodeLocation(channel, remoteAddress, sentence);
+            return decodeLocation(deviceSession, sentence);
         }
     }
 
-    private Position decodeLocation(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Position decodeLocation(DeviceSession deviceSession, String sentence) {
 
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null;
         }
 
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
+        String model = getDeviceModel(deviceSession);
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
@@ -165,20 +219,31 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         }
 
         long status = parser.nextHexLong();
-        position.set(Position.KEY_ALARM, decodeAlarm(status));
+        decodeAlarm(position, status, model);
         position.set(Position.KEY_BLOCKED, (status & 0x00080000) > 0);
         position.set(Position.KEY_IGNITION, (status & 0x00800000) > 0);
         position.set(Position.KEY_STATUS, status);
 
         position.set(Position.KEY_RSSI, parser.nextHexInt());
         position.set(Position.KEY_POWER, parser.nextDouble());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+
+        if ("E3+4G".equals(model)) {
+            position.set(Position.KEY_INDEX, parser.nextHexInt());
+        } else {
+            position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+        }
+
         position.set(Position.KEY_ODOMETER, parser.nextHexInt() * 100);
 
         position.setAltitude(parser.nextDouble(0));
 
         if (parser.hasNext(4)) {
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+            if ("E3+4G".equals(model)) {
+                position.set(Position.KEY_HOURS, parser.nextHexLong() * 60000);
+            } else {
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
+            }
+
             position.set(Position.PREFIX_TEMP + 1, parser.nextHexInt() * 0.01);
             position.set(Position.PREFIX_ADC + 1, parser.nextDouble());
             position.set(Position.KEY_SATELLITES, parser.nextInt());
@@ -187,16 +252,10 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
-    private Position decodeCell(Channel channel, SocketAddress remoteAddress, String sentence) {
+    private Position decodeCell(DeviceSession deviceSession, String sentence) {
 
         Parser parser = new Parser(PATTERN_CELL, sentence);
         if (!parser.matches()) {
-            return null;
-        }
-
-        String imei = parser.next();
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
-        if (deviceSession == null) {
             return null;
         }
 
@@ -205,16 +264,36 @@ public class EasyTrackProtocolDecoder extends BaseProtocolDecoder {
 
         getLastLocation(position, null);
 
-        if (channel != null && parser.nextInt() > 0) {
-            String response = String.format("*ET,%s,JZ,undefined#", imei);
-            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-        }
-
         int cid = parser.nextInt();
         int lac = parser.nextInt();
         int mcc = parser.nextInt();
         int mnc = parser.nextInt();
         position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid)));
+
+        return position;
+    }
+
+    private Position decodeObd(DeviceSession deviceSession, String sentence) {
+
+        Parser parser = new Parser(PATTERN_OBD, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
+        position.set(Position.KEY_RPM, parser.nextInt());
+        position.set(Position.KEY_OBD_SPEED, parser.nextInt());
+        position.set(Position.KEY_THROTTLE, parser.nextDouble());
+        position.set(Position.KEY_ENGINE_LOAD, parser.nextDouble());
+        position.set(Position.KEY_COOLANT_TEMP, parser.nextInt());
+        position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble());
+        position.set(Position.KEY_FUEL_CONSUMPTION, parser.nextDouble());
+        position.set(Position.KEY_HOURS, parser.nextInt());
 
         return position;
     }

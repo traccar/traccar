@@ -1,16 +1,20 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class GalileoFrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new GalileoFrameDecoder();
+        var decoder = inject(new GalileoFrameDecoder());
+
+        assertEquals(
+                binary("01003f01001c475b166133303035333430363431383437393000001d000064897bb003000b0221c20512a60a0000000802000f209d7b8964300f2536fbfd103c1d01"),
+                decoder.decode(null, null, binary("01003f01001c475b166133303035333430363431383437393000001d000064897bb003000b0221c20512a60a0000000802000f209d7b8964300f2536fbfd103c1d01")));
 
         assertEquals(
                 binary("011780011102e603383633353931303238393630323437043200801c"),

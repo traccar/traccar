@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -85,7 +85,7 @@ public class KenjiProtocolDecoder extends BaseProtocolDecoder {
         }
         position.setDeviceId(deviceSession.getDeviceId());
 
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt(0)));
+        position.addAlarm(decodeAlarm(parser.nextHexInt(0)));
         position.set(Position.KEY_OUTPUT, parser.nextHexInt(0));
         position.set(Position.KEY_INPUT, parser.nextHexInt(0));
 

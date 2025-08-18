@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,9 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
-import org.traccar.Context;
+import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Command;
-import org.traccar.Protocol;
 
 import java.nio.charset.StandardCharsets;
 
@@ -34,7 +33,7 @@ public class CastelProtocolEncoder extends BaseProtocolEncoder {
     private ByteBuf encodeContent(long deviceId, short type, ByteBuf content) {
 
         ByteBuf buf = Unpooled.buffer(0);
-        String uniqueId = Context.getIdentityManager().getById(deviceId).getUniqueId();
+        String uniqueId = getUniqueId(deviceId);
 
         buf.writeByte('@');
         buf.writeByte('@');
@@ -60,16 +59,17 @@ public class CastelProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
         ByteBuf content = Unpooled.buffer(0);
-        switch (command.getType()) {
-            case Command.TYPE_ENGINE_STOP:
+        return switch (command.getType()) {
+            case Command.TYPE_ENGINE_STOP -> {
                 content.writeByte(1);
-                return encodeContent(command.getDeviceId(), CastelProtocolDecoder.MSG_CC_PETROL_CONTROL, content);
-            case Command.TYPE_ENGINE_RESUME:
+                yield encodeContent(command.getDeviceId(), CastelProtocolDecoder.MSG_CC_PETROL_CONTROL, content);
+            }
+            case Command.TYPE_ENGINE_RESUME -> {
                 content.writeByte(0);
-                return encodeContent(command.getDeviceId(), CastelProtocolDecoder.MSG_CC_PETROL_CONTROL, content);
-            default:
-                return null;
-        }
+                yield encodeContent(command.getDeviceId(), CastelProtocolDecoder.MSG_CC_PETROL_CONTROL, content);
+            }
+            default -> null;
+        };
     }
 
 }

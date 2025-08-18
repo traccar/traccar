@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.UnitsConverter;
@@ -62,19 +62,9 @@ public class TlvProtocolDecoder extends BaseProtocolDecoder {
 
         if (channel != null) {
             switch (type) {
-                case "0A":
-                case "0C":
-                    sendResponse(channel, remoteAddress, type);
-                    break;
-                case "0B":
-                    sendResponse(channel, remoteAddress, type, "1482202689", "10", "20", "15");
-                    break;
-                case "0E":
-                case "0F":
-                    sendResponse(channel, remoteAddress, type, "30", "Unknown");
-                    break;
-                default:
-                    break;
+                case "0A", "0C" -> sendResponse(channel, remoteAddress, type);
+                case "0B" -> sendResponse(channel, remoteAddress, type, "1482202689", "10", "20", "15");
+                case "0E", "0F" -> sendResponse(channel, remoteAddress, type, "30", "Unknown");
             }
         }
 

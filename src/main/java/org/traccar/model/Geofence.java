@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,30 @@
  */
 package org.traccar.model;
 
-import java.text.ParseException;
-
-import org.traccar.Context;
-import org.traccar.config.Keys;
-import org.traccar.database.QueryIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.geofence.GeofenceCircle;
 import org.traccar.geofence.GeofenceGeometry;
 import org.traccar.geofence.GeofencePolygon;
 import org.traccar.geofence.GeofencePolyline;
+import org.traccar.storage.QueryIgnore;
+import org.traccar.storage.StorageName;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.text.ParseException;
 
-public class Geofence extends ScheduledModel {
+@StorageName("tc_geofences")
+public class Geofence extends ExtendedModel implements Schedulable {
 
-    public static final String TYPE_GEOFENCE_CILCLE = "geofenceCircle";
-    public static final String TYPE_GEOFENCE_POLYGON = "geofencePolygon";
-    public static final String TYPE_GEOFENCE_POLYLINE = "geofencePolyline";
+    private long calendarId;
+
+    @Override
+    public long getCalendarId() {
+        return calendarId;
+    }
+
+    @Override
+    public void setCalendarId(long calendarId) {
+        this.calendarId = calendarId;
+    }
 
     private String name;
 
@@ -59,21 +66,9 @@ public class Geofence extends ScheduledModel {
         return area;
     }
 
-    public void setArea(String area) throws ParseException {
-
-        if (area.startsWith("CIRCLE")) {
-            geometry = new GeofenceCircle(area);
-        } else if (area.startsWith("POLYGON")) {
-            geometry = new GeofencePolygon(area);
-        } else if (area.startsWith("LINESTRING")) {
-            final double distance = getDouble("polylineDistance");
-            geometry = new GeofencePolyline(area, distance > 0 ? distance
-                    : Context.getConfig().getDouble(Keys.GEOFENCE_POLYLINE_DISTANCE));
-        } else {
-            throw new ParseException("Unknown geometry type", 0);
-        }
-
+    public void setArea(String area) {
         this.area = area;
+        geometry = null;
     }
 
     private GeofenceGeometry geometry;
@@ -81,13 +76,28 @@ public class Geofence extends ScheduledModel {
     @QueryIgnore
     @JsonIgnore
     public GeofenceGeometry getGeometry() {
+        if (geometry == null) {
+            try {
+                if (area.startsWith("CIRCLE")) {
+                    geometry = new GeofenceCircle(area);
+                } else if (area.startsWith("POLYGON")) {
+                    geometry = new GeofencePolygon(area);
+                } else if (area.startsWith("LINESTRING")) {
+                    geometry = new GeofencePolyline(area, getDouble("polylineDistance", 25.0));
+                } else {
+                    throw new IllegalArgumentException("Unknown geometry type");
+                }
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+        }
         return geometry;
     }
 
     @QueryIgnore
     @JsonIgnore
     public void setGeometry(GeofenceGeometry geometry) {
-        area = geometry.toWkt();
-        this.geometry = geometry;
+        setArea(geometry.toWkt());
     }
+
 }

@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
@@ -123,7 +123,7 @@ public class Vt200ProtocolDecoder extends BaseProtocolDecoder {
 
             position.set("tripStart", decodeDate(buf).getTime());
             position.set("tripEnd", decodeDate(buf).getTime());
-            position.set("drivingTime", buf.readUnsignedShort());
+            position.set(Position.KEY_DRIVING_TIME, buf.readUnsignedShort());
 
             position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt());
             position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedInt());

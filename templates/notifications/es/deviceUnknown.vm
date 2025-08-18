@@ -1,0 +1,12 @@
+#set($subject = "$device.name: estado desconocido")
+#set($digest = "$device.name estado desconocido a las $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $device.name<br>
+Estado desconocido<br>
+Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Cancelar suscripción</a>
+</body>
+</html>

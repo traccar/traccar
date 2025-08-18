@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -67,12 +67,11 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             DateBuilder dateBuilder = new DateBuilder()
                     .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
 
-            position.setValid(true);
             position.setLatitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.DEG_MIN_MIN));
 
             int flags = parser.nextInt(0);
-            position.setValid(BitUtil.check(flags, 0));
+            position.setValid(!BitUtil.check(flags, 0));
             if (!BitUtil.check(flags, 1)) {
                 position.setLatitude(-position.getLatitude());
             }
@@ -89,52 +88,23 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(int alarm) {
-        if (BitUtil.check(alarm, 2)) {
-            return Position.ALARM_TAMPERING;
+    private void decodeTransparent(ByteBuf buf, Position position) {
+
+        int dataType = buf.readUnsignedShort();
+        int dataLength = buf.readUnsignedShort();
+
+        if (dataType == 0x4009) {
+            position.set(
+                    Position.KEY_DRIVER_UNIQUE_ID,
+                    buf.readCharSequence(dataLength, StandardCharsets.US_ASCII).toString());
+        } else {
+            position.set("data", ByteBufUtil.hexDump(buf.readSlice(dataLength)));
         }
-        return null;
     }
 
-    @Override
-    protected Object decode(
-            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+    private void decodeRegular(String head, ByteBuf buf, Position position) {
 
-        ByteBuf buf = (ByteBuf) msg;
-
-        if (buf.getByte(buf.readerIndex()) != '*') {
-            return null;
-        }
-
-        int headerIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) '&');
-        if (headerIndex < 0) {
-            headerIndex = buf.writerIndex();
-        }
-        String header = buf.readSlice(headerIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
-
-        Parser parser = new Parser(PATTERN_HEADER, header);
-        if (!parser.matches()) {
-            return null;
-        }
-
-        String head = parser.next();
-        boolean reply = parser.next().equals("1");
-
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
-        if (deviceSession == null) {
-            return null;
-        }
-
-        Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
         Network network = new Network();
-
-        String type = parser.next();
-        String subtype = parser.next();
-
-        if (reply && channel != null) {
-            channel.writeAndFlush(new NetworkMessage("*" + head + "Y" + type + subtype + "#", remoteAddress));
-        }
 
         while (buf.readableBytes() > 1) {
 
@@ -155,29 +125,42 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
             String stringValue;
 
             switch (dataType) {
-                case 'A':
-                    decodeLocation(position, data.toString(StandardCharsets.US_ASCII));
-                    break;
-                case 'B':
-                    position.set(Position.KEY_STATUS, data.toString(StandardCharsets.US_ASCII));
-                    break;
-                case 'C':
+                case 'A' -> decodeLocation(position, data.toString(StandardCharsets.US_ASCII));
+                case 'B' -> {
+                    String status = data.toString(StandardCharsets.US_ASCII);
+
+                    int[] s = new int[5];
+                    for (int i = 0; i < 5; i++) {
+                        s[i] = status.charAt(i) - '0';
+                    }
+                    position.set(Position.KEY_IGNITION, BitUtil.check(s[1], 0));
+
+                    int[] a = new int[5];
+                    for (int i = 0; i < 5; i++) {
+                        a[i] = status.charAt(i + 5) - '0';
+                    }
+                    position.addAlarm(BitUtil.check(a[0], 0) ? Position.ALARM_SOS : null);
+                    position.addAlarm(BitUtil.check(a[0], 2) ? Position.ALARM_VIBRATION : null);
+                    position.addAlarm(BitUtil.check(a[0], 3) ? Position.ALARM_MOVEMENT : null);
+                    position.addAlarm(BitUtil.check(a[1], 2) ? Position.ALARM_OVERSPEED : null);
+                    position.addAlarm(BitUtil.check(a[3], 1) ? Position.ALARM_TAMPERING : null);
+                    position.addAlarm(BitUtil.check(a[3], 2) ? Position.ALARM_LOW_POWER : null);
+
+                    position.set(Position.KEY_STATUS, status);
+                }
+                case 'C' -> {
                     long odometer = 0;
                     while (data.isReadable()) {
                         odometer <<= 4;
                         odometer += data.readByte() - (byte) '0';
                     }
                     position.set(Position.KEY_ODOMETER, odometer * 2 * 1852 / 3600);
-                    break;
-                case 'F':
-                    position.setSpeed(
-                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
-                    break;
-                case 'G':
-                    position.setAltitude(
-                            Integer.parseInt(data.readSlice(6).toString(StandardCharsets.US_ASCII)) * 0.1);
-                    break;
-                case 'I':
+                }
+                case 'F' -> position.setSpeed(
+                        Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
+                case 'G' -> position.setAltitude(
+                        Integer.parseInt(data.readSlice(6).toString(StandardCharsets.US_ASCII)) * 0.1);
+                case 'I' -> {
                     stringValue = data.toString(StandardCharsets.US_ASCII);
                     count = Integer.parseInt(stringValue.substring(0, 1));
                     if (stringValue.length() == 6 + count * 10) {
@@ -192,8 +175,8 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                                     Integer.parseInt(stringValue.substring(offset + 8, offset + 10))));
                         }
                     }
-                    break;
-                case 'J':
+                }
+                case 'J' -> {
                     if (data.readableBytes() == 6) {
                         char index = (char) data.readUnsignedByte();
                         int status = data.readUnsignedByte();
@@ -203,11 +186,9 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                         }
                         position.set(Position.PREFIX_TEMP + index, value);
                     }
-                    break;
-                case 'K':
-                    position.set("statusExtended", data.toString(StandardCharsets.US_ASCII));
-                    break;
-                case 'M':
+                }
+                case 'K' -> position.set("statusExtended", data.toString(StandardCharsets.US_ASCII));
+                case 'M' -> {
                     if (data.readableBytes() == 3) {
                         position.set(Position.KEY_BATTERY_LEVEL,
                                 Integer.parseInt(data.readSlice(3).toString(StandardCharsets.US_ASCII)) * 0.1);
@@ -218,16 +199,12 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                                 "humidity" + index,
                                 Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
                     }
-                    break;
-                case 'N':
-                    position.set(Position.KEY_RSSI,
-                            Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
-                    break;
-                case 'O':
-                    position.set(Position.KEY_SATELLITES,
-                            Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
-                    break;
-                case 'P':
+                }
+                case 'N' -> position.set(Position.KEY_RSSI,
+                        Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
+                case 'O' -> position.set(Position.KEY_SATELLITES,
+                        Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
+                case 'P' -> {
                     if (data.readableBytes() >= 16) {
                         position.setNetwork(new Network(CellTower.from(
                                 Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)),
@@ -235,13 +212,13 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                                 Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16),
                                 Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII), 16))));
                     }
-                    break;
-                case 'Q':
+                }
+                case 'Q' -> {
                     if (!head.startsWith("HQ")) {
                         position.set("obdPid", ByteBufUtil.hexDump(data));
                     }
-                    break;
-                case 'R':
+                }
+                case 'R' -> {
                     if (head.startsWith("HQ")) {
                         position.set(Position.KEY_RSSI,
                                 Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII)));
@@ -250,27 +227,34 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                     } else {
                         position.set("odbTravel", ByteBufUtil.hexDump(data));
                     }
-                    break;
-                case 'S':
-                    position.set("obdTraffic", ByteBufUtil.hexDump(data));
-                    break;
-                case 'T':
+                }
+                case 'S' -> position.set("obdTraffic", ByteBufUtil.hexDump(data));
+                case 'T' -> {
                     if (data.readableBytes() == 2) {
                         position.set(Position.KEY_BATTERY_LEVEL,
                                 Integer.parseInt(data.toString(StandardCharsets.US_ASCII)));
                     }
-                    break;
-                case 'V':
-                    position.set(Position.KEY_POWER,
-                            Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
-                    break;
-                case 'W':
-                    position.set(Position.KEY_ALARM,
-                            decodeAlarm(Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII))));
-                    break;
-                case 'X':
-                    String[] cells = data.toString(StandardCharsets.US_ASCII).split(";");
-                    if (!cells[0].startsWith("(")) {
+                }
+                case 'V' -> position.set(Position.KEY_POWER,
+                        Integer.parseInt(data.readSlice(4).toString(StandardCharsets.US_ASCII)) * 0.1);
+                case 'W' -> {
+                    int alarms = Integer.parseInt(data.readSlice(2).toString(StandardCharsets.US_ASCII));
+                    position.addAlarm(BitUtil.check(alarms, 2) ? Position.ALARM_TAMPERING : null);
+                }
+                case 'X' -> {
+                    String stringData = data.toString(StandardCharsets.US_ASCII);
+                    if (stringData.startsWith("(")) {
+                        String[] parameters = stringData.substring(1, stringData.length() - 1).split("\\)\\(");
+                        for (String parameter : parameters) {
+                            char type = parameter.charAt(0);
+                            String value = parameter.substring(1);
+                            switch (type) {
+                                case 'J' -> position.set("timezone", value);
+                                case 'k' -> position.set(Position.KEY_ICCID, value);
+                            }
+                        }
+                    } else {
+                        String[] cells = stringData.split(";");
                         for (int i = 0; i < cells.length; i++) {
                             String[] values = cells[i].split(",");
                             int index = 0;
@@ -286,8 +270,8 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                         }
                         position.setNetwork(network);
                     }
-                    break;
-                case 'Y':
+                }
+                case 'Y' -> {
                     stringValue = data.toString(StandardCharsets.US_ASCII);
                     count = Integer.parseInt(stringValue.substring(0, 1));
                     if (stringValue.length() == 6 + count * 14) {
@@ -299,26 +283,80 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
                                     mcc, mnc,
                                     Integer.parseInt(stringValue.substring(offset, offset + 4), 16),
                                     Long.parseLong(stringValue.substring(offset + 4, offset + 12), 16),
-                                    Integer.parseInt(stringValue.substring(offset + 12, offset + 14))));
+                                    Integer.parseInt(stringValue.substring(offset + 12, offset + 14), 16)));
                         }
                     } else {
                         position.set(Position.KEY_POWER,
                                 Integer.parseInt(data.readSlice(5).toString(StandardCharsets.US_ASCII)) * 0.001);
                     }
-                    break;
-                case 'b':
+                }
+                case 'b' -> {
                     if (data.readableBytes() > 3) {
                         position.set("serial", data.toString(StandardCharsets.US_ASCII).substring(3));
                     }
-                    break;
-                default:
-                    break;
+                }
+                case 'd' -> position.set(Position.PREFIX_ADC + 1,
+                        Integer.parseInt(data.toString(StandardCharsets.US_ASCII)) / 100.0);
+                case 'l' -> {
+                    String status = data.toString(StandardCharsets.US_ASCII);
+                    int[] s = new int[4];
+                    for (int i = 0; i < 4; i++) {
+                        s[i] = status.charAt(i) - '0';
+                    }
+                    position.set("logisticsLock", BitUtil.to(s[0], 3));
+                }
             }
 
         }
 
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
             position.setNetwork(network);
+        }
+    }
+
+    @Override
+    protected Object decode(
+            Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
+
+        ByteBuf buf = (ByteBuf) msg;
+
+        if (buf.getByte(buf.readerIndex()) != '*') {
+            return null;
+        }
+
+        int headerIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',') + 1;
+        while (headerIndex < buf.writerIndex() && Character.isLetterOrDigit(buf.getByte(headerIndex))) {
+            headerIndex += 1;
+        }
+        String header = buf.readSlice(headerIndex - buf.readerIndex()).toString(StandardCharsets.US_ASCII);
+
+        Parser parser = new Parser(PATTERN_HEADER, header);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        String head = parser.next();
+        boolean reply = parser.next().equals("1");
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        String type = parser.next();
+        String subtype = parser.next();
+
+        if (reply && channel != null) {
+            channel.writeAndFlush(new NetworkMessage("*" + head + "Y" + type + subtype + "#", remoteAddress));
+        }
+
+        if (type.equals("G") && subtype.equals("Y")) {
+            decodeTransparent(buf, position);
+        } else {
+            decodeRegular(head, buf, position);
         }
 
         if (position.getLatitude() == 0 || position.getLongitude() == 0) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,18 +28,15 @@ public class EasyTrackProtocolEncoder extends StringProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        switch (command.getType()) {
-            case Command.TYPE_ENGINE_STOP:
-                return formatCommand(command, "*ET,%s,FD,Y1#", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ENGINE_RESUME:
-                return formatCommand(command, "*ET,%s,FD,Y2#", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ALARM_ARM:
-                return formatCommand(command, "*ET,%s,FD,F1#", Command.KEY_UNIQUE_ID);
-            case Command.TYPE_ALARM_DISARM:
-                return formatCommand(command, "*ET,%s,FD,F2#", Command.KEY_UNIQUE_ID);
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_CUSTOM ->
+                    formatCommand(command, "*ET,%s,KS,%s#", Command.KEY_UNIQUE_ID, Command.KEY_DATA);
+            case Command.TYPE_ENGINE_STOP -> formatCommand(command, "*ET,%s,FD,Y1#", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ENGINE_RESUME -> formatCommand(command, "*ET,%s,FD,Y2#", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_ARM -> formatCommand(command, "*ET,%s,FD,F1#", Command.KEY_UNIQUE_ID);
+            case Command.TYPE_ALARM_DISARM -> formatCommand(command, "*ET,%s,FD,F2#", Command.KEY_UNIQUE_ID);
+            default -> null;
+        };
     }
 
 }

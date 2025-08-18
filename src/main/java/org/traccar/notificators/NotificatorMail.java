@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,22 +16,32 @@
  */
 package org.traccar.notificators;
 
-import org.traccar.Context;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import jakarta.mail.MessagingException;
+import org.traccar.mail.MailManager;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.notification.FullMessage;
+import org.traccar.model.User;
 import org.traccar.notification.MessageException;
 import org.traccar.notification.NotificationFormatter;
+import org.traccar.notification.NotificationMessage;
 
-import javax.mail.MessagingException;
+@Singleton
+public class NotificatorMail extends Notificator {
 
-public final class NotificatorMail extends Notificator {
+    private final MailManager mailManager;
+
+    @Inject
+    public NotificatorMail(MailManager mailManager, NotificationFormatter notificationFormatter) {
+        super(notificationFormatter);
+        this.mailManager = mailManager;
+    }
 
     @Override
-    public void sendSync(long userId, Event event, Position position) throws MessageException {
+    public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
         try {
-            FullMessage message = NotificationFormatter.formatFullMessage(userId, event, position);
-            Context.getMailManager().sendMessage(userId, message.getSubject(), message.getBody());
+            mailManager.sendMessage(user, false, message.subject(), message.body());
         } catch (MessagingException e) {
             throw new MessageException(e);
         }

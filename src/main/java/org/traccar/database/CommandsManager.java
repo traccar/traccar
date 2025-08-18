@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,154 +16,103 @@
  */
 package org.traccar.database;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
-import org.traccar.Context;
+import org.traccar.ServerManager;
+import org.traccar.broadcast.BroadcastInterface;
+import org.traccar.broadcast.BroadcastService;
+import org.traccar.command.CommandSenderManager;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
-import org.traccar.model.Typed;
+import org.traccar.model.Device;
+import org.traccar.model.Event;
+import org.traccar.model.ObjectOperation;
 import org.traccar.model.Position;
+import org.traccar.model.QueuedCommand;
+import org.traccar.session.ConnectionManager;
+import org.traccar.session.DeviceSession;
+import org.traccar.session.cache.CacheManager;
+import org.traccar.sms.SmsManager;
+import org.traccar.storage.Storage;
+import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Order;
+import org.traccar.storage.query.Request;
 
-public class CommandsManager  extends ExtendedObjectManager<Command> {
+import jakarta.annotation.Nullable;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CommandsManager.class);
+@Singleton
+public class CommandsManager implements BroadcastInterface {
 
-    private final Map<Long, Queue<Command>> deviceQueues = new ConcurrentHashMap<>();
+    private final Storage storage;
+    private final ServerManager serverManager;
+    private final SmsManager smsManager;
+    private final ConnectionManager connectionManager;
+    private final BroadcastService broadcastService;
+    private final NotificationManager notificationManager;
+    private final CacheManager cacheManager;
+    private final CommandSenderManager commandSenderManager;
 
-    private final boolean queueing;
-
-    public CommandsManager(DataManager dataManager, boolean queueing) {
-        super(dataManager, Command.class);
-        this.queueing = queueing;
+    @Inject
+    public CommandsManager(
+            Storage storage, ServerManager serverManager, @Nullable SmsManager smsManager,
+            ConnectionManager connectionManager, BroadcastService broadcastService,
+            NotificationManager notificationManager, CacheManager cacheManager,
+            CommandSenderManager commandSenderManager) {
+        this.storage = storage;
+        this.serverManager = serverManager;
+        this.smsManager = smsManager;
+        this.connectionManager = connectionManager;
+        this.broadcastService = broadcastService;
+        this.notificationManager = notificationManager;
+        this.cacheManager = cacheManager;
+        this.commandSenderManager = commandSenderManager;
+        broadcastService.registerListener(this);
     }
 
-    public boolean checkDeviceCommand(long deviceId, long commandId) {
-        return !getAllDeviceItems(deviceId).contains(commandId);
-    }
-
-    public boolean sendCommand(Command command) throws Exception {
+    public QueuedCommand sendCommand(Command command) throws Exception {
         long deviceId = command.getDeviceId();
-        if (command.getId() != 0) {
-            command = getById(command.getId()).clone();
-            command.setDeviceId(deviceId);
-        }
+        Device device = storage.getObject(Device.class, new Request(
+                new Columns.All(), new Condition.Equals("id", deviceId)));
+        Position position = storage.getObject(Position.class, new Request(
+                new Columns.All(), new Condition.Equals("id", device.getPositionId())));
+        BaseProtocol protocol = position != null ? serverManager.getProtocol(position.getProtocol()) : null;
+
         if (command.getTextChannel()) {
-            Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
-            String phone = Context.getIdentityManager().getById(deviceId).getPhone();
-            if (lastPosition != null) {
-                BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-                protocol.sendTextCommand(phone, command);
+            if (smsManager == null) {
+                throw new RuntimeException("SMS not configured");
+            }
+            if (position != null) {
+                protocol.sendTextCommand(device.getPhone(), command);
             } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                if (Context.getSmsManager() != null) {
-                    Context.getSmsManager().sendMessageSync(phone, command.getString(Command.KEY_DATA), true);
-                } else {
-                    throw new RuntimeException("SMS is not enabled");
-                }
+                smsManager.sendMessage(device.getPhone(), command.getString(Command.KEY_DATA), true);
             } else {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }
         } else {
-            ActiveDevice activeDevice = Context.getConnectionManager().getActiveDevice(deviceId);
-            if (activeDevice != null) {
-                if (activeDevice.supportsLiveCommands()) {
-                    activeDevice.sendCommand(command);
-                } else {
-                    getDeviceQueue(deviceId).add(command);
-                    return false;
-                }
-            } else if (!queueing) {
-                throw new RuntimeException("Device is not online");
+            String sender = device.getString(Keys.COMMAND_SENDER.getKey());
+            if (sender != null) {
+                commandSenderManager.getSender(sender).sendCommand(device, command);
             } else {
-                getDeviceQueue(deviceId).add(command);
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public Collection<Long> getSupportedCommands(long deviceId) {
-        List<Long> result = new ArrayList<>();
-        Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
-        for (long commandId : getAllDeviceItems(deviceId)) {
-            Command command = getById(commandId);
-            if (lastPosition != null) {
-                BaseProtocol protocol = Context.getServerManager().getProtocol(lastPosition.getProtocol());
-                if (command.getTextChannel() && protocol.getSupportedTextCommands().contains(command.getType())
-                        || !command.getTextChannel()
-                        && protocol.getSupportedDataCommands().contains(command.getType())) {
-                    result.add(commandId);
-                }
-            } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
-                result.add(commandId);
-            }
-        }
-        return result;
-    }
-
-    public Collection<Typed> getCommandTypes(long deviceId, boolean textChannel) {
-        Position lastPosition = Context.getIdentityManager().getLastPosition(deviceId);
-        if (lastPosition != null) {
-            return getCommandTypes(lastPosition.getProtocol(), textChannel);
-        } else {
-            return Collections.singletonList(new Typed(Command.TYPE_CUSTOM));
-        }
-    }
-
-    public Collection<Typed> getCommandTypes(String protocolName, boolean textChannel) {
-        List<Typed> result = new ArrayList<>();
-        BaseProtocol protocol = Context.getServerManager().getProtocol(protocolName);
-        Collection<String> commands;
-        commands = textChannel ? protocol.getSupportedTextCommands() : protocol.getSupportedDataCommands();
-        for (String commandKey : commands) {
-            result.add(new Typed(commandKey));
-        }
-        return result;
-    }
-
-    public Collection<Typed> getAllCommandTypes() {
-        List<Typed> result = new ArrayList<>();
-        Field[] fields = Command.class.getDeclaredFields();
-        for (Field field : fields) {
-            if (Modifier.isStatic(field.getModifiers()) && field.getName().startsWith("TYPE_")) {
-                try {
-                    result.add(new Typed(field.get(null).toString()));
-                } catch (IllegalArgumentException | IllegalAccessException error) {
-                    LOGGER.warn("Get command types error", error);
+                DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
+                if (deviceSession != null && deviceSession.supportsLiveCommands()) {
+                    deviceSession.sendCommand(command);
+                } else if (!command.getBoolean(Command.KEY_NO_QUEUE)) {
+                    QueuedCommand queuedCommand = QueuedCommand.fromCommand(command);
+                    queuedCommand.setId(storage.addObject(queuedCommand, new Request(new Columns.Exclude("id"))));
+                    broadcastService.updateCommand(true, deviceId);
+                    return queuedCommand;
+                } else {
+                    throw new RuntimeException("Failed to send command");
                 }
             }
         }
-        return result;
-    }
-
-    private Queue<Command> getDeviceQueue(long deviceId) {
-        Queue<Command> deviceQueue;
-        try {
-            readLock();
-            deviceQueue = deviceQueues.get(deviceId);
-        } finally {
-            readUnlock();
-        }
-        if (deviceQueue != null) {
-            return deviceQueue;
-        } else {
-            try {
-                writeLock();
-                return deviceQueues.computeIfAbsent(deviceId, key -> new ConcurrentLinkedQueue<>());
-            } finally {
-                writeUnlock();
-            }
-        }
+        return null;
     }
 
     public Collection<Command> readQueuedCommands(long deviceId) {
@@ -171,22 +120,54 @@ public class CommandsManager  extends ExtendedObjectManager<Command> {
     }
 
     public Collection<Command> readQueuedCommands(long deviceId, int count) {
-        Queue<Command> deviceQueue;
         try {
-            readLock();
-            deviceQueue = deviceQueues.get(deviceId);
-        } finally {
-            readUnlock();
+            var commands = storage.getObjects(QueuedCommand.class, new Request(
+                    new Columns.All(),
+                    new Condition.Equals("deviceId", deviceId),
+                    new Order("id", false, count)));
+            Map<Event, Position> events = new HashMap<>();
+            for (var command : commands) {
+                storage.removeObject(QueuedCommand.class, new Request(
+                        new Condition.Equals("id", command.getId())));
+
+                Event event = new Event(Event.TYPE_QUEUED_COMMAND_SENT, command.getDeviceId());
+                event.set("id", command.getId());
+                events.put(event, null);
+            }
+            notificationManager.updateEvents(events);
+            return commands.stream().map(QueuedCommand::toCommand).toList();
+        } catch (StorageException e) {
+            throw new RuntimeException(e);
         }
-        Collection<Command> result = new ArrayList<>();
-        if (deviceQueue != null) {
-            Command command = deviceQueue.poll();
-            while (command != null && result.size() < count) {
-                result.add(command);
-                command = deviceQueue.poll();
+    }
+
+    @Override
+    public void updateCommand(boolean local, long deviceId) {
+        if (!local) {
+            DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
+            if (deviceSession != null && deviceSession.supportsLiveCommands()) {
+                for (Command command : readQueuedCommands(deviceId)) {
+                    deviceSession.sendCommand(command);
+                }
             }
         }
-        return result;
+    }
+
+    public void updateNotificationToken(long deviceId, String token) {
+        var key = new Object();
+        try {
+            cacheManager.addDevice(deviceId, key);
+            Device device = cacheManager.getObject(Device.class, deviceId);
+            device.set("notificationTokens", token);
+            storage.updateObject(device, new Request(
+                    new Columns.Include("attributes"),
+                    new Condition.Equals("id", deviceId)));
+            cacheManager.invalidateObject(true, Device.class, deviceId, ObjectOperation.UPDATE);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            cacheManager.removeDevice(deviceId, key);
+        }
     }
 
 }

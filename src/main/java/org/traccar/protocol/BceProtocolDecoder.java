@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2021 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -30,6 +30,7 @@ import org.traccar.model.Position;
 
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -90,11 +91,13 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 14)) {
-            position.setNetwork(new Network(CellTower.from(
-                    buf.readUnsignedShortLE(), buf.readUnsignedByte(),
-                    buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
-                    buf.readUnsignedByte())));
-            buf.readUnsignedByte();
+            int mcc = buf.readUnsignedShortLE();
+            int mnc = buf.readUnsignedByte();
+            int lac = buf.readUnsignedShortLE();
+            int cid = buf.readUnsignedShortLE();
+            buf.readUnsignedByte(); // time advance
+            int rssi = -buf.readUnsignedByte();
+            position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
         }
     }
 
@@ -177,10 +180,16 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedShortLE(); // dallas humidity
         }
         if (BitUtil.check(mask, 9)) {
-            buf.skipBytes(6); // lls group 1
+            position.set("fuel1", buf.readUnsignedShortLE());
+            position.set("fuelTemp1", (int) buf.readByte());
+            position.set("fuel2", buf.readUnsignedShortLE());
+            position.set("fuelTemp2", (int) buf.readByte());
         }
         if (BitUtil.check(mask, 10)) {
-            buf.skipBytes(6); // lls group 2
+            position.set("fuel3", buf.readUnsignedShortLE());
+            position.set("fuelTemp3", (int) buf.readByte());
+            position.set("fuel4", buf.readUnsignedShortLE());
+            position.set("fuelTemp4", (int) buf.readByte());
         }
         if (BitUtil.check(mask, 11)) {
             buf.skipBytes(21); // j1979 group 1
@@ -279,6 +288,10 @@ public class BceProtocolDecoder extends BaseProtocolDecoder {
 
                     time = time >> 4 << 1;
                     time += 0x47798280; // 01/01/2008
+                    long threshold = System.currentTimeMillis() / 1000 - Duration.ofDays(3650).toSeconds();
+                    while (time < threshold) {
+                        time += 0x0FFFFFFF * 2;
+                    }
                     position.setTime(new Date(time * 1000));
 
                     // Read masks

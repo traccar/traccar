@@ -20,8 +20,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.Context;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.DateBuilder;
@@ -67,28 +66,18 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
             .compile();
 
     private String decodeAlarm(String value) {
-        switch (value) {
-            case "IN1":
-                return Position.ALARM_SOS;
-            case "GOF":
-                return Position.ALARM_GEOFENCE;
-            case "TOW":
-                return Position.ALARM_TOW;
-            case "HDA":
-                return Position.ALARM_ACCELERATION;
-            case "HDB":
-                return Position.ALARM_BRAKING;
-            case "FDA":
-                return Position.ALARM_FATIGUE_DRIVING;
-            case "SKA":
-                return Position.ALARM_VIBRATION;
-            case "PMA":
-                return Position.ALARM_MOVEMENT;
-            case "CPA":
-                return Position.ALARM_POWER_CUT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case "IN1" -> Position.ALARM_SOS;
+            case "GOF" -> Position.ALARM_GEOFENCE;
+            case "TOW" -> Position.ALARM_TOW;
+            case "HDA" -> Position.ALARM_ACCELERATION;
+            case "HDB" -> Position.ALARM_BRAKING;
+            case "FDA" -> Position.ALARM_FATIGUE_DRIVING;
+            case "SKA" -> Position.ALARM_VIBRATION;
+            case "PMA" -> Position.ALARM_MOVEMENT;
+            case "CPA" -> Position.ALARM_POWER_CUT;
+            default -> null;
+        };
     }
 
     private Position decodePosition(Channel channel, SocketAddress remoteAddress, String sentence) {
@@ -99,7 +88,7 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         Position position = new Position(getProtocolName());
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.next()));
+        position.addAlarm(decodeAlarm(parser.next()));
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
@@ -175,14 +164,13 @@ public class Pt502ProtocolDecoder extends BaseProtocolDecoder {
                 } else {
 
                     DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-                    String uniqueId = Context.getIdentityManager().getById(deviceSession.getDeviceId()).getUniqueId();
 
                     Position position = new Position(getProtocolName());
                     position.setDeviceId(deviceSession.getDeviceId());
 
                     getLastLocation(position, null);
 
-                    position.set(Position.KEY_IMAGE, Context.getMediaManager().writeFile(uniqueId, photo, "jpg"));
+                    position.set(Position.KEY_IMAGE, writeMediaFile(deviceSession.getUniqueId(), photo, "jpg"));
                     photo.release();
                     photo = null;
 

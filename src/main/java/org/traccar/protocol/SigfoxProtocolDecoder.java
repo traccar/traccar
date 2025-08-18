@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,8 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import org.traccar.BaseHttpProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.helper.BufferUtil;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DataConverter;
@@ -31,11 +32,11 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
-import javax.json.Json;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
+import jakarta.json.Json;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import java.io.StringReader;
 import java.net.SocketAddress;
 import java.net.URLDecoder;
@@ -104,7 +105,7 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
         FullHttpRequest request = (FullHttpRequest) msg;
         String content = request.content().toString(StandardCharsets.UTF_8);
         if (!content.startsWith("{")) {
-            content = URLDecoder.decode(content.split("=")[0], "UTF-8");
+            content = URLDecoder.decode(content.split("=")[0], StandardCharsets.UTF_8);
         }
         JsonObject json = Json.createReader(new StringReader(content)).readObject();
 
@@ -155,28 +156,30 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
 
             ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(json.getString("data")));
             try {
-                int event = buf.readUnsignedByte();
-                if (event == 0x0f || event == 0x1f) {
+                int header = buf.readUnsignedByte();
+                if ("Amber".equals(getDeviceModel(deviceSession))) {
 
-                    position.setValid(event >> 4 > 0);
+                    int flags = buf.readUnsignedByte();
+                    position.set(Position.KEY_MOTION, BitUtil.check(flags, 1));
 
-                    long value;
-                    value = buf.readUnsignedInt();
-                    position.setLatitude(BitUtil.to(value, 31) * 0.000001);
-                    if (BitUtil.check(value, 31)) {
-                        position.setLatitude(-position.getLatitude());
-                    }
-                    value = buf.readUnsignedInt();
-                    position.setLongitude(BitUtil.to(value, 31) * 0.000001);
-                    if (BitUtil.check(value, 31)) {
-                        position.setLongitude(-position.getLongitude());
-                    }
+                    position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.02);
+                    position.set(Position.PREFIX_TEMP + 1, (int) buf.readByte());
+
+                    position.setValid(true);
+                    position.setLatitude(buf.readInt() / 60000.0);
+                    position.setLongitude(buf.readInt() / 60000.0);
+
+                } else if (header == 0x0f || header == 0x1f) {
+
+                    position.setValid(header >> 4 > 0);
+                    position.setLatitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.000001);
+                    position.setLongitude(BufferUtil.readSignedMagnitudeInt(buf) * 0.000001);
 
                     position.set(Position.KEY_BATTERY, (int) buf.readUnsignedByte());
 
-                } else if (event >> 4 <= 3 && buf.writerIndex() == 12) {
+                } else if (header >> 4 <= 3 && buf.writerIndex() == 12) {
 
-                    if (BitUtil.to(event, 4) == 0) {
+                    if (BitUtil.to(header, 4) == 0) {
                         position.setValid(true);
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
@@ -200,48 +203,34 @@ public class SigfoxProtocolDecoder extends BaseHttpProtocolDecoder {
                 int event = buf.readUnsignedByte();
                 position.set(Position.KEY_EVENT, event);
                 if (event == 0x22 || event == 0x62) {
-                    position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+                    position.addAlarm(Position.ALARM_SOS);
                 }
 
                 while (buf.isReadable()) {
                     int type = buf.readUnsignedByte();
                     switch (type) {
-                        case 0x01:
+                        case 0x01 -> {
                             position.setValid(true);
                             position.setLatitude(buf.readMedium());
                             position.setLongitude(buf.readMedium());
-                            break;
-                        case 0x02:
+                        }
+                        case 0x02 -> {
                             position.setValid(true);
                             position.setLatitude(buf.readFloat());
                             position.setLongitude(buf.readFloat());
-                            break;
-                        case 0x03:
-                            position.set(Position.PREFIX_TEMP + 1, buf.readByte() * 0.5);
-                            break;
-                        case 0x04:
-                            position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
-                            break;
-                        case 0x05:
-                            position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                            break;
-                        case 0x06:
+                        }
+                        case 0x03 -> position.set(Position.PREFIX_TEMP + 1, buf.readByte() * 0.5);
+                        case 0x04 -> position.set(Position.KEY_BATTERY, buf.readUnsignedByte() * 0.1);
+                        case 0x05 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        case 0x06 -> {
                             String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
                             position.setNetwork(new Network(WifiAccessPoint.from(
                                     mac.substring(0, mac.length() - 1), buf.readUnsignedByte())));
-                            break;
-                        case 0x07:
-                            buf.skipBytes(10); // wifi extended
-                            break;
-                        case 0x08:
-                            buf.skipBytes(6); // accelerometer
-                            break;
-                        case 0x09:
-                            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
-                            break;
-                        default:
-                            buf.readUnsignedByte(); // fence number
-                            break;
+                        }
+                        case 0x07 -> buf.skipBytes(10); // wifi extended
+                        case 0x08 -> buf.skipBytes(6); // accelerometer
+                        case 0x09 -> position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
+                        default -> buf.readUnsignedByte(); // fence number
                     }
                 }
             } finally {

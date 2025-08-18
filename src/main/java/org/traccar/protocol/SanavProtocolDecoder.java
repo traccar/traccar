@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.DateBuilder;
@@ -97,7 +97,7 @@ public class SanavProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_OUT + 2, BitUtil.check(io, 7));
             position.set(Position.KEY_CHARGE, BitUtil.check(io, 8));
             if (!BitUtil.check(io, 9)) {
-                position.set(Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+                position.addAlarm(Position.ALARM_LOW_BATTERY);
             }
         }
 

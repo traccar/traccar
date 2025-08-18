@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,13 +9,173 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Gt06ProtocolDecoder(null);
+        var decoder = inject(new Gt06ProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "787805120099abec0d0a"));
 
         verifyNull(decoder, binary(
                 "78780D01086471700328358100093F040D0A"));
+
+        verifyAttribute(decoder, binary(
+                "79790008940b02e3048614200d0a"),
+                Position.KEY_POWER, 7.39);
+
+        verifyPosition(decoder, binary(
+                "7979003e3819050e0e0c26c5010fd98e0905f53000ccab0e000302c80100000c240000000000048b08001b002e04000015c4003b020000003c0401020001021f60220d0a"));
+
+        verifyAttributes(decoder, binary(
+                "78780ca346000106640c01123d5f5e0d0a"));
+
+        verifyAttribute(decoder, binary(
+                "7979000e941e000000d5000002ee00f59b850d0a"),
+                Position.KEY_HUMIDITY, 75.0);
+
+        verifyAttribute(decoder, binary(
+                "78789795ffff01180b0d031406da04b5ab0d08813df01ca9002c008a9200004556454e545f3836323739383035323432393038375f30303030303030305f323032345f31315f31325f32325f32305f30365f495f35362e6d70342c4556454e545f3836323739383035323432393038375f30303030303030305f323032345f31315f31325f32325f32305f30365f465f35352e6d70340037d45b0d0a"),
+                "eventFiles", "EVENT_862798052429087_00000000_2024_11_12_22_20_06_I_56.mp4,EVENT_862798052429087_00000000_2024_11_12_22_20_06_F_55.mp4");
+
+        verifyPosition(decoder, binary(
+                "787840a2180b0f0f3407cf00602cd208354064001c6a02dc650000698100000000095674c9114100002a04000100004b31000000000863829079286793020001a22a8f0d0a"));
+
+        verifyNotNull(decoder, binary(
+                "787895a2180b0f0f1d2602dc65000069810000000009569e9648000069810000000009569e3255000069810000000009569e0052000069810000000009569ec846000069810000000009569e64320000000000000000000000000000000000000000000000000000ff06f27cf64f17e13c909a4a53778c3dc83a350fa1b84522976d5ea4854854af976b9ab04cb04e26d703925102a1ce550d0a"));
+
+        verifyAttributes(decoder, binary(
+                "79790016f26718e430000c0a470000000010020000000024bff50d0a"));
+
+        verifyAttributes(decoder, binary(
+                "79790037f26718e389000b0a0423027aca200c465a60000a001d01c4a82828ccfe0000024254425554544f4e2c412c53233136382c35340016a1eb0d0a"));
+
+        verifyAttribute(decoder, binary(
+                "7878131340b2fa000201040000000000011c00400e550d0a"),
+                Position.PREFIX_TEMP + 1, 28.4);
+
+        verifyAttribute(decoder, binary(
+                "787817360005040002003201010018020192006a015f0324aeaf0d0a"),
+                Position.KEY_BATTERY, 4.02);
+
+        verifyPosition(decoder, binary(
+                "787840a218061b0e0f05cf021d22430aa2660b005c00014e140000026500000000024d4e02114504df06031c010007d00000000000086973105524576500c802a86fda0d0a"));
+
+        verifyAttribute(decoder, binary(
+                "79790007940B010A0B5ACE0D0A"),
+                "networkTechnology", "4G");
+
+        verifyAttribute(decoder, binary(
+                "7878293218061301261ccd0274c4ad050d7c960018000a02d4000ac3c70dbdc40b46f004210202af001784290d0a"),
+                "altitude", -31703.0);
+
+        verifyAttribute(decoder, binary(
+                "78782a31180613012b39cc0274c4dc050d7cd000180002d4000ac3c70dbdc4150100000000000002a6000ea40b0d0a"),
+                "altitude", 678.0);
+
+        verifyAttribute(decoder, binary(
+                "7878281718060e021831c6026e8acc0c361b1000140001cc00286d000f4dbf0000012ca7e001000004b2630d0a"),
+                Position.KEY_DRIVER_UNIQUE_ID, "bf0000012ca7e001");
+
+        verifyNotNull(decoder, binary(
+                "78782732180214123324ca0162bdf0041f45d900190b0a02d4000bc5270000ec025206040202005e07e10d0a"));
+
+        verifyAttribute(decoder, binary(
+                "78782616170A080C0E24C0027C58AD0C2B8B0100454E0901CC0025030328E7A0005D4B13021EC373170D0A"),
+                Position.KEY_BATTERY_LEVEL, 93);
+
+        verifyAttribute(decoder, binary(
+                "787826161709130f3a2dcc02c55f2a089f9af9005c210901360481fe066d9b03413e420102035f92fe0d0a"),
+                Position.KEY_ALARM, Position.ALARM_SOS);
+
+        verifyAttribute(decoder, binary(
+                "78782f221709130f3a32cc02c55f2a089f9afc005c2101360481fe066d9b03000000000025d4000000000020002d036049d70d0a"),
+                Position.PREFIX_TEMP + 1, 0.32);
+
+        verifyAttribute(decoder, binary(
+                "78785995ffff01170719152013df0163d45f041ee52018be002f00876900004556454e545f3836323739383035303137353131325f30303030303030305f323032335f30375f32355f31385f33325f30355f31342e6d70340119d15a0d0a"),
+                Position.KEY_EVENT, 0x69);
+
+        verifyAttribute(decoder, binary(
+                "787829a01707150f2d0ecd01635100041e96d000087c02d4020000912e000000000718798d000e0006ed3ce50d0a"),
+                Position.KEY_IGNITION, false);
+
+        verifyNotNull(decoder, binary(
+                "787829a0170704112226cf0163fe7c0420f6f000091302d402000091290000000007186b8f01030001460d010d0a"));
+
+        verifyAttribute(decoder, binary(
+                "797900109b0344373532304136320d0a000f87f00d0a"),
+                Position.KEY_RESULT, "D7520A62");
+
+        verifyAttribute(decoder, binary(
+                "7878241617070a150e24ca01fba0040780e177005c0001720253360027db6204e40400004bf1e90d0a"),
+                Position.KEY_ALARM, Position.ALARM_SOS);
+
+        verifyAttribute(decoder, binary(
+                "78780a130604ea04000006bc8a0d0a"),
+                Position.KEY_POWER, null);
+
+        verifyAttributes(decoder, binary(
+                "797900849404414c4d313d43353b414c4d323d43433b414c4d333d35433b535441313d43303b4459443d30313b534f533d303133323838333730302c2c3b43454e5445523d303133323838333730303b46454e43453d46656e63652c4f46462c302c302e3030303030302c302e3030303030302c3330302c494e206f72204f55542c313b00b79d120d0a"));
+
+        verifyAttribute(decoder, binary(
+                "78782912170316053b3bcf015b51220af1201105d56100000000000000000000869c0130010000000238d1af0d0a"),
+                Position.KEY_DRIVING_TIME, 0);
+
+        verifyAttribute(decoder, binary(
+                "78781219012ed042cc00954d00040419000056fe290d0a"),
+                Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+
+        verifyAttribute(decoder, binary(
+                "78782DA4150817073B10CF032EEA9C0B6CE0800015141001CC0100009A00000000000A6F24014605041900FF01908A640D0A"),
+                Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+
+        verifyAttribute(decoder, binary(
+                "78782627100419092D07C5027AC91C0C4658000005370900000000000000008002001900FF00004DF60D0A"),
+                Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
+
+        verifyPosition(decoder, binary(
+                "78781511170103100e1f9904efe30400a97f88003410ffdd000d0a"));
+
+        verifyAttribute(decoder, binary(
+                "787819a5012ed0000075df000000000098661502050413000019a12b0d0a"),
+                Position.KEY_ALARM, Position.ALARM_TAMPERING);
+
+        verifyAttribute(decoder, binary(
+                "7878131302801900002e42016f000000003a0177ef180d0a"),
+                Position.KEY_POWER, 3.67);
+
+        verifyAttribute(decoder, binary(
+                "78782526160913063918c002780fab0c44750f00040008027f14084c0038420600030c020007398e0d0a"),
+                Position.KEY_ALARM, Position.ALARM_TAMPERING);
+
+        verifyAttribute(decoder, binary(
+                "7979000d940516090908081c030defbd2d0d0a"),
+                Position.KEY_DOOR, true);
+
+        verifyAttribute(decoder, binary(
+                "78782516160908063736c0006e70110442fc800000000800000000000000000300002512000473fb0d0a"),
+                Position.KEY_ALARM, Position.ALARM_TAMPERING);
+
+        verifyPosition(decoder, binary(
+                "78782e2416061a103600c80275298404a0a24000184602d4023a49006f060104ed01940000086508004139765000be7d640d0a"));
+
+        verifyAttribute(decoder, binary(
+                "79790019941b524649443a3030384642324245424133390d0a000c14930d0a"),
+                "serial", "RFID:008FB2BEBA39");
+
+        verifyAttribute(decoder, binary(
+                "7878241216040e102c22cf00915ffb04c6016300195a02d402283b00753f400571040001dda4880d0a"),
+                Position.KEY_IGNITION, false);
+
+        verifyNotNull(decoder, binary(
+                "787831241603060c231e000194620213ee00606a3413ee0060692e000000000000000000000000000000000000000000003a0cb70d0a"));
+
+        verifyNotNull(decoder, binary(
+                "78783B2810010D02020201CC00287D001F713E287D001F7231287D001E232D287D001F4018000000000000000000000000000000000000FF00020005B14B0D0A"));
+
+        verifyNotNull(decoder, binary(
+                "78782111150b0b022c30c804b7af7808810cb0003c00012e02d075df0084890c000679950d0a"));
+
+        verifyNotNull(decoder, binary(
+                "797900377000000001020035000103002c0004616219d00043000b013601048153931500001a0001000808652820400643521000000101004e46760d0a"));
 
         verifyNull(decoder, binary(
                 "7878171915061810051a01f90101700d08c8f50c0000065494ae0d0a"));
@@ -38,8 +198,9 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "7878281520000000003c49434349443a38393838323339303030303039373330323635303e00020d446f260d0a"),
                 Position.KEY_ICCID, "89882390000097302650");
 
-        verifyNull(decoder, binary(
-                "797900099b0380d600046f91e90d0a"));
+        verifyAttribute(decoder, binary(
+                "797900099b0380d600046f91e90d0a"),
+                Position.KEY_RESULT, "80d600");
 
         verifyNull(decoder, binary(
                 "797900a56615010d081f3b012c323131303d30303033643238342c323130353d30303030316332302c323130623d30303030326537632c323130633d30303033643238342c323130663d30303030306331632c323130643d30303030323166632c323161363d30303030303030302c323130343d30303030306531302c323132663d30303030303030302c323134353d30303030303030302ccb03851f5f03c020525514a7003e216a0d0a"));
@@ -52,7 +213,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "7979000E9B0332382E33A1E60D0A0289BE490D0A"),
-                Position.PREFIX_TEMP + 1, 28.3);
+                Position.KEY_RESULT, "32382e33a1e60d0a");
 
         verifyPosition(decoder, binary(
                 "7878353714080d05000ac500a886eb0b7522f000100001fe0a05ea004f1b000001002e0400002328003b0217c0003c0401020001002c468a0d0a"));
@@ -95,7 +256,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "797900149b03023539303042343843454238410300139ba40d0a"),
-                Position.KEY_DRIVER_UNIQUE_ID, "5900B48CEB");
+                Position.KEY_RESULT, "0235393030423438434542384103");
 
         verifyPosition(decoder, binary(
                 "787821121303120b2524c70138e363085b549003d43301940057d200cd52c000006aa1ca0d0a"));
@@ -128,7 +289,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyAttributes(decoder, binary(
                 "79790008940000ed0289d6860d0a"));
 
-        verifyNull(decoder, binary(
+        verifyAttributes(decoder, binary(
                 "797900a59404414c4d313d34353b414c4d323d44353b414c4d333d35353b535441313d34303b4459443d30313b534f533d303538353036313536372c2c3b43454e5445523d3b46454e43453d46656e63652c4f46462c302c302e3030303030302c302e3030303030302c3330302c494e206f72204f55542c303b49434349443d38393937313033313031303038393539303432463b4d4f44453d4d4f44452c312c3138303b0008f65e0d0a"));
 
         verifyPosition(decoder, binary(
@@ -388,6 +549,34 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, binary(
                 "78785195140a020c2914055D4A800209D9C014009300004556454e545f3335333337363131303032333139365f30303030303030305f323032305f31305f30325f31345f34315f32305f30352e6d70340004e3a60d0a"),
                 Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+
+        decoder.setModelOverride("LW4G-4B");
+
+        verifyAttribute(decoder, binary(
+                "78780a13560604f0830ccf986f0d0a"),
+                Position.KEY_POWER, 13.1);
+
+        verifyAttribute(decoder, binary(
+                "78782516180516150812c804b50ee80880e40805dcf909012e000000986633460604190106c393490d0a"),
+                Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+
+        decoder.setModelOverride("SEEWORLD");
+
+        verifyAttribute(decoder, binary(
+                "78780a134506560b0102242b850d0a"),
+                Position.KEY_POWER, 11.0);
+
+        decoder.setModelOverride("R11");
+
+        verifyAttribute(decoder, binary(
+                "78780a13460b120400160642c20d0a"),
+                Position.KEY_POWER, 28.34);
+
+        decoder.setModelOverride("NT20");
+
+        verifyAttribute(decoder, binary(
+                "78783c22010357789648774484180c06142038180c06142038cb03313ee4061fe98300185e090000000000000000460984284c000200000000017101d6f35d0d0a"),
+                Position.KEY_HOURS, 22140000);
 
     }
 

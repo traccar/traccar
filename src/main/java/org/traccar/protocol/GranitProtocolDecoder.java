@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -72,7 +72,7 @@ public class GranitProtocolDecoder extends BaseProtocolDecoder {
         short flags = buf.readUnsignedByte();
         position.setValid(BitUtil.check(flags, 7));
         if (BitUtil.check(flags, 1)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+            position.addAlarm(Position.ALARM_GENERAL);
         }
 
         short satDel = buf.readUnsignedByte();

@@ -19,7 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.model.Position;
@@ -81,22 +81,14 @@ public class RetranslatorProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_SATELLITES, buf.readByte());
             } else {
                 switch (dataType) {
-                    case 1:
+                    case 1 -> {
                         int len = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) 0x00) - buf.readerIndex();
                         position.set(name, buf.readCharSequence(len, StandardCharsets.US_ASCII).toString());
                         buf.readByte();
-                        break;
-                    case 3:
-                        position.set(name, buf.readInt());
-                        break;
-                    case 4:
-                        position.set(name, buf.readDoubleLE());
-                        break;
-                    case 5:
-                        position.set(name, buf.readLong());
-                        break;
-                    default:
-                        break;
+                    }
+                    case 3 -> position.set(name, buf.readInt());
+                    case 4 -> position.set(name, buf.readDoubleLE());
+                    case 5 -> position.set(name, buf.readLong());
                 }
             }
 

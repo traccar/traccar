@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class TotemFrameDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class TotemFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TotemFrameDecoder();
+        var decoder = inject(new TotemFrameDecoder());
 
         verifyFrame(
                 binary("24243030323542423836323031303033373239343836313345"),

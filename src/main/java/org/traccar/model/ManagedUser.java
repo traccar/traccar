@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +16,8 @@
  */
 package org.traccar.model;
 
-public class ManagedUser extends User {
+import org.traccar.storage.StorageName;
 
+@StorageName("tc_users")
+public class ManagedUser extends User {
 }

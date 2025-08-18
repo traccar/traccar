@@ -18,7 +18,7 @@ package org.traccar.protocol;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramChannel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -49,7 +49,7 @@ public class EskyProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+)[+;]")               // speed
             .number("(d+)[+;]")                  // course
             .groupBegin()
-            .text("0x").number("(d+)[+;]")       // input
+            .text("0x").number("(x+)[+;]")       // input
             .number("(d+)[+;]")                  // message type
             .number("(d+)[+;]")                  // odometer
             .groupEnd("?")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,16 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import org.traccar.database.QueryExtended;
-import org.traccar.database.QueryIgnore;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.traccar.storage.QueryIgnore;
 import org.traccar.helper.Hashing;
+import org.traccar.storage.StorageName;
 
 import java.util.Date;
+import java.util.HashMap;
 
-public class User extends ExtendedModel {
+@StorageName("tc_users")
+public class User extends ExtendedModel implements UserRestrictions, Disableable {
 
     private String name;
 
@@ -62,11 +65,12 @@ public class User extends ExtendedModel {
     }
 
     public void setPhone(String phone) {
-        this.phone = phone;
+        this.phone = phone != null ? phone.trim() : null;
     }
 
     private boolean readonly;
 
+    @Override
     public boolean getReadonly() {
         return readonly;
     }
@@ -76,6 +80,12 @@ public class User extends ExtendedModel {
     }
 
     private boolean administrator;
+
+    @QueryIgnore
+    @JsonIgnore
+    public boolean getManager() {
+        return userLimit != 0;
+    }
 
     public boolean getAdministrator() {
         return administrator;
@@ -125,16 +135,6 @@ public class User extends ExtendedModel {
         this.zoom = zoom;
     }
 
-    private boolean twelveHourFormat;
-
-    public boolean getTwelveHourFormat() {
-        return twelveHourFormat;
-    }
-
-    public void setTwelveHourFormat(boolean twelveHourFormat) {
-        this.twelveHourFormat = twelveHourFormat;
-    }
-
     private String coordinateFormat;
 
     public String getCoordinateFormat() {
@@ -147,20 +147,24 @@ public class User extends ExtendedModel {
 
     private boolean disabled;
 
+    @Override
     public boolean getDisabled() {
         return disabled;
     }
 
+    @Override
     public void setDisabled(boolean disabled) {
         this.disabled = disabled;
     }
 
     private Date expirationTime;
 
+    @Override
     public Date getExpirationTime() {
         return expirationTime;
     }
 
+    @Override
     public void setExpirationTime(Date expirationTime) {
         this.expirationTime = expirationTime;
     }
@@ -187,6 +191,7 @@ public class User extends ExtendedModel {
 
     private boolean deviceReadonly;
 
+    @Override
     public boolean getDeviceReadonly() {
         return deviceReadonly;
     }
@@ -195,31 +200,37 @@ public class User extends ExtendedModel {
         this.deviceReadonly = deviceReadonly;
     }
 
-    private String token;
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        if (token != null && !token.isEmpty()) {
-            if (!token.matches("^[a-zA-Z0-9-]{16,}$")) {
-                throw new IllegalArgumentException("Illegal token");
-            }
-            this.token = token;
-        } else {
-            this.token = null;
-        }
-    }
-
     private boolean limitCommands;
 
+    @Override
     public boolean getLimitCommands() {
         return limitCommands;
     }
 
     public void setLimitCommands(boolean limitCommands) {
         this.limitCommands = limitCommands;
+    }
+
+    private boolean disableReports;
+
+    @Override
+    public boolean getDisableReports() {
+        return disableReports;
+    }
+
+    public void setDisableReports(boolean disableReports) {
+        this.disableReports = disableReports;
+    }
+
+    private boolean fixedEmail;
+
+    @Override
+    public boolean getFixedEmail() {
+        return fixedEmail;
+    }
+
+    public void setFixedEmail(boolean fixedEmail) {
+        this.fixedEmail = fixedEmail;
     }
 
     private String poiLayer;
@@ -232,11 +243,32 @@ public class User extends ExtendedModel {
         this.poiLayer = poiLayer;
     }
 
+    private String totpKey;
+
+    public String getTotpKey() {
+        return totpKey;
+    }
+
+    public void setTotpKey(String totpKey) {
+        this.totpKey = totpKey;
+    }
+
+    private boolean temporary;
+
+    public boolean getTemporary() {
+        return temporary;
+    }
+
+    public void setTemporary(boolean temporary) {
+        this.temporary = temporary;
+    }
+
     @QueryIgnore
     public String getPassword() {
         return null;
     }
 
+    @QueryIgnore
     public void setPassword(String password) {
         if (password != null && !password.isEmpty()) {
             Hashing.HashingResult hashingResult = Hashing.createHash(password);
@@ -248,11 +280,12 @@ public class User extends ExtendedModel {
     private String hashedPassword;
 
     @JsonIgnore
-    @QueryExtended
+    @QueryIgnore
     public String getHashedPassword() {
         return hashedPassword;
     }
 
+    @QueryIgnore
     public void setHashedPassword(String hashedPassword) {
         this.hashedPassword = hashedPassword;
     }
@@ -260,17 +293,31 @@ public class User extends ExtendedModel {
     private String salt;
 
     @JsonIgnore
-    @QueryExtended
+    @QueryIgnore
     public String getSalt() {
         return salt;
     }
 
+    @QueryIgnore
     public void setSalt(String salt) {
         this.salt = salt;
     }
 
     public boolean isPasswordValid(String password) {
         return Hashing.validatePassword(password, hashedPassword, salt);
+    }
+
+    public boolean compare(User other, String... exclusions) {
+        if (!EqualsBuilder.reflectionEquals(this, other, "attributes", "hashedPassword", "salt")) {
+            return false;
+        }
+        var thisAttributes = new HashMap<>(getAttributes());
+        var otherAttributes = new HashMap<>(other.getAttributes());
+        for (String exclusion : exclusions) {
+            thisAttributes.remove(exclusion);
+            otherAttributes.remove(exclusion);
+        }
+        return thisAttributes.equals(otherAttributes);
     }
 
 }

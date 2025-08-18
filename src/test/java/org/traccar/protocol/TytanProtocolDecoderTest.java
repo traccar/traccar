@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class TytanProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class TytanProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TytanProtocolDecoder(null);
+        var decoder = inject(new TytanProtocolDecoder(null));
 
         verifyPositions(decoder, binary(
                 "B500192000001405125652CA9B1A325FC98D11A9990018020118FC0D"));

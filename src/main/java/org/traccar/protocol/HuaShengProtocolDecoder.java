@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -48,6 +48,10 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_UPFAULT_RSP = 0xFF13;
     public static final int MSG_HSO_REQ = 0x0002;
     public static final int MSG_HSO_RSP = 0x0003;
+    public static final int MSG_SET_REQ = 0xAA04;
+    public static final int MSG_SET_RSP = 0xFF05;
+    public static final int MSG_CTRL_REQ = 0xAA16;
+    public static final int MSG_CTRL_RSP = 0xFF17;
 
     private void sendResponse(Channel channel, int type, int index, ByteBuf content) {
         if (channel != null) {
@@ -68,24 +72,16 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int event) {
-        switch (event) {
-            case 4:
-                return Position.ALARM_FATIGUE_DRIVING;
-            case 6:
-                return Position.ALARM_SOS;
-            case 7:
-                return Position.ALARM_BRAKING;
-            case 8:
-                return Position.ALARM_ACCELERATION;
-            case 9:
-                return Position.ALARM_CORNERING;
-            case 10:
-                return Position.ALARM_ACCIDENT;
-            case 16:
-                return Position.ALARM_REMOVING;
-            default:
-                return null;
-        }
+        return switch (event) {
+            case 4 -> Position.ALARM_FATIGUE_DRIVING;
+            case 6 -> Position.ALARM_SOS;
+            case 7 -> Position.ALARM_BRAKING;
+            case 8 -> Position.ALARM_ACCELERATION;
+            case 9 -> Position.ALARM_CORNERING;
+            case 10 -> Position.ALARM_ACCIDENT;
+            case 16 -> Position.ALARM_REMOVING;
+            default -> null;
+        };
     }
 
     @Override
@@ -159,21 +155,12 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() > 2) {
             String value = ByteBufUtil.hexDump(buf.readSlice(2));
             int digit = Integer.parseInt(value.substring(0, 1), 16);
-            char prefix;
-            switch (digit >> 2) {
-                default:
-                    prefix = 'P';
-                    break;
-                case 1:
-                    prefix = 'C';
-                    break;
-                case 2:
-                    prefix = 'B';
-                    break;
-                case 3:
-                    prefix = 'U';
-                    break;
-            }
+            char prefix = switch (digit >> 2) {
+                default -> 'P';
+                case 1 -> 'C';
+                case 2 -> 'B';
+                case 3 -> 'U';
+            };
             codes.append(prefix).append(digit % 4).append(value.substring(1));
             if (buf.readableBytes() > 2) {
                 codes.append(' ');
@@ -204,7 +191,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_IGNITION, BitUtil.check(status, 14));
 
         int event = buf.readUnsignedShort();
-        position.set(Position.KEY_ALARM, decodeAlarm(event));
+        position.addAlarm(decodeAlarm(event));
         position.set(Position.KEY_EVENT, event);
 
         String time = buf.readCharSequence(12, StandardCharsets.US_ASCII).toString();
@@ -225,13 +212,14 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(buf.readUnsignedShort());
         position.setAltitude(buf.readUnsignedShort());
 
-        position.set(Position.KEY_ODOMETER, buf.readUnsignedShort() * 1000);
+        buf.readUnsignedShort(); // odometer speed
 
         Network network = new Network();
 
         while (buf.readableBytes() > 4) {
             int subtype = buf.readUnsignedShort();
             int length = buf.readUnsignedShort() - 4;
+            int endIndex = buf.readerIndex() + length;
             switch (subtype) {
                 case 0x0001:
                     int coolantTemperature = buf.readUnsignedByte() - 40;
@@ -249,6 +237,9 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
                     buf.readUnsignedInt(); // trip id
+                    if (buf.readerIndex() < endIndex) {
+                        position.set("adBlueLevel", buf.readUnsignedByte() * 0.4);
+                    }
                     break;
                 case 0x0005:
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
@@ -256,11 +247,21 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedInt(); // run time
                     break;
                 case 0x0009:
-                    position.set(
-                            Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                    position.set(Position.KEY_VIN, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                    break;
+                case 0x0010:
+                    position.set(Position.KEY_ODOMETER, Double.parseDouble(
+                            buf.readCharSequence(length, StandardCharsets.US_ASCII).toString()) * 1000);
                     break;
                 case 0x0011:
                     position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 0.05);
+                    break;
+                case 0x0014:
+                    position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte() / 255.0);
+                    position.set("timingAdvance", buf.readUnsignedByte() * 0.5);
+                    position.set("airTemp", buf.readUnsignedByte() - 40);
+                    position.set("airFlow", buf.readUnsignedShort() * 0.01);
+                    position.set(Position.KEY_THROTTLE, buf.readUnsignedByte() / 255.0);
                     break;
                 case 0x0020:
                     String[] cells = buf.readCharSequence(
@@ -269,7 +270,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                         String[] values = cell.split("@");
                         network.addCellTower(CellTower.from(
                                 Integer.parseInt(values[0]), Integer.parseInt(values[1]),
-                                Integer.parseInt(values[2], 16), Integer.parseInt(values[3], 16)));
+                                Integer.parseInt(values[2], 16), Long.parseLong(values[3], 16)));
                     }
                     break;
                 case 0x0021:
@@ -284,6 +285,7 @@ public class HuaShengProtocolDecoder extends BaseProtocolDecoder {
                     buf.skipBytes(length);
                     break;
             }
+            buf.readerIndex(endIndex);
         }
 
         if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {

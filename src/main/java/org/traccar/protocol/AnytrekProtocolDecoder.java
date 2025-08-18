@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -106,7 +106,7 @@ public class AnytrekProtocolDecoder extends BaseProtocolDecoder {
         flags = buf.readUnsignedByte();
         position.set(Position.KEY_CHARGE, BitUtil.check(flags, 0));
         position.set(Position.KEY_IGNITION, BitUtil.check(flags, 1));
-        position.set(Position.KEY_ALARM, BitUtil.check(flags, 4) ? Position.ALARM_GENERAL : null);
+        position.addAlarm(BitUtil.check(flags, 4) ? Position.ALARM_GENERAL : null);
 
         buf.readUnsignedShortLE(); // charge current
 

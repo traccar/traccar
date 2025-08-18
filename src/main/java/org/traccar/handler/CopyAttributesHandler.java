@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,33 +16,35 @@
  */
 package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
-import org.traccar.BaseDataHandler;
-import org.traccar.database.IdentityManager;
+import jakarta.inject.Inject;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
-@ChannelHandler.Sharable
-public class CopyAttributesHandler extends BaseDataHandler {
+public class CopyAttributesHandler extends BasePositionHandler {
 
-    private IdentityManager identityManager;
+    private final CacheManager cacheManager;
 
-    public CopyAttributesHandler(IdentityManager identityManager) {
-        this.identityManager = identityManager;
+    @Inject
+    public CopyAttributesHandler(Config config, CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     @Override
-    protected Position handlePosition(Position position) {
-        String attributesString = identityManager.lookupAttributeString(
-                position.getDeviceId(), "processing.copyAttributes", "", false, true);
-        Position last = identityManager.getLastPosition(position.getDeviceId());
-        if (last != null) {
+    public void onPosition(Position position, Callback callback) {
+        String attributesString = AttributeUtil.lookup(
+                cacheManager, Keys.PROCESSING_COPY_ATTRIBUTES, position.getDeviceId());
+        Position last = cacheManager.getPosition(position.getDeviceId());
+        if (last != null && attributesString != null) {
             for (String attribute : attributesString.split("[ ,]")) {
-                if (last.getAttributes().containsKey(attribute) && !position.getAttributes().containsKey(attribute)) {
+                if (last.hasAttribute(attribute) && !position.hasAttribute(attribute)) {
                     position.getAttributes().put(attribute, last.getAttributes().get(attribute));
                 }
             }
         }
-        return position;
+        callback.processed(false);
     }
 
 }

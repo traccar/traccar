@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,9 +9,30 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Tlt2hProtocolDecoder(null);
+        var decoder = inject(new Tlt2hProtocolDecoder(null));
 
-        verifyNull(decoder, text(
+        verifyPositions(decoder, false, text(
+                "#862255061752835#MT710#0000#AUTO#1\r\n" +
+                "#4106#$GPRMC,151410.00,A,3010.4103,N,08146.2728,W,,214.90,010324,,,A*58\r\n"));
+
+        verifyPositions(decoder, text(
+                "#868105044690301#MT600+#0000#0#0#143#40#0#AUTO#1\r\n",
+                "#072030fcf21$GPRMC,155616.00,A,4931.9210,N,09652.5290,W,53.80,90.00,150224,,,A*48\r\n"));
+
+        verifyAttribute(decoder, text(
+                "#867665041689485#MT700N#0000#HT#1\r\n",
+                "#5065$GPRMC,148996.00,A,2485.2458,N,01258.4535,E,,,151348,,,A*5D\r\n"),
+                Position.KEY_BATTERY, 5.065);
+
+        verifyPositions(decoder, false, text(
+                "#862255061983166#MT700NW#0000#TOWED#1\r\n",
+                "#4502$WIFI,051550.00,A,-50,7683C2CBC0B0,-51,7683C29BC0B0,-51,7683C2BBC0B0,-51,7483C2DBC0B0,-51,7683C2ABC0B0,221123*78\r\n"));
+
+        verifyPositions(decoder, false, text(
+                "#862255061825896#MT710#0000#TOWED#1\r\n",
+                "#39#$WIFI,015259.00,A,-47,7483C2DBC0B0,-48,7683C2ABC0B0,-48,7683C29BC0B0,-48,7683C2CBC0B0,-48,7683C2BBC0B0,151123*74\r\n"));
+
+        verifyPositions(decoder, false, text(
                 "#860517049471362#MT700#0000#AUTO#1\r\n",
                 "#36$GPRMC,,V,,,,,,,,,,A*5C\r\n"));
 
@@ -81,6 +102,13 @@ public class Tlt2hProtocolDecoderTest extends ProtocolTest {
                 "#357671031289215#V600#0000#AUTOLOW#1\r\n",
                 "#00735e1c$GPRMC,115647.000,A,5553.6524,N,02632.3128,E,0.00,0.0,130614,0.0,W,A*28"));
 
+        verifyPositions(decoder, false, text(
+                "#860186058100000#MT700#0000#AUTO#1\r\n",
+                "#39#262,03,8CE6,A672$WIFI,154928.00,A,-74,3CA62F52615B,-82,A0E4CB83852D,,,050123*28\r\n##\r\n"));
+
+        verifyPositions(decoder, false, text(
+                "#860186058100000#MT700#0000#AUTO#1\r\n",
+                "#39#262,03,8CE6,A672$GPRMC,115419.00,V,,,,,,,050123,,,A*7D\r\n##\r\n"));
     }
 
 }

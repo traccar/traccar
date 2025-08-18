@@ -1,17 +1,17 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ItsProtocolEncoderTest extends ProtocolTest {
 
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new ItsProtocolEncoder(null);
+        var encoder = inject(new ItsProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class ObdDongleProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class ObdDongleProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new ObdDongleProtocolDecoder(null);
+        var decoder = inject(new ObdDongleProtocolDecoder(null));
 
         verifyNull(decoder, binary(
                 "55550003383634383637303232353131303135010009010011023402010201ABAAAA"));

@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2023 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -26,7 +26,6 @@ import org.traccar.helper.DateBuilder;
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -49,7 +48,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd("?")
             .number("(d{5})")                    // seconds
             .or()
-            .expression("(?:RGP|RCQ|RCV|RBR|RUS00),?") // type
+            .expression("(?:RGP|RCQ|RCV|RBR|RUS00|RPI),?") // type
             .number("(dd)?")                     // event
             .number("(dd)(dd)(dd)")              // date (mmddyy)
             .number("(dd)(dd)(dd)")              // time (hhmmss)
@@ -84,7 +83,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .or()
             .groupBegin()
             .number("(xx)")                      // input
-            .number("(xx)")                      // satellites
+            .number("xx")                        // satellites / outputs
             .number("(ddd)")                     // battery
             .number("(x{8})")                    // odometer
             .number("[01]")                      // gps power
@@ -96,10 +95,12 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             .number("[01]")                      // modem power
             .number("[0-5]")                     // gsm status
             .number("(dd)")                      // rssi
+            .groupBegin()
             .number("([-+]dddd)")                // temperature 1
             .number("xx")                        // seconds from last
             .number("([-+]dddd)")                // temperature 2
             .number("xx")                        // seconds from last
+            .groupEnd("?")
             .groupEnd("?")
             .groupEnd("?")
             .groupEnd()
@@ -121,30 +122,21 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private String decodeAlarm(int value) {
-        switch (value) {
-            case 0x01:
-                return Position.ALARM_SOS;
-            case 0x02:
-                return Position.ALARM_POWER_CUT;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 0x01 -> Position.ALARM_SOS;
+            case 0x02 -> Position.ALARM_POWER_CUT;
+            default -> null;
+        };
     }
 
     private String decodeAlarm2(int value) {
-        switch (value) {
-            case 22:
-                return Position.ALARM_ACCELERATION;
-            case 23:
-                return Position.ALARM_BRAKING;
-            case 24:
-                return Position.ALARM_ACCIDENT;
-            case 26:
-            case 28:
-                return Position.ALARM_CORNERING;
-            default:
-                return null;
-        }
+        return switch (value) {
+            case 22 -> Position.ALARM_ACCELERATION;
+            case 23 -> Position.ALARM_BRAKING;
+            case 24 -> Position.ALARM_ACCIDENT;
+            case 26, 28 -> Position.ALARM_CORNERING;
+            default -> null;
+        };
     }
 
     @Override
@@ -192,7 +184,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.setLongitude(parser.nextCoordinate(Parser.CoordinateFormat.HEM_DEG_MIN));
         }
 
-        position.setSpeed(UnitsConverter.knotsFromMph(parser.nextDouble(0)));
+        position.setSpeed(convertSpeed(parser.nextDouble(0), "mph"));
         position.setCourse(parser.nextDouble(0));
 
         if (parser.hasNext(2)) {
@@ -217,17 +209,18 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_HDOP, parser.nextInt());
         }
 
-        if (parser.hasNext(4)) {
+        if (parser.hasNext(3)) {
             position.set(Position.KEY_INPUT, parser.nextHexInt(0));
-            position.set(Position.KEY_SATELLITES, parser.nextHexInt(0));
             position.set(Position.KEY_BATTERY, parser.nextInt(0));
             position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
         }
 
-        if (parser.hasNext(4)) {
+        if (parser.hasNext(3)) {
             valid = parser.nextInt() > 0;
             position.set(Position.KEY_PDOP, parser.nextInt());
             position.set(Position.KEY_RSSI, parser.nextInt());
+        }
+        if (parser.hasNext(2)) {
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt() * 0.01);
             position.set(Position.PREFIX_TEMP + 2, parser.nextInt() * 0.01);
         }
@@ -237,9 +230,9 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         if (event != null) {
             position.set(Position.KEY_EVENT, event);
             if (sentence.charAt(5) == ',') {
-                position.set(Position.KEY_ALARM, decodeAlarm2(event));
+                position.addAlarm(decodeAlarm2(event));
             } else {
-                position.set(Position.KEY_ALARM, decodeAlarm(event));
+                position.addAlarm(decodeAlarm(event));
             }
         }
 
@@ -262,6 +255,7 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
         String uniqueId = null;
         DeviceSession deviceSession = null;
         String messageIndex = null;
+        boolean indexFirst = true;
 
         if (attributes != null) {
             for (String attribute : attributes) {
@@ -270,37 +264,28 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                     String key = attribute.substring(0, index).toLowerCase();
                     String value = attribute.substring(index + 1);
                     switch (key) {
-                        case "id":
+                        case "id" -> {
                             uniqueId = value;
                             deviceSession = getDeviceSession(channel, remoteAddress, value);
                             if (deviceSession != null) {
                                 position.setDeviceId(deviceSession.getDeviceId());
                             }
-                            break;
-                        case "io":
+                            if (messageIndex == null) {
+                                indexFirst = false;
+                            }
+                        }
+                        case "io" -> {
                             position.set(Position.KEY_IGNITION, BitUtil.check(value.charAt(0) - '0', 0));
                             position.set(Position.KEY_CHARGE, BitUtil.check(value.charAt(0) - '0', 1));
                             position.set(Position.KEY_OUTPUT, value.charAt(1) - '0');
                             position.set(Position.KEY_INPUT, value.charAt(2) - '0');
-                            break;
-                        case "ix":
-                            position.set(Position.PREFIX_IO + 1, value);
-                            break;
-                        case "ad":
-                            position.set(Position.PREFIX_ADC + 1, Integer.parseInt(value));
-                            break;
-                        case "sv":
-                            position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
-                            break;
-                        case "bl":
-                            position.set(Position.KEY_BATTERY, Integer.parseInt(value) * 0.001);
-                            break;
-                        case "vo":
-                            position.set(Position.KEY_ODOMETER, Long.parseLong(value));
-                            break;
-                        default:
-                            position.set(key, value);
-                            break;
+                        }
+                        case "ix" -> position.set(Position.PREFIX_IO + 1, value);
+                        case "ad" -> position.set(Position.PREFIX_ADC + 1, Integer.parseInt(value));
+                        case "sv" -> position.set(Position.KEY_SATELLITES, Integer.parseInt(value));
+                        case "bl" -> position.set(Position.KEY_BATTERY, Integer.parseInt(value) * 0.001);
+                        case "vo" -> position.set(Position.KEY_ODOMETER, Long.parseLong(value));
+                        default -> position.set(key, value);
                     }
                 } else if (attribute.startsWith("#")) {
                     messageIndex = attribute;
@@ -315,8 +300,15 @@ public class TaipProtocolDecoder extends BaseProtocolDecoder {
                     if (messageIndex.startsWith("#IP")) {
                         response = ">SAK;ID=" + uniqueId + ";" + messageIndex + "<";
                     } else {
-                        response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";*";
-                        response += String.format("%02X", Checksum.xor(response)) + "<";
+                        if (indexFirst) {
+                            response = ">ACK;" + messageIndex + ";ID=" + uniqueId + ";";
+                        } else {
+                            response = ">ACK;ID=" + uniqueId + ";" + messageIndex + ";";
+                        }
+                        String model = getDeviceModel(deviceSession);
+                        boolean lantrix = model != null && model.toUpperCase().startsWith("LANTRIX");
+                        int checksum = Checksum.xor(lantrix ? response : response + "*");
+                        response += String.format("*%02X", checksum) + "<";
                     }
                     channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
                 } else {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,6 @@
  */
 package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
@@ -25,61 +22,79 @@ import org.traccar.config.Keys;
 import org.traccar.database.StatisticsManager;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
-@ChannelHandler.Sharable
-public class GeolocationHandler extends ChannelInboundHandlerAdapter {
+public class GeolocationHandler extends BasePositionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GeolocationHandler.class);
 
     private final GeolocationProvider geolocationProvider;
+    private final CacheManager cacheManager;
     private final StatisticsManager statisticsManager;
     private final boolean processInvalidPositions;
+    private final boolean reuse;
+    private final boolean requireWifi;
 
     public GeolocationHandler(
-            Config config, GeolocationProvider geolocationProvider, StatisticsManager statisticsManager) {
+            Config config, GeolocationProvider geolocationProvider, CacheManager cacheManager,
+            StatisticsManager statisticsManager) {
         this.geolocationProvider = geolocationProvider;
+        this.cacheManager = cacheManager;
         this.statisticsManager = statisticsManager;
-        this.processInvalidPositions = config.getBoolean(Keys.GEOLOCATION_PROCESS_INVALID_POSITIONS);
+        processInvalidPositions = config.getBoolean(Keys.GEOLOCATION_PROCESS_INVALID_POSITIONS);
+        reuse = config.getBoolean(Keys.GEOLOCATION_REUSE);
+        requireWifi = config.getBoolean(Keys.GEOLOCATION_REQUIRE_WIFI);
     }
 
     @Override
-    public void channelRead(final ChannelHandlerContext ctx, Object message) {
-        if (message instanceof Position) {
-            final Position position = (Position) message;
-            if ((position.getOutdated() || processInvalidPositions && !position.getValid())
-                    && position.getNetwork() != null) {
-                if (statisticsManager != null) {
-                    statisticsManager.registerGeolocationRequest();
+    public void onPosition(Position position, Callback callback) {
+        if ((position.getOutdated() || processInvalidPositions && !position.getValid())
+                && position.getNetwork() != null
+                && (!requireWifi || position.getNetwork().getWifiAccessPoints() != null)) {
+            if (reuse) {
+                Position lastPosition = cacheManager.getPosition(position.getDeviceId());
+                if (lastPosition != null && position.getNetwork().equals(lastPosition.getNetwork())) {
+                    updatePosition(
+                            position, lastPosition.getLatitude(), lastPosition.getLongitude(),
+                            lastPosition.getAccuracy());
+                    callback.processed(false);
+                    return;
+                }
+            }
+
+            if (statisticsManager != null) {
+                statisticsManager.registerGeolocationRequest();
+            }
+
+            geolocationProvider.getLocation(position.getNetwork(),
+                    new GeolocationProvider.LocationProviderCallback() {
+                @Override
+                public void onSuccess(double latitude, double longitude, double accuracy) {
+                    updatePosition(position, latitude, longitude, accuracy);
+                    callback.processed(false);
                 }
 
-                geolocationProvider.getLocation(position.getNetwork(),
-                        new GeolocationProvider.LocationProviderCallback() {
-                    @Override
-                    public void onSuccess(double latitude, double longitude, double accuracy) {
-                        position.set(Position.KEY_APPROXIMATE, true);
-                        position.setValid(true);
-                        position.setFixTime(position.getDeviceTime());
-                        position.setLatitude(latitude);
-                        position.setLongitude(longitude);
-                        position.setAccuracy(accuracy);
-                        position.setAltitude(0);
-                        position.setSpeed(0);
-                        position.setCourse(0);
-                        ctx.fireChannelRead(position);
-                    }
-
-                    @Override
-                    public void onFailure(Throwable e) {
-                        LOGGER.warn("Geolocation network error", e);
-                        ctx.fireChannelRead(position);
-                    }
-                });
-            } else {
-                ctx.fireChannelRead(position);
-            }
+                @Override
+                public void onFailure(Throwable e) {
+                    LOGGER.warn("Geolocation network error", e);
+                    callback.processed(false);
+                }
+            });
         } else {
-            ctx.fireChannelRead(message);
+            callback.processed(false);
         }
+    }
+
+    private void updatePosition(Position position, double latitude, double longitude, double accuracy) {
+        position.set(Position.KEY_APPROXIMATE, true);
+        position.setValid(true);
+        position.setFixTime(position.getDeviceTime());
+        position.setLatitude(latitude);
+        position.setLongitude(longitude);
+        position.setAccuracy(accuracy);
+        position.setAltitude(0);
+        position.setSpeed(0);
+        position.setCourse(0);
     }
 
 }

@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,7 +9,11 @@ public class MeiligaoProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new MeiligaoProtocolDecoder(null);
+        var decoder = inject(new MeiligaoProtocolDecoder(null));
+
+        verifyAttribute(decoder, binary(
+                "242400166578902354329399034331453838d2c40d0a"),
+                Position.KEY_DTCS, "C1E88");
 
         verifyAttribute(decoder, binary(
                 "2424008f142180340967ff99553033333233302e3030302c412c313531362e383039392c4e2c31303435322e383835352c452c302e30302c33332c3038313232302c2c2a33367c302e387c3132337c323130307c303030302c303030302c303230452c303241417c30323038303030353038394530304531434638347c31437c31373243353832437c3042a8060d0a"),

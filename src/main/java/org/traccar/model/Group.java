@@ -15,6 +15,9 @@
  */
 package org.traccar.model;
 
+import org.traccar.storage.StorageName;
+
+@StorageName("tc_groups")
 public class Group extends GroupedModel {
 
     private String name;

@@ -20,7 +20,8 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.helper.BufferUtil;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
@@ -68,39 +69,39 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
 
     private void decodeAlarmStatus(Position position, byte[] status) {
         if (BitUtil.check(status[0], 4)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_LOW_POWER);
+            position.addAlarm(Position.ALARM_LOW_POWER);
         } else if (BitUtil.check(status[0], 6)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_EXIT);
+            position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
         } else if (BitUtil.check(status[0], 7)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_GEOFENCE_ENTER);
+            position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
         } else if (BitUtil.check(status[1], 0)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_SOS);
+            position.addAlarm(Position.ALARM_SOS);
         } else if (BitUtil.check(status[1], 1)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_OVERSPEED);
+            position.addAlarm(Position.ALARM_OVERSPEED);
         } else if (BitUtil.check(status[1], 3)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+            position.addAlarm(Position.ALARM_POWER_CUT);
         } else if (BitUtil.check(status[1], 6)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_TOW);
+            position.addAlarm(Position.ALARM_TOW);
         } else if (BitUtil.check(status[1], 7)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_DOOR);
+            position.addAlarm(Position.ALARM_DOOR);
         } else if (BitUtil.check(status[2], 2)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_TEMPERATURE);
+            position.addAlarm(Position.ALARM_TEMPERATURE);
         } else if (BitUtil.check(status[2], 4)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_TAMPERING);
+            position.addAlarm(Position.ALARM_TAMPERING);
         }  else if (BitUtil.check(status[2], 6)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_FATIGUE_DRIVING);
+            position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
         } else if (BitUtil.check(status[2], 7)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_IDLE);
+            position.addAlarm(Position.ALARM_IDLE);
         } else if (BitUtil.check(status[6], 3)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_VIBRATION);
+            position.addAlarm(Position.ALARM_VIBRATION);
         } else if (BitUtil.check(status[6], 4)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
+            position.addAlarm(Position.ALARM_BRAKING);
         } else if (BitUtil.check(status[6], 5)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
+            position.addAlarm(Position.ALARM_ACCELERATION);
         } else if (BitUtil.check(status[6], 6)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_CORNERING);
+            position.addAlarm(Position.ALARM_CORNERING);
         } else if (BitUtil.check(status[6], 7)) {
-            position.set(Position.KEY_ALARM, Position.ALARM_ACCIDENT);
+            position.addAlarm(Position.ALARM_ACCIDENT);
         }
     }
 
@@ -169,7 +170,9 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_FUEL_LEVEL, BitUtil.from(odometer, 16));
                 }
 
-                position.set(Position.KEY_STATUS, buf.readUnsignedInt());
+                long status = buf.readUnsignedInt();
+                position.set(Position.KEY_IGNITION, !BitUtil.check(status, 7 + 3 * 8));
+                position.set(Position.KEY_STATUS, status);
 
                 buf.readUnsignedShort();
                 buf.readUnsignedByte();
@@ -185,27 +188,37 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedShort(); // data length
 
                     int dataType = buf.readUnsignedByte();
-
-                    buf.readUnsignedByte(); // content length
+                    int dataLength = buf.readUnsignedByte();
 
                     switch (dataType) {
-                        case 0x01:
-                            position.set(Position.KEY_FUEL_LEVEL,
-                                    buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
-                            break;
-                        case 0x02:
-                            position.set(Position.PREFIX_TEMP + 1,
-                                    buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
-                            break;
-                        case 0x18:
+                        case 0x01 -> position.set(Position.KEY_FUEL_LEVEL,
+                                buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
+                        case 0x02 -> position.set(Position.PREFIX_TEMP + 1,
+                                buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
+                        case 0x05 -> {
+                            int sign = buf.readUnsignedByte();
+                            switch (sign) {
+                                case 1:
+                                    position.set("sign", true);
+                                    break;
+                                case 2:
+                                    position.set("sign", false);
+                                    break;
+                                default:
+                                    break;
+                            }
+                            position.set(Position.KEY_DRIVER_UNIQUE_ID, BufferUtil.readString(buf, dataLength - 1));
+                        }
+                        case 0x18 -> {
                             for (int i = 1; i <= 4; i++) {
                                 double value = buf.readUnsignedShort();
                                 if (value > 0x0000 && value < 0xFFFF) {
                                     position.set("fuel" + i, value / 0xFFFE);
                                 }
                             }
-                            break;
-                        case 0x23:
+                        }
+                        case 0x20 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                        case 0x23 -> {
                             Network network = new Network();
                             int count = buf.readUnsignedByte();
                             for (int i = 0; i < count; i++) {
@@ -216,9 +229,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                             if (count > 0) {
                                 position.setNetwork(network);
                             }
-                            break;
-                        default:
-                            break;
+                        }
                     }
 
                 }

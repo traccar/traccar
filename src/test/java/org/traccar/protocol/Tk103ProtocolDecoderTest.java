@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
@@ -9,7 +9,20 @@ public class Tk103ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Tk103ProtocolDecoder(null);
+        var decoder = inject(new Tk103ProtocolDecoder(null));
+
+        verifyAttributes(decoder, text(
+                "(007030201454BS5190:02150000753001DC,91:0EE8060EDC0A01DC,92:42014201DC0A01DC,93:00010127000037C8,94:0E01000002000000,95:020EE10EE20EE800030EE40EE00EE700040EDD0EE40EE400050EDC0EDF0EE400,96:0142000000000000,97:0000000000000000,98:0000000000000000)"));
+
+        verifyAttribute(decoder, text(
+                "(352602014867BS500064FF0EF10FF10FF00FF20FF30FF20FF20FF40FF20FF40FF40FF20FF30FF20F0000000000000000000000000000000000000000000000001663000000010004000000000000000002444444420000000000A00FA000000000000000200000000315E2000000)"),
+                "batteryTemp2", 26);
+
+        verifyAttributes(decoder, text(
+                "(027046434858BZ00,{460,0,20949,58711}\n{460,0,20494,54003}\n{460,0,20951,19569}\n,01000000)"));
+
+        verifyAttributes(decoder, text(
+                "(027045009305BP05355227045009305,{413,2,30073,16724}\n{413,2,30073,16730}\n{413,2,30073,49860}\n,01000000)"));
 
         verifyPosition(decoder, text(
                 "(868822040452227,DW3B,150421,A,4154.51607N,45.78950E,0.050,103142,0.000,595.200,7,0)"));

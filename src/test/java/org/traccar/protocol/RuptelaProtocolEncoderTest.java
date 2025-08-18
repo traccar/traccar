@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
@@ -9,7 +9,7 @@ public class RuptelaProtocolEncoderTest extends ProtocolTest {
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = new RuptelaProtocolEncoder(null);
+        var encoder = inject(new RuptelaProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

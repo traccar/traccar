@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.traccar.helper;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.model.Pair;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -28,7 +29,11 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileStore;
+import java.nio.file.FileSystems;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Formatter;
@@ -36,6 +41,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 public final class Log {
 
@@ -43,7 +49,7 @@ public final class Log {
     }
 
     private static final String STACK_PACKAGE = "org.traccar";
-    private static final int STACK_LIMIT = 3;
+    private static final int STACK_LIMIT = 4;
 
     private static class RollingFileHandler extends Handler {
 
@@ -51,10 +57,12 @@ public final class Log {
         private String suffix;
         private Writer writer;
         private final boolean rotate;
+        private final String template;
 
-        RollingFileHandler(String name, boolean rotate) {
+        RollingFileHandler(String name, boolean rotate, String rotateInterval) {
             this.name = name;
             this.rotate = rotate;
+            this.template = rotateInterval.equalsIgnoreCase("HOUR") ? "yyyyMMddHH" : "yyyyMMdd";
         }
 
         @Override
@@ -63,7 +71,7 @@ public final class Log {
                 try {
                     String suffix = "";
                     if (rotate) {
-                        suffix = new SimpleDateFormat("yyyyMMdd").format(new Date(record.getMillis()));
+                        suffix = new SimpleDateFormat(template).format(new Date(record.getMillis()));
                         if (writer != null && !suffix.equals(this.suffix)) {
                             writer.close();
                             writer = null;
@@ -118,21 +126,13 @@ public final class Log {
         }
 
         private static String formatLevel(Level level) {
-            switch (level.getName()) {
-                case "FINEST":
-                    return "TRACE";
-                case "FINER":
-                case "FINE":
-                case "CONFIG":
-                    return "DEBUG";
-                case "INFO":
-                    return "INFO";
-                case "WARNING":
-                    return "WARN";
-                case "SEVERE":
-                default:
-                    return "ERROR";
-            }
+            return switch (level.getName()) {
+                case "FINEST" -> "TRACE";
+                case "FINER", "FINE", "CONFIG" -> "DEBUG";
+                case "INFO" -> "INFO";
+                case "WARNING" -> "WARN";
+                default -> "ERROR";
+            };
         }
 
         @Override
@@ -144,28 +144,28 @@ public final class Log {
             }
 
             if (record.getThrown() != null) {
-                if (message.length() > 0) {
+                if (!message.isEmpty()) {
                     message.append(" - ");
                 }
                 if (fullStackTraces) {
                     StringWriter stringWriter = new StringWriter();
                     PrintWriter printWriter = new PrintWriter(stringWriter);
                     record.getThrown().printStackTrace(printWriter);
-                    message.append(System.lineSeparator()).append(stringWriter.toString());
+                    message.append(System.lineSeparator()).append(stringWriter);
                 } else {
                     message.append(exceptionStack(record.getThrown()));
                 }
             }
 
             return String.format("%1$tF %1$tT %2$5s: %3$s%n",
-                    new Date(record.getMillis()), formatLevel(record.getLevel()), message.toString());
+                    new Date(record.getMillis()), formatLevel(record.getLevel()), message);
         }
 
     }
 
     public static void setupDefaultLogger() {
         String path = null;
-        URL url =  ClassLoader.getSystemClassLoader().getResource(".");
+        URL url = ClassLoader.getSystemClassLoader().getResource(".");
         if (url != null) {
             File jarPath = new File(url.getPath());
             File logsPath = new File(jarPath, "logs");
@@ -174,7 +174,7 @@ public final class Log {
             }
             path = new File(logsPath, "tracker-server.log").getPath();
         }
-        setupLogger(path == null, path, Level.WARNING.getName(), false, true);
+        setupLogger(path == null, path, Level.WARNING.getName(), false, true, "DAY");
     }
 
     public static void setupLogger(Config config) {
@@ -183,11 +183,13 @@ public final class Log {
                 config.getString(Keys.LOGGER_FILE),
                 config.getString(Keys.LOGGER_LEVEL),
                 config.getBoolean(Keys.LOGGER_FULL_STACK_TRACES),
-                config.getBoolean(Keys.LOGGER_ROTATE));
+                config.getBoolean(Keys.LOGGER_ROTATE),
+                config.getString(Keys.LOGGER_ROTATE_INTERVAL));
     }
 
     private static void setupLogger(
-            boolean console, String file, String levelString, boolean fullStackTraces, boolean rotate) {
+            boolean console, String file, String levelString,
+            boolean fullStackTraces, boolean rotate, String rotateInterval) {
 
         Logger rootLogger = Logger.getLogger("");
         for (Handler handler : rootLogger.getHandlers()) {
@@ -198,7 +200,7 @@ public final class Log {
         if (console) {
             handler = new ConsoleHandler();
         } else {
-            handler = new RollingFileHandler(file, rotate);
+            handler = new RollingFileHandler(file, rotate, rotateInterval);
         }
 
         handler.setFormatter(new LogFormatter(fullStackTraces));
@@ -267,6 +269,25 @@ public final class Log {
             s.append(")");
         }
         return s.toString();
+    }
+
+    public static long[] getStorageSpace() {
+        var stores = new ArrayList<Pair<Long, Long>>();
+        for (FileStore store : FileSystems.getDefault().getFileStores()) {
+            try {
+                long usableSpace = store.getUsableSpace();
+                long totalSpace = store.getTotalSpace();
+                if (totalSpace > 1_000_000_000) {
+                    stores.add(new Pair<>(usableSpace, totalSpace));
+                }
+            } catch (IOException ignored) {
+            }
+        }
+        return stores.stream()
+                .sorted(Comparator.comparingDouble(p -> p.first() / (double) p.second()))
+                .flatMap(p -> Stream.of(p.first(), p.second()))
+                .mapToLong(Long::longValue)
+                .toArray();
     }
 
 }

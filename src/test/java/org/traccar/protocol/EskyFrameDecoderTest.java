@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class EskyFrameDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class EskyFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new EskyFrameDecoder();
+        var decoder = inject(new EskyFrameDecoder());
 
         verifyNull(
                 decoder.decode(null, null, binary("00")));

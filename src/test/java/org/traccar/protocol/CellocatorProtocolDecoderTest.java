@@ -1,14 +1,23 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class CellocatorProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new CellocatorProtocolDecoder(null);
+        var decoder = inject(new CellocatorProtocolDecoder(null));
+
+        verifyAttribute(decoder, binary(
+                "4d4347500003310f004018331424641a1d002000638000002a00b67ff6000000b8a5c7010000402d00040210af1ba9f88fb383fc10080100000000000000190015050ce80714"),
+                Position.KEY_DRIVER_UNIQUE_ID, "b8a5c7010000");
+
+        verifyAttribute(decoder, binary(
+                "4d4347500098ab31000856b12b2c041016002c0023b3000021f3f5ffb04c8f0100000000000078dd0004020f716445f75f3b0701126e0200b303000036002538151b0ce607ab"),
+                Position.KEY_IGNITION, true);
 
         verifyPosition(decoder, binary(
                 "4D43475000856308000004B2DE1F04009E00200100000000696CF7AB002F1A00000000000000325C000402069BFDE70857E22502F41C000036000000DF0B0932100B09DC0719"));

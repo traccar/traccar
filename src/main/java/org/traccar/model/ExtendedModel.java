@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2017 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,22 @@ package org.traccar.model;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class ExtendedModel extends BaseModel {
 
     private Map<String, Object> attributes = new LinkedHashMap<>();
+
+    public boolean hasAttribute(String key) {
+        return attributes.containsKey(key);
+    }
 
     public Map<String, Object> getAttributes() {
         return attributes;
     }
 
     public void setAttributes(Map<String, Object> attributes) {
-        this.attributes = attributes;
+        this.attributes = Objects.requireNonNullElseGet(attributes, LinkedHashMap::new);
     }
 
     public void set(String key, Boolean value) {
@@ -84,44 +89,103 @@ public class ExtendedModel extends BaseModel {
         }
     }
 
+    public String getString(String key, String defaultValue) {
+        return parseAsString(attributes.get(key), defaultValue);
+    }
+
     public String getString(String key) {
-        if (attributes.containsKey(key)) {
-            return (String) attributes.get(key);
-        } else {
-            return null;
-        }
+        return parseAsString(attributes.get(key), null);
+    }
+
+    public double getDouble(String key, double defaultValue) {
+        return parseAsDouble(attributes.get(key), defaultValue);
     }
 
     public double getDouble(String key) {
-        if (attributes.containsKey(key)) {
-            return ((Number) attributes.get(key)).doubleValue();
-        } else {
-            return 0.0;
-        }
+        return parseAsDouble(attributes.get(key), 0.0);
     }
 
     public boolean getBoolean(String key) {
-        if (attributes.containsKey(key)) {
-            return (Boolean) attributes.get(key);
-        } else {
-            return false;
-        }
+        return parseAsBoolean(attributes.get(key), false);
     }
 
     public int getInteger(String key) {
-        if (attributes.containsKey(key)) {
-            return ((Number) attributes.get(key)).intValue();
-        } else {
-            return 0;
-        }
+        return parseAsInteger(attributes.get(key), 0);
     }
 
     public long getLong(String key) {
-        if (attributes.containsKey(key)) {
-            return ((Number) attributes.get(key)).longValue();
+        return parseAsLong(attributes.get(key), 0L);
+    }
+
+    public Object removeAttribute(String key) {
+        return attributes.remove(key);
+    }
+
+    public String removeString(String key) {
+        return parseAsString(attributes.remove(key), null);
+    }
+
+    public Double removeDouble(String key) {
+        return parseAsDouble(attributes.remove(key), null);
+    }
+
+    public Boolean removeBoolean(String key) {
+        return parseAsBoolean(attributes.remove(key), null);
+    }
+
+    public Integer removeInteger(String key) {
+        return parseAsInteger(attributes.remove(key), null);
+    }
+
+    public Long removeLong(String key) {
+        return parseAsLong(attributes.remove(key), null);
+    }
+
+    private String parseAsString(Object value, String defaultValue) {
+        if (value == null) {
+            return defaultValue;
         } else {
-            return 0;
+            return value.toString();
         }
     }
 
+    private static Double parseAsDouble(Object value, Double defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        } else if (value instanceof Number numberValue) {
+            return numberValue.doubleValue();
+        } else {
+            return Double.parseDouble(value.toString());
+        }
+    }
+
+    private static Boolean parseAsBoolean(Object value, Boolean defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        } else if (value instanceof Boolean booleanValue) {
+            return booleanValue;
+        } else {
+            return Boolean.parseBoolean(value.toString());
+        }
+    }
+
+    private static Integer parseAsInteger(Object value, Integer defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        } else if (value instanceof Number numberValue) {
+            return numberValue.intValue();
+        } else {
+            return Integer.parseInt(value.toString());
+        }
+    }
+
+    private static Long parseAsLong(Object value, Long defaultValue) {
+        if (value == null) {
+            return defaultValue;
+        } else if (value instanceof Number numberValue) {
+            return numberValue.longValue();
+        } else {
+            return Long.parseLong(value.toString());
+        }
+    }
 }

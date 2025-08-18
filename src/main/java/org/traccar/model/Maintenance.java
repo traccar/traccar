@@ -16,6 +16,9 @@
  */
 package org.traccar.model;
 
+import org.traccar.storage.StorageName;
+
+@StorageName("tc_maintenances")
 public class Maintenance extends ExtendedModel {
 
     private String name;

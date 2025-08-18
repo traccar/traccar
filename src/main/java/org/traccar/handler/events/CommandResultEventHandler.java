@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,24 @@
  */
 package org.traccar.handler.events;
 
-import java.util.Collections;
-import java.util.Map;
-
-import io.netty.channel.ChannelHandler;
+import jakarta.inject.Inject;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
-@ChannelHandler.Sharable
 public class CommandResultEventHandler extends BaseEventHandler {
 
+    @Inject
+    public CommandResultEventHandler() {
+    }
+
     @Override
-    protected Map<Event, Position> analyzePosition(Position position) {
+    public void onPosition(Position position, Callback callback) {
         Object commandResult = position.getAttributes().get(Position.KEY_RESULT);
         if (commandResult != null) {
             Event event = new Event(Event.TYPE_COMMAND_RESULT, position);
             event.set(Position.KEY_RESULT, (String) commandResult);
-            return Collections.singletonMap(event, position);
+            callback.eventDetected(event);
         }
-        return null;
     }
 
 }

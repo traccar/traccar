@@ -19,20 +19,32 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
+import org.traccar.config.Config;
+import org.traccar.model.Command;
+
+import jakarta.inject.Inject;
 
 public class GatorProtocol extends BaseProtocol {
 
-    public GatorProtocol() {
-        addServer(new TrackerServer(false, getName()) {
+    @Inject
+    public GatorProtocol(Config config) {
+        setSupportedDataCommands(
+                Command.TYPE_POSITION_SINGLE,
+                Command.TYPE_ENGINE_RESUME,
+                Command.TYPE_ENGINE_STOP,
+                Command.TYPE_SET_SPEED_LIMIT,
+                Command.TYPE_SET_ODOMETER);
+        addServer(new TrackerServer(config, getName(), false) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new LengthFieldBasedFrameDecoder(1024, 3, 2));
+                pipeline.addLast(new GatorProtocolEncoder(GatorProtocol.this));
                 pipeline.addLast(new GatorProtocolDecoder(GatorProtocol.this));
             }
         });
-        addServer(new TrackerServer(true, getName()) {
+        addServer(new TrackerServer(config, getName(), true) {
             @Override
-            protected void addProtocolHandlers(PipelineBuilder pipeline) {
+            protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new GatorProtocolDecoder(GatorProtocol.this));
             }
         });

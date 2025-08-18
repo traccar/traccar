@@ -2,7 +2,7 @@ package org.traccar.protocol;
 
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class IotmProtocolDecoderTest extends ProtocolTest {
@@ -10,7 +10,7 @@ public class IotmProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new IotmProtocolDecoder(null);
+        var decoder = inject(new IotmProtocolDecoder(null));
 
         verifyNull(decoder, MqttMessageBuilders.connect().clientId(
                 "123456789012345").build());

@@ -49,14 +49,11 @@ public class PstProtocolEncoder extends BaseProtocolEncoder {
     @Override
     protected Object encodeCommand(Command command) {
 
-        switch (command.getType()) {
-            case Command.TYPE_ENGINE_STOP:
-                return encodeContent(command.getDeviceId(), 0x0002, 0xffff, 0xffff);
-            case Command.TYPE_ENGINE_RESUME:
-                return encodeContent(command.getDeviceId(), 0x0001, 0xffff, 0xffff);
-            default:
-                return null;
-        }
+        return switch (command.getType()) {
+            case Command.TYPE_ENGINE_STOP -> encodeContent(command.getDeviceId(), 0x0002, 0xffff, 0xffff);
+            case Command.TYPE_ENGINE_RESUME -> encodeContent(command.getDeviceId(), 0x0001, 0xffff, 0xffff);
+            default -> null;
+        };
     }
 
 }

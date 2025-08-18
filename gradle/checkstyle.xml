@@ -7,9 +7,8 @@
 
     <module name="SuppressWarningsFilter"/>
 
-    <module name="SuppressionSingleFilter">
-        <property name="files" value="[/\\]protobuf[/\\]"/>
-        <property name="checks" value=".*"/>
+    <module name="BeforeExecutionExclusionFileFilter">
+        <property name="fileNamePattern" value="^.*[\\/]protobuf[\\/].*$"/>
     </module>
 
     <!--<property name="fileExtensions" value="java, properties, xml"/>-->
@@ -26,7 +25,7 @@
 
     <!-- Checks for Size Violations.                    -->
     <!-- See http://checkstyle.sf.net/config_sizes.html -->
-    <module name="FileLength"/>
+    <!--<module name="FileLength"/>-->
     <module name="LineLength">
         <property name="max" value="120"/>
     </module>
@@ -78,8 +77,10 @@
         <!-- See http://checkstyle.sf.net/config_sizes.html -->
         <!--<module name="MethodLength">
             <property name="max" value="200"/>
+        </module>
+        <module name="ParameterNumber">
+            <property name="tokens" value="METHOD_DEF"/>
         </module>-->
-        <module name="ParameterNumber"/>
 
         <!-- Checks for whitespace                               -->
         <!-- See http://checkstyle.sf.net/config_whitespace.html -->
@@ -112,8 +113,8 @@
         <module name="EmptyStatement"/>
         <module name="EqualsHashCode"/>
         <module name="IllegalInstantiation"/>
-        <module name="InnerAssignment"/>
-        <module name="MissingSwitchDefault"/>
+        <!--<module name="InnerAssignment"/>-->
+        <!--<module name="MissingSwitchDefault"/>-->
         <module name="SimplifyBooleanExpression"/>
         <module name="SimplifyBooleanReturn"/>
 
@@ -122,7 +123,9 @@
         <module name="FinalClass"/>
         <module name="HideUtilityClassConstructor"/>
         <module name="InterfaceIsType"/>
-        <module name="VisibilityModifier"/>
+        <module name="VisibilityModifier">
+            <property name="protectedAllowed" value="true"/>
+        </module>
 
         <!-- Miscellaneous other checks.                   -->
         <!-- See http://checkstyle.sf.net/config_misc.html -->

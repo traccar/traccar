@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,55 +17,69 @@
 package org.traccar.notification;
 
 import org.apache.velocity.VelocityContext;
-import org.traccar.Context;
+import org.traccar.database.LocaleManager;
+import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
+import org.traccar.model.Driver;
 import org.traccar.model.Event;
+import org.traccar.model.Geofence;
+import org.traccar.model.Maintenance;
+import org.traccar.model.Notification;
 import org.traccar.model.Position;
+import org.traccar.model.Server;
 import org.traccar.model.User;
-import org.traccar.reports.ReportUtils;
+import org.traccar.session.cache.CacheManager;
 
-public final class NotificationFormatter {
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
-    private NotificationFormatter() {
+@Singleton
+public class NotificationFormatter {
+
+    private final LocaleManager localeManager;
+    private final CacheManager cacheManager;
+    private final TextTemplateFormatter textTemplateFormatter;
+
+    @Inject
+    public NotificationFormatter(
+            LocaleManager localeManager, CacheManager cacheManager, TextTemplateFormatter textTemplateFormatter) {
+        this.localeManager = localeManager;
+        this.cacheManager = cacheManager;
+        this.textTemplateFormatter = textTemplateFormatter;
     }
 
-    public static VelocityContext prepareContext(long userId, Event event, Position position) {
+    public NotificationMessage formatMessage(
+            Notification notification, User user, Event event, Position position) {
 
-        User user = Context.getPermissionsManager().getUser(userId);
-        Device device = Context.getIdentityManager().getById(event.getDeviceId());
+        Server server = cacheManager.getServer();
+        Device device = cacheManager.getObject(Device.class, event.getDeviceId());
 
-        VelocityContext velocityContext = TextTemplateFormatter.prepareContext(user);
+        VelocityContext velocityContext = textTemplateFormatter.prepareContext(server, user);
 
+        velocityContext.put("notification", notification);
         velocityContext.put("device", device);
         velocityContext.put("event", event);
+        velocityContext.put("translations", localeManager.getBundle(UserUtil.getLanguage(server, user)));
         if (position != null) {
             velocityContext.put("position", position);
-            velocityContext.put("speedUnit", ReportUtils.getSpeedUnit(userId));
-            velocityContext.put("distanceUnit", ReportUtils.getDistanceUnit(userId));
-            velocityContext.put("volumeUnit", ReportUtils.getVolumeUnit(userId));
+            velocityContext.put("speedUnit", UserUtil.getSpeedUnit(server, user));
+            velocityContext.put("distanceUnit", UserUtil.getDistanceUnit(server, user));
+            velocityContext.put("volumeUnit", UserUtil.getVolumeUnit(server, user));
         }
         if (event.getGeofenceId() != 0) {
-            velocityContext.put("geofence", Context.getGeofenceManager().getById(event.getGeofenceId()));
+            velocityContext.put("geofence", cacheManager.getObject(Geofence.class, event.getGeofenceId()));
         }
         if (event.getMaintenanceId() != 0) {
-            velocityContext.put("maintenance", Context.getMaintenancesManager().getById(event.getMaintenanceId()));
+            velocityContext.put("maintenance", cacheManager.getObject(Maintenance.class, event.getMaintenanceId()));
         }
         String driverUniqueId = event.getString(Position.KEY_DRIVER_UNIQUE_ID);
         if (driverUniqueId != null) {
-            velocityContext.put("driver", Context.getDriversManager().getDriverByUniqueId(driverUniqueId));
+            velocityContext.put("driver", cacheManager.getDeviceObjects(device.getId(), Driver.class).stream()
+                    .filter(driver -> driver.getUniqueId().equals(driverUniqueId)).findFirst().orElse(null));
         }
 
-        return velocityContext;
-    }
-
-    public static FullMessage formatFullMessage(long userId, Event event, Position position) {
-        VelocityContext velocityContext = prepareContext(userId, event, position);
-        return TextTemplateFormatter.formatFullMessage(velocityContext, event.getType());
-    }
-
-    public static String formatShortMessage(long userId, Event event, Position position) {
-        VelocityContext velocityContext = prepareContext(userId, event, position);
-        return TextTemplateFormatter.formatShortMessage(velocityContext, event.getType());
+        boolean priority = notification != null && notification.getBoolean("priority");
+        return textTemplateFormatter.formatMessage(velocityContext, event.getType(), priority);
     }
 
 }

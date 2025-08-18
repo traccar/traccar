@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
@@ -49,33 +49,27 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
             .number("(-?d+.d+)#")                // altitude
             .number("(d+)#")                     // battery
             .number("d+#")                       // geo area alarm
-            .number("(x+)#")                     // alarm
-            .number("([01])")                    // armed
+            .number("(x+)")                      // alarm
+            .groupBegin()
+            .number("#([01])?")                  // armed
             .number("([01])")                    // door
             .number("([01])#")                   // ignition
+            .groupEnd("?")
             .any()
             .text("$AP")
             .compile();
 
     private String decodeAlarm(int alarm) {
-        switch (alarm) {
-            case 0x2:
-                return Position.ALARM_SHOCK;
-            case 0x3:
-                return Position.ALARM_POWER_CUT;
-            case 0x4:
-                return Position.ALARM_OVERSPEED;
-            case 0x5:
-                return Position.ALARM_SOS;
-            case 0x6:
-                return Position.ALARM_DOOR;
-            case 0xA:
-                return Position.ALARM_LOW_BATTERY;
-            case 0xB:
-                return Position.ALARM_FAULT;
-            default:
-                return null;
-        }
+        return switch (alarm) {
+            case 0x2 -> Position.ALARM_VIBRATION;
+            case 0x3 -> Position.ALARM_POWER_CUT;
+            case 0x4 -> Position.ALARM_OVERSPEED;
+            case 0x5 -> Position.ALARM_SOS;
+            case 0x6 -> Position.ALARM_DOOR;
+            case 0xA -> Position.ALARM_LOW_BATTERY;
+            case 0xB -> Position.ALARM_FAULT;
+            default -> null;
+        };
     }
 
     @Override
@@ -109,11 +103,15 @@ public class C2stekProtocolDecoder extends BaseProtocolDecoder {
         position.setAltitude(parser.nextDouble());
 
         position.set(Position.KEY_BATTERY, parser.nextInt() * 0.001);
-        position.set(Position.KEY_ALARM, decodeAlarm(parser.nextHexInt()));
+        position.addAlarm(decodeAlarm(parser.nextHexInt()));
 
-        position.set(Position.KEY_ARMED, parser.nextInt() > 0);
-        position.set(Position.KEY_DOOR, parser.nextInt() > 0);
-        position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+        if (parser.hasNext()) {
+            position.set(Position.KEY_ARMED, parser.nextInt() > 0);
+        }
+        if (parser.hasNext(2)) {
+            position.set(Position.KEY_DOOR, parser.nextInt() > 0);
+            position.set(Position.KEY_IGNITION, parser.nextInt() > 0);
+        }
 
         return position;
     }

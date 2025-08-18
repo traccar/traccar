@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.Parser.CoordinateFormat;
@@ -139,7 +139,7 @@ public class CarcellProtocolDecoder extends BaseProtocolDecoder {
 
             String painelStatus = parser.next();
             if (painelStatus.equals("1")) {
-                position.set(Position.KEY_ALARM, Position.ALARM_GENERAL);
+                position.addAlarm(Position.ALARM_GENERAL);
             }
             position.set("painel", painelStatus.equals("2"));
 

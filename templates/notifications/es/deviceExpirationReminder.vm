@@ -1,0 +1,8 @@
+#set($subject = "Recordatorio de vencimiento del dispositivo")
+#set($digest = "El dispositivo $device.name vence el $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Su dispositivo $device.name vencerá el $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+</body>
+</html>

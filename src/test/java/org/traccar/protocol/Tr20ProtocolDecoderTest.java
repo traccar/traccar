@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class Tr20ProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,16 @@ public class Tr20ProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new Tr20ProtocolDecoder(null);
+        var decoder = inject(new Tr20ProtocolDecoder(null));
+
+        verifyNull(decoder, text(
+                "%%0630,A,250523152852,N0951.6838W08357.0221,000,000,T0;F2,00020000,108,CFG:0.00|"));
+
+        verifyPosition(decoder, text(
+                "%%0561,A,241025160359,N0951.6626W08357.0266,000,025,F0.0,00020000,108,CFG:0.12|"));
+
+        verifyPosition(decoder, text(
+                "%%m13,L,221221103115,N1237.2271W00801.9500,000,000,B13.1:F0.0,04020000,253,CFG:133.00|"));
 
         verifyPosition(decoder, text(
                 "%%TR20GRANT,L,210602170135,N0951.1733W08356.7672,000,000,C80:F0,00020008,108,CFG:6980.00|"));

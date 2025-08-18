@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,25 +16,29 @@
  */
 package org.traccar.handler;
 
-import io.netty.channel.ChannelHandler;
-import org.traccar.BaseDataHandler;
+import jakarta.inject.Inject;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Position;
+import org.traccar.session.cache.CacheManager;
 
-@ChannelHandler.Sharable
-public class MotionHandler extends BaseDataHandler {
+public class MotionHandler extends BasePositionHandler {
 
-    private double speedThreshold;
+    private final CacheManager cacheManager;
 
-    public MotionHandler(double speedThreshold) {
-        this.speedThreshold = speedThreshold;
+    @Inject
+    public MotionHandler(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
     }
 
     @Override
-    protected Position handlePosition(Position position) {
-        if (!position.getAttributes().containsKey(Position.KEY_MOTION)) {
-            position.set(Position.KEY_MOTION, position.getSpeed() > speedThreshold);
+    public void onPosition(Position position, Callback callback) {
+        if (!position.hasAttribute(Position.KEY_MOTION)) {
+            double threshold = AttributeUtil.lookup(
+                    cacheManager, Keys.EVENT_MOTION_SPEED_THRESHOLD, position.getDeviceId());
+            position.set(Position.KEY_MOTION, position.getSpeed() > threshold);
         }
-        return position;
+        callback.processed(false);
     }
 
 }

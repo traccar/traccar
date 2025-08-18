@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class HomtecsProtocolDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class HomtecsProtocolDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new HomtecsProtocolDecoder(null);
+        var decoder = inject(new HomtecsProtocolDecoder(null));
 
         verifyNull(decoder, text(
                 "MDS0001_R6d1821f7,170323,143601.00,04,,,,,,,,,"));

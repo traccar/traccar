@@ -17,7 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
@@ -125,15 +125,8 @@ public class PluginProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext()) {
             int event = parser.nextInt();
             switch (event) {
-                case 11317:
-                    position.set(Position.KEY_ALARM, Position.ALARM_ACCELERATION);
-                    break;
-                case 11319:
-                    position.set(Position.KEY_ALARM, Position.ALARM_BRAKING);
-                    break;
-                default:
-                    break;
-
+                case 11317 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                case 11319 -> position.addAlarm(Position.ALARM_BRAKING);
             }
             position.set(Position.KEY_EVENT, event);
         }

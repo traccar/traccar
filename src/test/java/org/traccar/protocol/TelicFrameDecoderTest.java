@@ -1,6 +1,6 @@
 package org.traccar.protocol;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
 public class TelicFrameDecoderTest extends ProtocolTest {
@@ -8,7 +8,7 @@ public class TelicFrameDecoderTest extends ProtocolTest {
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = new TelicFrameDecoder();
+        var decoder = inject(new TelicFrameDecoder());
 
         verifyFrame(
                 binary("303032363230333339337c3232367c31307c303032303034303130"),

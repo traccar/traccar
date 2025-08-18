@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Ivan Muratov (binakot@gmail.com)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,15 +20,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.DeviceSession;
+import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,10 +61,11 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
             } else if (version == HEADER_VERSION_2) {
                 response.writeByte(0x04);
                 response.writeByte(0x00);
-                ByteBuffer time = ByteBuffer.allocate(4).putInt((int) (System.currentTimeMillis() / 1000));
-                ((Buffer) time).position(0);
-                response.writeByte(Checksum.modulo256(time.slice()));
+                ByteBuf time = Unpooled.buffer();
+                time.writeBytes(time);
+                response.writeByte(Checksum.modulo256(time.nioBuffer()));
                 response.writeBytes(time);
+                time.release();
             }
             response.writeByte(0x7d);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
@@ -147,11 +146,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
         byte recordType = buf.readByte();
         while (buf.readableBytes() > 0) {
             switch (recordType) {
-                case RECORD_PING:
-                case RECORD_DATA:
-                case RECORD_TEXT:
-                case RECORD_FILE:
-                case RECORD_BINARY:
+                case RECORD_PING, RECORD_DATA, RECORD_TEXT, RECORD_FILE, RECORD_BINARY -> {
                     int length = buf.readUnsignedShortLE();
                     Date time = new Date(buf.readUnsignedIntLE() * 1000);
 
@@ -162,10 +157,10 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     }
 
                     buf.readUnsignedByte(); // checksum
-                    break;
-
-                default:
+                }
+                default -> {
                     return null;
+                }
             }
 
             recordType = buf.readByte();
