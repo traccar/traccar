@@ -43,7 +43,7 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             .text("RST;")
             .expression("([AL]);")               // archive
             .expression("([^,]+);")              // model
-            .expression("(.{5});")               // firmware
+            .expression("([^;]+);")              //
             .number("(d{9});")                   // serial number
             .number("(d+);")                     // index
             .number("(d+);")                     // type
