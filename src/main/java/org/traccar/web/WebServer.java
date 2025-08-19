@@ -56,6 +56,7 @@ import org.traccar.helper.ObjectMapperContextResolver;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -135,8 +136,9 @@ public class WebServer implements LifecycleObject {
         baseHolder.setInitParameter("cacheControl", cache);
         servletHandler.addServlet(baseHolder, "/");
 
-        String override = config.getString(Keys.WEB_OVERRIDE);
-        Path overrideReal = Paths.get(override).toRealPath(LinkOption.NOFOLLOW_LINKS);
+        Path override = Paths.get(config.getString(Keys.WEB_OVERRIDE));
+        Files.createDirectories(override);
+        Path overrideReal = override.toRealPath(LinkOption.NOFOLLOW_LINKS);
 
         ServletHolder overrideHolder = new ServletHolder(ResourceServlet.class);
         overrideHolder.setInitParameter("baseResource", overrideReal.toString());
