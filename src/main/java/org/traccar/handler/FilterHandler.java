@@ -57,6 +57,7 @@ public class FilterHandler extends BasePositionHandler {
     private final boolean filterRelative;
     private final long skipLimit;
     private final boolean skipAttributes;
+    private final boolean filterMT333;
 
     private final CacheManager cacheManager;
     private final Storage storage;
@@ -82,6 +83,7 @@ public class FilterHandler extends BasePositionHandler {
         filterRelative = config.getBoolean(Keys.FILTER_RELATIVE);
         skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
         skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
+        filterMT333 = config.getBoolean(Keys.FILTER_MT333);
         this.cacheManager = cacheManager;
         this.storage = storage;
         this.statisticsManager = statisticsManager;
@@ -195,6 +197,11 @@ public class FilterHandler extends BasePositionHandler {
         return false;
     }
 
+    private boolean filterMt3333(Position position) {
+        long fixTimeUnix = position.getFixTime().getTime() / 1000;
+       return fixTimeUnix < 1451606400L;
+    }
+
     protected boolean filter(Position position) {
 
         StringBuilder filterType = new StringBuilder();
@@ -256,6 +263,12 @@ public class FilterHandler extends BasePositionHandler {
             if (filterDailyLimit(position, preceding)) {
                 filterType.append("DailyLimit ");
             }
+        }
+
+        if (filterMt3333(position)) {
+            filterType.append("MT3333 ");
+            long fixTimeUnix = position.getFixTime().getTime() / 1000;
+            position.setFixTime(new java.util.Date((fixTimeUnix + 619315200L) * 1000));    
         }
 
         Device device = cacheManager.getObject(Device.class, deviceId);
