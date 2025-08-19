@@ -21,7 +21,6 @@ import jakarta.servlet.DispatcherType;
 import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.ee10.proxy.AsyncProxyServlet;
-import org.eclipse.jetty.ee10.servlet.ErrorHandler;
 import org.eclipse.jetty.ee10.servlet.FilterHolder;
 import org.eclipse.jetty.ee10.servlet.ResourceServlet;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
@@ -29,7 +28,6 @@ import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.ee10.servlet.SessionHandler;
 import org.eclipse.jetty.ee10.websocket.server.config.JettyWebSocketServletContainerInitializer;
 import org.eclipse.jetty.http.HttpCookie;
-import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.RequestLogWriter;
 import org.eclipse.jetty.server.Server;
@@ -57,7 +55,6 @@ import org.traccar.helper.ObjectMapperContextResolver;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.io.Writer;
 import java.net.InetSocketAddress;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
@@ -95,14 +92,6 @@ public class WebServer implements LifecycleObject {
         }
 
         initWebApp(servletHandler);
-
-        servletHandler.setErrorHandler(new ErrorHandler() {
-            @Override
-            protected void handleErrorPage(
-                    HttpServletRequest request, Writer writer, int code, String message) throws IOException {
-                writer.write("<!DOCTYPE html>" + code + " - " + HttpStatus.getMessage(code));
-            }
-        });
 
         Handler.Sequence handlers = new Handler.Sequence();
         initClientProxy(servletHandler);
