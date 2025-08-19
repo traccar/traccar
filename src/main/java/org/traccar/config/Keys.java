@@ -1457,6 +1457,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Filter positions with a zero accuracy.
+     */
+    public static final ConfigKey<Boolean> FILTER_ZERO_ACCURACY = new BooleanConfigKey(
+            "filter.zeroAccuracy",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Filter cell and wifi locations that are coming from geolocation provider.
      */
     public static final ConfigKey<Boolean> FILTER_APPROXIMATE = new BooleanConfigKey(

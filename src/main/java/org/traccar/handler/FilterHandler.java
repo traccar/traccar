@@ -48,6 +48,7 @@ public class FilterHandler extends BasePositionHandler {
     private final long filterPast;
     private final boolean filterApproximate;
     private final int filterAccuracy;
+    private final boolean filterZeroAccuracy;
     private final boolean filterStatic;
     private final int filterDistance;
     private final int filterMaxSpeed;
@@ -72,6 +73,7 @@ public class FilterHandler extends BasePositionHandler {
         filterFuture = config.getLong(Keys.FILTER_FUTURE) * 1000;
         filterPast = config.getLong(Keys.FILTER_PAST) * 1000;
         filterAccuracy = config.getInteger(Keys.FILTER_ACCURACY);
+        filterZeroAccuracy = config.getBoolean(Keys.FILTER_ZERO_ACCURACY);
         filterApproximate = config.getBoolean(Keys.FILTER_APPROXIMATE);
         filterStatic = config.getBoolean(Keys.FILTER_STATIC);
         filterDistance = config.getInteger(Keys.FILTER_DISTANCE);
@@ -131,7 +133,7 @@ public class FilterHandler extends BasePositionHandler {
     }
 
     private boolean filterAccuracy(Position position) {
-        return filterAccuracy != 0 && position.getAccuracy() > filterAccuracy;
+        return (filterAccuracy != 0 && position.getAccuracy() > filterAccuracy) || (filterZeroAccuracy && position.getAccuracy() == 0);
     }
 
     private boolean filterApproximate(Position position) {
