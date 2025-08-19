@@ -198,8 +198,11 @@ public class FilterHandler extends BasePositionHandler {
     }
 
     private boolean filterMt3333(Position position) {
-        long fixTimeUnix = position.getFixTime().getTime() / 1000;
-       return fixTimeUnix < 1451606400L;
+        if (filterMT333) {
+            long fixTimeUnix = position.getFixTime().getTime() / 1000;
+            return fixTimeUnix < 1451606400L;
+        }
+        return false;
     }
 
     protected boolean filter(Position position) {
@@ -268,7 +271,7 @@ public class FilterHandler extends BasePositionHandler {
         if (filterMt3333(position)) {
             filterType.append("MT3333 ");
             long fixTimeUnix = position.getFixTime().getTime() / 1000;
-            position.setFixTime(new java.util.Date((fixTimeUnix + 619315200L) * 1000));    
+            position.setFixTime(new java.util.Date((fixTimeUnix + 619315200L) * 1000));
         }
 
         Device device = cacheManager.getObject(Device.class, deviceId);
