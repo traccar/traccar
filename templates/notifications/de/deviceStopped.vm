@@ -1,12 +1,9 @@
-#set($subject = "$device.name: alarm!")
-#set($alarmKey = $event.getString('alarm'))
-#set($alarmName = $translations.get("alarm${alarmKey.substring(0, 1).toUpperCase()}${alarmKey.substring(1)}"))
-#set($digest = "$device.name Alarm: $alarmName am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr")
-<!DOCTYPE html>
+#set($subject = "$device.name: angehalten")
+#set($digest = "$device.name ist am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr angehalten")
 <html>
 <body>
 Ger&auml;t: $device.name<br>
-Alarm: $alarmName<br>
+Angehalten<br>
 am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr<br>
 Position: <a href="$webUrl?eventId=$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>
