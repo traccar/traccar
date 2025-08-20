@@ -1,0 +1,12 @@
+#set($subject = "$device.name: comando enfileirado enviado")
+#set($digest = "comando enfileirado enviado ao veículo $device.name às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $device.name<br>
+Comando enfileirado enviado<br>
+Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Cancelar subscrição</a>
+</body>
+</html>
