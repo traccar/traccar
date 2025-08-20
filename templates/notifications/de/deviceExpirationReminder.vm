@@ -1,0 +1,8 @@
+#set($subject = "Erinnerung an Ger&auml;teablauf")
+#set($digest = "Ger&auml;t $device.name wird am $dateTool.format('dd-MM-yyyy', $expiration, $locale, $timezone) ablaufen")
+<!DOCTYPE html>
+<html>
+<body>
+Dein Ger&auml;t $device.name wird am $dateTool.format('dd-MM-yyyy', $expiration, $locale, $timezone) ablaufen.
+</body>
+</html>
