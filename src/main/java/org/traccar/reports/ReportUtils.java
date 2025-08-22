@@ -57,7 +57,7 @@ import java.util.TimeZone;
 public final class ReportUtils {
 
     private static double speedThreshold = Context.getConfig().getDouble("event.motion.speedThreshold", 0.01);
-
+    private static double ralentiThreshold = Context.getConfig().getDouble("event.motion.ralentiThreshold", 120000);
     private ReportUtils() {
     }
 
@@ -405,7 +405,9 @@ public final class ReportUtils {
         if (position.getSpeed() < speedThreshold
                 && last.getSpeed() < speedThreshold
                 && position.getBoolean(Position.KEY_IGNITION)
-                && last.getBoolean(Position.KEY_IGNITION)) {
+                && last.getBoolean(Position.KEY_IGNITION)
+                && position.getFixTime().getTime() - last.getFixTime().getTime() < ralentiThreshold
+        ) {
             return position.getFixTime().getTime() - last.getFixTime().getTime();
         }
         return 0;
