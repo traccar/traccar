@@ -36,7 +36,6 @@ import org.traccar.storage.StorageException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.Locale;
@@ -87,7 +86,7 @@ public class TextTemplateFormatter {
         StringWriter writer = new StringWriter();
         String language = (String) velocityContext.get("language");
         Path filePath = localeManager.getTemplateFile(templatesRoot, "notifications", language, name + ".vm");
-        if (Files.exists(filePath)) {
+        if (filePath != null) {
             Template template = velocityEngine.getTemplate(filePath.toString(), StandardCharsets.UTF_8.name());
             template.merge(velocityContext, writer);
             return new NotificationMessage(
