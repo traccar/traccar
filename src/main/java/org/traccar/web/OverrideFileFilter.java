@@ -45,13 +45,13 @@ public class OverrideFileFilter implements Filter {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
-        if (!("GET".equals(httpRequest.getMethod()) || "HEAD".equals(httpRequest.getMethod()))) {
+        if (!"GET".equals(httpRequest.getMethod()) && !"HEAD".equals(httpRequest.getMethod())) {
             chain.doFilter(request, response);
             return;
         }
 
         String uri = httpRequest.getRequestURI();
-        if (uri.startsWith("/api/") || uri.startsWith("/console/")) {
+        if (uri.startsWith("/api") || uri.startsWith("/console")) {
             chain.doFilter(request, response);
             return;
         }
