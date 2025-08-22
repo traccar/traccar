@@ -63,7 +63,7 @@ public class TimeHandler extends BasePositionHandler {
 
     public static Date adjustRollover(long currentTime, Date time) {
         long positionTime = time.getTime();
-        while (currentTime - positionTime > ROLLOVER_THRESHOLD) {
+        while (positionTime > OutdatedHandler.GPS_EPOCH && currentTime - positionTime > ROLLOVER_THRESHOLD) {
             positionTime += ROLLOVER_CYCLE;
         }
         return positionTime == time.getTime() ? time : new Date(positionTime);
