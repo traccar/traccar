@@ -47,10 +47,10 @@ public class LocaleManager {
         this.objectMapper = objectMapper;
     }
 
-    public String getTemplateFile(String root, String path, String language, String fileName) {
+    public Path getTemplateFile(String root, String path, String language, String fileName) {
         String resolvedLanguage = language != null ? language : DEFAULT_LANGUAGE;
         Path targetFile = Path.of(root, path, resolvedLanguage, fileName);
-        return Paths.get(path, Files.exists(targetFile) ? resolvedLanguage : DEFAULT_LANGUAGE, fileName).toString();
+        return Paths.get(path, Files.exists(targetFile) ? resolvedLanguage : DEFAULT_LANGUAGE, fileName);
     }
 
     public Map<String, String> getBundle(String language) {
