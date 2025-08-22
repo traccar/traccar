@@ -29,7 +29,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 @Singleton
 public class LocaleManager {
@@ -47,10 +49,15 @@ public class LocaleManager {
         this.objectMapper = objectMapper;
     }
 
-    public String getTemplateFile(String root, String path, String language, String fileName) {
-        String resolvedLanguage = language != null ? language : DEFAULT_LANGUAGE;
-        Path targetFile = Path.of(root, path, resolvedLanguage, fileName);
-        return Paths.get(path, Files.exists(targetFile) ? resolvedLanguage : DEFAULT_LANGUAGE, fileName).toString();
+    public Path getTemplateFile(String root, String path, String language, String fileName) {
+        var languages = Stream.of(language, DEFAULT_LANGUAGE).filter(Objects::nonNull).toList();
+        for (var targetLanguage : languages) {
+            Path targetFile = Path.of(root, path, targetLanguage, fileName);
+            if (Files.exists(targetFile)) {
+                return Paths.get(path, targetLanguage, fileName);
+            }
+        }
+        return null;
     }
 
     public Map<String, String> getBundle(String language) {

@@ -1,0 +1,8 @@
+#set($subject = "Ger&auml;t abgelaufen")
+#set($digest = "Ger&auml;t $device.name ist abgelaufen")
+<!DOCTYPE html>
+<html>
+<body>
+Dein Ger&auml;t $device.name ist abgelaufen.
+</body>
+</html>
