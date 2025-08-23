@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,16 @@ package org.traccar.reports;
 
 import org.traccar.helper.DateUtil;
 import org.traccar.helper.model.PositionUtil;
+import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
 import jakarta.inject.Inject;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
+
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Date;
@@ -40,12 +45,16 @@ public class CsvExportProvider {
     }
 
     public void generate(
-            OutputStream outputStream, long deviceId, Date from, Date to) throws StorageException {
+            OutputStream outputStream, long deviceId, long geofenceId, Date from, Date to) throws StorageException {
 
         var positions = PositionUtil.getPositions(storage, deviceId, from, to);
 
+        Geofence geofence = geofenceId == 0 ? null : storage.getObject(Geofence.class, new Request(
+                new Columns.All(), new Condition.Equals("id", geofenceId)));
+
         var attributes = positions.stream()
-                .flatMap((position -> position.getAttributes().keySet().stream()))
+                .filter(position -> geofence == null || geofence.containsPosition(position))
+                .flatMap(position -> position.getAttributes().keySet().stream())
                 .collect(Collectors.toUnmodifiableSet());
 
         var properties = new LinkedHashMap<String, Function<Position, Object>>();

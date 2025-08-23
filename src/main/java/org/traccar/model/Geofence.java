@@ -100,4 +100,8 @@ public class Geofence extends ExtendedModel implements Schedulable {
         setArea(geometry.toWkt());
     }
 
+    public boolean containsPosition(Position position) {
+        return getGeometry().containsPoint(position.getLatitude(), position.getLongitude());
+    }
+
 }
