@@ -132,7 +132,7 @@ public class NotificatorTraccar extends Notificator {
                     cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
                 }
             } catch (Exception e) {
-                LOGGER.warn("Push error", e);
+                LOGGER.warn("Notification push error", e);
             }
         }
     }

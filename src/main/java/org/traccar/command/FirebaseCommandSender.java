@@ -39,12 +39,12 @@ import java.util.Collection;
 import java.util.List;
 
 @Singleton
-public class ClientCommandSender implements CommandSender {
+public class FirebaseCommandSender implements CommandSender {
 
     private final FirebaseMessaging firebaseMessaging;
 
     @Inject
-    public ClientCommandSender(Config config) throws IOException {
+    public FirebaseCommandSender(Config config) throws IOException {
         InputStream serviceAccount = new ByteArrayInputStream(
                 config.getString(Keys.COMMAND_CLIENT_SERVICE_ACCOUNT).getBytes());
 
