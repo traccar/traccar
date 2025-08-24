@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.api.ExtendedObjectResource;
+import org.traccar.command.CommandSender;
 import org.traccar.command.CommandSenderManager;
-import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.model.DeviceUtil;
@@ -168,10 +168,9 @@ public class CommandResource extends ExtendedObjectResource<Command> {
 
             Device device = storage.getObject(Device.class, new Request(
                     new Columns.All(), new Condition.Equals("id", deviceId)));
-            String sender = device.getString(Keys.COMMAND_SENDER.getKey());
+            CommandSender sender = commandSenderManager.getSender(device);
             if (sender != null) {
-                return commandSenderManager.getSender(sender).getSupportedCommands()
-                        .stream().map(Typed::new).toList();
+                return sender.getSupportedCommands().stream().map(Typed::new).toList();
             }
 
             BaseProtocol protocol = getDeviceProtocol(deviceId);

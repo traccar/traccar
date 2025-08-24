@@ -18,6 +18,8 @@ package org.traccar.command;
 import com.google.inject.Injector;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import org.traccar.config.Keys;
+import org.traccar.model.Device;
 
 import java.util.Map;
 
@@ -36,13 +38,14 @@ public class CommandSenderManager {
         this.injector = injector;
     }
 
-    public CommandSender getSender(String type) {
-        var clazz = SENDERS_ALL.get(type);
+    public CommandSender getSender(Device device) {
+        String senderType = device.getString(Keys.COMMAND_SENDER.getKey());
+        var clazz = SENDERS_ALL.get(senderType);
         var sender = injector.getInstance(clazz);
         if (sender != null) {
             return sender;
         }
-        throw new RuntimeException("Failed to get command sender " + type);
+        throw new RuntimeException("Failed to get command sender " + senderType);
     }
 
 }
