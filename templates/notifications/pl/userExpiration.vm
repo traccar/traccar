@@ -1,0 +1,8 @@
+#set($subject = "Konto wygasło")
+#set($digest = "Konto wygasło")
+<!DOCTYPE html>
+<html>
+<body>
+Twoje konto wygasło.
+</body>
+</html>
