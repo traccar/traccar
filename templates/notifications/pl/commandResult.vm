@@ -6,7 +6,7 @@
 Urządzenie: $device.name<br>
 Rezultat: $position.getString('result')<br>
 Czas: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
-Link: <a href="$webUrl?eventId=$event.id">$webUrl?eventId=$event.id</a><br>
+Link: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
 </body>
