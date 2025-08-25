@@ -1,11 +1,11 @@
 #set($subject = "$device.name: jest offline")
-#set($digest = "$device.name jest offline od $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name jest offline od $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
 Urządzenie: $device.name<br>
 Jest offline<br>
-Czas: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Czas: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
 </body>
