@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,8 +46,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class EventsReportProvider {
 
@@ -62,8 +62,8 @@ public class EventsReportProvider {
         this.storage = storage;
     }
 
-    private List<Event> getEvents(long deviceId, Date from, Date to) throws StorageException {
-        return storage.getObjects(Event.class, new Request(
+    private Stream<Event> getEvents(long deviceId, Date from, Date to) throws StorageException {
+        return storage.getObjectsStream(Event.class, new Request(
                 new Columns.All(),
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
@@ -84,18 +84,19 @@ public class EventsReportProvider {
             Collection<String> types, Collection<String> alarms, Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
 
-        ArrayList<Event> result = new ArrayList<>();
+        List<Event> result = new ArrayList<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            Collection<Event> events = getEvents(device.getId(), from, to);
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
-            for (Event event : events) {
+            var iterator = getEvents(device.getId(), from, to).iterator();
+            while (iterator.hasNext()) {
+                Event event = iterator.next();
                 if (all || filterType(types, alarms, event)) {
                     long geofenceId = event.getGeofenceId();
                     long maintenanceId = event.getMaintenanceId();
                     if ((geofenceId == 0 || reportUtils.getObject(userId, Geofence.class, geofenceId) != null)
                             && (maintenanceId == 0
                             || reportUtils.getObject(userId, Maintenance.class, maintenanceId) != null)) {
-                       result.add(event);
+                        result.add(event);
                     }
                 }
             }
@@ -109,15 +110,16 @@ public class EventsReportProvider {
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
 
-        ArrayList<DeviceReportSection> devicesEvents = new ArrayList<>();
-        ArrayList<String> sheetNames = new ArrayList<>();
+        List<DeviceReportSection> devicesEvents = new ArrayList<>();
+        List<String> sheetNames = new ArrayList<>();
         HashMap<Long, String> geofenceNames = new HashMap<>();
         HashMap<Long, String> maintenanceNames = new HashMap<>();
         HashMap<Long, Position> positions = new HashMap<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            Collection<Event> events = getEvents(device.getId(), from, to);
+            List<Event> events = new ArrayList<>();
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
-            for (Iterator<Event> iterator = events.iterator(); iterator.hasNext();) {
+            var iterator = getEvents(device.getId(), from, to).iterator();
+            while (iterator.hasNext()) {
                 Event event = iterator.next();
                 if (all || filterType(types, alarms, event)) {
                     long geofenceId = event.getGeofenceId();
@@ -126,19 +128,17 @@ public class EventsReportProvider {
                         Geofence geofence = reportUtils.getObject(userId, Geofence.class, geofenceId);
                         if (geofence != null) {
                             geofenceNames.put(geofenceId, geofence.getName());
-                        } else {
-                            iterator.remove();
+                            events.add(event);
                         }
                     } else if (maintenanceId != 0) {
                         Maintenance maintenance = reportUtils.getObject(userId, Maintenance.class, maintenanceId);
                         if (maintenance != null) {
                             maintenanceNames.put(maintenanceId, maintenance.getName());
-                        } else {
-                            iterator.remove();
+                            events.add(event);
                         }
+                    } else {
+                        events.add(event);
                     }
-                } else {
-                    iterator.remove();
                 }
             }
             for (Event event : events) {
