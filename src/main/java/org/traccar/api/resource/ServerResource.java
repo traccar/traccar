@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -159,6 +159,14 @@ public class ServerResource extends BaseResource {
         try (var input = new FileInputStream(inputFile); var output = new FileOutputStream(outputPath.toFile())) {
             input.transferTo(output);
         }
+        return Response.ok().build();
+    }
+
+    @Path("gc")
+    @GET
+    public Response gc() throws StorageException {
+        permissionsService.checkAdmin(getUserId());
+        System.gc();
         return Response.ok().build();
     }
 
