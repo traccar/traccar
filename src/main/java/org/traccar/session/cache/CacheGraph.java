@@ -40,7 +40,7 @@ public class CacheGraph {
         CacheKey key = new CacheKey(clazz, id);
         CacheNode node = nodes.remove(key);
         if (node != null) {
-            node.getAllLinks(false).forEach(child -> child.getLinks(key.clazz(), true).remove(node));
+            node.getAllLinks(true).forEach(child -> child.getLinks(key.clazz(), false).remove(node));
         }
         roots.remove(key);
     }
