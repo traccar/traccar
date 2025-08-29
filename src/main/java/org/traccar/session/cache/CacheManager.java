@@ -48,6 +48,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Singleton
@@ -246,10 +247,8 @@ public class CacheManager implements BroadcastInterface {
         }
 
         if (link) {
-            BaseModel object = storage.getObject(toClass, new Request(
-                    new Columns.All(), new Condition.Equals("id", toId)));
-            if (!graph.addLink(fromClass, fromId, object)) {
-                initializeCache(object);
+            if (!graph.addLink(fromClass, fromId, toClass, toId, createObjectSupplier(toClass, toId))) {
+                initializeCache(graph.getObject(toClass, toId));
             }
         } else {
             graph.removeLink(fromClass, fromId, toClass, toId);
@@ -296,6 +295,17 @@ public class CacheManager implements BroadcastInterface {
                 }
             }
         }
+    }
+
+    private <T> Supplier<T> createObjectSupplier(Class<T> clazz, long id) {
+        return () -> {
+            try {
+                return storage.getObject(clazz, new Request(
+                        new Columns.All(), new Condition.Equals("id", id)));
+            } catch (StorageException e) {
+                throw new RuntimeException(e);
+            }
+        };
     }
 
 }
