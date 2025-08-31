@@ -1,0 +1,14 @@
+#set($subject = "$device.name: Ελήφθη αρχείο")
+#set($digest = "Στη Συσκευή $device.name $event.getString('media') Ελήφθη αρχείο: $event.getString('file') στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Συσκευή: $device.name<br>
+Τύπος: $event.getString('media')<br>
+Αρχείο: <a href="$webUrl/api/media/$device.uniqueId/$event.getString('file')">$event.getString('file')</a><br>
+Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Σύνδεσμος: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Απεγγραφή</a>
+</body>
+</html>

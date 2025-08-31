@@ -1,0 +1,12 @@
+#set($subject = "Η Συσκευή $device.name ειναι εκτός σύνδεσης")
+#set($digest = "Η Συσκευή $device.name ειναι εκτός σύνδεσης από τις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Συσκευή: $device.name<br>
+Εκτός σύνδεσης<br>
+Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Απεγγραφή</a>
+</body>
+</html>
