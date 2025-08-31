@@ -55,10 +55,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -97,7 +97,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
     }
 
     @GET
-    public Collection<Device> get(
+    public Stream<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
             @QueryParam("id") List<Long> deviceIds,
@@ -122,7 +122,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
                                 new Condition.Equals("id", deviceId),
                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
             }
-            return result;
+            return result.stream();
 
         } else {
 
@@ -141,7 +141,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 }
             }
 
-            return storage.getObjects(baseClass, new Request(
+            return storage.getObjectsStream(baseClass, new Request(
                     columns, Condition.merge(conditions), new Order("name")));
 
         }

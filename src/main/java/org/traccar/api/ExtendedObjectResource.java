@@ -28,8 +28,8 @@ import org.traccar.storage.query.Request;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.QueryParam;
-import java.util.Collection;
 import java.util.LinkedList;
+import java.util.stream.Stream;
 
 public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResource<T> {
 
@@ -41,7 +41,7 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
     }
 
     @GET
-    public Collection<T> get(
+    public Stream<T> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("groupId") long groupId, @QueryParam("deviceId") long deviceId,
             @QueryParam("excludeAttributes") boolean excludeAttributes) throws StorageException {
@@ -71,7 +71,7 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
         }
 
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
-        return storage.getObjects(baseClass, new Request(
+        return storage.getObjectsStream(baseClass, new Request(
                 columns, Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
     }
 

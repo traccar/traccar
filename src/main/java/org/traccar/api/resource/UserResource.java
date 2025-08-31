@@ -46,8 +46,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.Collection;
+
 import java.util.LinkedList;
+import java.util.stream.Stream;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -68,7 +69,7 @@ public class UserResource extends BaseObjectResource<User> {
     }
 
     @GET
-    public Collection<User> get(
+    public Stream<User> get(
             @QueryParam("userId") long userId, @QueryParam("deviceId") long deviceId,
             @QueryParam("excludeAttributes") boolean excludeAttributes) throws StorageException {
         var conditions = new LinkedList<Condition>();
@@ -83,7 +84,7 @@ public class UserResource extends BaseObjectResource<User> {
             conditions.add(new Condition.Permission(User.class, Device.class, deviceId).excludeGroups());
         }
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
-        return storage.getObjects(baseClass, new Request(
+        return storage.getObjectsStream(baseClass, new Request(
                 columns, Condition.merge(conditions), new Order("name")));
     }
 
