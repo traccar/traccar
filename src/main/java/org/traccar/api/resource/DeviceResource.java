@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,21 +100,24 @@ public class DeviceResource extends BaseObjectResource<Device> {
     public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds) throws StorageException {
+            @QueryParam("id") List<Long> deviceIds,
+            @QueryParam("excludeAttributes") boolean excludeAttributes) throws StorageException {
+
+        Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
 
         if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
 
             List<Device> result = new LinkedList<>();
             for (String uniqueId : uniqueIds) {
                 result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
+                        columns,
                         new Condition.And(
                                 new Condition.Equals("uniqueId", uniqueId),
                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
             }
             for (Long deviceId : deviceIds) {
                 result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
+                        columns,
                         new Condition.And(
                                 new Condition.Equals("id", deviceId),
                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
@@ -139,7 +142,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
             }
 
             return storage.getObjects(baseClass, new Request(
-                    new Columns.All(), Condition.merge(conditions), new Order("name")));
+                    columns, Condition.merge(conditions), new Order("name")));
 
         }
     }

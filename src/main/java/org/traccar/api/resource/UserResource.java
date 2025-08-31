@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -69,7 +69,8 @@ public class UserResource extends BaseObjectResource<User> {
 
     @GET
     public Collection<User> get(
-            @QueryParam("userId") long userId, @QueryParam("deviceId") long deviceId) throws StorageException {
+            @QueryParam("userId") long userId, @QueryParam("deviceId") long deviceId,
+            @QueryParam("excludeAttributes") boolean excludeAttributes) throws StorageException {
         var conditions = new LinkedList<Condition>();
         if (userId > 0) {
             permissionsService.checkUser(getUserId(), userId);
@@ -81,8 +82,9 @@ public class UserResource extends BaseObjectResource<User> {
             permissionsService.checkManager(getUserId());
             conditions.add(new Condition.Permission(User.class, Device.class, deviceId).excludeGroups());
         }
+        Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
         return storage.getObjects(baseClass, new Request(
-                new Columns.All(), Condition.merge(conditions), new Order("name")));
+                columns, Condition.merge(conditions), new Order("name")));
     }
 
     @Override

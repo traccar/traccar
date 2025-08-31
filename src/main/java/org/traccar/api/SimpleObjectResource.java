@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,8 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
 
     @GET
     public Collection<T> get(
-            @QueryParam("all") boolean all, @QueryParam("userId") long userId) throws StorageException {
+            @QueryParam("all") boolean all, @QueryParam("userId") long userId,
+            @QueryParam("excludeAttributes") boolean excludeAttributes) throws StorageException {
 
         var conditions = new LinkedList<Condition>();
 
@@ -58,8 +59,9 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
 
+        Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
         return storage.getObjects(baseClass, new Request(
-                new Columns.All(), Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
+                columns, Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
     }
 
 }
