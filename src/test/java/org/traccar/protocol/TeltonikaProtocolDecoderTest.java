@@ -163,7 +163,6 @@ public class TeltonikaProtocolDecoderTest extends ProtocolTest {
 
     }
 
-
     @Test
     public void testDecodePhoto() throws Exception {
 
