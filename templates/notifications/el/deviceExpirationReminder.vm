@@ -1,0 +1,8 @@
+#set($subject = "Υπενθύμιση λήξης συσκευής")
+#set($digest = "Η Συσκευή $device.name λήγει στις $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Η Συσκευή σας $device.name θα λήξει στις $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+</body>
+</html>

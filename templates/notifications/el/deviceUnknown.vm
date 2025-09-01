@@ -1,0 +1,12 @@
+#set($subject = "Η Συσκευή $device.name: είναι σε άγνωστη κατάσταση")
+#set($digest = "Η Συσκευή $device.name είναι σε άγνωστη κατάσταση απο τις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Συσκευή: $device.name<br>
+είναι σε άγνωστη κατάσταση<br>
+Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Απεγγραφή</a>
+</body>
+</html>
