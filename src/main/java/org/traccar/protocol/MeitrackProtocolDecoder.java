@@ -39,6 +39,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
@@ -106,6 +107,31 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .number("xx")
             .text("\r\n").optional()
             .compile();
+
+    private static final Pattern NETWORK_DESC = Pattern.compile(
+            "volte\\s*:\\s*(\\d)\\s*\\\"([^\\\"]+)\\\"\\s*,\\s*(-?\\d+)\\s*,\\s*(-?\\d+)\\s*,\\s*(-?\\d+)\\s*,\\s*(-?\\d+)");
+
+    private void decodeNetworkInfo(Position position, int networkTypeCode, String descriptor) {
+        if (descriptor != null && !descriptor.isEmpty()) {
+            position.set("networkDescriptor", descriptor);
+            Matcher m = NETWORK_DESC.matcher(descriptor);
+            if (m.find()) {
+                try {
+                    position.set("volte", Integer.parseInt(m.group(1)));
+                    position.set("networkType", m.group(2));
+                    int rssi = Integer.parseInt(m.group(3));
+                    position.set("rssi", rssi);
+                    position.set(Position.KEY_RSSI, rssi);
+                    position.set("rsrp", Integer.parseInt(m.group(4)));
+                    position.set("sinr", Integer.parseInt(m.group(5)));
+                    position.set("rsrq", Integer.parseInt(m.group(6)));
+                } catch (NumberFormatException ignored) {
+                    // Ignore parse errors; keep raw descriptor
+                }
+            }
+        }
+        position.set("networkCode", networkTypeCode);
+    }
 
     private String decodeAlarm(int event) {
         return switch (event) {
@@ -451,7 +477,18 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedByte(); // label
                         position.set(Position.PREFIX_TEMP + (id - 0x2A), buf.readShortLE() * 0.01);
                     }
-                    case 0x4B -> buf.skipBytes(length); // network information
+                    case 0x4B -> { // network information (ID_Len, version, Type, DescriptorLen, Descriptor)
+                        int idLen = buf.readUnsignedByte();
+                        int version = buf.readUnsignedByte();
+                        int type = buf.readUnsignedByte();
+                        int descLen = buf.readUnsignedByte();
+                        int readLen = Math.min(descLen, Math.max(0, length - 4));
+                        String descriptor = buf.readCharSequence(readLen, StandardCharsets.US_ASCII).toString();
+                        // Skip any remaining bytes for this field if descriptor shorter than length-4
+                        int remaining = length - 4 - readLen;
+                        if (remaining > 0) buf.skipBytes(remaining);
+                        decodeNetworkInfo(position, type, descriptor);
+                    }
                     case 0xFE31 -> {
                         int alarmProtocol = buf.readUnsignedByte();
                         position.set("alarmType", buf.readUnsignedByte());
