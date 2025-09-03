@@ -1761,8 +1761,6 @@ components:
           type: string
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
-        outdated:
-          type: boolean
         valid:
           type: boolean
         latitude:
