@@ -206,11 +206,13 @@ public class Position extends Message {
 
     private boolean outdated;
 
+    @JsonIgnore
     @QueryIgnore
     public boolean getOutdated() {
         return outdated;
     }
 
+    @JsonIgnore
     @QueryIgnore
     public void setOutdated(boolean outdated) {
         this.outdated = outdated;
