@@ -46,13 +46,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 public final class ReportUtils {
 
@@ -446,6 +440,13 @@ public final class ReportUtils {
         }
     }
 
+    private static void filterPositions(ArrayList<Position> positions) {
+        if (Objects.equals(positions.get(0).getProtocol(), "gt06")) {
+            positions.removeIf(p -> !p.getValid() && !p.getBoolean(Position.KEY_IGNITION)
+                    && p.getServerTime().getTime() - p.getFixTime().getTime() > 1000 * 60 * 60);
+        }
+    }
+
     public static <T extends BaseReport> Collection<T> detectTripsAndStops(
             IdentityManager identityManager, DeviceManager deviceManager,
             Collection<Position> positionCollection,
@@ -455,6 +456,7 @@ public final class ReportUtils {
 
         ArrayList<Position> positions = new ArrayList<>(positionCollection);
         if (!positions.isEmpty()) {
+            filterPositions(positions);
             boolean trips = reportClass.equals(TripReport.class);
             MotionEventHandler  motionHandler = new MotionEventHandler(identityManager, deviceManager, tripsConfig);
             DeviceState deviceState = new DeviceState();
