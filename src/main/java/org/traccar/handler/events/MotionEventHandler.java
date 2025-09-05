@@ -34,6 +34,8 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import java.util.Arrays;
+
 public class MotionEventHandler extends BaseEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MotionEventHandler.class);
@@ -69,7 +71,8 @@ public class MotionEventHandler extends BaseEventHandler {
             state.toDevice(device);
             try {
                 storage.updateObject(device, new Request(
-                        new Columns.Include("motionStreak", "motionState", "motionTime", "motionDistance"),
+                        new Columns.Include(
+                                "motionStreak", "motionState", "motionPositionId", "motionTime", "motionDistance"),
                         new Condition.Equals("id", device.getId())));
             } catch (StorageException e) {
                 LOGGER.warn("Update device motion error", e);
