@@ -79,29 +79,32 @@ public class EventsReportProvider {
                 || alarms.contains(event.getString(Position.KEY_ALARM));
     }
 
-    public Collection<Event> getObjects(
+    public Stream<Event> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Collection<String> types, Collection<String> alarms, Date from, Date to) throws StorageException {
         reportUtils.checkPeriodLimit(from, to);
+        boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
 
-        List<Event> result = new ArrayList<>();
-        for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
-            boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
-            var iterator = getEvents(device.getId(), from, to).iterator();
-            while (iterator.hasNext()) {
-                Event event = iterator.next();
-                if (all || filterType(types, alarms, event)) {
-                    long geofenceId = event.getGeofenceId();
-                    long maintenanceId = event.getMaintenanceId();
-                    if ((geofenceId == 0 || reportUtils.getObject(userId, Geofence.class, geofenceId) != null)
-                            && (maintenanceId == 0
-                            || reportUtils.getObject(userId, Maintenance.class, maintenanceId) != null)) {
-                        result.add(event);
+        return DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds).stream()
+                .flatMap(device -> {
+                    try {
+                        return getEvents(device.getId(), from, to);
+                    } catch (StorageException e) {
+                        return Stream.of();
                     }
-                }
-            }
-        }
-        return result;
+                })
+                .filter(event -> all || filterType(types, alarms, event))
+                .filter(event -> {
+                    long geofenceId = event.getGeofenceId();
+                    if (geofenceId > 0 && reportUtils.getObject(userId, Geofence.class, geofenceId) == null) {
+                        return false;
+                    }
+                    long maintenanceId = event.getMaintenanceId();
+                    if (maintenanceId > 0 && reportUtils.getObject(userId, Maintenance.class, maintenanceId) == null) {
+                        return false;
+                    }
+                    return true;
+                });
     }
 
     public void getExcel(
@@ -118,26 +121,28 @@ public class EventsReportProvider {
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             List<Event> events = new ArrayList<>();
             boolean all = types.isEmpty() || types.contains(Event.ALL_EVENTS);
-            var iterator = getEvents(device.getId(), from, to).iterator();
-            while (iterator.hasNext()) {
-                Event event = iterator.next();
-                if (all || filterType(types, alarms, event)) {
-                    long geofenceId = event.getGeofenceId();
-                    long maintenanceId = event.getMaintenanceId();
-                    if (geofenceId != 0) {
-                        Geofence geofence = reportUtils.getObject(userId, Geofence.class, geofenceId);
-                        if (geofence != null) {
-                            geofenceNames.put(geofenceId, geofence.getName());
+            try (var unfilteredEvents = getEvents(device.getId(), from, to)) {
+                var iterator = unfilteredEvents.iterator();
+                while (iterator.hasNext()) {
+                    Event event = iterator.next();
+                    if (all || filterType(types, alarms, event)) {
+                        long geofenceId = event.getGeofenceId();
+                        long maintenanceId = event.getMaintenanceId();
+                        if (geofenceId != 0) {
+                            Geofence geofence = reportUtils.getObject(userId, Geofence.class, geofenceId);
+                            if (geofence != null) {
+                                geofenceNames.put(geofenceId, geofence.getName());
+                                events.add(event);
+                            }
+                        } else if (maintenanceId != 0) {
+                            Maintenance maintenance = reportUtils.getObject(userId, Maintenance.class, maintenanceId);
+                            if (maintenance != null) {
+                                maintenanceNames.put(maintenanceId, maintenance.getName());
+                                events.add(event);
+                            }
+                        } else {
                             events.add(event);
                         }
-                    } else if (maintenanceId != 0) {
-                        Maintenance maintenance = reportUtils.getObject(userId, Maintenance.class, maintenanceId);
-                        if (maintenance != null) {
-                            maintenanceNames.put(maintenanceId, maintenance.getName());
-                            events.add(event);
-                        }
-                    } else {
-                        events.add(event);
                     }
                 }
             }

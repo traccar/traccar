@@ -84,13 +84,16 @@ public class ReportUtils {
         this.geocoder = geocoder;
     }
 
-    public <T extends BaseModel> T getObject(
-            long userId, Class<T> clazz, long objectId) throws StorageException, SecurityException {
-        return storage.getObject(clazz, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("id", objectId),
-                        new Condition.Permission(User.class, userId, clazz))));
+    public <T extends BaseModel> T getObject(long userId, Class<T> clazz, long objectId) {
+        try {
+            return storage.getObject(clazz, new Request(
+                    new Columns.All(),
+                    new Condition.And(
+                            new Condition.Equals("id", objectId),
+                            new Condition.Permission(User.class, userId, clazz))));
+        } catch (StorageException e) {
+            return null;
+        }
     }
 
     public void checkPeriodLimit(Date from, Date to) {
