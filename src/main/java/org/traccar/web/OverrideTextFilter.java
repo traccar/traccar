@@ -65,9 +65,9 @@ public class OverrideTextFilter implements Filter {
         byte[] bytes = wrappedResponse.getCapture();
         if (bytes != null) {
             String contentType = wrappedResponse.getContentType();
-            String pathInfo = httpRequest.getPathInfo();
+            String requestUri = httpRequest.getRequestURI();
             boolean isHtml = contentType != null && contentType.contains("text/html");
-            boolean isManifest = pathInfo != null && pathInfo.endsWith("manifest.webmanifest");
+            boolean isManifest = requestUri != null && requestUri.endsWith("manifest.webmanifest");
 
             if (isHtml || isManifest) {
                 Server server;
