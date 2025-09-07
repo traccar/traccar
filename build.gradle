@@ -135,6 +135,7 @@ dependencies {
     implementation "com.rabbitmq:amqp-client:5.26.0"
     implementation "com.warrenstrange:googleauth:1.5.0"
     implementation "com.google.openlocationcode:openlocationcode:1.0.4"
+    implementation 'org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5'
     testImplementation "org.mockito:mockito-core:5.19.0"
     testImplementation "org.junit.jupiter:junit-jupiter:5.13.4"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
