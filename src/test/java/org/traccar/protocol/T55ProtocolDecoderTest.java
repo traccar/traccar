@@ -23,7 +23,7 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, text(
                 "$GNGGA,164414.90,4650.5156500,N,01246.1059604,E,1,12,0.84,740.729,M,44.804,M,,*4E"));
 
-        verifyNull(decoder, text(
+        verifyPosition(decoder, text(
                 "$GNGLL,4650.5156500,N,01246.1059604,E,164414.90,A,A*77"));
 
         verifyPosition(decoder, text(
