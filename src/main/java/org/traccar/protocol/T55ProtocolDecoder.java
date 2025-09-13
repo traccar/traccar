@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,9 +72,9 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .expression("([NS]),")
             .number("(d+)(dd.d+),")              // longitude
             .expression("([EW]),")
-            .number("(d+),")                     // fix quality 0..8
-            .number("(d+),")                     // sat used 00..99
-            .number("(d+.?d*),")                 // HDOP
+            .number("(d+),")                     // fix quality
+            .number("(d+),")                     // satellites
+            .number("(d+.?d*),")                 // hdop
             .number("(-?d+.?d*),")               // altitude
             .any()
             .compile();
@@ -257,12 +257,12 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         DateBuilder dateBuilder = new DateBuilder()
                 .setCurrentDate()
-                .setTime(parser.nextInt(0), parser.nextInt(0), parser.nextInt(0));
+                .setTime(parser.nextInt(), parser.nextInt(), parser.nextInt());
         position.setTime(dateBuilder.getDate());
 
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setValid(parser.nextInt(0) > 0);
+        position.setValid(parser.nextInt() > 0);
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_HDOP, parser.nextDouble());
         position.setAltitude(parser.nextDouble());
@@ -326,13 +326,13 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
         position.setTime(parser.nextDateTime());
 
         position.setValid(parser.next().equals("A"));
-        position.setLatitude(parser.nextDouble(0));
-        position.setLongitude(parser.nextDouble(0));
-        position.setSpeed(parser.nextDouble(0));
-        position.setCourse(parser.nextDouble(0));
-        position.setAltitude(parser.nextDouble(0));
+        position.setLatitude(parser.nextDouble());
+        position.setLongitude(parser.nextDouble());
+        position.setSpeed(parser.nextDouble());
+        position.setCourse(parser.nextDouble());
+        position.setAltitude(parser.nextDouble());
 
-        position.set(Position.KEY_BATTERY, parser.nextDouble(0));
+        position.set(Position.KEY_BATTERY, parser.nextDouble());
 
         return position;
     }
