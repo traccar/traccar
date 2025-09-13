@@ -76,7 +76,6 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // sat used 00..99
             .number("(d+.?d*),")                 // HDOP
             .number("(-?d+.?d*),")               // altitude
-            .expression("([M]),")                // altitude unit M
             .any()
             .compile();
 
@@ -263,7 +262,7 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
 
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
-        position.setValid(parser.nextInt(0) >= 1);
+        position.setValid(parser.nextInt(0) > 0);
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_HDOP, parser.nextDouble());
         position.setAltitude(parser.nextDouble());
