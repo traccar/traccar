@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.mqtt.MqttMessageBuilders;
+import io.netty.handler.codec.mqtt.MqttQoS;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
@@ -56,7 +57,10 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
 
         buf.writeByte(Checksum.sum(buf.nioBuffer()));
 
-        return MqttMessageBuilders.publish().payload(buf).build();
+        return MqttMessageBuilders.publish()
+                .qos(MqttQoS.AT_LEAST_ONCE)
+                .payload(buf)
+                .build();
     }
 
 }

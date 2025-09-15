@@ -1,5 +1,6 @@
 package org.traccar.protocol;
 
+import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
@@ -17,7 +18,8 @@ public class IotmProtocolEncoderTest extends ProtocolTest {
         command.set(Command.KEY_INDEX, 1);
         command.set(Command.KEY_DATA, "1");
 
-        verifyCommand(encoder, command, binary("787812800c0000000052656c61792c312300009dee0d0a"));
+        MqttPublishMessage encodedCommand = (MqttPublishMessage) encoder.encodeCommand(command);
+        verifyFrame(binary("0202080079df0d8648700000040a00ffffff7f00000301b0b19e"), encodedCommand.payload());
 
     }
 
