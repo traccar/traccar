@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ public class IotmProtocol extends BaseProtocol {
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(MqttEncoder.INSTANCE);
                 pipeline.addLast(new MqttDecoder());
+                pipeline.addLast(new IotmProtocolEncoder(IotmProtocol.this));
                 pipeline.addLast(new IotmProtocolDecoder(IotmProtocol.this));
             }
         });
