@@ -19,6 +19,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
@@ -47,6 +50,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
     public MeitrackProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MeitrackProtocolDecoder.class);
 
     private static final Pattern PATTERN = new PatternBuilder()
             .text("$$").expression(".")          // flag
@@ -129,7 +134,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Position decodeRegular(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
-
+        LOGGER.info("MSG decodeRegular: " + buf.toString(StandardCharsets.US_ASCII));
         Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
         if (!parser.matches()) {
             return null;
@@ -141,6 +146,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
+        LOGGER.info("Device model: " + Objects.requireNonNullElse(getDeviceModel(deviceSession), "").toUpperCase());
         position.setDeviceId(deviceSession.getDeviceId());
 
         int event = parser.nextInt();
@@ -218,24 +224,51 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        // sensorMagnetic
+        if (parser.hasNext()) {
+            String sensorMagnetic = parser.next();
+            LOGGER.info("MSG sensorMagnetic: " + sensorMagnetic);
+            String[] mag = sensorMagnetic.split("\\|");
+            if (mag.length > 3) {
+                position.set("mtState", Integer.parseInt(mag[0]));
+                position.set("mtForward", Integer.parseInt(mag[1]));
+                position.set("mtBackward",  Integer.parseInt(mag[2]));
+                position.set("mtSpeed",  Integer.parseInt(mag[3]));
+            }
+        }
+
         int protocol = parser.nextInt(0);
 
         if (parser.hasNext()) {
             String fuel = parser.next();
-            position.set(Position.KEY_FUEL_LEVEL,
-                    Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) * 0.01);
+        if (fuel != null && fuel.length() >= 4) {
+        position.set(Position.KEY_FUEL_LEVEL,
+            Integer.parseInt(fuel.substring(0, 2), 16)
+                + Integer.parseInt(fuel.substring(2), 16) * 0.01);
+        }
         }
 
         if (parser.hasNext()) {
-            for (String temp : parser.next().split("\\|")) {
-                int index = Integer.parseInt(temp.substring(0, 2), 16);
-                if (protocol >= 3) {
-                    double value = (short) Integer.parseInt(temp.substring(2), 16);
-                    position.set(Position.PREFIX_TEMP + index, value * 0.01);
-                } else {
-                    double value = Byte.parseByte(temp.substring(2, 4), 16);
-                    value += (value < 0 ? -0.01 : 0.01) * Integer.parseInt(temp.substring(4), 16);
-                    position.set(Position.PREFIX_TEMP + index, value);
+            String temps = parser.next();
+            if (temps != null && !temps.isEmpty()) {
+                for (String temp : temps.split("\\|")) {
+                    if (temp.length() < 6) { // expect at least index (2) + value (4)
+                        continue;
+                    }
+                    int index = Integer.parseInt(temp.substring(0, 2), 16);
+                    if (protocol >= 3) {
+                        if (temp.length() >= 6) {
+                            double value = (short) Integer.parseInt(temp.substring(2, 6), 16);
+                            position.set(Position.PREFIX_TEMP + index, value * 0.01);
+                        }
+                    } else {
+                        // old protocol: two hex for integer part and remaining as fractional (2)
+                        double value = Byte.parseByte(temp.substring(2, 4), 16);
+                        if (temp.length() > 4) {
+                            value += (value < 0 ? -0.01 : 0.01) * Integer.parseInt(temp.substring(4), 16);
+                        }
+                        position.set(Position.PREFIX_TEMP + index, value);
+                    }
                 }
             }
         }
@@ -271,6 +304,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private List<Position> decodeBinaryC(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+        LOGGER.info("MSG decodeBinaryC");
         List<Position> positions = new LinkedList<>();
 
         String flag = buf.toString(2, 1, StandardCharsets.US_ASCII);
@@ -340,6 +374,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private List<Position> decodeBinaryE(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
+        LOGGER.info("MSG decodeBinaryE");
         List<Position> positions = new LinkedList<>();
 
         buf.readerIndex(buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',') + 1);
@@ -351,24 +386,32 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        buf.readUnsignedIntLE(); // remaining cache
-        int count = buf.readUnsignedShortLE();
+    long remainingCache = buf.readUnsignedIntLE(); // remaining cache records on device
+    int count = buf.readUnsignedShortLE(); // number of data packets in this message
 
         for (int i = 0; i < count; i++) {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
+            position.set("cacheRemaining", remainingCache);
+            position.set("packetCount", count);
 
             Network network = new Network();
 
-            buf.readUnsignedShortLE(); // length
-            buf.readUnsignedShortLE(); // index
-
+            int recordLength = buf.readUnsignedShortLE(); // total record length (includes header)
+            int recordIndex = buf.readUnsignedShortLE(); // record index
+            position.set(Position.KEY_INDEX, recordIndex);
+            int recordStart = buf.readerIndex();
+            int recordEnd = recordStart + Math.max(0, recordLength - 4); // subtract length and index bytes already read
+            int event = 0;
             int paramCount = buf.readUnsignedByte();
             for (int j = 0; j < paramCount; j++) {
                 boolean extension = buf.getUnsignedByte(buf.readerIndex()) == 0xFE;
                 int id = extension ? buf.readUnsignedShort() : buf.readUnsignedByte();
                 switch (id) {
-                    case 0x01 -> position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+                    case 0x01 -> {
+                        event = buf.readUnsignedByte();
+                        position.set(Position.KEY_EVENT, event);
+                    }
                     case 0x05 -> position.setValid(buf.readUnsignedByte() > 0);
                     case 0x06 -> position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     case 0x07 -> position.set(Position.KEY_RSSI, buf.readUnsignedByte());
@@ -408,6 +451,16 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x9C -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShortLE());
                     case 0x9F -> position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShortLE());
                     case 0xC9 -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShortLE());
+                    case 0xFE25 -> { // IO status bitmask (2 bytes)
+                        int value = buf.readUnsignedShortLE();
+                        position.set("ioA84Raw", value);
+                        String binary = String.format("%16s", Integer.toBinaryString(value)).replace(' ', '0');
+                        position.set("ioA84Bits", binary); // 16-bit binary representation
+                    }
+                    case 0xFE26, 0xFE27, 0xFE28, 0xFE29 -> {
+                        int value = buf.readUnsignedShortLE();
+                        position.set("param" + Integer.toHexString(id), value);
+                    }
                     default -> buf.readUnsignedShortLE();
                 }
             }
@@ -452,6 +505,38 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.PREFIX_TEMP + (id - 0x2A), buf.readShortLE() * 0.01);
                     }
                     case 0x4B -> buf.skipBytes(length); // network information
+                    case 0x39 -> { // Driver unique ID (mag card)
+                        if (length > 0 && event == 37) {
+                            byte[] data = new byte[length];
+                            buf.readBytes(data);
+                            String value = new String(data, StandardCharsets.US_ASCII)
+                                    .trim()
+                                    .replace(" ", "")
+                                    .replace("\r", "")
+                                    .replace("|", "");
+                            if (!value.isEmpty()) {
+                                position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
+                            }
+                        }
+                    }
+                    case 0x49 -> { // Cameras status: <ID_Len><Number><Status(8 bytes bitmask)>
+                        if (length >= 10) {
+                            int idLen = buf.readUnsignedByte();
+                            int supported = buf.readUnsignedByte();
+                            long mask = buf.readLongLE(); // little-endian bit order
+                            position.set("cameraIdLength", idLen);
+                            position.set("camerasSupported", supported);
+                            position.set("camerasMask", mask);
+                            long limitMask = supported >= 64 ? -1L : (1L << supported) - 1;
+                            int connected = Long.bitCount(mask & limitMask);
+                            position.set("camerasConnected", connected);
+                            if (length > 10) {
+                                buf.skipBytes(length - 10); // skip any trailing bytes
+                            }
+                        } else {
+                            buf.skipBytes(length); // invalid length
+                        }
+                    }
                     case 0xFE31 -> {
                         int alarmProtocol = buf.readUnsignedByte();
                         position.set("alarmType", buf.readUnsignedByte());
@@ -488,7 +573,68 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         }
                         buf.readUnsignedByte(); // battery alert
                     }
+                    case 0xFE2B -> { // magnetic sensor extended: <Status><Forward count><Reverse count><RPM>
+                        if (length >= 11) {
+                            int status = buf.readUnsignedByte();
+                            long forward = buf.readUnsignedIntLE();
+                            long reverse = buf.readUnsignedIntLE();
+                            int rpm = buf.readUnsignedShortLE();
+                            // Reuse naming consistent with ASCII magnetic block
+                            position.set("mgState", status);
+                            position.set("mgForward", forward);
+                            position.set("mgBackward", reverse);
+                            position.set("mgRpm", rpm);
+                            if (length > 11) {
+                                buf.skipBytes(length - 11); // skip any extra bytes if present
+                            }
+                        } else {
+                            buf.skipBytes(length); // insufficient length; skip
+                        }
+                    }
+                    case 0xFEED -> { // magnetic sensor extended v2
+                        if (length >= 17) {
+                            int version = buf.readUnsignedByte();
+                            int state = buf.readUnsignedByte(); // 00 stop, 01 forward, 02 backward
+                            long forward = buf.readUnsignedIntLE();
+                            long reverse = buf.readUnsignedIntLE();
+                            int rawRpm = buf.readUnsignedShortLE();
+                            int rawInterval = buf.readUnsignedShortLE();
+                            int last60 = buf.readUnsignedByte();
+                            int last30 = buf.readUnsignedByte();
+                            int last5 = buf.readUnsignedByte();
+                            position.set("mgVersion", version);
+                            position.set("mgState", state);
+                            position.set("mgForward", forward);
+                            position.set("mgBackward", reverse);
+                            double mgRpm = rawRpm * 0.01;
+                            double mgInterval = rawInterval * 0.01;
+                            // round to 2 decimal places explicitly
+                            mgRpm = Math.round(mgRpm * 100.0) / 100.0;
+                            mgInterval = Math.round(mgInterval * 100.0) / 100.0;
+                            position.set("mgRpm", mgRpm); // ทศนิยมสองตำแหน่ง
+                            position.set("mgInterval", mgInterval); // ทศนิยมสองตำแหน่ง
+                            position.set("mgCount60", last60);
+                            position.set("mgCount30", last30);
+                            position.set("mgCount5", last5);
+                            if (length > 17) {
+                                buf.skipBytes(length - 17); // skip any trailing bytes
+                            }
+                        } else {
+                            byte[] data = new byte[length];
+                            buf.readBytes(data);
+                            position.set("paramfeed", ByteBufUtil.hexDump(data));
+                        }
+                    }
                     default -> buf.skipBytes(length);
+                }
+            }
+
+            // Safety: if record length boundary was provided
+            // and we over-read (due to unknown param mismatch), skip to end
+            if (recordLength > 0) {
+                int over = recordEnd - buf.readerIndex();
+                if (over > 0 && over < recordLength) {
+                    buf.skipBytes(over);
                 }
             }
 
