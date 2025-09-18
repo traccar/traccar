@@ -94,7 +94,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             .groupEnd()
             .groupBegin()
             .expression("([^,]+)?,").optional()  // event specific
-            .expression("[^,]*,")                // reserved
+            .expression("([^,]*)?,")              // sensor optional
             .number("(d+)?,")                    // protocol
             .number("(x{4})?")                   // fuel
             .groupBegin()
@@ -134,8 +134,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Position decodeRegular(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
-        LOGGER.info("MSG decodeRegular: " + buf.toString(StandardCharsets.US_ASCII));
-        Parser parser = new Parser(PATTERN, buf.toString(StandardCharsets.US_ASCII));
+        String original = buf.toString(StandardCharsets.US_ASCII);
+        LOGGER.debug("MSG decodeRegular: " + original);
+        Parser parser = new Parser(PATTERN, original);
         if (!parser.matches()) {
             return null;
         }
@@ -146,7 +147,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         if (deviceSession == null) {
             return null;
         }
-        LOGGER.info("Device model: " + Objects.requireNonNullElse(getDeviceModel(deviceSession), "").toUpperCase());
+        LOGGER.debug("Device model: " + Objects.requireNonNullElse(getDeviceModel(deviceSession), "").toUpperCase());
         position.setDeviceId(deviceSession.getDeviceId());
 
         int event = parser.nextInt();
@@ -218,8 +219,16 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         String eventData = parser.next();
         if (eventData != null && !eventData.isEmpty()) {
+            LOGGER.debug("MSG eventData: " + eventData);
             switch (event) {
-                case 37 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, eventData);
+                case 37 -> {
+                    String driverData = eventData
+                                    .trim()
+                                    .replace(" ", "")
+                                    .replace("\r", "")
+                                    .replace("|", "");
+                    position.set(Position.KEY_DRIVER_UNIQUE_ID, driverData);
+                }
                 default -> position.set("eventData", eventData);
             }
         }
@@ -227,13 +236,29 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         // sensorMagnetic
         if (parser.hasNext()) {
             String sensorMagnetic = parser.next();
-            LOGGER.info("MSG sensorMagnetic: " + sensorMagnetic);
-            String[] mag = sensorMagnetic.split("\\|");
-            if (mag.length > 3) {
-                position.set("mtState", Integer.parseInt(mag[0]));
-                position.set("mtForward", Integer.parseInt(mag[1]));
-                position.set("mtBackward",  Integer.parseInt(mag[2]));
-                position.set("mtSpeed",  Integer.parseInt(mag[3]));
+            LOGGER.debug("MSG sensorMagnetic: " + sensorMagnetic);
+            // Handle single numeric value or pipe-separated values
+            if (sensorMagnetic.contains("|")) {
+                String[] mag = sensorMagnetic.split("\\|");
+                if (mag.length > 3) {
+                    position.set("mgState", mag[0]);
+                    position.set("mgForward", mag[1]);
+                    position.set("mgBackward",  mag[2]);
+                    position.set("mgRpm",  mag[3]);
+                    if (mag.length > 4) {
+                        position.set("mgInterval",  mag[4]);
+                        position.set("mgCount60", mag[5]);
+                        position.set("mgCount30", mag[6]);
+                        position.set("mgCount5", mag[7]);
+                    }
+                }
+            } else {
+                // Single value case (like "108")
+                try {
+                    position.set("mgState", Integer.parseInt(sensorMagnetic));
+                } catch (NumberFormatException e) {
+                    LOGGER.warn("Failed to parse magnetic sensor value: " + sensorMagnetic);
+                }
             }
         }
 
@@ -278,6 +303,77 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             decodeDataFields(position, parser.next().split(","));
         }
 
+        // ------------------------------------------------------------
+        // Post-processing for extended ASCII segments not covered by regex
+        // Examples of tail segments:
+        //   ... ,0|0007|0000|0000|0000|0000,ACC|118|160,BUF|0|8192*20
+        //   ... ,0|0007|0000|0000|0000|0000,ACC|174|210,BUF|104|8192*11
+        // Where:
+        //   Previous token before ACC| is extended IO mask set (second element = 16-bit hex bitmask -> ioA84Raw)
+        //   ACC|X|Y contains ACC status / voltages (optional handling placeholder)
+        //   BUF|remaining|capacity contains remaining cached records on device (cacheRemaining)
+        try {
+            int asterisk = original.indexOf('*');
+            if (asterisk > 0) {
+                String core = original.substring(0, asterisk); // exclude checksum
+                // Skip initial '$$' header part when splitting
+                int firstComma = core.indexOf(',');
+                if (firstComma > 0) {
+                    String payload = core.substring(firstComma + 1);
+                    String[] tokens = payload.split(",");
+                    for (int i = 0; i < tokens.length; i++) {
+                        String token = tokens[i];
+                        if (token.startsWith("ACC|")) {
+                            // Previous token should be IO raw block
+                            if (i > 0) {
+                                String ioBlock = tokens[i - 1];
+                                // Expect format like 0|0007|0000|0000|0000|0000
+                                if (ioBlock.contains("|")) {
+                                    String[] parts = ioBlock.split("\\|");
+                                    if (parts.length >= 2 && parts[1].matches("(?i)[0-9a-f]{4}")) {
+                                        try {
+                                            int raw = Integer.parseInt(parts[1], 16);
+                                            position.set("ioA84Raw", raw);
+                                            String binary = String.format("%16s",
+                                                            Integer.toBinaryString(raw)).replace(' ', '0');
+                                            position.set("ioA84Bits", binary);
+                                        } catch (NumberFormatException ignored) { }
+                                    }
+                                }
+                            }
+                            // Optionally parse ACC voltages / status
+                            String[] accParts = token.split("\\|");
+                            if (accParts.length >= 2) {
+                                position.set("accLabel", accParts[0]); // usually 'ACC'
+                                if (accParts.length >= 2) {
+                                    position.set("accValue1", accParts[1]);
+                                }
+                                if (accParts.length >= 3) {
+                                    position.set("accValue2", accParts[2]);
+                                }
+                            }
+                        } else if (token.startsWith("BUF|")) {
+                            String[] bufParts = token.split("\\|");
+                            if (bufParts.length >= 2) {
+                                try {
+                                    long remaining = Long.parseLong(bufParts[1]);
+                                    position.set("cacheRemaining", remaining);
+                                } catch (NumberFormatException ignored) { }
+                            }
+                            if (bufParts.length >= 3) {
+                                try {
+                                    long capacity = Long.parseLong(bufParts[2]);
+                                    position.set("cacheCapacity", capacity);
+                                } catch (NumberFormatException ignored) { }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Extended ASCII tail parse failed: {}", e.getMessage());
+        }
+
         return position;
     }
 
@@ -304,7 +400,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private List<Position> decodeBinaryC(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
-        LOGGER.info("MSG decodeBinaryC");
+        LOGGER.debug("MSG decodeBinaryC");
         List<Position> positions = new LinkedList<>();
 
         String flag = buf.toString(2, 1, StandardCharsets.US_ASCII);
@@ -374,7 +470,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private List<Position> decodeBinaryE(Channel channel, SocketAddress remoteAddress, ByteBuf buf) {
-        LOGGER.info("MSG decodeBinaryE");
+        LOGGER.debug("MSG decodeBinaryE");
         List<Position> positions = new LinkedList<>();
 
         buf.readerIndex(buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',') + 1);
