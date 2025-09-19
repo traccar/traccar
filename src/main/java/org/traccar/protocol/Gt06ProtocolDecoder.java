@@ -544,6 +544,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     .setSecond(BcdUtil.readInteger(time, 2));
             position.setDeviceTime(dateBuilder.getDate());
             decodeGps(position, buf, false, deviceSession.getTimeZone());
+            buf.skipBytes(9); //LBS
+            int status = buf.readUnsignedByte();
+            position.set(Position.KEY_STATUS, status);
+            position.set(Position.KEY_IGNITION, BitUtil.check(status, 1));
+            position.set(Position.KEY_CHARGE, BitUtil.check(status, 2));
+            position.set(Position.KEY_BLOCKED, BitUtil.check(status, 7));
+
+            position.set(Position.KEY_POWER, buf.readShort() * 0.01);
+            position.set(Position.KEY_BATTERY, buf.readByte() * 0.1);
+            position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+
 
             return position;
         } else {
