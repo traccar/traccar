@@ -18,6 +18,8 @@ package org.traccar.database;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.Context;
 import org.traccar.model.Device;
 import org.traccar.model.Geofence;
@@ -35,13 +37,20 @@ public class GeofenceManager extends ExtendedObjectManager<Geofence> {
         recalculateDevicesGeofences();
     }
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GeofenceManager.class);
+
+
     public List<Long> getCurrentDeviceGeofences(Position position) {
         List<Long> result = new ArrayList<>();
         for (long geofenceId : getAllDeviceItems(position.getDeviceId())) {
-            Geofence geofence = getById(geofenceId);
-            if (geofence != null && geofence.getGeometry()
-                    .containsPoint(position.getLatitude(), position.getLongitude())) {
-                result.add(geofenceId);
+            try {
+                Geofence geofence = getById(geofenceId);
+                if (geofence != null && geofence.getGeometry()
+                        .containsPoint(position.getLatitude(), position.getLongitude())) {
+                    result.add(geofenceId);
+                }
+            } catch (Exception e) {
+                LOGGER.error("containsPoint, geofenceId " + geofenceId , e);
             }
         }
         return result;
