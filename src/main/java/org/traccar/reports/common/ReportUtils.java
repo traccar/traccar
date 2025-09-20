@@ -103,14 +103,30 @@ public class ReportUtils {
         }
     }
 
-    public double calculateFuel(Position first, Position last) {
+    
+    public double calculateFuel(Position first, Position last, Device device) {
         if (first.hasAttribute(Position.KEY_FUEL_USED) && last.hasAttribute(Position.KEY_FUEL_USED)) {
             return last.getDouble(Position.KEY_FUEL_USED) - first.getDouble(Position.KEY_FUEL_USED);
         } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL) && last.hasAttribute(Position.KEY_FUEL_LEVEL)) {
             return first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL);
+        } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL_PERCENTAGE)
+                && last.hasAttribute(Position.KEY_FUEL_LEVEL_PERCENTAGE)) {
+            if (device.hasAttribute("fuelCapacity")) {
+                try {
+                    Double fuelLevelPercentageDifference = first.getDouble(Position.KEY_FUEL_LEVEL_PERCENTAGE)
+                            - last.getDouble(Position.KEY_FUEL_LEVEL_PERCENTAGE);
+
+                    Double fuelCapacity = device.getDouble("fuelCapacity");
+                    return (fuelLevelPercentageDifference / 100) * fuelCapacity;
+                } catch (Exception e) {
+                    return 0;
+                }
+            }
+            return 0;
         }
         return 0;
     }
+
 
     public String findDriver(Position firstPosition, Position lastPosition) {
         if (firstPosition.hasAttribute(Position.KEY_DRIVER_UNIQUE_ID)) {
@@ -200,7 +216,7 @@ public class ReportUtils {
             trip.setAverageSpeed(UnitsConverter.knotsFromMps(trip.getDistance() * 1000 / tripDuration));
         }
         trip.setMaxSpeed(maxSpeed);
-        trip.setSpentFuel(calculateFuel(startTrip, endTrip));
+        trip.setSpentFuel(calculateFuel(startTrip, endTrip, device));
 
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));
         trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
@@ -241,7 +257,7 @@ public class ReportUtils {
 
         long stopDuration = endStop.getFixTime().getTime() - startStop.getFixTime().getTime();
         stop.setDuration(stopDuration);
-        stop.setSpentFuel(calculateFuel(startStop, endStop));
+        stop.setSpentFuel(calculateFuel(startStop, endStop, device));
 
         if (startStop.hasAttribute(Position.KEY_HOURS) && endStop.hasAttribute(Position.KEY_HOURS)) {
             stop.setEngineHours(endStop.getLong(Position.KEY_HOURS) - startStop.getLong(Position.KEY_HOURS));

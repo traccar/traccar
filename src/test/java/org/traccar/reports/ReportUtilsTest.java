@@ -92,16 +92,18 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
-    public void testCalculateSpentFuel() {
-        ReportUtils reportUtils = new ReportUtils(
-                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
-        Position startPosition = new Position();
-        Position endPosition = new Position();
-        assertEquals(reportUtils.calculateFuel(startPosition, endPosition), 0.0, 0.01);
-        startPosition.set(Position.KEY_FUEL_LEVEL, 0.7);
-        endPosition.set(Position.KEY_FUEL_LEVEL, 0.5);
-        assertEquals(reportUtils.calculateFuel(startPosition, endPosition), 0.2, 0.01);
-    }
+   public void testCalculateSpentFuel() {
+                ReportUtils reportUtils = new ReportUtils(
+                                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class),
+                                null);
+                Device device = mock(Device.class);
+                Position startPosition = new Position();
+                Position endPosition = new Position();
+                assertEquals(reportUtils.calculateFuel(startPosition, endPosition, device), 0.0, 0.01);
+                startPosition.set(Position.KEY_FUEL_LEVEL, 0.7);
+                endPosition.set(Position.KEY_FUEL_LEVEL, 0.5);
+                assertEquals(reportUtils.calculateFuel(startPosition, endPosition, device), 0.2, 0.01);
+        }
 
     @Test
     public void testDetectTripsSimple() throws Exception {
