@@ -20,6 +20,7 @@ import com.google.inject.servlet.GuiceFilter;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.http.HttpServletRequest;
+import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.ee10.proxy.AsyncProxyServlet;
 import org.eclipse.jetty.ee10.servlet.FilterHolder;
 import org.eclipse.jetty.ee10.servlet.ResourceServlet;
@@ -31,7 +32,6 @@ import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.RequestLogWriter;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.session.DatabaseAdaptor;
 import org.eclipse.jetty.session.DefaultSessionCache;
 import org.eclipse.jetty.session.JDBCSessionDataStoreFactory;
@@ -97,7 +97,7 @@ public class WebServer implements LifecycleObject {
         Handler.Sequence handlers = new Handler.Sequence();
         initClientProxy(servletHandler);
         handlers.addHandler(servletHandler);
-        handlers.addHandler(new GzipHandler());
+        handlers.addHandler(new CompressionHandler());
         server.setHandler(handlers);
 
         if (config.hasKey(Keys.WEB_REQUEST_LOG_PATH)) {

@@ -101,6 +101,8 @@ dependencies {
     implementation "org.glassfish:jakarta.json:2.0.1"
     implementation "com.sun.mail:jakarta.mail:2.0.2"
     implementation "org.eclipse.jetty:jetty-server:$jettyVersion"
+    implementation "org.eclipse.jetty.compression:jetty-compression-server:$jettyVersion"
+    implementation "org.eclipse.jetty.compression:jetty-compression-gzip:$jettyVersion"
     implementation "org.eclipse.jetty.ee10:jetty-ee10-servlet:$jettyVersion"
     implementation "org.eclipse.jetty.ee10:jetty-ee10-servlets:$jettyVersion"
     implementation "org.eclipse.jetty.ee10:jetty-ee10-proxy:$jettyVersion"
