@@ -75,9 +75,10 @@ public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionMa
     }
 
     @Override
-    public void onWebSocketClose(int statusCode, String reason) {
+    public void onWebSocketClose(int statusCode, String reason, Callback callback) {
         connectionManager.removeListener(userId, this);
         session = null;
+        callback.succeed();
     }
 
     @Override
