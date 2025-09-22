@@ -9,4 +9,9 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 
+    <!-- Auto-register unknown devices -->
+    <entry key='database.registerUnknown'>true</entry>
+    <entry key='database.registerUnknown.defaultCategory'>default</entry>
+    <entry key='database.registerUnknown.regex'>^[0-9]{15}$</entry>
+
 </properties>
