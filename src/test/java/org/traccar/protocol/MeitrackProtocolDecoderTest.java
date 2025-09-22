@@ -177,6 +177,39 @@ public class MeitrackProtocolDecoderTest extends ProtocolTest {
         verifyNull(decoder, buffer(
                 "$$z27,861451040910625,AAC,1*D3"));
 
+        // Test for corrupted message that caused IndexOutOfBoundsException
+        // This message has corrupted length field "B186" instead of proper number
+        // Device: 865413052614954, Command: CCE (Binary E)
+        // Expected to fail due to corrupted header
+        try {
+            System.out.println("=== DEBUGGING CORRUPTED MEITRACK MESSAGE ===");
+            System.out.println("IMEI: 865413052614954, Command: CCE (Binary E)");
+            System.out.println("Expected to fail due to corrupted length field 'B186'");
+            
+            List<Position> result = decoder.decode(null, null, binary(
+                    "2424423138362c3836353431333035323631343935342c4343452c0000000002004b00130006011d0500060007001500fe6900050800000900000a00000b00001aef010702ecad5cfe03231f1f0904545763300c765200000d008516001c41000000fe3700000000014b030101004b0013000601160500060007001500fe6900050800000900000a00000b00001aef010702ecad5cfe03231f1f0904565763300c765200000d028516001c41000000fe3700000000014b030101002a34450d0a"));
+            
+            if (result != null) {
+                System.out.println("SUCCESS: Message decoded! Positions: " + result.size());
+                for (Position pos : result) {
+                    System.out.println("  Position: " + pos.getTime() + " " + pos.getLatitude() + "," + pos.getLongitude());
+                }
+            } else {
+                System.out.println("RESULT: Message returned null");
+            }
+            
+        } catch (Exception e) {
+            System.out.println("EXCEPTION: " + e.getClass().getSimpleName());
+            System.out.println("Message: " + e.getMessage());
+            System.out.println("=== ANALYSIS ===");
+            System.out.println("Device IMEI 865413052614954 is sending corrupted data");
+            System.out.println("Solution: Reset device or update firmware");
+            System.out.println("==========================================");
+            
+            // Re-throw to maintain test failure
+            throw e;
+        }
+
     }
 
 }
