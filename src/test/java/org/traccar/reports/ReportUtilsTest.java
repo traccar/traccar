@@ -92,18 +92,40 @@ public class ReportUtilsTest extends BaseTest {
     }
 
     @Test
-   public void testCalculateSpentFuel() {
-                ReportUtils reportUtils = new ReportUtils(
-                                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class),
-                                null);
-                Device device = mock(Device.class);
-                Position startPosition = new Position();
-                Position endPosition = new Position();
-                assertEquals(reportUtils.calculateFuel(startPosition, endPosition, device), 0.0, 0.01);
-                startPosition.set(Position.KEY_FUEL_LEVEL, 0.7);
-                endPosition.set(Position.KEY_FUEL_LEVEL, 0.5);
-                assertEquals(reportUtils.calculateFuel(startPosition, endPosition, device), 0.2, 0.01);
-        }
+    public void testCalculateSpentFuel() {
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class),
+                null);
+        Device device = mock(Device.class);
+        Position startPosition = new Position();
+        Position endPosition = new Position();
+        
+        // Test with no fuel data - should return 0
+        assertEquals(reportUtils.calculateFuel(startPosition, endPosition, device), 0.0, 0.01);
+        
+        // Test with fuel level data - should calculate difference
+        startPosition.set(Position.KEY_FUEL_LEVEL, 0.7);
+        endPosition.set(Position.KEY_FUEL_LEVEL, 0.5);
+        assertEquals(reportUtils.calculateFuel(startPosition, endPosition, device), 0.2, 0.01);
+        
+        // Test with fuel used data - should calculate difference
+        Position startPosition2 = new Position();
+        Position endPosition2 = new Position();
+        startPosition2.set(Position.KEY_FUEL_USED, 10.0);
+        endPosition2.set(Position.KEY_FUEL_USED, 15.0);
+        assertEquals(reportUtils.calculateFuel(startPosition2, endPosition2, device), 5.0, 0.01);
+        
+        // Test with fuel level percentage and tank capacity
+        Position startPosition3 = new Position();
+        Position endPosition3 = new Position();
+        Device deviceWithCapacity = mock(Device.class);
+        when(deviceWithCapacity.hasAttribute(Position.KEY_FUEL_CAPACITY)).thenReturn(true);
+        when(deviceWithCapacity.getDouble(Position.KEY_FUEL_CAPACITY)).thenReturn(100.0);
+        
+        startPosition3.set(Position.KEY_FUEL_LEVEL_PERCENTAGE, 80.0);
+        endPosition3.set(Position.KEY_FUEL_LEVEL_PERCENTAGE, 60.0);
+        assertEquals(reportUtils.calculateFuel(startPosition3, endPosition3, deviceWithCapacity), 20.0, 0.01);
+    }
 
     @Test
     public void testDetectTripsSimple() throws Exception {

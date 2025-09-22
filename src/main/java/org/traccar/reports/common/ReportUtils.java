@@ -109,7 +109,8 @@ public class ReportUtils {
         } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL) && last.hasAttribute(Position.KEY_FUEL_LEVEL)) {
             return first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL);
         } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL_PERCENTAGE)
-                && last.hasAttribute(Position.KEY_FUEL_LEVEL_PERCENTAGE) && device.hasAttribute(Position.KEY_FUEL_CAPACITY)) {
+                && last.hasAttribute(Position.KEY_FUEL_LEVEL_PERCENTAGE)
+                 && device.hasAttribute(Position.KEY_FUEL_CAPACITY)) {
 
             Double fuelLevelPercentageDifference = first.getDouble(Position.KEY_FUEL_LEVEL_PERCENTAGE)
                     - last.getDouble(Position.KEY_FUEL_LEVEL_PERCENTAGE);
