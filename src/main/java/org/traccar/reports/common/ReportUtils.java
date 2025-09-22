@@ -103,30 +103,23 @@ public class ReportUtils {
         }
     }
 
-    
     public double calculateFuel(Position first, Position last, Device device) {
         if (first.hasAttribute(Position.KEY_FUEL_USED) && last.hasAttribute(Position.KEY_FUEL_USED)) {
             return last.getDouble(Position.KEY_FUEL_USED) - first.getDouble(Position.KEY_FUEL_USED);
         } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL) && last.hasAttribute(Position.KEY_FUEL_LEVEL)) {
             return first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL);
         } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL_PERCENTAGE)
-                && last.hasAttribute(Position.KEY_FUEL_LEVEL_PERCENTAGE)) {
-            if (device.hasAttribute("fuelCapacity")) {
-                try {
-                    Double fuelLevelPercentageDifference = first.getDouble(Position.KEY_FUEL_LEVEL_PERCENTAGE)
-                            - last.getDouble(Position.KEY_FUEL_LEVEL_PERCENTAGE);
+                && last.hasAttribute(Position.KEY_FUEL_LEVEL_PERCENTAGE) && device.hasAttribute(Position.KEY_FUEL_CAPACITY)) {
 
-                    Double fuelCapacity = device.getDouble("fuelCapacity");
-                    return (fuelLevelPercentageDifference / 100) * fuelCapacity;
-                } catch (Exception e) {
-                    return 0;
-                }
-            }
-            return 0;
+            Double fuelLevelPercentageDifference = first.getDouble(Position.KEY_FUEL_LEVEL_PERCENTAGE)
+                    - last.getDouble(Position.KEY_FUEL_LEVEL_PERCENTAGE);
+
+            Double fuelCapacity = device.getDouble(Position.KEY_FUEL_CAPACITY);
+            return (fuelLevelPercentageDifference / 100) * fuelCapacity;
+
         }
         return 0;
     }
-
 
     public String findDriver(Position firstPosition, Position lastPosition) {
         if (firstPosition.hasAttribute(Position.KEY_DRIVER_UNIQUE_ID)) {
@@ -292,11 +285,11 @@ public class ReportUtils {
     private boolean isMoving(List<Position> positions, int index, TripsConfig tripsConfig) {
         if (tripsConfig.getMinimalNoDataDuration() > 0) {
             boolean beforeGap = index < positions.size() - 1
-                    && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
-                    >= tripsConfig.getMinimalNoDataDuration();
+                    && positions.get(index + 1).getFixTime().getTime()
+                            - positions.get(index).getFixTime().getTime() >= tripsConfig.getMinimalNoDataDuration();
             boolean afterGap = index > 0
-                    && positions.get(index).getFixTime().getTime() - positions.get(index - 1).getFixTime().getTime()
-                    >= tripsConfig.getMinimalNoDataDuration();
+                    && positions.get(index).getFixTime().getTime()
+                            - positions.get(index - 1).getFixTime().getTime() >= tripsConfig.getMinimalNoDataDuration();
             if (beforeGap || afterGap) {
                 return false;
             }

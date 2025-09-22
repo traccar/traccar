@@ -59,6 +59,7 @@ public class Position extends Message {
     public static final String KEY_FUEL_USED = "fuelUsed"; // liters
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
     public static final String KEY_FUEL_LEVEL_PERCENTAGE = "fuelLevelPercentage"; // percentage
+    public static final String KEY_FUEL_CAPACITY = "fuelCapacity"; // liters
 
     public static final String KEY_VERSION_FW = "versionFw";
     public static final String KEY_VERSION_HW = "versionHw";
