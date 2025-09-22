@@ -34,26 +34,8 @@ public class MeitrackFrameDecoder extends BaseFrameDecoder {
 
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
         if (index != -1) {
-            String lengthStr = buf.toString(buf.readerIndex() + 3, index - buf.readerIndex() - 3, StandardCharsets.US_ASCII);
-            int length;
-            
-            try {
-                length = index - buf.readerIndex() + Integer.parseInt(lengthStr);
-            } catch (NumberFormatException e) {
-                // Handle corrupted length field like "B186" - extract numeric part
-                String numericPart = lengthStr.replaceAll("[^0-9]", "");
-                if (!numericPart.isEmpty()) {
-                    length = index - buf.readerIndex() + Integer.parseInt(numericPart);
-                    // Log the corruption for debugging
-                    System.out.println("MEITRACK CORRUPTION DETECTED: Length field '" + lengthStr + 
-                                     "' corrected to '" + numericPart + "' for device");
-                } else {
-                    // If no numeric part found, skip this message
-                    buf.skipBytes(buf.readableBytes());
-                    return null;
-                }
-            }
-            
+            int length = index - buf.readerIndex() + Integer.parseInt(
+                    buf.toString(buf.readerIndex() + 3, index - buf.readerIndex() - 3, StandardCharsets.US_ASCII));
             if (buf.readableBytes() >= length) {
                 return buf.readRetainedSlice(length);
             }
