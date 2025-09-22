@@ -32,21 +32,8 @@ public class DefaultDataHandler extends BaseDataHandler {
     AtomicLong id;
 
     public DefaultDataHandler(DeviceManager deviceManager) {
-
-        long maxPositionId = 0;
-        try {
-            maxPositionId = deviceManager.getInitialState(1/*admin*/)
-                                         .stream()
-                                         .mapToLong(Position::getId)
-                                         .max()
-                                         .orElseGet(() -> 0);
-        }
-        catch (Exception ex){
-            LOGGER.error("Failed to get maxPositionId. error - " + ex);
-        }
-
-        id = new AtomicLong(maxPositionId + 100000000);
-        LOGGER.error("maxPositionId: " + maxPositionId + " - position id starting with " + id.get());
+        id = new AtomicLong(System.nanoTime());
+        LOGGER.error("maxPositionId: " + id + " - position id starting with " + id.get());
     }
 
     @Override
