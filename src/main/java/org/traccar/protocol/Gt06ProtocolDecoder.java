@@ -1206,7 +1206,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 position.set(Position.PREFIX_TEMP + 1, parser.nextDouble(0));
-                position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble(0));
+                position.set(Position.KEY_FUEL, parser.nextDouble(0));
 
                 return position;
 
@@ -1293,7 +1293,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 if (values.length >= 2) {
                     switch (Integer.parseInt(values[0].substring(0, 2), 16)) {
                         case 40 -> position.set(Position.KEY_ODOMETER, Integer.parseInt(values[1], 16) * 0.01);
-                        case 43 -> position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[1], 16) * 0.01);
+                        case 43 -> position.set(Position.KEY_FUEL, Integer.parseInt(values[1], 16) * 0.01);
                         case 45 -> position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[1], 16) * 0.01);
                         case 53 -> position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[1], 16) * 0.01);
                         case 54 -> position.set(Position.KEY_RPM, Integer.parseInt(values[1], 16) * 0.01);

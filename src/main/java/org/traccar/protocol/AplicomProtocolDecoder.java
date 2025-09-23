@@ -514,7 +514,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.set("serviceDistance", buf.readInt());
             position.set("driverActivity", buf.readUnsignedByte());
             position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
-            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+            position.set(Position.KEY_FUEL, buf.readUnsignedByte());
         }
 
         if ((selector & 0x0040) != 0) {
@@ -545,7 +545,7 @@ public class AplicomProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_RPM, buf.readUnsignedShort() * 0.125);
             position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() / 256.0);
             position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.5);
-            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
+            position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.4);
         }
 
         if ((selector & 0x1000) != 0) {

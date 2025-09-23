@@ -90,7 +90,7 @@ public class SuntechProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, buffer(
                 "ST600UEX;008728327;20;568;20200602;17:10:03;0bf1a893;334;20;2f19;23;+20.514492;-100.743221;000.033;000.00;12;1;41564973;13.17;000000;44;t_0=1C;N_0=0419.0;t_1=22;N_1=0001.0;Q_D=09\n\r;76;113771;4.1;1"),
-                Position.KEY_FUEL_LEVEL, 1050.0);
+                Position.KEY_FUEL, 1050.0);
 
         verifyAttribute(decoder, buffer(
                 "ST300UEX;109003241;08;1026;20190425;17:36:04;04402;+04.722553;-074.052583;000.020;000.00;10;1;0;12.04;010000;51;CabAVL\"CabMensaje,0,58.5,-1.0,,,FinMensaje\"FinAVL\r\n;B1;0000000000;4.1;1"),

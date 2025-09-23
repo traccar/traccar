@@ -366,6 +366,13 @@ public final class Keys {
             0.0);
 
     /**
+     * Device fuel tank capacity in liters.
+     */
+    public static final ConfigKey<String> FUEL_CAPACITY = new StringConfigKey(
+            "fuelCapacity",
+            List.of(KeyType.DEVICE));
+
+    /**
      * Speed limit value in knots.
      */
     public static final ConfigKey<Double> EVENT_OVERSPEED_LIMIT = new DoubleConfigKey(

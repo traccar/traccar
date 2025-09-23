@@ -106,16 +106,16 @@ public class ReportUtils {
     public double calculateFuel(Position first, Position last, Device device) {
         if (first.hasAttribute(Position.KEY_FUEL_USED) && last.hasAttribute(Position.KEY_FUEL_USED)) {
             return last.getDouble(Position.KEY_FUEL_USED) - first.getDouble(Position.KEY_FUEL_USED);
-        } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL) && last.hasAttribute(Position.KEY_FUEL_LEVEL)) {
-            return first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL);
-        } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL_PERCENTAGE)
-                && last.hasAttribute(Position.KEY_FUEL_LEVEL_PERCENTAGE)
-                 && device.hasAttribute(Position.KEY_FUEL_CAPACITY)) {
+        } else if (first.hasAttribute(Position.KEY_FUEL) && last.hasAttribute(Position.KEY_FUEL)) {
+            return first.getDouble(Position.KEY_FUEL) - last.getDouble(Position.KEY_FUEL);
+        } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL)
+                && last.hasAttribute(Position.KEY_FUEL_LEVEL)
+                && device.hasAttribute(Keys.FUEL_CAPACITY.getKey())) {
 
-            Double fuelLevelPercentageDifference = first.getDouble(Position.KEY_FUEL_LEVEL_PERCENTAGE)
-                    - last.getDouble(Position.KEY_FUEL_LEVEL_PERCENTAGE);
+            Double fuelLevelPercentageDifference = first.getDouble(Position.KEY_FUEL_LEVEL)
+                    - last.getDouble(Position.KEY_FUEL_LEVEL);
 
-            Double fuelCapacity = device.getDouble(Position.KEY_FUEL_CAPACITY);
+            Double fuelCapacity = device.getDouble(Keys.FUEL_CAPACITY.getKey());
             return (fuelLevelPercentageDifference / 100) * fuelCapacity;
 
         }
