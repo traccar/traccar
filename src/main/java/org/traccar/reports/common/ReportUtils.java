@@ -108,6 +108,7 @@ public class ReportUtils {
             return last.getDouble(Position.KEY_FUEL_USED) - first.getDouble(Position.KEY_FUEL_USED);
         } else if (first.hasAttribute(Position.KEY_FUEL) && last.hasAttribute(Position.KEY_FUEL)) {
             return first.getDouble(Position.KEY_FUEL) - last.getDouble(Position.KEY_FUEL);
+
         } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL)
                 && last.hasAttribute(Position.KEY_FUEL_LEVEL)
                 && device.hasAttribute(Keys.FUEL_CAPACITY.getKey())) {

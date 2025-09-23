@@ -142,9 +142,11 @@ public class ReportUtilsTest extends BaseTest {
 
         Position startPosition = new Position();
         Position endPosition = new Position();
+
         startPosition.set(Position.KEY_FUEL_LEVEL, 80.0);
         endPosition.set(Position.KEY_FUEL_LEVEL, 60.0);
         assertEquals(reportUtils.calculateFuel(startPosition, endPosition, deviceWithCapacity), 20.0, 0.01);
+
     }
 
     @Test
