@@ -108,17 +108,10 @@ public class ReportUtils {
             return last.getDouble(Position.KEY_FUEL_USED) - first.getDouble(Position.KEY_FUEL_USED);
         } else if (first.hasAttribute(Position.KEY_FUEL) && last.hasAttribute(Position.KEY_FUEL)) {
             return first.getDouble(Position.KEY_FUEL) - last.getDouble(Position.KEY_FUEL);
-
-        } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL)
-                && last.hasAttribute(Position.KEY_FUEL_LEVEL)
+        } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL) && last.hasAttribute(Position.KEY_FUEL_LEVEL)
                 && device.hasAttribute(Keys.FUEL_CAPACITY.getKey())) {
-
-            Double fuelLevelPercentageDifference = first.getDouble(Position.KEY_FUEL_LEVEL)
-                    - last.getDouble(Position.KEY_FUEL_LEVEL);
-
-            Double fuelCapacity = device.getDouble(Keys.FUEL_CAPACITY.getKey());
-            return (fuelLevelPercentageDifference / 100) * fuelCapacity;
-
+            return ((first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL)) / 100)
+                    * device.getDouble(Keys.FUEL_CAPACITY.getKey());
         }
         return 0;
     }
@@ -282,21 +275,6 @@ public class ReportUtils {
         } else {
             return (T) calculateStop(device, startPosition, endPosition, ignoreOdometer);
         }
-    }
-
-    private boolean isMoving(List<Position> positions, int index, TripsConfig tripsConfig) {
-        if (tripsConfig.getMinimalNoDataDuration() > 0) {
-            boolean beforeGap = index < positions.size() - 1
-                    && positions.get(index + 1).getFixTime().getTime()
-                            - positions.get(index).getFixTime().getTime() >= tripsConfig.getMinimalNoDataDuration();
-            boolean afterGap = index > 0
-                    && positions.get(index).getFixTime().getTime()
-                            - positions.get(index - 1).getFixTime().getTime() >= tripsConfig.getMinimalNoDataDuration();
-            if (beforeGap || afterGap) {
-                return false;
-            }
-        }
-        return positions.get(index).getBoolean(Position.KEY_MOTION);
     }
 
     public <T extends BaseReportItem> List<T> detectTripsAndStops(
