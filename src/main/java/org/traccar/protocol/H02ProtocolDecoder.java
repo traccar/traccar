@@ -399,7 +399,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(6)) {
             position.set(Position.KEY_ODOMETER, parser.nextInt(0));
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
-            position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble(0));
+            position.set(Position.KEY_FUEL, parser.nextDouble(0));
 
             position.setAltitude(parser.nextInt(0));
 

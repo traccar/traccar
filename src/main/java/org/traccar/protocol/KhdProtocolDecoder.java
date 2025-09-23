@@ -167,7 +167,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                 if (BitUtil.to(odometer, 16) > 0) {
                     position.set(Position.KEY_ODOMETER, odometer);
                 } else if (odometer > 0) {
-                    position.set(Position.KEY_FUEL_LEVEL, BitUtil.from(odometer, 16));
+                    position.set(Position.KEY_FUEL, BitUtil.from(odometer, 16));
                 }
 
                 long status = buf.readUnsignedInt();
@@ -191,7 +191,7 @@ public class KhdProtocolDecoder extends BaseProtocolDecoder {
                     int dataLength = buf.readUnsignedByte();
 
                     switch (dataType) {
-                        case 0x01 -> position.set(Position.KEY_FUEL_LEVEL,
+                        case 0x01 -> position.set(Position.KEY_FUEL,
                                 buf.readUnsignedByte() * 100 + buf.readUnsignedByte());
                         case 0x02 -> position.set(Position.PREFIX_TEMP + 1,
                                 buf.readUnsignedByte() * 100 + buf.readUnsignedByte());

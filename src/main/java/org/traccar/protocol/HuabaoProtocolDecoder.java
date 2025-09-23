@@ -424,7 +424,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             int length = buf.readUnsignedByte();
             switch (type) {
                 case 0x01 -> position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100L);
-                case 0x02 -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShort() * 0.1);
+                case 0x02 -> position.set(Position.KEY_FUEL, buf.readUnsignedShort() * 0.1);
                 case 0x03 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShort() * 0.1);
                 case 0x56 -> {
                     buf.readUnsignedByte(); // power level
@@ -447,7 +447,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case 0x8C -> position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedInt() * 100L);
                 case 0x8D -> position.set(Position.KEY_ODOMETER_TRIP, buf.readUnsignedShort() * 1000L);
-                case 0x8E -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                case 0x8E -> position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                 case 0xA0 -> {
                     String codes = buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
                     position.set(Position.KEY_DTCS, codes.replace(',', ' '));
@@ -545,9 +545,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x02:
                     int fuel = buf.readUnsignedShort();
                     if (BitUtil.check(fuel, 15)) {
-                        position.set(Position.KEY_FUEL_LEVEL, BitUtil.to(fuel, 15));
+                        position.set(Position.KEY_FUEL, BitUtil.to(fuel, 15));
                     } else {
-                        position.set(Position.KEY_FUEL_LEVEL, fuel / 10.0);
+                        position.set(Position.KEY_FUEL, fuel / 10.0);
                     }
                     break;
                 case 0x06:
@@ -746,7 +746,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xE2:
                     if (!"DT800".equals(model)) {
-                        position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedInt() * 0.1);
+                        position.set(Position.KEY_FUEL, buf.readUnsignedInt() * 0.1);
                     }
                     break;
                 case 0xE3:
@@ -1218,15 +1218,15 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             case 0x0102, 0x0528, 0x0546 -> {
                                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
                             }
-                            case 0x0103 -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedInt() * 0.01);
+                            case 0x0103 -> position.set(Position.KEY_FUEL, buf.readUnsignedInt() * 0.01);
                             case 0x0111 -> position.set("fuelTemp", buf.readUnsignedByte() - 40);
                             case 0x012E -> position.set("oilLevel", buf.readUnsignedShort() * 0.1);
-                            case 0x052A -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShort() * 0.01);
+                            case 0x052A -> position.set(Position.KEY_FUEL, buf.readUnsignedShort() * 0.01);
                             case 0x0105, 0x052C -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.01);
                             case 0x014A, 0x0537, 0x0538, 0x0539 -> {
                                 position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShort() * 0.01);
                             }
-                            case 0x052B -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                            case 0x052B -> position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                             case 0x052D -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedByte() - 40);
                             case 0x052E -> position.set("airTemp", buf.readUnsignedByte() - 40);
                             case 0x0530 -> position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.001);

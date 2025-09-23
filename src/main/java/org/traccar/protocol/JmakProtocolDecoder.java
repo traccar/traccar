@@ -281,7 +281,7 @@ public class JmakProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 8)) {
-            position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(values[index++]));
+            position.set(Position.KEY_FUEL, Double.parseDouble(values[index++]));
         }
 
         if (BitUtil.check(mask, 9)) {

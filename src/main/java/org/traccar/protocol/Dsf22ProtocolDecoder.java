@@ -65,7 +65,7 @@ public class Dsf22ProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
             position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedByte()));
 
-            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShortLE() * 0.001);
+            position.set(Position.KEY_FUEL, buf.readUnsignedShortLE() * 0.001);
 
             int status = buf.readUnsignedByte();
             position.set(Position.KEY_IGNITION, BitUtil.check(status, 0));
