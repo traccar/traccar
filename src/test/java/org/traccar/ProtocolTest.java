@@ -259,8 +259,8 @@ public class ProtocolTest extends BaseTest {
             assertInstanceOf(Number.class, attributes.get(Position.KEY_RPM));
         }
 
-        if (attributes.containsKey(Position.KEY_FUEL_LEVEL)) {
-            assertInstanceOf(Number.class, attributes.get(Position.KEY_FUEL_LEVEL));
+        if (attributes.containsKey(Position.KEY_FUEL)) {
+            assertInstanceOf(Number.class, attributes.get(Position.KEY_FUEL));
         }
 
         if (attributes.containsKey(Position.KEY_FUEL_USED)) {

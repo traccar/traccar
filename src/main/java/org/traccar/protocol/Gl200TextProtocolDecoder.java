@@ -498,7 +498,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         position.set("dtcsNumber", parser.nextInt());
         position.set("dtcsCodes", parser.next());
         position.set(Position.KEY_THROTTLE, parser.nextInt());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        position.set(Position.KEY_FUEL, parser.nextInt());
         if (parser.hasNext()) {
             position.set(Position.KEY_OBD_ODOMETER, parser.nextInt() * 1000);
         }
@@ -560,7 +560,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
         if (BitUtil.check(reportMask, 8) && !v[index++].isEmpty()) {
-            position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(v[index - 1].substring(1)));
+            position.set(Position.KEY_FUEL, Double.parseDouble(v[index - 1].substring(1)));
         }
         if (BitUtil.check(reportMask, 9) && !v[index++].isEmpty()) {
             position.set("range", Long.parseLong(v[index - 1]) * 100);
@@ -908,7 +908,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         position.set(Position.KEY_RPM, parser.nextInt());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        position.set(Position.KEY_FUEL, parser.nextInt());
 
         if (parser.hasNext(2)) {
             if (reportType != null) {
@@ -1006,7 +1006,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(mask, 0) && !model.equals("GV350M")) {
-            position.set(Position.KEY_FUEL_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
+            position.set(Position.KEY_FUEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
         }
 
         if (BitUtil.check(mask, 1)) {
@@ -1032,11 +1032,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 if (model.equals("GV350M")) {
                     index += 1; // uart id
                     if (BitUtil.check(mask, 0)) {
-                        position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(v[index++], 16));
+                        position.set(Position.KEY_FUEL, Integer.parseInt(v[index++], 16));
                     }
                 }
                 if (BitUtil.check(mask, 3)) {
-                    position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(v[index++]));
+                    position.set(Position.KEY_FUEL, Double.parseDouble(v[index++]));
                 }
                 if (BitUtil.check(mask, 4)) {
                     index += 1; // volume
@@ -1388,7 +1388,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         String data = Unpooled.wrappedBuffer(DataConverter.parseHex(parser.next()))
                 .toString(StandardCharsets.US_ASCII);
         if (data.contains("COMB")) {
-            position.set(Position.KEY_FUEL_LEVEL, Double.parseDouble(data.split(",")[2]));
+            position.set(Position.KEY_FUEL, Double.parseDouble(data.split(",")[2]));
         } else {
             position.set(Position.KEY_RESULT, data);
         }

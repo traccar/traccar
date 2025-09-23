@@ -64,7 +64,7 @@ public class StarcomProtocolDecoder extends BaseProtocolDecoder {
                 case "ignition" -> position.set(Position.KEY_IGNITION, Integer.parseInt(value) != 0);
                 case "door" -> position.set(Position.KEY_DOOR, Integer.parseInt(value) != 0);
                 case "arm" -> position.set(Position.KEY_ARMED, Integer.parseInt(value) != 0);
-                case "fuel" -> position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(value));
+                case "fuel" -> position.set(Position.KEY_FUEL, Integer.parseInt(value));
                 case "rpm" -> position.set(Position.KEY_RPM, Integer.parseInt(value));
                 case "main_voltage" -> position.set(Position.KEY_POWER, Double.parseDouble(value));
                 case "backup_voltage" -> position.set(Position.KEY_BATTERY, Double.parseDouble(value));
