@@ -94,7 +94,7 @@ public class SummaryReportProvider {
                     new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
             boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
             result.setDistance(PositionUtil.calculateDistance(first, last, !ignoreOdometer));
-            result.setSpentFuel(reportUtils.calculateFuel(first, last));
+            result.setSpentFuel(reportUtils.calculateFuel(first, last, device));
 
             if (first.hasAttribute(Position.KEY_HOURS) && last.hasAttribute(Position.KEY_HOURS)) {
                 result.setStartHours(first.getLong(Position.KEY_HOURS));
