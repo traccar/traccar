@@ -181,8 +181,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         if (mcc != 0 && mnc != 0) {
             position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
         }
-
-        position.set(Position.KEY_INPUT, parser.nextHexInt());
+        int input = parser.nextHexInt();
+        position.set(Position.KEY_INPUT, input);
+        if (input == 4) {
+            position.set(Position.KEY_IGNITION, true);
+        } else { 
+            position.set(Position.KEY_IGNITION, false);
+        }
         position.set(Position.KEY_OUTPUT, parser.nextHexInt());
 
         if (parser.hasNext(2)) {
@@ -512,7 +517,15 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x06 -> position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
                     case 0x07 -> position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     case 0x14 -> position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
-                    case 0x15 -> position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+                    case 0x15 -> {
+                        int input = buf.readUnsignedByte();
+                        position.set(Position.KEY_INPUT, input);
+                        if (input == 4) {
+                            position.set(Position.KEY_IGNITION, true);
+                        } else { 
+                            position.set(Position.KEY_IGNITION, false);
+                        }
+                    }
                     case 0x47 -> {
                         int lockState = buf.readUnsignedByte();
                         if (lockState > 0) {
