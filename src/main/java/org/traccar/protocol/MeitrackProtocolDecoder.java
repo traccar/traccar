@@ -185,7 +185,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_INPUT, input);
         if (input == 4) {
             position.set(Position.KEY_IGNITION, true);
-        } else { 
+        } else {
             position.set(Position.KEY_IGNITION, false);
         }
         position.set(Position.KEY_OUTPUT, parser.nextHexInt());
@@ -522,7 +522,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_INPUT, input);
                         if (input == 4) {
                             position.set(Position.KEY_IGNITION, true);
-                        } else { 
+                        } else {
                             position.set(Position.KEY_IGNITION, false);
                         }
                     }
