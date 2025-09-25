@@ -32,7 +32,7 @@ public class DefaultDataHandler extends BaseDataHandler {
     AtomicLong id;
 
     public DefaultDataHandler(DeviceManager deviceManager) {
-        id = new AtomicLong(System.nanoTime());
+        id = new AtomicLong(System.currentTimeMillis());
         LOGGER.error("maxPositionId: " + id + " - position id starting with " + id.get());
     }
 
