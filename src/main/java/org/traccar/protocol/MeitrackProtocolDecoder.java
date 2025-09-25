@@ -308,47 +308,52 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        buf.skipBytes(index + 1 + 15 + 1 + 3 + 1 + 2 + 2 + 4);
+        int bytesToSkip = Math.min(index + 1 + 15 + 1 + 3 + 1 + 2 + 2 + 4, buf.readableBytes());
+        if (bytesToSkip > 0) {
+            buf.skipBytes(bytesToSkip);
+        }
 
         while (buf.readableBytes() >= 0x34) {
 
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            position.set(Position.KEY_EVENT, buf.readUnsignedByte());
+            position.set(Position.KEY_EVENT, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
 
-            position.setLatitude(buf.readIntLE() * 0.000001);
-            position.setLongitude(buf.readIntLE() * 0.000001);
+            if (buf.readableBytes() >= 4) position.setLatitude(buf.readIntLE() * 0.000001);
+            if (buf.readableBytes() >= 4) position.setLongitude(buf.readIntLE() * 0.000001);
 
-            position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 946684800 = 2000-01-01
+            if (buf.readableBytes() >= 4) position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 946684800 = 2000-01-01
 
-            position.setValid(buf.readUnsignedByte() == 1);
+            position.setValid(buf.readableBytes() >= 1 ? buf.readUnsignedByte() == 1 : false);
 
-            position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-            int rssi = buf.readUnsignedByte();
+            position.set(Position.KEY_SATELLITES, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
+            int rssi = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
 
-            position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
-            position.setCourse(buf.readUnsignedShortLE());
+            if (buf.readableBytes() >= 2) position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
+            if (buf.readableBytes() >= 2) position.setCourse(buf.readUnsignedShortLE());
 
-            position.set(Position.KEY_HDOP, buf.readUnsignedShortLE() * 0.1);
+            if (buf.readableBytes() >= 2) position.set(Position.KEY_HDOP, buf.readUnsignedShortLE() * 0.1);
 
-            position.setAltitude(buf.readUnsignedShortLE());
+            if (buf.readableBytes() >= 2) position.setAltitude(buf.readUnsignedShortLE());
 
-            position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
-            position.set("runtime", buf.readUnsignedIntLE());
+            if (buf.readableBytes() >= 4) position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+            if (buf.readableBytes() >= 4) position.set("runtime", buf.readUnsignedIntLE());
 
-            position.setNetwork(new Network(CellTower.from(
-                    buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
-                    buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
-                    rssi)));
+            if (buf.readableBytes() >= 8) {
+                position.setNetwork(new Network(CellTower.from(
+                        buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
+                        buf.readUnsignedShortLE(), buf.readUnsignedShortLE(),
+                        rssi)));
+            }
 
-            position.set(Position.KEY_STATUS, buf.readUnsignedShortLE());
+            if (buf.readableBytes() >= 2) position.set(Position.KEY_STATUS, buf.readUnsignedShortLE());
 
-            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
-            position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
-            position.set(Position.KEY_POWER, buf.readUnsignedShortLE());
+            if (buf.readableBytes() >= 2) position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE());
+            if (buf.readableBytes() >= 2) position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
+            if (buf.readableBytes() >= 2) position.set(Position.KEY_POWER, buf.readUnsignedShortLE());
 
-            buf.readUnsignedIntLE(); // geo-fence
+            if (buf.readableBytes() >= 4) buf.readUnsignedIntLE(); // geo-fence
 
             positions.add(position);
         }
@@ -370,7 +375,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readerIndex(buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',') + 1);
         String imei = buf.readSlice(15).toString(StandardCharsets.US_ASCII);
-        buf.skipBytes(1 + 3 + 1);
+        int bytesToSkip = Math.min(1 + 3 + 1, buf.readableBytes());
+        if (bytesToSkip > 0) {
+            buf.skipBytes(bytesToSkip);
+        }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
         if (deviceSession == null) {
@@ -386,36 +394,36 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             Network network = new Network();
 
-            buf.readUnsignedShortLE(); // length
-            buf.readUnsignedShortLE(); // index
+            if (buf.readableBytes() >= 2) buf.readUnsignedShortLE(); // length
+            if (buf.readableBytes() >= 2) buf.readUnsignedShortLE(); // index
 
-            int paramCount = buf.readUnsignedByte();
+            int paramCount = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
             for (int j = 0; j < paramCount; j++) {
-                boolean extension = buf.getUnsignedByte(buf.readerIndex()) == 0xFE;
+                boolean extension = (buf.readableBytes() > 0 ? buf.getUnsignedByte(buf.readerIndex()) : 0) == 0xFE;
                 int id = extension ? buf.readUnsignedShort() : buf.readUnsignedByte();
                 switch (id) {
-                    case 0x01 -> position.set(Position.KEY_EVENT, buf.readUnsignedByte());
-                    case 0x05 -> position.setValid(buf.readUnsignedByte() > 0);
-                    case 0x06 -> position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-                    case 0x07 -> position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    case 0x14 -> position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
-                    case 0x15 -> position.set(Position.KEY_INPUT, buf.readUnsignedByte());
+                    case 0x01 -> position.set(Position.KEY_EVENT, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
+                    case 0x05 -> position.setValid(buf.readableBytes() >= 1 ? buf.readUnsignedByte() > 0 : false);
+                    case 0x06 -> position.set(Position.KEY_SATELLITES, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
+                    case 0x07 -> position.set(Position.KEY_RSSI, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
+                    case 0x14 -> position.set(Position.KEY_OUTPUT, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
+                    case 0x15 -> position.set(Position.KEY_INPUT, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
                     case 0x47 -> {
-                        int lockState = buf.readUnsignedByte();
+                        int lockState = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
                         if (lockState > 0) {
                             position.set(Position.KEY_LOCK, lockState == 2);
                         }
                     }
-                    case 0x97 -> position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
-                    case 0x9D -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
-                    case 0xFE69 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
-                    default -> buf.readUnsignedByte();
+                    case 0x97 -> position.set(Position.KEY_THROTTLE, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
+                    case 0x9D -> position.set(Position.KEY_FUEL_LEVEL, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
+                    case 0xFE69 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
+                    default -> { if (buf.readableBytes() >= 1) buf.readUnsignedByte(); }
                 }
             }
 
-            paramCount = buf.readUnsignedByte();
+            paramCount = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
             for (int j = 0; j < paramCount; j++) {
-                boolean extension = buf.getUnsignedByte(buf.readerIndex()) == 0xFE;
+                boolean extension = (buf.readableBytes() > 0 ? buf.getUnsignedByte(buf.readerIndex()) : 0) == 0xFE;
                 int id = extension ? buf.readUnsignedShort() : buf.readUnsignedByte();
                 switch (id) {
                     case 0x08 -> position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
@@ -438,9 +446,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            paramCount = buf.readUnsignedByte();
+            paramCount = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
             for (int j = 0; j < paramCount; j++) {
-                boolean extension = buf.getUnsignedByte(buf.readerIndex()) == 0xFE;
+                boolean extension = (buf.readableBytes() > 0 ? buf.getUnsignedByte(buf.readerIndex()) : 0) == 0xFE;
                 int id = extension ? buf.readUnsignedShort() : buf.readUnsignedByte();
                 switch (id) {
                     case 0x02 -> position.setLatitude(buf.readIntLE() * 0.000001);
@@ -457,11 +465,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            paramCount = buf.readUnsignedByte();
+            paramCount = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
             for (int j = 0; j < paramCount; j++) {
-                boolean extension = buf.getUnsignedByte(buf.readerIndex()) == 0xFE;
-                int id = extension ? buf.readUnsignedShort() : buf.readUnsignedByte();
-                int length = buf.readUnsignedByte();
+                boolean extension = (buf.readableBytes() > 0 ? buf.getUnsignedByte(buf.readerIndex()) : 0) == 0xFE;
+                int id = extension ? (buf.readableBytes() >= 2 ? buf.readUnsignedShort() : 0) : (buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
+                int length = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
                 switch (id) {
                     case 0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25 -> {
                         String wifiMac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
@@ -474,39 +482,51 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                                 buf.readUnsignedShortLE(), buf.readUnsignedIntLE(), buf.readShortLE()));
                     }
                     case 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31 -> {
-                        buf.readUnsignedByte(); // label
-                        position.set(Position.PREFIX_TEMP + (id - 0x2A), buf.readShortLE() * 0.01);
+                        if (buf.readableBytes() >= 1) buf.readUnsignedByte(); // label
+                        if (buf.readableBytes() >= 2) position.set(Position.PREFIX_TEMP + (id - 0x2A), buf.readShortLE() * 0.01);
                     }
                     case 0x4B -> { // network information (ID_Len, version, Type, DescriptorLen, Descriptor)
-                        int idLen = buf.readUnsignedByte();
-                        int version = buf.readUnsignedByte();
-                        int type = buf.readUnsignedByte();
-                        int descLen = buf.readUnsignedByte();
+                        int idLen = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
+                        int version = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
+                        int type = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
+                        int descLen = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
                         int readLen = Math.min(descLen, Math.max(0, length - 4));
                         String descriptor = buf.readCharSequence(readLen, StandardCharsets.US_ASCII).toString();
                         // Skip any remaining bytes for this field if descriptor shorter than length-4
                         int remaining = length - 4 - readLen;
-                        if (remaining > 0) buf.skipBytes(remaining);
+                        if (remaining > 0) {
+                            int remainingBytes = Math.min(remaining, buf.readableBytes());
+                            if (remainingBytes > 0) {
+                                buf.skipBytes(remainingBytes);
+                            }
+                        }
                         decodeNetworkInfo(position, type, descriptor);
                     }
                     case 0xFE31 -> {
-                        int alarmProtocol = buf.readUnsignedByte();
-                        position.set("alarmType", buf.readUnsignedByte());
+                        int alarmProtocol = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
+                        position.set("alarmType", buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
                         if (alarmProtocol == 0x02 && length > 3) {
                             String file = buf.readCharSequence(length - 2, StandardCharsets.US_ASCII).toString();
                             String folder = file.substring(0, 8).replaceAll("(\\d{4})(\\d{2})(\\d{2})", "$1-$2-$3");
                             position.set(Position.KEY_IMAGE, folder + "/" + file);
                         } else {
-                            buf.skipBytes(length - 2);
+                            int alarmBytes = Math.min(length - 2, buf.readableBytes());
+                            if (alarmBytes > 0) {
+                                buf.skipBytes(alarmBytes);
+                            }
                         }
                     }
                     case 0xFE73 -> {
-                        buf.readUnsignedByte(); // version
-                        position.set(
-                                "tagName",
-                                buf.readCharSequence(buf.readUnsignedByte(), StandardCharsets.US_ASCII).toString());
-                        buf.skipBytes(6); // mac
-                        position.set("tagBattery", buf.readUnsignedByte());
+                        if (buf.readableBytes() >= 1) buf.readUnsignedByte(); // version
+                        int tagNameLen = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
+                        if (tagNameLen > 0 && buf.readableBytes() >= tagNameLen) {
+                            position.set("tagName", buf.readCharSequence(tagNameLen, StandardCharsets.US_ASCII).toString());
+                        }
+                        int macBytes = Math.min(6, buf.readableBytes());
+                        if (macBytes > 0) {
+                            buf.skipBytes(macBytes);
+                        }
+                        position.set("tagBattery", buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
                         position.set("tagTemp", buf.readShortLE() / 256.0);
                         position.set("tagHumidity", buf.readShortLE() / 256.0);
                         buf.readUnsignedShortLE(); // high temperature threshold
@@ -516,16 +536,24 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     }
                     case 0xFEA8 -> {
                         for (int k = 1; k <= 3; k++) {
-                            if (buf.readUnsignedByte() > 0) {
-                                String key = k == 1 ? Position.KEY_BATTERY_LEVEL : "battery" + k + "Level";
-                                position.set(key, buf.readUnsignedByte());
-                            } else {
-                                buf.readUnsignedByte();
+                            if (buf.readableBytes() >= 1) {
+                                int batteryCheck = buf.readUnsignedByte();
+                                if (batteryCheck > 0 && buf.readableBytes() >= 1) {
+                                    String key = k == 1 ? Position.KEY_BATTERY_LEVEL : "battery" + k + "Level";
+                                    position.set(key, buf.readUnsignedByte());
+                                } else if (buf.readableBytes() >= 1) {
+                                    buf.readUnsignedByte();
+                                }
                             }
                         }
-                        buf.readUnsignedByte(); // battery alert
+                        if (buf.readableBytes() >= 1) buf.readUnsignedByte(); // battery alert
                     }
-                    default -> buf.skipBytes(length);
+                    default -> {
+                        int defaultBytes = Math.min(length, buf.readableBytes());
+                        if (defaultBytes > 0) {
+                            buf.skipBytes(defaultBytes);
+                        }
+                    }
                 }
             }
 

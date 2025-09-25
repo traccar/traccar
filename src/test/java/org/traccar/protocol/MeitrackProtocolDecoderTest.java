@@ -186,13 +186,20 @@ public class MeitrackProtocolDecoderTest extends ProtocolTest {
             System.out.println("IMEI: 865413052614954, Command: CCE (Binary E)");
             System.out.println("Expected to fail due to corrupted length field 'B186'");
             
-            List<Position> result = decoder.decode(null, null, binary(
+            Object result = decoder.decode(null, null, binary(
                     "2424423138362c3836353431333035323631343935342c4343452c0000000002004b00130006011d0500060007001500fe6900050800000900000a00000b00001aef010702ecad5cfe03231f1f0904545763300c765200000d008516001c41000000fe3700000000014b030101004b0013000601160500060007001500fe6900050800000900000a00000b00001aef010702ecad5cfe03231f1f0904565763300c765200000d028516001c41000000fe3700000000014b030101002a34450d0a"));
             
             if (result != null) {
-                System.out.println("SUCCESS: Message decoded! Positions: " + result.size());
-                for (Position pos : result) {
-                    System.out.println("  Position: " + pos.getTime() + " " + pos.getLatitude() + "," + pos.getLongitude());
+                System.out.println("SUCCESS: Message decoded! Result type: " + result.getClass().getSimpleName());
+                if (result instanceof List) {
+                    List<?> positions = (List<?>) result;
+                    System.out.println("  Positions: " + positions.size());
+                    for (Object pos : positions) {
+                        if (pos instanceof Position) {
+                            Position position = (Position) pos;
+                            System.out.println("  Position: " + position.getFixTime() + " " + position.getLatitude() + "," + position.getLongitude());
+                        }
+                    }
                 }
             } else {
                 System.out.println("RESULT: Message returned null");

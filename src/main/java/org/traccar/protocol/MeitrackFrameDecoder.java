@@ -36,13 +36,8 @@ public class MeitrackFrameDecoder extends BaseFrameDecoder {
         if (index != -1) {
             int length = index - buf.readerIndex() + Integer.parseInt(
                     buf.toString(buf.readerIndex() + 3, index - buf.readerIndex() - 3, StandardCharsets.US_ASCII));
-            
-            // For CCE protocol messages, ensure we have enough buffer space
-            // The protocol decoder needs extra bytes for parsing multiple position records
-            int requiredBytes = Math.max(length, buf.readableBytes());
-            
-            if (buf.readableBytes() >= requiredBytes) {
-                return buf.readRetainedSlice(requiredBytes);
+            if (buf.readableBytes() >= length) {
+                return buf.readRetainedSlice(length);
             }
         }
 
