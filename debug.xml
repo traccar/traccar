@@ -21,8 +21,17 @@
     <entry key='database.user'>sa</entry>
     <entry key='database.password'></entry>
 
-    <!--<entry key='server.instantAcknowledgement'>true</entry>
-    <entry key='server.buffering.threshold'>5000</entry>-->
+    <!-- Buffer settings to handle larger Meitrack P88 packets -->
+    <entry key='server.instantAcknowledgement'>true</entry>
+    <entry key='server.buffering.threshold'>10000</entry>
+    <entry key='server.buffering.maximum'>50000</entry>
+    
+    <!-- Increase frame decoder buffer size for Meitrack devices -->
+    <entry key='server.decoder.bufferSize'>8192</entry>
+    
+    <!-- Meitrack-specific protocol settings -->
+    <entry key='meitrack.bufferSize'>16384</entry>
+    <entry key='meitrack.maxFrameLength'>32768</entry>
 
     <entry key='atrack.custom'>true</entry>
     <entry key='intellitrac.port'>6037</entry>
