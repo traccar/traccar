@@ -87,4 +87,13 @@ public final class BufferUtil {
         return buf.readCharSequence(length, StandardCharsets.US_ASCII).toString();
     }
 
+    public static String toHexString(ByteBuf byteBuf) {
+        StringBuilder builder = new StringBuilder();
+        byteBuf.forEachByte(value -> {
+            builder.append(String.format("%02x", value & 0xFF));
+            return true;
+        });
+        return builder.toString();
+    }
+
 }

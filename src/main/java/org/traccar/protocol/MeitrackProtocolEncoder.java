@@ -15,6 +15,8 @@
  */
 package org.traccar.protocol;
 
+import java.util.Random;
+
 import org.traccar.Protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.config.Keys;
@@ -34,6 +36,18 @@ public class MeitrackProtocolEncoder extends StringProtocolEncoder {
         String result = String.format("@@A%02d,%s,%s*", length, uniqueId, content);
         result += Checksum.sum(result) + "\r\n";
         return result;
+    }
+
+    public static char randomASCII() {
+        try {
+                char[] chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
+                Random random = new Random();
+                char c = chars[random.nextInt(chars.length)];
+                return c;
+        } catch (Exception e) {
+                System.out.println("[Decoder] CommandDecoder.random_ASCII() Error !!!");
+                return 'Z';
+        }
     }
 
     @Override

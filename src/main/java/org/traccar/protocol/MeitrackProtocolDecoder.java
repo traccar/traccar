@@ -26,6 +26,7 @@ import org.traccar.BaseProtocolDecoder;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
+import org.traccar.helper.BufferUtil;
 import org.traccar.helper.Checksum;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
@@ -766,6 +767,84 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
+    private void requestHeartbeat(Channel channel, SocketAddress socketAddress, String imei, int watchdog) {
+        if (watchdog > 0 && watchdog < 6) {
+            if (channel != null) {
+                char dataId = MeitrackProtocolEncoder.randomASCII();
+                String content = "B25,60";
+                int length = 1 + imei.length() + 1 + content.length() + 5;
+                String response = String.format("@@%c%02d,%s,%s*", dataId, length, imei, content);
+                response += Checksum.sum(response) + "\r\n";
+                LOGGER.info("Meitrack Command:" + response);
+                channel.writeAndFlush(new NetworkMessage(response, socketAddress));
+            }
+        }
+    }
+
+    private Position decodeCommandSend(Channel channel, SocketAddress remoteAddress,
+            ByteBuf buf, int index, String imei) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(getDeviceSession(channel, remoteAddress, imei).getDeviceId());
+            getLastLocation(position, null);
+            String command = buf.toString(index + 1, buf.writerIndex() - index - 8, StandardCharsets.US_ASCII);
+            position.set(Position.KEY_COMMAND, command);
+            return position;
+    }
+
+    private Position decodeCommandResult(Channel channel, SocketAddress remoteAddress,
+            ByteBuf buf, int index, String imei) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(getDeviceSession(channel, remoteAddress, imei).getDeviceId());
+            getLastLocation(position, null);
+            String result = buf.toString(index + 1, buf.writerIndex() - index - 8, StandardCharsets.US_ASCII);
+            position.set(Position.KEY_RESULT, result);
+            return position;
+    }
+
+        private Position decodeCommandResultC42(Channel channel, SocketAddress remoteAddress,
+            ByteBuf buf, int index, String imei) {
+            Position position = new Position(getProtocolName());
+            position.setDeviceId(getDeviceSession(channel, remoteAddress, imei).getDeviceId());
+            getLastLocation(position, null);
+            ByteBuf imeibuf =  buf.readBytes(index + 1);
+            buf.readBytes(4);
+            int tempsize = (buf.writerIndex() - (index + 1 + 4)) / 10;
+            LOGGER.info("MSG C42: " + tempsize + "," +  buf.toString(StandardCharsets.US_ASCII)
+            + "," + index + "," + buf.writerIndex());
+            if (tempsize > 0) {
+                StringBuilder temps = new StringBuilder();
+                for (int i = 0; i < tempsize; i++) {
+                ByteBuf temp =  buf.readBytes(10);
+                temps.append("Temp" + (i + 1) + ":" + BufferUtil.toHexString(temp));
+                if (i + 1 < tempsize) {
+                    temps.append(",");
+                }
+                LOGGER.info("MSG C42: " + tempsize + "," +  imeibuf.toString(StandardCharsets.US_ASCII)
+                + "," + index + "," + buf.writerIndex() + "," + temps.toString());
+                byte newValue = (byte) (0x1 + i);
+                temp.setByte(8, newValue);
+                temp.setByte(9, (byte) (0x2a));
+                registerTemp(channel, remoteAddress, imei, temp);
+            }
+            String result = temps.toString();
+            position.set(Position.KEY_RESULT, result);
+            return position;
+        }
+        return null;
+    }
+
+    private void registerTemp(Channel channel, SocketAddress socketAddress, String imei, ByteBuf tempset) {
+        if (channel != null) {
+                char dataId = MeitrackProtocolEncoder.randomASCII();
+                String content = "C40," + tempset.toString(StandardCharsets.US_ASCII);
+                int length = 1 + imei.length() + 1 + content.length() + 4;
+                String response = String.format("@@%c%02d,%s,%s", dataId, length, imei, content);
+                response += Checksum.sum(response) + "\r\n";
+                LOGGER.info("Meitrack Command:" + response + "," + BufferUtil.toHexString(tempset));
+                channel.writeAndFlush(new NetworkMessage(response, socketAddress));
+        }
+    }
+
     @Override
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
@@ -774,6 +853,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         int index = buf.indexOf(buf.readerIndex(), buf.writerIndex(), (byte) ',');
         String imei = buf.toString(index + 1, 15, StandardCharsets.US_ASCII);
+        String command = buf.toString(0, 2, StandardCharsets.US_ASCII);
         index = buf.indexOf(index + 1, buf.writerIndex(), (byte) ',');
         String type = buf.toString(index + 1, 3, StandardCharsets.US_ASCII);
 
@@ -837,6 +917,39 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             }
             case "CCC" -> decodeBinaryC(channel, remoteAddress, buf);
             case "CCE" -> decodeBinaryE(channel, remoteAddress, buf);
+            case "B25" -> {
+                int watchdog = -1;
+                try {
+                    String value = buf.toString(index + 5, 1, StandardCharsets.US_ASCII);
+                    LOGGER.info("imei: " + imei + " B25: " + value);
+                    watchdog = Integer.valueOf(value);
+                } catch (Exception e) {
+                    watchdog = -1;
+                }
+                requestHeartbeat(channel, remoteAddress, imei, watchdog);
+                yield null;
+            }
+            case "B47" -> {
+                yield decodeCommandSend(channel, remoteAddress, buf, index, imei);
+            }
+            case  "B67" -> {
+                yield decodeCommandResult(channel, remoteAddress, buf, index, imei);
+            }
+            case "AAA" -> {
+                yield decodeRegular(channel, remoteAddress, buf);
+            }
+            case "C42" -> {
+                LOGGER.info("MSG Data: " + buf.toString(StandardCharsets.US_ASCII));
+                if (command.equals("$$")) {
+                    if (type.equals("C42")) {
+                        yield decodeCommandResultC42(channel, remoteAddress, buf, index, imei);
+                    } else {
+                        yield decodeCommandResult(channel, remoteAddress, buf, index, imei);
+                    }
+                } else {
+                    yield decodeCommandSend(channel, remoteAddress, buf, index, imei);
+                }
+            }
             default -> decodeRegular(channel, remoteAddress, buf);
         };
     }
