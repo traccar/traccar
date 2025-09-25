@@ -22,6 +22,7 @@ import org.traccar.BaseDataHandler;
 import org.traccar.database.DeviceManager;
 import org.traccar.model.Position;
 
+import java.time.Instant;
 import java.util.concurrent.atomic.AtomicLong;
 
 @ChannelHandler.Sharable
@@ -32,7 +33,10 @@ public class DefaultDataHandler extends BaseDataHandler {
     AtomicLong id;
 
     public DefaultDataHandler(DeviceManager deviceManager) {
-        id = new AtomicLong(System.nanoTime());
+        Instant now = Instant.now();
+        long seconds = now.getEpochSecond();
+        int nanos   = now.getNano();
+        id = new AtomicLong(seconds * 1_000_000L + nanos / 1_000);
         LOGGER.error("maxPositionId: " + id + " - position id starting with " + id.get());
     }
 
