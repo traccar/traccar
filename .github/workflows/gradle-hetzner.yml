@@ -92,5 +92,6 @@ jobs:
         REMOTE_USER: ${{ secrets.REMOTE_USER }}
         SCRIPT_AFTER: |
           sudo /home/${{ secrets.REMOTE_USER }}/traccar.run
+          sudo service traccar stop
           sudo service traccar start
           echo $RSYNC_STDOUT
