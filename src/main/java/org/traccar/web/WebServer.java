@@ -15,14 +15,8 @@
  */
 package org.traccar.web;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
 import com.google.inject.servlet.GuiceFilter;
-import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
-import io.modelcontextprotocol.server.McpServer;
-import io.modelcontextprotocol.server.McpStatelessSyncServer;
-import io.modelcontextprotocol.server.transport.HttpServletStatelessServerTransport;
-import io.modelcontextprotocol.spec.McpSchema;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.http.HttpServletRequest;
@@ -74,15 +68,13 @@ public class WebServer implements LifecycleObject {
 
     private final Injector injector;
     private final Config config;
-    private final ObjectMapper objectMapper;
 
     private final Server server;
-    private McpStatelessSyncServer mcpServer;
+    private McpServerHolder mcpServerHolder;
 
-    public WebServer(Injector injector, Config config, ObjectMapper objectMapper) throws IOException {
+    public WebServer(Injector injector, Config config) throws IOException {
         this.injector = injector;
         this.config = config;
-        this.objectMapper = objectMapper;
         String address = config.getString(Keys.WEB_ADDRESS);
         int port = config.getInteger(Keys.WEB_PORT);
         if (address == null) {
@@ -179,24 +171,8 @@ public class WebServer implements LifecycleObject {
         }
 
         if (config.getBoolean(Keys.WEB_MCP_ENABLE)) {
-            var transport = HttpServletStatelessServerTransport.builder()
-                    .messageEndpoint("/api/mcp")
-                    .jsonMapper(new JacksonMcpJsonMapper(objectMapper))
-                    .build();
-
-            var capabilities = McpSchema.ServerCapabilities.builder()
-                    .tools(true)
-                    .resources(false, true)
-                    .prompts(true)
-                    .logging()
-                    .build();
-
-            mcpServer = McpServer.sync(transport)
-                    .serverInfo("traccar-mcp", "1.0.0")
-                    .capabilities(capabilities)
-                    .build();
-
-            servletHandler.addServlet(new ServletHolder(transport), "/api/mcp");
+            mcpServerHolder = injector.getInstance(McpServerHolder.class);
+            servletHandler.addServlet(new ServletHolder(mcpServerHolder.getServlet()), McpServerHolder.PATH);
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
@@ -266,8 +242,8 @@ public class WebServer implements LifecycleObject {
     @Override
     public void stop() throws Exception {
         server.stop();
-        if (mcpServer != null) {
-            mcpServer.close();
+        if (mcpServerHolder != null) {
+            mcpServerHolder.close();
         }
     }
 
