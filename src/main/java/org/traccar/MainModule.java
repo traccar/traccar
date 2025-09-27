@@ -197,9 +197,10 @@ public class MainModule extends AbstractModule {
     }
 
     @Provides
-    public static WebServer provideWebServer(Injector injector, Config config) throws IOException {
+    public static WebServer provideWebServer(
+            Injector injector, Config config, ObjectMapper objectMapper) throws IOException {
         if (config.getInteger(Keys.WEB_PORT) > 0) {
-            return new WebServer(injector, config);
+            return new WebServer(injector, config, objectMapper);
         }
         return null;
     }

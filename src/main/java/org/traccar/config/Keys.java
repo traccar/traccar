@@ -1924,6 +1924,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Enable MCP service.
+     */
+    public static final ConfigKey<Boolean> WEB_MCP_ENABLE = new BooleanConfigKey(
+            "web.mcp.enable",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Output logging to the standard terminal output instead of a log file.
      */
     public static final ConfigKey<Boolean> LOGGER_CONSOLE = new BooleanConfigKey(
