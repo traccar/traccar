@@ -18,6 +18,7 @@ package org.traccar.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
 import io.modelcontextprotocol.server.McpServer;
+import io.modelcontextprotocol.server.McpStatelessServerFeatures;
 import io.modelcontextprotocol.server.McpStatelessSyncServer;
 import io.modelcontextprotocol.server.transport.HttpServletStatelessServerTransport;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -45,13 +46,28 @@ public class McpServerHolder implements AutoCloseable {
                 .tools(true)
                 .resources(false, true)
                 .prompts(true)
-                .logging()
                 .build();
 
         server = McpServer.sync(transport)
                 .serverInfo("traccar-mcp", "1.0.0")
                 .capabilities(capabilities)
-                .tools() // TODO
+                .tools(createVersionTool())
+                .build();
+    }
+
+    private McpStatelessServerFeatures.SyncToolSpecification createVersionTool() {
+
+        var toolSchema = McpSchema.Tool.builder()
+                .name("traccar-version")
+                .title("Returns server version name")
+                .build();
+
+        return McpStatelessServerFeatures.SyncToolSpecification.builder()
+                .tool(toolSchema)
+                .callHandler((context, request) -> {
+                    String version = getClass().getPackage().getImplementationVersion();
+                    return new McpSchema.CallToolResult(version != null ? version : "Unknown", false);
+                })
                 .build();
     }
 
