@@ -17,28 +17,29 @@ package org.traccar.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.modelcontextprotocol.json.jackson.JacksonMcpJsonMapper;
+import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
-import io.modelcontextprotocol.server.McpStatelessServerFeatures;
-import io.modelcontextprotocol.server.McpStatelessSyncServer;
-import io.modelcontextprotocol.server.transport.HttpServletStatelessServerTransport;
+import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.servlet.http.HttpServlet;
+import reactor.core.publisher.Mono;
 
 @Singleton
 public class McpServerHolder implements AutoCloseable {
 
     public static final String PATH = "/api/mcp";
 
-    private final HttpServletStatelessServerTransport transport;
-    private final McpStatelessSyncServer server;
+    private final HttpServletStreamableServerTransportProvider transport;
+    private final McpAsyncServer server;
 
     @Inject
     public McpServerHolder(ObjectMapper objectMapper) {
 
-        transport = HttpServletStatelessServerTransport.builder()
-                .messageEndpoint(PATH)
+        transport = HttpServletStreamableServerTransportProvider.builder()
+                .mcpEndpoint(PATH)
                 .jsonMapper(new JacksonMcpJsonMapper(objectMapper))
                 .build();
 
@@ -48,25 +49,26 @@ public class McpServerHolder implements AutoCloseable {
                 .prompts(true)
                 .build();
 
-        server = McpServer.sync(transport)
+        server = McpServer.async(transport)
                 .serverInfo("traccar-mcp", "1.0.0")
                 .capabilities(capabilities)
                 .tools(createVersionTool())
                 .build();
     }
 
-    private McpStatelessServerFeatures.SyncToolSpecification createVersionTool() {
+    private McpServerFeatures.AsyncToolSpecification createVersionTool() {
 
         var toolSchema = McpSchema.Tool.builder()
                 .name("traccar-version")
                 .title("Returns server version name")
                 .build();
 
-        return McpStatelessServerFeatures.SyncToolSpecification.builder()
+        return McpServerFeatures.AsyncToolSpecification.builder()
                 .tool(toolSchema)
                 .callHandler((context, request) -> {
                     String version = getClass().getPackage().getImplementationVersion();
-                    return new McpSchema.CallToolResult(version != null ? version : "Unknown", false);
+                    var result = new McpSchema.CallToolResult(version != null ? version : "Unknown", false);
+                    return Mono.just(result);
                 })
                 .build();
     }
