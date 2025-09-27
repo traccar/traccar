@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ package org.traccar.handler.events;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.traccar.config.Keys;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
@@ -53,11 +52,6 @@ public class MotionEventHandler extends BaseEventHandler {
         long deviceId = position.getDeviceId();
         Device device = cacheManager.getObject(Device.class, deviceId);
         if (device == null || !PositionUtil.isLatest(cacheManager, position)) {
-            return;
-        }
-        boolean processInvalid = AttributeUtil.lookup(
-                cacheManager, Keys.EVENT_MOTION_PROCESS_INVALID_POSITIONS, deviceId);
-        if (!processInvalid && !position.getValid()) {
             return;
         }
 

@@ -433,14 +433,6 @@ public final class Keys {
             true);
 
     /**
-     * If set to true, invalid positions will be considered for motion logic.
-     */
-    public static final ConfigKey<Boolean> EVENT_MOTION_PROCESS_INVALID_POSITIONS = new BooleanConfigKey(
-            "event.motion.processInvalidPositions",
-            List.of(KeyType.CONFIG, KeyType.DEVICE),
-            false);
-
-    /**
      * If the speed is above specified value, the object is considered to be in motion. Default value is 0.01 knots.
      */
     public static final ConfigKey<Double> EVENT_MOTION_SPEED_THRESHOLD = new DoubleConfigKey(
@@ -1725,13 +1717,6 @@ public final class Keys {
             "geocoder.ignorePositions",
             List.of(KeyType.CONFIG),
             true);
-
-    /**
-     * Boolean flag to apply reverse geocoding to invalid positions.
-     */
-    public static final ConfigKey<Boolean> GEOCODER_PROCESS_INVALID_POSITIONS = new BooleanConfigKey(
-            "geocoder.processInvalidPositions",
-            List.of(KeyType.CONFIG));
 
     /**
      * Optional parameter to specify minimum distance for new reverse geocoding request. If distance is less than
