@@ -27,6 +27,8 @@ import jakarta.inject.Singleton;
 import jakarta.servlet.http.HttpServlet;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
+
 @Singleton
 public class McpServerHolder implements AutoCloseable {
 
@@ -58,9 +60,13 @@ public class McpServerHolder implements AutoCloseable {
 
     private McpServerFeatures.AsyncToolSpecification createVersionTool() {
 
+        var inputSchema = new McpSchema.JsonSchema(
+                "object", Collections.emptyMap(), null, null, null, null);
+
         var toolSchema = McpSchema.Tool.builder()
                 .name("traccar-version")
                 .title("Returns server version name")
+                .inputSchema(inputSchema)
                 .build();
 
         return McpServerFeatures.AsyncToolSpecification.builder()

@@ -172,7 +172,9 @@ public class WebServer implements LifecycleObject {
 
         if (config.getBoolean(Keys.WEB_MCP_ENABLE)) {
             mcpServerHolder = injector.getInstance(McpServerHolder.class);
-            servletHandler.addServlet(new ServletHolder(mcpServerHolder.getServlet()), McpServerHolder.PATH);
+            var mcpServletHolder = new ServletHolder(mcpServerHolder.getServlet());
+            mcpServletHolder.setAsyncSupported(true);
+            servletHandler.addServlet(mcpServletHolder, McpServerHolder.PATH);
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
