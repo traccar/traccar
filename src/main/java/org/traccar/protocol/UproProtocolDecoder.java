@@ -114,7 +114,7 @@ public class UproProtocolDecoder extends BaseProtocolDecoder {
 
             ByteBuf buf = (ByteBuf) msg;
 
-            LOGGER.info("upro < " + buf.toString());
+            LOGGER.info("upro < " + buf.toString(StandardCharsets.US_ASCII));
 
             if (buf.getByte(buf.readerIndex()) != '*') {
                 LOGGER.error("upro ignoring " + hexDump(buf));
