@@ -37,13 +37,15 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
             return null;
         }
 
+        String uniqueId = getUniqueId(command.getDeviceId());
+
         ByteBuf buf = Unpooled.buffer();
 
         buf.writeByte(2); // structure version
 
         buf.writeByte(2); // record type imei
         buf.writeShortLE(8); // record length
-        buf.writeLongLE(Long.parseLong(getUniqueId(command.getDeviceId())));
+        buf.writeLongLE(Long.parseLong(uniqueId));
 
         buf.writeByte(4); // record type output control
         buf.writeShortLE(10); // record length
@@ -58,8 +60,10 @@ public class IotmProtocolEncoder extends BaseProtocolEncoder {
         buf.writeByte(Checksum.sum(buf.nioBuffer()));
 
         return MqttMessageBuilders.publish()
+                .topicName(uniqueId + "/OUTC")
                 .qos(MqttQoS.AT_LEAST_ONCE)
                 .payload(buf)
+                .messageId(0)
                 .build();
     }
 
