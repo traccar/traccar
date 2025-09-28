@@ -84,9 +84,9 @@ public class RstProtocolDecoder extends BaseProtocolDecoder {
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         Parser parser = new Parser(PATTERN, (String) msg);
-        LOGGER.error((String) msg);
+        LOGGER.info((String) msg);
         if (!parser.matches()) {
-            LOGGER.error("ignoring: " + msg);
+            LOGGER.error("RST ignoring: " + msg);
             return null;
         }
 

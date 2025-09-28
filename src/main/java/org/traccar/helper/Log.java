@@ -173,7 +173,7 @@ public final class Log {
             }
             path = new File(logsPath, "tracker-server.log").getPath();
         }
-        setupLogger(path == null, path, Level.WARNING.getName(), false, true);
+        setupLogger(path == null, path, Level.WARNING.getName(), false, true, null);
     }
 
     public static void setupLogger(Config config) {
@@ -182,11 +182,12 @@ public final class Log {
                 config.getString("logger.file"),
                 config.getString("logger.level"),
                 config.getBoolean("logger.fullStackTraces"),
-                config.getBoolean("logger.rotate"));
+                config.getBoolean("logger.rotate"),
+                config.getString("logger.filter"));
     }
 
     private static void setupLogger(
-            boolean console, String file, String levelString, boolean fullStackTraces, boolean rotate) {
+            boolean console, String file, String levelString, boolean fullStackTraces, boolean rotate, String filter) {
 
         Logger rootLogger = Logger.getLogger("");
         for (Handler handler : rootLogger.getHandlers()) {
@@ -206,6 +207,9 @@ public final class Log {
         rootLogger.setLevel(level);
         handler.setLevel(level);
         handler.setFilter(record -> record != null && !record.getLoggerName().startsWith("sun"));
+        if (filter != null && !filter.isEmpty()) {
+            handler.setFilter(record -> record != null && record.getLoggerName().contains(filter));
+        }
 
         rootLogger.addHandler(handler);
     }
