@@ -206,9 +206,11 @@ public final class Log {
         Level level = Level.parse(levelString.toUpperCase());
         rootLogger.setLevel(level);
         handler.setLevel(level);
-
         if (filter != null && !filter.isEmpty()) {
-            handler.setFilter(record -> record != null && record.getLoggerName().contains(filter));
+            handler.setFilter(record -> record != null && (
+                record.getLoggerName().contains(filter) ||
+                record.getLevel()==Level.SEVERE
+            ));
         } else {
             handler.setFilter(record -> record != null && !record.getLoggerName().startsWith("sun"));
         }
