@@ -1,0 +1,8 @@
+#set($subject = "Account Scaduto")
+#set($digest = Account Scaduto")
+<!DOCTYPE html>
+<html>
+<body>
+Il tuo account utente è scaduto.
+</body>
+</html>
