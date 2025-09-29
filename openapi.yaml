@@ -623,6 +623,7 @@ paths:
       summary: Fetch Server information
       tags:
         - Server
+      security: []
       responses:
         '200':
           description: OK
@@ -653,6 +654,7 @@ paths:
       summary: Fetch Session information
       tags:
         - Session
+      security: []
       parameters:
         - name: token
           in: query
@@ -672,6 +674,7 @@ paths:
       summary: Create a new Session
       tags:
         - Session
+      security: []
       requestBody:
         content:
           application/x-www-form-urlencoded:
