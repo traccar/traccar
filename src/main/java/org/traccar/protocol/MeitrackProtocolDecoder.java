@@ -323,7 +323,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             if (buf.readableBytes() >= 4) position.setLatitude(buf.readIntLE() * 0.000001);
             if (buf.readableBytes() >= 4) position.setLongitude(buf.readIntLE() * 0.000001);
 
-            if (buf.readableBytes() >= 4) position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 946684800 = 2000-01-01
+            if (buf.readableBytes() >= 4) {
+                position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 946684800 = 2000-01-01
+            } else {
+                position.setTime(new Date()); // Fallback to current time if no timestamp available
+            }
 
             position.setValid(buf.readableBytes() >= 1 ? buf.readUnsignedByte() == 1 : false);
 
@@ -355,6 +359,10 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             if (buf.readableBytes() >= 4) buf.readUnsignedIntLE(); // geo-fence
 
+            // Ensure position always has a time
+            if (position.getFixTime() == null) {
+                position.setTime(new Date());
+            }
             positions.add(position);
         }
 
@@ -453,7 +461,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 switch (id) {
                     case 0x02 -> position.setLatitude(buf.readIntLE() * 0.000001);
                     case 0x03 -> position.setLongitude(buf.readIntLE() * 0.000001);
-                    case 0x04 -> position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 2000-01-01
+                    case 0x04 -> {
+                        if (buf.readableBytes() >= 4) {
+                            position.setTime(new Date((946684800 + buf.readUnsignedIntLE()) * 1000)); // 2000-01-01
+                        } else {
+                            position.setTime(new Date()); // Fallback to current time
+                        }
+                    }
                     case 0x0C -> position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
                     case 0x0D -> position.set("runtime", buf.readUnsignedIntLE());
                     case 0x25 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
@@ -559,6 +573,11 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
                 position.setNetwork(network);
+            }
+            
+            // Ensure position always has a time
+            if (position.getFixTime() == null) {
+                position.setTime(new Date());
             }
             positions.add(position);
         }
