@@ -1,4 +1,4 @@
-name: Build Installers
+name: Build staging installers
 
 on:
   push:
