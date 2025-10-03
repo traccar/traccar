@@ -1,0 +1,15 @@
+#set($subject = "$device.name: Allarme!")
+#set($alarmKey = $event.getString('alarm'))
+#set($alarmName = $translations.get("alarm${alarmKey.substring(0, 1).toUpperCase()}${alarmKey.substring(1)}"))
+#set($digest = "Allarme dal $device.name: $alarmName il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $device.name<br>
+Allarme: $alarmName<br>
+Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Indirizzo: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Annulla iscrizione</a>
+</body>
+</html>

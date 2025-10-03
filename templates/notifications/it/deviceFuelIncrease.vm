@@ -1,0 +1,15 @@
+#set($subject = "$device.name: Rifornimento di Carburante")
+#set($digest = "$device.name ha effettuato un rifornimento di carburante il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $device.name<br>
+ha effettuato un rifornimento di carburante<br>
+Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Quantità prima: $event.attributes.before<br>
+Quantità dopo: $event.attributes.after<br>
+Indirizzo: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Annulla iscrizione</a>
+</body>
+</html>
