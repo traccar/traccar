@@ -1,0 +1,12 @@
+#set($subject = "$device.name: commande en attente envoyée")
+#set($digest = "Commande en attente envoyée à $device.name à $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Appareil: $device.name<br>
+Commande en attente envoyée<br>
+Heure: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Se désabonner</a>
+</body>
+</html>

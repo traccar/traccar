@@ -1,0 +1,8 @@
+#set($subject = "Rappel d'expiration de l'appareil")
+#set($digest = "L'appareil $device.name expire le $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Votre appareil $device.name expirera le $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+</body>
+</html>

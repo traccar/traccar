@@ -1,0 +1,8 @@
+#set($subject = "Rappel d'expiration du compte")
+#set($digest = "Le compte expire le $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Votre compte utilisateur expirera le $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+</body>
+</html>
