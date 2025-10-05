@@ -1,4 +1,4 @@
-name: Build Installers
+name: Build installers
 
 on:
   workflow_dispatch:
