@@ -113,13 +113,11 @@ public class DcjbProtocolDecoder extends BaseMqttProtocolDecoder {
     protected Object decode(DeviceSession deviceSession, MqttPublishMessage message) throws Exception {
 
         List<Position> positions = new LinkedList<>();
-
         /*
          * The full message, either plain JSON or gzipped JSON (to be implemented).
          */
         ByteBuf buf = message.payload();
         String msgStr = buf.toString(StandardCharsets.UTF_8);
-
         /* Parse JSON. */
         ObjectMapper objectMapper = new ObjectMapper()
                 .enable(JsonParser.Feature.ALLOW_SINGLE_QUOTES)
