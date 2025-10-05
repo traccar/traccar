@@ -67,6 +67,7 @@ public abstract class BaseMqttProtocolDecoder extends BaseProtocolDecoder {
         } else if (msg instanceof MqttPublishMessage message) {
 
             DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+            deviceSession.set("mqttTopic", message.variableHeader().topicName());
             if (deviceSession == null) {
                 return null;
             }
