@@ -22,10 +22,15 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Decoder for DCJB MQTT packets.
  */
 public class DcjbProtocolDecoder extends BaseMqttProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DcjbProtocolDecoder.class);
 
     public DcjbProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -111,7 +116,10 @@ public class DcjbProtocolDecoder extends BaseMqttProtocolDecoder {
 
     @Override
     protected Object decode(DeviceSession deviceSession, MqttPublishMessage message) throws Exception {
-
+        
+        String mqttTopic = deviceSession.get("mqttTopic");
+        LOGGER.info("MQTT Topic: {}", mqttTopic);
+        
         List<Position> positions = new LinkedList<>();
 
         /*
