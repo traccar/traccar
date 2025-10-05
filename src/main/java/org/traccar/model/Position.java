@@ -81,6 +81,7 @@ public class Position extends Message {
     public static final String KEY_ACCELERATION = "acceleration";
     public static final String KEY_HUMIDITY = "humidity";
     public static final String KEY_DEVICE_TEMP = "deviceTemp"; // celsius
+    public static final String KEY_DEVICE_PRESSURE = "devicePressure";
     public static final String KEY_COOLANT_TEMP = "coolantTemp"; // celsius
     public static final String KEY_ENGINE_LOAD = "engineLoad";
     public static final String KEY_ENGINE_TEMP = "engineTemp";
@@ -92,6 +93,10 @@ public class Position extends Message {
     public static final String KEY_AXLE_WEIGHT = "axleWeight";
     public static final String KEY_G_SENSOR = "gSensor";
     public static final String KEY_ICCID = "iccid";
+    public static final String KEY_IMEI = "imei";
+    public static final String KEY_IMSI = "imsi";
+    public static final String KEY_CID = "cid";
+    public static final String KEY_LAC = "lac";
     public static final String KEY_PHONE = "phone";
     public static final String KEY_SPEED_LIMIT = "speedLimit";
     public static final String KEY_DRIVING_TIME = "drivingTime";
@@ -107,6 +112,9 @@ public class Position extends Message {
 
     // Start with 1 not 0
     public static final String PREFIX_TEMP = "temp";
+    public static final String PREFIX_BATTERY_LEVEL = "batteryLevel";
+    public static final String PREFIX_ACCELERATION = "acceleration";
+    public static final String PREFIX_GYROSCOPE = "gyroscope";
     public static final String PREFIX_ADC = "adc";
     public static final String PREFIX_IO = "io";
     public static final String PREFIX_COUNT = "count";
