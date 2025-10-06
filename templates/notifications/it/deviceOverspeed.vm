@@ -1,0 +1,22 @@
+#set($subject = "$device.name: Eccesso di Velocità")
+#if($speedUnit == "kmh")
+#set($speedValue = $position.speed * 1.852)
+#set($speedString = $numberTool.format('0.0 km/h', $speedValue))
+#elseif($speedUnit == "mph")
+#set($speedValue = $position.speed * 1.15078)
+#set($speedString = $numberTool.format('0.0 mph', $speedValue))
+#else
+#set($speedString = $numberTool.format('0.0 kn', $position.speed))
+#end
+#set($digest = "$device.name Indirizzo $speedString#{if}($geofence) in $geofence.name#{else}#{end} il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $device.name<br>
+e' in eccesso di velocità: $speedString#{if}($geofence) in $geofence.name#{else}#{end}<br>
+Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Indirizzo: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Annulla iscrizione</a>
+</body>
+</html>

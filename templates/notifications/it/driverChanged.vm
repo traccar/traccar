@@ -1,0 +1,18 @@
+#set($subject = "$device.name: Cambio Conducente")
+#if($driver)
+#set($driverName = $driver.name)
+#else
+#set($driverName = $event.getString('driverUniqueId'))
+#end
+#set($digest = "Il Conducente $driverName è cambiato dal $device.name at $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $device.name<br>
+Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Indirizzo: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+Conducente: $driverName<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Annulla iscrizione</a>
+</body>
+</html>
