@@ -137,7 +137,7 @@ public class DcjbProtocolDecoder extends BaseMqttProtocolDecoder {
     }
 
     /**
-     * Calculates the Euklidian vector norm from the given list of values.
+     * Calculates the Euclidean vector norm from the given list of values.
      */
     private <T extends Number> double calcNorm(List<T> vals) {
         double norm = 0;
