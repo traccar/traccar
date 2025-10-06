@@ -552,7 +552,7 @@ public class DcjbProtocolDecoder extends BaseMqttProtocolDecoder {
          */
         final JsonNode datetimeNode = getNodeForKey(instanceNode, "datetime");
         if (datetimeNode != null && !datetimeNode.isNull()) {
-            LOGGER.warn("Given instance-level datetime is ognored..");
+            LOGGER.warn("Given instance-level datetime is ignored..");
         }
 
         /* Get the actual values. */
