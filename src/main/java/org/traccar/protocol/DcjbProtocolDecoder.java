@@ -57,7 +57,7 @@ public class DcjbProtocolDecoder extends BaseMqttProtocolDecoder {
             throw new Exception("No coordinate(s) specified.");
         }
         if (coordNode.isObject()) {
-            /* Parse the degress. */
+            /* Parse the degrees. */
             JsonNode degNode = getNodeForKey(coordNode, "deg");
             if (degNode == null || degNode.isNull()) {
                 throw new Exception("No degree value specified.");
