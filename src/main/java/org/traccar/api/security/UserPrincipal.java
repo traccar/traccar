@@ -22,14 +22,20 @@ public class UserPrincipal implements Principal {
 
     private final long userId;
     private final Date expiration;
+    private final String userEmail;
 
-    public UserPrincipal(long userId, Date expiration) {
+    public UserPrincipal(long userId, String userEmail, Date expiration) {
         this.userId = userId;
         this.expiration = expiration;
+        this.userEmail = userEmail;
     }
 
     public Long getUserId() {
         return userId;
+    }
+
+    public String getUserEmail(){
+        return userEmail;
     }
 
     public Date getExpiration() {
