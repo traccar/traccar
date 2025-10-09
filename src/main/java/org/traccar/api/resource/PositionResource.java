@@ -154,7 +154,7 @@ public class PositionResource extends BaseResource {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
         StreamingOutput stream = output -> {
             try {
-                csvExportProvider.generate(output, deviceId, geofenceId, from, to);
+                csvExportProvider.generate(output, getUserId(), deviceId, geofenceId, from, to);
             } catch (StorageException e) {
                 throw new WebApplicationException(e);
             }

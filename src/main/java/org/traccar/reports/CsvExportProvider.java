@@ -15,8 +15,9 @@
  */
 package org.traccar.reports;
 
-import org.traccar.helper.DateUtil;
+import org.traccar.api.security.PermissionsService;
 import org.traccar.helper.model.PositionUtil;
+import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 import org.traccar.storage.Storage;
@@ -29,6 +30,7 @@ import org.traccar.storage.query.Request;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Objects;
@@ -38,16 +40,24 @@ import java.util.stream.Collectors;
 public class CsvExportProvider {
 
     private final Storage storage;
+    private final PermissionsService permissionsService;
 
     @Inject
-    public CsvExportProvider(Storage storage) {
+    public CsvExportProvider(Storage storage, PermissionsService permissionsService) {
         this.storage = storage;
+        this.permissionsService = permissionsService;
     }
 
     public void generate(
-            OutputStream outputStream, long deviceId, long geofenceId, Date from, Date to) throws StorageException {
+            OutputStream outputStream, long userId, long deviceId, long geofenceId,
+            Date from, Date to) throws StorageException {
 
+        var server = permissionsService.getServer();
+        var user = permissionsService.getUser(userId);
         var positions = PositionUtil.getPositions(storage, deviceId, from, to);
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        dateFormat.setTimeZone(UserUtil.getTimezone(server, user));
 
         Geofence geofence = geofenceId == 0 ? null : storage.getObject(Geofence.class, new Request(
                 new Columns.All(), new Condition.Equals("id", geofenceId)));
@@ -61,9 +71,9 @@ public class CsvExportProvider {
         properties.put("id", Position::getId);
         properties.put("deviceId", Position::getDeviceId);
         properties.put("protocol", Position::getProtocol);
-        properties.put("serverTime", position -> DateUtil.formatDate(position.getServerTime()));
-        properties.put("deviceTime", position -> DateUtil.formatDate(position.getDeviceTime()));
-        properties.put("fixTime", position -> DateUtil.formatDate(position.getFixTime()));
+        properties.put("serverTime", position -> dateFormat.format(position.getServerTime()));
+        properties.put("deviceTime", position -> dateFormat.format(position.getDeviceTime()));
+        properties.put("fixTime", position -> dateFormat.format(position.getFixTime()));
         properties.put("valid", Position::getValid);
         properties.put("latitude", Position::getLatitude);
         properties.put("longitude", Position::getLongitude);
