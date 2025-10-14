@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -31,27 +33,19 @@ jobs:
         run: echo "TAG_NAME=v${CURRENT_DATE}-${GITHUB_SHA::7}" >> $GITHUB_ENV
 
       - name: Zip built files
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
           mkdir -p release
           zip -r "release/traccar-${CURRENT_DATE}.zip" target/
 
       - name: Create GitHub Release
-        id: create_release
-        uses: actions/create-release@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.TAG_NAME }}
-          release_name: "Release ${{ env.TAG_NAME }}"
+          name: "Release ${{ env.TAG_NAME }}"
           draft: false
           prerelease: false
-
-      - name: Upload ZIP to GitHub Release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.PAT || secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: release/traccar-${{ env.CURRENT_DATE }}.zip
-          asset_name: traccar-${{ env.CURRENT_DATE }}.zip
-          asset_content_type: application/zip
+          files: release/traccar-${{ env.CURRENT_DATE }}.zip
