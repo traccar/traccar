@@ -110,10 +110,21 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
     private static final Pattern NETWORK_DESC = Pattern.compile(
             "volte\\s*:\\s*(\\d)\\s*\\\"([^\\\"]+)\\\"\\s*,\\s*(-?\\d+)\\s*,\\s*(-?\\d+)\\s*,\\s*(-?\\d+)\\s*,\\s*(-?\\d+)");
+    
+    private static final Pattern NETWORK_DESC_ALT = Pattern.compile(
+            "\\\"([^\\\"]+)\\\"\\s*,\\s*(-?\\d+)\\s*,\\s*(-?\\d+)\\s*,\\s*(-?\\d+)\\s*,\\s*(-?\\d+)\\s+volte\\s*:\\s*(\\d)");
+    
+    private static final Pattern NETWORK_DESC_SIMPLE = Pattern.compile(
+            "\\\"([^\\\"]+)\\\"\\s+volte\\s*:\\s*(\\d)");
+    
+    private static final Pattern NETWORK_DESC_SIMPLE_P88 = Pattern.compile(
+            "volte\\s*:\\s*(\\d)\\s*\\\"([^\\\"]+)\\\"");
 
     private void decodeNetworkInfo(Position position, int networkTypeCode, String descriptor) {
         if (descriptor != null && !descriptor.isEmpty()) {
             position.set("networkDescriptor", descriptor);
+            
+            // Try pattern 1: volte:0 "LTE",25,-107,59,-13 (P88 format with signal)
             Matcher m = NETWORK_DESC.matcher(descriptor);
             if (m.find()) {
                 try {
@@ -127,6 +138,45 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     position.set("rsrq", Integer.parseInt(m.group(6)));
                 } catch (NumberFormatException ignored) {
                     // Ignore parse errors; keep raw descriptor
+                }
+            } else {
+                // Try pattern 2: "LTE",54,-83,65,-9  volte:1 (P99 format with signal)
+                m = NETWORK_DESC_ALT.matcher(descriptor);
+                if (m.find()) {
+                    try {
+                        position.set("networkType", m.group(1));
+                        int rssi = Integer.parseInt(m.group(2));
+                        position.set("rssi", rssi);
+                        position.set(Position.KEY_RSSI, rssi);
+                        position.set("rsrp", Integer.parseInt(m.group(3)));
+                        position.set("sinr", Integer.parseInt(m.group(4)));
+                        position.set("rsrq", Integer.parseInt(m.group(5)));
+                        position.set("volte", Integer.parseInt(m.group(6)));
+                    } catch (NumberFormatException ignored) {
+                        // Ignore parse errors; keep raw descriptor
+                    }
+                } else {
+                    // Try pattern 3: "NOSERVICE"  volte:1 (P99 format without signal)
+                    m = NETWORK_DESC_SIMPLE.matcher(descriptor);
+                    if (m.find()) {
+                        position.set("networkType", m.group(1));
+                        try {
+                            position.set("volte", Integer.parseInt(m.group(2)));
+                        } catch (NumberFormatException ignored) {
+                            // Ignore parse errors
+                        }
+                    } else {
+                        // Try pattern 4: volte:0 "NOSERVICE" (P88 format without signal)
+                        m = NETWORK_DESC_SIMPLE_P88.matcher(descriptor);
+                        if (m.find()) {
+                            try {
+                                position.set("volte", Integer.parseInt(m.group(1)));
+                                position.set("networkType", m.group(2));
+                            } catch (NumberFormatException ignored) {
+                                // Ignore parse errors
+                            }
+                        }
+                    }
                 }
             }
         }
