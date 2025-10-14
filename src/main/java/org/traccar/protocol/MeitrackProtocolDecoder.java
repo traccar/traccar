@@ -521,7 +521,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x15 -> {
                         int input = buf.readUnsignedByte();
                         position.set(Position.KEY_INPUT, input);
-                        if (input == 4) {
+                        if (input == 2 || input == 4) {
                             position.set(Position.KEY_IGNITION, true);
                         } else {
                             position.set(Position.KEY_IGNITION, false);
