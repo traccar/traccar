@@ -37,38 +37,38 @@ public class HowenProtocolDecoderTest extends ProtocolTest {
         assertTrue(status.getBoolean(Position.KEY_IGNITION));
         assertTrue(status.getBoolean(Position.KEY_DOOR));
         assertEquals("status-28081102-000001E96BDFB010", status.getString("session"));
-        assertEquals(0x07, status.getInteger("howenGSensorMask"));
-        assertEquals(0, status.getInteger("howenAccelX"));
-        assertEquals(4, status.getInteger("howenAccelY"));
-        assertEquals(0, status.getInteger("howenAccelZ"));
-        assertEquals(2, status.getInteger("howenTilt"));
-        assertEquals(0, status.getInteger("howenImpact"));
-        assertEquals(0x1f, status.getInteger("howenModuleMask"));
-        assertEquals(0, status.getInteger("howenModuleMobile"));
-        assertEquals(1, status.getInteger("howenModuleLocation"));
-        assertEquals(3, status.getInteger("howenModuleWifi"));
-        assertEquals(1, status.getInteger("howenModuleGSensor"));
-        assertEquals(15, status.getInteger("howenModuleRecording"));
+        assertEquals(0x07, status.getInteger("GSensorMask"));
+        assertEquals(0, status.getInteger("AccelX"));
+        assertEquals(4, status.getInteger("AccelY"));
+        assertEquals(0, status.getInteger("AccelZ"));
+        assertEquals(2, status.getInteger("Tilt"));
+        assertEquals(0, status.getInteger("Impact"));
+        assertEquals(0x1f, status.getInteger("Mask"));
+        assertEquals(0, status.getInteger("Mobile"));
+        assertEquals(1, status.getInteger("Location"));
+        assertEquals(3, status.getInteger("Wifi"));
+        assertEquals(1, status.getInteger("GSensor"));
+        assertEquals(15, status.getInteger("Recording"));
         assertEquals(0, status.getInteger(Position.KEY_RSSI));
-        assertEquals(0, status.getInteger("howenSignal"));
-        assertEquals(0, status.getInteger("howenNetworkType"));
-        assertEquals(1, status.getInteger("howenStorageMask"));
-        assertEquals(0, status.getInteger("howenStorageDisk"));
-        assertEquals(1, status.getInteger("howenStorageStatus"));
-        assertEquals(60906L, status.getLong("howenStorageSize"));
-        assertEquals(0L, status.getLong("howenStorageAvailable"));
-        assertEquals(0x0fL, status.getLong("howenAlarmMask"));
-        assertEquals(0, status.getInteger("howenAlarmVideoLoss"));
-        assertEquals(0, status.getInteger("howenAlarmMotion"));
-        assertEquals(0, status.getInteger("howenAlarmCover"));
-        assertEquals(0, status.getInteger("howenAlarmInput"));
-        assertEquals(0x3f, status.getInteger("howenTempMask"));
-        assertEquals(0, status.getInteger("howenTempIn"));
-        assertEquals(0, status.getInteger("howenTempOut"));
-        assertEquals(0, status.getInteger("howenTempEngine"));
-        assertEquals(0, status.getInteger("howenTempDevice"));
-        assertEquals(0, status.getInteger("howenHumidityIn"));
-        assertEquals(0, status.getInteger("howenHumidityOut"));
+        assertEquals(0, status.getInteger("Signal"));
+        assertEquals(0, status.getInteger("NetworkType"));
+        assertEquals(1, status.getInteger("StorageMask"));
+        assertEquals(0, status.getInteger("StorageDisk"));
+        assertEquals(1, status.getInteger("StorageStatus"));
+        assertEquals(60906L, status.getLong("StorageSize"));
+        assertEquals(0L, status.getLong("StorageAvailable"));
+        assertEquals(0x0fL, status.getLong("AlarmMask"));
+        assertEquals(0, status.getInteger("AlarmVideoLoss"));
+        assertEquals(0, status.getInteger("AlarmMotion"));
+        assertEquals(0, status.getInteger("AlarmCover"));
+        assertEquals(0, status.getInteger("AlarmInput"));
+        assertEquals(0x3f, status.getInteger("TempMask"));
+        assertEquals(0, status.getInteger("TempIn"));
+        assertEquals(0, status.getInteger("TempOut"));
+        assertEquals(0, status.getInteger("TempEngine"));
+        assertEquals(0, status.getInteger("TempDevice"));
+        assertEquals(0, status.getInteger("HumidityIn"));
+        assertEquals(0, status.getInteger("HumidityOut"));
 
         Position alarm = (Position) decoder.decode(null, null, binary(
                 "48015110bc00000020616c61726d2d32383038313130322d3030303030314539364244464230313000640000007b22646574223a7b226368223a2231227d2c22647475223a22323031382d30392d31342031343a33313a3037222c226563223a2232222c226574223a22222c227061223a22222c227374223a22323031382d30392d31342031343a33313a3037227d0a0012090e0e1f072d00000112090e0e1f07000b00008214080071588f0800165a280500810000001f00000103010f000000000000"));
@@ -84,8 +84,7 @@ public class HowenProtocolDecoderTest extends ProtocolTest {
         assertEquals(2, alarm.getInteger(Position.KEY_EVENT));
         assertEquals("{\"ch\":\"1\"}", alarm.getString("alarmDetail"));
         assertEquals("alarm-28081102-000001E96BDFB010", alarm.getString("session"));
-        assertEquals(0x1f, alarm.getInteger("howenModuleMask"));
-        assertEquals(0L, alarm.getLong("howenAlarmMask"));
+        assertEquals(0L, alarm.getLong("AlarmMask"));
 
         decoder.decode(null, null, binary(
                 "48010110d10100007b22616c67223a22312e302e302e3530222c226170223a22222c226174223a2235222c226469616c"
@@ -139,6 +138,6 @@ public class HowenProtocolDecoderTest extends ProtocolTest {
                 alarm.getString("alarmDetail"));
         assertFalse(alarm.getValid());
         assertNotNull(alarm.getDeviceTime());
-        assertEquals(0, alarm.getInteger("howenModuleMask"));
+        assertEquals(0, alarm.getInteger("Mask"));
     }
 }
