@@ -288,7 +288,6 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                                  .replaceAll("\\n", "")               // Remove newlines
                                  .replaceAll("rn", "|")               // Replace 'rn' with pipe
                                  .replaceAll("\\$0\\$I[a-z]?", "")    // Remove $0$I or $0$Ir markers
-                                 .replaceAll("\\|+$", "")             // Remove trailing pipes
                                  .trim();
                     if (!value.isEmpty()) {
                         position.addAlarm(Position.KEY_DRIVER_UNIQUE_ID);
