@@ -101,13 +101,13 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeHeartbeat(Channel channel, SocketAddress remoteAddress) {
-        LOGGER.info("Received heartbeat");
+        LOGGER.debug("Received heartbeat");
         sendResponse(channel, remoteAddress, MSG_HEARTBEAT, null);
         return null;
     }
 
     private Object decodeRegistration(Channel channel, SocketAddress remoteAddress, ByteBuf payload) {
-        LOGGER.info("Received registration request");
+        LOGGER.debug("Received registration request");
         String content = readString(payload);
         if (content.isEmpty()) {
             return null;
@@ -179,7 +179,7 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeStatus(Channel channel, SocketAddress remoteAddress, ByteBuf payload) {
-        LOGGER.info("Received status message");
+        LOGGER.debug("Received status message");
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
             return null;
@@ -208,7 +208,7 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeAlarm(Channel channel, SocketAddress remoteAddress, ByteBuf payload) {
-        LOGGER.info("Received alarm message");
+        LOGGER.debug("Received alarm message");
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
             return null;
@@ -277,7 +277,7 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
             position.set("alarmDetail", json.get("det").toString());
         }
 
-        // Driver unique ID event code is 22, ignore it for alarm
+        // Driver unique ID event code is 22
         if (eventCode != null && !eventCode.isEmpty() && eventCode.equals("22")) {
             try {
                 String value = json.get("det").asJsonObject().getString("cn", null);
@@ -366,7 +366,7 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int identifier = buf.readUnsignedByte();
-        position.set("howenGSensorMask", identifier);
+        position.set("GSensorMask", identifier);
 
         int required = 0;
         if (BitUtil.check(contentMask, 2)) {
@@ -394,7 +394,7 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int valuesToRead = Math.min(5, available / 2);
-        String[] keys = {"howenAccelX", "howenAccelY", "howenAccelZ", "howenTilt", "howenImpact"};
+        String[] keys = {"AccelX", "AccelY", "AccelZ", "Tilt", "Impact"};
 
         for (int i = 0; i < valuesToRead; i++) {
             if (buf.readableBytes() < 2) {
@@ -417,12 +417,12 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         int gSensor = buf.readUnsignedByte();
         int recording = buf.readUnsignedShortLE();
 
-        position.set("howenModuleMask", mask);
-        position.set("howenModuleMobile", mobile);
-        position.set("howenModuleLocation", location);
-        position.set("howenModuleWifi", wifi);
-        position.set("howenModuleGSensor", gSensor);
-        position.set("howenModuleRecording", recording);
+        position.set("Mask", mask);
+        position.set("Mobile", mobile);
+        position.set("Location", location);
+        position.set("Wifi", wifi);
+        position.set("GSensor", gSensor);
+        position.set("Recording", recording);
     }
 
     private void decodeMobileStatus(Position position, ByteBuf buf) {
@@ -435,10 +435,10 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         int networkType = buf.readUnsignedByte();
         buf.skipBytes(Math.min(2, buf.readableBytes()));
 
-        position.set("howenMobileMask", mask);
-        position.set("howenSignal", signal);
+        position.set("MobileMask", mask);
+        position.set("Signal", signal);
         position.set(Position.KEY_RSSI, signal);
-        position.set("howenNetworkType", networkType);
+        position.set("NetworkType", networkType);
     }
 
     private void decodeStorageStatus(Position position, ByteBuf buf) {
@@ -452,11 +452,11 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         long diskSize = buf.readUnsignedIntLE();
         long diskAvailable = buf.readUnsignedIntLE();
 
-        position.set("howenStorageMask", mask);
-        position.set("howenStorageDisk", diskNumber);
-        position.set("howenStorageStatus", diskStatus);
-        position.set("howenStorageSize", diskSize);
-        position.set("howenStorageAvailable", diskAvailable);
+        position.set("StorageMask", mask);
+        position.set("StorageDisk", diskNumber);
+        position.set("StorageStatus", diskStatus);
+        position.set("StorageSize", diskSize);
+        position.set("StorageAvailable", diskAvailable);
     }
 
     private void decodeAlarmStatus(Position position, ByteBuf buf) {
@@ -470,11 +470,11 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         int videoCover = buf.readUnsignedShortLE();
         int inputTrigger = buf.readUnsignedShortLE();
 
-        position.set("howenAlarmMask", mask);
-        position.set("howenAlarmVideoLoss", videoLoss);
-        position.set("howenAlarmMotion", motionDetection);
-        position.set("howenAlarmCover", videoCover);
-        position.set("howenAlarmInput", inputTrigger);
+        position.set("AlarmMask", mask);
+        position.set("AlarmVideoLoss", videoLoss);
+        position.set("AlarmMotion", motionDetection);
+        position.set("AlarmCover", videoCover);
+        position.set("AlarmInput", inputTrigger);
     }
 
     private void decodeTemperatureStatus(Position position, ByteBuf buf) {
@@ -490,13 +490,13 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         int humidityIn = buf.readUnsignedByte();
         int humidityOut = buf.readUnsignedByte();
 
-        position.set("howenTempMask", mask);
-        position.set("howenTempIn", tempIn);
-        position.set("howenTempOut", tempOut);
-        position.set("howenTempEngine", tempEngine);
-        position.set("howenTempDevice", tempDevice);
-        position.set("howenHumidityIn", humidityIn);
-        position.set("howenHumidityOut", humidityOut);
+        position.set("TempMask", mask);
+        position.set("TempIn", tempIn);
+        position.set("TempOut", tempOut);
+        position.set("TempEngine", tempEngine);
+        position.set("TempDevice", tempDevice);
+        position.set("HumidityIn", humidityIn);
+        position.set("HumidityOut", humidityOut);
     }
 
     private void applyJsonDerivedValues(Position position, JsonObject json) {
