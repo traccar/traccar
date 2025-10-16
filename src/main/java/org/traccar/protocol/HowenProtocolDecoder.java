@@ -283,7 +283,7 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         }
 
         // Driver unique ID event code is 22, ignore it for alarm
-        if (eventCode != null && !eventCode.isEmpty() && !eventCode.equals("22")) {
+        if (eventCode != null && !eventCode.isEmpty() && eventCode.equals("22")) {
             try {
                 String value = json.get("det").asJsonObject().getString("cn", null);
                 if (value != null && !value.isEmpty()) {
