@@ -101,16 +101,13 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeHeartbeat(Channel channel, SocketAddress remoteAddress) {
-        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
-        if (deviceSession != null) {
-            requestSubscriptions(channel, remoteAddress, deviceSession, null);
-        }
+        LOGGER.info("Received heartbeat");
         sendResponse(channel, remoteAddress, MSG_HEARTBEAT, null);
         return null;
     }
 
     private Object decodeRegistration(Channel channel, SocketAddress remoteAddress, ByteBuf payload) {
-
+        LOGGER.info("Received registration request");
         String content = readString(payload);
         if (content.isEmpty()) {
             return null;
@@ -182,7 +179,7 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeStatus(Channel channel, SocketAddress remoteAddress, ByteBuf payload) {
-
+        LOGGER.info("Received status message");
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
             return null;
@@ -211,7 +208,7 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Object decodeAlarm(Channel channel, SocketAddress remoteAddress, ByteBuf payload) {
-
+        LOGGER.info("Received alarm message");
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
         if (deviceSession == null) {
             return null;
@@ -223,8 +220,6 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
             session = readString(payload, sessionLength);
             deviceSession.set(ATTR_SESSION, session);
         }
-
-        requestSubscriptions(channel, remoteAddress, deviceSession, session);
 
         while (payload.isReadable() && payload.getUnsignedByte(payload.readerIndex()) == 0) {
             payload.readUnsignedByte();
