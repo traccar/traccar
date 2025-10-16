@@ -321,10 +321,13 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
 
         int content = buf.readUnsignedShortLE();
 
-        if (BitUtil.check(content, 0)) {
+        boolean hasNewLocation = BitUtil.check(content, 0);
+        
+        if (hasNewLocation) {
             decodeLocation(position, buf);
         } else {
-            getLastLocation(position, deviceTime);
+            // No new GPS data - skip creating position with old location
+            return;
         }
 
         if (BitUtil.check(content, 1)) {
