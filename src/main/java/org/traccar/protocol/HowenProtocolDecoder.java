@@ -282,7 +282,30 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
             position.set("alarmDetail", json.get("det").toString());
         }
 
-        position.addAlarm(Position.ALARM_GENERAL);
+        // Driver unique ID event code is 22, ignore it for alarm
+        if (eventCode != null && !eventCode.isEmpty() && !eventCode.equals("22")) {
+            try {
+                String value = json.get("det").asJsonObject().getString("cn", null);
+                if (value != null && !value.isEmpty()) {
+                    // Clean the driver ID: remove whitespace, line breaks, and $0$I markers
+                    value = value.replaceAll("\\s+", "")              // Remove all whitespace (spaces, tabs)
+                                 .replaceAll("\\r", "")               // Remove carriage returns
+                                 .replaceAll("\\n", "")               // Remove newlines
+                                 .replaceAll("rn", "|")               // Replace 'rn' with pipe
+                                 .replaceAll("\\$0\\$I[a-z]?", "")    // Remove $0$I or $0$Ir markers
+                                 .replaceAll("\\|+$", "")             // Remove trailing pipes
+                                 .trim();
+                    if (!value.isEmpty()) {
+                        position.addAlarm(Position.KEY_DRIVER_UNIQUE_ID);
+                        position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
+                    }
+                }
+            } catch (Exception e) {
+                LOGGER.warn("Failed to parse driver unique ID", e);
+            }
+        } else {
+            position.addAlarm(Position.ALARM_GENERAL);
+        }
 
         decodeStatusData(position, payload);
         applyJsonDerivedValues(position, json);
