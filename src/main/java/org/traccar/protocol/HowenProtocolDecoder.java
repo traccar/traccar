@@ -322,7 +322,7 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         int content = buf.readUnsignedShortLE();
 
         boolean hasNewLocation = BitUtil.check(content, 0);
-        
+
         if (hasNewLocation) {
             decodeLocation(position, buf);
         } else {
