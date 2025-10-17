@@ -245,14 +245,14 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             // Decode packed datetime (from TiniPositionReport.java):
             // Device sends UTC time, no timezone conversion needed (Traccar uses UTC)
             // Note: Bits 30-31 are used for analog value, so only bits 0-29 for datetime
-            // Bits 26-29: Year (0-15), special logic: 9=2009, else +2010
+            // Bits 26-29: Year (0-15), special logic: 9=2019, else +2020 (compensate for device RTC -10 years)
             // Bits 22-25: Month (1-12)
             // Bits 17-21: Day (1-31)
             // Bits 12-16: Hour (0-23)
             // Bits 6-11: Minute (0-59)
             // Bits 0-5: Second (0-59)
             int yearBits = (int) ((time32 >> 26) & 0x0F);
-            int year = (yearBits == 9) ? 2009 : (2010 + yearBits);
+            int year = (yearBits == 9) ? 2019 : (2020 + yearBits);  // +10 years from original logic
             int month = (int) ((time32 >> 22) & 0x0F);
             int day = (int) ((time32 >> 17) & 0x1F);
             int hour = (int) ((time32 >> 12) & 0x1F);
@@ -266,8 +266,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(calendar.getTime());
 
             // Only add valid positions with reasonable datetime
-            // Valid range: 2009-2025 (TiniPositionReport encoding), month 1-12, day 1-31
-            if (year >= 2009 && year <= 2025 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            // Valid range: 2019-2035 (+10 years from original 2009-2025), month 1-12, day 1-31
+            if (year >= 2019 && year <= 2035 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
                 positions.add(position);
             }
         }
