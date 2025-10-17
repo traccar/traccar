@@ -40,6 +40,7 @@ import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -105,6 +106,12 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
+        if (channel != null) {
+            ByteBuf response = Unpooled.copiedBuffer(
+                "\r\n>OK\r\n>OK\r\n>OK", StandardCharsets.US_ASCII);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+
         if (buf.readableBytes() < 10) {
             return null;
         }
@@ -155,18 +162,15 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        // Send acknowledgment response to device (same as legacy DataServer.java)
-        if (channel != null) {
-            ByteBuf response = Unpooled.copiedBuffer(
-                    "\r\n>OK\r\n>OK\r\n>OK", java.nio.charset.StandardCharsets.US_ASCII);
-            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-        }
-
         // Handle position reports
         if (isPositionReport(messageType)) {
             List<Position> positions = decodePositions(deviceSession, decoded, messageType);
             decoded.release();
             return positions.isEmpty() ? null : positions;
+        } else if (messageType == M_PING_REPLY_ENHIO) {
+            Position position = decodePingReply(deviceSession, decoded);
+            decoded.release();
+            return position;
         }
 
         decoded.release();
@@ -315,6 +319,109 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return positions;
+    }
+
+    private Position decodePingReply(DeviceSession deviceSession, ByteBuf buf) {
+        // Expected payload length: 16 bytes for position fields + 66 bytes of extras
+        if (buf.readableBytes() < 82) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        byte[] latlongBytes = new byte[7];
+        buf.readBytes(latlongBytes);
+        String latlongHex = bytesToHex(latlongBytes);
+
+        try {
+            String latHex = latlongHex.substring(0, 7);
+            String lonHex = latlongHex.substring(7, 14);
+            position.setLatitude(parseLatitude(latHex));
+            position.setLongitude(parseLongitude(lonHex));
+        } catch (Exception e) {
+            return null;
+        }
+
+        int speed = buf.readUnsignedByte();
+        position.setSpeed(speed * 0.539957);
+
+        int flagDegree = buf.readUnsignedByte();
+        position.setValid((flagDegree & 0x40) != 0);
+        int courseBits = flagDegree & 0x1F;
+        position.setCourse(courseBits * 360.0 / 32.0);
+
+        int digital = buf.readUnsignedByte();
+        String digitalBinary = String.format("%8s", Integer.toBinaryString(digital)).replace(' ', '0');
+        position.set(Position.KEY_INPUT, digitalBinary);
+        position.set(Position.KEY_IGNITION, (digital & 0x01) != 0);
+
+        int analogByte = buf.readUnsignedByte();
+
+        int enh = buf.readUnsignedByte();
+        position.set(Position.KEY_STATUS, enh);
+
+        long time32 = buf.readUnsignedInt();
+        int analogValue = (analogByte << 2) + (int) ((time32 >> 30) & 0x03);
+        position.set(Position.KEY_POWER, analogValue);
+
+        int yearBits = (int) ((time32 >> 26) & 0x0F);
+        int year = (yearBits == 9) ? 2019 : (2020 + yearBits);
+        int month = (int) ((time32 >> 22) & 0x0F);
+        int day = (int) ((time32 >> 17) & 0x1F);
+        int hour = (int) ((time32 >> 12) & 0x1F);
+        int minute = (int) ((time32 >> 6) & 0x3F);
+        int second = (int) (time32 & 0x3F);
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.clear();
+        calendar.set(year, month - 1, day, hour, minute, second);
+        position.setTime(calendar.getTime());
+
+        byte[] phoneBytes = new byte[14];
+        buf.readBytes(phoneBytes);
+        String phone = new String(phoneBytes, StandardCharsets.US_ASCII).trim();
+        if (!phone.isEmpty()) {
+            position.set(Position.KEY_PHONE, phone);
+        }
+
+        long idSec = buf.readUnsignedInt();
+        position.set("idSec", idSec);
+
+        int sTime = buf.readUnsignedShort();
+        position.set("sTime", sTime);
+
+        buf.skipBytes(4); // reserved
+
+        int ltCell = buf.readUnsignedShortLE();
+        int lac = buf.readUnsignedShortLE();
+        int ci = buf.readUnsignedShortLE();
+        int ta = buf.readUnsignedByte();
+        int tc = buf.readUnsignedByte();
+        int ltbs = buf.readUnsignedShortLE();
+
+        byte[] baseStationBytes = new byte[32];
+        buf.readBytes(baseStationBytes);
+        String baseStation = new String(baseStationBytes, StandardCharsets.US_ASCII).trim();
+
+        if (!baseStation.isEmpty()) {
+            position.set("baseStation", baseStation);
+        }
+
+        position.set("cellTiming", ltCell);
+        position.set("timingAdvance", ta);
+        position.set("timingCorrection", tc);
+        position.set("baseStationTiming", ltbs);
+
+        if (lac != 0 || ci != 0) {
+            position.setNetwork(new org.traccar.model.Network());
+            org.traccar.model.CellTower cellTower = new org.traccar.model.CellTower();
+            cellTower.setLocationAreaCode(lac);
+            cellTower.setCellId((long) ci);
+            position.getNetwork().addCellTower(cellTower);
+        }
+
+        return position;
     }
 
     private double parseLatitude(String hex) {
