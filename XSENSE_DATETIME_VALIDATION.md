@@ -14,7 +14,9 @@ The XSense protocol uses a 32-bit packed integer for datetime with the following
 
 ```
 Bits 31-30: Reserved for analog value (2 bits)
-Bits 29-26: Year (4 bits) - special logic: 9=2019, else 2020+value (range: 2019-2035)
+Bits 29-26: Year (4 bits) - decade-based logic:
+            0-9: 2020+value (2020-2029 current decade)
+            10-15: 2000+value (2010-2015 previous decade)
 Bits 25-22: Month (4 bits) - range: 1-12
 Bits 21-17: Day (5 bits) - range: 1-31
 Bits 16-12: Hour (5 bits) - range: 0-23
@@ -70,8 +72,8 @@ Added comprehensive validation to filter invalid datetime values:
 
 ```java
 // Only add valid positions with reasonable datetime
-// Valid range: 2019-2035 (year bits 0-15), month 1-12, day 1-31
-if (year >= 2019 && year <= 2035 
+// Valid range: 2010-2029 (decade-based encoding), month 1-12, day 1-31
+if (year >= 2010 && year <= 2029 
     && month >= 1 && month <= 12 
     && day >= 1 && day <= 31) {
     positions.add(position);
@@ -82,7 +84,7 @@ if (year >= 2019 && year <= 2035
 
 | Field | Range | Rationale |
 |-------|-------|-----------|
-| Year | 2019-2035 | Protocol year encoding: 9=2019, 0-15 = 2020-2035 |
+| Year | 2010-2029 | Decade-based encoding: 0-9=2020-2029, 10-15=2010-2015 |
 | Month | 1-12 | Standard calendar months |
 | Day | 1-31 | Maximum days in any month (calendar validation handled by Java Calendar) |
 
@@ -105,15 +107,19 @@ if (year >= 2019 && year <= 2035
 ```java
 // Record 1: 2024-11-11 10:10:22 UTC
 time32 = 0x12D6A296
-year=4 → 2024, month=11, day=11 ✓
+year_bits=4 → 2020+4 = 2024, month=11, day=11 ✓
 
-// Record 2: 2019-11-11 10:10:22 UTC  
+// Record 2: 2029-11-11 10:10:22 UTC  
 time32 = 0x26D6A296
-year=9 → 2019, month=11, day=11 ✓
+year_bits=9 → 2020+9 = 2029, month=11, day=11 ✓
+
+// Record 3: 2014-11-11 10:10:22 UTC
+time32 = 0x3AD6A25A
+year_bits=14 → 2000+14 = 2014, month=11, day=11 ✓
 
 // Record 4: 2024-11-11 10:10:22 UTC
 time32 = 0x52D6A296
-year=4 → 2024, month=11, day=11 ✓
+year_bits=4 → 2020+4 = 2024, month=11, day=11 ✓
 ```
 
 ### Invalid Date Examples
@@ -121,11 +127,11 @@ year=4 → 2024, month=11, day=11 ✓
 ```java
 // Record 5: month=15 (INVALID)
 time32 = 0x67D6A296
-year=9 → 2019, month=15, day=11 ✗
+year_bits=9 → 2029, month=15, day=11 ✗
 
 // Record 6: month=15 (INVALID)  
 time32 = 0x7BD6A216
-year=14 → 2034, month=15, day=11 ✗
+year_bits=14 → 2014, month=15, day=11 ✗
 ```
 
 ## Recommendations
