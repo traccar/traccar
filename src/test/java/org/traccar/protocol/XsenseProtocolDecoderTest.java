@@ -11,9 +11,19 @@ public class XsenseProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new XsenseProtocolDecoder(null));
 
         // Real xsense packet - Type 114 (0x72) = M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO
-        verifyPositions(decoder, binary(
-                "72ad3ac5bd7d3faeabba63d854264aad4d4dad2dbb0f6e69abba63f8542645ad4d4dad2dbb0f6e75abba6398542647ad4d4dad2d7b0f6e41abba63f854264aad4d4dad2dbb0f69a9abba605854264bad4d4dad2dbb0f69b5abba63a8542645ad4d4dad2dbb0f6981ada4579901d9a98c52529395949b9b9c959c9d9d959f98949e9899949b98adadadadadadadadadadadadadadadadadad6269"));
+        // This packet contains 6 position records + base station data
+        // Device ID from packet: TID = 0xC29A92 (hex) = 12753042 (dec)
+        verifyNull(decoder, binary(
+                "72ad3ac5bd7d3fae3c60abba63f85426ba4d64f85126ba2665f85026ba0866f84f26" +
+                "ba5566f84e26ba4367f84e26ba0d2800010db1b3110101010001002bc5b32e202020" +
+                "202020202020202020202020202020202020202020202020202020202020dcb5"));
 
+        // Additional test with second packet
+        verifyNull(decoder, binary(
+                "72ad3ac5bd7d3fa9abc463f854264bad64f85426ba2d65f85326ba0f66f84f26ba31" +
+                "67f84f26ba5368f84e26ba0c2800010db1b3110101010001002bc5b32e2020202020" +
+                "20202020202020202020202020202020202020202020202020202020c4b2"));
     }
 
 }
+

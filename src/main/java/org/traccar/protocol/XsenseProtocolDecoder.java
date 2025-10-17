@@ -19,9 +19,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -140,6 +140,13 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        // Send acknowledgment response to device (same as legacy DataServer.java)
+        if (channel != null) {
+            ByteBuf response = Unpooled.copiedBuffer(
+                    "\r\n>OK\r\n>OK\r\n>OK", java.nio.charset.StandardCharsets.US_ASCII);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
+
         // Handle position reports
         if (isPositionReport(messageType)) {
             List<Position> positions = decodePositions(deviceSession, decoded, messageType);
@@ -167,22 +174,23 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
             try {
                 // First 7 hex chars = latitude, next 7 hex chars = longitude
-                long latVal = Long.parseLong(latlongHex.substring(0, 7), 16);
-                long lonVal = Long.parseLong(latlongHex.substring(7, 14), 16);
-                position.setLatitude(latVal / 100000.0);
-                position.setLongitude(lonVal / 100000.0);
+                // Format is DDMM.MMMM (degrees + minutes) not decimal
+                String latHex = latlongHex.substring(0, 7);
+                String lonHex = latlongHex.substring(7, 14);
+                position.setLatitude(parseLatitude(latHex));
+                position.setLongitude(parseLongitude(lonHex));
             } catch (Exception e) {
                 continue; // Skip invalid position
             }
 
-            // Speed (1 byte) - in original units, convert via speed multiplier
+            // Speed (1 byte) - already in knots after multiplying by 1.943
             int speed = buf.readUnsignedByte();
-            position.setSpeed(UnitsConverter.knotsFromKph(speed * 1.943));
+            position.setSpeed(speed * 1.943);
 
             // Flag and Degree (1 byte) - contains GPS status and course
             int flagDegree = buf.readUnsignedByte();
             position.setValid((flagDegree & 0x40) != 0); // Bit 6 = GPS status
-            int course = flagDegree & 0x1F; // Lower 5 bits = degree
+            int course = flagDegree & 0x1F; // Lower 5 bits = degree (0-31)
             position.setCourse(course * 360.0 / 32.0);
 
             // Digital inputs (1 byte)
@@ -190,40 +198,106 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_INPUT, digital);
             position.set(Position.KEY_IGNITION, (digital & 0x01) != 0);
 
-            // Analog (1 byte)
-            int analog = buf.readUnsignedByte();
-            position.set(Position.KEY_POWER, analog);
+            // Analog (1 byte) - will be combined with 2 bits from datetime
+            int analogByte = buf.readUnsignedByte();
 
             // Event (1 byte)
             int event = buf.readUnsignedByte();
             position.set(Position.KEY_EVENT, event);
 
-            // Time (4 bytes) - packed as 32-bit integer
+            // Time (4 bytes) - packed as 32-bit integer, read as little-endian
             long time32 = buf.readUnsignedIntLE();
 
-            // Decode packed datetime (from ExtendPosition.java):
-            // Bits 26-29: Year (0-15) + 2000
+            // Analog value = (analog_byte << 2) + top 2 bits of datetime (bits 30-31)
+            int analogValue = (analogByte << 2) + (int) ((time32 >> 30) & 0x03);
+            position.set(Position.KEY_POWER, analogValue);
+
+            // Decode packed datetime (from PositionReport.java):
+            // Bits 26-29: Year (0-15), special logic: 9=2019, else +2020
             // Bits 22-25: Month (1-12)
             // Bits 17-21: Day (1-31)
             // Bits 12-16: Hour (0-23)
             // Bits 6-11: Minute (0-59)
             // Bits 0-5: Second (0-59)
-            int year = (int) ((time32 >> 26) & 0x0F) + 2000;
+            int yearBits = (int) ((time32 >> 26) & 0x0F);
+            int year = (yearBits == 9) ? 2019 : (2020 + yearBits);
             int month = (int) ((time32 >> 22) & 0x0F);
             int day = (int) ((time32 >> 17) & 0x1F);
             int hour = (int) ((time32 >> 12) & 0x1F);
             int minute = (int) ((time32 >> 6) & 0x3F);
             int second = (int) (time32 & 0x3F);
 
+            // Bangkok timezone +7 hours (25200000 ms)
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             calendar.clear();
             calendar.set(year, month - 1, day, hour, minute, second);
+            calendar.add(Calendar.MILLISECOND, 25200000);
             position.setTime(calendar.getTime());
 
             positions.add(position);
         }
 
+        // Parse base station data for ONLINE position reports (types 112, 114)
+        // After all position records, if there's remaining data, it's base station info
+        if ((messageType == M_BATCH_ONLINE_POSITION_REPORT_ENHIO
+                || messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO)
+                && buf.readableBytes() >= 44) {
+
+            // Base station data: 44 bytes total
+            // LTCell(2) + LAC(2) + CI(2) + Ta(1) + Tc(1) + LTbs(2) + BaseStation(32)
+            int ltCell = buf.readUnsignedShortLE();
+            int lac = buf.readUnsignedShortLE();
+            int ci = buf.readUnsignedShortLE();
+            int ta = buf.readUnsignedByte();
+            int tc = buf.readUnsignedByte();
+            int ltbs = buf.readUnsignedShortLE();
+
+            byte[] baseStationBytes = new byte[32];
+            buf.readBytes(baseStationBytes);
+            String baseStation = new String(baseStationBytes, java.nio.charset.StandardCharsets.US_ASCII).trim();
+
+            // Add base station data to the last position (most recent)
+            if (!positions.isEmpty()) {
+                Position lastPosition = positions.get(positions.size() - 1);
+                lastPosition.setNetwork(new org.traccar.model.Network());
+
+                // Create cell tower info
+                org.traccar.model.CellTower cellTower = new org.traccar.model.CellTower();
+                cellTower.setLocationAreaCode(lac);
+                cellTower.setCellId((long) ci);
+
+                lastPosition.getNetwork().addCellTower(cellTower);
+
+                // Store additional base station data in position attributes
+                lastPosition.set("cellTiming", ltCell);
+                lastPosition.set("timingAdvance", ta);
+                lastPosition.set("timingCorrection", tc);
+                lastPosition.set("baseStationTiming", ltbs);
+                lastPosition.set("baseStation", baseStation);
+            }
+        }
+
         return positions;
+    }
+
+    private double parseLatitude(String hex) {
+        // hex = "013B2C4" (7 chars) represents DDMM.MMMM
+        long value = Long.parseLong(hex, 16);
+        String str = String.format("%08d", value); // Pad to 8 digits
+        // Format: DDMM.MMMM -> degrees + minutes/60
+        double degrees = Double.parseDouble(str.substring(0, 2));
+        double minutes = Double.parseDouble(str.substring(2, 4) + "." + str.substring(4));
+        return degrees + (minutes / 60.0);
+    }
+
+    private double parseLongitude(String hex) {
+        // hex = "0644F3A" (7 chars) represents DDDMM.MMMM
+        long value = Long.parseLong(hex, 16);
+        String str = String.format("%09d", value); // Pad to 9 digits
+        // Format: DDDMM.MMMM -> degrees + minutes/60
+        double degrees = Double.parseDouble(str.substring(0, 3));
+        double minutes = Double.parseDouble(str.substring(3, 5) + "." + str.substring(5));
+        return degrees + (minutes / 60.0);
     }
 
     private String bytesToHex(byte[] bytes) {
