@@ -187,8 +187,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        // Each record is 16 bytes:
-        // latlong(7) + speed(1) + flagdegree(1) + digital(1) + analog(1) + event(1) + time32(4)
+        // Each record is 16 bytes (from TiniPositionReportPack.java):
+        // latlong(7) + speed(1) + flagdegree(1) + digital(1) + analog(1) + enh(1) + time32(4)
         int recordCount = positionDataLength / 16;
 
         for (int i = 0; i < recordCount && buf.readableBytes() >= 16; i++) {
@@ -211,45 +211,48 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
                 continue; // Skip invalid position
             }
 
-            // Speed (1 byte) - already in knots after multiplying by 1.943
+            // Speed (1 byte) - km/h, convert to knots
             int speed = buf.readUnsignedByte();
-            position.setSpeed(speed * 1.943);
+            position.setSpeed(speed * 0.539957); // km/h to knots
 
-            // Flag and Degree (1 byte) - contains GPS status and course
+            // Flag and Degree (1 byte) - contains GPS status (bit 6) and course (bits 0-5)
             int flagDegree = buf.readUnsignedByte();
             position.setValid((flagDegree & 0x40) != 0); // Bit 6 = GPS status
-            int course = flagDegree & 0x1F; // Lower 5 bits = degree (0-31)
-            position.setCourse(course * 360.0 / 32.0);
+            int courseBits = flagDegree & 0x1F; // Lower 5 bits = course (0-31)
+            position.setCourse(courseBits * 360.0 / 32.0); // Map to 0-360 degrees
 
             // Digital inputs (1 byte)
             int digital = buf.readUnsignedByte();
             position.set(Position.KEY_INPUT, digital);
             position.set(Position.KEY_IGNITION, (digital & 0x01) != 0);
 
-            // Analog (1 byte) - will be combined with 2 bits from datetime
+            // Analog (1 byte) - will combine with top 2 bits of time32
             int analogByte = buf.readUnsignedByte();
 
-            // Event (1 byte)
-            int event = buf.readUnsignedByte();
-            position.set(Position.KEY_EVENT, event);
+            // Enh (1 byte) - enhanced I/O status
+            int enh = buf.readUnsignedByte();
+            position.set(Position.KEY_STATUS, enh);
 
-            // Time (4 bytes) - packed as 32-bit integer, read as little-endian
-            long time32 = buf.readUnsignedIntLE();
+            // Time (4 bytes) - packed as 32-bit integer, read as BIG-ENDIAN
+            long time32 = buf.readUnsignedInt(); // Big-endian!
 
-            // Analog value = (analog_byte << 2) + top 2 bits of datetime (bits 30-31)
-            int analogValue = (analogByte << 2) + (int) ((time32 >> 30) & 0x03);
+            // Analog value: combine analog byte with top 2 bits of time32 (bits 30-31)
+            // From TiniPositionReport.getAnalog(): (analog_byte << 2) + top_2_bits
+            int analogTop2Bits = (int) ((time32 >> 30) & 0x03);
+            int analogValue = (analogByte << 2) + analogTop2Bits;
             position.set(Position.KEY_POWER, analogValue);
 
-            // Decode packed datetime (from PositionReport.java):
+            // Decode packed datetime (from TiniPositionReport.java):
             // Device sends UTC time, no timezone conversion needed (Traccar uses UTC)
-            // Bits 26-29: Year (0-15), special logic: 9=2019, else +2020
+            // Note: Bits 30-31 are used for analog value, so only bits 0-29 for datetime
+            // Bits 26-29: Year (0-15), special logic: 9=2009, else +2010
             // Bits 22-25: Month (1-12)
             // Bits 17-21: Day (1-31)
             // Bits 12-16: Hour (0-23)
             // Bits 6-11: Minute (0-59)
             // Bits 0-5: Second (0-59)
             int yearBits = (int) ((time32 >> 26) & 0x0F);
-            int year = (yearBits == 9) ? 2019 : (2020 + yearBits);
+            int year = (yearBits == 9) ? 2009 : (2010 + yearBits);
             int month = (int) ((time32 >> 22) & 0x0F);
             int day = (int) ((time32 >> 17) & 0x1F);
             int hour = (int) ((time32 >> 12) & 0x1F);
