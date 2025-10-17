@@ -2,6 +2,13 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class XsenseProtocolDecoderTest extends ProtocolTest {
 
@@ -23,6 +30,33 @@ public class XsenseProtocolDecoderTest extends ProtocolTest {
                 "72ad3ac5bd7d3fa9abc463f854264bad64f85426ba2d65f85326ba0f66f84f26ba31" +
                 "67f84f26ba5368f84e26ba0c2800010db1b3110101010001002bc5b32e2020202020" +
                 "20202020202020202020202020202020202020202020202020202020c4b2"));
+    }
+
+    @Test
+    public void testBatchOfflineEnhIo() throws Exception {
+
+        var decoder = inject(new XsenseProtocolDecoder(null));
+
+    // Prime mocked connection manager so subsequent lookups return a DeviceSession
+    assertNotNull(decoder.getDeviceSession(null, null, "bootstrap", "10D092"));
+
+        @SuppressWarnings("unchecked")
+        List<Position> positions = (List<Position>) decoder.decode(null, null, binary(
+                "73D7B8BFC70745AED1C01AD22E5C19D73737D75FC1750BD3D1C01AF22E5C1BD7" +
+                "3737D75FC1750C3BD1C01AA22E5C1AD73737D75FC1750C0FD1C01A822E5C19D7" +
+                "3737D75741750C13D1C01A722E5C18D73737D65F41750C7BD1C01A622E5C19D7" +
+                "3737D757C1750C4FD6CDD7D7D7D7D7D76010"));
+
+        Position expected = position("2025-10-17 13:48:04.000", true, 6.648240, 100.400557);
+
+        assertNotNull(positions, "positions list is null");
+        assertEquals(6, positions.size(), "unexpected record count");
+
+        Position first = positions.get(0);
+        assertEquals(expected.getLatitude(), first.getLatitude(), 0.00001);
+        assertEquals(expected.getLongitude(), first.getLongitude(), 0.00001);
+        assertEquals(expected.getFixTime(), first.getFixTime());
+        assertTrue(first.getValid(), "first record should be valid");
     }
 
 }

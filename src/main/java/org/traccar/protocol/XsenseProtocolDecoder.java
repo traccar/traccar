@@ -129,7 +129,7 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         }
 
         ByteBuf dataForCrc = decoded.slice(0, dataLength);
-        int receivedCrc = decoded.getUnsignedShortLE(dataLength);
+        int receivedCrc = decoded.getUnsignedShort(dataLength);
         int calculatedCrc = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, dataForCrc.nioBuffer());
 
         if (receivedCrc != calculatedCrc) {
@@ -139,12 +139,13 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
         // Parse packet structure: Type(1) | Size(2) | Ver(1) | TID(3) | Seq(1) | Data(N)
         decoded.readerIndex(1); // Skip type already read
-        decoded.readUnsignedShortLE(); // payload size
+        decoded.readUnsignedShort(); // payload size (big-endian per legacy spec)
         decoded.readUnsignedByte(); // version
 
         byte[] tidBytes = new byte[3];
         decoded.readBytes(tidBytes);
-        String terminalId = bytesToHex(tidBytes);
+        long terminalIdValue = Long.parseLong(bytesToHex(tidBytes), 16);
+        String terminalId = Long.toString(terminalIdValue);
 
         decoded.readUnsignedByte(); // sequence
 
@@ -223,7 +224,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
             // Digital inputs (1 byte)
             int digital = buf.readUnsignedByte();
-            position.set(Position.KEY_INPUT, digital);
+            String digitalBinary = String.format("%8s", Integer.toBinaryString(digital)).replace(' ', '0');
+            position.set(Position.KEY_INPUT, digitalBinary);
             position.set(Position.KEY_IGNITION, (digital & 0x01) != 0);
 
             // Analog (1 byte) - will combine with top 2 bits of time32
