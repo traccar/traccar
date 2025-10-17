@@ -161,9 +161,23 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
     private List<Position> decodePositions(DeviceSession deviceSession, ByteBuf buf, int messageType) {
         List<Position> positions = new ArrayList<>();
 
+        // For ONLINE position reports, calculate how many position records by subtracting base station data
+        int dataLength = buf.readableBytes();
+        int positionDataLength = dataLength;
+
+        // ONLINE modes have 44 bytes of base station data after position records
+        if (messageType == M_BATCH_ONLINE_POSITION_REPORT_ENHIO
+                || messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO) {
+            if (dataLength >= 44) {
+                positionDataLength = dataLength - 44;
+            }
+        }
+
         // Each record is 16 bytes:
         // latlong(7) + speed(1) + flagdegree(1) + digital(1) + analog(1) + event(1) + time32(4)
-        while (buf.readableBytes() >= 16) {
+        int recordCount = positionDataLength / 16;
+
+        for (int i = 0; i < recordCount && buf.readableBytes() >= 16; i++) {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
@@ -213,6 +227,7 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_POWER, analogValue);
 
             // Decode packed datetime (from PositionReport.java):
+            // Device sends UTC time, no timezone conversion needed (Traccar uses UTC)
             // Bits 26-29: Year (0-15), special logic: 9=2019, else +2020
             // Bits 22-25: Month (1-12)
             // Bits 17-21: Day (1-31)
@@ -227,17 +242,19 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             int minute = (int) ((time32 >> 6) & 0x3F);
             int second = (int) (time32 & 0x3F);
 
-            // Bangkok timezone +7 hours (25200000 ms)
+            // Store as UTC (no timezone conversion)
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             calendar.clear();
             calendar.set(year, month - 1, day, hour, minute, second);
-            calendar.add(Calendar.MILLISECOND, 25200000);
             position.setTime(calendar.getTime());
 
-            positions.add(position);
+            // Only add valid positions with reasonable datetime
+            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+                positions.add(position);
+            }
         }
 
-        // Parse base station data for ONLINE position reports (types 112, 114)
+        // Parse base station data for ONLINE position reports (types 107, 114)
         // After all position records, if there's remaining data, it's base station info
         if ((messageType == M_BATCH_ONLINE_POSITION_REPORT_ENHIO
                 || messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO)

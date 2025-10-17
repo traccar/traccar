@@ -12,7 +12,7 @@ The XSense protocol is a UDP-based tracking protocol that supports position repo
 - **Validation**: CRC16/CCITT checksum
 - **Position Data**: GPS coordinates (DDMM.MMMM format), speed, course, digital I/O, analog inputs
 - **Cell Tower**: LAC, Cell ID, and base station information (online mode only)
-- **Timezone**: Automatic +7 hours adjustment (Bangkok time)
+- **Timezone**: UTC+0 (device sends GPS time in UTC, Traccar stores as-is)
 
 ## Supported Message Types
 
@@ -114,7 +114,7 @@ Bits 0-5: Second (0-59)
 5. **Decode Positions**: Parse 16-byte position records
 6. **Convert Coordinates**: Parse DDMM.MMMM hex string to decimal degrees
 7. **Decode DateTime**: Extract year/month/day/hour/minute/second from packed bits
-8. **Apply Timezone**: Add +7 hours (Bangkok time, 25,200,000 ms)
+8. **Store as UTC**: No timezone conversion (device sends UTC, Traccar stores UTC)
 9. **Parse Base Station**: Extract cell tower data if online mode
 
 ### Coordinate Conversion Example
@@ -188,7 +188,7 @@ tools/xsense/message/MessageType.java - Message types + XOR keys
 2. **Speed Calculation**: Removed double conversion (legacy already multiplied by 1.943)
 3. **Analog Value**: Added 2-bit combination with datetime bits 30-31 (10-bit total)
 4. **Year Logic**: Implemented special case for year=9 → 2019
-5. **Timezone**: Added +7 hours Bangkok timezone adjustment
+5. **Timezone**: Store as UTC+0 (device sends UTC, no conversion needed)
 6. **Base Station**: Added cell tower data parsing for online mode
 
 ## Notes
@@ -197,7 +197,7 @@ tools/xsense/message/MessageType.java - Message types + XOR keys
 - DateTime is **packed in 32-bit** with bit fields, NOT BCD encoding
 - Speed is **already in knots** after multiplying by 1.943
 - Analog is **10-bit value** combining analog byte + datetime bits
-- **Timezone is +7 hours** (Bangkok) applied to all timestamps
+- **Timezone is UTC+0** (device sends GPS time in UTC, stored as-is)
 - CRC calculation covers all bytes except the final 2 CRC bytes
 - Base station data only present in **online mode** (types 112, 114)
 
@@ -224,9 +224,10 @@ tools/xsense/message/MessageType.java - Message types + XOR keys
 
 ### Time Offset Issues
 
-1. Protocol uses **Bangkok timezone (+7 hours)**
-2. Year calculation: 9=2019, others=2020+yearBits
-3. Check datetime bit extraction (26-29:year, 22-25:month, etc.)
+1. Device sends datetime in **UTC (GPS time)**
+2. Traccar stores all times as **UTC+0**
+3. Frontend displays time according to **user's timezone preference**
+4. No server-side timezone conversion needed
 
 ### Base Station Not Parsed
 
