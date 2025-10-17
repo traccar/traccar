@@ -37,37 +37,39 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    // Message type constants from legacy MessageType.java
-    public static final int M_SYSTEM_LOG = 0x01;
-    public static final int M_ALERT = 0x02;
-    public static final int M_UPDATE_INTERVAL_TIME_RESULT = 0x03;
-    public static final int M_ENGINE_CONTROL_RESULT = 0x04;
-    public static final int M_PING_REPLY = 0x05;
-    public static final int M_EXTEND_POSITION_REPORT = 0x10;
-    public static final int M_BATCH_POSITION_REPORT = 0x11;
-    public static final int M_BATCH_OFFLINE_POSITION_REPORT = 0x12;
-    public static final int M_PING_REPLY_ENHIO = 0x25;
-    public static final int M_BATCH_ONLINE_POSITION_REPORT_ENHIO = 0x30;
-    public static final int M_BATCH_OFFLINE_POSITION_REPORT_ENHIO = 0x31;
-    public static final int M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO = 0x40;
-    public static final int M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO = 0x41;
+    // Message type constants from legacy MessageType.java (decimal values!)
+    public static final int M_SYSTEM_LOG = 97;
+    public static final int M_ALERT = 99;
+    public static final int M_UPDATE_INTERVAL_TIME_RESULT = 100;
+    public static final int M_ENGINE_CONTROL_RESULT = 101;
+    public static final int M_PING_REPLY = 102;
+    public static final int M_EXTEND_POSITION_REPORT = 103;
+    public static final int M_BATCH_POSITION_REPORT = 104;
+    public static final int M_BATCH_OFFLINE_POSITION_REPORT = 105;
+    public static final int M_POSITION_REPORT_ENHIO = 106;
+    public static final int M_BATCH_ONLINE_POSITION_REPORT_ENHIO = 107;
+    public static final int M_BATCH_OFFLINE_POSITION_REPORT_ENHIO = 108;
+    public static final int M_PING_REPLY_ENHIO = 109;
+    public static final int M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO = 114;
+    public static final int M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO = 115;
 
     // XOR keys for each message type (from legacy MessageType.java)
     private byte getXorKey(int messageType) {
         return switch (messageType) {
-            case M_SYSTEM_LOG -> (byte) 0x53;
-            case M_ALERT -> (byte) 0x54;
-            case M_UPDATE_INTERVAL_TIME_RESULT -> (byte) 0x55;
-            case M_ENGINE_CONTROL_RESULT -> (byte) 0x56;
-            case M_PING_REPLY -> (byte) 0x57;
-            case M_EXTEND_POSITION_REPORT -> (byte) 0x58;
-            case M_BATCH_POSITION_REPORT -> (byte) 0x59;
-            case M_BATCH_OFFLINE_POSITION_REPORT -> (byte) 0x5A;
-            case M_PING_REPLY_ENHIO -> (byte) 0x5B;
-            case M_BATCH_ONLINE_POSITION_REPORT_ENHIO -> (byte) 0x5C;
-            case M_BATCH_OFFLINE_POSITION_REPORT_ENHIO -> (byte) 0x5D;
-            case M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO -> (byte) 0x5E;
-            case M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO -> (byte) 0x5F;
+            case M_SYSTEM_LOG -> (byte) 0x39;
+            case M_ALERT -> (byte) 0x25;
+            case M_UPDATE_INTERVAL_TIME_RESULT -> (byte) 0x56;
+            case M_ENGINE_CONTROL_RESULT -> (byte) 0x72;
+            case M_PING_REPLY -> (byte) 0x29;
+            case M_EXTEND_POSITION_REPORT -> (byte) 0x33;
+            case M_BATCH_POSITION_REPORT -> (byte) 0x73;
+            case M_BATCH_OFFLINE_POSITION_REPORT -> (byte) 0xE7;
+            case M_POSITION_REPORT_ENHIO -> (byte) 0x66;
+            case M_BATCH_ONLINE_POSITION_REPORT_ENHIO -> (byte) 0x7A;
+            case M_BATCH_OFFLINE_POSITION_REPORT_ENHIO -> (byte) 0xDC;
+            case M_PING_REPLY_ENHIO -> (byte) 0xB9;
+            case M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO -> (byte) 0xAD;
+            case M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO -> (byte) 0xD7;
             default -> (byte) 0x00;
         };
     }
@@ -76,6 +78,7 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         return messageType == M_EXTEND_POSITION_REPORT
                 || messageType == M_BATCH_POSITION_REPORT
                 || messageType == M_BATCH_OFFLINE_POSITION_REPORT
+                || messageType == M_POSITION_REPORT_ENHIO
                 || messageType == M_BATCH_ONLINE_POSITION_REPORT_ENHIO
                 || messageType == M_BATCH_OFFLINE_POSITION_REPORT_ENHIO
                 || messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO
@@ -151,65 +154,76 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
     private List<Position> decodePositions(DeviceSession deviceSession, ByteBuf buf, int messageType) {
         List<Position> positions = new ArrayList<>();
 
-        while (buf.readableBytes() >= 20) {
+        // Each record is 16 bytes:
+        // latlong(7) + speed(1) + flagdegree(1) + digital(1) + analog(1) + event(1) + time32(4)
+        while (buf.readableBytes() >= 16) {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
-            // Parse extended position record (based on ExtendPosition.java)
-            // Date/Time: YYYYMMDDHHMMSS (6 bytes BCD-encoded)
-            int year = 2000 + decodeBcd(buf.readByte());
-            int month = decodeBcd(buf.readByte());
-            int day = decodeBcd(buf.readByte());
-            int hour = decodeBcd(buf.readByte());
-            int minute = decodeBcd(buf.readByte());
-            int second = decodeBcd(buf.readByte());
+            // Lat/Lon: 7 bytes as hex string, split into 3.5 bytes each
+            byte[] latlongBytes = new byte[7];
+            buf.readBytes(latlongBytes);
+            String latlongHex = bytesToHex(latlongBytes);
+
+            try {
+                // First 7 hex chars = latitude, next 7 hex chars = longitude
+                long latVal = Long.parseLong(latlongHex.substring(0, 7), 16);
+                long lonVal = Long.parseLong(latlongHex.substring(7, 14), 16);
+                position.setLatitude(latVal / 100000.0);
+                position.setLongitude(lonVal / 100000.0);
+            } catch (Exception e) {
+                continue; // Skip invalid position
+            }
+
+            // Speed (1 byte) - in original units, convert via speed multiplier
+            int speed = buf.readUnsignedByte();
+            position.setSpeed(UnitsConverter.knotsFromKph(speed * 1.943));
+
+            // Flag and Degree (1 byte) - contains GPS status and course
+            int flagDegree = buf.readUnsignedByte();
+            position.setValid((flagDegree & 0x40) != 0); // Bit 6 = GPS status
+            int course = flagDegree & 0x1F; // Lower 5 bits = degree
+            position.setCourse(course * 360.0 / 32.0);
+
+            // Digital inputs (1 byte)
+            int digital = buf.readUnsignedByte();
+            position.set(Position.KEY_INPUT, digital);
+            position.set(Position.KEY_IGNITION, (digital & 0x01) != 0);
+
+            // Analog (1 byte)
+            int analog = buf.readUnsignedByte();
+            position.set(Position.KEY_POWER, analog);
+
+            // Event (1 byte)
+            int event = buf.readUnsignedByte();
+            position.set(Position.KEY_EVENT, event);
+
+            // Time (4 bytes) - packed as 32-bit integer
+            long time32 = buf.readUnsignedIntLE();
+
+            // Decode packed datetime (from ExtendPosition.java):
+            // Bits 26-29: Year (0-15) + 2000
+            // Bits 22-25: Month (1-12)
+            // Bits 17-21: Day (1-31)
+            // Bits 12-16: Hour (0-23)
+            // Bits 6-11: Minute (0-59)
+            // Bits 0-5: Second (0-59)
+            int year = (int) ((time32 >> 26) & 0x0F) + 2000;
+            int month = (int) ((time32 >> 22) & 0x0F);
+            int day = (int) ((time32 >> 17) & 0x1F);
+            int hour = (int) ((time32 >> 12) & 0x1F);
+            int minute = (int) ((time32 >> 6) & 0x3F);
+            int second = (int) (time32 & 0x3F);
 
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             calendar.clear();
             calendar.set(year, month - 1, day, hour, minute, second);
             position.setTime(calendar.getTime());
 
-            // Latitude (4 bytes) - stored as integer representing degrees * 1000000
-            int latRaw = buf.readIntLE();
-            position.setLatitude(latRaw / 1000000.0);
-
-            // Longitude (4 bytes)
-            int lonRaw = buf.readIntLE();
-            position.setLongitude(lonRaw / 1000000.0);
-
-            // Speed (2 bytes) in km/h
-            int speed = buf.readUnsignedShortLE();
-            position.setSpeed(UnitsConverter.knotsFromKph(speed));
-
-            // Course (2 bytes) in degrees
-            int course = buf.readUnsignedShortLE();
-            position.setCourse(course);
-
-            // Status flags (1 byte)
-            int status = buf.readUnsignedByte();
-            position.setValid((status & 0x01) != 0);
-
-            // Satellites (1 byte)
-            if (buf.readableBytes() > 0) {
-                position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
-            }
-
-            // Digital inputs (if available)
-            if (buf.readableBytes() >= 2) {
-                int inputs = buf.readUnsignedShortLE();
-                position.set(Position.KEY_INPUT, inputs);
-            }
-
             positions.add(position);
         }
 
         return positions;
-    }
-
-    private int decodeBcd(byte b) {
-        int high = (b >> 4) & 0x0F;
-        int low = b & 0x0F;
-        return high * 10 + low;
     }
 
     private String bytesToHex(byte[] bytes) {
