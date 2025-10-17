@@ -249,7 +249,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(calendar.getTime());
 
             // Only add valid positions with reasonable datetime
-            if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            // Valid range: 2019-2035 (year bits 0-15), month 1-12, day 1-31
+            if (year >= 2019 && year <= 2035 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
                 positions.add(position);
             }
         }
