@@ -31,6 +31,14 @@ Some of the available features include:
 
 Please read [build from source documentation](https://www.traccar.org/build/) on the official website.
 
+## Custom Protocols
+
+### XSense Protocol
+
+This repository includes a custom XSense GPS tracking protocol implementation. The protocol uses UDP transport with XOR encryption and CRC16/CCITT validation.
+
+For detailed documentation, see [XSENSE_PROTOCOL.md](XSENSE_PROTOCOL.md).
+
 ## Team
 
 - Anton Tananaev ([anton@traccar.org](mailto:anton@traccar.org))

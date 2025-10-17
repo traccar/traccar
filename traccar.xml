@@ -33,4 +33,8 @@
         <entry key='geocoder.reuseDistance'>10</entry>
 
         <entry key='ruptela.timeout'>60</entry>
+
+        <!-- XSense Protocol Configuration -->
+        <entry key='xsense.port'>5262</entry>
+
     </properties>

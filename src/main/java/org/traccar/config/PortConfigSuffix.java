@@ -178,6 +178,7 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         PORTS.put("oko", 5152);
         PORTS.put("ivt401", 5153);
         PORTS.put("sigfox", 5154);
+        PORTS.put("xsense", 5262);
         PORTS.put("t57", 5155);
         PORTS.put("spot", 5156);
         PORTS.put("m2c", 5157);
