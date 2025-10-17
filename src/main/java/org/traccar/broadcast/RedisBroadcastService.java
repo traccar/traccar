@@ -55,6 +55,8 @@ public class RedisBroadcastService extends BaseBroadcastService {
             subscriber = new Jedis(url);
             publisher = new Jedis(url);
             subscriber.connect();
+            publisher.connect();  // Validate publisher connection at startup
+            LOGGER.info("Redis subscriber and publisher connected");
         } catch (JedisConnectionException e) {
             throw new IOException(e);
         }
