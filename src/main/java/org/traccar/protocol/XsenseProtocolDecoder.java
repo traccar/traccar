@@ -200,6 +200,11 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
+            if (messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO
+                    || messageType == M_BATCH_OFFLINE_POSITION_REPORT_ENHIO) {
+                    position.set(Position.KEY_STATUS, "offline");
+                }
+
             // Lat/Lon: 7 bytes as hex string, split into 3.5 bytes each
             byte[] latlongBytes = new byte[7];
             buf.readBytes(latlongBytes);
@@ -237,7 +242,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
             // Enh (1 byte) - enhanced I/O status
             int enh = buf.readUnsignedByte();
-            position.set(Position.KEY_STATUS, enh);
+            String enhBinary = String.format("%8s", Integer.toBinaryString(enh)).replace(' ', '0');
+            position.set("io", digitalBinary + enhBinary);
 
             // Time (4 bytes) - packed as 32-bit integer, read as BIG-ENDIAN
             long time32 = buf.readUnsignedInt(); // Big-endian!
@@ -246,7 +252,10 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             // From TiniPositionReport.getAnalog(): (analog_byte << 2) + top_2_bits
             int analogTop2Bits = (int) ((time32 >> 30) & 0x03);
             int analogValue = (analogByte << 2) + analogTop2Bits;
-            position.set(Position.KEY_POWER, analogValue);
+            position.set("adc1", analogValue);
+            position.set("adc2", 0); // Reserved
+            position.set("adc3", 0); // Reserved
+            position.set("adc4", 0); // Reserved
 
             // Decode packed datetime (from TiniPositionReport.java):
             // Device sends UTC time, no timezone conversion needed (Traccar uses UTC)
@@ -272,10 +281,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             position.setTime(calendar.getTime());
 
             // Only add valid positions with reasonable datetime
-            // Valid range: 2019-2035 (+10 years from original 2009-2025), month 1-12, day 1-31
-            if (year >= 2019 && year <= 2035 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-                positions.add(position);
-            }
+            positions.add(position);
+            
         }
 
         // Parse base station data for ONLINE position reports (types 107, 114)
@@ -359,11 +366,15 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         int analogByte = buf.readUnsignedByte();
 
         int enh = buf.readUnsignedByte();
-        position.set(Position.KEY_STATUS, enh);
+        String enhBinary = String.format("%8s", Integer.toBinaryString(enh)).replace(' ', '0');
+        position.set("io", digitalBinary + enhBinary);
 
         long time32 = buf.readUnsignedInt();
         int analogValue = (analogByte << 2) + (int) ((time32 >> 30) & 0x03);
-        position.set(Position.KEY_POWER, analogValue);
+        position.set("adc1", analogValue);
+        position.set("adc2", 0); // Reserved
+        position.set("adc3", 0); // Reserved
+        position.set("adc4", 0); // Reserved
 
         int yearBits = (int) ((time32 >> 26) & 0x0F);
         int year = (yearBits == 9) ? 2019 : (2020 + yearBits);
