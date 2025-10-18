@@ -282,7 +282,7 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
             // Only add valid positions with reasonable datetime
             positions.add(position);
-            
+
         }
 
         // Parse base station data for ONLINE position reports (types 107, 114)
