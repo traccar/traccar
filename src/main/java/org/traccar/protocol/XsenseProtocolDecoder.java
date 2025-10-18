@@ -65,8 +65,12 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
     public static final int M_BATCH_ONLINE_POSITION_REPORT_ENHIO = 107;
     public static final int M_BATCH_OFFLINE_POSITION_REPORT_ENHIO = 108;
     public static final int M_PING_REPLY_ENHIO = 109;
+    // Siemens GTR-Siemens message types
+    public static final int M_NEW_POSITION_GPS32_REPORT = 110;
     public static final int M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO = 114;
     public static final int M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO = 115;
+    public static final int M_LOCATION_BASE_REPORT = 116;
+    public static final int M_GPS_REPORT = 117;
 
     // XOR keys for each message type (from legacy MessageType.java)
     private byte getXorKey(int messageType) {
@@ -83,8 +87,11 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             case M_BATCH_ONLINE_POSITION_REPORT_ENHIO -> (byte) 0x7A;
             case M_BATCH_OFFLINE_POSITION_REPORT_ENHIO -> (byte) 0xDC;
             case M_PING_REPLY_ENHIO -> (byte) 0xB9;
+            case M_NEW_POSITION_GPS32_REPORT -> (byte) 0x00;
             case M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO -> (byte) 0xAD;
             case M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO -> (byte) 0xD7;
+            case M_LOCATION_BASE_REPORT -> (byte) 0x00;
+            case M_GPS_REPORT -> (byte) 0x00;
             default -> (byte) 0x00;
         };
     }
@@ -96,8 +103,50 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
                 || messageType == M_POSITION_REPORT_ENHIO
                 || messageType == M_BATCH_ONLINE_POSITION_REPORT_ENHIO
                 || messageType == M_BATCH_OFFLINE_POSITION_REPORT_ENHIO
+                || messageType == M_NEW_POSITION_GPS32_REPORT
                 || messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO
-                || messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO;
+                || messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO
+                || messageType == M_LOCATION_BASE_REPORT
+                || messageType == M_GPS_REPORT;
+    }
+
+    private boolean isSiemensDevice(int messageType) {
+        // Siemens devices use message types 110, 116, 117
+        // Note: Message types 114, 115 can be either GTR-3 or Siemens
+        // and need to be detected by payload size
+        return messageType == M_NEW_POSITION_GPS32_REPORT
+                || messageType == M_LOCATION_BASE_REPORT
+                || messageType == M_GPS_REPORT;
+    }
+
+    private boolean isSiemensFormat(ByteBuf buf, int messageType) {
+        // For message types 110, 116, 117: always Siemens
+        if (isSiemensDevice(messageType)) {
+            return true;
+        }
+
+        // For message types 114, 115: detect by record size
+        // GTR-3 uses 16-byte TINI records
+        // Siemens uses 32-byte GPS32 records
+        if (messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO
+                || messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO) {
+            int dataLength = buf.readableBytes();
+
+            // For ONLINE reports, GTR-3 has 44-byte base station data at the end
+            // So check if remaining data (after removing 44 bytes) is divisible by 16 or 32
+            int testLength = dataLength;
+            if (messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO && dataLength >= 44) {
+                testLength = dataLength - 44;
+            }
+
+            // If divisible by 32 but not by 16 (or divisible by both but 32 is more likely), it's Siemens
+            // If divisible by 16 but not by 32, it's GTR-3
+            if (testLength % 32 == 0 || (testLength >= 2 && (testLength - 2) % 32 == 0)) {
+                return true; // Siemens GPS32 format
+            }
+        }
+
+        return false;
     }
 
     @Override
@@ -106,12 +155,6 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        if (channel != null) {
-            ByteBuf response = Unpooled.copiedBuffer(
-                "\r\n>OK\r\n>OK\r\n>OK", StandardCharsets.US_ASCII);
-            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
-        }
-
         if (buf.readableBytes() < 10) {
             return null;
         }
@@ -119,42 +162,94 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         int messageType = buf.readUnsignedByte();
         byte xorKey = getXorKey(messageType);
 
-        // Create a copy for decoding
+        // Try XOR decoding first
         ByteBuf decoded = Unpooled.buffer(buf.readableBytes());
         decoded.writeByte(messageType);
 
-        // XOR decode from position 1 onwards
-        while (buf.isReadable()) {
-            decoded.writeByte(buf.readByte() ^ xorKey);
+        byte[] payloadBytes = new byte[buf.readableBytes()];
+        buf.getBytes(buf.readerIndex(), payloadBytes);
+
+        for (byte b : payloadBytes) {
+            decoded.writeByte(b ^ xorKey);
         }
 
-        // Validate CRC16/CCITT
+        // Validate CRC16/CCITT for XOR decoded
         int dataLength = decoded.readableBytes() - 2;
-        if (dataLength < 8) {
-            decoded.release();
-            return null;
-        }
-
         ByteBuf dataForCrc = decoded.slice(0, dataLength);
         int receivedCrc = decoded.getUnsignedShort(dataLength);
         int calculatedCrc = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, dataForCrc.nioBuffer());
 
-        if (receivedCrc != calculatedCrc) {
+        boolean isSiemensRaw = false;
+        boolean crcValid = (receivedCrc == calculatedCrc);
+
+        // If XOR CRC fails and message type supports raw Siemens, try without XOR
+        if (!crcValid && (messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO
+                || messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO
+                || isSiemensDevice(messageType))) {
+            decoded.release();
+            decoded = Unpooled.buffer(buf.readableBytes());
+            decoded.writeByte(messageType);
+            decoded.writeBytes(payloadBytes);
+
+            dataLength = decoded.readableBytes() - 2;
+            dataForCrc = decoded.slice(0, dataLength);
+            receivedCrc = decoded.getUnsignedShort(dataLength);
+            calculatedCrc = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, dataForCrc.nioBuffer());
+            crcValid = (receivedCrc == calculatedCrc);
+            isSiemensRaw = crcValid;
+        }
+
+        if (!crcValid || dataLength < 8) {
             decoded.release();
             return null;
         }
 
-        // Parse packet structure: Type(1) | Size(2) | Ver(1) | TID(3) | Seq(1) | Data(N)
+        // Parse packet structure
         decoded.readerIndex(1); // Skip type already read
-        decoded.readUnsignedShort(); // payload size (big-endian per legacy spec)
-        decoded.readUnsignedByte(); // version
 
-        byte[] tidBytes = new byte[3];
-        decoded.readBytes(tidBytes);
-        long terminalIdValue = Long.parseLong(bytesToHex(tidBytes), 16);
-        String terminalId = Long.toString(terminalIdValue);
+        String terminalId;
+        String ackBoxId;
+        int sequence;
 
-        decoded.readUnsignedByte(); // sequence
+        if (isSiemensRaw) {
+            // Siemens raw format: Type(1) | Seq(1) | Size(1) | BoxID(2) | Data(N) | CRC(2)
+            sequence = decoded.readUnsignedByte() & 0xFF;
+            int size = decoded.readUnsignedByte() & 0xFF;
+            int boxId = decoded.readUnsignedShort() & 0xFFFF;
+
+            // Device ID = boxId + 1200000
+            long deviceId = 1200000L + boxId;
+            terminalId = Long.toString(deviceId);
+            ackBoxId = String.format("%05d", boxId);
+        } else {
+            // GTR-3 format: Type(1) | Size(2) | Ver(1) | TID(3) | Seq(1) | Data(N) | CRC(2)
+            decoded.readUnsignedShort(); // payload size
+            decoded.readUnsignedByte(); // version
+
+            byte[] tidBytes = new byte[3];
+            decoded.readBytes(tidBytes);
+            long terminalIdValue = Long.parseLong(bytesToHex(tidBytes), 16);
+            terminalId = Long.toString(terminalIdValue);
+            ackBoxId = terminalId;
+
+            sequence = decoded.readUnsignedByte();
+        }
+
+        // Send acknowledgment
+        if (channel != null) {
+            String ack;
+            if (isSiemensRaw || isSiemensFormat(decoded, messageType)) {
+                // Siemens format: >OK,CRC,SEQ,BOXID,*
+                String crcHex = String.format("%04X", receivedCrc).toUpperCase();
+                ack = String.format(">OK,%s,%d,%s,*\r\n>OK\r\n",
+                    crcHex, sequence, ackBoxId);
+            } else {
+                // GTR-3 format: simple >OK
+                ack = "\r\n>OK\r\n>OK\r\n>OK";
+            }
+            ByteBuf response = Unpooled.copiedBuffer(ack, StandardCharsets.US_ASCII);
+            channel.writeAndFlush(new NetworkMessage(response, remoteAddress));
+        }
 
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, terminalId);
         if (deviceSession == null) {
@@ -164,11 +259,25 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
         // Handle position reports
         if (isPositionReport(messageType)) {
-            List<Position> positions = decodePositions(deviceSession, decoded, messageType);
+            List<Position> positions;
+            if (isSiemensRaw || isSiemensFormat(decoded, messageType)) {
+                // Siemens GTR-Siemens device (32-byte GPS32 format)
+                positions = decodeSiemensPositions(deviceSession, decoded);
+            } else {
+                // GTR-3 device (16-byte TINI format)
+                positions = decodePositions(deviceSession, decoded, messageType);
+            }
             decoded.release();
             return positions.isEmpty() ? null : positions;
         } else if (messageType == M_PING_REPLY_ENHIO) {
-            Position position = decodePingReply(deviceSession, decoded);
+            Position position;
+            if (decoded.readableBytes() >= 128) {
+                // Siemens GTR-Siemens ping reply (128 bytes)
+                position = decodeSiemensPingReply(deviceSession, decoded);
+            } else {
+                // GTR-3 ping reply (82 bytes)
+                position = decodePingReply(deviceSession, decoded);
+            }
             decoded.release();
             return position;
         }
@@ -434,6 +543,227 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
         return position;
     }
+
+    // ==================== Siemens GTR-Siemens Decoders ====================
+
+    private List<Position> decodeSiemensPositions(DeviceSession deviceSession, ByteBuf buf) {
+        List<Position> positions = new ArrayList<>();
+
+        // Siemens uses 32-byte GPS32 records (not 16-byte TINI like GTR-3)
+        int recordSize = 32;
+        int recordCount = buf.readableBytes() / recordSize;
+
+        for (int i = 0; i < recordCount && buf.readableBytes() >= recordSize; i++) {
+            Position position = decodeSiemensGps32Record(deviceSession, buf);
+            if (position != null) {
+                positions.add(position);
+            }
+        }
+
+        return positions;
+    }
+
+    private Position decodeSiemensGps32Record(DeviceSession deviceSession, ByteBuf buf) {
+        if (buf.readableBytes() < 32) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        // Read 32-byte GPS32 record
+        int recordType = buf.readUnsignedByte();
+        int flagDegree = buf.readUnsignedByte();
+        int hdop = buf.readUnsignedByte();
+        int speedRaw = buf.readUnsignedByte();
+        long datetimeRaw = buf.readUnsignedInt();
+        long latRaw = buf.readUnsignedInt();
+        long lonRaw = buf.readUnsignedInt();
+        int digi16 = buf.readUnsignedShort();
+        int opt16 = buf.readUnsignedShort();
+        int altRaw = buf.readUnsignedShort();
+        int ana01 = buf.readUnsignedMedium();
+        int ana23 = buf.readUnsignedMedium();
+        int ana45 = buf.readUnsignedMedium();
+        int recordCrc = buf.readUnsignedByte();
+
+        // Parse coordinates: dd*10000000 + mm.mmmmm
+        // Result = degrees + minutes / 6000000
+        long latDegrees = latRaw / 10000000L;
+        long latMinutes = latRaw % 10000000L;
+        double latitude = latDegrees + (latMinutes / 6000000.0);
+
+        long lonDegrees = lonRaw / 10000000L;
+        long lonMinutes = lonRaw % 10000000L;
+        double longitude = lonDegrees + (lonMinutes / 6000000.0);
+
+        // Parse flag_degree: bits 7=E/W, 6=N/S, 5=GPS valid, 4-0=course
+        boolean east = (flagDegree & 0x80) != 0;
+        boolean north = (flagDegree & 0x40) != 0;
+        boolean gpsValid = (flagDegree & 0x20) != 0;
+        int courseBits = flagDegree & 0x1F;
+
+        if (!north) {
+            latitude = -latitude;
+        }
+        if (!east) {
+            longitude = -longitude;
+        }
+
+        position.setLatitude(latitude);
+        position.setLongitude(longitude);
+        position.setValid(gpsValid);
+        position.setCourse(courseBits * 360.0 / 32.0);
+
+        // Speed: raw * 1.852 km/h, convert to knots
+        position.setSpeed(speedRaw * 1.852 * 0.539957);
+
+        // Altitude: (raw - 10000) * 0.3048 meters
+        position.setAltitude((altRaw - 10000) * 0.3048);
+
+        // HDOP
+        position.set(Position.KEY_HDOP, hdop);
+
+        // Digital inputs (16-bit)
+        String digitalBinary = String.format("%16s", Integer.toBinaryString(digi16)).replace(' ', '0');
+        position.set(Position.KEY_INPUT, digitalBinary);
+        position.set(Position.KEY_IGNITION, (digi16 & 0x0100) != 0); // bit 8
+
+        // Satellites
+        position.set(Position.KEY_SATELLITES, opt16 & 0xFF);
+        position.set(Position.KEY_STATUS, opt16);
+
+        // Analog values: 3 bytes each contain two 12-bit values
+        int ana0 = (ana01 >> 12) & 0xFFF;
+        int ana1 = ana01 & 0xFFF;
+        int ana2 = (ana23 >> 12) & 0xFFF;
+        int ana3 = ana23 & 0xFFF;
+        int ana4 = (ana45 >> 12) & 0xFFF;
+        int ana5 = ana45 & 0xFFF;
+
+        position.set(Position.PREFIX_ADC + 1, ana0);
+        position.set(Position.PREFIX_ADC + 2, ana1);
+        position.set(Position.PREFIX_ADC + 3, ana2);
+        position.set(Position.PREFIX_ADC + 4, ana3);
+        position.set(Position.PREFIX_ADC + 5, ana4);
+        position.set(Position.PREFIX_ADC + 6, ana5);
+        position.set(Position.KEY_POWER, ana1);
+
+        position.set("recordType", recordType);
+        position.set("recordCrc", recordCrc);
+
+        // Decode datetime: seconds/2(5), minutes(6), hours(5), day(5), month(4), year(7)+2000
+        int seconds = (int) ((datetimeRaw & 0x1F) * 2);
+        int minutes = (int) ((datetimeRaw >> 5) & 0x3F);
+        int hours = (int) ((datetimeRaw >> 11) & 0x1F);
+        int day = (int) ((datetimeRaw >> 16) & 0x1F);
+        int month = (int) ((datetimeRaw >> 21) & 0x0F);
+        int year = (int) ((datetimeRaw >> 25) & 0x7F) + 2000;
+
+        if (year < 2000 || year > 2127 || month < 1 || month > 12
+                || day < 1 || day > 31 || hours > 23 || minutes > 59 || seconds > 59) {
+            return null;
+        }
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.clear();
+        calendar.set(year, month - 1, day, hours, minutes, seconds);
+        position.setTime(calendar.getTime());
+
+        return position;
+    }
+
+    private Position decodeSiemensPingReply(DeviceSession deviceSession, ByteBuf buf) {
+        if (buf.readableBytes() < 128) {
+            return null;
+        }
+
+        // First 32 bytes: GPS32 record
+        Position position = decodeSiemensGps32Record(deviceSession, buf);
+        if (position == null) {
+            return null;
+        }
+
+        // Remaining 96 bytes: additional ping reply data
+        int offlinePtr = buf.readUnsignedShort();
+        int idSec = buf.readUnsignedShort();
+        int sTime = buf.readUnsignedShort();
+        int mcc = buf.readUnsignedShort();
+        int mnc = buf.readUnsignedShort();
+        int ltCell = buf.readUnsignedShort();
+        long cellId = buf.readUnsignedInt();
+        int ta = buf.readUnsignedByte();
+        int tc = buf.readUnsignedByte();
+        int ltbs = buf.readUnsignedShort();
+
+        byte[] baseStationBytes = new byte[32];
+        buf.readBytes(baseStationBytes);
+        String baseStation = new String(baseStationBytes, StandardCharsets.US_ASCII).trim();
+
+        int rssi = buf.readUnsignedByte();
+        int ltc13 = buf.readUnsignedShort();
+
+        int mcc1 = buf.readUnsignedShort();
+        int mnc1 = buf.readUnsignedShort();
+        long cellId1 = buf.readUnsignedInt();
+        int ta1 = buf.readUnsignedByte();
+
+        int mcc2 = buf.readUnsignedShort();
+        int mnc2 = buf.readUnsignedShort();
+        long cellId2 = buf.readUnsignedInt();
+        int ta2 = buf.readUnsignedByte();
+
+        int mcc3 = buf.readUnsignedShort();
+        int mnc3 = buf.readUnsignedShort();
+        long cellId3 = buf.readUnsignedInt();
+        int ta3 = buf.readUnsignedByte();
+
+        int opt = buf.readUnsignedShort();
+        int vtime = buf.readUnsignedShort();
+        int opt1 = buf.readUnsignedShort();
+        int opt2 = buf.readUnsignedShort();
+        int opt3 = buf.readUnsignedShort();
+        int opt4 = buf.readUnsignedShort();
+        int sync = buf.readUnsignedShort();
+
+        // Store additional fields
+        position.set("offlinePointer", offlinePtr);
+        position.set("idSec", idSec);
+        position.set("sTime", sTime);
+        position.set("cellTiming", ltCell);
+        position.set("timingAdvance", ta);
+        position.set("timingCorrection", tc);
+        position.set("baseStationTiming", ltbs);
+
+        if (!baseStation.isEmpty()) {
+            position.set("baseStation", baseStation);
+        }
+
+        position.set(Position.KEY_RSSI, rssi);
+        position.set("neighborTiming", ltc13);
+        position.set("opt", opt);
+        position.set("vTime", vtime);
+        position.set("opt1", opt1);
+        position.set("opt2", opt2);
+        position.set("opt3", opt3);
+        position.set("opt4", opt4);
+        position.set("sync", sync);
+
+        // Cell tower network
+        if (mcc != 0 || cellId != 0) {
+            org.traccar.model.Network network = new org.traccar.model.Network();
+            org.traccar.model.CellTower primary = org.traccar.model.CellTower.from(mcc, mnc, ltCell, cellId);
+            if (rssi != 0) {
+                primary.setSignalStrength(rssi);
+            }
+            network.addCellTower(primary);
+            position.setNetwork(network);
+        }
+
+        return position;
+    }
+
+    // ==================== GTR-3 Helper Methods ====================
 
     private double parseLatitude(String hex) {
         // hex = "013B2C4" (7 chars) represents DDMM.MMMM

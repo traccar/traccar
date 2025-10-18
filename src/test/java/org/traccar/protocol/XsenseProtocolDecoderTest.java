@@ -59,5 +59,19 @@ public class XsenseProtocolDecoderTest extends ProtocolTest {
         assertTrue(first.getValid(), "first record should be valid");
     }
 
-}
+    @Test
+    public void testSiemensGps32Format() throws Exception {
 
+        var decoder = inject(new XsenseProtocolDecoder(null));
+
+        // Real Siemens packet from tcpdump: 7E7E7E7E00726D242C7E11F4080033520D9909002A903EDBAC70FEF9000B289700000000078800000063D3CA7E7E
+        // After removing preamble (7E7E7E7E00) and trailer (7E7E):
+        // Type=72(114), Seq=6D, Size=24, BoxID=2C7E (11390), 1x GPS32 record (32 bytes) + CRC
+        // This is raw Siemens format (no XOR encoding)
+        // BoxID 0x2C7E (11390) + 1200000 = device 1211390
+        verifyPositions(decoder, binary(
+                "726D242C7E11F4080033520D9909002A903EDBAC70FEF9000B289700000000078800000063D3CA"));
+
+    }
+
+}
