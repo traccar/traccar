@@ -74,4 +74,23 @@ public class XsenseProtocolDecoderTest extends ProtocolTest {
 
     }
 
+    @Test
+    public void testSiemensPingReplyEnhIo() throws Exception {
+
+        var decoder = inject(new XsenseProtocolDecoder(null));
+
+        // Bootstrap device session for device 1209326
+        assertNotNull(decoder.getDeviceSession(null, null, "bootstrap", "1209326"));
+
+        // Siemens Ping Reply Enh I/O packet (CRC corrected)
+        // Type=109 (0x6D = M_PING_REPLY_ENHIO), Seq=45, Size=132, BoxID=0x246E (9326)
+        // Contains 32-byte GPS32 record + 96 bytes of ping reply data
+        // CRC: 0x460C (calculated over Type + Seq + Size + BoxID + 128 bytes data)
+        // This is raw Siemens format (no XOR encoding)
+        // BoxID 0x246E (9326) + 1200000 = device 1209326
+        verifyNotNull(decoder, binary(
+                "6D2D84246E11F6090A33520F3109CC58043E463D16FFF1000929310080100108D8000000E40000246E001400000000000B1FD439D100FF270E3E383934353730303030323132363536303239373500003237003500372E31001300000000000000000000000000000000000000000000000000000000000000001400000000000000005555460C"));
+
+    }
+
 }

@@ -32,6 +32,8 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -47,6 +49,8 @@ import java.util.List;
 import java.util.TimeZone;
 
 public class XsenseProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(XsenseProtocolDecoder.class);
 
     public XsenseProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -111,10 +115,11 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private boolean isSiemensDevice(int messageType) {
-        // Siemens devices use message types 110, 116, 117
+        // Siemens devices use message types 109, 110, 116, 117
         // Note: Message types 114, 115 can be either GTR-3 or Siemens
         // and need to be detected by payload size
-        return messageType == M_NEW_POSITION_GPS32_REPORT
+        return messageType == M_PING_REPLY_ENHIO
+                || messageType == M_NEW_POSITION_GPS32_REPORT
                 || messageType == M_LOCATION_BASE_REPORT
                 || messageType == M_GPS_REPORT;
     }
@@ -271,8 +276,12 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             return positions.isEmpty() ? null : positions;
         } else if (messageType == M_PING_REPLY_ENHIO) {
             Position position;
-            if (decoded.readableBytes() >= 128) {
+            if (isSiemensRaw || decoded.readableBytes() >= 128) {
                 // Siemens GTR-Siemens ping reply (128 bytes)
+                // For Siemens raw format, trim CRC from the end
+                if (isSiemensRaw && decoded.readableBytes() > 128) {
+                    decoded.writerIndex(decoded.readerIndex() + 128);
+                }
                 position = decodeSiemensPingReply(deviceSession, decoded);
             } else {
                 // GTR-3 ping reply (82 bytes)
