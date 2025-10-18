@@ -29,6 +29,7 @@ public class XsenseProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
+                pipeline.addLast(new XsenseFrameDecoder());
                 pipeline.addLast(new XsenseProtocolDecoder(XsenseProtocol.this));
             }
         });
