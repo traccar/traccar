@@ -115,11 +115,10 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private boolean isSiemensDevice(int messageType) {
-        // Siemens devices use message types 109, 110, 116, 117
-        // Note: Message types 114, 115 can be either GTR-3 or Siemens
+        // Siemens devices use message types 110, 116, 117
+        // Note: Message types 109, 114, 115 can be either GTR-3 or Siemens
         // and need to be detected by payload size
-        return messageType == M_PING_REPLY_ENHIO
-                || messageType == M_NEW_POSITION_GPS32_REPORT
+        return messageType == M_NEW_POSITION_GPS32_REPORT
                 || messageType == M_LOCATION_BASE_REPORT
                 || messageType == M_GPS_REPORT;
     }
@@ -130,9 +129,12 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             return true;
         }
 
-        // For message types 114, 115: detect by record size
-        // GTR-3 uses 16-byte TINI records
-        // Siemens uses 32-byte GPS32 records
+        // For message types 109, 114, 115: detect by payload size
+        // GTR-3 uses 16-byte TINI records for position, 82 bytes for ping reply
+        // Siemens uses 32-byte GPS32 records for position, 128 bytes for ping reply
+        // Note: M_PING_REPLY_ENHIO (109) format is detected by CRC validation in decode()
+        // using isSiemensRaw flag, so no need to check here
+
         if (messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO
                 || messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO) {
             int dataLength = buf.readableBytes();
@@ -188,7 +190,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         boolean crcValid = (receivedCrc == calculatedCrc);
 
         // If XOR CRC fails and message type supports raw Siemens, try without XOR
-        if (!crcValid && (messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO
+        if (!crcValid && (messageType == M_PING_REPLY_ENHIO
+                || messageType == M_TINI_BATCH_ONLINE_POSITION_REPORT_ENHIO
                 || messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO
                 || isSiemensDevice(messageType))) {
             decoded.release();
@@ -276,10 +279,10 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             return positions.isEmpty() ? null : positions;
         } else if (messageType == M_PING_REPLY_ENHIO) {
             Position position;
-            if (isSiemensRaw || decoded.readableBytes() >= 128) {
+            if (isSiemensRaw) {
                 // Siemens GTR-Siemens ping reply (128 bytes)
                 // For Siemens raw format, trim CRC from the end
-                if (isSiemensRaw && decoded.readableBytes() > 128) {
+                if (decoded.readableBytes() > 128) {
                     decoded.writerIndex(decoded.readerIndex() + 128);
                 }
                 position = decodeSiemensPingReply(deviceSession, decoded);
