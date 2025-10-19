@@ -638,7 +638,7 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
         // Digital inputs (16-bit)
         String digitalBinary = String.format("%16s", Integer.toBinaryString(digi16)).replace(' ', '0');
-        position.set(Position.KEY_INPUT, digitalBinary);
+        position.set("io", digitalBinary);
         position.set(Position.KEY_IGNITION, (digi16 & 0x0100) != 0); // bit 8
 
         // Satellites
