@@ -410,6 +410,113 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
 
+            // Phase 2: Trip Management
+            case "19":
+                // ACC on
+                position.set(Position.KEY_IGNITION, true);
+                position.set(Position.KEY_STATUS, "ACC_ON");
+                break;
+
+            case "31":
+                // ACC off
+                position.set(Position.KEY_IGNITION, false);
+                position.set(Position.KEY_STATUS, "ACC_OFF");
+                break;
+
+            case "40":
+                // Trip start
+                position.set(Position.KEY_STATUS, "TRIP_START");
+                position.set("tripState", "start");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("tid")) {
+                        try {
+                            position.set("tripId", detail.getString("tid"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("odo")) {
+                        try {
+                            double odometer = detail.getJsonNumber("odo").doubleValue();
+                            position.set(Position.KEY_ODOMETER, odometer * 1000); // Convert km to meters
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "41":
+                // Trip in progress
+                position.set(Position.KEY_STATUS, "TRIP_IN_PROGRESS");
+                position.set("tripState", "in_progress");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("tid")) {
+                        try {
+                            position.set("tripId", detail.getString("tid"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "42":
+                // Trip end
+                position.set(Position.KEY_STATUS, "TRIP_END");
+                position.set("tripState", "end");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("tid")) {
+                        try {
+                            position.set("tripId", detail.getString("tid"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("dur")) {
+                        try {
+                            int duration = detail.getInt("dur"); // Duration in seconds
+                            position.set("tripDuration", duration);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("dst")) {
+                        try {
+                            double distance = detail.getJsonNumber("dst").doubleValue();
+                            position.set("tripDistance", distance * 1000); // Convert km to meters
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("odo")) {
+                        try {
+                            double odometer = detail.getJsonNumber("odo").doubleValue();
+                            position.set(Position.KEY_ODOMETER, odometer * 1000); // Convert km to meters
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "43":
+                // Vehicle movement alarm
+                position.addAlarm(Position.ALARM_MOVEMENT);
+                position.set(Position.KEY_STATUS, "VEHICLE_MOVING");
+                break;
+
+            case "46":
+                // Vehicle stationary alarm
+                position.set(Position.KEY_STATUS, "VEHICLE_STATIONARY");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("dur")) {
+                        try {
+                            int duration = detail.getInt("dur"); // Stationary duration in seconds
+                            position.set("stationaryDuration", duration);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
             default:
                 // Unknown event code
                 position.addAlarm(Position.ALARM_GENERAL);
