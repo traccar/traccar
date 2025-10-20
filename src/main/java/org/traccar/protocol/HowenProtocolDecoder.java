@@ -301,28 +301,6 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 position.addAlarm(Position.ALARM_SOS);
                 break;
 
-            case "7":
-                // Over speed alarm
-                position.addAlarm(Position.ALARM_OVERSPEED);
-                if (json.containsKey("det")) {
-                    JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("spd")) {
-                        try {
-                            double speed = detail.getJsonNumber("spd").doubleValue();
-                            position.set("alarmSpeed", speed);
-                        } catch (Exception ignored) {
-                        }
-                    }
-                    if (detail.containsKey("lmt")) {
-                        try {
-                            double limit = detail.getJsonNumber("lmt").doubleValue();
-                            position.set("speedLimit", limit);
-                        } catch (Exception ignored) {
-                        }
-                    }
-                }
-                break;
-
             case "17":
                 // Overtime driving (fatigue)
                 position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
@@ -412,19 +390,26 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
 
             // Phase 2: Trip Management
             case "19":
-                // ACC on
-                position.set(Position.KEY_IGNITION, true);
-                position.set(Position.KEY_STATUS, "ACC_ON");
-                break;
-
-            case "31":
                 // ACC off
                 position.set(Position.KEY_IGNITION, false);
                 position.set(Position.KEY_STATUS, "ACC_OFF");
                 break;
 
+            case "31":
+                // ACC on (Report once at boot)
+                position.set(Position.KEY_IGNITION, true);
+                position.set(Position.KEY_STATUS, "ACC_ON");
+                position.set("bootEvent", true);
+                break;
+
             case "40":
-                // Trip start
+                // Vehicle move
+                position.addAlarm(Position.ALARM_MOVEMENT);
+                position.set(Position.KEY_STATUS, "VEHICLE_MOVING");
+                break;
+
+            case "41":
+                // Trip start (st/et/dtu time same)
                 position.set(Position.KEY_STATUS, "TRIP_START");
                 position.set("tripState", "start");
                 if (json.containsKey("det")) {
@@ -445,8 +430,8 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
 
-            case "41":
-                // Trip in progress
+            case "42":
+                // In trip
                 position.set(Position.KEY_STATUS, "TRIP_IN_PROGRESS");
                 position.set("tripState", "in_progress");
                 if (json.containsKey("det")) {
@@ -460,8 +445,8 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
 
-            case "42":
-                // Trip end
+            case "43":
+                // Trip ends (periodically report after acc off)
                 position.set(Position.KEY_STATUS, "TRIP_END");
                 position.set("tripState", "end");
                 if (json.containsKey("det")) {
@@ -496,21 +481,16 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
 
-            case "43":
-                // Vehicle movement alarm
-                position.addAlarm(Position.ALARM_MOVEMENT);
-                position.set(Position.KEY_STATUS, "VEHICLE_MOVING");
-                break;
-
             case "46":
-                // Vehicle stationary alarm
-                position.set(Position.KEY_STATUS, "VEHICLE_STATIONARY");
+                // None trip position (report periodically after trip ends)
+                position.set(Position.KEY_STATUS, "POST_TRIP_REPORT");
+                position.set("tripState", "post_trip");
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
                     if (detail.containsKey("dur")) {
                         try {
-                            int duration = detail.getInt("dur"); // Stationary duration in seconds
-                            position.set("stationaryDuration", duration);
+                            int duration = detail.getInt("dur"); // Time since trip ended
+                            position.set("postTripDuration", duration);
                         } catch (Exception ignored) {
                         }
                     }
@@ -633,25 +613,47 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 break;
 
             case "14":
-                // Geofence related event
-                position.addAlarm(Position.ALARM_GEOFENCE);
+                // Electronic route (route planning/navigation)
+                position.set(Position.KEY_ALARM, "electronicRoute");
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("gid")) {
+                    if (detail.containsKey("rid")) {
                         try {
-                            position.set("geofenceId", detail.getString("gid"));
+                            position.set("routeId", detail.getString("rid"));
                         } catch (Exception ignored) {
                         }
                     }
-                    if (detail.containsKey("gnm")) {
+                    if (detail.containsKey("rnm")) {
                         try {
-                            position.set("geofenceName", detail.getString("gnm"));
+                            position.set("routeName", detail.getString("rnm"));
                         } catch (Exception ignored) {
                         }
                     }
                     if (detail.containsKey("tp")) {
                         try {
-                            position.set("geofenceType", detail.getInt("tp"));
+                            position.set("routeType", detail.getInt("tp"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "15":
+                // Door abnormal open/close
+                position.addAlarm(Position.ALARM_DOOR);
+                position.set("doorEvent", "abnormal");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("st")) {
+                        try {
+                            int status = detail.getInt("st");
+                            position.set("doorStatus", status == 1 ? "open" : "close");
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("ch")) {
+                        try {
+                            position.set("doorChannel", detail.getInt("ch"));
                         } catch (Exception ignored) {
                         }
                     }
@@ -677,37 +679,6 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 break;
 
             case "2":
-                // Video signal occlusion
-                if (json.containsKey("det")) {
-                    JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("ch")) {
-                        try {
-                            int channel = detail.getInt("ch");
-                            position.set("videoOcclusionChannel", channel);
-                        } catch (Exception ignored) {
-                        }
-                    }
-                }
-                position.set(Position.KEY_ALARM, "videoOcclusion");
-                break;
-
-            case "3":
-                // Storage/Disk failure alarm
-                if (json.containsKey("det")) {
-                    JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("tp")) {
-                        try {
-                            int type = detail.getInt("tp");
-                            position.set("diskFailureType", type);
-                        } catch (Exception ignored) {
-                        }
-                    }
-                }
-                position.addAlarm(Position.ALARM_FAULT);
-                position.set("diskFailure", true);
-                break;
-
-            case "4":
                 // Motion detection alarm
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
@@ -720,6 +691,37 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
                 position.set(Position.KEY_ALARM, "motionDetection");
+                break;
+
+            case "3":
+                // Video cover (camera lens covered/blocked)
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("ch")) {
+                        try {
+                            int channel = detail.getInt("ch");
+                            position.set("videoCoverChannel", channel);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                position.set(Position.KEY_ALARM, "videoCover");
+                break;
+
+            case "4":
+                // Input trigger alarm (IO channels 0-8)
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("ch")) {
+                        try {
+                            int channel = detail.getInt("ch");
+                            position.set("inputChannel", channel);
+                            position.set(Position.KEY_INPUT, 1 << channel); // Set bit for the channel
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                position.set(Position.KEY_ALARM, "input");
                 break;
 
             case "12":
@@ -791,28 +793,75 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 break;
 
             case "45":
-                // Temperature alarm
+                // Video abnormal
+                position.addAlarm(Position.ALARM_FAULT);
+                position.set("faultType", "video_abnormal");
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    int subType = detail.getInt("tp", -1);
-
-                    switch (subType) {
-                        case 1:
-                            // High temperature alarm
-                            position.set(Position.KEY_ALARM, "temperatureHigh");
-                            position.set("temperatureEvent", "high");
-                            break;
-                        case 2:
-                            // Low temperature alarm
-                            position.set(Position.KEY_ALARM, "temperatureLow");
-                            position.set("temperatureEvent", "low");
-                            break;
-                        default:
-                            position.set(Position.KEY_ALARM, "temperature");
-                            break;
+                    if (detail.containsKey("ch")) {
+                        try {
+                            int channel = detail.getInt("ch");
+                            position.set("videoChannel", channel);
+                        } catch (Exception ignored) {
+                        }
                     }
+                }
+                break;
 
-                    // Extract temperature values
+            // Phase 6: System Status
+            case "0":
+                // Normal status / No alarm
+                position.set(Position.KEY_STATUS, "NORMAL");
+                break;
+
+            case "6":
+                // Low speed alarm
+                position.addAlarm(Position.ALARM_LOW_SPEED);
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("spd")) {
+                        try {
+                            position.set("alarmSpeed", detail.getJsonNumber("spd").doubleValue());
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            position.set("speedLimit", detail.getJsonNumber("lmt").doubleValue());
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "7":
+                // Over speed alarm
+                position.addAlarm(Position.ALARM_OVERSPEED);
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("spd")) {
+                        try {
+                            double speed = detail.getJsonNumber("spd").doubleValue();
+                            position.set("alarmSpeed", speed);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            double limit = detail.getJsonNumber("lmt").doubleValue();
+                            position.set("speedLimit", limit);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "8":
+                // Low temperature alarm
+                position.set(Position.KEY_ALARM, "temperatureLow");
+                position.set("temperatureEvent", "low");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
                     if (detail.containsKey("val")) {
                         try {
                             double temp = detail.getJsonNumber("val").doubleValue();
@@ -827,43 +876,62 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                         } catch (Exception ignored) {
                         }
                     }
-                } else {
-                    position.set(Position.KEY_ALARM, "temperature");
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            double limit = detail.getJsonNumber("lmt").doubleValue();
+                            position.set("temperatureLimit", limit);
+                        } catch (Exception ignored) {
+                        }
+                    }
                 }
                 break;
 
-            // Phase 6: System Status
-            case "0":
-                // Normal status / No alarm
-                position.set(Position.KEY_STATUS, "NORMAL");
-                break;
-
-            case "6":
-                // Illegal ignition
-                position.addAlarm(Position.ALARM_TAMPERING);
-                position.set("tamperingEvent", "illegal_ignition");
-                break;
-
-            case "8":
-                // Illegal displacement (vehicle moved without authorization)
-                position.addAlarm(Position.ALARM_TAMPERING);
-                position.set("tamperingEvent", "illegal_displacement");
-                break;
-
             case "9":
-                // Entry alarm
-                position.addAlarm(Position.ALARM_DOOR);
-                position.set("doorEvent", "entry_alarm");
-                break;
-
-            case "10":
-                // Low battery alarm
-                position.addAlarm(Position.ALARM_LOW_BATTERY);
+                // High temperature alarm
+                position.set(Position.KEY_ALARM, "temperatureHigh");
+                position.set("temperatureEvent", "high");
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
                     if (detail.containsKey("val")) {
                         try {
-                            position.set(Position.KEY_BATTERY_LEVEL, detail.getJsonNumber("val").doubleValue());
+                            double temp = detail.getJsonNumber("val").doubleValue();
+                            position.set(Position.PREFIX_TEMP + 1, temp);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("ch")) {
+                        try {
+                            int channel = detail.getInt("ch");
+                            position.set("temperatureChannel", channel);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            double limit = detail.getJsonNumber("lmt").doubleValue();
+                            position.set("temperatureLimit", limit);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "10":
+                // Humidity alarm
+                position.set(Position.KEY_ALARM, "humidity");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("val")) {
+                        try {
+                            double humidity = detail.getJsonNumber("val").doubleValue();
+                            position.set(Position.KEY_HUMIDITY, humidity);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            double limit = detail.getJsonNumber("lmt").doubleValue();
+                            position.set("humidityLimit", limit);
                         } catch (Exception ignored) {
                         }
                     }
@@ -871,28 +939,134 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 break;
 
             case "11":
-                // Power cut alarm (main power disconnected)
-                position.addAlarm(Position.ALARM_POWER_CUT);
-                break;
-
-            case "15":
-                // Vibration alarm
-                position.addAlarm(Position.ALARM_VIBRATION);
+                // Parking overtime alarm
+                position.set(Position.KEY_ALARM, "parkingOvertime");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("dur")) {
+                        try {
+                            position.set("parkingDuration", detail.getInt("dur"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
                 break;
 
             case "16":
-                // Falling alarm
-                position.addAlarm(Position.ALARM_FALL_DOWN);
+                // Storage abnormal (disk/storage issues)
+                position.addAlarm(Position.ALARM_FAULT);
+                position.set("faultType", "storage_abnormal");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    int subType = detail.getInt("st", -1);
+
+                    // Map sub-type to specific storage issue
+                    switch (subType) {
+                        case 0:
+                            position.set("storageEvent", "missing");
+                            position.set("storageIssue", "Storage missing");
+                            break;
+                        case 1:
+                            position.set("storageEvent", "broken");
+                            position.set("storageIssue", "Disk partition fatal error");
+                            break;
+                        case 2:
+                            position.set("storageEvent", "log_overwrite_failed");
+                            position.set("storageIssue", "Log cannot be overwritten");
+                            break;
+                        case 3:
+                            position.set("storageEvent", "write_block_failed");
+                            position.set("storageIssue", "Failed to write Block (EIO write error)");
+                            break;
+                        case 4:
+                            position.set("storageEvent", "disk_failure");
+                            position.set("storageIssue", "Disk failure (cannot be partitioned)");
+                            break;
+                        case 5:
+                            position.set("storageEvent", "mount_failed");
+                            position.set("storageIssue", "Log partition cannot be mounted");
+                            break;
+                        case 6:
+                            position.set("storageEvent", "too_many_bad_blocks");
+                            position.set("storageIssue", "Too many bad blocks (>20%)");
+                            break;
+                        case 7:
+                            position.set("storageEvent", "invalid_block");
+                            position.set("storageIssue", "Disk invalid block");
+                            break;
+                        case 8:
+                            position.set("storageEvent", "sampling_verification_failed");
+                            position.set("storageIssue", "Video sampling verification failed");
+                            break;
+                        case 9:
+                            position.set("storageEvent", "write_paused");
+                            position.set("storageIssue", "Disk pauses to write video");
+                            break;
+                        case 10:
+                            position.set("storageEvent", "overwrite_exception");
+                            position.set("storageIssue", "Recording overwrite exception");
+                            break;
+                        case 11:
+                            position.set("storageEvent", "no_recording_long_time");
+                            position.set("storageIssue", "No recording for over 2 minutes");
+                            break;
+                        case 12:
+                            position.set("storageEvent", "slow_write");
+                            position.set("storageIssue", "Slow write, cached data overwritten");
+                            break;
+                        case 13:
+                            position.set("storageEvent", "partition_abnormal");
+                            position.set("storageIssue", "Video partition abnormality");
+                            break;
+                        case 14:
+                            position.set("storageEvent", "temperature_alarm");
+                            position.set("storageIssue", "Disk temperature alarm (high 70°C / low 0°C)");
+                            break;
+                        default:
+                            position.set("storageEvent", "general");
+                            position.set("storageIssue", "General storage abnormality");
+                            break;
+                    }
+
+                    // Extract additional storage info if available
+                    if (detail.containsKey("ch")) {
+                        try {
+                            position.set("storageChannel", detail.getInt("ch"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
                 break;
 
             case "18":
-                // Low speed alarm
-                position.addAlarm(Position.ALARM_LOW_SPEED);
+                // Fuel consumption abnormal
+                position.set(Position.KEY_ALARM, "fuelAbnormal");
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("spd")) {
+                    int subType = detail.getInt("dt", -1);
+
+                    switch (subType) {
+                        case 1:
+                            // Refuel
+                            position.set("fuelEvent", "refuel");
+                            position.set("fuelIssue", "Refuel detected");
+                            break;
+                        case 2:
+                            // Fuel theft
+                            position.set("fuelEvent", "theft");
+                            position.set("fuelIssue", "Fuel theft detected");
+                            break;
+                        default:
+                            position.set("fuelEvent", "general");
+                            position.set("fuelIssue", "Fuel consumption abnormal");
+                            break;
+                    }
+
+                    // Extract fuel level if available
+                    if (detail.containsKey("val")) {
                         try {
-                            position.set("alarmSpeed", detail.getJsonNumber("spd").doubleValue());
+                            double fuelLevel = detail.getJsonNumber("val").doubleValue();
+                            position.set(Position.KEY_FUEL_LEVEL, fuelLevel);
                         } catch (Exception ignored) {
                         }
                     }
@@ -900,87 +1074,228 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 break;
 
             case "20":
-                // GPS antenna cut/disconnected
-                position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
+                // GPS module abnormal
+                position.addAlarm(Position.ALARM_FAULT);
+                position.set("faultType", "gps_module_abnormal");
                 break;
 
             case "21":
-                // GPS antenna short circuit
-                position.addAlarm(Position.ALARM_FAULT);
-                position.set("faultType", "gps_antenna_short");
+                // Front panel open
+                position.addAlarm(Position.ALARM_TAMPERING);
+                position.set("tamperEvent", "front_panel_open");
                 break;
 
             case "23":
-                // Device power on
-                position.addAlarm(Position.ALARM_POWER_ON);
-                break;
-
-            case "26":
-                // Illegal door open
-                position.addAlarm(Position.ALARM_DOOR);
-                position.set("doorEvent", "illegal_open");
-                break;
-
-            case "27":
-                // Door open alarm
-                position.addAlarm(Position.ALARM_DOOR);
-                break;
-
-            case "28":
-                // Door close alarm
-                position.set(Position.KEY_ALARM, "doorClose");
-                break;
-
-            case "29":
-                // Input alarm (IO trigger)
+                // IBUTTON (driver identification)
+                position.set(Position.KEY_DRIVER_UNIQUE_ID, "ibutton");
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("ch")) {
+                    if (detail.containsKey("cn")) {
                         try {
-                            position.set("inputChannel", detail.getInt("ch"));
+                            String cardNumber = detail.getString("cn");
+                            position.set(Position.KEY_DRIVER_UNIQUE_ID, cardNumber);
+                            position.set("iButtonId", cardNumber);
                         } catch (Exception ignored) {
                         }
                     }
                 }
-                position.set(Position.KEY_ALARM, "input");
+                break;
+
+            case "26":
+                // Low speed warning
+                position.addAlarm(Position.ALARM_LOW_SPEED);
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("spd")) {
+                        try {
+                            double speed = detail.getJsonNumber("spd").doubleValue();
+                            position.set("alarmSpeed", speed);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            double speedLimit = detail.getJsonNumber("lmt").doubleValue();
+                            position.set("speedLimit", speedLimit);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "27":
+                // High speed warning
+                position.addAlarm(Position.ALARM_OVERSPEED);
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("spd")) {
+                        try {
+                            double speed = detail.getJsonNumber("spd").doubleValue();
+                            position.set("alarmSpeed", speed);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            double speedLimit = detail.getJsonNumber("lmt").doubleValue();
+                            position.set("speedLimit", speedLimit);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "28":
+                // Voltage alarm with 7 sub-types
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    int subType = detail.getInt("dt", -1);
+
+                    switch (subType) {
+                        case 1:
+                            // Low voltage
+                            position.addAlarm(Position.ALARM_LOW_BATTERY);
+                            position.set("voltageEvent", "low_voltage");
+                            break;
+                        case 2:
+                            // High voltage
+                            position.addAlarm(Position.ALARM_FAULT);
+                            position.set("voltageEvent", "high_voltage");
+                            break;
+                        case 3:
+                            // Power off
+                            position.addAlarm(Position.ALARM_POWER_CUT);
+                            position.set("voltageEvent", "power_off");
+                            break;
+                        case 4:
+                            // Power on
+                            position.addAlarm(Position.ALARM_POWER_ON);
+                            position.set("voltageEvent", "power_on");
+                            break;
+                        case 5:
+                            // Suspicious disconnection
+                            position.addAlarm(Position.ALARM_TAMPERING);
+                            position.set("voltageEvent", "suspicious_disconnection");
+                            break;
+                        case 6:
+                            // Abnormal shutdown
+                            position.addAlarm(Position.ALARM_POWER_CUT);
+                            position.set("voltageEvent", "abnormal_shutdown");
+                            break;
+                        case 7:
+                            // Start up
+                            position.addAlarm(Position.ALARM_POWER_ON);
+                            position.set("voltageEvent", "start_up");
+                            break;
+                        default:
+                            // Generic voltage alarm
+                            position.set(Position.KEY_ALARM, "voltageAlarm");
+                            break;
+                    }
+
+                    // Extract voltage value if available
+                    if (detail.containsKey("val")) {
+                        try {
+                            double voltage = detail.getJsonNumber("val").doubleValue();
+                            position.set(Position.KEY_POWER, voltage);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "29":
+                // People counting
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+
+                    // Extract people count
+                    if (detail.containsKey("cnt")) {
+                        try {
+                            int peopleCount = detail.getInt("cnt");
+                            position.set("peopleCount", peopleCount);
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    // Extract channel if available
+                    if (detail.containsKey("ch")) {
+                        try {
+                            position.set("channel", detail.getInt("ch"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                position.set(Position.KEY_ALARM, "peopleCounting");
                 break;
 
             case "32":
-                // Cornering alarm
-                position.addAlarm(Position.ALARM_CORNERING);
+                // Idle alarm
+                position.set(Position.KEY_ALARM, "idle");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("dur")) {
+                        try {
+                            int idleDuration = detail.getInt("dur");
+                            position.set("idleDuration", idleDuration);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
                 break;
 
             case "33":
-                // Fuel leak alarm
-                position.set(Position.KEY_ALARM, "fuelLeak");
+                // GPS antenna break (disconnected)
+                position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
+                position.set("gpsAntennaEvent", "break");
                 break;
 
             case "34":
-                // Fuel theft alarm
-                position.set(Position.KEY_ALARM, "fuelTheft");
+                // GPS antenna short circuit
+                position.addAlarm(Position.ALARM_FAULT);
+                position.set("faultType", "gps_antenna_short");
+                position.set("gpsAntennaEvent", "short");
                 break;
 
             case "35":
-                // Engine start
-                position.set(Position.KEY_IGNITION, true);
-                position.set(Position.KEY_STATUS, "ENGINE_START");
+                // IO output alarm
+                position.set(Position.KEY_ALARM, "ioOutput");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("ch")) {
+                        try {
+                            int channel = detail.getInt("ch");
+                            position.set("outputChannel", channel);
+                            position.set(Position.PREFIX_IO + channel, true);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    // Extract output state if available
+                    if (detail.containsKey("st")) {
+                        try {
+                            int state = detail.getInt("st");
+                            position.set("outputState", state);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
                 break;
 
             case "36":
-                // Engine stop
-                position.set(Position.KEY_IGNITION, false);
-                position.set(Position.KEY_STATUS, "ENGINE_STOP");
+                // CANBUS connection abnormal
+                position.addAlarm(Position.ALARM_FAULT);
+                position.set("faultType", "canbus_abnormal");
                 break;
 
             case "38":
-                // External power supply alarm
-                position.set(Position.KEY_ALARM, "externalPower");
+                // Free wheeling (coasting/neutral gear)
+                position.set(Position.KEY_ALARM, "freeWheeling");
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("st")) {
+                    if (detail.containsKey("dur")) {
                         try {
-                            int status = detail.getInt("st");
-                            position.set("powerStatus", status == 1 ? "connected" : "disconnected");
+                            int duration = detail.getInt("dur");
+                            position.set("freeWheelingDuration", duration);
                         } catch (Exception ignored) {
                         }
                     }
@@ -1010,105 +1325,137 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 break;
 
             case "44":
-                // Mileage alarm
-                position.set(Position.KEY_ALARM, "mileage");
-                if (json.containsKey("det")) {
-                    JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("odo")) {
-                        try {
-                            double odometer = detail.getJsonNumber("odo").doubleValue();
-                            position.set(Position.KEY_ODOMETER, odometer * 1000);
-                        } catch (Exception ignored) {
-                        }
-                    }
-                }
+                // GPS location recover
+                position.set(Position.KEY_ALARM, "gpsLocationRecover");
+                position.set("gpsRecovered", true);
                 break;
 
             case "47":
-                // Jamming alarm (signal jamming detected)
-                position.set(Position.KEY_ALARM, "jamming");
+                // Main unit anomaly (Device not connected for long time, periodical alarms)
+                position.addAlarm(Position.ALARM_FAULT);
+                position.set("faultType", "main_unit_anomaly");
+                position.set("anomalyType", "device_disconnected");
                 break;
 
             case "49":
-                // Light sensor alarm
-                position.set(Position.KEY_ALARM, "lightSensor");
+                // Load alarm
+                position.set(Position.KEY_ALARM, "loadAlarm");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("val")) {
+                        try {
+                            double loadValue = detail.getJsonNumber("val").doubleValue();
+                            position.set("loadValue", loadValue);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
                 break;
 
             case "50":
-                // Parking overtime alarm
-                position.set(Position.KEY_ALARM, "parkingOvertime");
-                if (json.containsKey("det")) {
-                    JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("dur")) {
-                        try {
-                            position.set("parkingDuration", detail.getInt("dur"));
-                        } catch (Exception ignored) {
-                        }
-                    }
-                }
+                // SIM Card Lost
+                position.set(Position.KEY_ALARM, "simCardLost");
                 break;
 
             case "51":
-                // Bluetooth disconnect alarm
-                position.set(Position.KEY_ALARM, "bluetoothDisconnect");
+                // Tracker seat belt alarm
+                position.set(Position.KEY_ALARM, "seatBeltAlarm");
                 break;
 
             case "52":
-                // Canbus communication failure
-                position.addAlarm(Position.ALARM_FAULT);
-                position.set("faultType", "canbus_failure");
+                // Tracker harsh acceleration
+                position.addAlarm(Position.ALARM_ACCELERATION);
+                position.set("trackerEvent", "harsh_acceleration");
                 break;
 
             case "53":
-                // SIM card not inserted
-                position.set(Position.KEY_ALARM, "simNotInserted");
+                // Tracker harsh braking
+                position.addAlarm(Position.ALARM_BRAKING);
+                position.set("trackerEvent", "harsh_braking");
                 break;
 
             case "54":
-                // Network connection failure
-                position.set(Position.KEY_ALARM, "networkFailure");
-                break;
-
-            case "55":
-                // Positioning failure / GPS failure
-                position.set(Position.KEY_ALARM, "gpsFailure");
-                break;
-
-            case "56":
-                // Device malfunction
-                position.addAlarm(Position.ALARM_FAULT);
-                position.set("faultType", "device_malfunction");
-                break;
-
-            case "57":
-                // Camera failure
-                position.addAlarm(Position.ALARM_FAULT);
-                position.set("faultType", "camera_failure");
+                // Tracker overspeed
+                position.addAlarm(Position.ALARM_OVERSPEED);
+                position.set("trackerEvent", "overspeed");
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("ch")) {
+                    if (detail.containsKey("spd")) {
                         try {
-                            position.set("cameraChannel", detail.getInt("ch"));
+                            double speed = detail.getJsonNumber("spd").doubleValue();
+                            position.set("alarmSpeed", speed);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            double limit = detail.getJsonNumber("lmt").doubleValue();
+                            position.set("speedLimit", limit);
                         } catch (Exception ignored) {
                         }
                     }
                 }
                 break;
 
+            case "55":
+                // Tracker excessive overspeed
+                position.addAlarm(Position.ALARM_OVERSPEED);
+                position.set("trackerEvent", "excessive_overspeed");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("spd")) {
+                        try {
+                            double speed = detail.getJsonNumber("spd").doubleValue();
+                            position.set("alarmSpeed", speed);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            double limit = detail.getJsonNumber("lmt").doubleValue();
+                            position.set("speedLimit", limit);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "56":
+                // Tracker panel open
+                position.addAlarm(Position.ALARM_TAMPERING);
+                position.set("trackerEvent", "panel_open");
+                break;
+
+            case "57":
+                // Roaming Mode start
+                position.set(Position.KEY_ALARM, "roamingModeStart");
+                position.set("roamingMode", true);
+                break;
+
             case "58":
-                // Abnormal driving time
-                position.set(Position.KEY_ALARM, "abnormalDrivingTime");
+                // Roaming Mode end
+                position.set(Position.KEY_ALARM, "roamingModeEnd");
+                position.set("roamingMode", false);
                 break;
 
             case "59":
-                // Harsh turn alarm
-                position.addAlarm(Position.ALARM_CORNERING);
-                position.set("corneringEvent", "harsh_turn");
+                // Wake up event
+                position.set(Position.KEY_ALARM, "wakeUpEvent");
                 break;
 
             case "60":
-                // U-turn alarm
-                position.set(Position.KEY_ALARM, "uTurn");
+                // Satellite Modem status
+                position.set(Position.KEY_ALARM, "satelliteModemStatus");
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("st")) {
+                        try {
+                            int status = detail.getInt("st");
+                            position.set("satelliteModemStatus", status);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
                 break;
 
             case "768":
