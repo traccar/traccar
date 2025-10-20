@@ -988,13 +988,21 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 break;
 
             case "39":
-                // Idling alarm (engine running but vehicle stationary)
-                position.set(Position.KEY_ALARM, "idling");
+                // RPM exceeds (engine speed over limit)
+                position.set(Position.KEY_ALARM, Position.ALARM_HIGH_RPM);
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("dur")) {
+                    if (detail.containsKey("rpm")) {
                         try {
-                            position.set("idlingDuration", detail.getInt("dur"));
+                            int rpm = detail.getInt("rpm");
+                            position.set(Position.KEY_RPM, rpm);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            int rpmLimit = detail.getInt("lmt");
+                            position.set("rpmLimit", rpmLimit);
                         } catch (Exception ignored) {
                         }
                     }
