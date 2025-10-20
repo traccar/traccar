@@ -1722,11 +1722,17 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
             return;
         }
 
-    Date deviceTime = applyTimeOffset(readTimestamp(buf));
+        Date deviceTime = applyTimeOffset(readTimestamp(buf));
         position.setDeviceTime(deviceTime);
         position.setTime(deviceTime);
 
         int content = buf.readUnsignedShortLE();
+        // Convert content to Digitals String
+        StringBuilder digitalContents = new StringBuilder();
+        for (int i = 0; i < 16; i++) {
+            digitalContents.append(BitUtil.check(content, i) ? '1' : '0');
+        }
+        LOGGER.info("Digital Inputs Mask: {}", digitalContents.toString());
 
         if (BitUtil.check(content, 0)) {
             decodeLocation(position, buf);
@@ -2037,11 +2043,34 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeBasicStatus(Position position, ByteBuf buf) {
+        if (buf.readableBytes() < 4) {
+            return;
+        }
+
         int status1 = buf.readUnsignedByte();
         int status2 = buf.readUnsignedByte();
         buf.skipBytes(2);
 
+        // Status1 bits
         position.set(Position.KEY_IGNITION, BitUtil.check(status1, 0));
+        position.set("brake", BitUtil.check(status1, 1));
+        position.set("turnLeft", BitUtil.check(status1, 2));
+        position.set("turnRight", BitUtil.check(status1, 3));
+        position.set("gearForward", BitUtil.check(status1, 4));
+        position.set("gearBackward", BitUtil.check(status1, 5));
+
+        // Individual door status
+        position.set("doorLeftFront", BitUtil.check(status1, 6));
+        position.set("doorRightFront", BitUtil.check(status1, 7));
+        position.set("doorLeftMid", BitUtil.check(status2, 0));
+        position.set("doorRightMid", BitUtil.check(status2, 1));
+        position.set("doorLeftBack", BitUtil.check(status2, 2));
+        position.set("doorRightBack", BitUtil.check(status2, 3));
+
+        // Status2 bits
+        position.set("privateMode", BitUtil.check(status2, 4));
+
+        // Aggregated door status (any door open)
         boolean doorOpen = BitUtil.check(status1, 6) || BitUtil.check(status1, 7)
                 || BitUtil.check(status2, 0) || BitUtil.check(status2, 1)
                 || BitUtil.check(status2, 2) || BitUtil.check(status2, 3);
