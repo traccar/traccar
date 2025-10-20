@@ -517,6 +517,147 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
 
+            // Phase 3: Geofence
+            case "13":
+                // Geofence alarm with multiple sub-types
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    int subType = detail.getInt("st", -1);
+
+                    // Extract geofence information
+                    if (detail.containsKey("gid")) {
+                        try {
+                            position.set("geofenceId", detail.getString("gid"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("gnm")) {
+                        try {
+                            position.set("geofenceName", detail.getString("gnm"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    // Decode based on sub-type
+                    switch (subType) {
+                        case 0:
+                            // Enter geofence
+                            position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+                            position.set("geofenceEvent", "enter");
+                            break;
+                        case 1:
+                            // Exit geofence
+                            position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                            position.set("geofenceEvent", "exit");
+                            break;
+                        case 2:
+                            // Enter line geofence
+                            position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+                            position.set("geofenceEvent", "enter_line");
+                            position.set("geofenceType", "line");
+                            break;
+                        case 3:
+                            // Exit line geofence
+                            position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                            position.set("geofenceEvent", "exit_line");
+                            position.set("geofenceType", "line");
+                            break;
+                        case 4:
+                            // Enter polygon geofence
+                            position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+                            position.set("geofenceEvent", "enter_polygon");
+                            position.set("geofenceType", "polygon");
+                            break;
+                        case 5:
+                            // Exit polygon geofence
+                            position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                            position.set("geofenceEvent", "exit_polygon");
+                            position.set("geofenceType", "polygon");
+                            break;
+                        case 6:
+                            // Enter circular geofence
+                            position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+                            position.set("geofenceEvent", "enter_circle");
+                            position.set("geofenceType", "circle");
+                            break;
+                        case 7:
+                            // Exit circular geofence
+                            position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                            position.set("geofenceEvent", "exit_circle");
+                            position.set("geofenceType", "circle");
+                            break;
+                        case 8:
+                            // Overspeed in geofence
+                            position.addAlarm(Position.ALARM_OVERSPEED);
+                            position.set("geofenceEvent", "overspeed");
+                            if (detail.containsKey("spd")) {
+                                try {
+                                    double speed = detail.getJsonNumber("spd").doubleValue();
+                                    position.set("alarmSpeed", speed);
+                                } catch (Exception ignored) {
+                                }
+                            }
+                            if (detail.containsKey("lmt")) {
+                                try {
+                                    double limit = detail.getJsonNumber("lmt").doubleValue();
+                                    position.set("speedLimit", limit);
+                                } catch (Exception ignored) {
+                                }
+                            }
+                            break;
+                        case 9:
+                            // Dwell in geofence (stayed too long)
+                            position.set("geofenceEvent", "dwell");
+                            if (detail.containsKey("dur")) {
+                                try {
+                                    int duration = detail.getInt("dur");
+                                    position.set("dwellDuration", duration);
+                                } catch (Exception ignored) {
+                                }
+                            }
+                            break;
+                        case 10:
+                            // Route deviation
+                            position.addAlarm(Position.ALARM_GENERAL);
+                            position.set("geofenceEvent", "route_deviation");
+                            break;
+                        default:
+                            // Generic geofence alarm
+                            position.addAlarm(Position.ALARM_GEOFENCE);
+                            break;
+                    }
+                } else {
+                    // No detail, generic geofence alarm
+                    position.addAlarm(Position.ALARM_GEOFENCE);
+                }
+                break;
+
+            case "14":
+                // Geofence related event
+                position.addAlarm(Position.ALARM_GEOFENCE);
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("gid")) {
+                        try {
+                            position.set("geofenceId", detail.getString("gid"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("gnm")) {
+                        try {
+                            position.set("geofenceName", detail.getString("gnm"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("tp")) {
+                        try {
+                            position.set("geofenceType", detail.getInt("tp"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
             default:
                 // Unknown event code
                 position.addAlarm(Position.ALARM_GENERAL);
