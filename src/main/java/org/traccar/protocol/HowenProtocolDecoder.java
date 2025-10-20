@@ -277,29 +277,8 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
             position.set("alarmDetail", json.get("det").toString());
         }
 
-        // Driver unique ID event code is 22
-        if (eventCode != null && !eventCode.isEmpty() && eventCode.equals("22")) {
-            try {
-                String value = json.get("det").asJsonObject().getString("cn", null);
-                if (value != null && !value.isEmpty()) {
-                    // Clean the driver ID: remove whitespace, line breaks, and $0$I markers
-                    value = value.replaceAll("\\s+", "")              // Remove all whitespace (spaces, tabs)
-                                 .replaceAll("\\r", "")               // Remove carriage returns
-                                 .replaceAll("\\n", "")               // Remove newlines
-                                 .replaceAll("rn", "|")               // Replace 'rn' with pipe
-                                 .replaceAll("\\$0\\$I[a-z]?", "")    // Remove $0$I or $0$Ir markers
-                                 .trim();
-                    if (!value.isEmpty()) {
-                        position.addAlarm(Position.KEY_DRIVER_UNIQUE_ID);
-                        position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.warn("Failed to parse driver unique ID", e);
-            }
-        } else {
-            position.addAlarm(Position.ALARM_GENERAL);
-        }
+        // Decode event-specific alarms based on event code
+        decodeEventAlarm(position, eventCode, json);
 
         decodeStatusData(position, payload);
         applyJsonDerivedValues(position, json);
@@ -307,6 +286,135 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         sendResponse(channel, remoteAddress, MSG_ALARM_RESPONSE, null);
 
         return position;
+    }
+
+    private void decodeEventAlarm(Position position, String eventCode, JsonObject json) {
+        if (eventCode == null || eventCode.isEmpty()) {
+            position.addAlarm(Position.ALARM_GENERAL);
+            return;
+        }
+
+        switch (eventCode) {
+            // Phase 1: Critical Safety Alarms
+            case "5":
+                // Emergency alarm / SOS
+                position.addAlarm(Position.ALARM_SOS);
+                break;
+
+            case "7":
+                // Over speed alarm
+                position.addAlarm(Position.ALARM_OVERSPEED);
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("spd")) {
+                        try {
+                            double speed = detail.getJsonNumber("spd").doubleValue();
+                            position.set("alarmSpeed", speed);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("lmt")) {
+                        try {
+                            double limit = detail.getJsonNumber("lmt").doubleValue();
+                            position.set("speedLimit", limit);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "17":
+                // Overtime driving (fatigue)
+                position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("dt")) {
+                        try {
+                            int duration = detail.getInt("dt");
+                            position.set("drivingTime", duration);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "24":
+                // Harsh acceleration
+                position.addAlarm(Position.ALARM_ACCELERATION);
+                break;
+
+            case "25":
+                // Harsh braking
+                position.addAlarm(Position.ALARM_BRAKING);
+                break;
+
+            case "37":
+                // Towing
+                position.addAlarm(Position.ALARM_TOW);
+                break;
+
+            case "48":
+                // Excessive overspeed
+                position.addAlarm(Position.ALARM_OVERSPEED);
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("spd")) {
+                        try {
+                            double speed = detail.getJsonNumber("spd").doubleValue();
+                            position.set("alarmSpeed", speed);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "61":
+                // Alcohol detection alarm
+                position.addAlarm(Position.ALARM_GENERAL);
+                position.set("alcoholDetected", true);
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("val")) {
+                        try {
+                            double alcoholLevel = detail.getJsonNumber("val").doubleValue();
+                            position.set("alcoholLevel", alcoholLevel);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                break;
+
+            case "22":
+                // Driver unique ID / Swipe card
+                try {
+                    JsonObject detail = json.getJsonObject("det");
+                    String value = detail.getString("cn", null);
+                    if (value != null && !value.isEmpty()) {
+                        // Clean the driver ID: remove whitespace, line breaks, and $0$I markers
+                        value = value.replaceAll("\\s+", "")              // Remove all whitespace (spaces, tabs)
+                                     .replaceAll("\\r", "")               // Remove carriage returns
+                                     .replaceAll("\\n", "")               // Remove newlines
+                                     .replaceAll("rn", "|")               // Replace 'rn' with pipe
+                                     .replaceAll("\\$0\\$I[a-z]?", "")    // Remove $0$I or $0$Ir markers
+                                     .trim();
+                        if (!value.isEmpty()) {
+                            position.set(Position.KEY_DRIVER_UNIQUE_ID, value);
+                        }
+                    }
+                    // Extract tp (card type) if available
+                    if (detail.containsKey("tp")) {
+                        position.set("cardType", detail.getInt("tp"));
+                    }
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to parse driver unique ID", e);
+                }
+                break;
+
+            default:
+                // Unknown event code
+                position.addAlarm(Position.ALARM_GENERAL);
+                break;
+        }
     }
 
     private void decodeStatusData(Position position, ByteBuf buf) {
