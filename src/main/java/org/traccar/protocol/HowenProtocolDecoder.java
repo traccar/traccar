@@ -658,6 +658,180 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
 
+            // Phase 4: Video & Sensors
+            case "1":
+                // Video loss alarm
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("ch")) {
+                        try {
+                            int channel = detail.getInt("ch");
+                            position.set("videoLossChannel", channel);
+                            position.set(Position.KEY_ALARM, "videoLoss");
+                        } catch (Exception ignored) {
+                        }
+                    }
+                } else {
+                    position.set(Position.KEY_ALARM, "videoLoss");
+                }
+                break;
+
+            case "2":
+                // Video signal occlusion
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("ch")) {
+                        try {
+                            int channel = detail.getInt("ch");
+                            position.set("videoOcclusionChannel", channel);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                position.set(Position.KEY_ALARM, "videoOcclusion");
+                break;
+
+            case "3":
+                // Storage/Disk failure alarm
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("tp")) {
+                        try {
+                            int type = detail.getInt("tp");
+                            position.set("diskFailureType", type);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                position.addAlarm(Position.ALARM_FAULT);
+                position.set("diskFailure", true);
+                break;
+
+            case "4":
+                // Motion detection alarm
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    if (detail.containsKey("ch")) {
+                        try {
+                            int channel = detail.getInt("ch");
+                            position.set("motionChannel", channel);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+                position.set(Position.KEY_ALARM, "motionDetection");
+                break;
+
+            case "12":
+                // G-sensor alarm with sub-types
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    int subType = detail.getInt("tp", -1);
+
+                    switch (subType) {
+                        case 1:
+                            // Collision alarm
+                            position.addAlarm(Position.ALARM_ACCIDENT);
+                            position.set("gSensorEvent", "collision");
+                            break;
+                        case 2:
+                            // Roll over alarm
+                            position.addAlarm(Position.ALARM_ACCIDENT);
+                            position.set("gSensorEvent", "rollover");
+                            break;
+                        case 3:
+                            // Harsh acceleration
+                            position.addAlarm(Position.ALARM_ACCELERATION);
+                            position.set("gSensorEvent", "harsh_acceleration");
+                            break;
+                        case 4:
+                            // Harsh braking
+                            position.addAlarm(Position.ALARM_BRAKING);
+                            position.set("gSensorEvent", "harsh_braking");
+                            break;
+                        case 5:
+                            // Harsh cornering (left)
+                            position.addAlarm(Position.ALARM_CORNERING);
+                            position.set("gSensorEvent", "harsh_cornering_left");
+                            break;
+                        case 6:
+                            // Harsh cornering (right)
+                            position.addAlarm(Position.ALARM_CORNERING);
+                            position.set("gSensorEvent", "harsh_cornering_right");
+                            break;
+                        default:
+                            // Generic G-sensor alarm
+                            position.addAlarm(Position.ALARM_GENERAL);
+                            position.set("gSensorEvent", "general");
+                            break;
+                    }
+
+                    // Extract G-sensor values if available
+                    if (detail.containsKey("x")) {
+                        try {
+                            position.set("gSensorX", detail.getJsonNumber("x").doubleValue());
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("y")) {
+                        try {
+                            position.set("gSensorY", detail.getJsonNumber("y").doubleValue());
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("z")) {
+                        try {
+                            position.set("gSensorZ", detail.getJsonNumber("z").doubleValue());
+                        } catch (Exception ignored) {
+                        }
+                    }
+                } else {
+                    position.addAlarm(Position.ALARM_GENERAL);
+                }
+                break;
+
+            case "45":
+                // Temperature alarm
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    int subType = detail.getInt("tp", -1);
+
+                    switch (subType) {
+                        case 1:
+                            // High temperature alarm
+                            position.set(Position.KEY_ALARM, "temperatureHigh");
+                            position.set("temperatureEvent", "high");
+                            break;
+                        case 2:
+                            // Low temperature alarm
+                            position.set(Position.KEY_ALARM, "temperatureLow");
+                            position.set("temperatureEvent", "low");
+                            break;
+                        default:
+                            position.set(Position.KEY_ALARM, "temperature");
+                            break;
+                    }
+
+                    // Extract temperature values
+                    if (detail.containsKey("val")) {
+                        try {
+                            double temp = detail.getJsonNumber("val").doubleValue();
+                            position.set(Position.PREFIX_TEMP + 1, temp);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("ch")) {
+                        try {
+                            int channel = detail.getInt("ch");
+                            position.set("temperatureChannel", channel);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                } else {
+                    position.set(Position.KEY_ALARM, "temperature");
+                }
+                break;
+
             default:
                 // Unknown event code
                 position.addAlarm(Position.ALARM_GENERAL);
