@@ -832,6 +832,208 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 }
                 break;
 
+            // Phase 5: ADAS/DMS/BSD
+            case "30":
+                // Advanced Driver Assistance System alarms
+                if (json.containsKey("det")) {
+                    JsonObject detail = json.getJsonObject("det");
+                    int subType = detail.getInt("tp", -1);
+
+                    // Extract common ADAS data
+                    if (detail.containsKey("spd")) {
+                        try {
+                            position.set("adasSpeed", detail.getJsonNumber("spd").doubleValue());
+                        } catch (Exception ignored) {
+                        }
+                    }
+
+                    switch (subType) {
+                        // ADAS Alarms (tp=1-15)
+                        case 1:
+                            position.set(Position.KEY_ALARM, "forwardCollision");
+                            position.set("adasEvent", "forward_collision_warning");
+                            break;
+                        case 2:
+                            position.set(Position.KEY_ALARM, "laneDeparture");
+                            position.set("adasEvent", "lane_departure_warning");
+                            break;
+                        case 3:
+                            position.set(Position.KEY_ALARM, "pedestrianCollision");
+                            position.set("adasEvent", "pedestrian_collision_warning");
+                            break;
+                        case 4:
+                            position.set(Position.KEY_ALARM, "headwayWarning");
+                            position.set("adasEvent", "distance_monitoring_warning");
+                            break;
+                        case 5:
+                            position.set(Position.KEY_ALARM, "roadSignRecognition");
+                            position.set("adasEvent", "road_sign_recognition");
+                            break;
+                        case 6:
+                            position.set(Position.KEY_ALARM, "laneChange");
+                            position.set("adasEvent", "frequent_lane_change");
+                            break;
+                        case 7:
+                            position.set(Position.KEY_ALARM, "vehicleDistance");
+                            position.set("adasEvent", "vehicle_distance_warning");
+                            break;
+                        case 8:
+                            position.set(Position.KEY_ALARM, "pedestrianDetection");
+                            position.set("adasEvent", "pedestrian_detection");
+                            break;
+                        case 9:
+                            position.set(Position.KEY_ALARM, "adasFailure");
+                            position.set("adasEvent", "adas_failure");
+                            break;
+                        case 10:
+                            position.set(Position.KEY_ALARM, "obstacleWarning");
+                            position.set("adasEvent", "obstacle_warning");
+                            break;
+                        case 11:
+                            position.set(Position.KEY_ALARM, "blindSpotWarning");
+                            position.set("adasEvent", "blind_spot_warning");
+                            break;
+                        case 12:
+                            position.set(Position.KEY_ALARM, "rearCollision");
+                            position.set("adasEvent", "rear_collision_warning");
+                            break;
+                        case 13:
+                            position.set(Position.KEY_ALARM, "emergencyBraking");
+                            position.set("adasEvent", "automatic_emergency_braking");
+                            break;
+                        case 14:
+                            position.set(Position.KEY_ALARM, "trafficSignViolation");
+                            position.set("adasEvent", "traffic_sign_violation");
+                            break;
+                        case 15:
+                            position.set(Position.KEY_ALARM, "laneKeepingAssist");
+                            position.set("adasEvent", "lane_keeping_assist");
+                            break;
+
+                        // DMS Alarms (tp=16-30)
+                        case 16:
+                            position.set(Position.KEY_ALARM, "driverFatigue");
+                            position.set("dmsEvent", "driver_fatigue");
+                            break;
+                        case 17:
+                            position.set(Position.KEY_ALARM, "driverDistraction");
+                            position.set("dmsEvent", "driver_distraction");
+                            break;
+                        case 18:
+                            position.set(Position.KEY_ALARM, "phoneCall");
+                            position.set("dmsEvent", "phone_call_detected");
+                            break;
+                        case 19:
+                            position.set(Position.KEY_ALARM, "smoking");
+                            position.set("dmsEvent", "smoking_detected");
+                            break;
+                        case 20:
+                            position.set(Position.KEY_ALARM, "driverAbsent");
+                            position.set("dmsEvent", "driver_absent");
+                            break;
+                        case 21:
+                            position.set(Position.KEY_ALARM, "yawning");
+                            position.set("dmsEvent", "yawning_detected");
+                            break;
+                        case 22:
+                            position.set(Position.KEY_ALARM, "eyesClosed");
+                            position.set("dmsEvent", "eyes_closed");
+                            break;
+                        case 23:
+                            position.set(Position.KEY_ALARM, "headDown");
+                            position.set("dmsEvent", "head_down");
+                            break;
+                        case 24:
+                            position.set(Position.KEY_ALARM, "abnormalDriving");
+                            position.set("dmsEvent", "abnormal_driving_behavior");
+                            break;
+                        case 25:
+                            position.set(Position.KEY_ALARM, "dmsFailure");
+                            position.set("dmsEvent", "dms_failure");
+                            break;
+                        case 26:
+                            position.set(Position.KEY_ALARM, "faceNotDetected");
+                            position.set("dmsEvent", "face_not_detected");
+                            break;
+                        case 27:
+                            position.set(Position.KEY_ALARM, "cameraBlocked");
+                            position.set("dmsEvent", "camera_blocked");
+                            break;
+                        case 28:
+                            position.set(Position.KEY_ALARM, "infraredFailure");
+                            position.set("dmsEvent", "infrared_light_failure");
+                            break;
+                        case 29:
+                            position.set(Position.KEY_ALARM, "seatbeltNotFastened");
+                            position.set("dmsEvent", "seatbelt_not_fastened");
+                            break;
+                        case 30:
+                            position.set(Position.KEY_ALARM, "driverChange");
+                            position.set("dmsEvent", "driver_change_detected");
+                            break;
+
+                        // BSD Alarms (tp=31-39)
+                        case 31:
+                            position.set(Position.KEY_ALARM, "bsdLeftWarning");
+                            position.set("bsdEvent", "left_blind_spot_warning");
+                            break;
+                        case 32:
+                            position.set(Position.KEY_ALARM, "bsdRightWarning");
+                            position.set("bsdEvent", "right_blind_spot_warning");
+                            break;
+                        case 33:
+                            position.set(Position.KEY_ALARM, "laneChangeLeft");
+                            position.set("bsdEvent", "lane_change_left_warning");
+                            break;
+                        case 34:
+                            position.set(Position.KEY_ALARM, "laneChangeRight");
+                            position.set("bsdEvent", "lane_change_right_warning");
+                            break;
+                        case 35:
+                            position.set(Position.KEY_ALARM, "rearCrossingLeft");
+                            position.set("bsdEvent", "rear_crossing_left_warning");
+                            break;
+                        case 36:
+                            position.set(Position.KEY_ALARM, "rearCrossingRight");
+                            position.set("bsdEvent", "rear_crossing_right_warning");
+                            break;
+                        case 37:
+                            position.set(Position.KEY_ALARM, "bsdFailure");
+                            position.set("bsdEvent", "bsd_system_failure");
+                            break;
+                        case 38:
+                            position.set(Position.KEY_ALARM, "doorOpenWarning");
+                            position.set("bsdEvent", "door_open_warning");
+                            break;
+                        case 39:
+                            position.set(Position.KEY_ALARM, "parkingAssist");
+                            position.set("bsdEvent", "parking_assist_warning");
+                            break;
+
+                        default:
+                            position.set(Position.KEY_ALARM, "adas");
+                            position.set("adasEvent", "unknown");
+                            break;
+                    }
+
+                    // Extract additional ADAS/DMS data
+                    if (detail.containsKey("lvl")) {
+                        try {
+                            position.set("alarmLevel", detail.getInt("lvl"));
+                        } catch (Exception ignored) {
+                        }
+                    }
+                    if (detail.containsKey("dst")) {
+                        try {
+                            position.set("objectDistance", detail.getJsonNumber("dst").doubleValue());
+                        } catch (Exception ignored) {
+                        }
+                    }
+                } else {
+                    position.set(Position.KEY_ALARM, "adas");
+                }
+                break;
+
             default:
                 // Unknown event code
                 position.addAlarm(Position.ALARM_GENERAL);
