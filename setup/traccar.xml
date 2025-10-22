@@ -17,4 +17,10 @@
     <entry key='mail.smtp.auth'>true</entry>
     <entry key='mail.smtp.username'>smc@socratec.gmbh</entry>
     <entry key='mail.smtp.password'>Traccar321$%&amp;</entry>
+
+    <entry key='geocoder.enable'>true</entry>
+    <entry key='geocoder.type'>locationiq</entry>
+    <entry key='geocoder.key'>ddbd06eb64cd5604195d</entry>
+    <entry key='geocoder.onRequest'>false</entry>
+    <entry key='geocoder.ignorePositions'>false</entry>    
 </properties>
