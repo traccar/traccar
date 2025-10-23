@@ -1,0 +1,63 @@
+# Howen Protocol Test Data Analysis
+
+## Raw Data:
+48014110600000002436423842343536372d32334336333237422d41393938334336342d373334383333363600190a141309300f000101190a141309302a1500000d000600645ba604000d2b51080007ffffffff000000000200004000001f000101000100000000
+
+## Breakdown:
+
+### Header Section:
+48 01 41 10 60 00 00 00
+
+- 48: Protocol header (0x48 = 'H')
+- 01: Version/Type
+- 41 10: Message ID (0x1041 = Status message in little-endian)
+- 60 00: Length (0x0060 = 96 bytes)
+- 00 00: Reserved/Sequence
+
+### Device ID Section (24 bytes):
+24 36 42 38 42 34 35 36 37 2d 32 33 43 36 33 32 37 42 2d 41 39 39 38 33 43 36 34 2d 37 33 34 38 33 33 36 36
+
+ASCII: $6B8B4567-23C6327B-A9983C64-73483366
+(36 bytes device ID)
+
+### Timestamp 1:
+00 19 0a 14 13 09 30
+
+- 00: Year offset (2000)
+- 19: Year = 2025 (0x19 = 25)
+- 0a: Month = 10 (October)
+- 14: Day = 20
+- 13: Hour = 19 (7:00 PM)
+- 09: Minute = 9
+- 30: Second = 48
+
+Device Time: 2025-10-20 19:09:48
+
+### Content Mask:
+0f 00
+
+Binary: 0000 0000 0000 1111
+- Bit 0: 1 = Location data present
+- Bit 1: 1 = G-Sensor data present
+- Bit 2: 1 = Basic status present
+- Bit 3: 1 = Module status present
+
+### Status Data:
+01 01 19 0a 14 13 09 30
+
+- 01 01: Basic status bytes (ACC=1, no doors open)
+- 19 0a 14 13 09 30: Status timestamp (same as device time)
+
+### Location Data:
+2a 15 00 00 0d 00 06 00 64 5b a6 04 00 0d 2b 51 08 00 07 ff ff ff ff 00 00 00 00 02 00 00 40 00 00 1f 00
+
+Let me parse this in detail...
+
+### Remaining Data:
+01 01 00 01 00 00 00 00
+
+## Analysis Summary:
+- Message Type: 0x1041 (Status Report)
+- Device ID: $6B8B4567-23C6327B-A9983C64-73483366
+- Timestamp: 2025-10-20 19:09:48
+- Content: Location + G-Sensor + Basic Status + Module Status

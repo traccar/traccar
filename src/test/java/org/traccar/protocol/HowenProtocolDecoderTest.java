@@ -140,4 +140,40 @@ public class HowenProtocolDecoderTest extends ProtocolTest {
         assertNotNull(alarm.getDeviceTime());
         assertEquals(0, alarm.getInteger("Mask"));
     }
+
+    @Test
+    public void testNewStatusData() throws Exception {
+
+        var decoder = inject(new HowenProtocolDecoder(null));
+
+        // Initialize decoder with device info
+        decoder.decode(null, null, binary(
+                "48010110c80000007b226170223a22222c226174223a2231222c22646e223a223238303831313032222c226474223a22307834303030222c22647475223a22323031382d30392d31322032303a31383a3134222c2267756964223a2236423842343536372d32334336333237422d41393938334336342d3733343833333636222c226d62223a223238303831313032222c227373223a2236423842343536372d32334336333237422d41393938334336342d3733343833333636222c22766572223a22563138303832394230227d0a00"));
+
+        // Test new status data with basic status enhancements
+        Position position = (Position) decoder.decode(null, null, binary(
+                "48014110600000002436423842343536372d32334336333237422d41393938334336342d373334383333363600190a141309300f000101190a141309302a1500000d000600645ba604000d2b51080007ffffffff000000000200004000001f000101000100000000"));
+
+        assertNotNull(position);
+        assertNotNull(position.getDeviceTime());
+        
+        // Test that ignition attribute exists (value may be true or false)
+        assertNotNull(position.getAttributes().get(Position.KEY_IGNITION));
+        
+        // Test enhanced basic status fields (newly added)
+        assertNotNull(position.getAttributes().get("brake"));
+        assertNotNull(position.getAttributes().get("turnLeft"));
+        assertNotNull(position.getAttributes().get("turnRight"));
+        assertNotNull(position.getAttributes().get("gearForward"));
+        assertNotNull(position.getAttributes().get("gearBackward"));
+        assertNotNull(position.getAttributes().get("privateMode"));
+        
+        // Test individual door status
+        assertNotNull(position.getAttributes().get("doorLeftFront"));
+        assertNotNull(position.getAttributes().get("doorRightFront"));
+        assertNotNull(position.getAttributes().get("doorLeftMid"));
+        assertNotNull(position.getAttributes().get("doorRightMid"));
+        assertNotNull(position.getAttributes().get("doorLeftBack"));
+        assertNotNull(position.getAttributes().get("doorRightBack"));
+    }
 }

@@ -285,6 +285,7 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         PORTS.put("jmak", 5259);
         PORTS.put("bws", 5260);
         PORTS.put("howen", 5261);
+        PORTS.put("xsensegtr9", 5263);
     }
 
     PortConfigSuffix(String key, List<KeyType> types) {
