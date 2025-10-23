@@ -61,20 +61,41 @@ public class XsenseGtr9FrameDecoder extends BaseFrameDecoder {
 
             int suffixIndex = -1;
             int suffixLength = 0;
-            for (int i = payloadStart; i <= writerIndex - 2; i++) {
-                int first = buf.getUnsignedByte(i);
-                int second = buf.getUnsignedByte(i + 1);
-                if ((first == 0x7E && second == 0x7E) || (first == 0x00 && second == 0x00)) {
-                    suffixIndex = i;
-                    suffixLength = 2;
-                    break;
-                }
-            }
+            for (int i = payloadStart; i < writerIndex; i++) {
+                int current = buf.getUnsignedByte(i);
 
-            if (suffixIndex == -1) {
-                if (writerIndex > payloadStart && buf.getUnsignedByte(writerIndex - 1) == 0x7E) {
-                    suffixIndex = writerIndex - 1;
-                    suffixLength = 1;
+                if (i + 1 < writerIndex) {
+                    int next = buf.getUnsignedByte(i + 1);
+
+                    if ((current == 0x7E && next == 0x7E) || (current == 0x00 && next == 0x00)) {
+                        int candidateLength = 2;
+                        int candidateEnd = i + candidateLength;
+                        int remaining = writerIndex - candidateEnd;
+
+                        if (remaining == 0 || hasPreamble(buf, candidateEnd)) {
+                            suffixIndex = i;
+                            suffixLength = candidateLength;
+                            break;
+                        } else if (remaining < PREAMBLE_LENGTH) {
+                            buf.readerIndex(startIndex); // Wait for more data to confirm preamble
+                            return null;
+                        }
+                    }
+                }
+
+                if (current == 0x7E) {
+                    int candidateLength = 1;
+                    int candidateEnd = i + candidateLength;
+                    int remaining = writerIndex - candidateEnd;
+
+                    if (remaining == 0 || hasPreamble(buf, candidateEnd)) {
+                        suffixIndex = i;
+                        suffixLength = candidateLength;
+                        break;
+                    } else if (remaining < PREAMBLE_LENGTH) {
+                        buf.readerIndex(startIndex);
+                        return null;
+                    }
                 }
             }
 
@@ -98,6 +119,18 @@ public class XsenseGtr9FrameDecoder extends BaseFrameDecoder {
         // No valid preamble found, skip one byte and try again
         buf.skipBytes(1);
         return null;
+    }
+
+    private boolean hasPreamble(ByteBuf buf, int index) {
+        int remaining = buf.writerIndex() - index;
+        if (remaining < PREAMBLE_LENGTH) {
+            return false;
+        }
+        return buf.getUnsignedByte(index) == 0x7E
+                && buf.getUnsignedByte(index + 1) == 0x7E
+                && buf.getUnsignedByte(index + 2) == 0x7E
+                && buf.getUnsignedByte(index + 3) == 0x7E
+                && buf.getUnsignedByte(index + 4) == 0x00;
     }
 
 }
