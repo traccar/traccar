@@ -23,73 +23,52 @@ import org.traccar.BaseFrameDecoder;
 /**
  * Frame decoder for GTR-9 devices using Siemens RAW format.
  *
- * GTR-9 devices send packets with flexible suffix handling:
- * - Standard: 7E7E7E7E00 [payload] 7E7E
- * - Alternative: 7E7E7E7E00 [payload] 0000
- * - Malformed: 7E7E7E7E00 [payload] 7E (single byte suffix)
+ * GTR-9 devices send packets with fixed framing:
+ * - Preamble: 7E7E7E7E00 (5 bytes)
+ * - Payload: Variable length
+ * - Suffix: Any 4 bytes (commonly 7E7E, 0000, 007E, etc.)
  *
- * This decoder is more lenient than the standard XsenseFrameDecoder
- * to handle real-world packet variations from GTR-9 devices.
+ * This decoder simply strips the first 5 bytes and last 4 bytes
+ * without validating the suffix content.
  */
 public class XsenseGtr9FrameDecoder extends BaseFrameDecoder {
+
+    private static final int PREAMBLE_LENGTH = 5;
+    private static final int SUFFIX_LENGTH = 4;
+    private static final int MIN_PACKET_LENGTH = PREAMBLE_LENGTH + SUFFIX_LENGTH; // 9 bytes
 
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        if (buf.readableBytes() < 5) {
+        if (buf.readableBytes() < MIN_PACKET_LENGTH) {
             return null;
         }
 
         // Check for Siemens preamble: 7E 7E 7E 7E 00
-        if (buf.readableBytes() >= 5
-                && buf.getUnsignedByte(buf.readerIndex()) == 0x7E
+        if (buf.getUnsignedByte(buf.readerIndex()) == 0x7E
                 && buf.getUnsignedByte(buf.readerIndex() + 1) == 0x7E
                 && buf.getUnsignedByte(buf.readerIndex() + 2) == 0x7E
                 && buf.getUnsignedByte(buf.readerIndex() + 3) == 0x7E
                 && buf.getUnsignedByte(buf.readerIndex() + 4) == 0x00) {
 
-            // Skip preamble
-            buf.skipBytes(5);
+            // Skip preamble (5 bytes)
+            buf.skipBytes(PREAMBLE_LENGTH);
 
-            // Find suffix: 7E7E, 0000, or single 7E (for malformed packets)
-            int endIndex = -1;
-            int suffixLength = 2; // Default: 7E7E or 0000
-
-            // First, search for standard 2-byte suffix
-            for (int i = buf.readerIndex(); i < buf.writerIndex() - 1; i++) {
-                int byte1 = buf.getUnsignedByte(i);
-                int byte2 = buf.getUnsignedByte(i + 1);
-
-                // Check for standard 2-byte suffix
-                if ((byte1 == 0x7E && byte2 == 0x7E) || (byte1 == 0x00 && byte2 == 0x00)) {
-                    endIndex = i;
-                    suffixLength = 2;
-                    break;
-                }
-            }
-
-            // If standard suffix not found, check for single 7E at the end (malformed packet)
-            if (endIndex == -1 && buf.readableBytes() > 0) {
-                int lastByte = buf.getUnsignedByte(buf.writerIndex() - 1);
-                if (lastByte == 0x7E) {
-                    endIndex = buf.writerIndex() - 1;
-                    suffixLength = 1;
-                }
-            }
-
-            if (endIndex == -1) {
-                // Suffix not found, wait for more data
-                buf.readerIndex(buf.readerIndex() - 5); // Reset reader index
+            // Calculate payload length (total - preamble - suffix)
+            int payloadLength = buf.readableBytes() - SUFFIX_LENGTH;
+            
+            if (payloadLength <= 0) {
+                // Not enough data, wait for more
+                buf.readerIndex(buf.readerIndex() - PREAMBLE_LENGTH); // Reset
                 return null;
             }
 
             // Extract payload (without preamble and suffix)
-            int length = endIndex - buf.readerIndex();
-            ByteBuf frame = buf.readRetainedSlice(length);
+            ByteBuf frame = buf.readRetainedSlice(payloadLength);
 
-            // Skip suffix (7E7E, 0000, or single 7E)
-            buf.skipBytes(suffixLength);
+            // Skip suffix (4 bytes) - don't care what it contains
+            buf.skipBytes(SUFFIX_LENGTH);
 
             return frame;
         }
