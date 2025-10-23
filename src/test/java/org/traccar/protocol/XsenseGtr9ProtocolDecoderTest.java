@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class XsenseGtr9ProtocolDecoderTest extends ProtocolTest {
 
@@ -151,24 +152,44 @@ public class XsenseGtr9ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new XsenseGtr9ProtocolDecoder(null));
 
-        // Real GTR-9 driver license packets from user
-        // Note: These packets have CRC mismatches, but CRC validation is disabled for type 100
-        // The decoder will log CRC mismatch but still process the valid data
-
-        // Packet 1: BoxID 5064, SRITHONG PORNCHAI
-        /*
-        verifyAttribute(decoder, binary(
-                "64C16613C811EC06003356BBF409CF8C683D1686C6FF014D5B255E53524954484F4E4724504F524E43484149244D522E5E5E3F3B36303037363435343130343030303331353034443D3237303531393732303831303D3F5F3234313030303538353234303230305DDAE4"),
-                "driverLicense", "[%^SRITHONG$PORNCHAI$MR.^^?;6007645410400031504D=270519720810=?_241000585240200]");
-
-        // Packet 2: BoxID 4312, TANCHARUN SUTHIPHONG
-        verifyAttribute(decoder, binary(
-                "64376910D811ED061B3356BD0E04CD9C5A3B3F34ECFF016F5B255E54414E43484152554E24535554484950484F4E47244D522E5E5E3F3B36303037363431383430313030343233393636443D3238303831393933303132303D3F5F3233313030313331363238303230305D1C27"),
-                "driverLicense", "[%^TANCHARUN$SUTHIPHONG$MR.^^?;6007641840100423966D=280819930120=?_231001316280200]");
-
-        // Packet 3: BoxID 4938, SINPUKSA THONGSUK
+        // Real GTR-9 driver license packet from user
+        // Packet 3: BoxID 4938, SINPUKSA THONGSUK - CRC validates correctly (0x2F62)
         verifyAttribute(decoder, binary(
                 "646866134A11E006003356BF1B03DBAD463BC584E8FF015C5B255E53494E50554B53412454484F4E4753554B244D522E5E5E3F3B36303037363433343530373030343734383535443D3236303331393732313130393D3F5F3233313030303337363339303230325D2F62"),
-                "driverLicense", "[%^SINPUKSA$THONGSUK$MR.^^?;6007643450700474855D=260319721109=?_231000376390202]");
-        */
-    }}
+                Position.KEY_DRIVER_UNIQUE_ID, "%^SINPUKSA$THONGSUK$MR.^^?;6007643450700474855D=260319721109=?_231000376390202");
+    }
+
+    @Test
+    public void testDecodeGtr9PacketWith0000Suffix() throws Exception {
+
+        var decoder = inject(new XsenseGtr9ProtocolDecoder(null));
+
+        // GTR-9 packet ending with 0000 suffix (not 7E7E)
+        // Full packet: 7E7E7E7E00 736824189811E1051E33571A570930B6383D01538CFF050012298203D0000008740000000070008168E2 0000
+        // After frame decoder removes preamble (7E7E7E7E00) and suffix (0000):
+        // 736824189811E1051E33571A570930B6383D01538CFF050012298203D0000008740000000070008168E2
+        // Type=0x73 (115=M_TINI_BATCH_OFFLINE), Seq=0x68(104), Size=0x24(36 bytes), BoxID=0x1898(6296)
+        // Device ID = 1,300,000 + 6,296 = 1,306,296
+        // Data: 32 bytes GPS32 record + 4 bytes extra + CRC16(68E2)
+        //
+        // GPS32 breakdown (32 bytes):
+        // 11 = recordType
+        // E1 = flagDegree (11100001b: East=1, North=1, Valid=1, Course=01→22.5°)
+        // 05 = HDOP
+        // 1E = Speed (30 km/h)
+        // 33571A57 = DateTime
+        // 0930B638 = Latitude
+        // 3D01538C = Longitude
+        // FF05 = Digital
+        // 0012 = Opt (satellites)
+        // 298203 = Analog 0-1 (3 bytes)
+        // D00000 = Analog 2-3 (3 bytes)
+        // 087400 = Analog 4-5 (3 bytes)
+        // 00 = recordCrc (placeholder)
+        // Extra: 00007000 (4 bytes)
+        // CRC: 8168E2 (last 2 bytes at position 40-41)
+        verifyPositions(decoder, binary(
+                "736824189811E1051E33571A570930B6383D01538CFF050012298203D0000008740000000070008168E2"));
+    }
+
+}

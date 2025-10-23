@@ -26,11 +26,11 @@ import org.traccar.BaseFrameDecoder;
  * GTR-9 devices send packets with variable suffix:
  * - Preamble: 7E7E7E7E00 (5 bytes, fixed)
  * - Payload: Variable length
- * - Suffix: 2 or 4 bytes ending with 7E7E
- *   - Position packets: 4 bytes (e.g., 00007E7E, XXXX7E7E)
- *   - Ping/other packets: 2 bytes (7E7E)
+ * - Suffix: 2 bytes - either 7E7E or 0000
+ *   - Most packets: 7E7E
+ *   - Some position reports: 0000
  *
- * This decoder searches for 7E7E suffix and extracts payload accordingly.
+ * This decoder searches for either suffix and extracts payload accordingly.
  */
 public class XsenseGtr9FrameDecoder extends BaseFrameDecoder {
 
@@ -63,20 +63,21 @@ public class XsenseGtr9FrameDecoder extends BaseFrameDecoder {
                 return null;
             }
 
-            // Check if packet ends with 7E7E
+            // Check if packet ends with 7E7E or 0000
             int lastByte = buf.getUnsignedByte(buf.writerIndex() - 1);
             int secondLastByte = buf.getUnsignedByte(buf.writerIndex() - 2);
-            
-            if (lastByte == 0x7E && secondLastByte == 0x7E) {
-                // Found 7E7E suffix - extract payload
-                int payloadLength = totalBytes - 2; // Remove 7E7E
+
+            if ((lastByte == 0x7E && secondLastByte == 0x7E)
+                    || (lastByte == 0x00 && secondLastByte == 0x00)) {
+                // Found valid suffix (7E7E or 0000) - extract payload
+                int payloadLength = totalBytes - 2; // Remove suffix
 
                 ByteBuf frame = buf.readRetainedSlice(payloadLength);
-                buf.skipBytes(2); // Skip 7E7E
+                buf.skipBytes(2); // Skip suffix
 
                 return frame;
             } else {
-                // 7E7E not found, wait for more data
+                // Valid suffix not found, wait for more data
                 buf.readerIndex(buf.readerIndex() - PREAMBLE_LENGTH); // Reset
                 return null;
             }
