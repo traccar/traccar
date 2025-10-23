@@ -93,21 +93,21 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         // Save reader index to include message type in CRC calculation
         int startIndex = buf.readerIndex();
         int messageType = buf.readUnsignedByte();
-        
+
         // Read header to get size field (which indicates the actual packet size)
         int sequence = buf.readUnsignedByte();
         int sizeField = buf.readUnsignedByte();
         int boxId = buf.readUnsignedShort();
-        
+
         // Reset to start for CRC calculation
         buf.readerIndex(startIndex);
         int availableBytes = buf.readableBytes();
-        
+
         // GTR-9 packets may have trailing bytes after the specified size
         // The CRC is ALWAYS at the last 2 bytes of the buffer (after frame decoder)
         // Size field indicates the "official" packet size, but actual payload may be longer
         // Example: Size=36, but actual=42 (6 trailing bytes including final CRC)
-        
+
         // Validate CRC16/CCITT - CRC is at the LAST 2 bytes
         int dataLength = availableBytes - 2; // All data minus CRC
         ByteBuf dataForCrc = buf.slice(buf.readerIndex(), dataLength);
