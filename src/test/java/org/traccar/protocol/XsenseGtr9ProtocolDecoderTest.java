@@ -46,6 +46,27 @@ public class XsenseGtr9ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, binary(
                 "72012413F111E3051C335705A508F4691C3CD4D492FF050012296D0000000008801502C0287000BE7C11"));
 
+        // New packet: 7E7E7E7E0072722405F911E207000C690D510467110F3B9E23B7FE010009273778300067300063BD000000B60590DC7E7E
+        // After frame decoder: 72722405F911E207000C690D510467110F3B9E23B7FE010009273778300067300063BD000000B60590DC
+        // Type=0x72 (114), Seq=0x72(114), Size=0x24(36), BoxID=0x05F9(1529)
+        // Device ID = 1,300,000 + 1,529 = 1,301,529
+        // Expected values:
+        //   Type: 11 (0x11)
+        //   Engine: 0
+        //   flagDegree: 0xE2 (11100010b: East=1, North=1, Valid=1, Course=2 → 22.5°)
+        //   HDOP: 7
+        //   Speed: 0.0 km/h
+        //   DateTime: 0x0C690D51 → 2025-10-23 08:42:34
+        //   Latitude: 0x0467110F → 7.6439065°
+        //   Longitude: 0x3B9E23B7 → 100.03659583333334°
+        //   Digital: 0xFE01
+        //   Satellites: 9
+        //   Altitude: 0x2737 → 11.8872m
+        //   Analog values: ana0=1923, ana1=0, ana2=1651, ana3=0, ana4=1595, ana5=3328
+        //   RecordCRC: 0x05 (validated)
+        verifyPositions(decoder, binary(
+                "72722405F911E207000C690D510467110F3B9E23B7FE010009273778300067300063BD000000B60590DC"));
+
         // Ping reply packet: 7e7e7e7e00 6d008413f1 11e3051b...5555 05 837e 7e7e
         // After frame decoder: 6d008413f1 11e3051b...5555 05 837e
         // Type=0x6D (109=PING_REPLY_ENHIO), Seq=0x00, Size=0x84(132 bytes), BoxID=0x13F1(5105)

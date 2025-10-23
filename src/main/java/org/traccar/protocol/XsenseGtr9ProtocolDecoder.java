@@ -52,6 +52,9 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
     // Device ID offset for GTR-9
     private static final long DEVICE_ID_OFFSET = 1_300_000L;
+    // GPS week rollover constants (1024 weeks = ~19.7 years)
+    private static final long GPS_ROLLOVER_PERIOD_MS = 619_315_200_000L; // 1024 weeks in milliseconds
+    private static final int GPS_ROLLOVER_YEAR_THRESHOLD = 2008;
 
     public XsenseGtr9ProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -236,6 +239,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.clear();
         calendar.set(year, month - 1, day, hours, minutes, seconds);
+        applyGpsRollover(calendar, year);
         position.setTime(calendar.getTime());
 
         // Read license data (remaining bytes minus CRC)
@@ -258,6 +262,23 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         position.set("ntype", ntype);
 
         return position;
+    }
+
+    /**
+     * Apply GPS week rollover correction to timestamps
+     * GPS devices may report dates 19.7 years earlier due to 1024-week rollover
+     */
+    private void applyGpsRollover(Calendar calendar, int initialYear) {
+        if (calendar == null || initialYear >= GPS_ROLLOVER_YEAR_THRESHOLD) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        long original = calendar.getTimeInMillis();
+        long adjusted = original + GPS_ROLLOVER_PERIOD_MS;
+        // Choose the timestamp closest to current time
+        if (Math.abs(now - adjusted) < Math.abs(now - original)) {
+            calendar.setTimeInMillis(adjusted);
+        }
     }
 
     /**
@@ -401,6 +422,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.clear();
         calendar.set(year, month - 1, day, hours, minutes, seconds);
+        applyGpsRollover(calendar, year);
         position.setTime(calendar.getTime());
 
         return position;
