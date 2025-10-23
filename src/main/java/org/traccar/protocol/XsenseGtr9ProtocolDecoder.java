@@ -210,7 +210,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         if (messageType == M_DRIVER_LICENSE) {
             return decodeDriverLicense(deviceSession, buf, sequence, boxId);
         } else if (isPositionReport(messageType)) {
-            return decodeSiemensPositions(deviceSession, buf);
+            return decodeSiemensPositions(deviceSession, buf, messageType);
         } else if (messageType == M_PING_REPLY_ENHIO) {
             return decodeSiemensPingReply(deviceSession, buf);
         } else if (messageType == M_SYSTEM_LOG) {
@@ -341,7 +341,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
     /**
      * Decode Siemens GPS32 position records
      */
-    private List<Position> decodeSiemensPositions(DeviceSession deviceSession, ByteBuf buf) {
+    private List<Position> decodeSiemensPositions(DeviceSession deviceSession, ByteBuf buf, int messageType) {
         List<Position> positions = new ArrayList<>();
 
         // Each GPS32 record is 32 bytes, but may have extra padding
@@ -349,6 +349,8 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() >= 32) {
             Position position = decodeSiemensGps32Record(deviceSession, buf);
             if (position != null) {
+                boolean outdated = messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO;
+                position.setOutdated(outdated);
                 positions.add(position);
             } else {
                 break; // Stop if we can't decode a record
@@ -403,7 +405,6 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         if (!east) {
             longitude = -longitude;
         }
-
         position.setLatitude(latitude);
         position.setLongitude(longitude);
         position.setValid(gpsValid);
@@ -596,24 +597,25 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeSystemLog(DeviceSession deviceSession, ByteBuf buf) {
         // System log - create a simple position with current time
-        Position position = new Position(getProtocolName());
-        position.setDeviceId(deviceSession.getDeviceId());
-        position.setTime(new java.util.Date());
+        //Position position = new Position(getProtocolName());
+        //position.setDeviceId(deviceSession.getDeviceId());
+        //position.setTime(new java.util.Date());
 
         // Read log data
         if (buf.readableBytes() > 0) {
             byte[] logBytes = new byte[Math.min(buf.readableBytes(), 256)];
             buf.readBytes(logBytes);
             String logData = new String(logBytes, StandardCharsets.US_ASCII).trim();
-            position.set("systemLog", logData);
+            LOGGER.info("System log from device {}: {}", deviceSession.getDeviceId(), logData);
+            //position.set("systemLog", logData);
         }
 
         // Set a default valid position (0,0) for system logs
-        position.setValid(false);
-        position.setLatitude(0);
-        position.setLongitude(0);
+        //position.setValid(false);
+        //position.setLatitude(0);
+        //position.setLongitude(0);
 
-        return position;
+        return null;
     }
 
 }
