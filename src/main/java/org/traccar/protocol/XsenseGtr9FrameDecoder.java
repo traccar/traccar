@@ -46,41 +46,53 @@ public class XsenseGtr9FrameDecoder extends BaseFrameDecoder {
         }
 
         // Check for Siemens preamble: 7E 7E 7E 7E 00
-        if (buf.getUnsignedByte(buf.readerIndex()) == 0x7E
-                && buf.getUnsignedByte(buf.readerIndex() + 1) == 0x7E
-                && buf.getUnsignedByte(buf.readerIndex() + 2) == 0x7E
-                && buf.getUnsignedByte(buf.readerIndex() + 3) == 0x7E
-                && buf.getUnsignedByte(buf.readerIndex() + 4) == 0x00) {
+        int startIndex = buf.readerIndex();
+        if (buf.getUnsignedByte(startIndex) == 0x7E
+                && buf.getUnsignedByte(startIndex + 1) == 0x7E
+                && buf.getUnsignedByte(startIndex + 2) == 0x7E
+                && buf.getUnsignedByte(startIndex + 3) == 0x7E
+                && buf.getUnsignedByte(startIndex + 4) == 0x00) {
 
             // Skip preamble (5 bytes)
             buf.skipBytes(PREAMBLE_LENGTH);
 
-            // Search for 7E7E suffix from the end
-            // Check last 2 bytes for 7E7E
-            int totalBytes = buf.readableBytes();
-            if (totalBytes < 2) {
-                buf.readerIndex(buf.readerIndex() - PREAMBLE_LENGTH); // Reset
+            int payloadStart = buf.readerIndex();
+            int writerIndex = buf.writerIndex();
+
+            int suffixIndex = -1;
+            int suffixLength = 0;
+            for (int i = payloadStart; i <= writerIndex - 2; i++) {
+                int first = buf.getUnsignedByte(i);
+                int second = buf.getUnsignedByte(i + 1);
+                if ((first == 0x7E && second == 0x7E) || (first == 0x00 && second == 0x00)) {
+                    suffixIndex = i;
+                    suffixLength = 2;
+                    break;
+                }
+            }
+
+            if (suffixIndex == -1) {
+                if (writerIndex > payloadStart && buf.getUnsignedByte(writerIndex - 1) == 0x7E) {
+                    suffixIndex = writerIndex - 1;
+                    suffixLength = 1;
+                }
+            }
+
+            if (suffixIndex == -1) {
+                buf.readerIndex(startIndex); // Reset and wait for more data
                 return null;
             }
 
-            // Check if packet ends with 7E7E or 0000
-            int lastByte = buf.getUnsignedByte(buf.writerIndex() - 1);
-            int secondLastByte = buf.getUnsignedByte(buf.writerIndex() - 2);
-
-            if ((lastByte == 0x7E && secondLastByte == 0x7E)
-                    || (lastByte == 0x00 && secondLastByte == 0x00)) {
-                // Found valid suffix (7E7E or 0000) - extract payload
-                int payloadLength = totalBytes - 2; // Remove suffix
-
-                ByteBuf frame = buf.readRetainedSlice(payloadLength);
-                buf.skipBytes(2); // Skip suffix
-
-                return frame;
-            } else {
-                // Valid suffix not found, wait for more data
-                buf.readerIndex(buf.readerIndex() - PREAMBLE_LENGTH); // Reset
+            int payloadLength = suffixIndex - payloadStart;
+            if (payloadLength <= 0) {
+                buf.readerIndex(startIndex); // Invalid frame, reset
                 return null;
             }
+
+            ByteBuf frame = buf.readRetainedSlice(payloadLength);
+            buf.skipBytes(suffixLength); // Skip suffix bytes (7E7E, 0000 or single 7E)
+
+            return frame;
         }
 
         // No valid preamble found, skip one byte and try again
