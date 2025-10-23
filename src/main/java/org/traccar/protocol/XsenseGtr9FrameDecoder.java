@@ -23,19 +23,19 @@ import org.traccar.BaseFrameDecoder;
 /**
  * Frame decoder for GTR-9 devices using Siemens RAW format.
  *
- * GTR-9 devices send packets with fixed framing:
- * - Preamble: 7E7E7E7E00 (5 bytes)
+ * GTR-9 devices send packets with variable suffix:
+ * - Preamble: 7E7E7E7E00 (5 bytes, fixed)
  * - Payload: Variable length
- * - Suffix: Any 4 bytes (commonly 7E7E, 0000, 007E, etc.)
+ * - Suffix: 2 or 4 bytes ending with 7E7E
+ *   - Position packets: 4 bytes (e.g., 00007E7E, XXXX7E7E)
+ *   - Ping/other packets: 2 bytes (7E7E)
  *
- * This decoder simply strips the first 5 bytes and last 4 bytes
- * without validating the suffix content.
+ * This decoder searches for 7E7E suffix and extracts payload accordingly.
  */
 public class XsenseGtr9FrameDecoder extends BaseFrameDecoder {
 
     private static final int PREAMBLE_LENGTH = 5;
-    private static final int SUFFIX_LENGTH = 4;
-    private static final int MIN_PACKET_LENGTH = PREAMBLE_LENGTH + SUFFIX_LENGTH; // 9 bytes
+    private static final int MIN_PACKET_LENGTH = PREAMBLE_LENGTH + 2; // 5 + at least 7E7E
 
     @Override
     protected Object decode(
@@ -55,22 +55,31 @@ public class XsenseGtr9FrameDecoder extends BaseFrameDecoder {
             // Skip preamble (5 bytes)
             buf.skipBytes(PREAMBLE_LENGTH);
 
-            // Calculate payload length (total - preamble - suffix)
-            int payloadLength = buf.readableBytes() - SUFFIX_LENGTH;
-
-            if (payloadLength <= 0) {
-                // Not enough data, wait for more
+            // Search for 7E7E suffix from the end
+            // Check last 2 bytes for 7E7E
+            int totalBytes = buf.readableBytes();
+            if (totalBytes < 2) {
                 buf.readerIndex(buf.readerIndex() - PREAMBLE_LENGTH); // Reset
                 return null;
             }
 
-            // Extract payload (without preamble and suffix)
-            ByteBuf frame = buf.readRetainedSlice(payloadLength);
+            // Check if packet ends with 7E7E
+            int lastByte = buf.getUnsignedByte(buf.writerIndex() - 1);
+            int secondLastByte = buf.getUnsignedByte(buf.writerIndex() - 2);
+            
+            if (lastByte == 0x7E && secondLastByte == 0x7E) {
+                // Found 7E7E suffix - extract payload
+                int payloadLength = totalBytes - 2; // Remove 7E7E
 
-            // Skip suffix (4 bytes) - don't care what it contains
-            buf.skipBytes(SUFFIX_LENGTH);
+                ByteBuf frame = buf.readRetainedSlice(payloadLength);
+                buf.skipBytes(2); // Skip 7E7E
 
-            return frame;
+                return frame;
+            } else {
+                // 7E7E not found, wait for more data
+                buf.readerIndex(buf.readerIndex() - PREAMBLE_LENGTH); // Reset
+                return null;
+            }
         }
 
         // No valid preamble found, skip one byte and try again

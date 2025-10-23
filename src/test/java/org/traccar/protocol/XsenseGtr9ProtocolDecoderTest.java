@@ -127,6 +127,15 @@ public class XsenseGtr9ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, binary(
                 "7207241ABF11E00700335721AF0A439B623D16AD90FF05000E29B307C00000086C000E00007000B27CF6"));
 
+        // Ping reply with 2-byte suffix: 7e7e7e7e00 6d538418981...5555edbc 7e7e
+        // After frame decoder: 6d538418981...5555edbc (removes 5-byte preamble and 2-byte suffix 7E7E)
+        // Type=0x6D (109=PING_REPLY_ENHIO), Seq=0x53(83), Size=0x84(132 bytes), BoxID=0x1898(6296)
+        // Device ID = 1,300,000 + 6,296 = 1,306,296
+        // Note: This packet has 2-byte suffix (7E7E) not 4 bytes like position packets
+        // Frame decoder detects 7E7E at the end and removes it dynamically
+        verifyNotNull(decoder, binary(
+                "6D5384189811E1061D335723B1099171EE3D0E9AD7FF010010291103B0000007E3000000880000000000140208000500010A8EB0C600000000000000002C00012C0000000000000000000000000000000000000000000000001600000000000000000000000000000000000000000000000000000000000000000000000000000000005555EDBC"));
+
     }
 
     @Test
