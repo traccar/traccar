@@ -125,6 +125,8 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
             receivedCrc = receivedCrc1;
             calculatedCrc = calculatedCrc1;
             crcValid = true;
+            LOGGER.debug("CRC validated at last 2 bytes: type={}, position={}, CRC={}",
+                    messageType, dataLength1, String.format("%04X", receivedCrc1));
         } else {
             // Try position 2: CRC at size field position
             int dataLength2 = sizeField - 2;
@@ -139,11 +141,17 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
                     receivedCrc = receivedCrc2;
                     calculatedCrc = calculatedCrc2;
                     crcValid = true;
+                    LOGGER.debug("CRC validated at size field position: type={}, position={}, CRC={}",
+                            messageType, dataLength2, String.format("%04X", receivedCrc2));
                 } else {
                     // Neither position validates, use last 2 bytes as default
                     dataLength = dataLength1;
                     receivedCrc = receivedCrc1;
                     calculatedCrc = calculatedCrc1;
+                    LOGGER.debug("CRC validation failed at both positions: type={}, pos1[{}]={}/{}, pos2[{}]={}/{}",
+                            messageType,
+                            dataLength1, String.format("%04X", receivedCrc1), String.format("%04X", calculatedCrc1),
+                            dataLength2, String.format("%04X", receivedCrc2), String.format("%04X", calculatedCrc2));
                 }
             } else {
                 // Size field invalid, use last 2 bytes
