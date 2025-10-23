@@ -103,23 +103,64 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         buf.readerIndex(startIndex);
         int availableBytes = buf.readableBytes();
 
-        // GTR-9 packets may have trailing bytes after the specified size
-        // The CRC is ALWAYS at the last 2 bytes of the buffer (after frame decoder)
-        // Size field indicates the "official" packet size, but actual payload may be longer
-        // Example: Size=36, but actual=42 (6 trailing bytes including final CRC)
+        // GTR-9 packets have two possible CRC positions:
+        // 1. At the last 2 bytes (when there are trailing bytes after the packet)
+        // 2. At Size field - 2 (when packet ends exactly at size boundary)
+        // Try both positions and use whichever validates correctly
 
-        // Validate CRC16/CCITT - CRC is at the LAST 2 bytes
-        int dataLength = availableBytes - 2; // All data minus CRC
-        ByteBuf dataForCrc = buf.slice(buf.readerIndex(), dataLength);
-        int receivedCrc = buf.getUnsignedShort(buf.readerIndex() + dataLength);
-        int calculatedCrc = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, dataForCrc.nioBuffer());
+        int dataLength;
+        int receivedCrc;
+        int calculatedCrc;
+        boolean crcValid = false;
+
+        // Try position 1: CRC at last 2 bytes
+        int dataLength1 = availableBytes - 2;
+        ByteBuf dataForCrc1 = buf.slice(buf.readerIndex(), dataLength1);
+        int receivedCrc1 = buf.getUnsignedShort(buf.readerIndex() + dataLength1);
+        int calculatedCrc1 = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, dataForCrc1.nioBuffer());
+
+        if (receivedCrc1 == calculatedCrc1) {
+            // CRC matches at last 2 bytes (trailing bytes present)
+            dataLength = dataLength1;
+            receivedCrc = receivedCrc1;
+            calculatedCrc = calculatedCrc1;
+            crcValid = true;
+        } else {
+            // Try position 2: CRC at size field position
+            int dataLength2 = sizeField - 2;
+            if (dataLength2 > 0 && dataLength2 + 2 <= availableBytes) {
+                ByteBuf dataForCrc2 = buf.slice(buf.readerIndex(), dataLength2);
+                int receivedCrc2 = buf.getUnsignedShort(buf.readerIndex() + dataLength2);
+                int calculatedCrc2 = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, dataForCrc2.nioBuffer());
+
+                if (receivedCrc2 == calculatedCrc2) {
+                    // CRC matches at size field position
+                    dataLength = dataLength2;
+                    receivedCrc = receivedCrc2;
+                    calculatedCrc = calculatedCrc2;
+                    crcValid = true;
+                } else {
+                    // Neither position validates, use last 2 bytes as default
+                    dataLength = dataLength1;
+                    receivedCrc = receivedCrc1;
+                    calculatedCrc = calculatedCrc1;
+                }
+            } else {
+                // Size field invalid, use last 2 bytes
+                dataLength = dataLength1;
+                receivedCrc = receivedCrc1;
+                calculatedCrc = calculatedCrc1;
+            }
+        }
 
         // Skip CRC validation for message type 100 (driver license)
         // These packets have CRC mismatches but valid data
         // Also skip CRC validation for type 109 (ping reply) if size mismatch detected
         boolean skipCrcValidation = messageType == M_DRIVER_LICENSE
                 || (messageType == M_PING_REPLY_ENHIO && dataLength != calculatedCrc);
-        if (!skipCrcValidation && (receivedCrc != calculatedCrc || dataLength < 4)) {
+
+        // Validate CRC (unless already validated by trying both positions, or skip is requested)
+        if (!crcValid && !skipCrcValidation && (receivedCrc != calculatedCrc || dataLength < 4)) {
             LOGGER.warn("CRC validation failed: type={}, received={}, calculated={}, dataLength={}",
                     messageType,
                     String.format("%04X", receivedCrc),

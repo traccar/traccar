@@ -100,6 +100,16 @@ public class XsenseGtr9ProtocolDecoderTest extends ProtocolTest {
         verifyNotNull(decoder, binary(
                 "6D458405F911E207000C6904F6046710983B9E23E8FE01000B273778200067500063C000720000000000000208000300000150992C00000000223347222C00002C07380000000000000000000000000000000000000000000000B40000000000000000000000000000000000000000000000000000000000000000000000000000000055559EEE"));
 
+        // Packet with CRC at size field position (not at end): 7e7e7e7e00 720924199411e0060033571f79...0dd0...b52f 7e7e
+        // After frame decoder: 720924199411e0060033571f79...0dd0...b52f
+        // Type=0x72 (114=TINI_BATCH_ONLINE), Seq=0x09(9), Size=0x24(36 bytes), BoxID=0x1994(6548)
+        // Device ID = 1,300,000 + 6,548 = 1,306,548
+        // This packet has CRC at position (size-2) = 34, not at the end (position 41)
+        // Decoder tries both positions and uses whichever validates correctly
+        // GPS32 data at position 5-36, then trailing data 37-42
+        verifyPositions(decoder, binary(
+                "720924199411E0060033571F79086117F23BD381B0FF05001127210DD000000824000FD9007000A8B52F"));
+
     }
 
     @Test
