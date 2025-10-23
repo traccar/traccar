@@ -110,6 +110,23 @@ public class XsenseGtr9ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, binary(
                 "720924199411E0060033571F79086117F23BD381B0FF05001127210DD000000824000FD9007000A8B52F"));
 
+        // More packets with CRC at last 2 bytes (all have Size=36, Actual=42, trailing 6 bytes)
+        // Packet: BoxID 0x0FB0 (4016), Device 1304016
+        verifyPositions(decoder, binary(
+                "7208240FB011F1060B335721AE03C1D2183BC148AFFF050012280F000000000878000150007000DF548E"));
+
+        // Packet: BoxID 0x0E5A (3674), Device 1303674
+        verifyPositions(decoder, binary(
+                "7201240E5A11E00A000C6921AE07F168B63B5688EFFE050008271F0000000008006B00000070B688EF28"));
+
+        // Packet: BoxID 0x1563 (5475), Device 1305475
+        verifyPositions(decoder, binary(
+                "720324156311F50604335721AF0891008E3C3B5772FF050010283D0000000008700004101070008BDA44"));
+
+        // Packet: BoxID 0x1ABF (6847), Device 1306847
+        verifyPositions(decoder, binary(
+                "7207241ABF11E00700335721AF0A439B623D16AD90FF05000E29B307C00000086C000E00007000B27CF6"));
+
     }
 
     @Test
