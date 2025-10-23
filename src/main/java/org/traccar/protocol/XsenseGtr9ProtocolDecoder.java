@@ -93,14 +93,25 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         // Save reader index to include message type in CRC calculation
         int startIndex = buf.readerIndex();
         int messageType = buf.readUnsignedByte();
-
-        // Validate CRC16/CCITT
-        // CRC covers: Type(1) | Seq(1) | Size(1) | BoxID(2) | Data(N)
-        // CRC is the last 2 bytes
-        int dataLength = buf.readableBytes() - 2; // Remaining bytes minus CRC
-        buf.readerIndex(startIndex); // Reset to include message type
-        ByteBuf dataForCrc = buf.slice(buf.readerIndex(), dataLength + 1); // Include message type
-        int receivedCrc = buf.getUnsignedShort(buf.readerIndex() + dataLength + 1);
+        
+        // Read header to get size field (which indicates the actual packet size)
+        int sequence = buf.readUnsignedByte();
+        int sizeField = buf.readUnsignedByte();
+        int boxId = buf.readUnsignedShort();
+        
+        // Reset to start for CRC calculation
+        buf.readerIndex(startIndex);
+        int availableBytes = buf.readableBytes();
+        
+        // GTR-9 packets may have trailing bytes after the specified size
+        // The CRC is ALWAYS at the last 2 bytes of the buffer (after frame decoder)
+        // Size field indicates the "official" packet size, but actual payload may be longer
+        // Example: Size=36, but actual=42 (6 trailing bytes including final CRC)
+        
+        // Validate CRC16/CCITT - CRC is at the LAST 2 bytes
+        int dataLength = availableBytes - 2; // All data minus CRC
+        ByteBuf dataForCrc = buf.slice(buf.readerIndex(), dataLength);
+        int receivedCrc = buf.getUnsignedShort(buf.readerIndex() + dataLength);
         int calculatedCrc = Checksum.crc16(Checksum.CRC16_CCITT_FALSE, dataForCrc.nioBuffer());
 
         // Skip CRC validation for message type 100 (driver license)
@@ -124,11 +135,8 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
                     String.format("%04X", calculatedCrc));
         }
 
-        // Parse Siemens raw format: Type(1) | Seq(1) | Size(1) | BoxID(2) | Data(N) | CRC(2)
-        buf.readerIndex(startIndex + 1); // Skip type byte
-        int sequence = buf.readUnsignedByte();
-        buf.readUnsignedByte(); // size - not used
-        int boxId = buf.readUnsignedShort();
+        // Reset buffer position to skip already-read header
+        buf.readerIndex(startIndex + 5); // Skip Type(1) + Seq(1) + Size(1) + BoxID(2)
 
         // GTR-9 uses offset 1,300,000
         long deviceId = DEVICE_ID_OFFSET + boxId;
