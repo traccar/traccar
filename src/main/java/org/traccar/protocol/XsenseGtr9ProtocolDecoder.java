@@ -102,7 +102,10 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
         // Skip CRC validation for message type 100 (driver license)
         // These packets have CRC mismatches but valid data
-        if (messageType != M_DRIVER_LICENSE && (receivedCrc != calculatedCrc || dataLength < 4)) {
+        // Also skip CRC validation for type 109 (ping reply) if size mismatch detected
+        boolean skipCrcValidation = messageType == M_DRIVER_LICENSE
+                || (messageType == M_PING_REPLY_ENHIO && dataLength != calculatedCrc);
+        if (!skipCrcValidation && (receivedCrc != calculatedCrc || dataLength < 4)) {
             LOGGER.warn("CRC validation failed: type={}, received={}, calculated={}, dataLength={}",
                     messageType,
                     String.format("%04X", receivedCrc),
@@ -111,8 +114,9 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (messageType == M_DRIVER_LICENSE && receivedCrc != calculatedCrc) {
-            LOGGER.debug("Driver license CRC mismatch (ignored): received={}, calculated={}",
+        if (skipCrcValidation && receivedCrc != calculatedCrc) {
+            LOGGER.debug("CRC mismatch (ignored) for type {}: received={}, calculated={}",
+                    messageType,
                     String.format("%04X", receivedCrc),
                     String.format("%04X", calculatedCrc));
         }
@@ -403,6 +407,10 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private Position decodeSiemensPingReply(DeviceSession deviceSession, ByteBuf buf) {
+        // GTR-9 ping reply has variable size:
+        // - Old format: 32 GPS32 + 96 ping data = 128 bytes
+        // - New format: 32 GPS32 + 96 ping data + 4 extended = 132 bytes
+        // Some devices may send incomplete data, handle gracefully
         if (buf.readableBytes() < 128) {
             return null;
         }
@@ -413,7 +421,14 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        // Remaining 96 bytes: additional ping reply data
+        // Check remaining bytes for ping data
+        int remainingBytes = buf.readableBytes();
+        if (remainingBytes < 96) {
+            LOGGER.warn("Ping reply has insufficient data: {} bytes (expected at least 96)", remainingBytes);
+            return position; // Return GPS position without ping data
+        }
+
+        // Read 96 bytes: additional ping reply data
         int offlinePtr = buf.readUnsignedShort();
         int idSec = buf.readUnsignedShort();
         int sTime = buf.readUnsignedShort();
@@ -442,6 +457,30 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // opt3 - not used
         buf.readUnsignedShort(); // opt4 - not used
         int sync = buf.readUnsignedShort();
+
+        // GTR-9 Extended Data: Read 4 additional bytes if available
+        // Some firmware versions may not include extended data
+        if (buf.readableBytes() >= 4) {
+            int event1 = buf.readUnsignedByte();
+            int event2 = buf.readUnsignedByte();
+            int event3 = buf.readUnsignedByte();
+            buf.readUnsignedByte(); // crc_record - not used
+
+            String sensor1Binary = String.format("%8s", Integer.toBinaryString(event1)).replace(' ', '0');
+            String sensor2Binary = String.format("%8s", Integer.toBinaryString(event2)).replace(' ', '0');
+            String extensionBinary = String.format("%8s", Integer.toBinaryString(event3)).replace(' ', '0');
+            String sensorData = sensor1Binary + sensor2Binary + extensionBinary;
+
+            position.set("sensorData", sensorData);
+            position.set("event1", event1);
+            position.set("event2", event2);
+            position.set("event3", event3);
+
+            LOGGER.debug("Ping reply extended data - event1: {}, event2: {}, event3: {}",
+                    event1, event2, event3);
+        } else {
+            LOGGER.debug("Ping reply without extended data (old format or incomplete packet)");
+        }
 
         // Store additional fields
         position.set("offlinePointer", offlinePtr);

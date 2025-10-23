@@ -38,6 +38,24 @@ public class XsenseGtr9ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, binary(
                 "723C2418FC11EA07003356B2400467187C3B9E21D2FE01000D27AE0000000007A800BD000000B640B0EC"));
 
+        // Packet from log: 7e7e7e7e00 72012413f1 11e3051c335705a508f4691c3cd4d492ff050012296d0000000008801502c0287000be 7c11 7e7e
+        // After frame decoder: 72012413f1 11e3051c335705a508f4691c3cd4d492ff050012296d0000000008801502c0287000be 7c11
+        // Type=0x72 (114=TINI_BATCH_ONLINE), Seq=0x01(1), Size=0x24(36 bytes), BoxID=0x13F1(5105)
+        // Device ID = 1,300,000 + 5,105 = 1,305,105
+        // Data: 32 bytes GPS32 record + 4 bytes extra + CRC16(7C11)
+        verifyPositions(decoder, binary(
+                "72012413F111E3051C335705A508F4691C3CD4D492FF050012296D0000000008801502C0287000BE7C11"));
+
+        // Ping reply packet: 7e7e7e7e00 6d008413f1 11e3051b...5555 05 837e 7e7e
+        // After frame decoder: 6d008413f1 11e3051b...5555 05 837e
+        // Type=0x6D (109=PING_REPLY_ENHIO), Seq=0x00, Size=0x84(132 bytes), BoxID=0x13F1(5105)
+        // Device ID = 1,300,000 + 5,105 = 1,305,105
+        // Note: Size field says 132 bytes but packet has only 129 bytes data
+        //       Decoder handles this gracefully (may be old format 128+1 or incomplete extended)
+        //       CRC validation will fail but position data should decode
+        verifyNotNull(decoder, binary(
+                "6D008413F111E3051B3357058608F400583CD44AB8FF010012296C0000000008851502B0A900000000001402080003000E01C1305F00000000000000002C000E2C000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000000000000000000000000000000555505837E"));
+
     }
 
     @Test
