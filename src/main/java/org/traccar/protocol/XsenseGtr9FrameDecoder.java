@@ -57,7 +57,7 @@ public class XsenseGtr9FrameDecoder extends BaseFrameDecoder {
 
             // Calculate payload length (total - preamble - suffix)
             int payloadLength = buf.readableBytes() - SUFFIX_LENGTH;
-            
+
             if (payloadLength <= 0) {
                 // Not enough data, wait for more
                 buf.readerIndex(buf.readerIndex() - PREAMBLE_LENGTH); // Reset
