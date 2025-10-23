@@ -472,7 +472,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         int month = (int) ((datetimeRaw >> 21) & 0x0F);
         int year = (int) ((datetimeRaw >> 25) & 0x7F) + 2000;
 
-        if (year < 2000 || year > 2127 || month < 1 || month > 12
+        if (year < 2000 || year > 2050 || month < 1 || month > 12
                 || day < 1 || day > 31 || hours > 23 || minutes > 59 || seconds > 59) {
             return null;
         }
