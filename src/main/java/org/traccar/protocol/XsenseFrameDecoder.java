@@ -41,10 +41,12 @@ public class XsenseFrameDecoder extends BaseFrameDecoder {
             // Skip preamble
             buf.skipBytes(5);
 
-            // Find suffix: 7E 7E
+            // Find suffix: 7E 7E or 00 00 (some devices send 0000 instead of 7E7E)
             int endIndex = -1;
             for (int i = buf.readerIndex(); i < buf.writerIndex() - 1; i++) {
-                if (buf.getUnsignedByte(i) == 0x7E && buf.getUnsignedByte(i + 1) == 0x7E) {
+                int byte1 = buf.getUnsignedByte(i);
+                int byte2 = buf.getUnsignedByte(i + 1);
+                if ((byte1 == 0x7E && byte2 == 0x7E) || (byte1 == 0x00 && byte2 == 0x00)) {
                     endIndex = i;
                     break;
                 }
@@ -60,7 +62,7 @@ public class XsenseFrameDecoder extends BaseFrameDecoder {
             int length = endIndex - buf.readerIndex();
             ByteBuf frame = buf.readRetainedSlice(length);
 
-            // Skip suffix
+            // Skip suffix (7E7E or 0000)
             buf.skipBytes(2);
 
             return frame;

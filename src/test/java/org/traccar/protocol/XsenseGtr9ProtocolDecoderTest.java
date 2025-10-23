@@ -67,6 +67,15 @@ public class XsenseGtr9ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, binary(
                 "72722405F911E207000C690D510467110F3B9E23B7FE010009273778300067300063BD000000B60590DC"));
 
+        // Packet with 0000 suffix (instead of 7E7E): 7e7e7e7e00 73092410ab...746b 0000
+        // After frame decoder: 73092410ab11e005003357110303c278c63bc19e82fe050012282d00000000079800000000700028746b
+        // Type=0x73 (115=OFFLINE), Seq=0x09(9), Size=0x24(36 bytes), BoxID=0x10AB(4267)
+        // Device ID = 1,300,000 + 4,267 = 1,304,267
+        // Note: Some devices send 0000 instead of 7E7E as suffix
+        // Frame decoder now handles both 7E7E and 0000 as valid suffixes
+        verifyPositions(decoder, binary(
+                "73092410AB11E005003357110303C278C63BC19E82FE050012282D00000000079800000000700028746B"));
+
         // Ping reply packet: 7e7e7e7e00 6d008413f1 11e3051b...5555 05 837e 7e7e
         // After frame decoder: 6d008413f1 11e3051b...5555 05 837e
         // Type=0x6D (109=PING_REPLY_ENHIO), Seq=0x00, Size=0x84(132 bytes), BoxID=0x13F1(5105)
@@ -76,6 +85,20 @@ public class XsenseGtr9ProtocolDecoderTest extends ProtocolTest {
         //       CRC validation will fail but position data should decode
         verifyNotNull(decoder, binary(
                 "6D008413F111E3051B3357058608F400583CD44AB8FF010012296C0000000008851502B0A900000000001402080003000E01C1305F00000000000000002C000E2C000000000000000000000000000000000000000000000000180000000000000000000000000000000000000000000000000000000000000000000000000000000000555505837E"));
+
+        // New ping reply: 7e7e7e7e00 6d458405f9 11e207000c6904f6...5555 9eee 7e7e
+        // After frame decoder: 6d458405f9 11e207000c6904f6...5555 9eee
+        // Type=0x6D (109=PING_REPLY_ENHIO), Seq=0x45(69), Size=0x84(132 bytes), BoxID=0x05F9(1529)
+        // Device ID = 1,300,000 + 1,529 = 1,301,529
+        // GPS32 data:
+        //   DateTime: 0x0C6904F6 → 2025-10-23 07:39:44 (with GPS rollover)
+        //   Latitude: 0x04671098 → 7.643886666666667°
+        //   Longitude: 0x3B9E23E8 → 100.036604°
+        //   Satellites: 11, Altitude: 11.8872m
+        //   Analog: ana0=1922, ana1=0, ana2=1653, ana3=0, ana4=1596, ana5=0
+        // Cell tower: MCC=520 (0x0208), MNC=3, Cell ID=0x0150992C
+        verifyNotNull(decoder, binary(
+                "6D458405F911E207000C6904F6046710983B9E23E8FE01000B273778200067500063C000720000000000000208000300000150992C00000000223347222C00002C07380000000000000000000000000000000000000000000000B40000000000000000000000000000000000000000000000000000000000000000000000000000000055559EEE"));
 
     }
 
