@@ -329,10 +329,17 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             Position position = new Position(getProtocolName());
             position.setDeviceId(deviceSession.getDeviceId());
 
+            // Mark batch data type with custom attribute (not using outdated flag)
+            // Using outdated=true would cause OutdatedHandler to override deviceTime and coordinates
+            // Instead, use a custom attribute to preserve original device timestamps
             if (messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO
                     || messageType == M_BATCH_OFFLINE_POSITION_REPORT_ENHIO) {
-                    position.set(Position.KEY_STATUS, "offline");
-                }
+                position.set("offlineBatch", true);
+                position.set("batchType", "offline");
+            } else {
+                position.set("offlineBatch", false);
+                position.set("batchType", "online");
+            }
 
             // Lat/Lon: 7 bytes as hex string, split into 3.5 bytes each
             byte[] latlongBytes = new byte[7];

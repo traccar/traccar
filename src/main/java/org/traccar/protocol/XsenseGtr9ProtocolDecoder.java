@@ -375,13 +375,18 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
                             deviceSession.getDeviceId());
                     continue; // Skip this position
                 }
-                /*
-                boolean outdated = messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO;
-                position.setOutdated(outdated);
-                if (outdated) {
-                   position.setDeviceTime(position.getFixTime());
+
+                // Mark batch data type with custom attribute (not using outdated flag)
+                // Using outdated=true would cause OutdatedHandler to override deviceTime and coordinates
+                // Instead, use a custom attribute to preserve original device timestamps
+                if (messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO) {
+                    position.set("offlineBatch", true);
+                    position.set("batchType", "offline");
+                } else {
+                    position.set("offlineBatch", false);
+                    position.set("batchType", "online");
                 }
-                */
+
                 positions.add(position);
             } else {
                 break; // Stop if we can't decode a record
