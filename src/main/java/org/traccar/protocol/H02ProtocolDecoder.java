@@ -181,14 +181,14 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .number("-(d+)-(d+.d+),([NS]),")     // latitude
             .or()
-            .number("(d+)(dd.d+),([NS]),")       // latitude
+            .number("(d*)(dd.d+),([NS]),")       // latitude
             .or()
             .number("(d+)(dd)(d{4}),([NS]),")    // latitude
             .groupEnd()
             .groupBegin()
             .number("-(d+)-(d+.d+),([EW]),")     // longitude
             .or()
-            .number("(d+)(dd.d+),([EW]),")       // longitude
+            .number("(d*)(dd.d+),([EW]),")       // longitude
             .or()
             .number("(d+)(dd)(d{4}),([EW]),")    // longitude
             .groupEnd()
