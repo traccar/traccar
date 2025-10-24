@@ -306,8 +306,8 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         calendar.clear();
         calendar.set(year, month - 1, day, hours, minutes, seconds);
         applyGpsRollover(calendar, year);
-        position.setTime(calendar.getTime());
-
+        position.setFixTime(calendar.getTime());
+         position.setDeviceTime(calendar.getTime());
         // Read license data (remaining bytes minus CRC)
         // CRC is the last 2 bytes, so exclude them
         int licenseLength = buf.readableBytes() - 2;
@@ -489,7 +489,8 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         calendar.clear();
         calendar.set(year, month - 1, day, hours, minutes, seconds);
         applyGpsRollover(calendar, year);
-        position.setTime(calendar.getTime());
+        position.setFixTime(calendar.getTime());
+        position.setDeviceTime(calendar.getTime());
 
         return position;
     }
