@@ -294,7 +294,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(latitude);
         position.setLongitude(longitude);
         position.setValid(gpsValid);
-        position.setCourse(courseBits * 360.0 / 32.0);
+        position.setCourse(courseBits * 360.0 / 24.0); // GTR-9: 24 directions = 15° each
         position.setSpeed(speed * 1.852 * 0.539957);
         position.set(Position.KEY_HDOP, hdop);
 
@@ -444,7 +444,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(latitude);
         position.setLongitude(longitude);
         position.setValid(gpsValid);
-        position.setCourse(courseBits * 360.0 / 32.0);
+        position.setCourse(courseBits * 360.0 / 24.0); // GTR-9: 24 directions = 15° each
         position.setSpeed(speedRaw * 1.852 * 0.539957);
         position.setAltitude((altRaw - 10000) * 0.3048);
         position.set(Position.KEY_HDOP, hdop);

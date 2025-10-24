@@ -364,8 +364,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             // Flag and Degree (1 byte) - contains GPS status (bit 6) and course (bits 0-5)
             int flagDegree = buf.readUnsignedByte();
             position.setValid((flagDegree & 0x40) != 0); // Bit 6 = GPS status
-            int courseBits = flagDegree & 0x1F; // Lower 5 bits = course (0-31)
-            position.setCourse(courseBits * 360.0 / 32.0); // Map to 0-360 degrees
+            int courseBits = flagDegree & 0x1F; // Lower 5 bits = course (0-23 for Xsense)
+            position.setCourse(courseBits * 360.0 / 24.0); // Convert to angle: 24 directions = 15° each
 
             // Digital inputs (1 byte)
             int digital = buf.readUnsignedByte();
@@ -493,7 +493,7 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         int flagDegree = buf.readUnsignedByte();
         position.setValid((flagDegree & 0x40) != 0);
         int courseBits = flagDegree & 0x1F;
-        position.setCourse(courseBits * 360.0 / 32.0);
+        position.setCourse(courseBits * 360.0 / 24.0); // 24 directions = 15° each
 
         int digital = buf.readUnsignedByte();
         String digitalBinary = String.format("%8s", Integer.toBinaryString(digital)).replace(' ', '0');
@@ -642,7 +642,7 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         position.setLatitude(latitude);
         position.setLongitude(longitude);
         position.setValid(gpsValid);
-        position.setCourse(courseBits * 360.0 / 32.0);
+        position.setCourse(courseBits * 360.0 / 24.0); // 24 directions = 15° each
 
         // Speed: raw * 1.852 km/h, convert to knots
         position.setSpeed(speedRaw * 1.852 * 0.539957);
