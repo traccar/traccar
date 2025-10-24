@@ -407,7 +407,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
             Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             calendar.clear();
             calendar.set(year, month - 1, day, hour, minute, second);
-            position.setTime(calendar.getTime());
+            position.setFixTime(calendar.getTime());
+            position.setDeviceTime(calendar.getTime());
 
             // Only add valid positions with reasonable datetime
             positions.add(position);
@@ -516,7 +517,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.clear();
         calendar.set(year, month - 1, day, hour, minute, second);
-        position.setTime(calendar.getTime());
+        position.setFixTime(calendar.getTime());
+        position.setDeviceTime(calendar.getTime());
 
         byte[] phoneBytes = new byte[14];
         buf.readBytes(phoneBytes);
@@ -688,7 +690,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.clear();
         calendar.set(year, month - 1, day, hours, minutes, seconds);
-        position.setTime(calendar.getTime());
+        position.setFixTime(calendar.getTime());
+        position.setDeviceTime(calendar.getTime());
 
         return position;
     }
