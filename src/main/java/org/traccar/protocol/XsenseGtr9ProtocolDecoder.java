@@ -42,9 +42,13 @@ import java.util.TimeZone;
  * 2. ACK format: ">OK,<CRC>#\r\n" (supports command queue)
  * 3. New message type 100: driver_license (RFID reader data)
  * 4. Command return/pending logic for bidirectional communication
+ * 5. Strict deviceTime validation: positions with null deviceTime are rejected
  *
  * Protocol uses Siemens RAW format (no XOR encoding):
  * Type(1) | Seq(1) | Size(1) | BoxID(2) | Data(N) | CRC16(2)
+ *
+ * Important: deviceTime MUST always come from the device. If deviceTime is null,
+ * the position will be rejected to ensure data integrity.
  */
 public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
@@ -327,6 +331,13 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         position.set("messageType", "driverLicense");
         position.set("ntype", ntype);
 
+        // GTR-9 requirement: deviceTime must come from device, never null
+        if (position.getDeviceTime() == null) {
+            LOGGER.warn("Driver license position rejected: deviceTime is null for device {}", 
+                    deviceSession.getDeviceId());
+            return null;
+        }
+
         return position;
     }
 
@@ -358,6 +369,12 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         while (buf.readableBytes() >= 32) {
             Position position = decodeSiemensGps32Record(deviceSession, buf);
             if (position != null) {
+                // GTR-9 requirement: deviceTime must come from device, never null
+                if (position.getDeviceTime() == null) {
+                    LOGGER.warn("Position rejected: deviceTime is null for device {}", 
+                            deviceSession.getDeviceId());
+                    continue; // Skip this position
+                }
                 boolean outdated = messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO;
                 position.setOutdated(outdated);
                 positions.add(position);
@@ -492,6 +509,13 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         position.setFixTime(calendar.getTime());
         position.setDeviceTime(calendar.getTime());
 
+        // GTR-9 requirement: deviceTime must come from device, never null
+        if (position.getDeviceTime() == null) {
+            LOGGER.warn("GPS32 position rejected: deviceTime is null for device {}", 
+                    deviceSession.getDeviceId());
+            return null;
+        }
+
         return position;
     }
 
@@ -599,6 +623,13 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
             }
             network.addCellTower(primary);
             position.setNetwork(network);
+        }
+
+        // GTR-9 requirement: deviceTime must come from device, never null
+        if (position.getDeviceTime() == null) {
+            LOGGER.warn("Ping reply position rejected: deviceTime is null for device {}", 
+                    deviceSession.getDeviceId());
+            return null;
         }
 
         return position;
