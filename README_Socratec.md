@@ -17,7 +17,6 @@ There is also a set of mobile apps that you can use for tracking mobile devices:
 
 ## Local Setup
 1. Checkout Traccar repository
-2. Fetch Git submodule which contains the web application `git submodule update --init --recursive`
 
 ### Starting the Application
 #### Method 1: Using Gradle (Recommended for Development)
@@ -57,14 +56,15 @@ The gradle run task uses `debug.xml` by default, which configures results in hav
 - __Database__: H2 file database at `./target/database` and Web admin interface enabled
 - __Media storage__: `./target/media`
 
-## Accessing the Application
+## Accessing the Services
 Once started, the services will be accessible at:
 
-| Service     | URL                          |
-| -------     | ---                          |
-| Web App     | http://localhost:8082        |
-| APIs        | http://localhost:8082/api/   |
-| Database    | http://localhost:8082/console|
+| Service                   | URL                           | Note  |
+| -------                   | ---                           | ---   |
+| Web App (legacy app)      | http://localhost:8082         |       |
+| Web App                   | http://localhost:3000         | Web app needs to be setup and started separately, see section further down.   |
+| APIs                      | http://localhost:8082/api/    |       |
+| Database                  | http://localhost:8082/console |       |
 
 ### Access H2 database
 1. Open your browser and navigate to http://localhost:8082/console
@@ -73,3 +73,9 @@ Once started, the services will be accessible at:
 - __User Name__: `sa`
 - __Password__: (leave empty)
 - __Driver Class__: `org.h2.Driver`
+
+### Start and access Web App
+1. Clone the repository traccar/traccar-web
+2. The web-app is react based and can locally be hosted using nodejs. Therefor run `npm install` after you cloned the repo to fetch all required dependencies.
+3. To start the web server use `start.sh` or respective `start.bat`. By default the web server is configured using `vite.config.js`. The config defines the APIs used by the web app to be available on `localhost:8082`.
+4. After startup, the web app is locally available via http://localhost:3000/.
