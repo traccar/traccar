@@ -333,7 +333,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
         // GTR-9 requirement: deviceTime must come from device, never null
         if (position.getDeviceTime() == null) {
-            LOGGER.warn("Driver license position rejected: deviceTime is null for device {}", 
+            LOGGER.warn("Driver license position rejected: deviceTime is null for device {}",
                     deviceSession.getDeviceId());
             return null;
         }
@@ -371,7 +371,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
             if (position != null) {
                 // GTR-9 requirement: deviceTime must come from device, never null
                 if (position.getDeviceTime() == null) {
-                    LOGGER.warn("Position rejected: deviceTime is null for device {}", 
+                    LOGGER.warn("Position rejected: deviceTime is null for device {}",
                             deviceSession.getDeviceId());
                     continue; // Skip this position
                 }
@@ -511,7 +511,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
         // GTR-9 requirement: deviceTime must come from device, never null
         if (position.getDeviceTime() == null) {
-            LOGGER.warn("GPS32 position rejected: deviceTime is null for device {}", 
+            LOGGER.warn("GPS32 position rejected: deviceTime is null for device {}",
                     deviceSession.getDeviceId());
             return null;
         }
@@ -627,7 +627,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
         // GTR-9 requirement: deviceTime must come from device, never null
         if (position.getDeviceTime() == null) {
-            LOGGER.warn("Ping reply position rejected: deviceTime is null for device {}", 
+            LOGGER.warn("Ping reply position rejected: deviceTime is null for device {}",
                     deviceSession.getDeviceId());
             return null;
         }
