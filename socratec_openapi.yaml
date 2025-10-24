@@ -1,0 +1,260 @@
+openapi: 3.1.0
+info:
+  title: Socratec Traccar Extensions
+  description: Socratec-specific extensions to the Traccar GPS tracking server API. This includes additional endpoints and models for enhanced trip management functionality.
+  contact:
+    name: Socratec Telematic GmbH
+    url: https://www.socratec.de/
+    email: support@socratec.de
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: '1.0.0'
+servers:
+  - url: http://{host}:{port}/api
+    description: Socratec Server
+    variables:
+      host:
+        default: localhost
+      port:
+        enum:
+          - '8082'
+          - '80'
+        default: '8082'
+security:
+  - BasicAuth: []
+  - ApiKey: []
+tags:
+  - name: Trips
+    description: Trip management and logbook functionality
+paths:
+  /trips:
+    get:
+      summary: Fetch a list of Trips
+      description: Without params, it returns a list of Trips the user has access to
+      tags:
+        - Trips
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Trip'
+        '400':
+          description: No permission
+          content: {}
+    post:
+      summary: Create a Trip (Not Supported)
+      description: Trip creation is not supported. This endpoint returns HTTP 405 Method Not Allowed.
+      tags:
+        - Trips
+      responses:
+        '405':
+          description: Method Not Allowed - Trip creation is not supported
+          content: {}
+  /trips/{id}:
+    get:
+      summary: Get a single Trip
+      tags:
+        - Trips
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Trip not found
+          content: {}
+        '400':
+          description: No permission
+          content: {}
+    put:
+      summary: Update a Trip
+      tags:
+        - Trips
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Trip'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Trip'
+        '404':
+          description: Trip not found
+          content: {}
+        '400':
+          description: No permission or validation error
+          content: {}
+      x-codegen-request-body-name: body
+    delete:
+      summary: Delete a Trip (Not Supported)
+      description: Trip deletion is not supported. This endpoint returns HTTP 405 Method Not Allowed.
+      tags:
+        - Trips
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '405':
+          description: Method Not Allowed - Trip deletion is not supported
+          content: {}
+components:
+  schemas:
+    Trip:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the trip
+        deviceId:
+          type: integer
+          format: int64
+          description: ID of the device that performed this trip
+        distance:
+          type: number
+          format: double
+          description: Total distance of the trip in meters
+        averageSpeed:
+          type: number
+          format: double
+          description: Average speed during the trip in km/h
+        maxSpeed:
+          type: number
+          format: double
+          description: Maximum speed reached during the trip in km/h
+        spentFuel:
+          type: number
+          format: double
+          description: Amount of fuel consumed during the trip in liters
+        startOdometer:
+          type: number
+          format: double
+          description: Odometer reading at trip start
+        endOdometer:
+          type: number
+          format: double
+          description: Odometer reading at trip end
+        startTime:
+          type: string
+          format: date-time
+          description: Trip start time in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+        endTime:
+          type: string
+          format: date-time
+          description: Trip end time in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+        startPositionId:
+          type: integer
+          format: int64
+          description: ID of the position record at trip start
+        endPositionId:
+          type: integer
+          format: int64
+          description: ID of the position record at trip end
+        startLat:
+          type: number
+          format: double
+          description: Latitude coordinate at trip start
+        startLon:
+          type: number
+          format: double
+          description: Longitude coordinate at trip start
+        endLat:
+          type: number
+          format: double
+          description: Latitude coordinate at trip end
+        endLon:
+          type: number
+          format: double
+          description: Longitude coordinate at trip end
+        startAddress:
+          type: string
+          maxLength: 512
+          description: Human-readable address at trip start location
+          nullable: true
+        endAddress:
+          type: string
+          maxLength: 512
+          description: Human-readable address at trip end location
+          nullable: true
+        duration:
+          type: integer
+          format: int64
+          description: Trip duration in milliseconds
+        driverId:
+          type: integer
+          format: int64
+          description: ID of the driver who performed this trip
+          nullable: true
+      required:
+        - deviceId
+        - distance
+        - averageSpeed
+        - maxSpeed
+        - spentFuel
+        - startOdometer
+        - endOdometer
+        - startTime
+        - endTime
+        - startPositionId
+        - endPositionId
+        - startLat
+        - startLon
+        - endLat
+        - endLon
+        - duration
+  requestBodies:
+    Trip:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Trip'
+      required: true
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    ApiKey:
+      type: http
+      scheme: bearer

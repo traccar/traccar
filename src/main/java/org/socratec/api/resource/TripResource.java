@@ -15,38 +15,37 @@
  */
 package org.socratec.api.resource;
 
-import org.traccar.api.BaseResource;
+import org.traccar.api.SimpleObjectResource;
 import org.socratec.model.Trip;
 
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.UUID;
+import jakarta.ws.rs.core.Response;
 
-@Path("logbook")
+@Path("trips")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-public class LogbookResource extends BaseResource {
+public class TripResource extends SimpleObjectResource<Trip> {
 
-    @GET
-    public Collection<Trip> get() {
-        // Return 2 mock Trip instances
-        Trip trip1 = new Trip(
-                UUID.randomUUID().toString(),
-                52.5200, // Berlin latitude
-                13.4050  // Berlin longitude
-        );
+    public TripResource() {
+        super(Trip.class, "startTime");
+    }
 
-        Trip trip2 = new Trip(
-                UUID.randomUUID().toString(),
-                48.8566, // Paris latitude
-                2.3522   // Paris longitude
-        );
+    @Override
+    @POST
+    public Response add(Trip entity) {
+        return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
+    }
 
-        return Arrays.asList(trip1, trip2);
+    @Override
+    @Path("{id}")
+    @DELETE
+    public Response remove(@PathParam("id") long id) {
+        return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
     }
 }
