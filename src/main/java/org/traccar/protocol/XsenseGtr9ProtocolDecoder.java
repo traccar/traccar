@@ -60,6 +60,15 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    @Override
+    protected void onMessageEvent(
+            Channel channel, SocketAddress remoteAddress, Object originalMessage, Object decodedMessage) {
+        // Override to disable deviceOnline and deviceUnknown events for GTR-9
+        // GTR-9 devices should not trigger online/unknown events
+        // Only register statistics without updating device status
+        // Note: This prevents connectionManager.updateDevice() from being called
+    }
+
     // Message type constants
     public static final int M_SYSTEM_LOG = 97;
     public static final int M_DRIVER_LICENSE = 100;  // GTR-9 specific (was update_time_result in GTR-Siemens)
@@ -420,7 +429,6 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
         // Satellites
         position.set(Position.KEY_SATELLITES, opt16 & 0xFF);
-        position.set(Position.KEY_STATUS, opt16);
 
         // Analog values
         int ana0 = (ana01 >> 12) & 0xFFF;
