@@ -16,16 +16,22 @@
 package org.socratec.api.resource;
 
 import org.traccar.api.SimpleObjectResource;
+import org.traccar.model.UserRestrictions;
+import org.traccar.storage.StorageException;
 import org.socratec.model.Trip;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
+import java.util.Collection;
 
 @Path("trips")
 @Produces(MediaType.APPLICATION_JSON)
@@ -34,6 +40,16 @@ public class TripResource extends SimpleObjectResource<Trip> {
 
     public TripResource() {
         super(Trip.class, "startTime");
+    }
+
+    @Override
+    @GET
+    public Collection<Trip> get(
+            @QueryParam("all") boolean all,
+            @QueryParam("userId") long userId
+    ) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        return super.get(all, userId);
     }
 
     @Override
