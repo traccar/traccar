@@ -282,6 +282,9 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     position.set("tagId", Long.toHexString(tagIdPart1) + Long.toHexString(tagIdPart2));
                 }
 
+                // Detect offline batch data based on time gap (using BaseProtocolDecoder helper)
+                detectOfflineBatch(position);
+
                 positions.add(position);
             }
 

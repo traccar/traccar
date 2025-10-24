@@ -460,6 +460,9 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             buf.readUnsignedIntLE(); // geo-fence
 
+            // Detect offline batch data based on time gap (using BaseProtocolDecoder helper)
+            detectOfflineBatch(position);
+
             positions.add(position);
         }
 

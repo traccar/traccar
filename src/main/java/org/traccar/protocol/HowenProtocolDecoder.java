@@ -1768,6 +1768,9 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
             decodeTemperatureStatus(position, buf);
         }
 
+        // Detect offline batch data based on time gap (using BaseProtocolDecoder helper)
+        detectOfflineBatch(position);
+
         if (buf.isReadable()) {
             buf.skipBytes(buf.readableBytes());
         }

@@ -155,6 +155,40 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
         }
     }
 
+    /**
+     * Detect and mark offline batch data based on time gap.
+     * If position time differs from server time by more than the threshold, mark as offline batch.
+     *
+     * @param position Position to check
+     * @param thresholdMinutes Time gap threshold in minutes (default: 10 minutes)
+     */
+    protected void detectOfflineBatch(Position position, int thresholdMinutes) {
+        Date positionTime = position.getDeviceTime() != null ? position.getDeviceTime() : position.getFixTime();
+
+        if (positionTime != null) {
+            Date serverTime = new Date();
+            long timeDiff = Math.abs(serverTime.getTime() - positionTime.getTime());
+            long thresholdMs = thresholdMinutes * 60 * 1000L;
+
+            if (timeDiff > thresholdMs) {
+                position.set("offlineBatch", true);
+                position.set("batchType", "offline");
+            } else {
+                position.set("offlineBatch", false);
+                position.set("batchType", "online");
+            }
+        }
+    }
+
+    /**
+     * Detect and mark offline batch data with default threshold of 10 minutes.
+     *
+     * @param position Position to check
+     */
+    protected void detectOfflineBatch(Position position) {
+        detectOfflineBatch(position, 10);
+    }
+
     @Override
     protected void onMessageEvent(
             Channel channel, SocketAddress remoteAddress, Object originalMessage, Object decodedMessage) {

@@ -310,6 +310,9 @@ public class FifotrackProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        // Detect offline batch data based on time gap (using BaseProtocolDecoder helper)
+        detectOfflineBatch(position);
+
         return position;
     }
 
