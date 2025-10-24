@@ -375,11 +375,13 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
                             deviceSession.getDeviceId());
                     continue; // Skip this position
                 }
+                /*
                 boolean outdated = messageType == M_TINI_BATCH_OFFLINE_POSITION_REPORT_ENHIO;
                 position.setOutdated(outdated);
                 if (outdated) {
                    position.setDeviceTime(position.getFixTime());
                 }
+                */
                 positions.add(position);
             } else {
                 break; // Stop if we can't decode a record
