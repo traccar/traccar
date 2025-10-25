@@ -141,12 +141,52 @@ paths:
         '405':
           description: Method Not Allowed - Trip deletion is not supported
           content: {}
-  /reports/logbook:
+  /logbook:
     get:
-      summary: Generate Logbook Report
+      summary: List LogbookEntry objects
       description: |
-        Generates a logbook report containing LogbookEntry objects for the specified devices and date range.
-        Returns trip data directly from the database with proper filtering and security checks.
+        List all accessible LogbookEntry objects using standard CRUD parameters.
+        For filtered queries by device, group, and date range, use /logbook/report endpoint.
+      tags:
+        - Reports
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          required: false
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own userId
+          required: false
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successfully retrieved LogbookEntry objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LogbookEntry'
+        '401':
+          description: Unauthorized - Authentication required
+          content: {}
+        '403':
+          description: Forbidden - Reports are disabled for this user
+          content: {}
+        '500':
+          description: Internal server error
+          content: {}
+  /logbook/report:
+    get:
+      summary: Get filtered LogbookEntry report
+      description: |
+        Get LogbookEntry objects filtered by device, group, and date range.
+        This endpoint replaces the original /reports/logbook functionality.
         Results are ordered by startTime.
       tags:
         - Reports
@@ -154,8 +194,7 @@ paths:
         - name: deviceId
           in: query
           description: |
-            List of device IDs to include in the report. Multiple device IDs can be specified.
-            At least one deviceId or groupId must be provided.
+            List of device IDs to include. Multiple device IDs can be specified.
           required: false
           schema:
             type: array
@@ -168,8 +207,8 @@ paths:
         - name: groupId
           in: query
           description: |
-            List of group IDs to include in the report. All devices in the specified groups will be included.
-            Multiple group IDs can be specified. At least one deviceId or groupId must be provided.
+            List of group IDs to include. All devices in the specified groups will be included.
+            Multiple group IDs can be specified.
           required: false
           schema:
             type: array
@@ -182,7 +221,7 @@ paths:
         - name: from
           in: query
           description: |
-            Start date and time for the report in ISO 8601 format.
+            Start date and time for filtering in ISO 8601 format.
             Only trips starting on or after this date will be included.
           required: true
           schema:
@@ -192,7 +231,7 @@ paths:
         - name: to
           in: query
           description: |
-            End date and time for the report in ISO 8601 format.
+            End date and time for filtering in ISO 8601 format.
             Only trips starting on or before this date will be included.
           required: true
           schema:
@@ -202,8 +241,8 @@ paths:
       responses:
         '200':
           description: |
-            Successfully generated logbook report. Returns an array of LogbookEntry objects
-            containing trip data for the specified devices and date range.
+            Successfully retrieved filtered LogbookEntry objects.
+            Results are ordered by startTime.
           content:
             application/json:
               schema:
@@ -235,10 +274,10 @@ paths:
         '400':
           description: |
             Bad request. This can occur when:
-            - Required parameters (from, to) are missing or invalid
+            - Required parameters (from, to) are missing
             - Date format is incorrect
-            - No deviceId or groupId is provided
             - Date range exceeds configured limits
+            - Invalid parameter values
           content:
             application/json:
               schema:
@@ -246,7 +285,7 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "from date parameter is required"
+                    example: "Both 'from' and 'to' parameters are required for filtered queries"
         '401':
           description: Unauthorized - Authentication required
           content: {}
@@ -254,6 +293,158 @@ paths:
           description: |
             Forbidden - User does not have permission to access the specified devices or groups,
             or reports are disabled for this user.
+          content: {}
+        '500':
+          description: Internal server error
+          content: {}
+  /logbook/{id}:
+    get:
+      summary: Get single LogbookEntry
+      description: |
+        Retrieve a single LogbookEntry by its ID.
+        User must have permission to access the device associated with this LogbookEntry.
+      tags:
+        - Reports
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the LogbookEntry to retrieve
+          schema:
+            type: integer
+            format: int64
+          example: 123
+      responses:
+        '200':
+          description: Successfully retrieved the LogbookEntry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogbookEntry'
+              example:
+                id: 123
+                deviceId: 1
+                distance: 150.5
+                averageSpeed: 45.2
+                maxSpeed: 80.0
+                spentFuel: 12.5
+                startOdometer: 1000.0
+                endOdometer: 1150.5
+                startTime: "2024-01-01T08:00:00.000Z"
+                endTime: "2024-01-01T10:30:00.000Z"
+                startPositionId: 123
+                endPositionId: 124
+                startLat: 52.5200
+                startLon: 13.4050
+                endLat: 52.5300
+                endLon: 13.4150
+                startAddress: "Berlin, Germany"
+                endAddress: "Berlin, Germany"
+                duration: 9000000
+                driverId: 1
+                type: 1
+        '404':
+          description: LogbookEntry not found
+          content: {}
+        '401':
+          description: Unauthorized - Authentication required
+          content: {}
+        '403':
+          description: |
+            Forbidden - User does not have permission to access the device
+            associated with this LogbookEntry.
+          content: {}
+        '500':
+          description: Internal server error
+          content: {}
+    put:
+      summary: Update LogbookEntry type
+      description: |
+        Updates ONLY the type field of a LogbookEntry for trip classification.
+        All other fields in the request body are ignored and remain unchanged.
+        This endpoint is used to classify trips as NONE (0), BUSINESS (1), or PRIVATE (2).
+      tags:
+        - Reports
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The ID of the LogbookEntry to update
+          schema:
+            type: integer
+            format: int64
+          example: 123
+      requestBody:
+        required: true
+        description: |
+          LogbookEntry object with the type field to update.
+          Only the 'type' field will be processed - all other fields are ignored.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  $ref: '#/components/schemas/LogbookEntryType'
+              required:
+                - type
+            example:
+              type: 1
+      responses:
+        '200':
+          description: |
+            Successfully updated the LogbookEntry type.
+            Returns the complete LogbookEntry object with the updated type.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogbookEntry'
+              example:
+                id: 123
+                deviceId: 1
+                distance: 150.5
+                averageSpeed: 45.2
+                maxSpeed: 80.0
+                spentFuel: 12.5
+                startOdometer: 1000.0
+                endOdometer: 1150.5
+                startTime: "2024-01-01T08:00:00.000Z"
+                endTime: "2024-01-01T10:30:00.000Z"
+                startPositionId: 123
+                endPositionId: 124
+                startLat: 52.5200
+                startLon: 13.4050
+                endLat: 52.5300
+                endLon: 13.4150
+                startAddress: "Berlin, Germany"
+                endAddress: "Berlin, Germany"
+                duration: 9000000
+                driverId: 1
+                type: 1
+        '400':
+          description: |
+            Bad request. This can occur when:
+            - Invalid type value (must be 0, 1, or 2)
+            - Missing required 'type' field in request body
+            - Invalid request format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid type value. Must be 0 (NONE), 1 (BUSINESS), or 2 (PRIVATE)"
+        '404':
+          description: LogbookEntry not found
+          content: {}
+        '401':
+          description: Unauthorized - Authentication required
+          content: {}
+        '403':
+          description: |
+            Forbidden - User does not have permission to access or modify the device
+            associated with this LogbookEntry.
           content: {}
         '500':
           description: Internal server error

@@ -174,6 +174,7 @@ public class WebServer implements LifecycleObject {
                 CorsResponseFilter.class,
                 ResourceErrorHandler.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
+        resourceConfig.packages("org.socratec.api.resource");
         if (resourceConfig.getClasses().stream().filter(ServerResource.class::equals).findAny().isEmpty()) {
             LOGGER.warn("Failed to load API resources");
         }
