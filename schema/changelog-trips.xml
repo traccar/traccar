@@ -18,25 +18,63 @@
       <column autoIncrement="true" name="id" type="INT">
         <constraints primaryKey="true" />
       </column>
-      <column name="deviceid" type="INT" />
-      <column name="distance" type="DOUBLE" />
-      <column name="averagespeed" type="DOUBLE" />
-      <column name="maxspeed" type="DOUBLE" />
-      <column name="spentfuel" type="DOUBLE" />
-      <column name="startodometer" type="DOUBLE" />
-      <column name="endodometer" type="DOUBLE" />
-      <column name="starttime" type="TIMESTAMP" />
-      <column name="endtime" type="TIMESTAMP" />
-      <column name="startpositionid" type="INT" />
-      <column name="endpositionid" type="INT" />
-      <column name="startlat" type="DOUBLE" />
-      <column name="startlon" type="DOUBLE" />
-      <column name="endlat" type="DOUBLE" />
-      <column name="endlon" type="DOUBLE" />
-      <column name="startaddress" type="VARCHAR(512)" />
-      <column name="endaddress" type="VARCHAR(512)" />
-      <column name="duration" type="BIGINT" />
-      <column name="driverid" type="INT" />
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+	  </column>
+      <column name="distance" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="averagespeed" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="maxspeed" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="spentfuel" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="startodometer" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endodometer" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="starttime" type="TIMESTAMP">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endtime" type="TIMESTAMP">
+        <constraints nullable="false" />
+	  </column>
+      <column name="startpositionid" type="INT">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endpositionid" type="INT">
+        <constraints nullable="false" />
+	  </column>
+      <column name="startlat" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="startlon" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endlat" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endlon" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="startaddress" type="VARCHAR(512)">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endaddress" type="VARCHAR(512)">
+        <constraints nullable="false" />
+	  </column>
+      <column name="duration" type="BIGINT">
+        <constraints nullable="false" />
+	  </column>
+      <column name="driverid" type="INT">
+        <constraints nullable="true" />
+	  </column>
     </createTable>
 
     <addForeignKeyConstraint
