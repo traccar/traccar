@@ -42,4 +42,12 @@ public class BaseResource {
         return 0;
     }
 
+    protected String getUserEmail() {
+        UserPrincipal principal = (UserPrincipal) securityContext.getUserPrincipal();
+        if (principal != null) {
+            return principal.getUserEmail();
+        }
+        return "NA";
+    }
+
 }
