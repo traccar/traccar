@@ -21,10 +21,10 @@ import org.traccar.storage.StorageName;
 import java.util.Date;
 
 /**
- * Trip model for tc_trips table
+ * LogbookEntry model for tc_trips table
  */
 @StorageName("tc_trips")
-public class Trip extends BaseModel {
+public class LogbookEntry extends BaseModel {
 
     private long deviceId;
     private double distance;
@@ -45,6 +45,7 @@ public class Trip extends BaseModel {
     private String endAddress;
     private long duration;
     private long driverId;
+    private LogbookEntryType type = LogbookEntryType.NONE;
 
     public long getDeviceId() {
         return deviceId;
@@ -196,5 +197,13 @@ public class Trip extends BaseModel {
 
     public void setDriverId(long driverId) {
         this.driverId = driverId;
+    }
+
+    public LogbookEntryType getType() {
+        return type;
+    }
+
+    public void setType(LogbookEntryType type) {
+        this.type = type != null ? type : LogbookEntryType.NONE;
     }
 }

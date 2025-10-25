@@ -27,6 +27,8 @@ security:
 tags:
   - name: Trips
     description: Trip management and logbook functionality
+  - name: Reports
+    description: Report generation endpoints for logbook and trip data
 paths:
   /trips:
     get:
@@ -139,6 +141,123 @@ paths:
         '405':
           description: Method Not Allowed - Trip deletion is not supported
           content: {}
+  /reports/logbook:
+    get:
+      summary: Generate Logbook Report
+      description: |
+        Generates a logbook report containing LogbookEntry objects for the specified devices and date range.
+        Returns trip data directly from the database with proper filtering and security checks.
+        Results are ordered by startTime.
+      tags:
+        - Reports
+      parameters:
+        - name: deviceId
+          in: query
+          description: |
+            List of device IDs to include in the report. Multiple device IDs can be specified.
+            At least one deviceId or groupId must be provided.
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+          style: form
+          explode: true
+          example: [1, 2, 3]
+        - name: groupId
+          in: query
+          description: |
+            List of group IDs to include in the report. All devices in the specified groups will be included.
+            Multiple group IDs can be specified. At least one deviceId or groupId must be provided.
+          required: false
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+          style: form
+          explode: true
+          example: [1, 2]
+        - name: from
+          in: query
+          description: |
+            Start date and time for the report in ISO 8601 format.
+            Only trips starting on or after this date will be included.
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2024-01-01T00:00:00.000Z"
+        - name: to
+          in: query
+          description: |
+            End date and time for the report in ISO 8601 format.
+            Only trips starting on or before this date will be included.
+          required: true
+          schema:
+            type: string
+            format: date-time
+          example: "2024-01-31T23:59:59.999Z"
+      responses:
+        '200':
+          description: |
+            Successfully generated logbook report. Returns an array of LogbookEntry objects
+            containing trip data for the specified devices and date range.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LogbookEntry'
+              example:
+                - id: 1
+                  deviceId: 1
+                  distance: 150.5
+                  averageSpeed: 45.2
+                  maxSpeed: 80.0
+                  spentFuel: 12.5
+                  startOdometer: 1000.0
+                  endOdometer: 1150.5
+                  startTime: "2024-01-01T08:00:00.000Z"
+                  endTime: "2024-01-01T10:30:00.000Z"
+                  startPositionId: 123
+                  endPositionId: 124
+                  startLat: 52.5200
+                  startLon: 13.4050
+                  endLat: 52.5300
+                  endLon: 13.4150
+                  startAddress: "Berlin, Germany"
+                  endAddress: "Berlin, Germany"
+                  duration: 9000000
+                  driverId: 1
+                  type: 1
+        '400':
+          description: |
+            Bad request. This can occur when:
+            - Required parameters (from, to) are missing or invalid
+            - Date format is incorrect
+            - No deviceId or groupId is provided
+            - Date range exceeds configured limits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "from date parameter is required"
+        '401':
+          description: Unauthorized - Authentication required
+          content: {}
+        '403':
+          description: |
+            Forbidden - User does not have permission to access the specified devices or groups,
+            or reports are disabled for this user.
+          content: {}
+        '500':
+          description: Internal server error
+          content: {}
 components:
   schemas:
     Trip:
@@ -244,6 +363,137 @@ components:
         - endLat
         - endLon
         - duration
+    LogbookEntry:
+      type: object
+      description: |
+        Represents a logbook entry containing detailed trip information.
+        LogbookEntry objects are stored in the tc_trips database table and contain
+        comprehensive trip data including location, timing, fuel consumption, and classification.
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique identifier for the logbook entry
+        deviceId:
+          type: integer
+          format: int64
+          description: ID of the device that performed this trip
+        distance:
+          type: number
+          format: double
+          description: Total distance of the trip in meters
+        averageSpeed:
+          type: number
+          format: double
+          description: Average speed during the trip in km/h
+        maxSpeed:
+          type: number
+          format: double
+          description: Maximum speed reached during the trip in km/h
+        spentFuel:
+          type: number
+          format: double
+          description: Amount of fuel consumed during the trip in liters
+        startOdometer:
+          type: number
+          format: double
+          description: Odometer reading at trip start
+        endOdometer:
+          type: number
+          format: double
+          description: Odometer reading at trip end
+        startTime:
+          type: string
+          format: date-time
+          description: Trip start time in ISO 8601 format. eg. `2024-01-01T08:00:00.000Z`
+        endTime:
+          type: string
+          format: date-time
+          description: Trip end time in ISO 8601 format. eg. `2024-01-01T10:30:00.000Z`
+        startPositionId:
+          type: integer
+          format: int64
+          description: ID of the position record at trip start
+        endPositionId:
+          type: integer
+          format: int64
+          description: ID of the position record at trip end
+        startLat:
+          type: number
+          format: double
+          description: Latitude coordinate at trip start
+          minimum: -90
+          maximum: 90
+        startLon:
+          type: number
+          format: double
+          description: Longitude coordinate at trip start
+          minimum: -180
+          maximum: 180
+        endLat:
+          type: number
+          format: double
+          description: Latitude coordinate at trip end
+          minimum: -90
+          maximum: 90
+        endLon:
+          type: number
+          format: double
+          description: Longitude coordinate at trip end
+          minimum: -180
+          maximum: 180
+        startAddress:
+          type: string
+          maxLength: 512
+          description: Human-readable address at trip start location
+          nullable: true
+        endAddress:
+          type: string
+          maxLength: 512
+          description: Human-readable address at trip end location
+          nullable: true
+        duration:
+          type: integer
+          format: int64
+          description: Trip duration in milliseconds
+          minimum: 0
+        driverId:
+          type: integer
+          format: int64
+          description: ID of the driver who performed this trip
+        type:
+          $ref: '#/components/schemas/LogbookEntryType'
+      required:
+        - deviceId
+        - distance
+        - averageSpeed
+        - maxSpeed
+        - spentFuel
+        - startOdometer
+        - endOdometer
+        - startTime
+        - endTime
+        - startPositionId
+        - endPositionId
+        - startLat
+        - startLon
+        - endLat
+        - endLon
+        - duration
+        - driverId
+        - type
+    LogbookEntryType:
+      type: integer
+      description: |
+        Enum representing the type/classification of a logbook entry.
+        Used to categorize trips for business reporting and tax purposes.
+      enum: [0, 1, 2]
+      x-enum-varnames: [NONE, BUSINESS, PRIVATE]
+      x-enum-descriptions:
+        - "NONE (0): Unclassified or default entry type"
+        - "BUSINESS (1): Business-related trip"
+        - "PRIVATE (2): Private/personal trip"
+      example: 1
   requestBodies:
     Trip:
       content:

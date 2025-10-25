@@ -38,6 +38,8 @@ import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.SummaryReportItem;
 import org.traccar.reports.model.TripReportItem;
 import org.traccar.storage.StorageException;
+import org.socratec.model.LogbookEntry;
+import org.socratec.reports.LogbookReportProvider;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -82,6 +84,9 @@ public class ReportResource extends SimpleObjectResource<Report> {
 
     @Inject
     private DevicesReportProvider devicesReportProvider;
+
+    @Inject
+    private LogbookReportProvider logbookReportProvider;
 
     @Inject
     private ReportMailer reportMailer;
@@ -332,6 +337,18 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("to") Date to,
             @PathParam("type") String type) throws StorageException {
         return getStopsExcel(deviceIds, groupIds, from, to, type.equals("mail"));
+    }
+
+    @Path("logbook")
+    @GET
+    public Collection<LogbookEntry> getLogbook(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        actionLogger.report(request, getUserId(), false, "logbook", from, to, deviceIds, groupIds);
+        return logbookReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
     }
 
     @Path("devices/{type:xlsx|mail}")
