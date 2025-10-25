@@ -365,7 +365,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(3)) {
             position.setLatitude(parser.nextCoordinate());
         }
-        if (parser.hasNext(3)) {
+        if (parser.hasNextAny(3)) {
             position.setLatitude(parser.nextCoordinate());
         }
         if (parser.hasNext(4)) {
@@ -375,7 +375,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(3)) {
             position.setLongitude(parser.nextCoordinate());
         }
-        if (parser.hasNext(3)) {
+        if (parser.hasNextAny(3)) {
             position.setLongitude(parser.nextCoordinate());
         }
         if (parser.hasNext(4)) {
