@@ -531,10 +531,11 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
     private Position decodeSiemensPingReply(DeviceSession deviceSession, ByteBuf buf) {
         // GTR-9 ping reply has variable size:
-        // - Old format: 32 GPS32 + 96 ping data = 128 bytes
-        // - New format: 32 GPS32 + 96 ping data + 4 extended = 132 bytes
+        // - Minimum: 32 GPS32 + some ping data
+        // - Standard: 32 GPS32 + 96 ping data
+        // - Extended: 32 GPS32 + 96 ping data + 4 extended
         // Some devices may send incomplete data, handle gracefully
-        if (buf.readableBytes() < 128) {
+        if (buf.readableBytes() < 32) {
             return null;
         }
 
@@ -546,12 +547,13 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
         // Check remaining bytes for ping data
         int remainingBytes = buf.readableBytes();
-        if (remainingBytes < 96) {
-            LOGGER.warn("Ping reply has insufficient data: {} bytes (expected at least 96)", remainingBytes);
-            return position; // Return GPS position without ping data
+        if (remainingBytes < 49) {
+            // Less than minimum (up to ltc13), return GPS position without ping data
+            LOGGER.debug("Ping reply has minimal data: {} bytes, returning GPS position only", remainingBytes);
+            return position;
         }
 
-        // Read 96 bytes: additional ping reply data
+        // Read ping reply data (at least 49 bytes available for basic fields)
         int offlinePtr = buf.readUnsignedShort();
         int idSec = buf.readUnsignedShort();
         int sTime = buf.readUnsignedShort();
@@ -570,16 +572,25 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         int rssi = buf.readUnsignedByte();
         int ltc13 = buf.readUnsignedShort();
 
-        // Skip neighbor cells (not used for now)
-        buf.skipBytes(27); // 3 neighbor cells * 9 bytes each
+        // Skip neighbor cells if available (27 bytes = 3 neighbor cells * 9 bytes each)
+        if (buf.readableBytes() >= 27) {
+            buf.skipBytes(27);
+        }
 
-        int opt = buf.readUnsignedShort();
-        int vtime = buf.readUnsignedShort();
-        buf.readUnsignedShort(); // opt1 - not used
-        buf.readUnsignedShort(); // opt2 - not used
-        buf.readUnsignedShort(); // opt3 - not used
-        buf.readUnsignedShort(); // opt4 - not used
-        int sync = buf.readUnsignedShort();
+        // Read optional fields if available
+        int opt = 0;
+        int vtime = 0;
+        int sync = 0;
+
+        if (buf.readableBytes() >= 14) {
+            opt = buf.readUnsignedShort();
+            vtime = buf.readUnsignedShort();
+            buf.readUnsignedShort(); // opt1 - not used
+            buf.readUnsignedShort(); // opt2 - not used
+            buf.readUnsignedShort(); // opt3 - not used
+            buf.readUnsignedShort(); // opt4 - not used
+            sync = buf.readUnsignedShort();
+        }
 
         // GTR-9 Extended Data: Read 4 additional bytes if available
         // Some firmware versions may not include extended data
@@ -620,9 +631,12 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
         position.set(Position.KEY_RSSI, rssi);
         position.set("neighborTiming", ltc13);
-        position.set("opt", opt);
-        position.set("vTime", vtime);
-        position.set("sync", sync);
+
+        if (opt != 0 || vtime != 0 || sync != 0) {
+            position.set("opt", opt);
+            position.set("vTime", vtime);
+            position.set("sync", sync);
+        }
 
         // Cell tower network
         if (mcc != 0 || cellId != 0) {
