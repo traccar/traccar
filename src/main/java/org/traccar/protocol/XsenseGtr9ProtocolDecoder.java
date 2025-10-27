@@ -65,14 +65,27 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     /**
-     * Clean base station string by removing null characters and control characters.
+     * Clean base station string by removing null characters, control characters,
+     * and any garbage data after the valid base station identifier.
      */
     private String cleanBaseStation(String baseStation) {
         if (baseStation == null || baseStation.isEmpty()) {
             return "";
         }
-        // Remove null characters, control characters, and trim
-        return baseStation.replaceAll("[\\x00-\\x1F\\x7F]+", "").trim();
+        // Remove null characters and control characters first
+        String cleaned = baseStation.replaceAll("[\\x00-\\x1F\\x7F]+", "").trim();
+        // Find the first occurrence of special characters that indicate end of base station ID
+        // Base station format is typically: >digits or letters, stop at comma, quote, or other special chars
+        int endIndex = cleaned.length();
+        for (int i = 0; i < cleaned.length(); i++) {
+            char c = cleaned.charAt(i);
+            // Stop at comma, quote, asterisk, or other non-alphanumeric chars (except > at start)
+            if (c == ',' || c == '"' || c == '*' || c == '\n' || c == '\r') {
+                endIndex = i;
+                break;
+            }
+        }
+        return cleaned.substring(0, endIndex).trim();
     }
 
     @Override
