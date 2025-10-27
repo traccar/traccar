@@ -108,6 +108,17 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         };
     }
 
+    /**
+     * Clean base station string by removing null characters and control characters.
+     */
+    private String cleanBaseStation(String baseStation) {
+        if (baseStation == null || baseStation.isEmpty()) {
+            return "";
+        }
+        // Remove null characters, control characters, and trim
+        return baseStation.replaceAll("[\\x00-\\x1F\\x7F]+", "").trim();
+    }
+
     private boolean isPositionReport(int messageType) {
         return messageType == M_EXTEND_POSITION_REPORT
                 || messageType == M_BATCH_POSITION_REPORT
@@ -439,7 +450,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
             byte[] baseStationBytes = new byte[32];
             buf.readBytes(baseStationBytes);
-            String baseStation = new String(baseStationBytes, java.nio.charset.StandardCharsets.US_ASCII).trim();
+            String baseStation = cleanBaseStation(
+                    new String(baseStationBytes, java.nio.charset.StandardCharsets.US_ASCII));
 
             // Add base station data to the last position (most recent)
             if (!positions.isEmpty()) {
@@ -728,7 +740,8 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
         byte[] baseStationBytes = new byte[32];
         buf.readBytes(baseStationBytes);
-        String baseStation = new String(baseStationBytes, StandardCharsets.US_ASCII).trim();
+        String baseStation = cleanBaseStation(
+                new String(baseStationBytes, StandardCharsets.US_ASCII));
 
         int rssi = buf.readUnsignedByte();
         int ltc13 = buf.readUnsignedShort();

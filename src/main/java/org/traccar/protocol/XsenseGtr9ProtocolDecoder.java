@@ -64,6 +64,17 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
+    /**
+     * Clean base station string by removing null characters and control characters.
+     */
+    private String cleanBaseStation(String baseStation) {
+        if (baseStation == null || baseStation.isEmpty()) {
+            return "";
+        }
+        // Remove null characters, control characters, and trim
+        return baseStation.replaceAll("[\\x00-\\x1F\\x7F]+", "").trim();
+    }
+
     @Override
     protected void onMessageEvent(
             Channel channel, SocketAddress remoteAddress, Object originalMessage, Object decodedMessage) {
@@ -567,7 +578,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
         byte[] baseStationBytes = new byte[32];
         buf.readBytes(baseStationBytes);
-        String baseStation = new String(baseStationBytes, StandardCharsets.US_ASCII).trim();
+        String baseStation = cleanBaseStation(new String(baseStationBytes, StandardCharsets.US_ASCII));
 
         int rssi = buf.readUnsignedByte();
         int ltc13 = buf.readUnsignedShort();
