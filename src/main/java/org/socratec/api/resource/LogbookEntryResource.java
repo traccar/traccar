@@ -5,9 +5,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -54,15 +57,24 @@ public class LogbookEntryResource extends BaseObjectResource<LogbookEntry> {
         super(LogbookEntry.class);
     }
 
+    @Override
+    @Path("{id}")
     @GET
-    public Collection<LogbookEntry> get(
-            @QueryParam("all") boolean all,
-            @QueryParam("userId") long userId) throws StorageException {
+    public Response getSingle(@PathParam("id") long id) throws StorageException {
+        return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
+    }
 
-        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+    @Override
+    @POST
+    public Response add(LogbookEntry entity) throws Exception {
+        return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
+    }
 
-        // Custom permission logic based on device access instead of direct user-logbook permissions
-        return getLogbookEntriesForUser(getUserId(), all, userId);
+    @Override
+    @Path("{id}")
+    @DELETE
+    public Response remove(@PathParam("id") long id) throws Exception {
+        return Response.status(Response.Status.METHOD_NOT_ALLOWED).build();
     }
 
     @GET
@@ -114,10 +126,6 @@ public class LogbookEntryResource extends BaseObjectResource<LogbookEntry> {
         return Response.ok(existing).build();
     }
 
-    /**
-     * Get LogbookEntry objects for a user based on device permissions
-     * Uses an efficient database query with IN condition for accessible device IDs
-     */
     private Collection<LogbookEntry> getLogbookEntriesForUser(
             long currentUserId,
             boolean all,
@@ -160,10 +168,6 @@ public class LogbookEntryResource extends BaseObjectResource<LogbookEntry> {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Private method containing the merged logic from LogbookReportProvider
-     * Handles filtered queries with date range and device/group filtering
-     */
     private Collection<LogbookEntry> getFilteredLogbookEntries(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
