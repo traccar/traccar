@@ -563,7 +563,7 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
 
         byte[] baseStationBytes = new byte[32];
         buf.readBytes(baseStationBytes);
-        String baseStation = new String(baseStationBytes, StandardCharsets.US_ASCII).trim();
+        String baseStation = cleanBaseStation(new String(baseStationBytes, StandardCharsets.US_ASCII));
 
         if (!baseStation.isEmpty()) {
             position.set("baseStation", baseStation);
