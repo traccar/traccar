@@ -48,6 +48,16 @@ public class Action extends ExtendedModel {
         return userId;
     }
 
+    private String userEmail;
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
     public void setUserId(long userId) {
         this.userId = userId;
     }

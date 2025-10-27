@@ -78,7 +78,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                         User user = loginResult.getUser();
                         statisticsManager.registerRequest(user.getId());
                         securityContext = new UserSecurityContext(
-                                new UserPrincipal(user.getId(), loginResult.getExpiration()));
+                                new UserPrincipal(user.getId(), user.getEmail(), loginResult.getExpiration()));
                     }
                 } catch (StorageException | GeneralSecurityException | IOException e) {
                     throw new WebApplicationException(e);
@@ -93,7 +93,7 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                     if (user != null) {
                         user.checkDisabled();
                         statisticsManager.registerRequest(userId);
-                        securityContext = new UserSecurityContext(new UserPrincipal(userId, expiration));
+                        securityContext = new UserSecurityContext(new UserPrincipal(userId, user.getEmail(), expiration));
                     }
                 }
 

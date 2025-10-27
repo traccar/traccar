@@ -23,6 +23,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Action;
+import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
@@ -41,10 +42,23 @@ public class AuditResource extends BaseResource {
     public Stream<Action> get(
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkAdmin(getUserId());
-        return storage.getObjectsStream(Action.class, new Request(
+
+        Stream<Action> actions = storage.getObjectsStream(Action.class, new Request(
                 new Columns.All(),
                 new Condition.Between("actionTime", from, to),
                 new Order("actionTime")));
-    }
 
+        return actions.map(action -> {
+            try {
+                User user = storage.getObject(User.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", action.getUserId())));
+                if (user != null) {
+                    action.setUserEmail(user.getEmail());
+                }
+            } catch (StorageException e) {
+                throw new RuntimeException(e);
+            }
+            return action;
+        });
+    }
 }
