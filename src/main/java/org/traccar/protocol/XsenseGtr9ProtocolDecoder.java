@@ -591,7 +591,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
 
         byte[] baseStationBytes = new byte[32];
         buf.readBytes(baseStationBytes);
-        String baseStation = cleanBaseStation(new String(baseStationBytes, StandardCharsets.US_ASCII));
+        //String baseStation = cleanBaseStation(new String(baseStationBytes, StandardCharsets.US_ASCII));
 
         int rssi = buf.readUnsignedByte();
         int ltc13 = buf.readUnsignedShort();
@@ -648,11 +648,7 @@ public class XsenseGtr9ProtocolDecoder extends BaseProtocolDecoder {
         position.set("timingAdvance", ta);
         position.set("timingCorrection", tc);
         position.set("baseStationTiming", ltbs);
-
-        if (!baseStation.isEmpty()) {
-            position.set("baseStation", baseStation);
-        }
-
+        //position.set("baseStation", baseStation);
         position.set(Position.KEY_RSSI, rssi);
         position.set("neighborTiming", ltc13);
 

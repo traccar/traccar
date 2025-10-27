@@ -118,7 +118,6 @@ public class XsenseProtocolDecoder extends BaseProtocolDecoder {
         }
         // Remove null characters and control characters first
         String cleaned = baseStation.replaceAll("[\\x00-\\x1F\\x7F]+", "").trim();
-
         // Find the first occurrence of special characters that indicate end of base station ID
         // Base station format is typically: >digits or letters, stop at comma, quote, or other special chars
         int endIndex = cleaned.length();
