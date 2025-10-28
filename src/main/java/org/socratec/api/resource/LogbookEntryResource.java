@@ -83,12 +83,13 @@ public class LogbookEntryResource extends BaseObjectResource<LogbookEntry> {
         // Check if user has access to the device associated with this logbook entry
         permissionsService.checkPermission(Device.class, getUserId(), existing.getDeviceId());
 
-        // Update ONLY the type field - all other fields are ignored
+        // Update ONLY the type and notes fields - all other fields are ignored
         existing.setType(entity.getType());
+        existing.setNotes(entity.getNotes());
 
         // Save the updated entry
         storage.updateObject(existing, new Request(
-                new Columns.Include("type"),
+                new Columns.Include("type", "notes"),
                 new Condition.Equals("id", entity.getId())));
 
         // Log the update action

@@ -15,6 +15,7 @@
  */
 package org.socratec.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.model.BaseModel;
 import org.traccar.storage.StorageName;
 
@@ -45,6 +46,8 @@ public class LogbookEntry extends BaseModel {
     private String endAddress;
     private long duration;
     private long driverId;
+    private String hash;
+    private String notes;
     private LogbookEntryType type = LogbookEntryType.NONE;
 
     public long getDeviceId() {
@@ -197,6 +200,24 @@ public class LogbookEntry extends BaseModel {
 
     public void setDriverId(long driverId) {
         this.driverId = driverId;
+    }
+
+    @JsonIgnore
+    public String getHash() {
+        return hash;
+    }
+
+    @JsonIgnore
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 
     public LogbookEntryType getType() {
