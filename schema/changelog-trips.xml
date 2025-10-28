@@ -75,6 +75,15 @@
       <column name="driverid" type="INT">
         <constraints nullable="true" />
 	  </column>
+	  <column name="hash" type="CHAR(64)">
+        <constraints nullable="false" unique="true" />
+      </column>
+	  <column name="type" type="TINYINT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+	  <column name="notes" type="TEXT">
+        <constraints nullable="true" />
+      </column>
     </createTable>
 
     <addForeignKeyConstraint

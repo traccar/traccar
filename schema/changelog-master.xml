@@ -49,6 +49,5 @@
   <include file="changelog-6.7.0.xml" relativeToChangelogFile="true" />
 
   <include file="changelog-trips.xml" relativeToChangelogFile="true" />
-  <include file="changelog-trips-type.xml" relativeToChangelogFile="true" />
 
 </databaseChangeLog>
