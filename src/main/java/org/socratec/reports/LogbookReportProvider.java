@@ -1,13 +1,13 @@
 package org.socratec.reports;
 
 import org.apache.poi.ss.util.WorkbookUtil;
+import org.socratec.reports.model.LogbookReportSection;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.DeviceUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Group;
 import org.traccar.reports.common.ReportUtils;
-import org.traccar.reports.model.DeviceReportSection;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -40,6 +40,12 @@ public class LogbookReportProvider {
         this.storage = storage;
     }
 
+    private double calculateTotalDistance(Collection<LogbookEntry> logbookEntries) {
+        return logbookEntries.stream()
+                .mapToDouble(LogbookEntry::getDistance)
+                .sum();
+    }
+
     public Collection<LogbookEntry> getObjects(
             long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
             Date from, Date to) throws StorageException {
@@ -65,7 +71,7 @@ public class LogbookReportProvider {
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
 
-        ArrayList<DeviceReportSection> devicesLogbook = new ArrayList<>();
+        ArrayList<LogbookReportSection> devicesLogbook = new ArrayList<>();
         ArrayList<String> sheetNames = new ArrayList<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             Collection<LogbookEntry> logbookEntries = storage.getObjects(LogbookEntry.class, new Request(
@@ -76,7 +82,7 @@ public class LogbookReportProvider {
                     ),
                     new Order("startTime")
             ));
-            DeviceReportSection deviceLogbook = new DeviceReportSection();
+            LogbookReportSection deviceLogbook = new LogbookReportSection();
             deviceLogbook.setDeviceName(device.getName());
             sheetNames.add(WorkbookUtil.createSafeSheetName(deviceLogbook.getDeviceName()));
             if (device.getGroupId() > 0) {
@@ -87,6 +93,7 @@ public class LogbookReportProvider {
                 }
             }
             deviceLogbook.setObjects(logbookEntries);
+            deviceLogbook.setTotalDistance(calculateTotalDistance(logbookEntries));
             devicesLogbook.add(deviceLogbook);
         }
 
