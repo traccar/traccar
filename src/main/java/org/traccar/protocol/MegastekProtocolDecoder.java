@@ -375,9 +375,8 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             position.set("belt", parser.nextInt());
         }
 
-        String battery = parser.next();
-        if (battery != null) {
-            position.set(Position.KEY_BATTERY, Integer.parseInt(battery));
+        if (parser.hasNext()) {
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
         }
 
         if (parser.hasNext()) {
