@@ -41,7 +41,7 @@ public class GeocoderHandler extends BasePositionHandler {
 
     @Override
     public void onPosition(Position position, Callback callback) {
-        if (!ignorePositions) {
+        if (!ignorePositions && position.getValid()) {
             if (reuseDistance != 0) {
                 Position lastPosition = cacheManager.getPosition(position.getDeviceId());
                 if (lastPosition != null && lastPosition.getAddress() != null

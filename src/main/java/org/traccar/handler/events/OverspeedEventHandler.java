@@ -63,7 +63,7 @@ public class OverspeedEventHandler extends BaseEventHandler {
         if (device == null) {
             return;
         }
-        if (!PositionUtil.isLatest(cacheManager, position)) {
+        if (!PositionUtil.isLatest(cacheManager, position) || !position.getValid()) {
             return;
         }
 

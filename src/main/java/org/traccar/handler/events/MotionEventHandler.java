@@ -54,6 +54,9 @@ public class MotionEventHandler extends BaseEventHandler {
         if (device == null || !PositionUtil.isLatest(cacheManager, position)) {
             return;
         }
+        if (!position.getValid()) {
+            return;
+        }
 
         TripsConfig tripsConfig = new TripsConfig(new AttributeUtil.CacheProvider(cacheManager, deviceId));
         MotionState state = MotionState.fromDevice(device);
