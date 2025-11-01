@@ -57,7 +57,7 @@ public class DistanceHandler extends BasePositionHandler {
             }
             if (filter && last.getLatitude() != 0 && last.getLongitude() != 0) {
                 boolean satisfiesMin = minError == 0 || distance > minError;
-                boolean satisfiesMax = maxError == 0 || distance < maxError;
+                boolean satisfiesMax = maxError == 0 || distance < maxError || position.getValid();
                 if (!satisfiesMin || !satisfiesMax) {
                     position.setValid(last.getValid());
                     position.setLatitude(last.getLatitude());
