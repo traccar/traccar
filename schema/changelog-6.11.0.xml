@@ -7,6 +7,7 @@
   logicalFilePath="changelog-6.11.0">
 
   <changeSet author="author" id="changelog-6.11.0-timescale" runInTransaction="false">
+
     <preConditions onFail="MARK_RAN">
       <dbms type="postgresql" />
       <sqlCheck expectedResult="1">
@@ -34,7 +35,8 @@
 
   </changeSet>
 
-  <changeSet author="author" id="changelog-6.11.0">
+  <changeSet author="author" id="changelog-6.11.0-other">
+
     <preConditions onFail="MARK_RAN">
       <not>
         <changeSetExecuted changeLogFile="changelog-6.11.0" id="changelog-6.11.0-timescale" author="author" />
@@ -44,6 +46,16 @@
     <createIndex indexName="tc_actions_actiontime_idx" tableName="tc_actions">
       <column name="actiontime" />
     </createIndex>
+
+  </changeSet>
+
+  <changeSet author="author" id="changelog-6.11.0">
+
+    <createTable tableName="tc_revoked_tokens">
+      <column name="id" type="BIGINT">
+        <constraints primaryKey="true" nullable="false" />
+      </column>
+    </createTable>
 
   </changeSet>
 

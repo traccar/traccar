@@ -707,6 +707,49 @@ paths:
         '204':
           description: No Content
           content: {}
+  /session/token:
+    post:
+      summary: Generate Session Token
+      tags:
+        - Session
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                expiration:
+                  type: string
+                  format: date-time
+        required: false
+      responses:
+        '200':
+          description: Token string
+          content:
+            text/plain:
+              schema:
+                type: string
+  /session/token/revoke:
+    post:
+      summary: Revoke Session Token
+      tags:
+        - Session
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+        required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          description: Bad Request
+          content: {}
   /session/openid/auth:
     get:
       summary: Fetch Session information
