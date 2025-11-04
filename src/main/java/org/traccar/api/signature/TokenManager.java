@@ -80,7 +80,7 @@ public class TokenManager {
             long userId, Date expiration) throws IOException, GeneralSecurityException, StorageException {
         TokenData data = new TokenData();
         data.userId = userId;
-        data.id = random.nextLong();
+        data.id = random.nextLong() & Long.MAX_VALUE;
         if (expiration != null) {
             data.expiration = expiration;
         } else {
