@@ -141,74 +141,7 @@ paths:
         '405':
           description: Method Not Allowed - Trip deletion is not supported
           content: {}
-  /logbook:
-    get:
-      summary: List LogbookEntry objects
-      description: |
-        List all accessible LogbookEntry objects using standard CRUD parameters.
-        For filtered queries by device, group, and date range, use /reports/logbook endpoint.
-      tags:
-        - Trips
-      parameters:
-        - name: all
-          in: query
-          description: Can only be used by admins or managers to fetch all entities
-          required: false
-          schema:
-            type: boolean
-        - name: userId
-          in: query
-          description: Standard users can use this only with their own userId
-          required: false
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Successfully retrieved LogbookEntry objects
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/LogbookEntry'
-        '401':
-          description: Unauthorized - Authentication required
-          content: {}
-        '403':
-          description: Forbidden - Reports are disabled for this user
-          content: {}
-        '500':
-          description: Internal server error
-          content: {}
-    post:
-      summary: Create LogbookEntry (Not Supported)
-      description: LogbookEntry creation is not supported. This endpoint returns HTTP 405 Method Not Allowed.
-      tags:
-        - Trips
-      responses:
-        '405':
-          description: Method Not Allowed - LogbookEntry creation is not supported
-          content: {}
   /logbook/{id}:
-    get:
-      summary: Get single LogbookEntry (Not Supported)
-      description: LogbookEntry retrieval by ID is not supported. This endpoint returns HTTP 405 Method Not Allowed.
-      tags:
-        - Trips
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The ID of the LogbookEntry
-          schema:
-            type: integer
-            format: int64
-          example: 123
-      responses:
-        '405':
-          description: Method Not Allowed - LogbookEntry retrieval by ID is not supported
-          content: {}
     put:
       summary: Update LogbookEntry type and notes
       description: |
@@ -306,24 +239,6 @@ paths:
           content: {}
         '500':
           description: Internal server error
-          content: {}
-    delete:
-      summary: Delete LogbookEntry (Not Supported)
-      description: LogbookEntry deletion is not supported. This endpoint returns HTTP 405 Method Not Allowed.
-      tags:
-        - Trips
-      parameters:
-        - name: id
-          in: path
-          required: true
-          description: The ID of the LogbookEntry
-          schema:
-            type: integer
-            format: int64
-          example: 123
-      responses:
-        '405':
-          description: Method Not Allowed - LogbookEntry deletion is not supported
           content: {}
   /reports/logbook:
     get:
