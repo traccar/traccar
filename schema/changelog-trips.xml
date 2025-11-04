@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-trips">
+
+  <changeSet author="Marco Grams" id="changelog-trips">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <tableExists tableName="tc_trips" />
+      </not>
+    </preConditions>
+
+	<createTable tableName="tc_trips">
+      <column autoIncrement="true" name="id" type="INT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+	  </column>
+      <column name="distance" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="averagespeed" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="maxspeed" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="spentfuel" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="startodometer" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endodometer" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="starttime" type="TIMESTAMP">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endtime" type="TIMESTAMP">
+        <constraints nullable="false" />
+	  </column>
+      <column name="startpositionid" type="INT">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endpositionid" type="INT">
+        <constraints nullable="false" />
+	  </column>
+      <column name="startlat" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="startlon" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endlat" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endlon" type="DOUBLE">
+        <constraints nullable="false" />
+	  </column>
+      <column name="startaddress" type="VARCHAR(512)">
+        <constraints nullable="false" />
+	  </column>
+      <column name="endaddress" type="VARCHAR(512)">
+        <constraints nullable="false" />
+	  </column>
+      <column name="duration" type="BIGINT">
+        <constraints nullable="false" />
+	  </column>
+      <column name="driverid" type="INT">
+        <constraints nullable="true" />
+	  </column>
+	  <column name="hash" type="CHAR(64)">
+        <constraints nullable="false" unique="true" />
+      </column>
+	  <column name="type" type="TINYINT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+	  <column name="notes" type="TEXT">
+        <constraints nullable="true" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+      baseTableName="tc_trips"
+      baseColumnNames="deviceid"
+      constraintName="fk_trips_deviceid"
+      referencedTableName="tc_devices"
+      referencedColumnNames="id"
+      onDelete="CASCADE" />
+
+    <addForeignKeyConstraint
+      baseTableName="tc_trips"
+      baseColumnNames="startpositionid"
+      constraintName="fk_trips_startpositionid"
+      referencedTableName="tc_positions"
+      referencedColumnNames="id"
+      onDelete="CASCADE" />
+
+    <addForeignKeyConstraint
+      baseTableName="tc_trips"
+      baseColumnNames="endpositionid"
+      constraintName="fk_trips_endpositionid"
+      referencedTableName="tc_positions"
+      referencedColumnNames="id"
+      onDelete="CASCADE" />
+
+    <addForeignKeyConstraint
+      baseTableName="tc_trips"
+      baseColumnNames="driverid"
+      constraintName="fk_trips_driverid"
+      referencedTableName="tc_drivers"
+      referencedColumnNames="id"
+      onDelete="CASCADE" />
+
+    <createTable tableName="tc_user_trip">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="tripid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_user_trip" baseColumnNames="userid" constraintName="fk_user_trip_userid" referencedTableName="tc_users" referencedColumnNames="id" onDelete="CASCADE" />
+    <addForeignKeyConstraint baseTableName="tc_user_trip" baseColumnNames="tripid" constraintName="fk_user_trip_tripid" referencedTableName="tc_trips" referencedColumnNames="id" onDelete="CASCADE" />
+
+  </changeSet>
+
+</databaseChangeLog>

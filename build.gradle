@@ -125,3 +125,16 @@ jar {
                 "Class-Path": configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(" "))
     }
 }
+
+task run(type: JavaExec) {
+    dependsOn build
+    mainClass = 'org.traccar.Main'
+    classpath = sourceSets.main.runtimeClasspath
+    args = project.hasProperty('args') ? project.property('args').split('\\s+') : ['debug.xml']
+    
+    // Set working directory to project root
+    workingDir = projectDir
+    
+    // Enable console input for interactive mode
+    standardInput = System.in
+}

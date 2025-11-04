@@ -18,6 +18,8 @@ package org.traccar.api.resource;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
+import org.socratec.model.LogbookEntry;
+import org.socratec.reports.LogbookReportProvider;
 import org.traccar.api.SimpleObjectResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Event;
@@ -345,4 +347,48 @@ public class ReportResource extends SimpleObjectResource<Report> {
         });
     }
 
+    // Added Socratec specific report
+
+    @Inject
+    private LogbookReportProvider logbookReportProvider;
+
+    @Path("logbook")
+    @GET
+    public Collection<LogbookEntry> getLogbook(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        actionLogger.report(request, getUserId(), false, "logbook", from, to, deviceIds, groupIds);
+        return logbookReportProvider.getObjects(getUserId(), deviceIds, groupIds, from, to);
+    }
+
+    @Path("logbook")
+    @GET
+    @Produces(EXCEL)
+    public Response getLogbookExcel(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @QueryParam("mail") boolean mail) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        return executeReport(getUserId(), mail, stream -> {
+            actionLogger.report(request, getUserId(), false, "logbook", from, to, deviceIds, groupIds);
+            logbookReportProvider.getExcel(stream, getUserId(), deviceIds, groupIds, from, to);
+        });
+    }
+
+    @Path("logbook/{type:xlsx|mail}")
+    @GET
+    @Produces(EXCEL)
+    public Response getLogbookExcel(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @PathParam("type") String type) throws StorageException {
+        return getLogbookExcel(deviceIds, groupIds, from, to, type.equals("mail"));
+    }
 }
