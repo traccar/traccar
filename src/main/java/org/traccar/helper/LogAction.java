@@ -61,7 +61,6 @@ public final class LogAction {
     private static final String ACTION_ACCUMULATORS = "accumulators";
     private static final String ACTION_COMMAND = "command";
     private static final String ACTION_REPORT = "report";
-    private static final String ACTION_TOKEN = "token";
 
     public void create(HttpServletRequest request, long userId, BaseModel object) {
         logObjectAction(request, ACTION_CREATE, userId, object.getClass(), object.getId());
@@ -97,8 +96,9 @@ public final class LogAction {
         Action action = new Action();
         action.setAddress(WebHelper.retrieveRemoteAddress(request));
         action.setUserId(userId);
-        action.setActionType(ACTION_TOKEN);
-        action.set("tokenId", tokenId);
+        action.setActionType(ACTION_CREATE);
+        action.setObjectType("token");
+        action.setObjectId(tokenId);
         storeAction(action);
     }
 
