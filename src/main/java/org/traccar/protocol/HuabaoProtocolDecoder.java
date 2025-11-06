@@ -717,6 +717,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 case 0xD4:
                 case 0xE1:
+                case 0xE9:
                     if (length == 1) {
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     } else {
@@ -773,6 +774,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                             position.set("humidity" + sensorIndex, decodeCustomDouble(buf));
                         }
                     }
+                    break;
+                case 0xE8:
+                    position.set("lockStatus", buf.readUnsignedMedium());
                     break;
                 case 0xEA:
                     if (length > 2) {
