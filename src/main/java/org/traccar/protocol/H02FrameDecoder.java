@@ -63,7 +63,7 @@ public class H02FrameDecoder extends BaseFrameDecoder {
             case '$':
 
                 if (messageLength == 0) {
-                    if (buf.readableBytes() == MESSAGE_LONG) {
+                    if (buf.readableBytes() >= MESSAGE_LONG) {
                         messageLength = MESSAGE_LONG;
                     } else {
                         messageLength = MESSAGE_SHORT;
@@ -71,7 +71,15 @@ public class H02FrameDecoder extends BaseFrameDecoder {
                 }
 
                 if (buf.readableBytes() >= messageLength) {
-                    return buf.readRetainedSlice(messageLength);
+                    // Check if we have extended data beyond standard long message
+                    int actualLength = messageLength;
+                    if (messageLength == MESSAGE_LONG && buf.readableBytes() > MESSAGE_LONG) {
+                        // Extended format may have 2 additional bytes for external voltage
+                        if (buf.readableBytes() >= MESSAGE_LONG + 2) {
+                            actualLength = MESSAGE_LONG + 2;  // 47 bytes total
+                        }
+                    }
+                    return buf.readRetainedSlice(actualLength);
                 }
 
                 break;
