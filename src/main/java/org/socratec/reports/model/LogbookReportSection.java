@@ -23,26 +23,36 @@ import java.util.List;
 public class LogbookReportSection {
 
     private String deviceName;
+    private String groupName = "";
+    private double totalDistance;
+    private double totalDuration;
+    private double privateDistance;
+    private double businessDistance;
+    private double privateDuration;
+    private double businessDuration;
+    private List<?> objects;
+
 
     public String getDeviceName() {
         return deviceName;
     }
-
     public void setDeviceName(String deviceName) {
         this.deviceName = deviceName;
     }
 
-    private String groupName = "";
-
     public String getGroupName() {
         return groupName;
     }
-
     public void setGroupName(String groupName) {
         this.groupName = groupName;
     }
 
-    private double totalDistance;
+    public Collection<?> getObjects() {
+        return objects;
+    }
+    public void setObjects(Collection<?> objects) {
+        this.objects = new ArrayList<>(objects);
+    }
 
     public double getTotalDistance() {
         return totalDistance;
@@ -52,14 +62,43 @@ public class LogbookReportSection {
         this.totalDistance = totalDistance;
     }
 
-    private List<?> objects;
-
-    public Collection<?> getObjects() {
-        return objects;
+    public double getTotalDuration() {
+        return totalDuration;
     }
 
-    public void setObjects(Collection<?> objects) {
-        this.objects = new ArrayList<>(objects);
+    public void setTotalDuration(double totalDuration) {
+        this.totalDuration = totalDuration;
     }
 
+    public double getPrivateDistance() {
+        return privateDistance;
+    }
+
+    public void setPrivateDistance(double privateDistance) {
+        this.privateDistance = privateDistance;
+    }
+
+    public double getBusinessDistance() {
+        return businessDistance;
+    }
+
+    public void setBusinessDistance(double businessDistance) {
+        this.businessDistance = businessDistance;
+    }
+
+    public double getPrivateDuration() {
+        return privateDuration;
+    }
+
+    public void setPrivateDuration(double privateDuration) {
+        this.privateDuration = privateDuration;
+    }
+
+    public double getBusinessDuration() {
+        return businessDuration;
+    }
+
+    public void setBusinessDuration(double businessDuration) {
+        this.businessDuration = businessDuration;
+    }
 }
