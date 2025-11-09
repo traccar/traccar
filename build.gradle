@@ -105,6 +105,9 @@ dependencies {
     testImplementation "org.mockito:mockito-core:5.17.0"
     testImplementation "org.junit.jupiter:junit-jupiter:5.12.0"
     testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+    
+    // Socratec: PDF generation for logbook reports
+    implementation "com.itextpdf:html2pdf:5.0.5"
 }
 
 test {

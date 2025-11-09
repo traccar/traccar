@@ -17,12 +17,17 @@ import org.traccar.storage.query.Request;
 import org.socratec.model.LogbookEntry;
 import org.socratec.model.LogbookEntryType;
 
+import com.itextpdf.html2pdf.HtmlConverter;
 import jakarta.inject.Inject;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -75,8 +80,73 @@ public class LogbookReportProvider {
             Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
 
-        ArrayList<LogbookReportSection> devicesLogbook = new ArrayList<>();
+        // Reuse the common data preparation logic
+        ArrayList<LogbookReportSection> devicesLogbook = createLogbookReportSections(
+                userId, deviceIds, groupIds, from, to);
+
         ArrayList<String> sheetNames = new ArrayList<>();
+        for (LogbookReportSection deviceLogbook : devicesLogbook) {
+            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceLogbook.getDeviceName()));
+        }
+
+        File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "logbook.xlsx").toFile();
+        try (InputStream inputStream = new FileInputStream(file)) {
+            var context = reportUtils.initializeContext(userId);
+            context.putVar("devices", devicesLogbook);
+            context.putVar("sheetNames", sheetNames);
+            context.putVar("from", from);
+            context.putVar("to", to);
+            reportUtils.processTemplateWithSheets(inputStream, outputStream, context);
+        }
+    }
+
+    public void getPdf(OutputStream outputStream,
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+            Date from, Date to) throws StorageException, IOException {
+        reportUtils.checkPeriodLimit(from, to);
+
+        // Reuse the same data preparation logic
+        ArrayList<LogbookReportSection> devicesLogbook = createLogbookReportSections(
+                userId, deviceIds, groupIds, from, to);
+
+        // Initialize Velocity Engine
+        VelocityEngine velocityEngine = new VelocityEngine();
+        velocityEngine.setProperty("resource.loaders", "file");
+        velocityEngine.setProperty("resource.loader.file.class",
+                "org.apache.velocity.runtime.resource.loader.FileResourceLoader");
+        velocityEngine.setProperty("resource.loader.file.path",
+                config.getString(Keys.TEMPLATES_ROOT) + "/export");
+        velocityEngine.init();
+
+        // Create Velocity Context using reportUtils for consistency
+        var jxlsContext = reportUtils.initializeContext(userId);
+        VelocityContext velocityContext = new VelocityContext();
+
+        // Transfer relevant variables from JXLS context to Velocity context
+        velocityContext.put("devices", devicesLogbook);
+        velocityContext.put("from", from);
+        velocityContext.put("to", to);
+        velocityContext.put("distanceUnit", jxlsContext.getVar("distanceUnit"));
+        velocityContext.put("speedUnit", jxlsContext.getVar("speedUnit"));
+        velocityContext.put("volumeUnit", jxlsContext.getVar("volumeUnit"));
+        velocityContext.put("timezone", jxlsContext.getVar("timezone"));
+        velocityContext.put("locale", jxlsContext.getVar("locale"));
+        velocityContext.put("dateTool", jxlsContext.getVar("dateTool"));
+        velocityContext.put("numberTool", jxlsContext.getVar("numberTool"));
+
+        // Process template
+        StringWriter writer = new StringWriter();
+        velocityEngine.getTemplate("logbook.vm").merge(velocityContext, writer);
+        String htmlContent = writer.toString();
+
+        // Convert HTML to PDF
+        HtmlConverter.convertToPdf(htmlContent, outputStream);
+    }
+
+    private ArrayList<LogbookReportSection> createLogbookReportSections(
+            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+            Date from, Date to) throws StorageException {
+        ArrayList<LogbookReportSection> devicesLogbook = new ArrayList<>();
         for (Device device: DeviceUtil.getAccessibleDevices(storage, userId, deviceIds, groupIds)) {
             Collection<LogbookEntry> logbookEntries = storage.getObjects(LogbookEntry.class, new Request(
                     new Columns.All(),
@@ -88,7 +158,6 @@ public class LogbookReportProvider {
             ));
             LogbookReportSection deviceLogbook = new LogbookReportSection();
             deviceLogbook.setDeviceName(device.getName());
-            sheetNames.add(WorkbookUtil.createSafeSheetName(deviceLogbook.getDeviceName()));
             if (device.getGroupId() > 0) {
                 Group group = storage.getObject(Group.class, new Request(
                         new Columns.All(), new Condition.Equals("id", device.getGroupId())));
@@ -106,16 +175,7 @@ public class LogbookReportProvider {
             deviceLogbook.setBusinessDuration(sumReport.businessDuration);
             devicesLogbook.add(deviceLogbook);
         }
-
-        File file = Paths.get(config.getString(Keys.TEMPLATES_ROOT), "export", "logbook.xlsx").toFile();
-        try (InputStream inputStream = new FileInputStream(file)) {
-            var context = reportUtils.initializeContext(userId);
-            context.putVar("devices", devicesLogbook);
-            context.putVar("sheetNames", sheetNames);
-            context.putVar("from", from);
-            context.putVar("to", to);
-            reportUtils.processTemplateWithSheets(inputStream, outputStream, context);
-        }
+        return devicesLogbook;
     }
 
     private SumReport calculateAllSums(Collection<LogbookEntry> logbookEntries) {

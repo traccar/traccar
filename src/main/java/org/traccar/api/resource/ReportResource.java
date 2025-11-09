@@ -115,6 +115,23 @@ public class ReportResource extends SimpleObjectResource<Report> {
         }
     }
 
+    private Response executePdfReport(long userId, boolean mail, ReportExecutor executor) {
+        if (mail) {
+            reportMailer.sendAsync(userId, executor);
+            return Response.noContent().build();
+        } else {
+            StreamingOutput stream = output -> {
+                try {
+                    executor.execute(output);
+                } catch (StorageException e) {
+                    throw new WebApplicationException(e);
+                }
+            };
+            return Response.ok(stream)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=report.pdf").build();
+        }
+    }
+
     @Path("combined")
     @GET
     public Collection<CombinedReportItem> getCombined(
@@ -390,5 +407,33 @@ public class ReportResource extends SimpleObjectResource<Report> {
             @QueryParam("to") Date to,
             @PathParam("type") String type) throws StorageException {
         return getLogbookExcel(deviceIds, groupIds, from, to, type.equals("mail"));
+    }
+
+    @Path("logbook")
+    @GET
+    @Produces("application/pdf")
+    public Response getLogbookPdf(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @QueryParam("mail") boolean mail) throws StorageException {
+        permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
+        return executePdfReport(getUserId(), mail, stream -> {
+            actionLogger.report(request, getUserId(), false, "logbook", from, to, deviceIds, groupIds);
+            logbookReportProvider.getPdf(stream, getUserId(), deviceIds, groupIds, from, to);
+        });
+    }
+
+    @Path("logbook/{type:pdf|mail}")
+    @GET
+    @Produces("application/pdf")
+    public Response getLogbookPdf(
+            @QueryParam("deviceId") List<Long> deviceIds,
+            @QueryParam("groupId") List<Long> groupIds,
+            @QueryParam("from") Date from,
+            @QueryParam("to") Date to,
+            @PathParam("type") String type) throws StorageException {
+        return getLogbookPdf(deviceIds, groupIds, from, to, type.equals("mail"));
     }
 }
