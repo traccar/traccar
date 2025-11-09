@@ -132,25 +132,25 @@
             background-color: #f9f9f9;
         }
         
-        /* Define specific column widths */
+        /* Define specific column widths - Total: 100% */
         .entries-table th:nth-child(1),
         .entries-table td:nth-child(1) {
-            width: 12%;
+            width: 11%;
         }
         
         .entries-table th:nth-child(2),
         .entries-table td:nth-child(2) {
-            width: 12%;
+            width: 11%;
         }
         
         .entries-table th:nth-child(3),
         .entries-table td:nth-child(3) {
-            width: 15%;
+            width: 14%;
         }
         
         .entries-table th:nth-child(4),
         .entries-table td:nth-child(4) {
-            width: 15%;
+            width: 14%;
         }
         
         .entries-table th:nth-child(5),
@@ -180,12 +180,12 @@
         
         .entries-table th:nth-child(10),
         .entries-table td:nth-child(10) {
-            width: 5%;
+            width: 7%;
         }
         
         .entries-table th:nth-child(11),
         .entries-table td:nth-child(11) {
-            width: 5%;
+            width: 7%;
         }
         
         .date-time {

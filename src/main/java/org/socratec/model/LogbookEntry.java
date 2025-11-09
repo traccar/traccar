@@ -47,7 +47,7 @@ public class LogbookEntry extends BaseModel {
     private long driverId;
     private String hash;
     private String notes;
-    private LogbookEntryType type = LogbookEntryType.NONE;
+    private LogbookEntryType type = LogbookEntryType.BUSINESS;
 
     public long getDeviceId() {
         return deviceId;
@@ -222,6 +222,6 @@ public class LogbookEntry extends BaseModel {
     }
 
     public void setType(LogbookEntryType type) {
-        this.type = type != null ? type : LogbookEntryType.NONE;
+        this.type = type != null ? type : LogbookEntryType.BUSINESS;
     }
 }
