@@ -21,7 +21,6 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * Enum representing the type of a logbook entry
  */
 public enum LogbookEntryType {
-    NONE(0),
     BUSINESS(1),
     PRIVATE(2);
 
@@ -42,6 +41,6 @@ public enum LogbookEntryType {
                 return type;
             }
         }
-        return NONE; // Default fallback
+        return BUSINESS; // Default fallback
     }
 }

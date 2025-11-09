@@ -141,13 +141,533 @@ paths:
         '405':
           description: Method Not Allowed - Trip deletion is not supported
           content: {}
+  /logbook:
+    post:
+      summary: Create single LogbookEntry (Service Users Only)
+      description: |
+        Creates a single logbook entry in the system. This endpoint is restricted to service users only
+        and requires authentication with a service account token. Regular users will receive a 403 Forbidden response.
+        
+        Service users are authenticated using the Bearer token scheme with a service account token
+        configured via the `web.serviceAccountToken` configuration property.
+        
+        The endpoint validates required fields and automatically calculates duration if not provided.
+        All creation actions are logged for audit purposes.
+      tags:
+        - Reports
+      security:
+        - ApiKey: []
+      requestBody:
+        required: true
+        description: |
+          LogbookEntry object to create. The ID field will be auto-generated and should not be provided.
+          Required fields: deviceId, driverId, startPositionId, endPositionId, startTime, endTime, hash. 
+          Duration will be calculated automatically if not provided.
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                deviceId:
+                  type: integer
+                  format: int64
+                  description: ID of the device for this trip (required)
+                  minimum: 1
+                driverId:
+                  type: integer
+                  format: int64
+                  description: ID of the driver who performed this trip (required)
+                  minimum: 1
+                startPositionId:
+                  type: integer
+                  format: int64
+                  description: ID of the position record at trip start (required)
+                  minimum: 1
+                endPositionId:
+                  type: integer
+                  format: int64
+                  description: ID of the position record at trip end (required)
+                  minimum: 1
+                startTime:
+                  type: string
+                  format: date-time
+                  description: Trip start time in ISO 8601 format (required)
+                endTime:
+                  type: string
+                  format: date-time
+                  description: Trip end time in ISO 8601 format (required)
+                hash:
+                  type: string
+                  description: Hash value for the trip (required for deduplication/integrity)
+                  minLength: 1
+                distance:
+                  type: number
+                  format: double
+                  description: Total distance of the trip in meters
+                  minimum: 0
+                averageSpeed:
+                  type: number
+                  format: double
+                  description: Average speed during the trip in km/h
+                  minimum: 0
+                maxSpeed:
+                  type: number
+                  format: double
+                  description: Maximum speed reached during the trip in km/h
+                  minimum: 0
+                spentFuel:
+                  type: number
+                  format: double
+                  description: Amount of fuel consumed during the trip in liters
+                  minimum: 0
+                startOdometer:
+                  type: number
+                  format: double
+                  description: Odometer reading at trip start
+                  minimum: 0
+                endOdometer:
+                  type: number
+                  format: double
+                  description: Odometer reading at trip end
+                  minimum: 0
+                startLat:
+                  type: number
+                  format: double
+                  description: Latitude coordinate at trip start
+                  minimum: -90
+                  maximum: 90
+                startLon:
+                  type: number
+                  format: double
+                  description: Longitude coordinate at trip start
+                  minimum: -180
+                  maximum: 180
+                endLat:
+                  type: number
+                  format: double
+                  description: Latitude coordinate at trip end
+                  minimum: -90
+                  maximum: 90
+                endLon:
+                  type: number
+                  format: double
+                  description: Longitude coordinate at trip end
+                  minimum: -180
+                  maximum: 180
+                startAddress:
+                  type: string
+                  maxLength: 512
+                  description: Human-readable address at trip start location
+                  nullable: true
+                endAddress:
+                  type: string
+                  maxLength: 512
+                  description: Human-readable address at trip end location
+                  nullable: true
+                duration:
+                  type: integer
+                  format: int64
+                  description: Trip duration in milliseconds (auto-calculated if not provided)
+                  minimum: 0
+                notes:
+                  type: string
+                  description: Additional notes or comments for the trip
+                  nullable: true
+                type:
+                  $ref: '#/components/schemas/LogbookEntryType'
+              required:
+                - deviceId
+                - driverId
+                - startPositionId
+                - endPositionId
+                - startTime
+                - endTime
+                - hash
+            example:
+              deviceId: 123
+              driverId: 1
+              startPositionId: 1
+              endPositionId: 2
+              startTime: "2024-11-07T08:00:00.000Z"
+              endTime: "2024-11-07T10:30:00.000Z"
+              distance: 125.7
+              averageSpeed: 65.3
+              maxSpeed: 95.0
+              startLat: 52.520008
+              startLon: 13.404954
+              endLat: 52.370216
+              endLon: 13.404954
+              startAddress: "Berlin, Alexanderplatz, Germany"
+              endAddress: "Berlin, Tempelhof Airport, Germany"
+              notes: "Business trip to client meeting"
+              type: 1
+              hash: "a1b2c3d4e5f6789012345abcdef67890"
+      responses:
+        '200':
+          description: |
+            LogbookEntry successfully created. Returns the created LogbookEntry object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogbookEntry'
+              example:
+                id: 456
+                deviceId: 123
+                startTime: "2024-11-07T08:00:00.000Z"
+                endTime: "2024-11-07T10:30:00.000Z"
+                duration: 9000000
+                distance: 125.7
+                averageSpeed: 65.3
+                maxSpeed: 95.0
+                startLat: 52.520008
+                startLon: 13.404954
+                endLat: 52.370216
+                endLon: 13.404954
+                startAddress: "Berlin, Alexanderplatz, Germany"
+                endAddress: "Berlin, Tempelhof Airport, Germany"
+                notes: "Business trip to client meeting"
+                type: 1
+        '400':
+          description: |
+            Bad request. This can occur when:
+            - Entry is null
+            - Required fields are missing
+            - Validation errors (e.g., endTime before startTime)
+            - Invalid field values
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Missing required hash."
+        '401':
+          description: Unauthorized - Authentication required
+          content: {}
+        '403':
+          description: |
+            Forbidden - Access denied. This endpoint is restricted to service users only.
+            Regular users and administrators cannot create logbook entries through this endpoint.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Access denied: Service account required"
+        '500':
+          description: Internal server error
+          content: {}
+  /logbook/bulk:
+    post:
+      summary: Create multiple LogbookEntries (Service Users Only)
+      description: |
+        Creates multiple logbook entries in the system with partial success support. This endpoint is restricted to service users only
+        and requires authentication with a service account token. Regular users will receive a 403 Forbidden response.
+        
+        The endpoint processes each entry individually and returns detailed results for both successful and failed entries.
+        Even if some entries fail validation or processing, successful entries will still be created.
+        
+        Service users are authenticated using the Bearer token scheme with a service account token
+        configured via the `web.serviceAccountToken` configuration property.
+        
+        The endpoint validates required fields and automatically calculates duration if not provided.
+        All creation actions are logged for audit purposes.
+      tags:
+        - Reports
+      security:
+        - ApiKey: []
+      requestBody:
+        required: true
+        description: |
+          Array of LogbookEntry objects to create. The ID field will be auto-generated for each entry and should not be provided.
+          Required fields per entry: deviceId, driverId, startPositionId, endPositionId, startTime, endTime, hash. 
+          Duration will be calculated automatically if not provided.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  deviceId:
+                    type: integer
+                    format: int64
+                    description: ID of the device for this trip (required)
+                    minimum: 1
+                  driverId:
+                    type: integer
+                    format: int64
+                    description: ID of the driver who performed this trip (required)
+                    minimum: 1
+                  startPositionId:
+                    type: integer
+                    format: int64
+                    description: ID of the position record at trip start (required)
+                    minimum: 1
+                  endPositionId:
+                    type: integer
+                    format: int64
+                    description: ID of the position record at trip end (required)
+                    minimum: 1
+                  startTime:
+                    type: string
+                    format: date-time
+                    description: Trip start time in ISO 8601 format (required)
+                  endTime:
+                    type: string
+                    format: date-time
+                    description: Trip end time in ISO 8601 format (required)
+                  hash:
+                    type: string
+                    description: Hash value for the trip (required for deduplication/integrity)
+                    minLength: 1
+                  distance:
+                    type: number
+                    format: double
+                    description: Total distance of the trip in meters
+                    minimum: 0
+                  averageSpeed:
+                    type: number
+                    format: double
+                    description: Average speed during the trip in km/h
+                    minimum: 0
+                  maxSpeed:
+                    type: number
+                    format: double
+                    description: Maximum speed reached during the trip in km/h
+                    minimum: 0
+                  spentFuel:
+                    type: number
+                    format: double
+                    description: Amount of fuel consumed during the trip in liters
+                    minimum: 0
+                  startOdometer:
+                    type: number
+                    format: double
+                    description: Odometer reading at trip start
+                    minimum: 0
+                  endOdometer:
+                    type: number
+                    format: double
+                    description: Odometer reading at trip end
+                    minimum: 0
+                  startLat:
+                    type: number
+                    format: double
+                    description: Latitude coordinate at trip start
+                    minimum: -90
+                    maximum: 90
+                  startLon:
+                    type: number
+                    format: double
+                    description: Longitude coordinate at trip start
+                    minimum: -180
+                    maximum: 180
+                  endLat:
+                    type: number
+                    format: double
+                    description: Latitude coordinate at trip end
+                    minimum: -90
+                    maximum: 90
+                  endLon:
+                    type: number
+                    format: double
+                    description: Longitude coordinate at trip end
+                    minimum: -180
+                    maximum: 180
+                  startAddress:
+                    type: string
+                    maxLength: 512
+                    description: Human-readable address at trip start location
+                    nullable: true
+                  endAddress:
+                    type: string
+                    maxLength: 512
+                    description: Human-readable address at trip end location
+                    nullable: true
+                  duration:
+                    type: integer
+                    format: int64
+                    description: Trip duration in milliseconds (auto-calculated if not provided)
+                    minimum: 0
+                  notes:
+                    type: string
+                    description: Additional notes or comments for the trip
+                    nullable: true
+                  type:
+                    $ref: '#/components/schemas/LogbookEntryType'
+                required:
+                  - deviceId
+                  - driverId
+                  - startPositionId
+                  - endPositionId
+                  - startTime
+                  - endTime
+                  - hash
+            example:
+              - deviceId: 123
+                driverId: 1
+                startPositionId: 1
+                endPositionId: 2
+                startTime: "2024-11-07T08:00:00.000Z"
+                endTime: "2024-11-07T10:30:00.000Z"
+                distance: 125.7
+                averageSpeed: 65.3
+                maxSpeed: 95.0
+                startLat: 52.520008
+                startLon: 13.404954
+                endLat: 52.370216
+                endLon: 13.404954
+                startAddress: "Berlin, Alexanderplatz, Germany"
+                endAddress: "Berlin, Tempelhof Airport, Germany"
+                notes: "Business trip to client meeting"
+                type: 1
+                hash: "a1b2c3d4e5f6789012345abcdef67890"
+              - deviceId: 124
+                driverId: 2
+                startPositionId: 3
+                endPositionId: 4
+                startTime: "2024-11-07T11:00:00.000Z"
+                endTime: "2024-11-07T12:30:00.000Z"
+                distance: 85.2
+                averageSpeed: 55.8
+                maxSpeed: 80.0
+                startLat: 52.370216
+                startLon: 13.404954
+                endLat: 52.520008
+                endLon: 13.404954
+                startAddress: "Berlin, Tempelhof Airport, Germany"
+                endAddress: "Berlin, Alexanderplatz, Germany"
+                notes: "Return trip"
+                type: 1
+                hash: "b2c3d4e5f6789012345abcdef67890a1"
+      responses:
+        '200':
+          description: |
+            All entries processed successfully. Returns detailed results with all created LogbookEntry objects.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogbookEntriesResult'
+              example:
+                totalRequested: 2
+                successful: 2
+                failed: 0
+                results:
+                  - index: 0
+                    status: "success"
+                    entry:
+                      id: 456
+                      deviceId: 123
+                      startTime: "2024-11-07T08:00:00.000Z"
+                      endTime: "2024-11-07T10:30:00.000Z"
+                      duration: 9000000
+                      distance: 125.7
+                      averageSpeed: 65.3
+                      maxSpeed: 95.0
+                      startLat: 52.520008
+                      startLon: 13.404954
+                      endLat: 52.370216
+                      endLon: 13.404954
+                      startAddress: "Berlin, Alexanderplatz, Germany"
+                      endAddress: "Berlin, Tempelhof Airport, Germany"
+                      notes: "Business trip to client meeting"
+                      type: 1
+                  - index: 1
+                    status: "success"
+                    entry:
+                      id: 457
+                      deviceId: 124
+                      startTime: "2024-11-07T11:00:00.000Z"
+                      endTime: "2024-11-07T12:30:00.000Z"
+                      duration: 5400000
+                      distance: 85.2
+                      averageSpeed: 55.8
+                      maxSpeed: 80.0
+                      startLat: 52.370216
+                      startLon: 13.404954
+                      endLat: 52.520008
+                      endLon: 13.404954
+                      startAddress: "Berlin, Tempelhof Airport, Germany"
+                      endAddress: "Berlin, Alexanderplatz, Germany"
+                      notes: "Return trip"
+                      type: 1
+        '207':
+          description: |
+            Partial success - Some entries were created successfully, others failed.
+            Returns detailed results showing which entries succeeded and which failed with error messages.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogbookEntriesResult'
+              example:
+                totalRequested: 3
+                successful: 2
+                failed: 1
+                results:
+                  - index: 0
+                    status: "success"
+                    entry:
+                      id: 456
+                      deviceId: 123
+                      # ... complete LogbookEntry object
+                  - index: 1
+                    status: "error"
+                    error: "Missing required hash."
+                    originalEntry:
+                      deviceId: 124
+                      driverId: 2
+                      # ... the failed entry data
+                  - index: 2
+                    status: "success"
+                    entry:
+                      id: 457
+                      deviceId: 125
+                      # ... complete LogbookEntry object
+        '400':
+          description: |
+            Bad request. This can occur when:
+            - Entry list is null or empty
+            - All entries failed validation or processing
+            - Invalid request format
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      error:
+                        type: string
+                        example: "Entry list cannot be null or empty"
+                  - $ref: '#/components/schemas/LogbookEntriesResult'
+        '401':
+          description: Unauthorized - Authentication required
+          content: {}
+        '403':
+          description: |
+            Forbidden - Access denied. This endpoint is restricted to service users only.
+            Regular users and administrators cannot create logbook entries through this endpoint.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Access denied: Service account required"
+        '500':
+          description: Internal server error
+          content: {}
   /logbook/{id}:
     put:
       summary: Update LogbookEntry type and notes
       description: |
         Updates ONLY the type and notes fields of a LogbookEntry for trip classification and annotation.
         All other fields in the request body are ignored and remain unchanged.
-        This endpoint is used to classify trips as NONE (0), BUSINESS (1), or PRIVATE (2) and add notes.
+        This endpoint is used to classify trips as BUSINESS (1) or PRIVATE (2) and add notes.
       tags:
         - Reports
       parameters:
@@ -215,7 +735,7 @@ paths:
         '400':
           description: |
             Bad request. This can occur when:
-            - Invalid type value (must be 0, 1, or 2)
+            - Invalid type value (must be 1 or 2)
             - Missing required 'type' field in request body
             - Invalid request format
           content:
@@ -225,7 +745,7 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: "Invalid type value. Must be 0 (NONE), 1 (BUSINESS), or 2 (PRIVATE)"
+                    example: "Invalid type value. Must be 1 (BUSINESS) or 2 (PRIVATE)"
         '404':
           description: LogbookEntry not found
           content: {}
@@ -698,13 +1218,66 @@ components:
       description: |
         Enum representing the type/classification of a logbook entry.
         Used to categorize trips for business reporting and tax purposes.
-      enum: [0, 1, 2]
-      x-enum-varnames: [NONE, BUSINESS, PRIVATE]
+      enum: [1, 2]
+      x-enum-varnames: [BUSINESS, PRIVATE]
       x-enum-descriptions:
-        - "NONE (0): Unclassified or default entry type"
         - "BUSINESS (1): Business-related trip"
         - "PRIVATE (2): Private/personal trip"
       example: 1
+    LogbookEntryCreateResult:
+      type: object
+      description: |
+        Represents the result of attempting to create a single LogbookEntry during bulk operations.
+        Contains either the successfully created entry or error information for failed entries.
+      properties:
+        index:
+          type: integer
+          description: Zero-based index of this entry in the original request array
+          minimum: 0
+        status:
+          type: string
+          enum: ["success", "error"]
+          description: Status of the creation attempt
+        entry:
+          $ref: '#/components/schemas/LogbookEntry'
+          description: The successfully created LogbookEntry (only present when status is "success")
+        error:
+          type: string
+          description: Error message explaining why the creation failed (only present when status is "error")
+        originalEntry:
+          $ref: '#/components/schemas/LogbookEntry'
+          description: The original entry data that failed to be created (only present when status is "error")
+      required:
+        - index
+        - status
+    LogbookEntriesResult:
+      type: object
+      description: |
+        Response object for bulk LogbookEntry creation operations.
+        Provides summary statistics and detailed results for each entry in the request.
+      properties:
+        totalRequested:
+          type: integer
+          description: Total number of entries in the original request
+          minimum: 0
+        successful:
+          type: integer
+          description: Number of entries that were successfully created
+          minimum: 0
+        failed:
+          type: integer
+          description: Number of entries that failed to be created
+          minimum: 0
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogbookEntryCreateResult'
+          description: Detailed results for each entry, ordered by the original request index
+      required:
+        - totalRequested
+        - successful
+        - failed
+        - results
   requestBodies:
     Trip:
       content:

@@ -15,7 +15,6 @@
  */
 package org.socratec.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.model.BaseModel;
 import org.traccar.storage.StorageName;
 
@@ -202,12 +201,10 @@ public class LogbookEntry extends BaseModel {
         this.driverId = driverId;
     }
 
-    @JsonIgnore
     public String getHash() {
         return hash;
     }
 
-    @JsonIgnore
     public void setHash(String hash) {
         this.hash = hash;
     }
