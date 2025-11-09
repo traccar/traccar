@@ -110,6 +110,7 @@
             border-collapse: collapse;
             margin-top: 10px;
             table-layout: fixed;
+            box-sizing: border-box;
         }
         
         .entries-table th,
@@ -132,50 +133,50 @@
             background-color: #f9f9f9;
         }
         
-        /* Define specific column widths - Total: 100% */
+        /* Define specific column widths for 11-column table - Total: exactly 100% */
         .entries-table th:nth-child(1),
         .entries-table td:nth-child(1) {
-            width: 11%;
+            width: 9%;
         }
         
         .entries-table th:nth-child(2),
         .entries-table td:nth-child(2) {
-            width: 11%;
+            width: 9%;
         }
         
         .entries-table th:nth-child(3),
         .entries-table td:nth-child(3) {
-            width: 14%;
+            width: 12%;
         }
         
         .entries-table th:nth-child(4),
         .entries-table td:nth-child(4) {
-            width: 14%;
+            width: 12%;
         }
         
         .entries-table th:nth-child(5),
         .entries-table td:nth-child(5) {
-            width: 8%;
+            width: 9%;
         }
         
         .entries-table th:nth-child(6),
         .entries-table td:nth-child(6) {
-            width: 8%;
+            width: 9%;
         }
         
         .entries-table th:nth-child(7),
         .entries-table td:nth-child(7) {
-            width: 7%;
+            width: 9%;
         }
         
         .entries-table th:nth-child(8),
         .entries-table td:nth-child(8) {
-            width: 7%;
+            width: 9%;
         }
         
         .entries-table th:nth-child(9),
         .entries-table td:nth-child(9) {
-            width: 6%;
+            width: 8%;
         }
         
         .entries-table th:nth-child(10),
@@ -349,9 +350,7 @@
                     <th>Duration</th>
                     <th>Avg Speed ($speedUnit)</th>
                     <th>Max Speed ($speedUnit)</th>
-                    #if($volumeUnit)
                     <th>Fuel ($volumeUnit)</th>
-                    #end
                     <th>Type</th>
                     <th>Notes</th>
                 </tr>
@@ -379,9 +378,7 @@
                     </td>
                     <td class="number">$numberTool.format('#0.0', $entry.averageSpeed)</td>
                     <td class="number">$numberTool.format('#0.0', $entry.maxSpeed)</td>
-                    #if($volumeUnit)
                     <td class="number">#if($entry.spentFuel > 0)$numberTool.format('#0.00', $entry.spentFuel)#else-#end</td>
-                    #end
                     <td class="type-cell">#if($entry.type)$entry.type#else-#end</td>
                     <td class="notes-cell">#if($entry.notes)$entry.notes#else-#end</td>
                 </tr>
