@@ -357,108 +357,25 @@ paths:
         '500':
           description: Internal server error
           content: {}
-  /reports/logbook.xlsx:
-    get:
-      summary: Get logbook report (Excel)
-      description: |
-        Generate a logbook report in Excel format (.xlsx) filtered by device, group, and date range.
-        Returns an Excel file with logbook entries including the Type column for trip classification.
-        The Excel file contains formatted data with proper headers and styling.
-      tags:
-        - Reports
-      parameters:
-        - name: deviceId
-          in: query
-          description: |
-            List of device IDs to include. Multiple device IDs can be specified.
-          required: false
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int64
-          style: form
-          explode: true
-          example: [1, 2, 3]
-        - name: groupId
-          in: query
-          description: |
-            List of group IDs to include. All devices in the specified groups will be included.
-            Multiple group IDs can be specified.
-          required: false
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int64
-          style: form
-          explode: true
-          example: [1, 2]
-        - name: from
-          in: query
-          description: |
-            Start date and time for filtering in ISO 8601 format.
-            Only trips starting on or after this date will be included.
-          required: true
-          schema:
-            type: string
-            format: date-time
-          example: "2024-01-01T00:00:00.000Z"
-        - name: to
-          in: query
-          description: |
-            End date and time for filtering in ISO 8601 format.
-            Only trips starting on or before this date will be included.
-          required: true
-          schema:
-            type: string
-            format: date-time
-          example: "2024-01-31T23:59:59.999Z"
-      responses:
-        '200':
-          description: |
-            Successfully generated Excel logbook report.
-            The response contains an Excel file with logbook entries.
-          content:
-            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
-              schema:
-                type: string
-                format: binary
-          headers:
-            Content-Disposition:
-              description: Attachment header with filename
-              schema:
-                type: string
-                example: "attachment; filename=report.xlsx"
-        '400':
-          description: |
-            Bad request. This can occur when:
-            - Required parameters (from, to) are missing
-            - Date format is incorrect
-            - Date range exceeds configured limits
-            - Invalid parameter values
-          content: {}
-        '401':
-          description: Unauthorized - Authentication required
-          content: {}
-        '403':
-          description: |
-            Forbidden - User does not have permission to access the specified devices or groups,
-            or reports are disabled for this user.
-          content: {}
-        '500':
-          description: Internal server error
-          content: {}
-  /reports/logbook/xlsx:
+  /reports/logbook/{type}:
     get:
       summary: Get logbook report (Excel - alternative path)
       description: |
         Alternative endpoint for generating logbook reports in Excel format.
-        Functionally identical to /reports/logbook.xlsx.
-        Returns an Excel file with logbook entries including the Type column.
+        Supports both 'xlsx' for direct download and 'mail' for email delivery.
+        Returns an Excel file with enhanced logbook entries including separate sheets per device,
+        summary calculations, and entry counts.
       tags:
         - Reports
       parameters:
+        - name: type
+          in: path
+          required: true
+          description: Report delivery type - 'xlsx' for download, 'mail' for email
+          schema:
+            type: string
+            enum: [xlsx, mail]
+          example: "xlsx"
         - name: deviceId
           in: query
           description: |
@@ -509,8 +426,8 @@ paths:
       responses:
         '200':
           description: |
-            Successfully generated Excel logbook report.
-            The response contains an Excel file with logbook entries.
+            Successfully generated Excel logbook report for direct download (type=xlsx).
+            The response contains an Excel file with enhanced logbook entries.
           content:
             application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
               schema:
@@ -522,86 +439,10 @@ paths:
               schema:
                 type: string
                 example: "attachment; filename=report.xlsx"
-        '400':
-          description: |
-            Bad request. This can occur when:
-            - Required parameters (from, to) are missing
-            - Date format is incorrect
-            - Date range exceeds configured limits
-            - Invalid parameter values
-          content: {}
-        '401':
-          description: Unauthorized - Authentication required
-          content: {}
-        '403':
-          description: |
-            Forbidden - User does not have permission to access the specified devices or groups,
-            or reports are disabled for this user.
-          content: {}
-        '500':
-          description: Internal server error
-          content: {}
-  /reports/logbook/mail:
-    get:
-      summary: Email logbook report (Excel)
-      description: |
-        Generate and email a logbook report in Excel format to the authenticated user.
-        The report is filtered by device, group, and date range and sent via email.
-        This endpoint returns HTTP 204 No Content on successful email dispatch.
-      tags:
-        - Reports
-      parameters:
-        - name: deviceId
-          in: query
-          description: |
-            List of device IDs to include. Multiple device IDs can be specified.
-          required: false
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int64
-          style: form
-          explode: true
-          example: [1, 2, 3]
-        - name: groupId
-          in: query
-          description: |
-            List of group IDs to include. All devices in the specified groups will be included.
-            Multiple group IDs can be specified.
-          required: false
-          schema:
-            type: array
-            items:
-              type: integer
-              format: int64
-          style: form
-          explode: true
-          example: [1, 2]
-        - name: from
-          in: query
-          description: |
-            Start date and time for filtering in ISO 8601 format.
-            Only trips starting on or after this date will be included.
-          required: true
-          schema:
-            type: string
-            format: date-time
-          example: "2024-01-01T00:00:00.000Z"
-        - name: to
-          in: query
-          description: |
-            End date and time for filtering in ISO 8601 format.
-            Only trips starting on or before this date will be included.
-          required: true
-          schema:
-            type: string
-            format: date-time
-          example: "2024-01-31T23:59:59.999Z"
-      responses:
         '204':
           description: |
-            Email successfully dispatched. The logbook report has been sent to the user's email address.
+            Email successfully dispatched (type=mail).
+            The logbook report has been sent to the user's email address.
             No content is returned in the response body.
           content: {}
         '400':
@@ -611,6 +452,7 @@ paths:
             - Date format is incorrect
             - Date range exceeds configured limits
             - Invalid parameter values
+            - Invalid type parameter (must be 'xlsx' or 'mail')
           content: {}
         '401':
           description: Unauthorized - Authentication required
@@ -621,7 +463,7 @@ paths:
             or reports are disabled for this user.
           content: {}
         '500':
-          description: Internal server error - Email dispatch failed
+          description: Internal server error
           content: {}
 components:
   schemas:
