@@ -879,22 +879,22 @@ paths:
           content: {}
   /reports/logbook/{type}:
     get:
-      summary: Get logbook report (Excel - alternative path)
+      summary: Get logbook report (Excel/PDF)
       description: |
-        Alternative endpoint for generating logbook reports in Excel format.
-        Supports both 'xlsx' for direct download and 'mail' for email delivery.
-        Returns an Excel file with enhanced logbook entries including separate sheets per device,
-        summary calculations, and entry counts.
+        Endpoint for generating logbook reports in multiple formats.
+        Supports 'xlsx' for Excel download, 'pdf' for PDF download, and 'mail' for email delivery.
+        Returns a formatted file with enhanced logbook entries including separate sheets per device (Excel),
+        formatted pages with summary calculations and entry tables (PDF), or sends via email.
       tags:
         - Reports
       parameters:
         - name: type
           in: path
           required: true
-          description: Report delivery type - 'xlsx' for download, 'mail' for email
+          description: Report delivery type - 'xlsx' for Excel download, 'pdf' for PDF download, 'mail' for email
           schema:
             type: string
-            enum: [xlsx, mail]
+            enum: [xlsx, pdf, mail]
           example: "xlsx"
         - name: deviceId
           in: query
@@ -946,10 +946,15 @@ paths:
       responses:
         '200':
           description: |
-            Successfully generated Excel logbook report for direct download (type=xlsx).
-            The response contains an Excel file with enhanced logbook entries.
+            Successfully generated logbook report for direct download.
+            For type=xlsx: Returns an Excel file with enhanced logbook entries and separate sheets per device.
+            For type=pdf: Returns a PDF document with formatted logbook entries, summary calculations, and professional layout.
           content:
             application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+            application/pdf:
               schema:
                 type: string
                 format: binary
@@ -972,7 +977,7 @@ paths:
             - Date format is incorrect
             - Date range exceeds configured limits
             - Invalid parameter values
-            - Invalid type parameter (must be 'xlsx' or 'mail')
+            - Invalid type parameter (must be 'xlsx', 'pdf', or 'mail')
           content: {}
         '401':
           description: Unauthorized - Authentication required
@@ -1188,6 +1193,10 @@ components:
           type: integer
           format: int64
           description: ID of the driver who performed this trip
+        hash:
+          type: string
+          description: Hash value for the trip (required for deduplication/integrity)
+          minLength: 1
         notes:
           type: string
           description: Additional notes or comments for the trip
@@ -1212,16 +1221,19 @@ components:
         - endLon
         - duration
         - driverId
+        - hash
         - type
     LogbookEntryType:
       type: integer
       description: |
         Enum representing the type/classification of a logbook entry.
         Used to categorize trips for business reporting and tax purposes.
+        Defaults to BUSINESS (1) if not provided during creation.
       enum: [1, 2]
+      default: 1
       x-enum-varnames: [BUSINESS, PRIVATE]
       x-enum-descriptions:
-        - "BUSINESS (1): Business-related trip"
+        - "BUSINESS (1): Business-related trip (default)"
         - "PRIVATE (2): Private/personal trip"
       example: 1
     LogbookEntryCreateResult:
