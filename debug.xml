@@ -15,8 +15,6 @@
     <entry key='logger.console'>true</entry>
     <entry key='logger.queries'>false</entry>
     <entry key='logger.fullStackTraces'>true</entry>
-    
-    <entry key='logger.attributes'>time,position,speed,course,accuracy,result,power</entry>
 
     <entry key='mail.debug'>true</entry>
 

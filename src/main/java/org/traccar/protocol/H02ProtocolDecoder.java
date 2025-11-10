@@ -155,17 +155,9 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         processStatus(position, buf.readUnsignedInt());
 
-        // Read external voltage (for wired trackers with extended format)
-        // Voltage is always at bytes -3 and -2 from end (last byte is record number)
-        // Skip to last 3 bytes dynamically, regardless of exact extended data length
         if (buf.readableBytes() >= 3) {
-            int remainingBytes = buf.readableBytes();
-            buf.skipBytes(remainingBytes - 3); // Skip to last 3 bytes
-            int voltage = buf.readUnsignedShort(); // Read bytes -3, -2
-            if (voltage > 0 && voltage < 6000) { // Reasonable range: 0-600V
-                position.set(Position.KEY_POWER, voltage / 10.0);
-            }
-            // Last byte (record number) is left unread, which is fine
+            buf.skipBytes(buf.readableBytes() - 3);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() / 10.0);
         }
 
         if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
