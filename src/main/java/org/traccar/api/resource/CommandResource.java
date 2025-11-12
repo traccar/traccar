@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.api.ExtendedObjectResource;
+import org.traccar.command.CommandSender;
 import org.traccar.command.CommandSenderManager;
-import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.model.DeviceUtil;
@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Path("commands")
 @Produces(MediaType.APPLICATION_JSON)
@@ -116,7 +115,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
             } else {
                 return type.equals(Command.TYPE_CUSTOM);
             }
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     @POST
@@ -169,18 +168,17 @@ public class CommandResource extends ExtendedObjectResource<Command> {
 
             Device device = storage.getObject(Device.class, new Request(
                     new Columns.All(), new Condition.Equals("id", deviceId)));
-            String sender = device.getString(Keys.COMMAND_SENDER.getKey());
+            CommandSender sender = commandSenderManager.getSender(device);
             if (sender != null) {
-                return commandSenderManager.getSender(sender).getSupportedCommands()
-                        .stream().map(Typed::new).collect(Collectors.toList());
+                return sender.getSupportedCommands().stream().map(Typed::new).toList();
             }
 
             BaseProtocol protocol = getDeviceProtocol(deviceId);
             if (protocol != null) {
                 if (textChannel) {
-                    return protocol.getSupportedTextCommands().stream().map(Typed::new).collect(Collectors.toList());
+                    return protocol.getSupportedTextCommands().stream().map(Typed::new).toList();
                 } else {
-                    return protocol.getSupportedDataCommands().stream().map(Typed::new).collect(Collectors.toList());
+                    return protocol.getSupportedDataCommands().stream().map(Typed::new).toList();
                 }
             } else {
                 return Collections.singletonList(new Typed(Command.TYPE_CUSTOM));

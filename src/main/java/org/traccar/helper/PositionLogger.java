@@ -65,6 +65,9 @@ public class PositionLogger {
                 case "course":
                     builder.append(", course: ").append(String.format("%.1f", position.getCourse()));
                     break;
+                case "altitude":
+                    builder.append(", altitude: ").append(String.format("%.1f", position.getAltitude()));
+                    break;
                 case "accuracy":
                     if (position.getAccuracy() > 0) {
                         builder.append(", accuracy: ").append(String.format("%.1f", position.getAccuracy()));

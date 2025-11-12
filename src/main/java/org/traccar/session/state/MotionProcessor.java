@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,23 @@ public final class MotionProcessor {
     }
 
     public static void updateState(
-            MotionState state, Position position, boolean newState, TripsConfig tripsConfig) {
+            MotionState state, Position last, Position position, boolean newState, TripsConfig tripsConfig) {
 
         state.setEvent(null);
+
+        if (last != null) {
+            long oldTime = last.getFixTime().getTime();
+            long newTime = position.getFixTime().getTime();
+            if (newTime - oldTime >= tripsConfig.getMinimalNoDataDuration() && state.getMotionStreak()) {
+                state.setMotionStreak(false);
+                state.setMotionState(false);
+                state.setMotionPositionId(0);
+                state.setMotionTime(null);
+                state.setMotionDistance(0);
+                state.setEvent(new Event(Event.TYPE_DEVICE_STOPPED, last));
+                return;
+            }
+        }
 
         boolean oldState = state.getMotionState();
         if (oldState == newState) {
@@ -57,9 +71,12 @@ public final class MotionProcessor {
                 if (generateEvent) {
 
                     String eventType = newState ? Event.TYPE_DEVICE_MOVING : Event.TYPE_DEVICE_STOPPED;
-                    Event event = new Event(eventType, position);
+                    Event event = new Event(eventType, position.getDeviceId());
+                    event.setPositionId(state.getMotionPositionId());
+                    event.setEventTime(state.getMotionTime());
 
                     state.setMotionStreak(newState);
+                    state.setMotionPositionId(0);
                     state.setMotionTime(null);
                     state.setMotionDistance(0);
                     state.setEvent(event);
@@ -69,9 +86,11 @@ public final class MotionProcessor {
         } else {
             state.setMotionState(newState);
             if (state.getMotionStreak() == newState) {
+                state.setMotionPositionId(0);
                 state.setMotionTime(null);
                 state.setMotionDistance(0);
             } else {
+                state.setMotionPositionId(position.getId());
                 state.setMotionTime(position.getFixTime());
                 state.setMotionDistance(position.getDouble(Position.KEY_TOTAL_DISTANCE));
             }

@@ -250,7 +250,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_COOLANT_TEMP, buf.readByte() + 40);
                 position.set("fmsStatus", buf.readUnsignedShort());
                 position.set("fmsEvents", buf.readUnsignedShort());
-                position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                 position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.5);
             }
 
@@ -267,7 +267,7 @@ public class AstraProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_COOLANT_TEMP, buf.readByte() + 40);
                 position.set("obdStatus", buf.readUnsignedShort());
                 position.set("obdEvents", buf.readUnsignedShort());
-                position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                 position.set(Position.KEY_FUEL_USED, buf.readUnsignedShort() * 0.1);
             }
 

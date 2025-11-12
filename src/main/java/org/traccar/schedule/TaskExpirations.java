@@ -74,7 +74,7 @@ public class TaskExpirations extends SingleScheduleTask {
             Server server, User user, String template) throws MessagingException {
         var velocityContext = textTemplateFormatter.prepareContext(server, user);
         velocityContext.put("expiration", user.getExpirationTime());
-        var fullMessage = textTemplateFormatter.formatMessage(velocityContext, template, "full", false);
+        var fullMessage = textTemplateFormatter.formatMessage(velocityContext, template, false);
         mailManager.sendMessage(user, true, fullMessage.subject(), fullMessage.body());
     }
 
@@ -86,7 +86,7 @@ public class TaskExpirations extends SingleScheduleTask {
             var velocityContext = textTemplateFormatter.prepareContext(server, user);
             velocityContext.put("expiration", device.getExpirationTime());
             velocityContext.put("device", device);
-            var fullMessage = textTemplateFormatter.formatMessage(velocityContext, template, "full", false);
+            var fullMessage = textTemplateFormatter.formatMessage(velocityContext, template, false);
             mailManager.sendMessage(user, true, fullMessage.subject(), fullMessage.body());
         }
     }

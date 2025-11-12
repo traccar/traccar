@@ -1,0 +1,14 @@
+#set($subject = "$device.name: archivo multimedia recibido")
+#set($digest = "$device.name $event.getString('media') recibido: $event.getString('file') a las $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $device.name<br>
+Tipo: $event.getString('media')<br>
+Archivo: <a href="$webUrl/api/media/$device.uniqueId/$event.getString('file')">$event.getString('file')</a><br>
+Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Enlace: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Cancelar suscripción</a>
+</body>
+</html>

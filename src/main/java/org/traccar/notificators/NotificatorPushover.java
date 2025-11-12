@@ -52,7 +52,7 @@ public class NotificatorPushover extends Notificator {
 
     @Inject
     public NotificatorPushover(Config config, NotificationFormatter notificationFormatter, Client client) {
-        super(notificationFormatter, "short");
+        super(notificationFormatter);
         this.client = client;
         url = "https://api.pushover.net/1/messages.json";
         token = config.getString(Keys.NOTIFICATOR_PUSHOVER_TOKEN);
@@ -75,7 +75,7 @@ public class NotificatorPushover extends Notificator {
         }
 
         message.title = shortMessage.subject();
-        message.message = shortMessage.body();
+        message.message = shortMessage.digest();
 
         client.target(url).request().post(Entity.json(message)).close();
     }

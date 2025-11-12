@@ -66,7 +66,7 @@ public class NotificatorFirebase extends Notificator {
     public NotificatorFirebase(
             Config config, NotificationFormatter notificationFormatter,
             Storage storage, CacheManager cacheManager) throws IOException {
-        super(notificationFormatter, "short");
+        super(notificationFormatter);
         this.storage = storage;
         this.cacheManager = cacheManager;
 
@@ -102,7 +102,7 @@ public class NotificatorFirebase extends Notificator {
             var messageBuilder = MulticastMessage.builder()
                     .setNotification(com.google.firebase.messaging.Notification.builder()
                             .setTitle(message.subject())
-                            .setBody(message.body())
+                            .setBody(message.digest())
                             .build())
                     .setAndroidConfig(androidConfig.build())
                     .setApnsConfig(apnsConfig.build())

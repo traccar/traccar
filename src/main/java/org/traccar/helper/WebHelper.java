@@ -59,7 +59,7 @@ public final class WebHelper {
             } catch (UnknownHostException e) {
                 address = "localhost";
             }
-            return URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT), "", "");
+            return URIUtil.newURI("http", address, config.getInteger(Keys.WEB_PORT));
         }
     }
 }

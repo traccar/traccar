@@ -1,0 +1,8 @@
+#set($subject = "Напоминание об истечении срока действия устройства")
+#set($digest = "Срок действия устройства $device.name истекает $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Срок действия вашего устройства $device.name истекает $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+</body>
+</html>

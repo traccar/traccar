@@ -23,6 +23,7 @@ import org.traccar.api.signature.TokenManager;
 import org.traccar.database.OpenIdProvider;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.SessionHelper;
+import org.traccar.model.RevokedToken;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -147,7 +148,21 @@ public class SessionResource extends BaseResource {
         if (currentExpiration != null && currentExpiration.before(expiration)) {
             expiration = currentExpiration;
         }
-        return tokenManager.generateToken(getUserId(), expiration);
+        String token = tokenManager.generateToken(getUserId(), expiration);
+        TokenManager.TokenData data = tokenManager.decodeToken(token);
+        actionLogger.token(request, getUserId(), data.getId());
+        return token;
+    }
+
+    @Path("token/revoke")
+    @POST
+    public Response revokeToken(
+            @FormParam("token") String token) throws StorageException, GeneralSecurityException, IOException {
+        TokenManager.TokenData data = tokenManager.decodeToken(token);
+        RevokedToken revokedToken = new RevokedToken();
+        revokedToken.setId(data.getId());
+        storage.addObject(revokedToken, new Request(new Columns.Include("id")));
+        return Response.noContent().build();
     }
 
     @PermitAll

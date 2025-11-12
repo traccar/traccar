@@ -33,7 +33,7 @@ services:
       DATABASE_USER: traccar
       DATABASE_PASSWORD: traccar
     healthcheck:
-      test: [ "CMD", "curl", "-fsS", "http://localhost:8082/api/health" ]
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8082/api/health" ]
       interval: 2m
       timeout: 5s
       start_period: 1h
@@ -43,3 +43,13 @@ services:
       - "5000-5500:5000-5500"
     volumes:
       - /opt/traccar/logs:/opt/traccar/logs
+
+  autoheal:
+    image: willfarrell/autoheal:latest
+    restart: always
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: all
+      AUTOHEAL_INTERVAL: 60
+      AUTOHEAL_START_PERIOD: 3600
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro

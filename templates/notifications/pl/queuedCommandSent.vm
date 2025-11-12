@@ -1,0 +1,12 @@
+#set($subject = "$device.name: wysłano polecenie do kolejki")
+#set($digest = "Wysłano polecenie do kolejki: $device.name o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Urządzenie: $device.name<br>
+Wysłano polecenie do kolejki<br>
+Czas: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+</body>
+</html>

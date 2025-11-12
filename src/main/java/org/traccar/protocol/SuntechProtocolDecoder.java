@@ -326,7 +326,7 @@ public class SuntechProtocolDecoder extends BaseProtocolDecoder {
             remaining -= attribute.length() + 1;
         }
         if (totalFuel > 0) {
-            position.set(Position.KEY_FUEL_LEVEL, totalFuel);
+            position.set(Position.KEY_FUEL, totalFuel);
         }
         return index + 1; // checksum
     }

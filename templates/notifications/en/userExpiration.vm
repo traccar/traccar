@@ -1,0 +1,8 @@
+#set($subject = "Account expiration")
+#set($digest = "Account expired")
+<!DOCTYPE html>
+<html>
+<body>
+Your user account has expired.
+</body>
+</html>

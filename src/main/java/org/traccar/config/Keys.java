@@ -306,7 +306,7 @@ public final class Keys {
     public static final ConfigKey<Long> SERVER_BUFFERING_THRESHOLD = new LongConfigKey(
             "server.buffering.threshold",
             List.of(KeyType.CONFIG),
-            2500L);
+            3000L);
 
     /**
      * Server wide connection timeout value in seconds. See protocol timeout for more information.
@@ -364,6 +364,13 @@ public final class Keys {
             "fuelIncreaseThreshold",
             List.of(KeyType.SERVER, KeyType.DEVICE),
             0.0);
+
+    /**
+     * Device fuel tank capacity in liters.
+     */
+    public static final ConfigKey<String> FUEL_CAPACITY = new StringConfigKey(
+            "fuelCapacity",
+            List.of(KeyType.DEVICE));
 
     /**
      * Speed limit value in knots.
@@ -426,29 +433,12 @@ public final class Keys {
             true);
 
     /**
-     * If set to true, invalid positions will be considered for motion logic.
-     */
-    public static final ConfigKey<Boolean> EVENT_MOTION_PROCESS_INVALID_POSITIONS = new BooleanConfigKey(
-            "event.motion.processInvalidPositions",
-            List.of(KeyType.CONFIG, KeyType.DEVICE),
-            false);
-
-    /**
      * If the speed is above specified value, the object is considered to be in motion. Default value is 0.01 knots.
      */
     public static final ConfigKey<Double> EVENT_MOTION_SPEED_THRESHOLD = new DoubleConfigKey(
             "event.motion.speedThreshold",
             List.of(KeyType.CONFIG, KeyType.DEVICE),
             0.01);
-
-    /**
-     * Global polyline geofence distance. Within that distance from the polyline, point is considered within the
-     * geofence. Each individual geofence can also has 'polylineDistance' attribute which will take precedence.
-     */
-    public static final ConfigKey<Double> GEOFENCE_POLYLINE_DISTANCE = new DoubleConfigKey(
-            "geofence.polylineDistance",
-            List.of(KeyType.CONFIG),
-            25.0);
 
     /**
      * Enable in-memory database instead of an SQL database.
@@ -869,12 +859,20 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Cache control header value. By default resources are cached for one hour.
+     * Cache control header value. By default, resources are cached for one hour.
      */
     public static final ConfigKey<String> WEB_CACHE_CONTROL = new StringConfigKey(
             "web.cacheControl",
             List.of(KeyType.CONFIG),
             "max-age=3600,public");
+
+    /**
+     * Path to localization files.
+     */
+    public static final ConfigKey<String> WEB_LOCALIZATION_PATH = new StringConfigKey(
+            "web.localizationPath",
+            List.of(KeyType.CONFIG),
+            "./templates/translations");
 
     /**
      * Enable TOTP authentication on the server.
@@ -1587,8 +1585,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Distance in meters. Distances above this value gets handled like explained in 'coordinates.filter', but only if
-     * Position is also marked as 'invalid'.
+     * Distance in meters. Distances above this value gets handled like explained in 'coordinates.filter'.
      */
     public static final ConfigKey<Integer> COORDINATES_MAX_ERROR = new IntegerConfigKey(
             "coordinates.maxError",
@@ -1719,13 +1716,6 @@ public final class Keys {
             "geocoder.ignorePositions",
             List.of(KeyType.CONFIG),
             true);
-
-    /**
-     * Boolean flag to apply reverse geocoding to invalid positions.
-     */
-    public static final ConfigKey<Boolean> GEOCODER_PROCESS_INVALID_POSITIONS = new BooleanConfigKey(
-            "geocoder.processInvalidPositions",
-            List.of(KeyType.CONFIG));
 
     /**
      * Optional parameter to specify minimum distance for new reverse geocoding request. If distance is less than
@@ -1930,6 +1920,13 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> WEB_SHARE_DEVICE_REPORTS = new BooleanConfigKey(
             "web.shareDevice.reports",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Enable MCP service.
+     */
+    public static final ConfigKey<Boolean> WEB_MCP_ENABLE = new BooleanConfigKey(
+            "web.mcp.enable",
             List.of(KeyType.CONFIG));
 
     /**

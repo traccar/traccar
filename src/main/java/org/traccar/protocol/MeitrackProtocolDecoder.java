@@ -298,7 +298,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             String fuel = parser.next();
-            position.set(Position.KEY_FUEL_LEVEL,
+            position.set(Position.KEY_FUEL,
                     Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) * 0.01);
         }
 
@@ -513,7 +513,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x17 -> position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE() * 0.01);
                     case 0x19 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
                     case 0x1A -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
-                    case 0x29 -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShortLE() * 0.01);
+                    case 0x29 -> position.set(Position.KEY_FUEL, buf.readUnsignedShortLE() * 0.01);
                     case 0x40 -> position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
                     case 0x91, 0x92 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShortLE());
                     case 0x98 -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedShortLE());

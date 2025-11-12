@@ -18,6 +18,9 @@ package org.traccar.command;
 import com.google.inject.Injector;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.model.Device;
 
 import java.util.Map;
 
@@ -25,23 +28,31 @@ import java.util.Map;
 public class CommandSenderManager {
 
     private static final Map<String, Class<? extends CommandSender>> SENDERS_ALL = Map.of(
-            "client", ClientCommandSender.class,
+            "firebase", FirebaseCommandSender.class,
+            "traccar", TraccarCommandSender.class,
             "findHub", FindHubCommandSender.class);
 
+    private final Config config;
     private final Injector injector;
 
     @Inject
-    public CommandSenderManager(Injector injector) {
+    public CommandSenderManager(Config config, Injector injector) {
+        this.config = config;
         this.injector = injector;
     }
 
-    public CommandSender getSender(String type) {
-        var clazz = SENDERS_ALL.get(type);
-        var sender = injector.getInstance(clazz);
-        if (sender != null) {
-            return sender;
+    public CommandSender getSender(Device device) {
+        String senderType = device.getString(Keys.COMMAND_SENDER.getKey());
+        if (senderType != null) {
+            return injector.getInstance(SENDERS_ALL.get(senderType));
+        } else if (device.hasAttribute("notificationTokens")) {
+            if (config.hasKey(Keys.COMMAND_CLIENT_SERVICE_ACCOUNT)) {
+                return injector.getInstance(FirebaseCommandSender.class);
+            } else if (config.hasKey(Keys.NOTIFICATOR_TRACCAR_KEY)) {
+                return injector.getInstance(TraccarCommandSender.class);
+            }
         }
-        throw new RuntimeException("Failed to get command sender " + type);
+        return null;
     }
 
 }

@@ -1,0 +1,8 @@
+#set($subject = "Vencimiento de la cuenta")
+#set($digest = "La cuenta ha expirado")
+<!DOCTYPE html>
+<html>
+<body>
+Su cuenta de usuario ha expirado.
+</body>
+</html>

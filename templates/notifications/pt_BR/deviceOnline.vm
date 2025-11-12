@@ -1,0 +1,12 @@
+#set($subject = "$device.name: conectado")
+#set($digest = "$device.name conectado às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $device.name<br>
+Conectado<br>
+Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Cancelar subscrição</a>
+</body>
+</html>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2016 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +21,7 @@ public final class DistanceCalculator {
     private DistanceCalculator() {
     }
 
-    private static final double EQUATORIAL_EARTH_RADIUS = 6378.1370;
+    private static final double EQUATORIAL_EARTH_RADIUS = 6378137.0;
     private static final double DEG_TO_RAD = Math.PI / 180;
 
     public static double distance(double lat1, double lon1, double lat2, double lon2) {
@@ -30,8 +30,7 @@ public final class DistanceCalculator {
         double a = Math.pow(Math.sin(dlat / 2), 2)
                 + Math.cos(lat1 * DEG_TO_RAD) * Math.cos(lat2 * DEG_TO_RAD) * Math.pow(Math.sin(dlong / 2), 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double d = EQUATORIAL_EARTH_RADIUS * c;
-        return d * 1000;
+        return EQUATORIAL_EARTH_RADIUS * c;
     }
 
     public static double distanceToLine(
@@ -48,6 +47,14 @@ public final class DistanceCalculator {
         double halfP = (d0 + d1 + d2) * 0.5;
         double area = Math.sqrt(halfP * (halfP - d0) * (halfP - d1) * (halfP - d2));
         return 2 * area / d1;
+    }
+
+    public static double getLatitudeDelta(double meters) {
+        return meters / 111320;
+    }
+
+    public static double getLongitudeDelta(double meters, double latitude) {
+        return meters / (111320 * Math.cos(Math.toRadians(latitude)));
     }
 
 }

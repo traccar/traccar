@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.ReflectionCache;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
@@ -34,15 +35,12 @@ import org.traccar.session.cache.CacheManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Date;
 
 public class ComputedAttributesHandler extends BasePositionHandler {
@@ -108,37 +106,30 @@ public class ComputedAttributesHandler extends BasePositionHandler {
                 }
             }
         }
-        Position last = null;
-        if (includeLastAttributes) {
-            last = cacheManager.getPosition(position.getDeviceId());
-        }
-        Set<Method> methods = new HashSet<>(Arrays.asList(position.getClass().getMethods()));
-        Arrays.asList(Object.class.getMethods()).forEach(methods::remove);
-        for (Method method : methods) {
-            if (method.getName().startsWith("get") && method.getParameterTypes().length == 0) {
-                String name = Character.toLowerCase(method.getName().charAt(3)) + method.getName().substring(4);
-
-                try {
-                    if (!method.getReturnType().equals(Map.class)) {
-                        result.set(name, method.invoke(position));
-                        if (last != null) {
-                            result.set(prefixAttribute("last", name), method.invoke(last));
-                        }
-                    } else {
-                        for (Map.Entry<?, ?> entry : ((Map<?, ?>) method.invoke(position)).entrySet()) {
-                            result.set((String) entry.getKey(), entry.getValue());
-                        }
-                        if (last != null) {
-                            for (Map.Entry<?, ?> entry : ((Map<?, ?>) method.invoke(last)).entrySet()) {
-                                result.set(prefixAttribute("last", (String) entry.getKey()), entry.getValue());
-                            }
+        Position last = includeLastAttributes ? cacheManager.getPosition(position.getDeviceId()) : null;
+        ReflectionCache.getProperties(Position.class, "get").forEach((key, value) -> {
+            Method method = value.method();
+            String name = Character.toLowerCase(method.getName().charAt(3)) + method.getName().substring(4);
+            try {
+                if (!method.getReturnType().equals(Map.class)) {
+                    result.set(name, method.invoke(position));
+                    if (last != null) {
+                        result.set(prefixAttribute("last", name), method.invoke(last));
+                    }
+                } else {
+                    for (Map.Entry<?, ?> entry : ((Map<?, ?>) method.invoke(position)).entrySet()) {
+                        result.set((String) entry.getKey(), entry.getValue());
+                    }
+                    if (last != null) {
+                        for (Map.Entry<?, ?> entry : ((Map<?, ?>) method.invoke(last)).entrySet()) {
+                            result.set(prefixAttribute("last", (String) entry.getKey()), entry.getValue());
                         }
                     }
-                } catch (IllegalAccessException | InvocationTargetException error) {
-                    LOGGER.warn("Attribute reflection error", error);
                 }
+            } catch (IllegalAccessException | InvocationTargetException error) {
+                LOGGER.warn("Attribute reflection error", error);
             }
-        }
+        });
         return result;
     }
 

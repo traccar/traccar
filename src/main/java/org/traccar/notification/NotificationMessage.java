@@ -16,8 +16,10 @@
  */
 package org.traccar.notification;
 
-public record NotificationMessage(String subject, String body, boolean priority) {
-    public NotificationMessage(String subject, String body) {
-        this(subject, body, false);
+public record NotificationMessage(String subject, String digest, String body, boolean priority) {
+    public NotificationMessage {
+        if (digest == null) {
+            digest = body;
+        }
     }
 }

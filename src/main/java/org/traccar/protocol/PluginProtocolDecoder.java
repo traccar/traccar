@@ -111,7 +111,7 @@ public class PluginProtocolDecoder extends BaseProtocolDecoder {
         }
         position.set(Position.KEY_STATUS, status);
 
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble());
+        position.set(Position.KEY_FUEL, parser.nextDouble());
 
         if (parser.hasNext(6)) {
             position.set(Position.PREFIX_TEMP + 1, parser.nextDouble());

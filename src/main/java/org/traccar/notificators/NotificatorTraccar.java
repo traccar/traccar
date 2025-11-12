@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2020 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,8 @@ public class NotificatorTraccar extends Notificator {
     }
 
     public static class Message {
+        @JsonProperty("type")
+        private String type;
         @JsonProperty("registration_ids")
         private String[] tokens;
         @JsonProperty("notification")
@@ -75,7 +77,7 @@ public class NotificatorTraccar extends Notificator {
     public NotificatorTraccar(
             Config config, NotificationFormatter notificationFormatter, Client client,
             Storage storage, CacheManager cacheManager) {
-        super(notificationFormatter, "short");
+        super(notificationFormatter);
         this.client = client;
         this.storage = storage;
         this.cacheManager = cacheManager;
@@ -89,13 +91,14 @@ public class NotificatorTraccar extends Notificator {
 
             NotificationObject item = new NotificationObject();
             item.title = shortMessage.subject();
-            item.body = shortMessage.body();
+            item.body = shortMessage.digest();
             item.sound = "default";
 
             String[] tokenArray = user.getString("notificationTokens").split("[, ]");
             List<String> registrationTokens = new ArrayList<>(Arrays.asList(tokenArray));
 
             Message message = new Message();
+            message.type = "manager";
             message.tokens = user.getString("notificationTokens").split("[, ]");
             message.notification = item;
 
@@ -129,7 +132,7 @@ public class NotificatorTraccar extends Notificator {
                     cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
                 }
             } catch (Exception e) {
-                LOGGER.warn("Push error", e);
+                LOGGER.warn("Notification push error", e);
             }
         }
     }

@@ -1,0 +1,8 @@
+#set($subject = "Vencimiento del dispositivo")
+#set($digest = "El dispositivo $device.name ha expirado")
+<!DOCTYPE html>
+<html>
+<body>
+Su dispositivo $device.name ha expirado.
+</body>
+</html>

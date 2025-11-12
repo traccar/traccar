@@ -1,0 +1,22 @@
+#set($subject = "$device.name: &uuml;berschreitet die Geschwindigkeit")
+#if($speedUnit == "kmh")
+#set($speedValue = $position.speed * 1.852)
+#set($speedString = $numberTool.format('0.0 km/h', $speedValue))
+#elseif($speedUnit == "mph")
+#set($speedValue = $position.speed * 1.15078)
+#set($speedString = $numberTool.format('0.0 mph', $speedValue))
+#else
+#set($speedString = $numberTool.format('0.0 kn', $position.speed))
+#end
+#set($digest = "$device.name hat die Geschwindigkeit $speedString#{if}($geofence) in $geofence.name#{else}#{end} am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr &uuml;berschritten")
+<!DOCTYPE html>
+<html>
+<body>
+Ger&auml;t: $device.name<br>
+&uuml;berschreitet die Geschwindigkeit: $speedString#{if}($geofence) in $geofence.name#{else}#{end}<br>
+am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr<br>
+Position: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+</body>
+</html>

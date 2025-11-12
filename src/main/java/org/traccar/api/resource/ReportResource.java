@@ -54,6 +54,7 @@ import jakarta.ws.rs.core.StreamingOutput;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Path("reports")
 @Produces(MediaType.APPLICATION_JSON)
@@ -167,7 +168,7 @@ public class ReportResource extends SimpleObjectResource<Report> {
 
     @Path("events")
     @GET
-    public Collection<Event> getEvents(
+    public Stream<Event> getEvents(
             @QueryParam("deviceId") List<Long> deviceIds,
             @QueryParam("groupId") List<Long> groupIds,
             @QueryParam("type") List<String> types,

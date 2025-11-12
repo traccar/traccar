@@ -1,0 +1,18 @@
+#set($subject = "$device.name: driver has changed")
+#if($driver)
+#set($driverName = $driver.name)
+#else
+#set($driverName = $event.getString('driverUniqueId'))
+#end
+#set($digest = "Driver $driverName has changed in $device.name at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Device: $device.name<br>
+Time: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Point: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+Driver: $driverName<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+</body>
+</html>
