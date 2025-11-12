@@ -472,7 +472,28 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                             position.set(Position.KEY_LOCK, lockState == 2);
                         }
                     }
+                    case 0x93 -> {
+                        int v = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
+                        position.set("clutchPressed", v == 1);
+                    }
+                    case 0x94 -> {
+                        int v = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
+                        position.set("tachographPerformanceAnalysis", v == 1);
+                    }
+                    case 0x95 -> {
+                        int v = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
+                        position.set("parkingBrake", v == 1);
+                    }
+                    case 0x96 -> {
+                        int v = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
+                        position.set("cruiseControl", v == 1);
+                    }
                     case 0x97 -> position.set(Position.KEY_THROTTLE, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
+                    case 0x9E -> {
+                        int v = buf.readableBytes() >= 1 ? buf.readByte() : 0; // SINT8
+                        position.set("engineTorquePercent", v);
+                    }
+                    case 0xA1 -> position.set("engineTorqueAtSpeedPercent", buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
                     case 0x9D -> position.set(Position.KEY_FUEL_LEVEL, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
                     case 0xFE69 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0);
                     default -> { if (buf.readableBytes() >= 1) buf.readUnsignedByte(); }
@@ -486,7 +507,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                 switch (id) {
                     case 0x08 -> position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE()));
                     case 0x09 -> position.setCourse(buf.readUnsignedShortLE());
-                    case 0x0A -> position.set(Position.KEY_HDOP, buf.readUnsignedShortLE());
+                    case 0x0A -> position.set(Position.KEY_HDOP, buf.readUnsignedShortLE() * 0.1);
                     case 0x0B -> position.setAltitude(buf.readShortLE());
                     case 0x16 -> position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShortLE() * 0.01);
                     case 0x17 -> position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE() * 0.01);
@@ -499,7 +520,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x99 -> position.set(Position.KEY_RPM, buf.readUnsignedShortLE());
                     case 0x9C -> position.set(Position.KEY_COOLANT_TEMP, buf.readUnsignedShortLE());
                     case 0x9F -> position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShortLE());
-                    case 0xC9 -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShortLE());
+                    case 0xC9 -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedShortLE() * 0.1); // L/100km
                     default -> buf.readUnsignedShortLE();
                 }
             }
@@ -522,6 +543,13 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x0D -> position.set("runtime", buf.readUnsignedIntLE());
                     case 0x25 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
                     case 0x9B -> position.set(Position.KEY_OBD_ODOMETER, buf.readUnsignedIntLE());
+                    case 0x98 -> position.set("fuelUsedTotalL", buf.readUnsignedIntLE());
+                    case 0x9A -> position.set("engineHours", buf.readUnsignedIntLE() / 10.0);
+                    case 0x1C -> {
+                        long flag = buf.readUnsignedIntLE();
+                        position.set("systemFlag", flag);
+                        position.set("eep2Modified", (flag & 1) == 1);
+                    }
                     case 0xA0 -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE() * 0.001);
                     case 0xA2 -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedIntLE() * 0.01);
                     case 0xFEF4 -> position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 60000);
@@ -565,6 +593,30 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                             }
                         }
                         decodeNetworkInfo(position, type, descriptor);
+                    }
+                    case 0x4A -> { // ignition-off journey detail
+                        int used = 0;
+                        int idLen = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
+                        used += 1;
+                        long distanceM = 0;
+                        long timeS = 0;
+                        int avgKph = 0;
+                        int maxKph = 0;
+                        if (buf.readableBytes() >= 4) { distanceM = buf.readUnsignedIntLE(); used += 4; }
+                        if (buf.readableBytes() >= 4) { timeS = buf.readUnsignedIntLE(); used += 4; }
+                        if (buf.readableBytes() >= 2) { avgKph = buf.readUnsignedShortLE(); used += 2; }
+                        if (buf.readableBytes() >= 2) { maxKph = buf.readUnsignedShortLE(); used += 2; }
+                        position.set("journeyDistanceM", distanceM);
+                        position.set("journeyTimeS", timeS);
+                        position.set("journeyAvgSpeedKph", avgKph);
+                        position.set("journeyMaxSpeedKph", maxKph);
+                        int remaining = length - used;
+                        if (remaining > 0) {
+                            int remainingBytes = Math.min(remaining, buf.readableBytes());
+                            if (remainingBytes > 0) {
+                                buf.skipBytes(remainingBytes);
+                            }
+                        }
                     }
                     case 0xFE31 -> {
                         int alarmProtocol = buf.readableBytes() >= 1 ? buf.readUnsignedByte() : 0;
