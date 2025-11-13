@@ -1,9 +1,0 @@
-#set($subject = "Rapporto")
-#set($digest = "Il rapporto programmato è pronto: $webUrl$reportUrl")
-<!DOCTYPE html>
-<html>
-<body>
-Il rapporto programmato è pronto:<br>
-<a href="$webUrl$reportUrl">$webUrl$reportUrl</a><br>
-</body>
-</html>

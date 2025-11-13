@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,12 +30,12 @@ import org.traccar.storage.query.Request;
 import jakarta.inject.Inject;
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class DatabaseStorage extends Storage {
 
@@ -50,8 +50,8 @@ public class DatabaseStorage extends Storage {
         this.dataSource = dataSource;
         this.objectMapper = objectMapper;
 
-        try (var connection = dataSource.getConnection()) {
-            databaseType = connection.getMetaData().getDatabaseProductName();
+        try {
+            databaseType = dataSource.getConnection().getMetaData().getDatabaseProductName();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -59,13 +59,6 @@ public class DatabaseStorage extends Storage {
 
     @Override
     public <T> List<T> getObjects(Class<T> clazz, Request request) throws StorageException {
-        try (var objects = getObjectsStream(clazz, request)) {
-            return objects.toList();
-        }
-    }
-
-    @Override
-    public <T> Stream<T> getObjectsStream(Class<T> clazz, Request request) throws StorageException {
         StringBuilder query = new StringBuilder("SELECT ");
         if (request.getColumns() instanceof Columns.All) {
             query.append('*');
@@ -77,11 +70,10 @@ public class DatabaseStorage extends Storage {
         query.append(formatOrder(request.getOrder()));
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
-            List<Object> values = getConditionVariables(request.getCondition());
-            for (int index = 0; index < values.size(); index++) {
-                builder.setValue(index, values.get(index));
+            for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
+                builder.setValue(variable.getKey(), variable.getValue());
             }
-            return builder.executeQueryStreamed(clazz);
+            return builder.executeQuery(clazz);
         } catch (SQLException e) {
             throw new StorageException(e);
         }
@@ -95,7 +87,7 @@ public class DatabaseStorage extends Storage {
         query.append("(");
         query.append(formatColumns(columns, c -> c));
         query.append(") VALUES (");
-        query.append(formatColumns(columns, c -> "?"));
+        query.append(formatColumns(columns, c -> ':' + c));
         query.append(")");
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true);
@@ -112,14 +104,13 @@ public class DatabaseStorage extends Storage {
         StringBuilder query = new StringBuilder("UPDATE ");
         query.append(getStorageName(entity.getClass()));
         query.append(" SET ");
-        query.append(formatColumns(columns, c -> c + " = ?"));
+        query.append(formatColumns(columns, c -> c + " = :" + c));
         query.append(formatCondition(request.getCondition()));
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
             builder.setObject(entity, columns);
-            List<Object> values = getConditionVariables(request.getCondition());
-            for (int index = 0; index < values.size(); index++) {
-                builder.setValue(columns.size() + index, values.get(index));
+            for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
+                builder.setValue(variable.getKey(), variable.getValue());
             }
             builder.executeUpdate();
         } catch (SQLException e) {
@@ -134,9 +125,8 @@ public class DatabaseStorage extends Storage {
         query.append(formatCondition(request.getCondition()));
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
-            List<Object> values = getConditionVariables(request.getCondition());
-            for (int index = 0; index < values.size(); index++) {
-                builder.setValue(index, values.get(index));
+            for (Map.Entry<String, Object> variable : getConditionVariables(request.getCondition()).entrySet()) {
+                builder.setValue(variable.getKey(), variable.getValue());
             }
             builder.executeUpdate();
         } catch (SQLException e) {
@@ -161,9 +151,8 @@ public class DatabaseStorage extends Storage {
         query.append(formatCondition(combinedCondition));
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString());
-            List<Object> values = getConditionVariables(combinedCondition);
-            for (int index = 0; index < values.size(); index++) {
-                builder.setValue(index, values.get(index));
+            for (Map.Entry<String, Object> variable : getConditionVariables(combinedCondition).entrySet()) {
+                builder.setValue(variable.getKey(), variable.getValue());
             }
             return builder.executePermissionsQuery();
         } catch (SQLException e) {
@@ -173,16 +162,15 @@ public class DatabaseStorage extends Storage {
 
     @Override
     public void addPermission(Permission permission) throws StorageException {
-        var entries = permission.get().entrySet().stream().toList();
         StringBuilder query = new StringBuilder("INSERT INTO ");
         query.append(permission.getStorageName());
         query.append(" VALUES (");
-        query.append(entries.stream().map(e -> "?").collect(Collectors.joining(", ")));
+        query.append(permission.get().keySet().stream().map(key -> ':' + key).collect(Collectors.joining(", ")));
         query.append(")");
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true);
-            for (int index = 0; index < entries.size(); index++) {
-                builder.setLong(index, entries.get(index).getValue());
+            for (var entry : permission.get().entrySet()) {
+                builder.setLong(entry.getKey(), entry.getValue());
             }
             builder.executeUpdate();
         } catch (SQLException e) {
@@ -192,15 +180,15 @@ public class DatabaseStorage extends Storage {
 
     @Override
     public void removePermission(Permission permission) throws StorageException {
-        var entries = permission.get().entrySet().stream().toList();
         StringBuilder query = new StringBuilder("DELETE FROM ");
         query.append(permission.getStorageName());
         query.append(" WHERE ");
-        query.append(entries.stream().map(e -> e.getKey() + " = ?").collect(Collectors.joining(" AND ")));
+        query.append(permission
+                .get().keySet().stream().map(key -> key + " = :" + key).collect(Collectors.joining(" AND ")));
         try {
             QueryBuilder builder = QueryBuilder.create(config, dataSource, objectMapper, query.toString(), true);
-            for (int index = 0; index < entries.size(); index++) {
-                builder.setLong(index, entries.get(index).getValue());
+            for (var entry : permission.get().entrySet()) {
+                builder.setLong(entry.getKey(), entry.getValue());
             }
             builder.executeUpdate();
         } catch (SQLException e) {
@@ -216,25 +204,27 @@ public class DatabaseStorage extends Storage {
         return storageName.value();
     }
 
-    private List<Object> getConditionVariables(Condition genericCondition) {
-        List<Object> results = new ArrayList<>();
+    private Map<String, Object> getConditionVariables(Condition genericCondition) {
+        Map<String, Object> results = new HashMap<>();
         if (genericCondition instanceof Condition.Compare condition) {
-            results.add(condition.getValue());
+            if (condition.getValue() != null) {
+                results.put(condition.getVariable(), condition.getValue());
+            }
         } else if (genericCondition instanceof Condition.Between condition) {
-            results.add(condition.getFromValue());
-            results.add(condition.getToValue());
+            results.put(condition.getFromVariable(), condition.getFromValue());
+            results.put(condition.getToVariable(), condition.getToValue());
         } else if (genericCondition instanceof Condition.Binary condition) {
-            results.addAll(getConditionVariables(condition.getFirst()));
-            results.addAll(getConditionVariables(condition.getSecond()));
+            results.putAll(getConditionVariables(condition.getFirst()));
+            results.putAll(getConditionVariables(condition.getSecond()));
         } else if (genericCondition instanceof Condition.Permission condition) {
-            long conditionId = condition.getOwnerId() > 0 ? condition.getOwnerId() : condition.getPropertyId();
-            results.add(conditionId);
-            if (condition.getIncludeGroups()) {
-                results.add(conditionId);
+            if (condition.getOwnerId() > 0) {
+                results.put(Permission.getKey(condition.getOwnerClass()), condition.getOwnerId());
+            } else {
+                results.put(Permission.getKey(condition.getPropertyClass()), condition.getPropertyId());
             }
         } else if (genericCondition instanceof Condition.LatestPositions condition) {
             if (condition.getDeviceId() > 0) {
-                results.add(condition.getDeviceId());
+                results.put("deviceId", condition.getDeviceId());
             }
         }
         return results;
@@ -259,26 +249,24 @@ public class DatabaseStorage extends Storage {
                 result.append(condition.getColumn());
                 result.append(" ");
                 result.append(condition.getOperator());
-                result.append(" ?");
+                result.append(" :");
+                result.append(condition.getVariable());
 
             } else if (genericCondition instanceof Condition.Between condition) {
 
                 result.append(condition.getColumn());
-                result.append(" BETWEEN ? AND ?");
+                result.append(" BETWEEN :");
+                result.append(condition.getFromVariable());
+                result.append(" AND :");
+                result.append(condition.getToVariable());
 
             } else if (genericCondition instanceof Condition.Binary condition) {
 
-                if (genericCondition instanceof Condition.Or) {
-                    result.append('(');
-                }
                 result.append(formatCondition(condition.getFirst(), false));
                 result.append(" ");
                 result.append(condition.getOperator());
                 result.append(" ");
                 result.append(formatCondition(condition.getSecond(), false));
-                if (genericCondition instanceof Condition.Or) {
-                    result.append(')');
-                }
 
             } else if (genericCondition instanceof Condition.Permission condition) {
 
@@ -292,7 +280,7 @@ public class DatabaseStorage extends Storage {
                 result.append("SELECT positionId FROM ");
                 result.append(getStorageName(Device.class));
                 if (condition.getDeviceId() > 0) {
-                    result.append(" WHERE id = ?");
+                    result.append(" WHERE id = :deviceId");
                 }
                 result.append(")");
 
@@ -343,7 +331,8 @@ public class DatabaseStorage extends Storage {
         result.append(storageName);
         result.append(" WHERE ");
         result.append(conditionKey);
-        result.append(" = ?");
+        result.append(" = :");
+        result.append(conditionKey);
 
         if (condition.getIncludeGroups()) {
 
@@ -400,7 +389,8 @@ public class DatabaseStorage extends Storage {
 
             result.append(" WHERE ");
             result.append(conditionKey);
-            result.append(" = ?");
+            result.append(" = :");
+            result.append(conditionKey);
 
         }
 

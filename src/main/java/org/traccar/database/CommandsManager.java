@@ -20,8 +20,8 @@ import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
-import org.traccar.command.CommandSender;
 import org.traccar.command.CommandSenderManager;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -45,6 +45,7 @@ import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Singleton
 public class CommandsManager implements BroadcastInterface {
@@ -95,9 +96,9 @@ public class CommandsManager implements BroadcastInterface {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }
         } else {
-            CommandSender sender = commandSenderManager.getSender(device);
+            String sender = device.getString(Keys.COMMAND_SENDER.getKey());
             if (sender != null) {
-                sender.sendCommand(device, command);
+                commandSenderManager.getSender(sender).sendCommand(device, command);
             } else {
                 DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
                 if (deviceSession != null && deviceSession.supportsLiveCommands()) {
@@ -135,7 +136,7 @@ public class CommandsManager implements BroadcastInterface {
                 events.put(event, null);
             }
             notificationManager.updateEvents(events);
-            return commands.stream().map(QueuedCommand::toCommand).toList();
+            return commands.stream().map(QueuedCommand::toCommand).collect(Collectors.toList());
         } catch (StorageException e) {
             throw new RuntimeException(e);
         }

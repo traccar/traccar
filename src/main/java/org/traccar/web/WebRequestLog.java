@@ -18,7 +18,6 @@ package org.traccar.web;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.RequestLog;
 import org.eclipse.jetty.server.Response;
-import org.eclipse.jetty.server.Session;
 import org.eclipse.jetty.util.DateCache;
 import org.eclipse.jetty.util.component.ContainerLifeCycle;
 import org.traccar.helper.SessionHelper;
@@ -41,17 +40,16 @@ public class WebRequestLog extends ContainerLifeCycle implements RequestLog {
     @Override
     public void log(Request request, Response response) {
         try {
-            Session session = request.getSession(true);
-            Long userId = session != null ? (Long) session.getAttribute(SessionHelper.USER_ID_KEY) : null;
+            Long userId = (Long) request.getSession().getAttribute(SessionHelper.USER_ID_KEY);
             writer.write(String.format("%s - %s [%s] \"%s %s %s\" %d %d",
-                    Request.getRemoteAddr(request),
+                    request.getRemoteHost(),
                     userId != null ? String.valueOf(userId) : "-",
-                    dateCache.format(Request.getTimeStamp(request)),
+                    dateCache.format(request.getTimeStamp()),
                     request.getMethod(),
-                    request.getHttpURI().toString(),
-                    request.getConnectionMetaData().getProtocol(),
-                    response.getStatus(),
-                    Response.getContentBytesWritten(response)));
+                    request.getOriginalURI(),
+                    request.getProtocol(),
+                    response.getCommittedMetaData().getStatus(),
+                    response.getHttpChannel().getBytesWritten()));
         } catch (Throwable ignored) {
         }
     }

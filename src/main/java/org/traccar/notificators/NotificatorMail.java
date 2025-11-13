@@ -34,7 +34,7 @@ public class NotificatorMail extends Notificator {
 
     @Inject
     public NotificatorMail(MailManager mailManager, NotificationFormatter notificationFormatter) {
-        super(notificationFormatter);
+        super(notificationFormatter, "full");
         this.mailManager = mailManager;
     }
 

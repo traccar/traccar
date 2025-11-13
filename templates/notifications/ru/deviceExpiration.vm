@@ -1,8 +1,0 @@
-#set($subject = "Истечение срока действия устройства")
-#set($digest = "Срок действия устройства $device.name истёк")
-<!DOCTYPE html>
-<html>
-<body>
-Срок действия вашего устройства $device.name истёк.
-</body>
-</html>

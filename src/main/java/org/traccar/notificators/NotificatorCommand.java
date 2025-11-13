@@ -38,7 +38,7 @@ public class NotificatorCommand extends Notificator {
 
     @Inject
     public NotificatorCommand(Storage storage, CommandsManager commandsManager) {
-        super(null);
+        super(null, null);
         this.storage = storage;
         this.commandsManager = commandsManager;
     }

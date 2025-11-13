@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -97,32 +97,29 @@ public class DeviceResource extends BaseObjectResource<Device> {
     }
 
     @GET
-    public Stream<Device> get(
+    public Collection<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds,
-            @QueryParam("excludeAttributes") boolean excludeAttributes) throws StorageException {
-
-        Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
+            @QueryParam("id") List<Long> deviceIds) throws StorageException {
 
         if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
 
             List<Device> result = new LinkedList<>();
             for (String uniqueId : uniqueIds) {
                 result.addAll(storage.getObjects(Device.class, new Request(
-                        columns,
+                        new Columns.All(),
                         new Condition.And(
                                 new Condition.Equals("uniqueId", uniqueId),
                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
             }
             for (Long deviceId : deviceIds) {
                 result.addAll(storage.getObjects(Device.class, new Request(
-                        columns,
+                        new Columns.All(),
                         new Condition.And(
                                 new Condition.Equals("id", deviceId),
                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
             }
-            return result.stream();
+            return result;
 
         } else {
 
@@ -141,8 +138,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 }
             }
 
-            return storage.getObjectsStream(baseClass, new Request(
-                    columns, Condition.merge(conditions), new Order("name")));
+            return storage.getObjects(baseClass, new Request(
+                    new Columns.All(), Condition.merge(conditions), new Order("name")));
 
         }
     }

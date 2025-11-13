@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ package org.traccar.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Set;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Network {
@@ -89,36 +89,36 @@ public class Network {
         this.considerIp = considerIp;
     }
 
-    private Set<CellTower> cellTowers;
+    private Collection<CellTower> cellTowers;
 
-    public Set<CellTower> getCellTowers() {
+    public Collection<CellTower> getCellTowers() {
         return cellTowers;
     }
 
-    public void setCellTowers(Set<CellTower> cellTowers) {
+    public void setCellTowers(Collection<CellTower> cellTowers) {
         this.cellTowers = cellTowers;
     }
 
     public void addCellTower(CellTower cellTower) {
         if (cellTowers == null) {
-            cellTowers = new HashSet<>();
+            cellTowers = new ArrayList<>();
         }
         cellTowers.add(cellTower);
     }
 
-    private Set<WifiAccessPoint> wifiAccessPoints;
+    private Collection<WifiAccessPoint> wifiAccessPoints;
 
-    public Set<WifiAccessPoint> getWifiAccessPoints() {
+    public Collection<WifiAccessPoint> getWifiAccessPoints() {
         return wifiAccessPoints;
     }
 
-    public void setWifiAccessPoints(Set<WifiAccessPoint> wifiAccessPoints) {
+    public void setWifiAccessPoints(Collection<WifiAccessPoint> wifiAccessPoints) {
         this.wifiAccessPoints = wifiAccessPoints;
     }
 
     public void addWifiAccessPoint(WifiAccessPoint wifiAccessPoint) {
         if (wifiAccessPoints == null) {
-            wifiAccessPoints = new HashSet<>();
+            wifiAccessPoints = new ArrayList<>();
         }
         wifiAccessPoints.add(wifiAccessPoint);
     }

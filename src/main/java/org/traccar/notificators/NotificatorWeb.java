@@ -34,7 +34,7 @@ public final class NotificatorWeb extends Notificator {
 
     @Inject
     public NotificatorWeb(ConnectionManager connectionManager, NotificationFormatter notificationFormatter) {
-        super(null);
+        super(null, null);
         this.connectionManager = connectionManager;
         this.notificationFormatter = notificationFormatter;
     }
@@ -52,8 +52,8 @@ public final class NotificatorWeb extends Notificator {
         copy.setMaintenanceId(event.getMaintenanceId());
         copy.getAttributes().putAll(event.getAttributes());
 
-        var message = notificationFormatter.formatMessage(notification, user, event, position);
-        copy.set("message", message.digest());
+        var message = notificationFormatter.formatMessage(notification, user, event, position, "short");
+        copy.set("message", message.body());
 
         connectionManager.updateEvent(true, user.getId(), copy);
     }

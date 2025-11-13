@@ -1,8 +1,0 @@
-#set($subject = "Cihaz Süresi Bitti")
-#set($digest = "Cihaz $device.name Süresi Bitti")
-<!DOCTYPE html>
-<html>
-<body>
-Mevcut Cihazınız: $device.name Geçerlilik tarihi sona ermiştir.
-</body>
-</html>

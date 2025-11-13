@@ -9,7 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: '6.10.0'
+  version: '6.8.1'
 servers:
   - url: https://demo.traccar.org/api
     description: Demo Server 1
@@ -623,7 +623,6 @@ paths:
       summary: Fetch Server information
       tags:
         - Server
-      security: []
       responses:
         '200':
           description: OK
@@ -654,7 +653,6 @@ paths:
       summary: Fetch Session information
       tags:
         - Session
-      security: []
       parameters:
         - name: token
           in: query
@@ -674,7 +672,6 @@ paths:
       summary: Create a new Session
       tags:
         - Session
-      security: []
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -706,49 +703,6 @@ paths:
       responses:
         '204':
           description: No Content
-          content: {}
-  /session/token:
-    post:
-      summary: Generate Session Token
-      tags:
-        - Session
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              properties:
-                expiration:
-                  type: string
-                  format: date-time
-        required: false
-      responses:
-        '200':
-          description: Token string
-          content:
-            text/plain:
-              schema:
-                type: string
-  /session/token/revoke:
-    post:
-      summary: Revoke Session Token
-      tags:
-        - Session
-      requestBody:
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              required:
-                - token
-              properties:
-                token:
-                  type: string
-        required: true
-      responses:
-        '204':
-          description: No Content
-          content: {}
-        '400':
-          description: Bad Request
           content: {}
   /session/openid/auth:
     get:
@@ -1807,6 +1761,8 @@ components:
           type: string
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
+        outdated:
+          type: boolean
         valid:
           type: boolean
         latitude:

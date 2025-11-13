@@ -20,7 +20,6 @@ import io.netty.buffer.Unpooled;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.helper.Checksum;
-import org.traccar.helper.DataConverter;
 import org.traccar.model.Command;
 
 import java.nio.charset.StandardCharsets;
@@ -51,14 +50,8 @@ public class Minifinder2ProtocolEncoder extends BaseProtocolEncoder {
         if (command.getType().equals(Command.TYPE_CONFIGURATION)) {
             ByteBuf content = Unpooled.buffer();
             content.writeByte(Minifinder2ProtocolDecoder.MSG_CONFIGURATION);
-            if (command.hasAttribute(Command.KEY_DATA)) {
-                byte[] data = DataConverter.parseHex(command.getString(Command.KEY_DATA));
-                content.writeBytes(data);
-            } else {
-                content.writeByte(1); // length
-                content.writeByte(0xF0); // type
-            }
-            return encodeContent(content);
+            content.writeByte(1); // length
+            content.writeByte(0xF0); // type
         }
 
         if ("Nano".equalsIgnoreCase(getDeviceModel(command.getDeviceId()))) {

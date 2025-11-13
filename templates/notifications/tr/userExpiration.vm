@@ -1,8 +1,0 @@
-#set($subject = "Hesap Süresi Geçerlilik Tarihi Bitti")
-#set($digest = "Hesap Süresi Doldu")
-<!DOCTYPE html>
-<html>
-<body>
-Hesabınızın mevcut Geçerlilik tarihi sona ermiştir.
-</body>
-</html>

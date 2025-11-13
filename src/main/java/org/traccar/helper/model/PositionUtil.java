@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.traccar.storage.query.Request;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class PositionUtil {
 
@@ -57,29 +56,12 @@ public final class PositionUtil {
 
     public static List<Position> getPositions(
             Storage storage, long deviceId, Date from, Date to) throws StorageException {
-        try (var positions = getPositionsStream(storage, deviceId, from, to)) {
-            return positions.toList();
-        }
-    }
-
-    public static Stream<Position> getPositionsStream(
-            Storage storage, long deviceId, Date from, Date to) throws StorageException {
-        return storage.getObjectsStream(Position.class, new Request(
+        return storage.getObjects(Position.class, new Request(
                 new Columns.All(),
                 new Condition.And(
                         new Condition.Equals("deviceId", deviceId),
-                        new Condition.Between("fixTime", from, to)),
+                        new Condition.Between("fixTime", "from", from, "to", to)),
                 new Order("fixTime")));
-    }
-
-    public static Position getEdgePosition(
-            Storage storage, long deviceId, Date from, Date to, boolean end) throws StorageException {
-        return storage.getObject(Position.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("deviceId", deviceId),
-                        new Condition.Between("fixTime", from, to)),
-                new Order("fixTime", end, 1)));
     }
 
     public static List<Position> getLatestPositions(Storage storage, long userId) throws StorageException {
@@ -92,7 +74,7 @@ public final class PositionUtil {
                 new Columns.All(), new Condition.LatestPositions()));
         return positions.stream()
                 .filter(position -> deviceIds.contains(position.getDeviceId()))
-                .toList();
+                .collect(Collectors.toList());
     }
 
 }

@@ -107,9 +107,9 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
                 SpeedLimitHandler.class,
                 MotionHandler.class,
                 ComputedAttributesHandler.Late.class,
+                EngineHoursHandler.class,
                 DriverHandler.class,
                 CopyAttributesHandler.class,
-                EngineHoursHandler.class,
                 PositionForwardingHandler.class,
                 DatabaseHandler.class)
                 .map((clazz) -> (BasePositionHandler) injector.getInstance(clazz))
@@ -138,7 +138,6 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Position position) {
-            cacheManager.addDevice(position.getDeviceId(), position);
             bufferingManager.accept(ctx, position);
         } else {
             super.channelRead(ctx, msg);
@@ -154,6 +153,11 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
             queue.offer(position);
         }
         if (!queued) {
+            try {
+                cacheManager.addDevice(position.getDeviceId(), position.getDeviceId());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             processPositionHandlers(context, position);
         }
     }
@@ -200,7 +204,6 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
             ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
             processNextPosition(ctx, position.getDeviceId());
         }
-        cacheManager.removeDevice(position.getDeviceId(), position);
     }
 
     private void processNextPosition(ChannelHandlerContext ctx, long deviceId) {
@@ -211,7 +214,9 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
             nextPosition = queue.peek();
         }
         if (nextPosition != null) {
-            ctx.executor().execute(() -> processPositionHandlers(ctx, nextPosition));
+            processPositionHandlers(ctx, nextPosition);
+        } else {
+            cacheManager.removeDevice(deviceId, deviceId);
         }
     }
 

@@ -17,6 +17,7 @@ package org.traccar.model;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.traccar.storage.QueryIgnore;
@@ -55,10 +56,9 @@ public class Position extends Message {
     public static final String KEY_POWER = "power"; // volts
     public static final String KEY_BATTERY = "battery"; // volts
     public static final String KEY_BATTERY_LEVEL = "batteryLevel"; // percentage
-    public static final String KEY_FUEL = "fuel"; // liters
+    public static final String KEY_FUEL_LEVEL = "fuel"; // liters
     public static final String KEY_FUEL_USED = "fuelUsed"; // liters
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
-    public static final String KEY_FUEL_LEVEL = "fuelLevel"; // percentage
 
     public static final String KEY_VERSION_FW = "versionFw";
     public static final String KEY_VERSION_HW = "versionHw";
@@ -207,13 +207,11 @@ public class Position extends Message {
 
     private boolean outdated;
 
-    @JsonIgnore
     @QueryIgnore
     public boolean getOutdated() {
         return outdated;
     }
 
-    @JsonIgnore
     @QueryIgnore
     public void setOutdated(boolean outdated) {
         this.outdated = outdated;
@@ -323,7 +321,7 @@ public class Position extends Message {
 
     public void setGeofenceIds(List<? extends Number> geofenceIds) {
         if (geofenceIds != null) {
-            this.geofenceIds = geofenceIds.stream().map(Number::longValue).toList();
+            this.geofenceIds = geofenceIds.stream().map(Number::longValue).collect(Collectors.toList());
         } else {
             this.geofenceIds = null;
         }

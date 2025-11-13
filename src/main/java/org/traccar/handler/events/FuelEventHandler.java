@@ -44,11 +44,11 @@ public class FuelEventHandler extends BaseEventHandler {
             return;
         }
 
-        if (position.hasAttribute(Position.KEY_FUEL)) {
+        if (position.hasAttribute(Position.KEY_FUEL_LEVEL)) {
             Position lastPosition = cacheManager.getPosition(position.getDeviceId());
-            if (lastPosition != null && lastPosition.hasAttribute(Position.KEY_FUEL)) {
-                double before = lastPosition.getDouble(Position.KEY_FUEL);
-                double after = position.getDouble(Position.KEY_FUEL);
+            if (lastPosition != null && lastPosition.hasAttribute(Position.KEY_FUEL_LEVEL)) {
+                double before = lastPosition.getDouble(Position.KEY_FUEL_LEVEL);
+                double after = position.getDouble(Position.KEY_FUEL_LEVEL);
                 double change = after - before;
 
                 if (change > 0) {

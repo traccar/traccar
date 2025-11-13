@@ -85,7 +85,6 @@ public class DatabaseModule extends AbstractModule {
             ResourceAccessor resourceAccessor = new DirectoryResourceAccessor(new File("."));
 
             System.setProperty("liquibase.changelogLockWaitTimeInMinutes", "1");
-            System.setProperty("liquibase.analytics.enabled", "false");
 
             try {
                 Database database = DatabaseFactory.getInstance().openDatabase(
