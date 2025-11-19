@@ -491,8 +491,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-    long remainingCache = buf.readUnsignedIntLE(); // remaining cache records on device
-    int count = buf.readUnsignedShortLE(); // number of data packets in this message
+        long remainingCache = buf.readUnsignedIntLE(); // remaining cache records on device
+        int count = buf.readUnsignedShortLE(); // number of data packets in this message
 
         for (int i = 0; i < count; i++) {
             Position position = new Position(getProtocolName());
@@ -516,6 +516,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x01 -> {
                         event = buf.readUnsignedByte();
                         position.set(Position.KEY_EVENT, event);
+                        // Set alarm based on event using decodeAlarm
+                        position.addAlarm(decodeAlarm(event));
                     }
                     case 0x05 -> position.setValid(buf.readUnsignedByte() > 0);
                     case 0x06 -> position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
