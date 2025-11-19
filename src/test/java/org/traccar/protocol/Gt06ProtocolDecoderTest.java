@@ -18,6 +18,10 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78780D01086471700328358100093F040D0A"));
 
         verifyAttribute(decoder, binary(
+                "7979001f70002c00046919c641007f000ec4a82841074a7fff64012201dc071ea430360d0a"),
+                "tag1Temp", 29.0);
+
+        verifyAttribute(decoder, binary(
                 "79790008940b02e3048614200d0a"),
                 Position.KEY_POWER, 7.39);
 

@@ -1384,6 +1384,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         buf.readUnsignedIntLE(); // time
                         buf.skipBytes(buf.readUnsignedByte()); // content
                     }
+                    case 0x7f -> {
+                        position.set("tag1Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                        position.set("tag1Battery", buf.readUnsignedShort() / 1000.0);
+                        position.set("tag1BatteryLevel", buf.readUnsignedByte());
+                        position.set("tag1Temp", buf.readShort() / 10.0);
+                        position.set("tag1Humidity", buf.readShort());
+                        position.set("tag1Status", buf.readUnsignedByte());
+                    }
                     default -> buf.skipBytes(moduleLength);
                 }
             }
