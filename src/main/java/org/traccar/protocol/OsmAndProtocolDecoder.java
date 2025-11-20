@@ -247,7 +247,7 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
             if (heading >= 0) {
                 position.setCourse(heading);
             }
-            if (speed >= 0 || heading >= 0) {
+            if (speed < 0 && heading < 0) {
                 position.setAccuracy(coordinates.getJsonNumber("accuracy").doubleValue());
             }
             position.setAltitude(coordinates.getJsonNumber("altitude").doubleValue());
