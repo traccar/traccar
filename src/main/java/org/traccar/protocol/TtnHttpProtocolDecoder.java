@@ -20,7 +20,11 @@ import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import jakarta.json.*;
+import jakarta.json.Json;
+import jakarta.json.JsonNumber;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.DateUtil;
@@ -56,7 +60,7 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
         }
     }
 
-    private void PositionSetFromJson(Position position, String key, JsonValue value) {
+    private void positionSetFromJson(Position position, String key, JsonValue value) {
         switch (value.getValueType()) {
             case STRING:
                 position.set(key, ((JsonString) value).getString());
@@ -139,7 +143,7 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
             for (String jsonKey : payload.keySet()) {
                 // Check if the jsonKey matches the posKey or has an underscore after (for CayenneLPP's index)
                 if (posKey.equals(jsonKey) || jsonKey.startsWith(posKey + '_')) {
-                    PositionSetFromJson(position, posKey, payload.get(jsonKey));
+                    positionSetFromJson(position, posKey, payload.get(jsonKey));
                 }
             }
         }
@@ -166,7 +170,7 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
                     // CayenneLPP uses 0-based indexing, "Start with 1 not 0"
                     suffix += 1;
                     String posKey = prefixMappings.get(prefix) + suffix;
-                    PositionSetFromJson(position, posKey, payload.get(jsonKey));
+                    positionSetFromJson(position, posKey, payload.get(jsonKey));
                 }
             }
             // TTN's CayenneLPP decoder uses a 'gps_*' key for coordinates
@@ -179,55 +183,57 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
                 position.setLatitude(coordinates.getJsonNumber("latitude").doubleValue());
                 position.setLongitude(coordinates.getJsonNumber("longitude").doubleValue());
                 position.setAltitude(coordinates.getJsonNumber("altitude").doubleValue());
-            } else switch (jsonKey) {
-                case "latitude":
-                case "lat":
-                    position.setLatitude(payload.getJsonNumber(jsonKey).doubleValue());
-                    foundLat = true;
-                    break;
-                case "longitude":
-                case "lng":
-                    position.setLongitude(payload.getJsonNumber(jsonKey).doubleValue());
-                    foundLng = true;
-                    break;
-                case "altitude":
-                case "alt":
-                    position.setAltitude(payload.getJsonNumber(jsonKey).doubleValue());
-                    break;
-                case "sat":
-                case "sats":
-                case "satellites":
-                    position.setValid(payload.getJsonNumber(jsonKey).doubleValue() > 0);
-                    position.set(Position.KEY_SATELLITES, payload.getJsonNumber(jsonKey).intValue());
-                    foundSats = true;
-                    break;
-                case "speed":
-                    position.setSpeed(convertSpeed(payload.getJsonNumber(jsonKey).doubleValue(), "kn"));
-                    break;
-                case "bearing":
-                case "heading":
-                    position.setCourse(payload.getJsonNumber(jsonKey).doubleValue());
-                    break;
-                case "accuracy":
-                    position.setAccuracy(payload.getJsonNumber(jsonKey).doubleValue());
-                    break;
-                case "time":
-                    // If the device provides its own timestamp, use that for the fix time
-                    switch (payload.get("time").getValueType()) {
-                        case STRING:
-                            position.setFixTime(DateUtil.parseDate(payload.getString("time")));
-                            break;
-                        case NUMBER:
-                            long timestamp = payload.getJsonNumber("time").longValue();
-                            // Check if the timestamp is in seconds or milliseconds
-                            if (timestamp > 10000000000L) {
-                                position.setFixTime(new Date(timestamp));
-                            } else {
-                                position.setFixTime(new Date(timestamp * 1000));
-                            }
-                            break;
-                    }
-                    break;
+            } else {
+                switch (jsonKey) {
+                    case "latitude":
+                    case "lat":
+                        position.setLatitude(payload.getJsonNumber(jsonKey).doubleValue());
+                        foundLat = true;
+                        break;
+                    case "longitude":
+                    case "lng":
+                        position.setLongitude(payload.getJsonNumber(jsonKey).doubleValue());
+                        foundLng = true;
+                        break;
+                    case "altitude":
+                    case "alt":
+                        position.setAltitude(payload.getJsonNumber(jsonKey).doubleValue());
+                        break;
+                    case "sat":
+                    case "sats":
+                    case "satellites":
+                        position.setValid(payload.getJsonNumber(jsonKey).doubleValue() > 0);
+                        position.set(Position.KEY_SATELLITES, payload.getJsonNumber(jsonKey).intValue());
+                        foundSats = true;
+                        break;
+                    case "speed":
+                        position.setSpeed(convertSpeed(payload.getJsonNumber(jsonKey).doubleValue(), "kn"));
+                        break;
+                    case "bearing":
+                    case "heading":
+                        position.setCourse(payload.getJsonNumber(jsonKey).doubleValue());
+                        break;
+                    case "accuracy":
+                        position.setAccuracy(payload.getJsonNumber(jsonKey).doubleValue());
+                        break;
+                    case "time":
+                        // If the device provides its own timestamp, use that for the fix time
+                        switch (payload.get("time").getValueType()) {
+                            case STRING:
+                                position.setFixTime(DateUtil.parseDate(payload.getString("time")));
+                                break;
+                            case NUMBER:
+                                long timestamp = payload.getJsonNumber("time").longValue();
+                                // Check if the timestamp is in seconds or milliseconds
+                                if (timestamp > 10000000000L) {
+                                    position.setFixTime(new Date(timestamp));
+                                } else {
+                                    position.setFixTime(new Date(timestamp * 1000));
+                                }
+                                break;
+                        }
+                        break;
+                }
             }
         }
 
