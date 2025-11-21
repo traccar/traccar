@@ -24,17 +24,17 @@ import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
 import org.traccar.config.Config;
 
-public class TtnProtocol extends BaseProtocol {
+public class TtnHttpProtocol extends BaseProtocol {
 
     @Inject
-    public TtnProtocol(Config config) {
+    public TtnHttpProtocol(Config config) {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
                 pipeline.addLast(new HttpResponseEncoder());
                 pipeline.addLast(new HttpRequestDecoder());
                 pipeline.addLast(new HttpObjectAggregator(16384));
-                pipeline.addLast(new TtnProtocolDecoder(TtnProtocol.this));
+                pipeline.addLast(new TtnHttpProtocolDecoder(TtnHttpProtocol.this));
             }
         });
     }

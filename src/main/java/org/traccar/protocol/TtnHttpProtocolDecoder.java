@@ -37,9 +37,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class TtnProtocolDecoder extends BaseHttpProtocolDecoder {
+public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
 
-    public TtnProtocolDecoder(Protocol protocol) {
+    public TtnHttpProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 
