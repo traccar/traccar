@@ -21,9 +21,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import jakarta.json.Json;
-import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
-import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.Protocol;
@@ -32,13 +30,9 @@ import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
 import java.io.StringReader;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
 
@@ -88,67 +82,47 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setTime(DateUtil.parseDate(message.getString("received_at")));
         }
 
-        for (Field field : Position.class.getDeclaredFields()) {
-            int mods = field.getModifiers();
-            if (!(Modifier.isPublic(mods) && Modifier.isStatic(mods) && Modifier.isFinal(mods)
-                    && field.getType().equals(String.class))) {
-                continue;
-            }
-            if (!(field.getName().startsWith("KEY_"))) {
-                continue;
-            }
-
-            String posKey = (String) field.get(null);
-
-            for (String jsonKey : payload.keySet()) {
-                if (posKey.equals(jsonKey) || jsonKey.startsWith(posKey + '_')) {
-                    decodeJsonValue(position, posKey, payload.get(jsonKey));
-                }
-            }
-        }
-
-        Map<String, String> prefixMappings = new HashMap<>() {{
-            put("digital_in", Position.PREFIX_IN);
-            put("digital_out", Position.PREFIX_OUT);
-            put("analog_in", Position.PREFIX_ADC);
-            put("presence", Position.PREFIX_COUNT);
-            put("temp", Position.PREFIX_TEMP);
-            put("temperature", Position.PREFIX_TEMP);
-        }};
-
-        boolean foundLat = false;
-        boolean foundLng = false;
-        boolean foundSats = false;
+        boolean foundGps = false;
 
         for (String jsonKey : payload.keySet()) {
-            for (String prefix : prefixMappings.keySet()) {
-                if (jsonKey.startsWith(prefix + "_")) {
-                    int suffix = Integer.parseInt(jsonKey.substring((prefix + "_").length()));
-                    suffix += 1;
-                    String posKey = prefixMappings.get(prefix) + suffix;
-                    decodeJsonValue(position, posKey, payload.get(jsonKey));
-                }
-            }
             if (jsonKey.startsWith("gps_")) {
                 JsonObject coordinates = payload.getJsonObject(jsonKey);
                 if (coordinates.getValueType() != JsonValue.ValueType.OBJECT) {
                     continue;
                 }
-                position.setValid(true);
                 position.setLatitude(coordinates.getJsonNumber("latitude").doubleValue());
                 position.setLongitude(coordinates.getJsonNumber("longitude").doubleValue());
                 position.setAltitude(coordinates.getJsonNumber("altitude").doubleValue());
+                foundGps = true;
+            } else if (jsonKey.startsWith("digital_in_")) {
+                int suffix = Integer.parseInt(jsonKey.substring(("digital_in_").length()));
+                suffix += 1;
+                position.set(Position.PREFIX_IN + suffix, payload.getJsonNumber(jsonKey).doubleValue());
+            } else if (jsonKey.startsWith("digital_out_")) {
+                int suffix = Integer.parseInt(jsonKey.substring(("digital_out_").length()));
+                suffix += 1;
+                position.set(Position.PREFIX_OUT + suffix, payload.getJsonNumber(jsonKey).doubleValue());
+            } else if (jsonKey.startsWith("analog_in_")) {
+                int suffix = Integer.parseInt(jsonKey.substring(("analog_in_").length()));
+                suffix += 1;
+                position.set(Position.PREFIX_ADC + suffix, payload.getJsonNumber(jsonKey).doubleValue());
+            } else if (jsonKey.startsWith("temperature_")) {
+                int suffix = Integer.parseInt(jsonKey.substring(("temperature_").length()));
+                suffix += 1;
+                position.set(Position.PREFIX_TEMP + suffix, payload.getJsonNumber(jsonKey).doubleValue());
+            } else if (jsonKey.startsWith("humidity_")) {
+                position.set(Position.KEY_HUMIDITY, payload.getJsonNumber(jsonKey).doubleValue());
             } else {
                 switch (jsonKey) {
                     case "latitude":
                     case "lat":
                         position.setLatitude(payload.getJsonNumber(jsonKey).doubleValue());
-                        foundLat = true;
+                        foundGps = true;
                         break;
                     case "longitude":
                     case "lng":
                         position.setLongitude(payload.getJsonNumber(jsonKey).doubleValue());
-                        foundLng = true;
+                        foundGps = true;
                         break;
                     case "altitude":
                     case "alt":
@@ -157,9 +131,7 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
                     case "sat":
                     case "sats":
                     case "satellites":
-                        position.setValid(payload.getJsonNumber(jsonKey).doubleValue() > 0);
                         position.set(Position.KEY_SATELLITES, payload.getJsonNumber(jsonKey).intValue());
-                        foundSats = true;
                         break;
                     case "speed":
                         position.setSpeed(convertSpeed(payload.getJsonNumber(jsonKey).doubleValue(), "kn"));
@@ -170,6 +142,9 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
                         break;
                     case "accuracy":
                         position.setAccuracy(payload.getJsonNumber(jsonKey).doubleValue());
+                        break;
+                    case "hdop":
+                        position.set(Position.KEY_HDOP, payload.getJsonNumber(jsonKey).doubleValue());
                         break;
                     case "time":
                         switch (payload.get("time").getValueType()) {
@@ -186,38 +161,26 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
                                 break;
                         }
                         break;
+                    case "humidity":
+                        position.set(Position.KEY_HUMIDITY, payload.getJsonNumber(jsonKey).doubleValue());
+                        break;
+                    case "battery":
+                        position.set(Position.KEY_BATTERY, payload.getJsonNumber(jsonKey).doubleValue());
+                        break;
+                    case "alarm":
+                        position.set(Position.KEY_ALARM, payload.getString(jsonKey));
+                        break;
                 }
             }
         }
 
-        if (!foundSats) {
-            position.setValid(foundLat && foundLng);
-        }
-
-        if (!(foundLat && foundLng)) {
+        if (foundGps) {
+            position.setValid(true);
+        } else {
             getLastLocation(position, null);
         }
 
         sendResponse(channel, HttpResponseStatus.OK);
         return position;
-    }
-
-    private void decodeJsonValue(Position position, String key, JsonValue value) {
-        switch (value.getValueType()) {
-            case STRING:
-                position.set(key, ((JsonString) value).getString());
-                break;
-            case NUMBER:
-                position.set(key, ((JsonNumber) value).doubleValue());
-                break;
-            case TRUE:
-                position.set(key, true);
-                break;
-            case FALSE:
-                position.set(key, false);
-                break;
-            default:
-                break;
-        }
     }
 }
