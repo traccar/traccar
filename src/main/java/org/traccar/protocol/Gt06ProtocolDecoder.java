@@ -429,7 +429,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(short value, boolean modelLW, boolean modelSW, boolean modelVL) {
+    private String decodeAlarm(int value, boolean modelLW, boolean modelSW, boolean modelVL) {
         return switch (value) {
             case 0x01 -> Position.ALARM_SOS;
             case 0x02 -> Position.ALARM_POWER_CUT;
@@ -874,7 +874,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     if (type == MSG_STATUS && modelLW) {
                         position.set(Position.KEY_POWER, BitUtil.to(buf.readUnsignedShort(), 12) / 10.0);
                     } else {
-                        short extension = buf.readUnsignedByte();
+                        int extension = buf.readUnsignedByte();
+                        if (type == MSG_GPS_LBS_STATUS_3 || type == MSG_FENCE_MULTI) {
+                            extension += (buf.getUnsignedByte(buf.readerIndex()) & 0xf) << 8;
+                        }
                         if (type == MSG_STATUS && modelSW) {
                             position.set(Position.KEY_POWER, (double) extension);
                         } else if (variant != Variant.VXT01) {
@@ -884,8 +887,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            if (type == MSG_STATUS_2) {
+            if (type == MSG_STATUS_2 || type == MSG_GPS_LBS_STATUS_5 || type == MSG_GPS_LBS_STATUS_3
+                    || type == MSG_FENCE_MULTI || modelNT20 && type == MSG_GPS_LBS_2) {
                 buf.readUnsignedByte(); // language
+            }
+
+            if (type == MSG_STATUS_2) {
                 while (buf.readableBytes() > 6) {
                     int moduleType = buf.readUnsignedShort();
                     int moduleLength = buf.readUnsignedByte();
@@ -899,7 +906,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (type == MSG_GPS_LBS_STATUS_5) {
-                buf.readUnsignedByte(); // language
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                 position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 1000);
                 buf.skipBytes(8); // terminal id
@@ -1006,7 +1012,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (modelNT20 && type == MSG_GPS_LBS_2) {
-                buf.readUnsignedByte(); // language
                 position.set(Position.KEY_ODOMETER, buf.readMedium());
                 position.set(Position.KEY_HOURS, buf.readMedium() * 60 * 1000);
             }
