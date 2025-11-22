@@ -204,4 +204,27 @@ public class StatisticsManager {
         geolocationRequests += 1;
     }
 
+    public synchronized Statistics getStatistics() {
+        checkSplit();
+        Statistics statistics = new Statistics();
+        statistics.setCaptureTime(new Date());
+        statistics.setActiveUsers(users.size());
+        statistics.setActiveDevices(deviceProtocols.size());
+        statistics.setRequests(requests);
+        statistics.setMessagesReceived(messagesReceived);
+        statistics.setMessagesStored(messagesStored);
+        statistics.setMailSent(mailSent);
+        statistics.setSmsSent(smsSent);
+        statistics.setGeocoderRequests(geocoderRequests);
+        statistics.setGeolocationRequests(geolocationRequests);
+        if (!deviceProtocols.isEmpty()) {
+            Map<String, Integer> protocols = new HashMap<>();
+            for (String protocol : deviceProtocols.values()) {
+                protocols.merge(protocol, (Integer) 1, Integer::sum);
+            }
+            statistics.setProtocols(protocols);
+        }
+        return statistics;
+    }
+
 }
