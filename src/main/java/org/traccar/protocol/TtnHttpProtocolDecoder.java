@@ -83,51 +83,39 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setTime(DateUtil.parseDate(message.getString("received_at")));
         }
 
-        boolean foundGps = false;
+        boolean hasLocation = false;
 
-        for (String jsonKey : payload.keySet()) {
-            if (jsonKey.startsWith("gps_")) {
-                JsonObject coordinates = payload.getJsonObject(jsonKey);
-                if (coordinates.getValueType() != JsonValue.ValueType.OBJECT) {
+        for (String key : payload.keySet()) {
+            if (key.startsWith("gps_")) {
+                JsonObject location = payload.getJsonObject(key);
+                if (location.getValueType() != JsonValue.ValueType.OBJECT) {
                     continue;
                 }
-                position.setLatitude(coordinates.getJsonNumber("latitude").doubleValue());
-                position.setLongitude(coordinates.getJsonNumber("longitude").doubleValue());
-                position.setAltitude(coordinates.getJsonNumber("altitude").doubleValue());
-                foundGps = true;
+                position.setLatitude(location.getJsonNumber("latitude").doubleValue());
+                position.setLongitude(location.getJsonNumber("longitude").doubleValue());
+                position.setAltitude(location.getJsonNumber("altitude").doubleValue());
+                hasLocation = true;
             } else {
-                switch (jsonKey) {
-                    case "latitude":
-                        position.setLatitude(payload.getJsonNumber(jsonKey).doubleValue());
-                        foundGps = true;
-                        break;
-                    case "longitude":
-                        position.setLongitude(payload.getJsonNumber(jsonKey).doubleValue());
-                        foundGps = true;
-                        break;
-                    case "altitude":
-                        position.setAltitude(payload.getJsonNumber(jsonKey).doubleValue());
-                        break;
-                    case "accuracy":
-                        position.setAccuracy(payload.getJsonNumber(jsonKey).doubleValue());
-                        break;
-                    case "sats":
-                        position.set(Position.KEY_SATELLITES, payload.getJsonNumber(jsonKey).intValue());
-                        break;
-                    case "speed":
-                        position.setSpeed(convertSpeed(payload.getJsonNumber(jsonKey).doubleValue(), "kn"));
-                        break;
-                    case "heading":
-                        position.setCourse(payload.getJsonNumber(jsonKey).doubleValue());
-                        break;
-                    default:
-                        decodeJsonValue(position, jsonKey, payload.get(jsonKey));
-                        break;
+                switch (key) {
+                    case "latitude" -> {
+                        position.setLatitude(payload.getJsonNumber(key).doubleValue());
+                        hasLocation = true;
+                    }
+                    case "longitude" -> {
+                        position.setLongitude(payload.getJsonNumber(key).doubleValue());
+                        hasLocation = true;
+                    }
+                    case "altitude" -> position.setAltitude(payload.getJsonNumber(key).doubleValue());
+                    case "accuracy" -> position.setAccuracy(payload.getJsonNumber(key).doubleValue());
+                    case "sats" -> position.set(Position.KEY_SATELLITES, payload.getJsonNumber(key).intValue());
+                    case "speed" -> position.setSpeed(convertSpeed(payload.getJsonNumber(key).doubleValue(), "kn"));
+                    case "heading" -> position.setCourse(payload.getJsonNumber(key).doubleValue());
+                    default -> decodeJsonValue(position, key, payload.get(key));
                 }
             }
         }
 
-        if (foundGps) {
+        if (hasLocation) {
             position.setValid(true);
         } else {
             getLastLocation(position, null);
@@ -139,20 +127,13 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
 
     private void decodeJsonValue(Position position, String key, JsonValue value) {
         switch (value.getValueType()) {
-            case STRING:
-                position.set(key, ((JsonString) value).getString());
-                break;
-            case NUMBER:
-                position.set(key, ((JsonNumber) value).doubleValue());
-                break;
-            case TRUE:
-                position.set(key, true);
-                break;
-            case FALSE:
-                position.set(key, false);
-                break;
-            default:
-                break;
+            case STRING -> position.set(key, ((JsonString) value).getString());
+            case NUMBER -> position.set(key, ((JsonNumber) value).doubleValue());
+            case TRUE -> position.set(key, true);
+            case FALSE -> position.set(key, false);
+            default -> {
+            }
         }
     }
+
 }
