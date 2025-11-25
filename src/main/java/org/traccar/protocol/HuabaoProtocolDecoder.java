@@ -837,6 +837,9 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                                     position.set("fuel2", Double.parseDouble(
                                             buf.readCharSequence(6, StandardCharsets.US_ASCII).toString()));
                                     break;
+                                case 0x002D:
+                                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
+                                    break;
                                 case 0x00B2:
                                     position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(
                                             buf.readSlice(10)).replaceAll("f", ""));
