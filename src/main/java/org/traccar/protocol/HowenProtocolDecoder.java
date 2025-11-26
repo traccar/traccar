@@ -502,7 +502,11 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 // Geofence alarm with multiple sub-types
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    int subType = detail.getInt("st", -1);
+                    int subType = -1;
+                    Integer st = parseJsonInt(detail, "st");
+                    if (st != null) {
+                        subType = st;
+                    }
 
                     // Extract geofence information
                     if (detail.containsKey("gid")) {
@@ -728,7 +732,11 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 // G-sensor alarm with sub-types
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    int subType = detail.getInt("tp", -1);
+                    int subType = -1;
+                    Integer tp = parseJsonInt(detail, "tp");
+                    if (tp != null) {
+                        subType = tp;
+                    }
 
                     switch (subType) {
                         case 1:
@@ -958,7 +966,11 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 position.set("faultType", "storage_abnormal");
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    int subType = detail.getInt("st", -1);
+                    int subType = -1;
+                    Integer st = parseJsonInt(detail, "st");
+                    if (st != null) {
+                        subType = st;
+                    }
 
                     // Map sub-type to specific storage issue
                     switch (subType) {
@@ -1043,7 +1055,11 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 position.set(Position.KEY_ALARM, "fuelAbnormal");
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    int subType = detail.getInt("dt", -1);
+                    int subType = -1;
+                    Integer dt = parseJsonInt(detail, "dt");
+                    if (dt != null) {
+                        subType = dt;
+                    }
 
                     switch (subType) {
                         case 1:
@@ -1517,7 +1533,11 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 // Advanced Driver Assistance System alarms
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
-                    int subType = detail.getInt("tp", -1);
+                    int subType = -1;
+                    Integer tp = parseJsonInt(detail, "tp");
+                    if (tp != null) {
+                        subType = tp;
+                    }
 
                     // Extract common ADAS data
                     if (detail.containsKey("spd")) {
