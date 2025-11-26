@@ -18,6 +18,7 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import jakarta.json.Json;
+import jakarta.json.JsonArray;
 import jakarta.json.JsonNumber;
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
@@ -1518,11 +1519,28 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 // Disk detection alarm
                 position.set(Position.KEY_ALARM, "diskDetection");
                 if (json.containsKey("det")) {
-                    JsonObject detail = json.getJsonObject("det");
-                    if (detail.containsKey("st")) {
-                        try {
-                            position.set("diskStatus", detail.getInt("st"));
-                        } catch (Exception ignored) {
+                    JsonValue detValue = json.get("det");
+                    if (detValue.getValueType() == JsonValue.ValueType.ARRAY) {
+                        JsonArray detailArray = json.getJsonArray("det");
+                        for (int i = 0; i < detailArray.size(); i++) {
+                            JsonObject detail = detailArray.getJsonObject(i);
+                            if (detail.containsKey("num")) {
+                                position.set("diskNumber" + (i + 1), detail.getString("num"));
+                            }
+                            if (detail.containsKey("ow")) {
+                                position.set("diskOverwrite" + (i + 1), detail.getInt("ow"));
+                            }
+                            if (detail.containsKey("st")) {
+                                position.set("diskStatus" + (i + 1), detail.getInt("st"));
+                            }
+                        }
+                    } else if (detValue.getValueType() == JsonValue.ValueType.OBJECT) {
+                        JsonObject detail = json.getJsonObject("det");
+                        if (detail.containsKey("st")) {
+                            try {
+                                position.set("diskStatus", detail.getInt("st"));
+                            } catch (Exception ignored) {
+                            }
                         }
                     }
                 }
