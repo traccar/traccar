@@ -1150,7 +1150,11 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
                     LOGGER.info("Voltage alarm detail: " + detail.toString());
-                    int subType = detail.getInt("dt", -1);
+                    int subType = -1;
+                    Integer dt = parseJsonInt(detail, "dt");
+                    if (dt != null) {
+                        subType = dt;
+                    }
                     LOGGER.info("Voltage alarm sub-type: " + subType);
                     switch (subType) {
                         case 1:
@@ -2146,5 +2150,23 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         byte[] payload = Arrays.copyOf(content, content.length + 1);
         payload[payload.length - 1] = 0;
         return payload;
+    }
+
+    private Integer parseJsonInt(JsonObject source, String key) {
+        if (!source.containsKey(key)) {
+            return null;
+        }
+        JsonValue value = source.get(key);
+        if (value.getValueType() == JsonValue.ValueType.NUMBER) {
+            return source.getInt(key);
+        }
+        if (value.getValueType() == JsonValue.ValueType.STRING) {
+            try {
+                return Integer.parseInt(source.getString(key));
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+        return null;
     }
 }
