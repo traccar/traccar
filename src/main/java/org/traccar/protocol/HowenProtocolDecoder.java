@@ -236,7 +236,7 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         }
 
         String content = readString(payload, contentLength);
-
+        LOGGER.info("Howen Alarm: " + content);
         JsonObject json = Json.createReader(new StringReader(content)).readObject();
 
         Position position = new Position(getProtocolName());
