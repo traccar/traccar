@@ -1149,8 +1149,9 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
                 // Voltage alarm with 7 sub-types
                 if (json.containsKey("det")) {
                     JsonObject detail = json.getJsonObject("det");
+                    LOGGER.info("Voltage alarm detail: " + detail.toString());
                     int subType = detail.getInt("dt", -1);
-
+                    LOGGER.info("Voltage alarm sub-type: " + subType);
                     switch (subType) {
                         case 1:
                             // Low voltage
