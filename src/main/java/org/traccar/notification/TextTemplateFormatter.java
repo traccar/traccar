@@ -93,7 +93,7 @@ public class TextTemplateFormatter {
                     (String) velocityContext.get("subject"), (String) velocityContext.get("digest"),
                     writer.toString(), priority);
         } else {
-            return new NotificationMessage("(***)", "(***)", "(***)", priority);
+            return new NotificationMessage(name, name, name, priority);
         }
     }
 
