@@ -573,6 +573,17 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0x06:
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     break;
+                case 0x0B:
+                    position.set("lockCommand", buf.readUnsignedByte());
+                    if (length >= 5 && length <= 6) {
+                        position.set("lockCard", buf.readUnsignedInt());
+                    } else if (length >= 7) {
+                        position.set("lockPassword", buf.readCharSequence(6, StandardCharsets.US_ASCII).toString());
+                    }
+                    if (length % 2 == 0) {
+                        position.set("unlockResult", buf.readUnsignedByte());
+                    }
+                    break;
                 case 0x14:
                     position.set("videoAlarm", buf.readUnsignedInt());
                     break;
