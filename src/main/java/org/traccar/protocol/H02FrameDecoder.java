@@ -63,7 +63,7 @@ public class H02FrameDecoder extends BaseFrameDecoder {
             case '$':
 
                 if (messageLength == 0) {
-                    if (buf.readableBytes() >= MESSAGE_LONG) {
+                    if (buf.readableBytes() == MESSAGE_LONG) {
                         messageLength = MESSAGE_LONG;
                     } else {
                         messageLength = MESSAGE_SHORT;
@@ -71,11 +71,7 @@ public class H02FrameDecoder extends BaseFrameDecoder {
                 }
 
                 if (buf.readableBytes() >= messageLength) {
-                    if (messageLength == MESSAGE_SHORT) {
-                        return buf.readRetainedSlice(messageLength);
-                    } else {
-                        return buf.readRetainedSlice(Math.min(buf.readableBytes(), MESSAGE_LONG + 2));
-                    }
+                    return buf.readRetainedSlice(messageLength);
                 }
 
                 break;
