@@ -116,7 +116,8 @@ public class OidcResource extends BaseResource {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        AuthorizationCode authCode = sessionManager.consumeCode(code, clientId, redirectUri != null ? URI.create(redirectUri) : null);
+        AuthorizationCode authCode = sessionManager.consumeCode(
+                code, clientId, redirectUri != null ? URI.create(redirectUri) : null);
         if (authCode == null) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
