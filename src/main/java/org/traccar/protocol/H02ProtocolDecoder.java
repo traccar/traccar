@@ -155,8 +155,8 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         processStatus(position, buf.readUnsignedInt());
 
-        if (buf.readableBytes() >= 3) {
-            buf.skipBytes(buf.readableBytes() - 3);
+        if (buf.readableBytes() == 18) {
+            buf.skipBytes(15);
             position.set(Position.KEY_POWER, buf.readUnsignedShort() / 10.0);
         }
 
