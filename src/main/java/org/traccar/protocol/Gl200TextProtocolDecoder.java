@@ -89,7 +89,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("F8", "GV800W"),
             Map.entry("FC", "GV600W"),
             Map.entry("802004", "GV58LAU"),
-            Map.entry("802005", "GV355CEU"));
+            Map.entry("802005", "GV355CEU"),
+            Map.entry("80201E", "GV30CEU"));
 
     private boolean ignoreFixTime;
 
@@ -976,7 +977,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
                 decodeAnalog(position, 3, v[index - 1]);
             }
         }
-        if (model.startsWith("GV355CEU") || model.startsWith("GV600M")) {
+        if (model.startsWith("GV3") && model.endsWith("CEU") || model.startsWith("GV600M")) {
             index += 1; // reserved
         }
 
