@@ -68,6 +68,7 @@ public class OidcResource extends BaseResource {
         payload.put("authorization_endpoint", issuer + "/authorize");
         payload.put("token_endpoint", issuer + "/token");
         payload.put("userinfo_endpoint", issuer + "/userinfo");
+        payload.put("jwks_uri", issuer + "/jwks");
         payload.put("subject_types_supported", List.of("public"));
         payload.put("response_types_supported", List.of("code"));
         payload.put("grant_types_supported", List.of("authorization_code"));
@@ -146,4 +147,14 @@ public class OidcResource extends BaseResource {
         profile.put("email", user.getEmail());
         return profile;
     }
+
+    @PermitAll
+    @GET
+    @Path("jwks")
+    public Map<String, Object> jwks() {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("keys", List.of());
+        return payload;
+    }
+
 }
