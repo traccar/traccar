@@ -48,6 +48,7 @@ import org.traccar.api.DateParameterConverterProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.StreamWriter;
 import org.traccar.api.resource.ServerResource;
+import org.traccar.api.security.LoginService;
 import org.traccar.api.security.SecurityRequestFilter;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -175,6 +176,9 @@ public class WebServer implements LifecycleObject {
             var mcpServletHolder = new ServletHolder(mcpServerHolder.getServlet());
             mcpServletHolder.setAsyncSupported(true);
             servletHandler.addServlet(mcpServletHolder, McpServerHolder.PATH);
+            servletHandler.addFilter(
+                    new FilterHolder(new McpAuthFilter(injector.getInstance(LoginService.class))),
+                    McpServerHolder.PATH + "/*", EnumSet.of(DispatcherType.REQUEST));
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();

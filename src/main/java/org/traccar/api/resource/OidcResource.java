@@ -85,6 +85,20 @@ public class OidcResource extends BaseResource {
         return payload;
     }
 
+    @PermitAll
+    @GET
+    @Path(".well-known/oauth-protected-resource")
+    public Map<String, Object> protectedResourceConfiguration() {
+        String issuer = WebHelper.retrieveWebUrl(config) + "/api/oidc";
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("issuer", issuer);
+        payload.put("authorization_servers", List.of(issuer));
+        payload.put("jwks_uri", issuer + "/jwks");
+        payload.put("scopes_supported", List.of("openid", "profile", "email"));
+        payload.put("resource", issuer);
+        return payload;
+    }
+
     @GET
     @Path("authorize")
     public Response authorize(
