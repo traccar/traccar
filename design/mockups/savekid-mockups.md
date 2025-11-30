@@ -17,6 +17,7 @@ A continuación se presentan mockups de referencia utilizando el logo proporcion
 - **Etiquetas de estado**: chips con fondo translúcido (por ejemplo, azul 12% de opacidad) y texto en el color de estado.
 
 ## Mockup 1 – Inicio web (escritorio)
+
 <div style="border:1px solid #dce6f5; padding:18px; border-radius:12px; background:#f9fbff; font-family:Inter, 'Work Sans', system-ui; color:#0e1b2c;">
   <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
     <img src="../assets/savekid-logo.svg" alt="SaveKid" width="64" height="64" />

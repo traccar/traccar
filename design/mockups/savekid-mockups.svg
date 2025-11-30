@@ -1,0 +1,167 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1800" viewBox="0 0 1600 1800" role="img" aria-labelledby="title desc">
+  <title>Mockups visuales SaveKid</title>
+  <desc>Presentación de layout web y móvil con la línea gráfica azul SaveKid.</desc>
+  <defs>
+    <style><![CDATA[
+      .panel { fill: #ffffff; stroke: #e4ecf7; stroke-width: 2; rx: 20; ry: 20; }
+      .card { fill: #ffffff; stroke: #e4ecf7; stroke-width: 2; rx: 18; ry: 18; }
+      .shadow { filter: drop-shadow(0 12px 32px rgba(13,132,255,0.16)); }
+      .title { font-family: 'Inter', 'Work Sans', Arial, sans-serif; font-weight: 800; fill: #0d84ff; }
+      .subtitle { font-family: 'Inter', 'Work Sans', Arial, sans-serif; font-size: 18px; font-weight: 700; fill: #0a5ccd; }
+      .text { font-family: 'Inter', 'Work Sans', Arial, sans-serif; font-size: 16px; fill: #0e1b2c; }
+      .muted { fill: #4b5563; font-size: 14px; }
+      .chip { fill: rgba(13,132,255,0.14); stroke: none; rx: 12; ry: 12; }
+      .chip-text { font-family: 'Inter', 'Work Sans', Arial, sans-serif; font-size: 12px; font-weight: 800; fill: #0d84ff; }
+      .btn-primary { fill: #0d84ff; rx: 12; ry: 12; }
+      .btn-secondary { fill: none; stroke: #0d84ff; stroke-width: 2; rx: 12; ry: 12; }
+      .btn-text-primary { font-family: 'Inter', 'Work Sans', Arial, sans-serif; font-size: 14px; font-weight: 800; fill: #ffffff; }
+      .btn-text-secondary { font-family: 'Inter', 'Work Sans', Arial, sans-serif; font-size: 14px; font-weight: 800; fill: #0d84ff; }
+    ]]></style>
+  </defs>
+  <rect width="1600" height="1800" fill="url(#bg)"/>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f9fbff"/>
+      <stop offset="100%" stop-color="#eef3ff"/>
+    </linearGradient>
+    <linearGradient id="map" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dceeff"/>
+      <stop offset="100%" stop-color="#f4f8ff"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Encabezado general -->
+  <text x="60" y="90" class="title" font-size="36">SaveKid · Línea gráfica azul</text>
+  <text x="60" y="125" class="muted" font-size="18">Mockups visuales usando logo y paleta SaveKid: vista web, móvil y timeline.</text>
+
+  <!-- Mockup web -->
+  <text x="60" y="185" class="subtitle">Mockup web – Inicio y mapa en vivo</text>
+  <g transform="translate(60 210)">
+    <rect width="1180" height="520" fill="#f9fbff" stroke="#dce6f5" stroke-width="2" rx="22" ry="22"/>
+    <g class="shadow">
+      <rect x="20" y="18" width="1140" height="92" class="panel"/>
+    </g>
+    <image href="../assets/savekid-logo.svg" x="38" y="26" width="72" height="72"/>
+    <text x="122" y="66" class="title" font-size="22">SaveKid</text>
+    <text x="122" y="92" class="muted" font-size="15">Panel · Ubicaciones recientes</text>
+    <g transform="translate(770 38)">
+      <rect width="170" height="40" class="btn-primary"/>
+      <text x="20" y="26" class="btn-text-primary">Agregar dispositivo</text>
+      <rect x="190" width="170" height="40" class="btn-secondary"/>
+      <text x="212" y="26" class="btn-text-secondary">Compartir ubicación</text>
+    </g>
+
+    <g transform="translate(20 130)">
+      <g class="shadow">
+        <rect width="760" height="360" class="panel"/>
+      </g>
+      <text x="18" y="36" class="text" font-weight="800">Mapa en vivo</text>
+      <rect x="620" y="14" width="94" height="28" class="chip"/>
+      <text x="640" y="33" class="chip-text">EN LÍNEA</text>
+      <rect x="18" y="60" width="724" height="272" fill="url(#map)" rx="16" ry="16" stroke="#dce6f5" stroke-width="2"/>
+      <text x="260" y="200" class="subtitle" fill="#0a5ccd">Pines activos y zonas seguras</text>
+    </g>
+
+    <g transform="translate(820 130)">
+      <g class="shadow">
+        <rect width="340" height="170" class="panel"/>
+      </g>
+      <text x="18" y="36" class="text" font-weight="800">Dispositivo principal</text>
+      <text x="18" y="72" class="muted">Última actualización</text>
+      <text x="260" y="72" class="muted">Hace 2 min</text>
+      <text x="18" y="102" class="muted">Batería</text>
+      <text x="260" y="102" class="subtitle" font-size="16" fill="#2ed47a">82%</text>
+      <rect x="18" y="120" width="120" height="36" class="btn-primary"/>
+      <text x="38" y="143" class="btn-text-primary">Ver ruta</text>
+      <rect x="152" y="120" width="120" height="36" class="btn-secondary"/>
+      <text x="176" y="143" class="btn-text-secondary">Alertas</text>
+    </g>
+
+    <g transform="translate(820 320)" class="shadow">
+      <rect width="340" height="150" fill="#0d84ff" rx="18" ry="18"/>
+      <text x="18" y="48" class="btn-text-primary" font-size="18">Zona segura activa</text>
+      <text x="18" y="82" class="btn-text-primary" font-size="14" opacity="0.9">Notifica cuando se salga del perímetro definido.</text>
+    </g>
+  </g>
+
+  <!-- Mockup móvil -->
+  <text x="60" y="800" class="subtitle">Mockup móvil – Seguimiento y alertas</text>
+  <g transform="translate(60 830)">
+    <rect width="520" height="420" fill="none" stroke="#dce6f5" stroke-width="2" rx="26" ry="26"/>
+    <g transform="translate(24 20)" class="shadow">
+      <rect width="230" height="380" fill="#f9fbff" stroke="#dce6f5" stroke-width="2" rx="24" ry="24"/>
+      <rect x="12" y="12" width="206" height="78" fill="#0d84ff" rx="18" ry="18"/>
+      <image href="../assets/savekid-logo.svg" x="22" y="20" width="40" height="40"/>
+      <text x="72" y="50" class="btn-text-primary" font-size="16">SaveKid</text>
+      <rect x="150" y="26" width="56" height="24" class="chip" fill="rgba(255,255,255,0.22)"/>
+      <text x="158" y="43" class="btn-text-primary" font-size="11">EN LÍNEA</text>
+      <g transform="translate(12 102)">
+        <rect width="206" height="250" class="card"/>
+        <text x="14" y="32" class="text" font-weight="800">Mapa</text>
+        <rect x="14" y="48" width="178" height="128" fill="url(#map)" stroke="#dce6f5" stroke-width="2" rx="14" ry="14"/>
+        <text x="68" y="126" class="subtitle" fill="#0a5ccd" font-size="13">Pin activo</text>
+        <text x="14" y="196" class="muted" font-size="12">Última señal</text>
+        <text x="134" y="196" class="subtitle" font-size="12">Hace 2 min</text>
+        <rect x="14" y="210" width="88" height="30" class="btn-primary"/>
+        <text x="38" y="230" class="btn-text-primary" font-size="13">Ruta</text>
+        <rect x="108" y="210" width="88" height="30" class="btn-secondary"/>
+        <text x="126" y="230" class="btn-text-secondary" font-size="13">Zona segura</text>
+      </g>
+    </g>
+
+    <g transform="translate(280 20)" class="shadow">
+      <rect width="230" height="380" fill="#f9fbff" stroke="#dce6f5" stroke-width="2" rx="24" ry="24"/>
+      <g transform="translate(12 12)">
+        <rect width="206" height="356" class="card"/>
+        <text x="14" y="32" class="text" font-weight="800">Alertas recientes</text>
+        <rect x="14" y="50" width="178" height="46" fill="#f4f8ff" rx="12" ry="12" stroke="#dce6f5"/>
+        <text x="24" y="78" class="muted" font-size="12">Salida de zona segura</text>
+        <text x="142" y="78" class="subtitle" font-size="12" fill="#ffb547">Hace 5 min</text>
+        <rect x="14" y="106" width="178" height="46" fill="#f4f8ff" rx="12" ry="12" stroke="#dce6f5"/>
+        <text x="24" y="134" class="muted" font-size="12">Batería baja</text>
+        <text x="154" y="134" class="subtitle" font-size="12" fill="#ff5c5c">15%</text>
+        <rect x="14" y="314" width="178" height="34" class="btn-primary"/>
+        <text x="54" y="336" class="btn-text-primary">Ver historial</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Timeline web -->
+  <text x="60" y="1325" class="subtitle">Timeline de alertas (web)</text>
+  <g transform="translate(60 1350)" class="shadow">
+    <rect width="1180" height="360" class="panel"/>
+    <image href="../assets/savekid-logo.svg" x="22" y="20" width="52" height="52"/>
+    <text x="84" y="56" class="title" font-size="22">Alertas y seguridad</text>
+    <g transform="translate(22 86)">
+      <text x="0" y="-10" class="muted" font-size="14">Resumen de eventos</text>
+      <line x1="14" y1="0" x2="14" y2="250" stroke="#0d84ff" stroke-width="3"/>
+      <g transform="translate(0 10)">
+        <rect x="22" y="0" width="520" height="78" fill="#f4f8ff" stroke="#e4ecf7" rx="14" ry="14"/>
+        <text x="36" y="32" class="text" font-weight="800">Salida de zona segura</text>
+        <text x="454" y="32" class="subtitle" font-size="12" fill="#ffb547">08:42</text>
+        <text x="36" y="60" class="muted" font-size="13">Parque Central · Radio 300 m</text>
+      </g>
+      <g transform="translate(0 98)">
+        <rect x="22" y="0" width="520" height="78" fill="#f4f8ff" stroke="#e4ecf7" rx="14" ry="14"/>
+        <text x="36" y="32" class="text" font-weight="800">Velocidad elevada</text>
+        <text x="454" y="32" class="subtitle" font-size="12">08:30</text>
+        <text x="36" y="60" class="muted" font-size="13">45 km/h cerca de casa</text>
+      </g>
+      <g transform="translate(0 186)">
+        <rect x="22" y="0" width="520" height="78" fill="#f4f8ff" stroke="#e4ecf7" rx="14" ry="14"/>
+        <text x="36" y="32" class="text" font-weight="800">Batería baja</text>
+        <text x="454" y="32" class="subtitle" font-size="12" fill="#ff5c5c">08:05</text>
+        <text x="36" y="60" class="muted" font-size="13">15% restante · Recordatorio de carga</text>
+      </g>
+    </g>
+    <g transform="translate(760 96)">
+      <rect width="380" height="240" fill="#f9fbff" stroke="#e4ecf7" rx="14" ry="14"/>
+      <text x="16" y="32" class="text" font-weight="800">Acciones rápidas</text>
+      <rect x="16" y="50" width="348" height="46" class="btn-primary"/>
+      <text x="82" y="80" class="btn-text-primary">Activar zona segura</text>
+      <rect x="16" y="110" width="348" height="46" class="btn-secondary"/>
+      <text x="108" y="140" class="btn-text-secondary">Compartir en vivo</text>
+      <text x="16" y="190" class="muted" font-size="13">Tip: usa el azul SaveKid para acciones y tarjetas claras para jerarquía.</text>
+    </g>
+  </g>
+</svg>
