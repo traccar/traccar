@@ -5,7 +5,9 @@ Ext.define('Traccar.view.MainMenu', {
     requires: [
         'Traccar.view.savekid.SavekidChildrenView',
         'Traccar.view.savekid.SavekidChildProfilePanel',
-        'Traccar.view.savekid.SavekidStatusPanel'
+        'Traccar.view.savekid.SavekidStatusPanel',
+        'Traccar.view.savekid.SavekidHealthHistoryView',
+        'Traccar.view.savekid.SavekidWeeklyReportPanel'
     ],
 
     title: 'Menú principal',
@@ -43,17 +45,15 @@ Ext.define('Traccar.view.MainMenu', {
         }, {
             text: 'Historial de salud',
             handler: function () {
-                Ext.create('Traccar.view.savekid.SavekidChildProfilePanel', {
-                    title: 'Historial de salud',
-                    showHistoryOnly: true
+                Ext.create('Traccar.view.savekid.SavekidHealthHistoryView', {
+                    title: 'Historial fisiológico diario'
                 }).show();
             }
         }, {
             text: 'Reportes semanales',
             handler: function () {
-                Ext.create('Traccar.view.savekid.SavekidChildProfilePanel', {
-                    title: 'Reportes semanales',
-                    showReportsOnly: true
+                Ext.create('Traccar.view.savekid.SavekidWeeklyReportPanel', {
+                    title: 'Reporte semanal'
                 }).show();
             }
         }]
