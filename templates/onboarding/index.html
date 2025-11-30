@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Onboarding Familiar</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="container">
+        <header class="hero">
+            <div class="logo-circle">👨‍👩‍👧‍👦</div>
+            <div>
+                <p class="eyebrow">Configura la protección de tu hijo</p>
+                <h1>Onboarding familiar</h1>
+                <p class="subtitle">Completa los pasos para registrar a tu hijo y vincular su dispositivo.</p>
+            </div>
+        </header>
+
+        <section class="progress" aria-label="Progreso de registro">
+            <div class="progress-bar">
+                <div class="progress-bar__fill" id="progressFill"></div>
+            </div>
+            <ol class="steps" id="stepLabels">
+                <li class="steps__item active">Datos personales</li>
+                <li class="steps__item">Salud</li>
+                <li class="steps__item">Dispositivo</li>
+                <li class="steps__item">Confirmación</li>
+            </ol>
+        </section>
+
+        <form id="onboardingForm" novalidate>
+            <section class="card" data-step="1">
+                <h2>Paso 1: Datos personales del niño</h2>
+                <div class="field">
+                    <label for="childName">Nombre completo</label>
+                    <input type="text" id="childName" name="childName" required autocomplete="name" placeholder="Ej. Sofía Gómez" />
+                    <p class="hint">Como aparece en sus documentos.</p>
+                </div>
+                <div class="field">
+                    <label for="birthDate">Fecha de nacimiento</label>
+                    <input type="date" id="birthDate" name="birthDate" required />
+                </div>
+                <div class="field">
+                    <label for="guardian">Padre/madre o tutor</label>
+                    <input type="text" id="guardian" name="guardian" required autocomplete="parent" placeholder="Tu nombre" />
+                </div>
+            </section>
+
+            <section class="card" data-step="2" hidden>
+                <h2>Paso 2: Datos de salud</h2>
+                <div class="field two-columns">
+                    <div>
+                        <label for="weight">Peso (kg)</label>
+                        <input type="number" id="weight" name="weight" inputmode="decimal" min="1" max="200" step="0.1" placeholder="Ej. 28.5" required />
+                        <p class="hint">Rango razonable: 1 - 200 kg.</p>
+                    </div>
+                    <div>
+                        <label for="height">Altura (cm)</label>
+                        <input type="number" id="height" name="height" inputmode="numeric" min="30" max="220" step="0.1" placeholder="Ej. 128" required />
+                        <p class="hint">Rango razonable: 30 - 220 cm.</p>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="bloodType">Tipo de sangre</label>
+                    <select id="bloodType" name="bloodType">
+                        <option value="">Selecciona</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="medicalNotes">Notas médicas (opcional)</label>
+                    <textarea id="medicalNotes" name="medicalNotes" rows="3" placeholder="Alergias, medicación o instrucciones especiales"></textarea>
+                </div>
+            </section>
+
+            <section class="card" data-step="3" hidden>
+                <h2>Paso 3: Asociación de dispositivo</h2>
+                <div class="field">
+                    <label for="deviceId">ID del dispositivo</label>
+                    <input type="text" id="deviceId" name="deviceId" required autocomplete="off" placeholder="IMEI o código interno" />
+                </div>
+                <div class="field">
+                    <label for="deviceAlias">Nombre para mostrar</label>
+                    <input type="text" id="deviceAlias" name="deviceAlias" required placeholder="Ej. Reloj GPS de Sofía" />
+                    <p class="hint">Así se mostrará en la app.</p>
+                </div>
+            </section>
+
+            <section class="card" data-step="4" hidden>
+                <h2>Paso 4: Confirmación</h2>
+                <p class="summary-hint">Revisa y confirma que los datos sean correctos.</p>
+                <dl class="summary" id="summaryList"></dl>
+                <div class="notice" id="statusBox" role="status" aria-live="polite"></div>
+            </section>
+
+            <div class="actions" id="actionButtons">
+                <button type="button" class="btn ghost" id="backBtn" disabled>Anterior</button>
+                <button type="button" class="btn" id="nextBtn">Siguiente</button>
+            </div>
+        </form>
+    </main>
+
+    <template id="summaryTemplate">
+        <div class="summary__group">
+            <dt></dt>
+            <dd></dd>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>
