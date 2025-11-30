@@ -1,0 +1,27 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title>SaveKid primary logo</title>
+  <desc>Minimal line logo of a smiling baby inside a pin outline.</desc>
+  <defs>
+    <style type="text/css"><![CDATA[
+      .accent { stroke: #0d84ff; fill: none; stroke-width: 20; stroke-linecap: round; stroke-linejoin: round; }
+      .face-fill { fill: #ffffff; stroke: #0d84ff; stroke-width: 16; stroke-linejoin: round; }
+      .solid { fill: #0d84ff; }
+    ]]></style>
+  </defs>
+  <g transform="translate(256 230)">
+    <circle class="accent" r="180" />
+    <circle class="accent" r="140" />
+    <path class="accent" d="M-36 214 L0 274 L36 214" />
+    <circle class="face-fill" r="90" />
+    <path class="accent" d="M-140 0 C-140 -68 -90 -122 -26 -134" />
+    <path class="accent" d="M140 0 C140 -68 90 -122 26 -134" />
+    <g class="solid" transform="translate(-36 10)">
+      <circle r="14" cx="-20" cy="-18" />
+      <circle r="14" cx="84" cy="-18" />
+      <rect x="26" y="-12" width="32" height="12" rx="6" />
+      <rect x="-12" y="-12" width="32" height="12" rx="6" />
+      <path d="M52 -46 C52 -70 80 -70 80 -52" fill="none" stroke="#0d84ff" stroke-width="12" stroke-linecap="round" />
+      <path d="M16 26 C22 44 42 58 62 58 C82 58 102 44 108 26" fill="none" stroke="#0d84ff" stroke-width="12" stroke-linecap="round" />
+    </g>
+  </g>
+</svg>
