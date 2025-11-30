@@ -15,22 +15,37 @@
  */
 package org.traccar.api.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.KeyUse;
+import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.codec.binary.Base64;
+import org.traccar.api.signature.CryptoManager;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.config.Config;
 import org.traccar.helper.WebHelper;
 import org.traccar.model.User;
+import org.traccar.storage.StorageException;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.security.GeneralSecurityException;
+import java.security.KeyPair;
+import java.security.MessageDigest;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Base64.Encoder;
-import java.util.LinkedHashMap;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -43,79 +58,67 @@ import java.util.stream.Stream;
 @Singleton
 public class OidcSessionManager {
 
-    public static class AuthorizationCode {
-
-        private final long userId;
-        private final String clientId;
-        private final URI redirectUri;
-        private final String scope;
-        private final Instant expiration;
-
-        AuthorizationCode(long userId, String clientId, URI redirectUri, String scope, Instant expiration) {
-            this.userId = userId;
-            this.clientId = clientId;
-            this.redirectUri = redirectUri;
-            this.scope = scope;
-            this.expiration = expiration;
-        }
-
-        public long getUserId() {
-            return userId;
-        }
-
-        public String getClientId() {
-            return clientId;
-        }
-
-        public URI getRedirectUri() {
-            return redirectUri;
-        }
-
-        public String getScope() {
-            return scope;
-        }
-
-        public Instant getExpiration() {
-            return expiration;
-        }
+    public record AuthorizationCode(
+            long userId,
+            String clientId,
+            URI redirectUri,
+            String scope,
+            Instant expiration,
+            String nonce,
+            String codeChallenge,
+            String codeChallengeMethod) {
     }
 
+    public static final JWSAlgorithm ID_TOKEN_ALGORITHM = JWSAlgorithm.ES256;
     private static final Duration DEFAULT_LIFETIME = Duration.ofMinutes(5);
 
     private final Config config;
-    private final ObjectMapper objectMapper;
+    private final CryptoManager cryptoManager;
+    private volatile ECKey signingKey;
 
     private final ConcurrentMap<String, AuthorizationCode> codes = new ConcurrentHashMap<>();
 
     @Inject
-    public OidcSessionManager(Config config, ObjectMapper objectMapper) {
+    public OidcSessionManager(Config config, CryptoManager cryptoManager) {
         this.config = config;
-        this.objectMapper = objectMapper;
+        this.cryptoManager = cryptoManager;
     }
 
-    public String issueCode(long userId, String clientId, URI redirectUri, String scope) {
+    public String issueCode(
+            long userId,
+            String clientId,
+            URI redirectUri,
+            String scope,
+            String nonce,
+            String codeChallenge,
+            String codeChallengeMethod) {
         byte[] random = new byte[32];
         ThreadLocalRandom.current().nextBytes(random);
         String code = Base64.encodeBase64URLSafeString(random);
         codes.put(code, new AuthorizationCode(
                 userId, Objects.requireNonNull(clientId), redirectUri,
                 scope == null || scope.isBlank() ? "openid" : scope,
-                Instant.now().plus(DEFAULT_LIFETIME)));
+                Instant.now().plus(DEFAULT_LIFETIME), nonce, codeChallenge, codeChallengeMethod));
         return code;
     }
 
-    public AuthorizationCode consumeCode(String code, String clientId, URI redirectUri) {
+    public AuthorizationCode consumeCode(String code, String clientId, URI redirectUri, String codeVerifier) {
         AuthorizationCode data = codes.remove(code);
         if (data == null) {
             return null;
         }
-        if (!data.getClientId().equals(clientId)) {
+        if (!data.clientId().equals(clientId)) {
             return null;
         }
-        if (redirectUri != null && !data.getRedirectUri().equals(redirectUri)) {
+        if (redirectUri != null) {
+            if (data.redirectUri() == null || !data.redirectUri().equals(redirectUri)) {
+                return null;
+            }
+        }
+        if (Instant.now().isAfter(data.expiration())) {
             return null;
         }
-        if (Instant.now().isAfter(data.getExpiration())) {
+        if (!verifyCodeChallenge(data, codeVerifier)) {
             return null;
         }
         return data;
@@ -126,23 +129,35 @@ public class OidcSessionManager {
             String clientId,
             TokenManager.TokenData tokenData,
             Set<String> scopes,
-            User user) throws IOException {
+            User user) throws GeneralSecurityException, JOSEException, StorageException {
 
-        Map<String, Object> header = Map.of("alg", "none", "typ", "JWT");
+        ECKey key = getSigningKey();
+        Instant issuedAt = Instant.now();
 
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("iss", WebHelper.retrieveWebUrl(config) + "/api/oidc");
-        payload.put("sub", String.valueOf(authCode.getUserId()));
-        payload.put("aud", clientId);
-        payload.put("exp", tokenData.getExpiration().toInstant().getEpochSecond());
-        payload.put("iat", Instant.now().getEpochSecond());
+        JWTClaimsSet.Builder claims = new JWTClaimsSet.Builder()
+                .issuer(WebHelper.retrieveWebUrl(config) + "/api/oidc")
+                .subject(String.valueOf(authCode.userId()))
+                .audience(clientId)
+                .expirationTime(tokenData.getExpiration())
+                .issueTime(Date.from(issuedAt));
 
-        if (scopes.contains("email") || scopes.contains("profile")) {
-            payload.put("email", user.getEmail());
-            payload.put("name", user.getName());
+        if (authCode.nonce() != null) {
+            claims.claim("nonce", authCode.nonce());
         }
 
-        return encodeSegment(header) + "." + encodeSegment(payload) + ".";
+        if (scopes.contains("email") || scopes.contains("profile")) {
+            claims.claim("email", user.getEmail());
+            claims.claim("name", user.getName());
+        }
+
+        SignedJWT jwt = new SignedJWT(
+                new JWSHeader.Builder(ID_TOKEN_ALGORITHM)
+                        .type(JOSEObjectType.JWT)
+                        .keyID(key.getKeyID())
+                        .build(),
+                claims.build());
+        jwt.sign(new ECDSASigner(key));
+        return jwt.serialize();
     }
 
     public Set<String> parseScopes(String scope) {
@@ -151,11 +166,52 @@ public class OidcSessionManager {
                 .collect(Collectors.toSet());
     }
 
-    private String encodeSegment(Object data) throws IOException {
-        ByteArrayOutputStream output = new ByteArrayOutputStream();
-        objectMapper.writeValue(output, data);
-        Encoder encoder = java.util.Base64.getUrlEncoder().withoutPadding();
-        return encoder.encodeToString(output.toByteArray());
+    public Map<String, Object> getJwks() throws GeneralSecurityException, StorageException, JOSEException {
+        ECKey key = getSigningKey();
+        return Map.of("keys", List.of(key.toPublicJWK().toJSONObject()));
+    }
+
+    private boolean verifyCodeChallenge(AuthorizationCode data, String codeVerifier) {
+        if (data.codeChallenge() == null) {
+            return true;
+        }
+        if (codeVerifier == null) {
+            return false;
+        }
+        String method = data.codeChallengeMethod() == null ? "plain" : data.codeChallengeMethod();
+        if ("S256".equalsIgnoreCase(method)) {
+            try {
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
+                byte[] hash = digest.digest(codeVerifier.getBytes(StandardCharsets.US_ASCII));
+                String computed = Base64.encodeBase64URLSafeString(hash);
+                return computed.equals(data.codeChallenge());
+            } catch (GeneralSecurityException e) {
+                return false;
+            }
+        } else {
+            return codeVerifier.equals(data.codeChallenge());
+        }
+    }
+
+    private ECKey getSigningKey() throws GeneralSecurityException, StorageException, JOSEException {
+        ECKey key = signingKey;
+        if (key == null) {
+            synchronized (this) {
+                key = signingKey;
+                if (key == null) {
+                    KeyPair keyPair = cryptoManager.getKeyPair();
+                    ECKey jwk = new ECKey.Builder(Curve.P_256, (ECPublicKey) keyPair.getPublic())
+                            .privateKey((ECPrivateKey) keyPair.getPrivate())
+                            .keyUse(KeyUse.SIGNATURE)
+                            .algorithm(ID_TOKEN_ALGORITHM)
+                            .keyIDFromThumbprint()
+                            .build();
+                    signingKey = jwk;
+                    key = jwk;
+                }
+            }
+        }
+        return key;
     }
 
 }

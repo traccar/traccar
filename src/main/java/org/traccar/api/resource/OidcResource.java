@@ -23,6 +23,7 @@ import org.traccar.config.Config;
 import org.traccar.helper.WebHelper;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
+import com.nimbusds.jose.JOSEException;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
@@ -77,7 +78,10 @@ public class OidcResource extends BaseResource {
         payload.put("response_types_supported", List.of("code"));
         payload.put("grant_types_supported", List.of("authorization_code"));
         payload.put("scopes_supported", List.of("openid", "profile", "email"));
-        payload.put("id_token_signing_alg_values_supported", List.of("none"));
+        payload.put("id_token_signing_alg_values_supported", List.of(sessionManager.ID_TOKEN_ALGORITHM));
+        payload.put("code_challenge_methods_supported", List.of("S256", "plain"));
+        payload.put("token_endpoint_auth_methods_supported",
+                List.of("client_secret_basic", "client_secret_post", "none"));
         return payload;
     }
 
@@ -88,17 +92,14 @@ public class OidcResource extends BaseResource {
             @QueryParam("redirect_uri") String redirectUri,
             @QueryParam("state") String state,
             @QueryParam("scope") String scope,
-            @QueryParam("response_type") String responseType) {
-
-        if (!"code".equalsIgnoreCase(responseType == null ? "code" : responseType)) {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        }
-        if (clientId == null || redirectUri == null) {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        }
+            @QueryParam("response_type") String responseType,
+            @QueryParam("code_challenge") String codeChallenge,
+            @QueryParam("code_challenge_method") String codeChallengeMethod,
+            @QueryParam("nonce") String nonce) {
 
         URI target = URI.create(redirectUri);
-        String code = sessionManager.issueCode(getUserId(), clientId, target, scope);
+        String code = sessionManager.issueCode(
+                getUserId(), clientId, target, scope, nonce, codeChallenge, codeChallengeMethod);
 
         UriBuilder redirectBuilder = UriBuilder.fromUri(target).queryParam("code", code);
         if (state != null) {
@@ -116,12 +117,9 @@ public class OidcResource extends BaseResource {
             @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri,
             @FormParam("client_id") String clientId,
+            @FormParam("code_verifier") String codeVerifier,
             @HeaderParam("Authorization") String authorization)
-            throws StorageException, IOException, GeneralSecurityException {
-
-        if (!"authorization_code".equalsIgnoreCase(grantType)) {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        }
+            throws StorageException, IOException, GeneralSecurityException, JOSEException {
 
         if (clientId == null && authorization != null && authorization.startsWith("Basic ")) {
             String credentials = new String(Base64.getDecoder().decode(
@@ -130,16 +128,16 @@ public class OidcResource extends BaseResource {
         }
 
         AuthorizationCode authCode = sessionManager.consumeCode(
-                code, clientId, redirectUri != null ? URI.create(redirectUri) : null);
+                code, clientId, redirectUri != null ? URI.create(redirectUri) : null, codeVerifier);
         if (authCode == null) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        String token = tokenManager.generateToken(authCode.getUserId());
+        String token = tokenManager.generateToken(authCode.userId());
         TokenManager.TokenData tokenData = tokenManager.decodeToken(token);
         long expiresIn = Math.max(0, (tokenData.getExpiration().getTime() - System.currentTimeMillis()) / 1000);
-        Set<String> scopes = sessionManager.parseScopes(authCode.getScope());
-        User user = permissionsService.getUser(authCode.getUserId());
+        Set<String> scopes = sessionManager.parseScopes(authCode.scope());
+        User user = permissionsService.getUser(authCode.userId());
         String idToken = sessionManager.generateIdToken(authCode, clientId, tokenData, scopes, user);
 
         Map<String, Object> response = new LinkedHashMap<>();
@@ -147,7 +145,7 @@ public class OidcResource extends BaseResource {
         response.put("token_type", "Bearer");
         response.put("expires_in", expiresIn);
         response.put("id_token", idToken);
-        response.put("scope", authCode.getScope());
+        response.put("scope", authCode.scope());
         return Response.ok(response).build();
     }
 
@@ -165,10 +163,8 @@ public class OidcResource extends BaseResource {
     @PermitAll
     @GET
     @Path("jwks")
-    public Map<String, Object> jwks() {
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("keys", List.of());
-        return payload;
+    public Map<String, Object> jwks() throws GeneralSecurityException, StorageException, JOSEException {
+        return sessionManager.getJwks();
     }
 
 }
