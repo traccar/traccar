@@ -73,7 +73,8 @@ public class McpAuthFilter implements Filter {
     private void unauthorized(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         String safeMessage = message.replace("\"", "");
-        response.setHeader("WWW-Authenticate", "Bearer error=\"invalid_token\", error_description=\"" + safeMessage + "\"");
+        response.setHeader(
+                "WWW-Authenticate", "Bearer error=\"invalid_token\", error_description=\"" + safeMessage + "\"");
         response.setContentType("application/json");
         response.getWriter().write("{\"error\":\"unauthorized\",\"error_description\":\"" + safeMessage + "\"}");
     }
