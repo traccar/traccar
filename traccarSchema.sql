@@ -646,6 +646,44 @@ CREATE TABLE `tc_users` (
 
 DELIMITER $$
 
+
+/*Table structure for table `tc_children_profile` */
+
+CREATE TABLE `tc_children_profile` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `deviceid` bigint NOT NULL,
+  `name` varchar(128) NOT NULL,
+  `lastname` varchar(128) DEFAULT NULL,
+  `birthdate` date DEFAULT NULL,
+  `weight` double DEFAULT NULL,
+  `height` double DEFAULT NULL,
+  `medicalconditions` text DEFAULT NULL,
+  `createdat` timestamp NULL DEFAULT current_timestamp(),
+  `updatedat` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_children_profile_deviceid` (`deviceid`),
+  CONSTRAINT `fk_children_profile_deviceid` FOREIGN KEY (`deviceid`) REFERENCES `tc_devices` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+
+/*Table structure for table `tc_children_health` */
+
+CREATE TABLE `tc_children_health` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `childid` bigint NOT NULL,
+  `deviceid` bigint NOT NULL,
+  `servertime` timestamp NOT NULL,
+  `heartrate` int DEFAULT NULL,
+  `bodytemp` double DEFAULT NULL,
+  `steps` int DEFAULT NULL,
+  `sleepstatus` varchar(64) DEFAULT NULL,
+  `rawpositionid` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_children_health_childid` (`childid`),
+  KEY `idx_children_health_deviceid_servertime` (`deviceid`,`servertime`),
+  CONSTRAINT `fk_children_health_childid` FOREIGN KEY (`childid`) REFERENCES `tc_children_profile` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_children_health_deviceid` FOREIGN KEY (`deviceid`) REFERENCES `tc_devices` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_children_health_positionid` FOREIGN KEY (`rawpositionid`) REFERENCES `tc_positions` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 /*!50003 CREATE DEFINER=`ardangps`@`%` FUNCTION `buscar_mes`(`entra_mes` INT) RETURNS varchar(30) CHARSET latin1 COLLATE latin1_swedish_ci
     NO SQL
 BEGIN
