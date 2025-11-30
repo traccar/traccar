@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mockups SaveKid</title>
+  <style>
+    :root {
+      --blue: #0d84ff;
+      --blue-dark: #0a5ccd;
+      --bg-soft: #f4f8ff;
+      --text-main: #0e1b2c;
+      --text-muted: #4b5563;
+      --shadow: 0 12px 36px rgba(13, 132, 255, 0.16);
+      --border: #e4ecf7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 32px;
+      font-family: 'Inter', 'Work Sans', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(180deg, #f9fbff 0%, #eef3ff 100%);
+      color: var(--text-main);
+    }
+    h1 { margin: 0 0 8px; color: var(--blue); }
+    h2 { margin: 24px 0 12px; color: var(--blue-dark); }
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 18px;
+    }
+    .card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .chip {
+      background: rgba(13, 132, 255, 0.14);
+      color: var(--blue);
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .button-primary {
+      background: var(--blue);
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      box-shadow: 0 10px 24px rgba(13, 132, 255, 0.24);
+    }
+    .button-secondary {
+      border: 1px solid var(--blue);
+      color: var(--blue);
+      background: transparent;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+    .map-placeholder {
+      height: 260px;
+      border-radius: 14px;
+      background: radial-gradient(circle at 20% 30%, rgba(13,132,255,0.12), rgba(13,132,255,0)),
+                  radial-gradient(circle at 70% 60%, rgba(42,115,255,0.16), rgba(13,132,255,0)),
+                  linear-gradient(135deg, #dceeff, #f4f8ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--blue-dark);
+      font-weight: 800;
+      letter-spacing: 0.3px;
+    }
+    .layout-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      background: white;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+    .layout-bar img { width: 56px; height: 56px; }
+    .layout-bar .title { font-size: 18px; font-weight: 800; color: var(--blue); }
+    .layout-bar .subtitle { color: var(--text-muted); font-size: 13px; }
+    .badge {
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(46, 212, 122, 0.14);
+      color: #178f55;
+      padding: 6px 10px;
+      border-radius: 10px;
+    }
+    .mobile-area {
+      display: flex;
+      gap: 18px;
+    }
+    .phone {
+      width: 240px;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 12px;
+      background: #f9fbff;
+      box-shadow: var(--shadow);
+    }
+    .phone-header {
+      background: var(--blue);
+      color: white;
+      border-radius: 18px 18px 10px 10px;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .phone-card {
+      margin-top: 10px;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+    .timeline {
+      border-left: 3px solid var(--blue);
+      padding-left: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .timeline .item {
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 8px 22px rgba(13, 132, 255, 0.12);
+    }
+    footer { margin-top: 16px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SaveKid · Línea gráfica azul</h1>
+    <div style="color: var(--text-muted); max-width: 720px;">Mockups visuales utilizando el logo proporcionado y la paleta azul. Incluye vista web de escritorio, vistas móviles y timeline de alertas.</div>
+  </header>
+
+  <section id="web" style="margin-top:24px;">
+    <h2>Mockup web – Inicio y mapa en vivo</h2>
+    <div class="layout-bar">
+      <img src="../assets/savekid-logo.svg" alt="SaveKid" />
+      <div>
+        <div class="title">SaveKid</div>
+        <div class="subtitle">Panel · Ubicaciones recientes</div>
+      </div>
+      <div style="margin-left:auto; display:flex; gap:10px;">
+        <button class="button-primary">Agregar dispositivo</button>
+        <button class="button-secondary">Compartir ubicación</button>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div style="font-weight:800;">Mapa en vivo</div>
+          <span class="chip">EN LÍNEA</span>
+        </div>
+        <div class="map-placeholder">Pines activos y zonas seguras</div>
+      </div>
+      <div style="display:grid; gap:12px;">
+        <div class="card">
+          <div style="font-weight:800; margin-bottom:6px;">Dispositivo principal</div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted);"><span>Última actualización</span><span>Hace 2 min</span></div>
+          <div style="display:flex; justify-content:space-between; font-size:13px; color:var(--text-muted);"><span>Batería</span><span style="color:#2ed47a; font-weight:800;">82%</span></div>
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <button class="button-primary" style="padding:8px 12px; box-shadow:none;">Ver ruta</button>
+            <button class="button-secondary" style="padding:8px 12px;">Alertas</button>
+          </div>
+        </div>
+        <div class="card" style="background: var(--blue); color:white; box-shadow: 0 14px 32px rgba(13,132,255,0.32);">
+          <div style="font-weight:800; margin-bottom:4px;">Zona segura activa</div>
+          <div style="font-size:13px; opacity:0.92;">Notifica cuando se salga del perímetro definido.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="mobile" style="margin-top:32px;">
+    <h2>Mockup móvil – Seguimiento y alertas</h2>
+    <div class="mobile-area">
+      <div class="phone">
+        <div class="phone-header">
+          <img src="../assets/savekid-logo.svg" alt="SaveKid" width="32" height="32" />
+          <div style="font-weight:800;">SaveKid</div>
+          <span class="chip" style="background: rgba(255,255,255,0.16); color:white; margin-left:auto;">EN LÍNEA</span>
+        </div>
+        <div class="phone-card">
+          <div style="font-weight:800;">Mapa</div>
+          <div class="map-placeholder" style="height:140px; border-radius:12px; margin:10px 0;">Pin activo</div>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted);">
+            <span>Última señal</span><span style="color:var(--blue); font-weight:800;">Hace 2 min</span>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:10px;">
+            <button class="button-primary" style="flex:1; padding:8px;">Ruta</button>
+            <button class="button-secondary" style="flex:1; padding:8px;">Zona segura</button>
+          </div>
+        </div>
+      </div>
+      <div class="phone">
+        <div class="phone-card" style="height:100%;">
+          <div style="font-weight:800; margin-bottom:6px;">Alertas recientes</div>
+          <div style="font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; padding:8px; border-radius:10px; background:var(--bg-soft); margin-bottom:8px;">
+            <span>Salida de zona segura</span>
+            <span style="color:#ffb547; font-weight:800;">Hace 5 min</span>
+          </div>
+          <div style="font-size:12px; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; padding:8px; border-radius:10px; background:var(--bg-soft); margin-bottom:8px;">
+            <span>Batería baja</span>
+            <span style="color:#ff5c5c; font-weight:800;">15%</span>
+          </div>
+          <button class="button-primary" style="width:100%; padding:9px;">Ver historial</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="timeline" style="margin-top:32px;">
+    <h2>Timeline de alertas (web)</h2>
+    <div class="card">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <img src="../assets/savekid-logo.svg" alt="SaveKid" width="44" height="44" />
+        <div style="font-weight:900; font-size:18px; color:var(--blue);">Alertas y seguridad</div>
+      </div>
+      <div class="grid" style="grid-template-columns:1.2fr 0.8fr;">
+        <div>
+          <div style="font-size:13px; color:var(--text-muted); margin-bottom:8px;">Resumen de eventos</div>
+          <div class="timeline">
+            <div class="item">
+              <div style="display:flex; justify-content:space-between; font-weight:800;">Salida de zona segura<span style="color:#ffb547; font-size:12px;">08:42</span></div>
+              <div style="font-size:12px; color:var(--text-muted);">Parque Central · Radio 300 m</div>
+            </div>
+            <div class="item">
+              <div style="display:flex; justify-content:space-between; font-weight:800;">Velocidad elevada<span style="color:var(--blue); font-size:12px;">08:30</span></div>
+              <div style="font-size:12px; color:var(--text-muted);">45 km/h cerca de casa</div>
+            </div>
+            <div class="item">
+              <div style="display:flex; justify-content:space-between; font-weight:800;">Batería baja<span style="color:#ff5c5c; font-size:12px;">08:05</span></div>
+              <div style="font-size:12px; color:var(--text-muted);">15% restante · Recordatorio de carga</div>
+            </div>
+          </div>
+        </div>
+        <div style="background:#f9fbff; border:1px solid var(--border); border-radius:12px; padding:12px; box-shadow: 0 8px 22px rgba(13,132,255,0.12);">
+          <div style="font-weight:800; margin-bottom:6px;">Acciones rápidas</div>
+          <button class="button-primary" style="width:100%; margin-bottom:8px;">Activar zona segura</button>
+          <button class="button-secondary" style="width:100%;">Compartir en vivo</button>
+          <div style="margin-top:12px; font-size:12px; color:var(--text-muted);">Tip: usa el azul SaveKid para acciones principales y tarjetas claras para jerarquía.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>Mockups visuales para presentación interna. Ajustar textos, iconos y mapa real antes de implementación.</footer>
+</body>
+</html>
