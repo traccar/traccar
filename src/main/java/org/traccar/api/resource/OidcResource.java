@@ -20,7 +20,6 @@ import org.traccar.api.security.OidcSessionManager;
 import org.traccar.api.security.OidcSessionManager.AuthorizationCode;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.config.Config;
-import org.traccar.helper.WebHelper;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import com.nimbusds.jose.JOSEException;
@@ -45,7 +44,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.util.Base64;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -64,41 +62,6 @@ public class OidcResource extends BaseResource {
     private OidcSessionManager sessionManager;
 
     @PermitAll
-    @GET
-    @Path(".well-known/openid-configuration")
-    public Map<String, Object> configuration() {
-        String issuer = WebHelper.retrieveWebUrl(config) + "/api/oidc";
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("issuer", issuer);
-        payload.put("authorization_endpoint", issuer + "/authorize");
-        payload.put("token_endpoint", issuer + "/token");
-        payload.put("userinfo_endpoint", issuer + "/userinfo");
-        payload.put("jwks_uri", issuer + "/jwks");
-        payload.put("subject_types_supported", List.of("public"));
-        payload.put("response_types_supported", List.of("code"));
-        payload.put("grant_types_supported", List.of("authorization_code"));
-        payload.put("scopes_supported", List.of("openid", "profile", "email"));
-        payload.put("id_token_signing_alg_values_supported", List.of(sessionManager.ID_TOKEN_ALGORITHM));
-        payload.put("code_challenge_methods_supported", List.of("S256", "plain"));
-        payload.put("token_endpoint_auth_methods_supported",
-                List.of("client_secret_basic", "client_secret_post", "none"));
-        return payload;
-    }
-
-    @PermitAll
-    @GET
-    @Path(".well-known/oauth-protected-resource")
-    public Map<String, Object> protectedResourceConfiguration() {
-        String issuer = WebHelper.retrieveWebUrl(config) + "/api/oidc";
-        Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("issuer", issuer);
-        payload.put("authorization_servers", List.of(issuer));
-        payload.put("jwks_uri", issuer + "/jwks");
-        payload.put("scopes_supported", List.of("openid", "profile", "email"));
-        payload.put("resource", issuer);
-        return payload;
-    }
-
     @GET
     @Path("authorize")
     public Response authorize(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ public class WebModule extends ServletModule {
         filter("/*").through(OverrideTextFilter.class);
         filter("/api/*").through(ThrottlingFilter.class);
         filter("/api/media/*").through(MediaFilter.class);
+        serve("/.well-known/*").with(WellKnownServlet.class);
         serve("/api/socket").with(AsyncSocketServlet.class);
     }
 }
