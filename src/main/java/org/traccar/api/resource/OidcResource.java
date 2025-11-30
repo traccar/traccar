@@ -29,6 +29,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -39,10 +40,13 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Path("oidc")
 @Produces(MediaType.APPLICATION_JSON)
@@ -111,11 +115,18 @@ public class OidcResource extends BaseResource {
             @FormParam("grant_type") String grantType,
             @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri,
-            @FormParam("client_id") String clientId)
+            @FormParam("client_id") String clientId,
+            @HeaderParam("Authorization") String authorization)
             throws StorageException, IOException, GeneralSecurityException {
 
         if (!"authorization_code".equalsIgnoreCase(grantType)) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+
+        if (clientId == null && authorization != null && authorization.startsWith("Basic ")) {
+            String credentials = new String(Base64.getDecoder().decode(
+                    authorization.substring("Basic ".length())), StandardCharsets.UTF_8);
+            clientId = credentials.substring(0, credentials.indexOf(':'));
         }
 
         AuthorizationCode authCode = sessionManager.consumeCode(
@@ -127,12 +138,15 @@ public class OidcResource extends BaseResource {
         String token = tokenManager.generateToken(authCode.getUserId());
         TokenManager.TokenData tokenData = tokenManager.decodeToken(token);
         long expiresIn = Math.max(0, (tokenData.getExpiration().getTime() - System.currentTimeMillis()) / 1000);
+        Set<String> scopes = sessionManager.parseScopes(authCode.getScope());
+        User user = permissionsService.getUser(authCode.getUserId());
+        String idToken = sessionManager.generateIdToken(authCode, clientId, tokenData, scopes, user);
 
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("access_token", token);
         response.put("token_type", "Bearer");
         response.put("expires_in", expiresIn);
-        response.put("id_token", token);
+        response.put("id_token", idToken);
         response.put("scope", authCode.getScope());
         return Response.ok(response).build();
     }
