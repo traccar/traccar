@@ -12,7 +12,9 @@
     let currentStep = 0;
 
     const clampNumber = (value, min, max) => {
-        const number = Number(value);
+        const normalized = typeof value === 'string' ? value.trim() : value;
+        if (normalized === '' || normalized === null || normalized === undefined) return null;
+        const number = Number(normalized);
         if (Number.isNaN(number)) return null;
         return Math.min(Math.max(number, min), max);
     };
