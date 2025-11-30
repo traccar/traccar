@@ -4,7 +4,8 @@ Ext.define('Traccar.view.MainMenu', {
 
     requires: [
         'Traccar.view.savekid.SavekidChildrenView',
-        'Traccar.view.savekid.SavekidChildProfilePanel'
+        'Traccar.view.savekid.SavekidChildProfilePanel',
+        'Traccar.view.savekid.SavekidStatusPanel'
     ],
 
     title: 'Menú principal',
@@ -34,9 +35,9 @@ Ext.define('Traccar.view.MainMenu', {
         }, {
             text: 'Estado actual',
             handler: function () {
-                Ext.create('Traccar.view.savekid.SavekidChildProfilePanel', {
+                Ext.create('Traccar.view.savekid.SavekidStatusPanel', {
                     title: 'Estado actual',
-                    autoLoadLastChild: true
+                    autoLoad: true
                 }).show();
             }
         }, {
