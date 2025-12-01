@@ -29,6 +29,7 @@ Some of the available features include:
 
 Traccar uses Java 17. Install a JDK 17+ and ensure your `JAVA_HOME` points to it before running Gradle; otherwise you will see an error similar to "Gradle requires JVM 17 or later to run. Your build is currently configured to use JVM 11." The Gradle build also declares a Java 17 toolchain to download a compatible compiler automatically. For detailed instructions, see the [build from source documentation](https://www.traccar.org/build/) on the official website.
 
+
 ## Team
 
 - Anton Tananaev ([anton@traccar.org](mailto:anton@traccar.org))
