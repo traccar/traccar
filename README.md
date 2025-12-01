@@ -29,21 +29,6 @@ Some of the available features include:
 
 Traccar uses Java 17. Install a JDK 17+ and ensure your `JAVA_HOME` points to it before running Gradle; otherwise you will see an error similar to "Gradle requires JVM 17 or later to run. Your build is currently configured to use JVM 11." The Gradle build also declares a Java 17 toolchain to download a compatible compiler automatically. For detailed instructions, see the [build from source documentation](https://www.traccar.org/build/) on the official website.
 
-After assembling (`./gradlew assemble`), the sample configuration file lives at `setup/traccar.xml`. Either pass that file explicitly when starting the server:
-
-```
-java -jar target/traccar-server-6.10.0.jar setup/traccar.xml
-```
-
-or copy it to a `conf` directory so the default path (`conf/traccar.xml`) resolves correctly:
-
-```
-mkdir -p conf
-cp setup/traccar.xml conf/traccar.xml
-java -jar target/traccar-server-6.10.0.jar conf/traccar.xml
-```
-
-If the configuration file is missing, the server will exit with a `FileNotFoundException` similar to `Main method error - conf/traccar.xml (No such file or directory)`.
 
 ## Team
 
