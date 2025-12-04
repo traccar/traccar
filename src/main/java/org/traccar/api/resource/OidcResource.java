@@ -20,6 +20,7 @@ import org.traccar.api.security.OidcSessionManager;
 import org.traccar.api.security.OidcSessionManager.AuthorizationCode;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import com.nimbusds.jose.JOSEException;
@@ -42,6 +43,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -74,6 +76,10 @@ public class OidcResource extends BaseResource {
             @QueryParam("code_challenge_method") String codeChallengeMethod,
             @QueryParam("nonce") String nonce) {
 
+        if (!getClients().containsKey(clientId)) {
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        }
+
         URI target = URI.create(redirectUri);
         String code = sessionManager.issueCode(
                 getUserId(), clientId, target, scope, nonce, codeChallenge, codeChallengeMethod);
@@ -94,14 +100,21 @@ public class OidcResource extends BaseResource {
             @FormParam("code") String code,
             @FormParam("redirect_uri") String redirectUri,
             @FormParam("client_id") String clientId,
+            @FormParam("client_secret") String clientSecret,
             @FormParam("code_verifier") String codeVerifier,
             @HeaderParam("Authorization") String authorization)
             throws StorageException, IOException, GeneralSecurityException, JOSEException {
 
-        if (clientId == null && authorization != null && authorization.startsWith("Basic ")) {
-            String credentials = new String(Base64.getDecoder().decode(
-                    authorization.substring("Basic ".length())), StandardCharsets.UTF_8);
-            clientId = credentials.substring(0, credentials.indexOf(':'));
+        if (authorization != null && authorization.startsWith("Basic ")) {
+            String[] credentials = new String(Base64.getDecoder().decode(
+                    authorization.substring("Basic ".length())), StandardCharsets.UTF_8).split(":");
+            clientId = credentials[0];
+            clientSecret = credentials[1];
+        }
+
+        String expectedSecret = getClients().get(clientId);
+        if (expectedSecret == null || !expectedSecret.equals(clientSecret)) {
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
         AuthorizationCode authCode = sessionManager.consumeCode(
@@ -142,6 +155,19 @@ public class OidcResource extends BaseResource {
     @Path("jwks")
     public Map<String, Object> jwks() throws GeneralSecurityException, StorageException, JOSEException {
         return sessionManager.getJwks();
+    }
+
+    private Map<String, String> getClients() {
+        String value = config.getString(Keys.OPENID_CLIENTS);
+        if (value == null || value.isBlank()) {
+            return Collections.emptyMap();
+        }
+        Map<String, String> clients = new LinkedHashMap<>();
+        for (String entry : value.split(",")) {
+            String[] values = entry.split(":");
+            clients.put(values[0], values[1]);
+        }
+        return clients;
     }
 
 }

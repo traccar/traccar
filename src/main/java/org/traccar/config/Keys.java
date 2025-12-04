@@ -652,6 +652,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * List of OpenID Connect clients for the built-in provider.
+     * Value should be a comma-separated list of 'clientId:clientSecret' pairs.
+     */
+    public static final ConfigKey<String> OPENID_CLIENTS = new StringConfigKey(
+            "openid.clients",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Force OpenID Connect authentication. When enabled, the Traccar login page will be skipped
      * and users are redirected to the OpenID Connect provider.
      */
