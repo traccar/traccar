@@ -117,6 +117,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PERIPHERAL = 0xF2;         // VL842
     public static final int MSG_STATUS_3 = 0xA3;           // GL21L
     public static final int MSG_GPS_LBS_8 = 0x38;
+    public static final int MSG_GPS_LBS_STATUS_6 = 0x12;   // SEEWORD S5 Location packet
 
     private enum Variant {
         VXT01,
@@ -239,6 +240,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return "NT20".equalsIgnoreCase(model);
             case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
                 return variant == Variant.SEEWORLD;
+            case MSG_GPS_LBS_STATUS_6:
+                return variant == Variant.S5;
             default:
                 return false;
         }
@@ -418,7 +421,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 position.addAlarm(Position.ALARM_GEOFENCE);
                 break;
             case 7:
-                if (variant == Variant.VXT01) {
+                if (variant == Variant.VXT01 || variant == Variant.S5) {
                     position.addAlarm(Position.ALARM_OVERSPEED);
                 } else {
                     position.addAlarm(Position.ALARM_REMOVING);
@@ -829,7 +832,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         && type != MSG_LBS_STATUS
                         && type != MSG_LBS_ALARM
                         && (type != MSG_GPS_LBS_STATUS_1 || variant != Variant.VXT01)
-                        && type != MSG_GPS_LBS_STATUS_5;
+                        && type != MSG_GPS_LBS_STATUS_5
+                        && variant != Variant.S5;
                 decodeLbs(position, buf, type, hasLength);
             }
 
@@ -853,6 +857,21 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     if (mode == 4) {
                         position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 10.0);
                     }
+                } else if (variant == Variant.S5) {
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, modelVL));
+
+                    if (type != MSG_STATUS) { // Expansion information does not exist in MSG_STATUS
+                        position.set("oil", buf.readUnsignedShort());
+                        int temperature = buf.readUnsignedByte();
+                        if (BitUtil.check(temperature, 7)) {
+                            temperature = -BitUtil.to(temperature, 7);
+                        }
+                        position.set(Position.PREFIX_TEMP + 1, temperature);
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 10);
+                    }
+
                 } else {
                     if (type == MSG_GPS_LBS_STATUS_5 || (modelNT20 && type == MSG_GPS_LBS_2)) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
@@ -942,18 +961,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
                     buf.readUnsignedByte(); // alarm extension
-                } else if (variant == Variant.S5) {
-                    decodeStatus(position, buf);
-                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
-                    position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, modelVL));
-                    position.set("oil", buf.readUnsignedShort());
-                    int temperature = buf.readUnsignedByte();
-                    if (BitUtil.check(temperature, 7)) {
-                        temperature = -BitUtil.to(temperature, 7);
-                    }
-                    position.set(Position.PREFIX_TEMP + 1, temperature);
-                    position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 10);
                 } else if (variant == Variant.WETRUST) {
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     position.set(Position.KEY_CARD, buf.readCharSequence(
@@ -1544,7 +1551,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             variant = Variant.GT06E_CARD;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x21) {
             variant = Variant.BENWAY;
-        } else if (header == 0x7878 && type == MSG_GPS_LBS_1 && length == 0x2b) {
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_6 && length == 0x2b) {
+            variant = Variant.S5;
+        } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x2b) {
+            variant = Variant.S5;
+        } else if (header == 0x7878 && type == MSG_STATUS && length == 0x0a) {
             variant = Variant.S5;
         } else if (header == 0x7878 && type == MSG_LBS_STATUS && length >= 0x17) {
             variant = Variant.SPACE10X;
