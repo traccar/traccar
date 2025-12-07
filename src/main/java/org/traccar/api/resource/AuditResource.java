@@ -47,18 +47,15 @@ public class AuditResource extends BaseResource {
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkAdmin(getUserId());
 
-        List<Action> actions = storage.getObjects(Action.class, new Request(
-                new Columns.All(),
-                new Condition.Between("actionTime", from, to),
-                new Order("actionTime")));
-
         var users = storage.getObjects(User.class, new Request(new Columns.All()));
-
         var userEmailMap = users.stream()
                 .filter(user -> user.getEmail() != null)
                 .collect(Collectors.toMap(User::getId, User::getEmail));
 
-        return actions.stream()
+        return storage.getObjectsStream(Action.class, new Request(
+                        new Columns.All(),
+                        new Condition.Between("actionTime", from, to),
+                        new Order("actionTime")))
                 .peek(action -> action.setUserEmail(userEmailMap.get(action.getUserId())));
     }
 
