@@ -1039,6 +1039,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     } else if (length == 2) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
+                    } else if (length == 4) {
+                        position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                     } else {
                         int mark = buf.readUnsignedByte();
                         if (mark == 0x7C) {
