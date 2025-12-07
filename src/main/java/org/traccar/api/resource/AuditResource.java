@@ -54,20 +54,12 @@ public class AuditResource extends BaseResource {
 
         var users = storage.getObjects(User.class, new Request(new Columns.All()));
 
-        var userEmailMap = new HashMap<Long, String>();
-        for (User user : users) {
-            if (user.getEmail() != null) {
-                userEmailMap.put(user.getId(), user.getEmail());
-            }
-        }
+        var userEmailMap = users.stream()
+                .filter(user -> user.getEmail() != null)
+                .collect(Collectors.toMap(User::getId, User::getEmail));
 
-        for (Action action : actions) {
-            if (userEmailMap.containsKey(action.getUserId())) {
-                action.setUserEmail(userEmailMap.get(action.getUserId()));
-            }
-        }
-
-        return actions.stream();
+        return actions.stream()
+                .peek(action -> action.setUserEmail(userEmailMap.get(action.getUserId())));
     }
 
 }
