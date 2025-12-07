@@ -52,19 +52,12 @@ public class AuditResource extends BaseResource {
                 new Condition.Between("actionTime", from, to),
                 new Order("actionTime")));
 
-        Set<Long> userIds = actions.stream()
-                .map(Action::getUserId)
-                .filter(id -> id > 0)
-                .collect(Collectors.toSet());
+        var users = storage.getObjects(User.class, new Request(new Columns.All()));
 
         var userEmailMap = new HashMap<Long, String>();
-        for (long userId : userIds) {
-            User user = storage.getObject(User.class, new Request(
-                    new Columns.All(),
-                    new Condition.Equals("id", userId)));
-
-            if (user != null) {
-                userEmailMap.put(userId, user.getEmail());
+        for (User user : users) {
+            if (user.getEmail() != null) {
+                userEmailMap.put(user.getId(), user.getEmail());
             }
         }
 
