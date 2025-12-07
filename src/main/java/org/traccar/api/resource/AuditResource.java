@@ -23,6 +23,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import org.traccar.api.BaseResource;
 import org.traccar.model.Action;
+import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
@@ -30,6 +31,10 @@ import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Path("audit")
@@ -41,10 +46,35 @@ public class AuditResource extends BaseResource {
     public Stream<Action> get(
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkAdmin(getUserId());
-        return storage.getObjectsStream(Action.class, new Request(
+
+        List<Action> actions = storage.getObjects(Action.class, new Request(
                 new Columns.All(),
                 new Condition.Between("actionTime", from, to),
                 new Order("actionTime")));
+
+        Set<Long> userIds = actions.stream()
+                .map(Action::getUserId)
+                .filter(id -> id > 0)
+                .collect(Collectors.toSet());
+
+        var userEmailMap = new HashMap<Long, String>();
+        for (long userId : userIds) {
+            User user = storage.getObject(User.class, new Request(
+                    new Columns.All(),
+                    new Condition.Equals("id", userId)));
+
+            if (user != null) {
+                userEmailMap.put(userId, user.getEmail());
+            }
+        }
+
+        for (Action action : actions) {
+            if (userEmailMap.containsKey(action.getUserId())) {
+                action.setUserEmail(userEmailMap.get(action.getUserId()));
+            }
+        }
+
+        return actions.stream();
     }
 
 }
