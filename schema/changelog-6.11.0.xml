@@ -28,9 +28,9 @@
 
       CREATE INDEX IF NOT EXISTS tc_actions_id_idx ON tc_actions(id);
 
-      PERFORM add_retention_policy('tc_actions', INTERVAL '1 year');
-      PERFORM add_retention_policy('tc_positions', INTERVAL '1 year');
-      PERFORM add_retention_policy('tc_events', INTERVAL '1 year');
+      SELECT add_retention_policy('tc_actions', INTERVAL '1 year');
+      SELECT add_retention_policy('tc_positions', INTERVAL '1 year');
+      SELECT add_retention_policy('tc_events', INTERVAL '1 year');
     </sql>
 
   </changeSet>
