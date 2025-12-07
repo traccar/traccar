@@ -30,10 +30,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Order;
 import org.traccar.storage.query.Request;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -47,10 +44,12 @@ public class AuditResource extends BaseResource {
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkAdmin(getUserId());
 
-        var users = storage.getObjects(User.class, new Request(new Columns.All()));
-        var userEmailMap = users.stream()
-                .filter(user -> user.getEmail() != null)
-                .collect(Collectors.toMap(User::getId, User::getEmail));
+        Map<Long, String> userEmailMap;
+        try (var stream = storage.getObjectsStream(User.class, new Request(new Columns.All()))) {
+            userEmailMap = stream
+                    .filter(user -> user.getEmail() != null)
+                    .collect(Collectors.toMap(User::getId, User::getEmail));
+        }
 
         return storage.getObjectsStream(Action.class, new Request(
                         new Columns.All(),
