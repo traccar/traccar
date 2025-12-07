@@ -68,15 +68,17 @@ def get_html():
 
 
 def get_pug():
-    return ("\n").join(
-        [
-            f"""  div(class='card mt-3')
-    div(class='card-body')
-      h5(class='card-title') {x["key"]} {" ".join(map("#[span(class='badge badge-dark') {:}]".format, x["types"]))}
-      p(class='card-text') {x["description"]}{f"\n      p(class='card-text') Default value: {x["default"]}" if x["default"] is not None else ""}"""
-            for x in get_config_keys()
-        ]
-    )
+    cards = []
+    for x in get_config_keys():
+        badge_types = " ".join("#[span(class='badge badge-dark') {:}]".format(t) for t in x["types"])
+        default_value = (f"\n      p(class='card-text') Default value: {x['default']}" if x["default"] is not None else "")
+        cards.append(
+            "  div(class='card mt-3')\n"
+            "    div(class='card-body')\n"
+            f"      h5(class='card-title') {x['key']} {badge_types}\n"
+            f"      p(class='card-text') {x['description']}{default_value}"
+        )
+    return "\n".join(cards)
 
 
 if __name__ == "__main__":
