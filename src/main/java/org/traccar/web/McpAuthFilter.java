@@ -29,7 +29,7 @@ import java.util.Locale;
 
 public class McpAuthFilter implements Filter {
 
-    public static final String ATTRIBUTE_USER = "mcpUser";
+    public static final String ATTRIBUTE_USER_ID = "userId";
 
     private final LoginService loginService;
 
@@ -61,7 +61,7 @@ public class McpAuthFilter implements Filter {
                 unauthorized(httpResponse, "Invalid access token");
                 return;
             }
-            httpRequest.setAttribute(ATTRIBUTE_USER, loginResult.getUser());
+            httpRequest.setAttribute(ATTRIBUTE_USER_ID, loginResult.getUser().getId());
         } catch (Exception e) {
             unauthorized(httpResponse, "Invalid access token");
             return;
@@ -72,10 +72,9 @@ public class McpAuthFilter implements Filter {
 
     private void unauthorized(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        String safeMessage = message.replace("\"", "");
-        response.setHeader(
-                "WWW-Authenticate", "Bearer error=\"invalid_token\", error_description=\"" + safeMessage + "\"");
+        response.setHeader("WWW-Authenticate", "Bearer error=\"invalid_token\"");
         response.setContentType("application/json");
-        response.getWriter().write("{\"error\":\"unauthorized\",\"error_description\":\"" + safeMessage + "\"}");
+        response.getWriter().write("{\"error\":\"unauthorized\",\"error_description\":\"" + message + "\"}");
     }
+
 }
