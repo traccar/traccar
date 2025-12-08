@@ -56,7 +56,10 @@ public class AuditResource extends BaseResource {
                         new Columns.All(),
                         new Condition.Between("actionTime", from, to),
                         new Order("actionTime")))
-                .peek(action -> action.setUserEmail(userEmailMap.get(action.getUserId())));
+                .map(action -> {
+                    action.setUserEmail(userEmailMap.get(action.getUserId()));
+                    return action;
+                });
     }
 
 }
