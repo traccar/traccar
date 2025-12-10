@@ -52,12 +52,13 @@ jobs:
 
       - name: Trigger traccar-6-docker build
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        env:
-          PAT: ${{ secrets.PAT }}
-        run: |
-          curl -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token $PAT" \
-            https://api.github.com/repos/xsense/traccar-6-docker/dispatches \
-            -d '{"event_type":"traccar-6-release","client_payload":{"tag":"${{ env.TAG_NAME }}","sha":"${{ github.sha }}"}}'
-          echo "✅ Repository dispatch sent to xsense/traccar-6-docker"
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT }}
+          repository: xsense/traccar-6-docker
+          event-type: traccar-6-release
+          client-payload: '{"tag": "${{ env.TAG_NAME }}", "sha": "${{ github.sha }}"}'
+
+      - name: Confirm dispatch sent
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: echo "✅ Repository dispatch sent to xsense/traccar-6-docker with event traccar-6-release"
