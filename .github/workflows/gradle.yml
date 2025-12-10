@@ -49,3 +49,12 @@ jobs:
           draft: false
           prerelease: false
           files: release/traccar-${{ env.CURRENT_DATE }}.zip
+
+      - name: Trigger traccar-6-docker build
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT }}
+          repository: xsense/traccar-6-docker
+          event-type: traccar-6-release
+          client-payload: '{"tag": "${{ env.TAG_NAME }}", "sha": "${{ github.sha }}"}'
