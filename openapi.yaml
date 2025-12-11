@@ -977,6 +977,38 @@ paths:
         '400':
           description: Could happen if sending has failed
           content: {}
+  /notifications/send/{notificator}:
+    post:
+      summary: Send a custom notification to selected users using the specified notificator
+      tags:
+        - Notifications
+      parameters:
+        - name: notificator
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: query
+          description: Optional list of user ids to send the notification to; if omitted, sends to all permitted users
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationMessage'
+        required: true
+      responses:
+        '204':
+          description: Successful sending
+          content: {}
+        '400':
+          description: Could happen if sending has failed
+          content: {}
   /geofences:
     get:
       summary: Fetch a list of Geofences
@@ -1910,6 +1942,8 @@ components:
           type: string
         poiLayer:
           type: string
+        announcement:
+          type: string
         latitude:
           type: number
         longitude:
@@ -2103,6 +2137,23 @@ components:
         attributes:
           type: object
           properties: {}
+    NotificationMessage:
+      type: object
+      properties:
+        subject:
+          type: string
+          description: Subject or title of the notification
+        digest:
+          type: string
+          description: Short summary shown in compact contexts; defaults to the body when omitted
+        body:
+          type: string
+          description: Full notification text
+        priority:
+          type: boolean
+          description: Whether to send the notification with high priority
+      required:
+        - body
     NotificationType:
       type: object
       properties:
