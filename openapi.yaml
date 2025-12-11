@@ -69,7 +69,29 @@ tags:
     description: Calendar management
   - name: Statistics
     description: Retrieving server statistics
+  - name: Health
+    description: Checking server health status
+  - name: Orders
+    description: Order management
 paths:
+  /health:
+    get:
+      summary: Check server health
+      description: Return plain text status for basic uptime monitoring
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: OK
+        '500':
+          description: Service is unavailable
+          content: {}
   /commands:
     get:
       summary: Fetch a list of Saved Commands
@@ -183,6 +205,7 @@ paths:
           description: >-
             Standard users can use this only with _deviceId_s, they have access
             to
+          required: true
           schema:
             type: integer
       responses:
@@ -202,6 +225,12 @@ paths:
       description: Dispatch a new command or Saved Command if _body.id_ set
       tags:
         - Commands
+      parameters:
+        - name: groupId
+          in: query
+          description: Send the command to all devices in the group
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
@@ -220,7 +249,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Command'
+                anyOf:
+                  - $ref: '#/components/schemas/QueuedCommand'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/QueuedCommand'
         '400':
           description: >-
             Could happen when the user doesn't have permission or an incorrect
@@ -242,11 +275,6 @@ paths:
             reported some locations
           schema:
             type: integer
-        - name: protocol
-          in: query
-          description: Protocol name. Can be used instead of device id
-          schema:
-            type: string
         - name: textChannel
           in: query
           description: >-
@@ -267,6 +295,94 @@ paths:
           description: >-
             Could happen when trying to fetch from a device the user does not
             have permission
+          content: {}
+  /orders:
+    get:
+      summary: Fetch a list of Orders
+      description: Without params, it returns a list of Orders the user has access to
+      tags:
+        - Orders
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: excludeAttributes
+          in: query
+          description: Skip returning the attributes map
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+    post:
+      summary: Create an Order
+      tags:
+        - Orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+      x-codegen-request-body-name: body
+  /orders/{id}:
+    put:
+      summary: Update an Order
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+      x-codegen-request-body-name: body
+    delete:
+      summary: Delete an Order
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
           content: {}
   /devices:
     get:
@@ -1976,6 +2092,24 @@ components:
           type: string
         type:
           type: string
+        textChannel:
+          type: boolean
+        attributes:
+          type: object
+          properties: {}
+    QueuedCommand:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        deviceId:
+          type: integer
+          format: int64
+        type:
+          type: string
+        textChannel:
+          type: boolean
         attributes:
           type: object
           properties: {}
@@ -2366,6 +2500,23 @@ components:
           type: number
         period:
           type: number
+        attributes:
+          type: object
+          properties: {}
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        uniqueId:
+          type: string
+        description:
+          type: string
+        fromAddress:
+          type: string
+        toAddress:
+          type: string
         attributes:
           type: object
           properties: {}
