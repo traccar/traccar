@@ -1228,6 +1228,8 @@ paths:
           content: {}
   /events/{id}:
     get:
+      summary: Get event by id
+      description: Retrieve a single event record with full context for the specified identifier
       tags:
         - Events
       parameters:
@@ -1938,11 +1940,14 @@ components:
         id:
           type: integer
           format: int64
+          description: Unique position record identifier
         deviceId:
           type: integer
           format: int64
+          description: Identifier of the device that reported this position
         protocol:
           type: string
+          description: Device protocol name that produced the message
         deviceTime:
           type: string
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
@@ -1957,30 +1962,40 @@ components:
           format: date-time
         valid:
           type: boolean
+          description: Indicates whether the position was marked as valid by the device
         latitude:
           type: number
+          description: Latitude in decimal degrees
         longitude:
           type: number
+          description: Longitude in decimal degrees
         altitude:
           type: number
+          description: Altitude above sea level in meters
         speed:
           type: number
           description: in knots
         course:
           type: number
+          description: Heading in degrees (0-360) where 0 is true north
         address:
           type: string
+          description: Resolved reverse-geocoded address if available
         accuracy:
           type: number
+          description: Estimated positional accuracy in meters when provided
         network:
           type: object
+          description: Network metadata (e.g. cell or Wi‑Fi data) supplied by the device
           properties: {}
         geofenceIds:
           type: array
           items:
             type: integer
+          description: List of geofence ids applicable to this position
         attributes:
           type: object
+          description: Custom key-value attributes sent by the device or enrichments
           properties: {}
     User:
       type: object
@@ -2042,42 +2057,61 @@ components:
         id:
           type: integer
           format: int64
+          description: Unique server configuration identifier
         registration:
           type: boolean
+          description: Whether new user registrations are allowed
         readonly:
           type: boolean
+          description: When true only administrators can modify server-wide settings
         deviceReadonly:
           type: boolean
+          description: Disallow device attribute changes for non-admins
         limitCommands:
           type: boolean
+          description: Restrict command execution to supported protocol commands
         map:
           type: string
+          description: Default map layer identifier
         bingKey:
           type: string
+          description: Bing Maps API key used when Bing is selected as a provider
         mapUrl:
           type: string
+          description: Custom tile server URL template if configured
         poiLayer:
           type: string
+          description: External point-of-interest layer configuration
         announcement:
           type: string
+          description: Message displayed to all users in the web application
         latitude:
           type: number
+          description: Default map center latitude
         longitude:
           type: number
+          description: Default map center longitude
         zoom:
           type: integer
+          description: Default map zoom level
         version:
           type: string
+          description: Traccar server version string
         forceSettings:
           type: boolean
+          description: Forces users to use the server-wide settings instead of their own
         coordinateFormat:
           type: string
+          description: Default coordinate format for displaying positions
         openIdEnabled:
           type: boolean
+          description: Indicates whether OpenID authentication is available
         openIdForce:
           type: boolean
+          description: Require OpenID authentication for all users when enabled
         attributes:
           type: object
+          description: Additional server-level configuration values
           properties: {}
     Command:
       type: object
@@ -2085,17 +2119,23 @@ components:
         id:
           type: integer
           format: int64
+          description: Unique saved command identifier
         deviceId:
           type: integer
           format: int64
+          description: Target device identifier when the command is bound to one device
         description:
           type: string
+          description: User friendly label displayed in the UI
         type:
           type: string
+          description: Command type as defined by the device protocol
         textChannel:
           type: boolean
+          description: Whether to send the command using the SMS channel
         attributes:
           type: object
+          description: Additional parameters required by the command type
           properties: {}
     QueuedCommand:
       type: object
@@ -2103,15 +2143,20 @@ components:
         id:
           type: integer
           format: int64
+          description: Identifier of the queued command job
         deviceId:
           type: integer
           format: int64
+          description: Device identifier the queued command will be delivered to
         type:
           type: string
+          description: Command type that will be executed
         textChannel:
           type: boolean
+          description: Indicates whether the queued command uses SMS delivery
         attributes:
           type: object
+          description: Stored parameters for the queued command
           properties: {}
     Device:
       type: object
@@ -2119,14 +2164,19 @@ components:
         id:
           type: integer
           format: int64
+          description: Unique identifier assigned by Traccar
         name:
           type: string
+          description: Human friendly device label
         uniqueId:
           type: string
+          description: Hardware or protocol specific unique identifier
         status:
           type: string
+          description: Current connection status such as `online`, `offline`, or `unknown`
         disabled:
           type: boolean
+          description: Whether the device is disabled by an administrator
         lastUpdate:
           type: string
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
@@ -2136,24 +2186,31 @@ components:
           type: integer
           format: int64
           nullable: true
+          description: Identifier of the last known position
         groupId:
           type: integer
           format: int64
           nullable: true
+          description: Parent group identifier when the device is assigned to a group
         phone:
           type: string
           nullable: true
+          description: Contact phone number used for SMS commands
         model:
           type: string
           nullable: true
+          description: Device model or hardware revision
         contact:
           type: string
           nullable: true
+          description: Responsible person's contact information
         category:
           type: string
           nullable: true
+          description: Free form category used for grouping devices in the UI
         attributes:
           type: object
+          description: Custom attributes for protocol or business specific data
           properties: {}
     Group:
       type: object
@@ -2161,13 +2218,17 @@ components:
         id:
           type: integer
           format: int64
+          description: Unique group identifier
         name:
           type: string
+          description: Group display name
         groupId:
           type: integer
           format: int64
+          description: Parent group identifier for nested grouping
         attributes:
           type: object
+          description: Arbitrary metadata attached to the group
           properties: {}
     Permission:
       type: object
