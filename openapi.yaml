@@ -2003,33 +2003,46 @@ components:
         id:
           type: integer
           format: int64
+          description: Unique user identifier
         name:
           type: string
+          description: User display name
         email:
           type: string
+          description: Email address used for login and notifications
         phone:
           type: string
           nullable: true
+          description: Contact phone number for alerts
         readonly:
           type: boolean
+          description: When true, the user cannot change settings
         administrator:
           type: boolean
+          description: Grants full administrative privileges when enabled
         map:
           type: string
           nullable: true
+          description: Preferred default map layer for the user
         latitude:
           type: number
+          description: Default map center latitude for this user
         longitude:
           type: number
+          description: Default map center longitude for this user
         zoom:
           type: integer
+          description: Default map zoom level on login
         password:
           type: string
+          description: Password for user authentication
         coordinateFormat:
           type: string
           nullable: true
+          description: Preferred coordinate display format
         disabled:
           type: boolean
+          description: Indicates whether the user account is disabled
         expirationTime:
           type: string
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
@@ -2037,19 +2050,26 @@ components:
           nullable: true
         deviceLimit:
           type: integer
+          description: Maximum number of devices the user can manage
         userLimit:
           type: integer
+          description: Maximum number of subordinate users
         deviceReadonly:
           type: boolean
+          description: Restricts user from modifying device attributes
         limitCommands:
           type: boolean
+          description: Prevents user from sending unsupported commands
         fixedEmail:
           type: boolean
+          description: Locks the email field to avoid changes
         poiLayer:
           type: string
           nullable: true
+          description: External POI layer configured for the user
         attributes:
           type: object
+          description: Additional custom user attributes
           properties: {}
     Server:
       type: object
@@ -2290,6 +2310,7 @@ components:
       properties:
         type:
           type: string
+          description: Command type identifier
     Geofence:
       type: object
       properties:
@@ -2368,14 +2389,17 @@ components:
       properties:
         type:
           type: string
+          description: Notification type identifier
     Event:
       type: object
       properties:
         id:
           type: integer
           format: int64
+          description: Unique event identifier
         type:
           type: string
+          description: Event type name
         eventTime:
           type: string
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
@@ -2383,25 +2407,32 @@ components:
         deviceId:
           type: integer
           format: int64
+          description: Device associated with the event
         positionId:
           type: integer
           format: int64
+          description: Position record linked to the event when applicable
         geofenceId:
           type: integer
           format: int64
+          description: Geofence referenced by the event if any
         maintenanceId:
           type: integer
+          description: Maintenance record tied to the event
         attributes:
           type: object
           properties: {}
+          description: Additional event-specific attributes
     ReportSummary:
       type: object
       properties:
         deviceId:
           type: integer
           format: int64
+          description: Device identifier for the summary row
         deviceName:
           type: string
+          description: Human readable device name
         maxSpeed:
           type: number
           description: in knots
@@ -2416,14 +2447,17 @@ components:
           description: in liters
         engineHours:
           type: integer
+          description: Engine hours accumulated for the report period
     ReportTrips:
       type: object
       properties:
         deviceId:
           type: integer
           format: int64
+          description: Device identifier for the trip
         deviceName:
           type: string
+          description: Human readable device name
         maxSpeed:
           type: number
           description: in knots
@@ -2438,50 +2472,65 @@ components:
           description: in liters
         duration:
           type: integer
+          description: Trip duration in seconds
         startTime:
           type: string
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         startAddress:
           type: string
+          description: Address where the trip started
         startLat:
           type: number
+          description: Starting latitude in decimal degrees
         startLon:
           type: number
+          description: Starting longitude in decimal degrees
         endTime:
           type: string
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         endAddress:
           type: string
+          description: Address where the trip ended
         endLat:
           type: number
+          description: Ending latitude in decimal degrees
         endLon:
           type: number
+          description: Ending longitude in decimal degrees
         driverUniqueId:
           type: string
+          description: Unique identifier of the driver assigned to the trip
         driverName:
           type: string
+          description: Name of the driver assigned to the trip
     ReportStops:
       type: object
       properties:
         deviceId:
           type: integer
           format: int64
+          description: Device identifier for the stop
         deviceName:
           type: string
+          description: Human readable device name
         duration:
           type: integer
+          description: Stop duration in seconds
         startTime:
           type: string
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         address:
           type: string
+          description: Address where the stop occurred
         lat:
           type: number
+          description: Stop latitude in decimal degrees
         lon:
           type: number
+          description: Stop longitude in decimal degrees
         endTime:
           type: string
           description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
@@ -2491,6 +2540,7 @@ components:
           description: in liters
         engineHours:
           type: integer
+          description: Engine hours accumulated during the stop
     Statistics:
       type: object
       properties:
@@ -2500,52 +2550,65 @@ components:
           format: date-time
         activeUsers:
           type: integer
+          description: Number of active users in the capture period
         activeDevices:
           type: integer
+          description: Number of active devices in the capture period
         requests:
           type: integer
+          description: Total API requests processed
         messagesReceived:
           type: integer
+          description: Number of device messages received
         messagesStored:
           type: integer
+          description: Number of device messages stored to the database
     DeviceAccumulators:
       type: object
       properties:
         deviceId:
           type: integer
           format: int64
+          description: Device identifier for the accumulator entry
         totalDistance:
           type: number
           description: in meters
         hours:
           type: number
+          description: Total engine hours recorded by the device
     Calendar:
       type: object
       properties:
         id:
           type: integer
           format: int64
+          description: Unique calendar identifier
         name:
           type: string
+          description: Calendar display name
         data:
           type: string
           description: base64 encoded in iCalendar format
         attributes:
           type: object
           properties: {}
+          description: Custom calendar attributes
     Attribute:
       type: object
       properties:
         id:
           type: integer
           format: int64
+          description: Unique computed attribute identifier
         description:
           type: string
           description: Human readable name of the attribute
         attribute:
           type: string
+          description: Attribute name used in expressions
         expression:
           type: string
+          description: Expression that defines how the attribute is calculated
         type:
           type: string
           description: String|Number|Boolean
@@ -2555,52 +2618,68 @@ components:
         id:
           type: integer
           format: int64
+          description: Unique driver identifier
         name:
           type: string
+          description: Driver full name
         uniqueId:
           type: string
+          description: Unique external identifier for the driver
         attributes:
           type: object
           properties: {}
+          description: Custom driver attributes
     Maintenance:
       type: object
       properties:
         id:
           type: integer
           format: int64
+          description: Unique maintenance item identifier
         name:
           type: string
+          description: Maintenance task name
         type:
           type: string
+          description: Metric the maintenance is based on
         start:
           type: number
+          description: Current accumulated value when maintenance tracking starts
         period:
           type: number
+          description: Threshold value after which maintenance is due
         attributes:
           type: object
           properties: {}
+          description: Custom maintenance attributes
     Order:
       type: object
       properties:
         id:
           type: integer
           format: int64
+          description: Unique order identifier
         uniqueId:
           type: string
+          description: External order identifier used by clients
         description:
           type: string
           description: Additional details about the order assignment
         fromAddress:
           type: string
+          description: Pickup location address
         toAddress:
           type: string
+          description: Destination address
         attributes:
           type: object
           properties: {}
+          description: Custom order attributes
   parameters:
     entityId:
       name: id
       in: path
+      description: Unique identifier of the entity
       required: true
       schema:
         type: integer
@@ -2614,6 +2693,7 @@ components:
     refresh:
       name: refresh
       in: query
+      description: Force refreshed values instead of cached results
       schema:
         type: boolean
     userId:
@@ -2642,6 +2722,7 @@ components:
       in: query
       style: form
       explode: true
+      description: List of device identifiers to include
       schema:
         type: array
         items:
@@ -2652,6 +2733,7 @@ components:
       in: query
       style: form
       explode: true
+      description: List of group identifiers to include
       schema:
         type: array
         items:
