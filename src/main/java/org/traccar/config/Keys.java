@@ -284,6 +284,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Minimum accuracy to include. If the value is lower, it will be set to zero.
+     */
+    public static final ConfigKey<Double> OSMAND_MIN_ACCURACY = new DoubleConfigKey(
+            "osmand.minAccuracy",
+            List.of(KeyType.CONFIG),
+            10.0);
+
+    /**
      * Use alternative format for the protocol of commands.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_ALTERNATIVE = new BooleanConfigSuffix(

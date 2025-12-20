@@ -25,6 +25,7 @@ import io.netty.handler.codec.http.QueryStringDecoder;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
 import org.traccar.BaseHttpProtocolDecoder;
+import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
@@ -46,8 +47,15 @@ import java.util.Map;
 
 public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
+    private double minAccuracy;
+
     public OsmAndProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    @Override
+    protected void init() {
+        minAccuracy = getConfig().getDouble(Keys.OSMAND_MIN_ACCURACY);
     }
 
     @Override
@@ -247,8 +255,9 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
             if (heading >= 0) {
                 position.setCourse(heading);
             }
-            if (speed < 0 && heading < 0) {
-                position.setAccuracy(coordinates.getJsonNumber("accuracy").doubleValue());
+            double accuracy = coordinates.getJsonNumber("accuracy").doubleValue();
+            if (accuracy >= minAccuracy) {
+                position.setAccuracy(accuracy);
             }
             position.setAltitude(coordinates.getJsonNumber("altitude").doubleValue());
         } else {
