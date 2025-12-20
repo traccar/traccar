@@ -2,6 +2,7 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
 
 public class ArknavProtocolDecoderTest extends ProtocolTest {
 
@@ -19,6 +20,14 @@ public class ArknavProtocolDecoderTest extends ProtocolTest {
 
         verifyPosition(decoder, text(
                 "123456789012345,05*850,000,L001,A,2459.3640,N,12125.2958,E,000.0,224.8,00.8,07:47:26 09-09-05,9.00,D3,0,C4,1,,,00000000,"));
+        
+        verifyPosition(decoder, text(
+                "358266016278447,05*827,000,PT33,A,4821.6584,N,01053.8650,E,000.0,000.0,00.0,20:26:24 17-09-24,2.35,98"),
+                position("2024-09-17 20:26:24.000", true, 48.36097, 10.89775));
+
+        verifyAttribute(decoder, text(
+                "358266016278447,05*827,000,PT33,V,4821.6584,N,01053.8650,E,000.0,000.0,00.0,20:26:24 17-09-24,2.35,16"),
+                Position.KEY_BATTERY_LEVEL, 16);
 
     }
 
