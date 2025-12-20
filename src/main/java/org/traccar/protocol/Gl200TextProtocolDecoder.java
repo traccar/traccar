@@ -81,6 +81,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("55", "GL50B"),
             Map.entry("5E", "GV500MAP"),
             Map.entry("6E", "GV310LAU"),
+            Map.entry("70", "GV50M"),
             Map.entry("BD", "CV200"),
             Map.entry("C2", "GV600M"),
             Map.entry("DC", "GV600MG"),
@@ -88,6 +89,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("F1", "GV350M"),
             Map.entry("F8", "GV800W"),
             Map.entry("FC", "GV600W"),
+            Map.entry("FE", "GV53MG"),
             Map.entry("802004", "GV58LAU"),
             Map.entry("802005", "GV355CEU"),
             Map.entry("80201E", "GV30CEU"));
@@ -1130,6 +1132,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         String model = getDeviceModel(deviceSession, protocolVersion);
         index += 1; // device name
+        if (isVirtualIgnitionMode(type, model)) index += 1; // virtual ignition mode
         index += 1; // duration of ignition on/off
 
         index = decodeLocation(position, model, v, index);
@@ -1148,6 +1151,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return position;
+    }
+
+    private boolean isVirtualIgnitionMode(String type, String model) {
+        return type.contains("VG") &&
+                List.of("GV50M", "GV53MG").contains(model);
     }
 
     private static final Pattern PATTERN_LSW = new PatternBuilder()
