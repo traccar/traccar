@@ -1130,6 +1130,10 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         String model = getDeviceModel(deviceSession, protocolVersion);
         index += 1; // device name
+        if (model.equals("CV200")) {
+            index += 1; // reserved
+            index += 1; // report type
+        }
         index += 1; // duration of ignition on/off
 
         index = decodeLocation(position, model, v, index);
