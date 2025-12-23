@@ -83,6 +83,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             Map.entry("6E", "GV310LAU"),
             Map.entry("BD", "CV200"),
             Map.entry("C2", "GV600M"),
+            Map.entry("C3", "GL320M"),
             Map.entry("DC", "GV600MG"),
             Map.entry("DE", "GL500M"),
             Map.entry("F1", "GV350M"),
@@ -962,6 +963,8 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
 
         if (!model.startsWith("GL5")) {
             position.set(Position.KEY_ODOMETER, v[index++].isEmpty() ? null : Double.parseDouble(v[index - 1]) * 1000);
+        }
+        if (!model.startsWith("GL5") && !model.equals("GL320M")) {
             position.set(Position.KEY_HOURS, parseHours(v[index++]));
             if (!v[index++].isEmpty()) {
                 decodeAnalog(position, 1, v[index - 1]);
@@ -989,6 +992,11 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_INPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
             position.set(Position.KEY_OUTPUT, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1], 16));
             index += 1; // uart device type
+        } else if (model.equals("GL320M")) {
+            position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+            if (BitUtil.check(mask, 7)) {
+                position.set("externalBattery", v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
+            }
         } else {
             position.set(Position.KEY_BATTERY_LEVEL, v[index++].isEmpty() ? null : Integer.parseInt(v[index - 1]));
             if (!v[index++].isEmpty()) {
@@ -1045,7 +1053,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (BitUtil.check(mask, 7)) {
+        if (BitUtil.check(mask, 7) && !model.equals("GL320M")) {
             int deviceCount = Integer.parseInt(v[index++]);
             for (int i = 1; i <= deviceCount; i++) {
                 index += 1; // serial number
@@ -1057,7 +1065,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        if (BitUtil.check(mask, 8)) {
+        if (BitUtil.check(mask, 8) && !model.equals("GL320M")) {
             int deviceCount = Integer.parseInt(v[index++]);
             for (int i = 1; i <= deviceCount; i++) {
                 index += 1; // index
