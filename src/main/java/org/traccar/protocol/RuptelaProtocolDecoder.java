@@ -273,6 +273,12 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                     decodeParameter(position, id, buf, 8);
                 }
 
+                Integer event = position.getInteger(Position.KEY_EVENT);
+                Double power = position.getDouble(Position.KEY_POWER);
+                if (event != null && event == 4 && power != null) {
+                    position.addAlarm(power < 5.0 ? Position.ALARM_POWER_CUT : Position.ALARM_POWER_RESTORED);
+                }
+
                 decodeDriver(position, Position.PREFIX_IO + 126, Position.PREFIX_IO + 127); // can driver
                 decodeDriver(position, Position.PREFIX_IO + 155, Position.PREFIX_IO + 156); // tco driver
 

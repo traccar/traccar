@@ -6,6 +6,63 @@ import org.traccar.model.Position;
 
 public class RuptelaProtocolDecoderTest extends ProtocolTest {
 
+        @Test
+        public void testPowerCutRestored() throws Exception {
+
+                var decoder = inject(new RuptelaProtocolDecoder(null));
+
+                verifyAttribute(decoder, binary(
+                                "0025" + // length (not validated)
+                                "0003115c885fa8c6" + // imei
+                                "01" + // type (records)
+                                "00" + // records left
+                                "01" + // count
+                                "65920000" + // time (seconds)
+                                "00" + // timestamp extension
+                                "00" + // priority
+                                "00000000" + // longitude
+                                "00000000" + // latitude
+                                "0000" + // altitude
+                                "0000" + // course
+                                "05" + // satellites
+                                "0000" + // speed
+                                "00" + // hdop
+                                "04" + // event
+                                "00" + // 1-byte values
+                                "01" + // 2-byte values
+                                "1d" + // power id
+                                "0fa0" + // 4.000V
+                                "00" + // 4-byte values
+                                "00"), // 8-byte values
+                                Position.KEY_ALARM, Position.ALARM_POWER_CUT);
+
+                verifyAttribute(decoder, binary(
+                                "0025" + // length (not validated)
+                                "0003115c885fa8c6" + // imei
+                                "01" + // type (records)
+                                "00" + // records left
+                                "01" + // count
+                                "65920001" + // time (seconds)
+                                "00" + // timestamp extension
+                                "00" + // priority
+                                "00000000" + // longitude
+                                "00000000" + // latitude
+                                "0000" + // altitude
+                                "0000" + // course
+                                "05" + // satellites
+                                "0000" + // speed
+                                "00" + // hdop
+                                "04" + // event
+                                "00" + // 1-byte values
+                                "01" + // 2-byte values
+                                "1d" + // power id
+                                "1388" + // 5.000V
+                                "00" + // 4-byte values
+                                "00"), // 8-byte values
+                                Position.KEY_ALARM, Position.ALARM_POWER_RESTORED);
+
+        }
+
     @Test
     public void testDecode() throws Exception {
 
