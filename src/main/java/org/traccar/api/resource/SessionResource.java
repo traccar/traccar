@@ -35,6 +35,7 @@ import jakarta.annotation.Nullable;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.FormParam;
@@ -86,8 +87,9 @@ public class SessionResource extends BaseResource {
             }
         }
 
-        Long userId = (Long) request.getSession().getAttribute(SessionHelper.USER_ID_KEY);
-        if (userId != null) {
+        HttpSession session = request.getSession(false);
+        Long userId = session != null ? (Long) session.getAttribute(SessionHelper.USER_ID_KEY) : null;
+        if (userId != null && SessionHelper.isSessionOriginValid(request)) {
             User user = permissionsService.getUser(userId);
             if (user != null) {
                 return user;

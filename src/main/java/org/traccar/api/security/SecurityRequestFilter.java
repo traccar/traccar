@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,8 +87,8 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
 
             } else {
 
-                HttpSession session = request.getSession(false);
-                if (session != null) {
+                if (SessionHelper.isSessionOriginValid(request)) {
+                    HttpSession session = request.getSession(false);
                     Long userId = (Long) session.getAttribute(SessionHelper.USER_ID_KEY);
                     Date expiration = (Date) session.getAttribute(SessionHelper.EXPIRATION_KEY);
                     if (expiration != null && expiration.before(new Date())) {
