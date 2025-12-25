@@ -194,7 +194,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     static {
         Predicate<String> any = (m) -> true;
-        Predicate<String> fmbXXX = (m) -> m != null && (m.startsWith("FM") || m.equals("MTB100") || m.equals("MSP500"));
+        Predicate<String> fmbXXX = (m) -> m != null && (m.startsWith("FM") || m.startsWith("FTC") || m.equals("MTB100") || m.equals("MSP500"));
         Predicate<String> fmb6XX = (m) -> m != null && m.matches("FM.6..");
 
         register(1, any, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
@@ -256,6 +256,25 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(181, any, (p, b) -> p.set(Position.KEY_PDOP, b.readUnsignedShort() * 0.1));
         register(182, any, (p, b) -> p.set(Position.KEY_HDOP, b.readUnsignedShort() * 0.1));
         register(199, any, (p, b) -> p.set(Position.KEY_ODOMETER_TRIP, b.readUnsignedInt()));
+        register(69, any, (p, b) -> p.set("gnssStatus", b.readUnsignedByte()));
+        register(70, fmbXXX, (p, b) -> p.set("pcbTemp", b.readShort() * 0.1));
+        register(237, any, (p, b) -> p.set("networkType", b.readUnsignedByte()));
+        register(250, fmbXXX, (p, b) -> p.set("tripMode", b.readUnsignedByte()));
+        register(254, fmbXXX, (p, b) -> p.set("ecoScore", b.readUnsignedByte()));
+        register(255, fmbXXX, (p, b) -> p.set("overSpeeding", b.readUnsignedByte()));
+        register(303, fmbXXX, (p, b) -> p.set("instantMovement", b.readUnsignedByte() > 0));
+        register(383, fmbXXX, (p, b) -> p.set("accelerometerCalibration", b.readUnsignedByte()));
+        register(386, fmbXXX, (p, b) -> p.set("lastFixTime", b.readUnsignedShort()));
+        register(449, fmbXXX, (p, b) -> p.set("userId", b.readUnsignedInt()));
+        register(800, fmbXXX, (p, b) -> p.set("externalVoltage", b.readUnsignedInt() * 0.001));
+        register(841, fmbXXX, (p, b) -> p.set("dout1Overcurrent", b.readUnsignedByte() > 0));
+        register(842, fmbXXX, (p, b) -> p.set("dout2Overcurrent", b.readUnsignedByte() > 0));
+        register(1148, fmbXXX, (p, b) -> p.set("connectivityQuality", b.readUnsignedInt()));
+        register(380, fmbXXX, (p, b) -> p.set("digitalInput3", b.readUnsignedByte() > 0));
+        register(381, fmbXXX, (p, b) -> p.set("groundSense", b.readUnsignedByte() > 0));
+        register(387, fmbXXX, (p, b) -> p.set(Position.KEY_ICCID + "2", String.valueOf(b.readLong())));
+        register(389, fmbXXX, (p, b) -> p.set("obdOemMileage", b.readUnsignedInt()));
+        register(390, fmbXXX, (p, b) -> p.set("timeSinceDtcCleared", b.readUnsignedInt()));
         register(200, fmbXXX, (p, b) -> p.set("sleepMode", b.readUnsignedByte()));
         register(205, fmbXXX, (p, b) -> p.set("cid2g", b.readUnsignedShort()));
         register(206, fmbXXX, (p, b) -> p.set("lac", b.readUnsignedShort()));
@@ -279,6 +298,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT);
         });
         register(636, fmbXXX, (p, b) -> p.set("cid4g", b.readUnsignedInt()));
+        register(641, fmbXXX, (p, b) -> p.set("iccid1", String.valueOf(b.readLong())));
         register(662, fmbXXX, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedByte() > 0));
         register(10644, fmbXXX, (p, b) -> p.set("tempProbe1", b.readShort() / 100.0));
         register(10645, fmbXXX, (p, b) -> p.set("tempProbe2", b.readShort() / 100.0));
@@ -294,6 +314,15 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(10833, fmbXXX, (p, b) -> p.set("eyeRoll2", b.readShort()));
         register(10834, fmbXXX, (p, b) -> p.set("eyeRoll3", b.readShort()));
         register(10835, fmbXXX, (p, b) -> p.set("eyeRoll4", b.readShort()));
+        register(13266, fmbXXX, (p, b) -> p.set("gpsOdometer", b.readUnsignedByte()));
+        register(13267, fmbXXX, (p, b) -> p.set("gpsOdometerType", b.readUnsignedByte()));
+        register(238, fmbXXX, (p, b) -> p.set("userDefinedData", b.readUnsignedByte()));
+        register(243, fmbXXX, (p, b) -> p.set("greenDrivingStatus", b.readUnsignedByte()));
+        register(244, fmbXXX, (p, b) -> p.set(Position.KEY_ROAMING, b.readUnsignedByte() > 0));
+        register(245, fmbXXX, (p, b) -> p.set("gsmJamming", b.readUnsignedByte() > 0));
+        register(269, fmbXXX, (p, b) -> p.set("fuelConsumedCounted", b.readUnsignedInt()));
+        register(270, fmbXXX, (p, b) -> p.set("fuelRateCounted", b.readUnsignedShort()));
+        register(635, fmbXXX, (p, b) -> p.set("lac4g", b.readUnsignedShort()));
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
