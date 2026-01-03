@@ -21,6 +21,7 @@ import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.Parser;
 import org.traccar.helper.PatternBuilder;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 
 import java.net.SocketAddress;
@@ -35,8 +36,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(d+),")                     // imei
             .expression(".{6},")                 // id code
-            .number("ddd,")                      // status
-            .number("Lddd,")                     // version
+            .number("(x{3}),")                   // status
+            .expression("(.{4}),")               // version
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
@@ -47,6 +48,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // hdop
             .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
             .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
+            .expression(".{4},")                 // Unit Version number
+            .expression("(..)")                  // Battery level
             .any()
             .compile();
 
@@ -59,23 +62,40 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        Position position = new Position(getProtocolName());
-
         DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
         if (deviceSession == null) {
             return null;
         }
+
+        Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-
-        position.setValid(parser.next().equals("A"));
-        position.setLatitude(parser.nextCoordinate());
+        long status = parser.nextHexLong();
+        String model = parser.next();
+        position.setValid(parser.next().equals("A"));            
+        position.setLatitude(parser.nextCoordinate());          
         position.setLongitude(parser.nextCoordinate());
-        position.setSpeed(parser.nextDouble(0));
+        position.setSpeed(UnitsConverter.kphFromKnots(parser.nextDouble(0)));
         position.setCourse(parser.nextDouble(0));
-
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
-
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
+        if (model.equals("PT33")) {
+            position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
+            if ((status & 0x100L) != 0) {
+                position.addAlarm(Position.ALARM_LOW_BATTERY);
+            }
+            if ((status & 0x200L) != 0) {
+                position.addAlarm(Position.ALARM_MOVEMENT);
+            }
+            if ((status & 0x400L) != 0) {
+                position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+            }
+            if ((status & 0x010L) != 0) {
+                position.addAlarm(Position.ALARM_SOS);
+            }
+            if ((status & 0x001L) != 0) {
+                position.addAlarm(Position.ALARM_OVERSPEED);
+            }
+        }
 
         return position;
     }
