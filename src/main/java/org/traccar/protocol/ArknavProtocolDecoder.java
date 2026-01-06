@@ -47,7 +47,7 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.?d*),")                 // hdop
             .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
             .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
-            .expression("(.{4}),")               // unit version number
+            .expression("(.{4}),")               // firmware version
             .number("(xx)")                      // battery level
             .any()
             .compile();
@@ -70,7 +70,8 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
 
         position.set(Position.KEY_STATUS, parser.next());
-        position.set(Position.KEY_VERSION_HW, parser.next());
+        String model = parser.next();
+        position.set("model", model);
         position.setValid(parser.next().equals("A"));
         position.setLatitude(parser.nextCoordinate());
         position.setLongitude(parser.nextCoordinate());
@@ -79,7 +80,7 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_HDOP, parser.nextDouble(0));
         position.setTime(parser.nextDateTime(Parser.DateTimeFormat.HMS_DMY));
         position.set(Position.KEY_VERSION_FW, parser.next());
-        if (position.getString(Position.KEY_VERSION_HW).equals("PT33")) {
+        if (model.equals("PT33")) {
             String status = position.getString(Position.KEY_STATUS);
             switch (status.charAt(0)) {
                 case '1' -> position.addAlarm(Position.ALARM_LOW_BATTERY);

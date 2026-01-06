@@ -31,7 +31,7 @@ public class ArknavProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, text(
                 "358266016278447,05*827,000,PT33,V,4821.6584,N,01053.8650,E,000.0,000.0,00.0,20:26:24 17-09-24,2.35,16"),
-                Position.KEY_VERSION_HW, "PT33");
+                "model", "PT33");
 
         verifyAttribute(decoder, text(
                 "358266016278447,05*827,100,PT33,V,4821.6584,N,01053.8650,E,000.0,000.0,00.0,20:26:24 17-09-24,2.35,16"),
