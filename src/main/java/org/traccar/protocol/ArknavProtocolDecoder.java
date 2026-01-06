@@ -35,20 +35,20 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
     private static final Pattern PATTERN = new PatternBuilder()
             .number("(d+),")                     // imei
             .expression(".{6},")                 // id code
-            .expression("(.{3}),")               // status
+            .number("(ddd),")                    // status
             .expression("(.{4}),")               // unit number
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
-            .expression("([NS]),")               // latitude hemisphere
+            .expression("([NS]),")
             .number("(ddd)(dd.d+),")             // longitude
-            .expression("([EW]),")               // longitude hemisphere
+            .expression("([EW]),")
             .number("(d+.?d*),")                 // speed
             .number("(d+.?d*),")                 // course
             .number("(d+.?d*),")                 // hdop
             .number("(dd):(dd):(dd) ")           // time (hh:mm:ss)
             .number("(dd)-(dd)-(dd),")           // date (dd-mm-yy)
             .expression("(.{4}),")               // unit version number
-            .expression("(.{2})")                // battery level
+            .number("(xx)")                      // battery level
             .any()
             .compile();
 
