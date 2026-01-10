@@ -11,6 +11,9 @@ public class MegastekProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new MegastekProtocolDecoder(null));
 
+        verifyPosition(decoder, text(
+                "0323$MGV002,861045082971493,,R,090126,134250,V,5231.64780,N,01323.48837,E,00,00,00,7.682,0.227,116.709,42.5,,262,01,5D8,1922400,20,0000,0000,0,,,,,,01,092,Timer,0268eb529865:50|3ca62f1ff798:63|b8bef41b75a0:64|1ced6f4ad291:72|b4f267537963:76|d2f267537963:76|58d7599127f8:82|32cda7ad09f3:83|485d35090af8:87|b0fc88ab407e:88,,0,,;!"));
+
         verifyAttribute(decoder, text(
                 "$MGV002,862311065582635,,R,311025,144117,V,5231.64099,N,01323.47200,E,00,00,00,99.9,,,25.7,,262,01,05D8,1924F03,18,,,,,,,,,10,100,Timer,32cda7ad09f3:42|1ced6f4ad291:47|b4f267537963:69|d2f267537963:70|3ca62f1ff798:73|04b4fe4955c7:75|74427f7dce16:77|ea55a82da860:80|30d32d9aec05:82|f086201d99ba:82,,0,,;!"),
                 Position.KEY_BATTERY_LEVEL, 100);
