@@ -55,7 +55,7 @@ public class User extends ExtendedModel implements UserRestrictions, Disableable
     }
 
     public void setEmail(String email) {
-        this.email = email.trim();
+        this.email = email.trim().toLowerCase();
     }
 
     private String phone;

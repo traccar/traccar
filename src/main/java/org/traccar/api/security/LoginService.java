@@ -92,7 +92,7 @@ public class LoginService {
             return null;
         }
 
-        email = email.trim();
+        email = email.trim().toLowerCase();
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
                 new Condition.Or(
