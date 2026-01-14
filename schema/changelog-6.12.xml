@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-6.12">
+
+  <!--
+    WARNING: PostgreSQL-specific solution for case-insensitive email login.
+    This migration will ONLY work on PostgreSQL databases.
+
+    For other databases (MySQL, H2, SQL Server, etc.), this changeset will be
+    skipped and case-sensitive email comparison will remain.
+
+    See issue #5723 for discussion.
+  -->
+
+  <changeSet author="author" id="changelog-6.12-citext-email">
+
+    <preConditions onFail="MARK_RAN">
+      <dbms type="postgresql" />
+    </preConditions>
+
+    <sql splitStatements="true" endDelimiter=";">
+      -- Enable CITEXT extension for case-insensitive text type
+      CREATE EXTENSION IF NOT EXISTS citext;
+
+      -- Convert email column to case-insensitive type
+      ALTER TABLE tc_users ALTER COLUMN email TYPE citext USING email::citext;
+    </sql>
+
+  </changeSet>
+
+</databaseChangeLog>
