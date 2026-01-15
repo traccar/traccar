@@ -1,5 +1,5 @@
 /*
- * Copyright 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2025 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ public class LocaleManager {
     }
 
     public Path getTemplateFile(String root, String path, String language, String fileName) {
-        var languages = Stream.of(language, DEFAULT_LANGUAGE).filter(Objects::nonNull).toList();
+        var languages = Stream.of(sanitizeLanguage(language), DEFAULT_LANGUAGE).filter(Objects::nonNull).toList();
         for (var targetLanguage : languages) {
             Path targetFile = Path.of(root, path, targetLanguage, fileName);
             if (Files.exists(targetFile)) {
@@ -61,7 +61,7 @@ public class LocaleManager {
     }
 
     public Map<String, String> getBundle(String language) {
-        String resolvedLanguage = language != null ? language : DEFAULT_LANGUAGE;
+        String resolvedLanguage = Objects.requireNonNullElse(sanitizeLanguage(language), DEFAULT_LANGUAGE);
         return languageBundles.computeIfAbsent(resolvedLanguage, missingLanguage -> {
             Path targetFile = path.resolve(missingLanguage + ".json");
             Path file = Files.exists(targetFile) ? targetFile : path.resolve(DEFAULT_LANGUAGE + ".json");
@@ -79,6 +79,13 @@ public class LocaleManager {
 
     public String getString(String language, String key) {
         return getBundle(language).get(key);
+    }
+
+    private static String sanitizeLanguage(String language) {
+        if (language != null && !language.matches("^[A-Za-z0-9_-]+$")) {
+            throw new IllegalArgumentException("Invalid language");
+        }
+        return language;
     }
 
 }
