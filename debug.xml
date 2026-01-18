@@ -2,7 +2,7 @@
 <!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
 <properties>
 
-    <entry key='web.path'>./traccar-web/simple</entry>
+    <entry key='web.path'>./traccar-web/build</entry>
     <entry key='web.localizationPath'>./traccar-web/src/resources/l10n</entry>
     <entry key='web.debug'>true</entry>
     <entry key='web.console'>true</entry>
@@ -13,14 +13,14 @@
     <entry key='media.path'>./target/media</entry>
 
     <entry key='logger.console'>true</entry>
-    <entry key='logger.queries'>false</entry>
+    <entry key='logger.queries'>true</entry>
     <entry key='logger.fullStackTraces'>true</entry>
 
     <entry key='mail.debug'>true</entry>
 
-    <entry key='database.driver'>org.h2.Driver</entry>
-    <entry key='database.url'>jdbc:h2:./target/database</entry>
-    <entry key='database.user'>sa</entry>
+    <entry key='database.driver'>org.postgresql.Driver</entry>
+    <entry key='database.url'>jdbc:postgresql://localhost:5432/traccar_test</entry>
+    <entry key='database.user'>michaelflowers</entry>
     <entry key='database.password'></entry>
 
     <!--<entry key='server.instantAcknowledgement'>true</entry>
