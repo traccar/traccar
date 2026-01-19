@@ -26,6 +26,7 @@ import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
 import java.net.SocketAddress;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.regex.Pattern;
 
@@ -70,6 +71,11 @@ public class Fa66sProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         String sentence = (String) msg;
+        if (sentence.startsWith("[") && sentence.endsWith("]")
+                && (sentence.contains("*UD_LTE,") || sentence.contains("*LK,"))) {
+            return decodeBracket(channel, remoteAddress, sentence);
+        }
+
         Parser parser = new Parser(PATTERN, sentence);
         if (!parser.matches()) {
             return null; // Ignore messages that do not match expected FA66S format
@@ -110,5 +116,168 @@ public class Fa66sProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return position;
+    }
+
+    private Object decodeBracket(Channel channel, SocketAddress remoteAddress, String sentence) {
+        String content = sentence.substring(1, sentence.length() - 1);
+        int commaIndex = content.indexOf(',');
+        if (commaIndex < 0) {
+            return null;
+        }
+
+        String header = content.substring(0, commaIndex);
+        String[] headerParts = header.split("\\*");
+        if (headerParts.length < 4) {
+            return null;
+        }
+
+        String deviceId = headerParts[1];
+        String type = headerParts[3];
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, deviceId);
+        if (deviceSession == null) {
+            return null;
+        }
+
+        if ("LK".equals(type)) {
+            return null;
+        }
+
+        if (!"UD_LTE".equals(type)) {
+            return null;
+        }
+
+        String[] payload = content.substring(commaIndex + 1).split(",", -1);
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        Date time = parseDateTime(getValue(payload, 0), getValue(payload, 1));
+        position.setTime(time != null ? time : new Date());
+
+        String valid = getValue(payload, 2);
+        position.setValid(valid != null && valid.equalsIgnoreCase("A"));
+
+        double latitude = parseCoordinate(getValue(payload, 3), getValue(payload, 4));
+        double longitude = parseCoordinate(getValue(payload, 5), getValue(payload, 6));
+        position.setLatitude(latitude);
+        position.setLongitude(longitude);
+
+        double speed = parseDouble(getValue(payload, 7));
+        if (!Double.isNaN(speed)) {
+            position.setSpeed(UnitsConverter.knotsFromKph(speed));
+        }
+
+        double course = parseDouble(getValue(payload, 8));
+        if (!Double.isNaN(course)) {
+            position.setCourse(course);
+        }
+
+        double altitude = parseDouble(getValue(payload, 9));
+        if (!Double.isNaN(altitude)) {
+            position.setAltitude(altitude);
+        }
+
+        double batteryLevel = parseDouble(getValue(payload, 11));
+        if (!Double.isNaN(batteryLevel)) {
+            position.set(Position.KEY_BATTERY_LEVEL, batteryLevel);
+        }
+
+        double signal = parseDouble(getValue(payload, 12));
+        if (!Double.isNaN(signal)) {
+            position.set("signal", signal);
+        }
+
+        int mcc = parseInt(getValue(payload, 18), Integer.MIN_VALUE);
+        int mnc = parseInt(getValue(payload, 19), Integer.MIN_VALUE);
+        int lac = parseInt(getValue(payload, 20), Integer.MIN_VALUE);
+        int cid = parseInt(getValue(payload, 21), Integer.MIN_VALUE);
+        if (mcc != Integer.MIN_VALUE) {
+            position.set("mcc", mcc);
+        }
+        if (mnc != Integer.MIN_VALUE) {
+            position.set("mnc", mnc);
+        }
+        if (lac != Integer.MIN_VALUE) {
+            position.set("lac", lac);
+        }
+        if (cid != Integer.MIN_VALUE) {
+            position.set("cid", cid);
+        }
+
+        int wifiIndex = findWifiIndex(payload);
+        if (wifiIndex != -1) {
+            position.set("wifi", String.join(",", Arrays.copyOfRange(payload, wifiIndex, payload.length)));
+        }
+
+        return position;
+    }
+
+    private String getValue(String[] payload, int index) {
+        return index >= 0 && index < payload.length ? payload[index] : null;
+    }
+
+    private Date parseDateTime(String date, String time) {
+        try {
+            if (date == null || time == null || date.length() < 6 || time.length() < 6) {
+                return null;
+            }
+            int year = parseInt(date.substring(0, 2), -1);
+            int month = parseInt(date.substring(2, 4), -1);
+            int day = parseInt(date.substring(4, 6), -1);
+            int hour = parseInt(time.substring(0, 2), -1);
+            int minute = parseInt(time.substring(2, 4), -1);
+            int second = parseInt(time.substring(4, 6), -1);
+            if (year < 0 || month < 0 || day < 0 || hour < 0 || minute < 0 || second < 0) {
+                return null;
+            }
+            return new DateBuilder()
+                    .setDate(year, month, day)
+                    .setTime(hour, minute, second)
+                    .getDate();
+        } catch (NumberFormatException | IndexOutOfBoundsException ex) {
+            return null;
+        }
+    }
+
+    private double parseCoordinate(String value, String hemisphere) {
+        double coordinate = parseDouble(value);
+        if (Double.isNaN(coordinate)) {
+            return 0;
+        }
+        if (hemisphere != null) {
+            if (hemisphere.equalsIgnoreCase("S") || hemisphere.equalsIgnoreCase("W")) {
+                coordinate = -Math.abs(coordinate);
+            } else if (hemisphere.equalsIgnoreCase("N") || hemisphere.equalsIgnoreCase("E")) {
+                coordinate = Math.abs(coordinate);
+            }
+        }
+        return coordinate;
+    }
+
+    private int findWifiIndex(String[] payload) {
+        for (int i = 0; i < payload.length; i++) {
+            String value = payload[i];
+            if (value != null && value.contains(":")) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private int parseInt(String value, int defaultValue) {
+        try {
+            return value == null || value.isEmpty() ? defaultValue : Integer.parseInt(value);
+        } catch (NumberFormatException ex) {
+            return defaultValue;
+        }
+    }
+
+    private double parseDouble(String value) {
+        try {
+            return value == null || value.isEmpty() ? Double.NaN : Double.parseDouble(value);
+        } catch (NumberFormatException ex) {
+            return Double.NaN;
+        }
     }
 }
