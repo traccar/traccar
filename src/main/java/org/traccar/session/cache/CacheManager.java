@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,12 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import java.util.AbstractQueue;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -66,7 +68,7 @@ public class CacheManager implements BroadcastInterface {
     private final CacheGraph graph = new CacheGraph();
 
     private volatile Server server;
-    private final Map<Long, Position> devicePositions = new ConcurrentHashMap<>();
+    private final Map<Long, AbstractQueue<Position>> devicePositions = new ConcurrentHashMap<>();
     private final Map<Long, HashSet<Object>> deviceReferences = new ConcurrentHashMap<>();
 
     @Inject
@@ -97,7 +99,8 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public Position getPosition(long deviceId) {
-        return devicePositions.get(deviceId);
+        var positions = devicePositions.get(deviceId);
+        return positions != null ? positions.peek() : null;
     }
 
     public Server getServer() {
@@ -131,7 +134,9 @@ public class CacheManager implements BroadcastInterface {
                 Position position = storage.getObject(Position.class, new Request(
                         new Columns.All(), new Condition.Equals("id", device.getPositionId())));
                 if (position != null) {
-                    devicePositions.put(deviceId, position);
+                    devicePositions
+                            .computeIfAbsent(deviceId, k -> new ConcurrentLinkedQueue<>())
+                            .add(position);
                 }
             }
         }
@@ -152,7 +157,11 @@ public class CacheManager implements BroadcastInterface {
 
     public void updatePosition(Position position) {
         deviceReferences.computeIfPresent(position.getDeviceId(), (key, oldValue) -> {
-            devicePositions.put(key, position);
+            var positions = devicePositions.computeIfAbsent(key, k -> new ConcurrentLinkedQueue<>());
+            positions.add(position);
+            while (positions.size() > 1) {
+                positions.poll();
+            }
             return oldValue;
         });
     }
