@@ -1346,6 +1346,14 @@ public final class Keys {
             86400L);
 
     /**
+     * Enable new trips calculation logic.
+     */
+    public static final ConfigKey<Boolean> REPORT_TRIP_NEW_LOGIC = new BooleanConfigKey(
+            "report.trip.newLogic",
+            List.of(KeyType.CONFIG),
+            false);
+
+    /**
      * Trips less than minimal duration and minimal distance are ignored. 300 seconds and 500 meters are default.
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DISTANCE = new LongConfigKey(
