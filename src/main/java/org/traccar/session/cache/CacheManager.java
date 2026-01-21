@@ -22,6 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
@@ -99,7 +101,7 @@ public class CacheManager implements BroadcastInterface {
 
     public Position getPosition(long deviceId) {
         var positions = devicePositions.get(deviceId);
-        return positions != null ? positions.peek() : null;
+        return positions != null ? positions.peekLast() : null;
     }
 
     public Server getServer() {
@@ -158,8 +160,23 @@ public class CacheManager implements BroadcastInterface {
         deviceReferences.computeIfPresent(position.getDeviceId(), (key, oldValue) -> {
             var positions = devicePositions.computeIfAbsent(key, k -> new ConcurrentLinkedDeque<>());
             positions.add(position);
-            while (positions.size() > 1) {
-                positions.poll();
+            if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
+                long minimalTripDuration = AttributeUtil.lookup(
+                        this, Keys.REPORT_TRIP_MINIMAL_TRIP_DURATION, key) * 1000;
+                while (positions.size() > 1) {
+                    var iterator = positions.iterator();
+                    Position second = iterator.next();
+                    Position last = positions.peekLast();
+                    if (last.getFixTime().getTime() - second.getFixTime().getTime() >= minimalTripDuration) {
+                        positions.poll();
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                while (positions.size() > 1) {
+                    positions.poll();
+                }
             }
             return oldValue;
         });
