@@ -44,12 +44,11 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
-import java.util.AbstractQueue;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -68,7 +67,7 @@ public class CacheManager implements BroadcastInterface {
     private final CacheGraph graph = new CacheGraph();
 
     private volatile Server server;
-    private final Map<Long, AbstractQueue<Position>> devicePositions = new ConcurrentHashMap<>();
+    private final Map<Long, ConcurrentLinkedDeque<Position>> devicePositions = new ConcurrentHashMap<>();
     private final Map<Long, HashSet<Object>> deviceReferences = new ConcurrentHashMap<>();
 
     @Inject
@@ -135,7 +134,7 @@ public class CacheManager implements BroadcastInterface {
                         new Columns.All(), new Condition.Equals("id", device.getPositionId())));
                 if (position != null) {
                     devicePositions
-                            .computeIfAbsent(deviceId, k -> new ConcurrentLinkedQueue<>())
+                            .computeIfAbsent(deviceId, k -> new ConcurrentLinkedDeque<>())
                             .add(position);
                 }
             }
@@ -157,7 +156,7 @@ public class CacheManager implements BroadcastInterface {
 
     public void updatePosition(Position position) {
         deviceReferences.computeIfPresent(position.getDeviceId(), (key, oldValue) -> {
-            var positions = devicePositions.computeIfAbsent(key, k -> new ConcurrentLinkedQueue<>());
+            var positions = devicePositions.computeIfAbsent(key, k -> new ConcurrentLinkedDeque<>());
             positions.add(position);
             while (positions.size() > 1) {
                 positions.poll();
