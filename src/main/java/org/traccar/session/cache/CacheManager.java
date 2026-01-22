@@ -24,6 +24,7 @@ import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.model.AttributeUtil;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
@@ -46,6 +47,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -135,9 +137,19 @@ public class CacheManager implements BroadcastInterface {
                 Position position = storage.getObject(Position.class, new Request(
                         new Columns.All(), new Condition.Equals("id", device.getPositionId())));
                 if (position != null) {
-                    devicePositions
-                            .computeIfAbsent(deviceId, k -> new ConcurrentLinkedDeque<>())
-                            .add(position);
+                    var positions = devicePositions.computeIfAbsent(deviceId, k -> new ConcurrentLinkedDeque<>());
+                    if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
+                        long minimalTripDuration = AttributeUtil.lookup(
+                                this, Keys.REPORT_TRIP_MINIMAL_TRIP_DURATION, deviceId) * 1000;
+                        var from = new Date(position.getFixTime().getTime() - minimalTripDuration);
+                        var to = position.getFixTime();
+                        try (var positionsStream =
+                                PositionUtil.getPositionsStreamWithExtra(storage, deviceId, from, to)) {
+                            positionsStream.forEach(positions::add);
+                        }
+                    } else {
+                        positions.add(position);
+                    }
                 }
             }
         }
@@ -165,6 +177,7 @@ public class CacheManager implements BroadcastInterface {
                         this, Keys.REPORT_TRIP_MINIMAL_TRIP_DURATION, key) * 1000;
                 while (positions.size() > 1) {
                     var iterator = positions.iterator();
+                    iterator.next();
                     Position second = iterator.next();
                     Position last = positions.peekLast();
                     if (last.getFixTime().getTime() - second.getFixTime().getTime() >= minimalTripDuration) {
