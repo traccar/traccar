@@ -20,7 +20,9 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.reports.common.TripsConfig;
 
+import java.util.ArrayList;
 import java.util.Deque;
+import java.util.List;
 
 public final class NewMotionProcessor {
 
@@ -29,7 +31,8 @@ public final class NewMotionProcessor {
 
     public static void updateState(NewMotionState state, Position position, TripsConfig tripsConfig) {
 
-        state.setEvent(null);
+        List<Event> events = new ArrayList<>();
+        state.setEvents(events);
 
         Deque<Position> positions = state.getPositions();
         if (positions.isEmpty()) {
@@ -38,16 +41,26 @@ public final class NewMotionProcessor {
 
         double minimalDistance = tripsConfig.getMinimalTripDistance();
         long minimalDuration = tripsConfig.getMinimalTripDuration();
-        for (var iterator = positions.descendingIterator(); iterator.hasNext(); ) {
+        double targetSpeed = minimalDuration > 0 ? minimalDistance / minimalDuration : 0;
+        for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
             Position candidate = iterator.next();
             long duration = position.getFixTime().getTime() - candidate.getFixTime().getTime();
             double distance = DistanceCalculator.distance(
                     candidate.getLatitude(), candidate.getLongitude(),
                     position.getLatitude(), position.getLongitude());
-            if (distance >= minimalDistance && duration <= minimalDuration) {
-                if (!state.getMotionStreak()) {
-                    state.setMotionStreak(true);
-                    state.setEvent(newEvent(Event.TYPE_DEVICE_MOVING, position, position.getDeviceId()));
+            if (distance >= minimalDistance) {
+                if (duration <= minimalDuration || distance >= targetSpeed * duration) {
+                    if (!state.getMotionStreak()) {
+                        state.setMotionStreak(true);
+                        events.add(newEvent(Event.TYPE_DEVICE_MOVING, position, position.getDeviceId()));
+                    }
+                } else {
+                    if (state.getMotionStreak()) {
+                        events.add(newEvent(Event.TYPE_DEVICE_STOPPED, candidate, position.getDeviceId()));
+                    }
+                    events.add(newEvent(Event.TYPE_DEVICE_MOVING, candidate, position.getDeviceId()));
+                    events.add(newEvent(Event.TYPE_DEVICE_STOPPED, position, position.getDeviceId()));
+                    state.setMotionStreak(false);
                 }
                 return;
             }
@@ -57,7 +70,7 @@ public final class NewMotionProcessor {
         long duration = position.getFixTime().getTime() - oldest.getFixTime().getTime();
         if (duration >= minimalDuration && state.getMotionStreak()) {
             state.setMotionStreak(false);
-            state.setEvent(newEvent(Event.TYPE_DEVICE_STOPPED, position, position.getDeviceId()));
+            events.add(newEvent(Event.TYPE_DEVICE_STOPPED, position, position.getDeviceId()));
         }
     }
 

@@ -19,6 +19,7 @@ import org.traccar.model.Event;
 import org.traccar.model.Position;
 
 import java.util.Deque;
+import java.util.List;
 
 public class NewMotionState {
 
@@ -49,14 +50,14 @@ public class NewMotionState {
         this.positions = positions;
     }
 
-    private Event event;
+    private List<Event> events;
 
-    public Event getEvent() {
-        return event;
+    public List<Event> getEvents() {
+        return events;
     }
 
-    public void setEvent(Event event) {
-        this.event = event;
+    public void setEvents(List<Event> events) {
+        this.events = events;
     }
 
 }

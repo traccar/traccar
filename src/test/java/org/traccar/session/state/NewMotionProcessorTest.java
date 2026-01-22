@@ -16,7 +16,6 @@ import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NewMotionProcessorTest extends BaseTest {
@@ -51,8 +50,9 @@ public class NewMotionProcessorTest extends BaseTest {
         NewMotionProcessor.updateState(state, current, tripsConfig);
 
         assertTrue(state.getMotionStreak());
-        assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvent().getType());
-        assertEquals(current.getFixTime(), state.getEvent().getEventTime());
+        assertEquals(1, state.getEvents().size());
+        assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(0).getType());
+        assertEquals(current.getFixTime(), state.getEvents().get(0).getEventTime());
     }
 
     @Test
@@ -74,8 +74,9 @@ public class NewMotionProcessorTest extends BaseTest {
         Position current = position("2017-01-01 00:06:00", latitude, delta100);
         NewMotionProcessor.updateState(state, current, tripsConfig);
 
-        assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvent().getType());
-        assertEquals(current.getFixTime(), state.getEvent().getEventTime());
+        assertEquals(1, state.getEvents().size());
+        assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvents().get(0).getType());
+        assertEquals(current.getFixTime(), state.getEvents().get(0).getEventTime());
         assertFalse(state.getMotionStreak());
     }
 
@@ -97,7 +98,7 @@ public class NewMotionProcessorTest extends BaseTest {
         Position current = position("2017-01-01 00:02:00", latitude, delta100);
         NewMotionProcessor.updateState(state, current, tripsConfig);
 
-        assertNull(state.getEvent());
+        assertTrue(state.getEvents().isEmpty());
         assertTrue(state.getMotionStreak());
     }
 
@@ -119,8 +120,58 @@ public class NewMotionProcessorTest extends BaseTest {
         Position current = position("2017-01-01 00:03:00", latitude, delta600);
         NewMotionProcessor.updateState(state, current, tripsConfig);
 
-        assertNull(state.getEvent());
+        assertTrue(state.getEvents().isEmpty());
         assertTrue(state.getMotionStreak());
+    }
+
+    @Test
+    public void testMotionWithFastAverageSpeed() throws ParseException {
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 0, 0, false, false);
+
+        double latitude = 0.0;
+        double delta1200 = DistanceCalculator.getLongitudeDelta(1200, latitude);
+
+        Deque<Position> positions = new ArrayDeque<>();
+        positions.add(position("2017-01-01 00:00:00", latitude, 0.0));
+
+        NewMotionState state = new NewMotionState();
+        state.setPositions(positions);
+
+        Position current = position("2017-01-01 00:10:00", latitude, delta1200);
+        NewMotionProcessor.updateState(state, current, tripsConfig);
+
+        assertTrue(state.getMotionStreak());
+        assertEquals(1, state.getEvents().size());
+        assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(0).getType());
+        assertEquals(current.getFixTime(), state.getEvents().get(0).getEventTime());
+    }
+
+    @Test
+    public void testSlowSpeedStopMotionStop() throws ParseException {
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 0, 0, false, false);
+
+        double latitude = 0.0;
+        double delta700 = DistanceCalculator.getLongitudeDelta(700, latitude);
+
+        Deque<Position> positions = new ArrayDeque<>();
+        Position last = position("2017-01-01 00:00:00", latitude, 0.0);
+        positions.add(last);
+
+        NewMotionState state = new NewMotionState();
+        state.setPositions(positions);
+        state.setMotionStreak(true);
+
+        Position current = position("2017-01-01 00:10:00", latitude, delta700);
+        NewMotionProcessor.updateState(state, current, tripsConfig);
+
+        assertFalse(state.getMotionStreak());
+        assertEquals(3, state.getEvents().size());
+        assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvents().get(0).getType());
+        assertEquals(last.getFixTime(), state.getEvents().get(0).getEventTime());
+        assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(1).getType());
+        assertEquals(last.getFixTime(), state.getEvents().get(1).getEventTime());
+        assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvents().get(2).getType());
+        assertEquals(current.getFixTime(), state.getEvents().get(2).getEventTime());
     }
 
 }
