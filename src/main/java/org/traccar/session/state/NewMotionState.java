@@ -39,17 +39,6 @@ public class NewMotionState {
         changed = true;
     }
 
-    private boolean motionState;
-
-    public boolean getMotionState() {
-        return motionState;
-    }
-
-    public void setMotionState(boolean motionState) {
-        this.motionState = motionState;
-        changed = true;
-    }
-
     private Deque<Position> positions;
 
     public Deque<Position> getPositions() {
