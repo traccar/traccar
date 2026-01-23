@@ -11,6 +11,25 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new H02ProtocolDecoder(null));
 
+        verifyPosition(decoder, binary(
+                "24410600082621532131081504419390060740418306000000fffffbfdff0015060000002c02dc0c000000001f"),
+                position("2015-08-31 21:53:21.000", true, 4.69898, -74.06971));
+
+        verifyAttribute(decoder, binary(
+                "24720104244110373303112551337904060000794834000000fffff9ffff001b0a00000ee600ea0f00000000007601"),
+                Position.KEY_POWER, 11.8);
+
+        verifyAttribute(decoder, binary(
+                "24720104244110373303112551337904060000794834000000fffff9ffff001b0a00000ee600ea0f0000000000f501"),
+                Position.KEY_POWER, 24.5);
+
+        verifyPosition(decoder, buffer(
+                "*HQ,7340014741,V1,085056,A,5133.7992,N,00007.9499,W,000.00,000,021225,BFFFFBFF,460,00,0,0,6#"),
+                position("2025-12-02 08:50:56.000", true, 51.56332, -0.13250));
+
+        verifyAttributes(decoder, buffer(
+                "*HQ,4109179024,NBR,103732,722,310,0,6,8106,32010,23,8101,22007,25,8106,12010,23,8106,22105,22,8101,22012,16,8106,42010,5,100217,FFFFFBFF,5#"));
+
         verifyPosition(decoder, buffer(
                 "*HQ,9001000002,V8,213945,A,3542.2043,N,38.6508,W,0.00,170,221025,FBFFF9FF,0,0,0,0,22,31,126,0#"),
                 position("2025-10-22 21:39:45.000", true, 35.70340, -0.64418));
