@@ -48,6 +48,7 @@ import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -104,6 +105,10 @@ public class CacheManager implements BroadcastInterface {
     public Position getPosition(long deviceId) {
         var positions = devicePositions.get(deviceId);
         return positions != null ? positions.peekLast() : null;
+    }
+
+    public Deque<Position> getPositions(long deviceId) {
+        return devicePositions.get(deviceId);
     }
 
     public Server getServer() {
