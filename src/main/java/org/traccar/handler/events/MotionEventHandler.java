@@ -61,19 +61,23 @@ public class MotionEventHandler extends BaseEventHandler {
             return;
         }
 
-        TripsConfig tripsConfig = new TripsConfig(new AttributeUtil.CacheProvider(cacheManager, deviceId));
+        var attributeProvider = new AttributeUtil.CacheProvider(cacheManager, deviceId);
         if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
-            handleNewLogic(device, position, tripsConfig, callback);
+            double minDistance = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DISTANCE);
+            long minDuration = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DURATION) * 1000;
+            handleNewLogic(device, position, minDistance, minDuration, callback);
         } else {
+            TripsConfig tripsConfig = new TripsConfig(attributeProvider);
             handleOldLogic(device, position, tripsConfig, callback);
         }
     }
 
-    private void handleNewLogic(Device device, Position position, TripsConfig tripsConfig, Callback callback) {
+    private void handleNewLogic(
+            Device device, Position position, double minDistance, long minDuration, Callback callback) {
         NewMotionState state = new NewMotionState();
         state.setMotionStreak(device.getMotionStreak());
         state.setPositions(cacheManager.getPositions(device.getId()));
-        NewMotionProcessor.updateState(state, position, tripsConfig);
+        NewMotionProcessor.updateState(state, position, minDistance, minDuration);
         if (state.isChanged()) {
             device.setMotionStreak(state.getMotionStreak());
             try {

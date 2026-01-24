@@ -1354,6 +1354,22 @@ public final class Keys {
             false);
 
     /**
+     * Distance above min are considered as trips.
+     */
+    public static final ConfigKey<Long> REPORT_TRIP_MIN_DISTANCE = new LongConfigKey(
+            "report.trip.minDistance",
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            200L);
+
+    /**
+     * If device doesn't move for min duration, it is considered a stop.
+     */
+    public static final ConfigKey<Long> REPORT_TRIP_MIN_DURATION = new LongConfigKey(
+            "report.trip.minDuration",
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            180L);
+
+    /**
      * Trips less than minimal duration and minimal distance are ignored. 300 seconds and 500 meters are default.
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DISTANCE = new LongConfigKey(

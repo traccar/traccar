@@ -18,7 +18,6 @@ package org.traccar.session.state;
 import org.traccar.helper.DistanceCalculator;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
-import org.traccar.reports.common.TripsConfig;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -29,7 +28,8 @@ public final class NewMotionProcessor {
     private NewMotionProcessor() {
     }
 
-    public static void updateState(NewMotionState state, Position position, TripsConfig tripsConfig) {
+    public static void updateState(
+            NewMotionState state, Position position, double minDistance, long minDuration) {
 
         List<Event> events = new ArrayList<>();
         state.setEvents(events);
@@ -39,17 +39,15 @@ public final class NewMotionProcessor {
             return;
         }
 
-        double minimalDistance = tripsConfig.getMinimalTripDistance();
-        long minimalDuration = tripsConfig.getMinimalTripDuration();
-        double targetSpeed = minimalDuration > 0 ? minimalDistance / minimalDuration : 0;
+        double targetSpeed = minDuration > 0 ? minDistance / minDuration : 0;
         for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
             Position candidate = iterator.next();
             long duration = position.getFixTime().getTime() - candidate.getFixTime().getTime();
             double distance = DistanceCalculator.distance(
                     candidate.getLatitude(), candidate.getLongitude(),
                     position.getLatitude(), position.getLongitude());
-            if (distance >= minimalDistance) {
-                if (duration <= minimalDuration || distance >= targetSpeed * duration) {
+            if (distance >= minDistance) {
+                if (duration <= minDuration || distance >= targetSpeed * duration) {
                     if (!state.getMotionStreak()) {
                         state.setMotionStreak(true);
                         events.add(newEvent(Event.TYPE_DEVICE_MOVING, position, position.getDeviceId()));
@@ -68,7 +66,7 @@ public final class NewMotionProcessor {
 
         Position oldest = positions.peekFirst();
         long duration = position.getFixTime().getTime() - oldest.getFixTime().getTime();
-        if (duration >= minimalDuration && state.getMotionStreak()) {
+        if (duration >= minDuration && state.getMotionStreak()) {
             state.setMotionStreak(false);
             events.add(newEvent(Event.TYPE_DEVICE_STOPPED, position, position.getDeviceId()));
         }
