@@ -8,6 +8,8 @@
     <entry key='web.console'>true</entry>
     <entry key='web.mcp.enable'>true</entry>
 
+    <entry key='report.trip.newLogic'>true</entry>
+
     <entry key='geocoder.type'>pluscodes</entry>
 
     <entry key='media.path'>./target/media</entry>
