@@ -8,7 +8,7 @@
     <entry key='web.console'>true</entry>
     <entry key='web.mcp.enable'>true</entry>
 
-    <entry key='report.trip.newLogic'>true</entry>
+    <entry key='report.trip.newLogic'>false</entry>
 
     <entry key='geocoder.type'>pluscodes</entry>
 
