@@ -41,6 +41,10 @@ public class MotionEventHandler extends BaseEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MotionEventHandler.class);
 
+    private static final String KEY_MOTION_TIME = "motionTime";
+    private static final String KEY_MOTION_LAT = "motionLat";
+    private static final String KEY_MOTION_LON = "motionLon";
+
     private final Config config;
     private final CacheManager cacheManager;
     private final Storage storage;
@@ -80,9 +84,12 @@ public class MotionEventHandler extends BaseEventHandler {
         NewMotionProcessor.updateState(state, position, minDistance, minDuration);
         if (state.isChanged()) {
             device.setMotionStreak(state.getMotionStreak());
+            device.set(KEY_MOTION_TIME, state.getEventTime().getTime());
+            device.set(KEY_MOTION_LAT, state.getEventLatitude());
+            device.set(KEY_MOTION_LON, state.getEventLongitude());
             try {
                 storage.updateObject(device, new Request(
-                        new Columns.Include("motionStreak"),
+                        new Columns.Include("motionStreak", "attributes"),
                         new Condition.Equals("id", device.getId())));
             } catch (StorageException e) {
                 LOGGER.warn("Update device motion error", e);

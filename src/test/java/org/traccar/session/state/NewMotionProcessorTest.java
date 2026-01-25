@@ -53,6 +53,9 @@ public class NewMotionProcessorTest extends BaseTest {
         assertEquals(1, state.getEvents().size());
         assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(0).getType());
         assertEquals(current.getFixTime(), state.getEvents().get(0).getEventTime());
+        assertEquals(current.getFixTime(), state.getEventTime());
+        assertEquals(current.getLatitude(), state.getEventLatitude());
+        assertEquals(current.getLongitude(), state.getEventLongitude());
     }
 
     @Test
@@ -79,6 +82,9 @@ public class NewMotionProcessorTest extends BaseTest {
         assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvents().get(0).getType());
         assertEquals(current.getFixTime(), state.getEvents().get(0).getEventTime());
         assertFalse(state.getMotionStreak());
+        assertEquals(current.getFixTime(), state.getEventTime());
+        assertEquals(current.getLatitude(), state.getEventLatitude());
+        assertEquals(current.getLongitude(), state.getEventLongitude());
     }
 
     @Test
@@ -177,6 +183,9 @@ public class NewMotionProcessorTest extends BaseTest {
         assertEquals(last.getFixTime(), state.getEvents().get(1).getEventTime());
         assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvents().get(2).getType());
         assertEquals(current.getFixTime(), state.getEvents().get(2).getEventTime());
+        assertEquals(current.getFixTime(), state.getEventTime());
+        assertEquals(current.getLatitude(), state.getEventLatitude());
+        assertEquals(current.getLongitude(), state.getEventLongitude());
     }
 
 }

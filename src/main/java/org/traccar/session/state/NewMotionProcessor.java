@@ -50,14 +50,14 @@ public final class NewMotionProcessor {
                 if (duration <= minDuration || distance >= targetSpeed * duration) {
                     if (!state.getMotionStreak()) {
                         state.setMotionStreak(true);
-                        events.add(newEvent(Event.TYPE_DEVICE_MOVING, position, position.getDeviceId()));
+                        addEvent(state, events, Event.TYPE_DEVICE_MOVING, position);
                     }
                 } else {
                     if (state.getMotionStreak()) {
-                        events.add(newEvent(Event.TYPE_DEVICE_STOPPED, candidate, position.getDeviceId()));
+                        addEvent(state, events, Event.TYPE_DEVICE_STOPPED, candidate);
                     }
-                    events.add(newEvent(Event.TYPE_DEVICE_MOVING, candidate, position.getDeviceId()));
-                    events.add(newEvent(Event.TYPE_DEVICE_STOPPED, position, position.getDeviceId()));
+                    addEvent(state, events, Event.TYPE_DEVICE_MOVING, candidate);
+                    addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
                     state.setMotionStreak(false);
                 }
                 return;
@@ -68,15 +68,16 @@ public final class NewMotionProcessor {
         long duration = position.getFixTime().getTime() - oldest.getFixTime().getTime();
         if (duration >= minDuration && state.getMotionStreak()) {
             state.setMotionStreak(false);
-            events.add(newEvent(Event.TYPE_DEVICE_STOPPED, position, position.getDeviceId()));
+            addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
         }
     }
 
-    private static Event newEvent(String type, Position position, long deviceId) {
-        Event event = new Event(type, deviceId);
+    private static void addEvent(NewMotionState state, List<Event> events, String type, Position position) {
+        Event event = new Event(type, position.getDeviceId());
         event.setPositionId(position.getId());
         event.setEventTime(position.getFixTime());
-        return event;
+        events.add(event);
+        state.setEventPosition(position);
     }
 
 }

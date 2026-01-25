@@ -18,6 +18,7 @@ package org.traccar.session.state;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
+import java.util.Date;
 import java.util.Deque;
 import java.util.List;
 
@@ -58,6 +59,31 @@ public class NewMotionState {
 
     public void setEvents(List<Event> events) {
         this.events = events;
+    }
+
+    private Date eventTime;
+
+    public Date getEventTime() {
+        return eventTime;
+    }
+
+    private double eventLatitude;
+
+    public double getEventLatitude() {
+        return eventLatitude;
+    }
+
+    private double eventLongitude;
+
+    public double getEventLongitude() {
+        return eventLongitude;
+    }
+
+    public void setEventPosition(Position position) {
+        eventTime = position.getFixTime();
+        eventLatitude = position.getLatitude();
+        eventLongitude = position.getLongitude();
+        changed = true;
     }
 
 }
