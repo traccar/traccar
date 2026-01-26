@@ -53,10 +53,10 @@ public class NewMotionProcessorTest extends BaseTest {
         assertTrue(state.getMotionStreak());
         assertEquals(1, state.getEvents().size());
         assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(0).getType());
-        assertEquals(current.getFixTime(), state.getEvents().get(0).getEventTime());
-        assertEquals(current.getFixTime(), state.getEventTime());
-        assertEquals(current.getLatitude(), state.getEventLatitude());
-        assertEquals(current.getLongitude(), state.getEventLongitude());
+        assertEquals(positions.peekLast().getFixTime(), state.getEvents().get(0).getEventTime());
+        assertEquals(positions.peekLast().getFixTime(), state.getEventTime());
+        assertEquals(positions.peekLast().getLatitude(), state.getEventLatitude());
+        assertEquals(positions.peekLast().getLongitude(), state.getEventLongitude());
     }
 
     @Test
@@ -82,11 +82,11 @@ public class NewMotionProcessorTest extends BaseTest {
 
         assertEquals(1, state.getEvents().size());
         assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvents().get(0).getType());
-        assertEquals(current.getFixTime(), state.getEvents().get(0).getEventTime());
+        assertEquals(positions.peekFirst().getFixTime(), state.getEvents().get(0).getEventTime());
         assertFalse(state.getMotionStreak());
-        assertEquals(current.getFixTime(), state.getEventTime());
-        assertEquals(current.getLatitude(), state.getEventLatitude());
-        assertEquals(current.getLongitude(), state.getEventLongitude());
+        assertEquals(positions.peekFirst().getFixTime(), state.getEventTime());
+        assertEquals(positions.peekFirst().getLatitude(), state.getEventLatitude());
+        assertEquals(positions.peekFirst().getLongitude(), state.getEventLongitude());
     }
 
     @Test
@@ -158,7 +158,7 @@ public class NewMotionProcessorTest extends BaseTest {
         assertTrue(state.getMotionStreak());
         assertEquals(1, state.getEvents().size());
         assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(0).getType());
-        assertEquals(current.getFixTime(), state.getEvents().get(0).getEventTime());
+        assertEquals(positions.peekFirst().getFixTime(), state.getEvents().get(0).getEventTime());
     }
 
 }

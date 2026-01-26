@@ -39,6 +39,8 @@ public final class NewMotionProcessor {
             return;
         }
 
+        double minAverageSpeed = minDistance / minDuration;
+
         if (state.getMotionStreak()) {
             for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
                 Position candidate = iterator.next();
@@ -54,7 +56,8 @@ public final class NewMotionProcessor {
             long duration = position.getFixTime().getTime() - oldest.getFixTime().getTime();
             if (duration >= minDuration) {
                 state.setMotionStreak(false);
-                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
+                Position stopPosition = findStopPosition(positions, minAverageSpeed);
+                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, stopPosition);
             }
         } else {
             double distance = DistanceCalculator.distance(
@@ -62,9 +65,48 @@ public final class NewMotionProcessor {
                     position.getLatitude(), position.getLongitude());
             if (distance >= minDistance) {
                 state.setMotionStreak(true);
-                addEvent(state, events, Event.TYPE_DEVICE_MOVING, position);
+                Position motionPosition = findMotionPosition(positions, position, minAverageSpeed);
+                addEvent(state, events, Event.TYPE_DEVICE_MOVING, motionPosition);
             }
         }
+    }
+
+    private static Position findStopPosition(Deque<Position> positions, double minAverageSpeed) {
+        var iterator = positions.iterator();
+        Position previous = iterator.next();
+        while (iterator.hasNext()) {
+            Position next = iterator.next();
+            if (averageSpeed(previous, next) < minAverageSpeed) {
+                return previous;
+            }
+            previous = next;
+        }
+        return previous;
+    }
+
+    private static Position findMotionPosition(
+            Deque<Position> positions, Position current, double minAverageSpeed) {
+        var iterator = positions.descendingIterator();
+        Position previous = current;
+        while (iterator.hasNext()) {
+            Position next = iterator.next();
+            if (averageSpeed(next, previous) >= minAverageSpeed) {
+                return next;
+            }
+            previous = next;
+        }
+        return current;
+    }
+
+    private static double averageSpeed(Position from, Position to) {
+        long duration = to.getFixTime().getTime() - from.getFixTime().getTime();
+        if (duration <= 0) {
+            return Double.NaN;
+        }
+        double distance = DistanceCalculator.distance(
+                from.getLatitude(), from.getLongitude(),
+                to.getLatitude(), to.getLongitude());
+        return distance / duration;
     }
 
     private static void addEvent(NewMotionState state, List<Event> events, String type, Position position) {
