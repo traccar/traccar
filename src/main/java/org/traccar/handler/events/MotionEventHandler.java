@@ -36,6 +36,7 @@ import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
+import java.util.Date;
 
 public class MotionEventHandler extends BaseEventHandler {
 
@@ -81,6 +82,14 @@ public class MotionEventHandler extends BaseEventHandler {
         NewMotionState state = new NewMotionState();
         state.setMotionStreak(device.getMotionStreak());
         state.setPositions(cacheManager.getPositions(device.getId()));
+        if (device.hasAttribute(KEY_MOTION_TIME)) {
+            state.setEventPosition(
+                    new Date(device.getLong(KEY_MOTION_TIME)),
+                    device.getDouble(KEY_MOTION_LAT),
+                    device.getDouble(KEY_MOTION_LON));
+        } else {
+            state.setEventPosition(position);
+        }
         NewMotionProcessor.updateState(state, position, minDistance, minDuration);
         if (state.isChanged()) {
             device.setMotionStreak(state.getMotionStreak());

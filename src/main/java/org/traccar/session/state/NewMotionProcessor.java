@@ -39,36 +39,31 @@ public final class NewMotionProcessor {
             return;
         }
 
-        double targetSpeed = minDuration > 0 ? minDistance / minDuration : 0;
-        for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
-            Position candidate = iterator.next();
-            long duration = position.getFixTime().getTime() - candidate.getFixTime().getTime();
+        if (state.getMotionStreak()) {
+            for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
+                Position candidate = iterator.next();
+                double distance = DistanceCalculator.distance(
+                        candidate.getLatitude(), candidate.getLongitude(),
+                        position.getLatitude(), position.getLongitude());
+                if (distance >= minDistance) {
+                    return;
+                }
+            }
+
+            Position oldest = positions.peekFirst();
+            long duration = position.getFixTime().getTime() - oldest.getFixTime().getTime();
+            if (duration >= minDuration) {
+                state.setMotionStreak(false);
+                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
+            }
+        } else {
             double distance = DistanceCalculator.distance(
-                    candidate.getLatitude(), candidate.getLongitude(),
+                    state.getEventLatitude(), state.getEventLongitude(),
                     position.getLatitude(), position.getLongitude());
             if (distance >= minDistance) {
-                if (duration <= minDuration || distance >= targetSpeed * duration) {
-                    if (!state.getMotionStreak()) {
-                        state.setMotionStreak(true);
-                        addEvent(state, events, Event.TYPE_DEVICE_MOVING, position);
-                    }
-                } else {
-                    if (state.getMotionStreak()) {
-                        addEvent(state, events, Event.TYPE_DEVICE_STOPPED, candidate);
-                    }
-                    addEvent(state, events, Event.TYPE_DEVICE_MOVING, candidate);
-                    addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
-                    state.setMotionStreak(false);
-                }
-                return;
+                state.setMotionStreak(true);
+                addEvent(state, events, Event.TYPE_DEVICE_MOVING, position);
             }
-        }
-
-        Position oldest = positions.peekFirst();
-        long duration = position.getFixTime().getTime() - oldest.getFixTime().getTime();
-        if (duration >= minDuration && state.getMotionStreak()) {
-            state.setMotionStreak(false);
-            addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
         }
     }
 

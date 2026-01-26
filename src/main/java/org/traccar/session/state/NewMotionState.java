@@ -79,6 +79,12 @@ public class NewMotionState {
         return eventLongitude;
     }
 
+    public void setEventPosition(Date eventTime, double eventLatitude, double eventLongitude) {
+        this.eventTime = eventTime;
+        this.eventLatitude = eventLatitude;
+        this.eventLongitude = eventLongitude;
+    }
+
     public void setEventPosition(Position position) {
         eventTime = position.getFixTime();
         eventLatitude = position.getLatitude();
