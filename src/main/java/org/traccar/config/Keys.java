@@ -1351,7 +1351,7 @@ public final class Keys {
     public static final ConfigKey<Boolean> REPORT_TRIP_NEW_LOGIC = new BooleanConfigKey(
             "report.trip.newLogic",
             List.of(KeyType.CONFIG),
-            false);
+            true);
 
     /**
      * Distance above min are considered as trips.
