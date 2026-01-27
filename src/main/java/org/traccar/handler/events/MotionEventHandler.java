@@ -70,7 +70,8 @@ public class MotionEventHandler extends BaseEventHandler {
         if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
             double minDistance = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DISTANCE);
             long minDuration = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DURATION) * 1000;
-            handleNewLogic(device, position, minDistance, minDuration, callback);
+            long stopGap = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_STOP_GAP) * 1000;
+            handleNewLogic(device, position, minDistance, minDuration, stopGap, callback);
         } else {
             TripsConfig tripsConfig = new TripsConfig(attributeProvider);
             handleOldLogic(device, position, tripsConfig, callback);
@@ -78,7 +79,7 @@ public class MotionEventHandler extends BaseEventHandler {
     }
 
     private void handleNewLogic(
-            Device device, Position position, double minDistance, long minDuration, Callback callback) {
+            Device device, Position position, double minDistance, long minDuration, long stopGap, Callback callback) {
         NewMotionState state = new NewMotionState();
         state.setMotionStreak(device.getMotionStreak());
         state.setPositions(cacheManager.getPositions(device.getId()));
@@ -90,7 +91,7 @@ public class MotionEventHandler extends BaseEventHandler {
         } else {
             state.setEventPosition(position);
         }
-        NewMotionProcessor.updateState(state, position, minDistance, minDuration);
+        NewMotionProcessor.updateState(state, position, minDistance, minDuration, stopGap);
         if (state.isChanged()) {
             device.setMotionStreak(state.getMotionStreak());
             device.set(KEY_MOTION_TIME, state.getEventTime().getTime());

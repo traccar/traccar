@@ -1370,6 +1370,15 @@ public final class Keys {
             180L);
 
     /**
+     * Gaps of more than specified time are treated as stop/trip/stop based on average speed.
+     * Default value is one hour.
+     */
+    public static final ConfigKey<Long> REPORT_TRIP_STOP_GAP = new LongConfigKey(
+            "report.trip.stopGap",
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            3600L);
+
+    /**
      * Trips less than minimal duration and minimal distance are ignored. 300 seconds and 500 meters are default.
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_TRIP_DISTANCE = new LongConfigKey(

@@ -29,7 +29,7 @@ public final class NewMotionProcessor {
     }
 
     public static void updateState(
-            NewMotionState state, Position position, double minDistance, long minDuration) {
+            NewMotionState state, Position position, double minDistance, long minDuration, long stopGap) {
 
         List<Event> events = new ArrayList<>();
         state.setEvents(events);
@@ -40,6 +40,20 @@ public final class NewMotionProcessor {
         }
 
         double minAverageSpeed = minDistance / minDuration;
+
+        Position last = positions.peekLast();
+        if (last != null) {
+            long gap = position.getFixTime().getTime() - last.getFixTime().getTime();
+            if (gap > stopGap && averageSpeed(last, position) < minAverageSpeed) {
+                if (state.getMotionStreak()) {
+                    addEvent(state, events, Event.TYPE_DEVICE_STOPPED, last);
+                }
+                addEvent(state, events, Event.TYPE_DEVICE_MOVING, last);
+                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
+                state.setMotionStreak(false);
+                return;
+            }
+        }
 
         if (state.getMotionStreak()) {
             for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
