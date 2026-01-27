@@ -1765,6 +1765,8 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
             return;
         }
 
+        LOGGER.info("decodeStatusData HEX: {}", toHex(buf));
+
         Date deviceTime = applyTimeOffset(readTimestamp(buf));
         position.setDeviceTime(deviceTime);
         position.setTime(deviceTime);
@@ -1809,6 +1811,11 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
 
         if (BitUtil.check(content, 7) && buf.readableBytes() >= 12) {
             decodeTemperatureStatus(position, buf);
+        }
+
+        // Cement Mixer Data (Full 16 bytes)
+        if (buf.readableBytes() >= 16) {
+            decodeCementMixerStatus16byte(position, buf);
         }
 
         // Detect offline batch data based on time gap (using BaseProtocolDecoder helper)
@@ -2207,4 +2214,59 @@ public class HowenProtocolDecoder extends BaseProtocolDecoder {
         }
         return null;
     }
+
+    private void decodeCementMixerStatus16byte(Position position, ByteBuf buf) {
+
+        if (buf.readableBytes() < 16) {
+            return;
+        }
+
+        LOGGER.info("CementMixerStatus HEX: {}", toHex(buf));
+
+        int status = buf.readUnsignedByte();
+        int speedRpm = buf.readUnsignedShortLE();
+        long fwdRevs = buf.readUnsignedIntLE();
+        long revRevs = buf.readUnsignedIntLE();
+        long mixingTimeSec = buf.readUnsignedIntLE();
+    
+        position.set("cementMixerStatus", status);
+    
+        switch (status) {
+            case 0:
+                position.set("cementMixerState", "stopped");
+                break;
+            case 1:
+                position.set("cementMixerState", "forward");
+                break;
+            case 2:
+                position.set("cementMixerState", "backward");
+                break;
+            default:
+                position.set("cementMixerState", "unknown");
+        }
+    
+        position.set("cementMixerSpeedRpm", speedRpm);
+        position.set("cementMixerFwdRevs", fwdRevs);
+        position.set("cementMixerRevRevs", revRevs);
+        position.set("cementMixerMixingTimeSec", mixingTimeSec);
+        position.set("cementMixerMixingTimeHour", mixingTimeSec / 3600.0);
+
+        // format Meitrack
+        position.set("mgState", status);
+        position.set("mgForward", fwdRevs);
+        position.set("mgBackward", revRevs);
+        position.set("mgRpm", speedRpm);
+        position.set("mgMixingTimeSec", mixingTimeSec);
+    
+        LOGGER.info("CementMixer status={}, speed={}rpm, fwdRevs={}, revRevs={}, time={}s", status, speedRpm, fwdRevs, revRevs, mixingTimeSec);
+    }
+
+    private String toHex(ByteBuf buf) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = buf.readerIndex(); i < buf.writerIndex(); i++) {
+            sb.append(String.format("%02x", buf.getUnsignedByte(i)));
+        }
+        return sb.toString();
+    }
+    
 }
