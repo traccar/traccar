@@ -47,6 +47,8 @@ import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.TripReportItem;
 import org.traccar.session.state.MotionProcessor;
 import org.traccar.session.state.MotionState;
+import org.traccar.session.state.NewMotionProcessor;
+import org.traccar.session.state.NewMotionState;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -58,8 +60,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Duration;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -292,10 +296,11 @@ public class ReportUtils {
             Device device, Date from, Date to, Class<T> reportClass) throws StorageException {
 
         List<T> result = new ArrayList<>();
-        TripsConfig tripsConfig = new TripsConfig(
-                new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
+        var attributeProvider = new AttributeUtil.StorageProvider(config, storage, permissionsService, device);
+        TripsConfig tripsConfig = new TripsConfig(attributeProvider);
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
         boolean trips = reportClass.equals(TripReportItem.class);
+        boolean useNewLogic = config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC);
 
         List<Event> events = new ArrayList<>();
         Map<Long, Position> positionMap = new HashMap<>();
@@ -303,26 +308,63 @@ public class ReportUtils {
         double maxSpeed = 0;
         var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
         if (!positions.isEmpty()) {
-            MotionState motionState = new MotionState();
             boolean initialValue = positions.get(0).getBoolean(Position.KEY_MOTION);
-            motionState.setMotionStreak(initialValue);
-            motionState.setMotionState(initialValue);
             if (initialValue == trips) {
                 startPosition = positions.get(0);
                 maxSpeed = startPosition.getSpeed();
             }
 
-            for (int i = 0; i < positions.size(); i++) {
-                Position last = i > 0 ? positions.get(i - 1) : null;
-                Position position = positions.get(i);
-                maxSpeed = Math.max(maxSpeed, position.getSpeed());
-                positionMap.put(position.getId(), position);
-                boolean motion = position.getBoolean(Position.KEY_MOTION);
-                MotionProcessor.updateState(motionState, last, positions.get(i), motion, tripsConfig);
-                if (motionState.getEvent() != null) {
-                    motionState.getEvent().set("maxSpeed", maxSpeed);
-                    events.add(motionState.getEvent());
-                    maxSpeed = 0;
+            if (useNewLogic) {
+                double minDistance = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DISTANCE);
+                long minDuration = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DURATION) * 1000;
+                long stopGap = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_STOP_GAP) * 1000;
+                Deque<Position> motionPositions = new ArrayDeque<>();
+                NewMotionState motionState = new NewMotionState();
+                motionState.setPositions(motionPositions);
+                motionState.setMotionStreak(initialValue);
+                motionState.setEventPosition(positions.get(0));
+
+                for (Position position : positions) {
+                    maxSpeed = Math.max(maxSpeed, position.getSpeed());
+                    positionMap.put(position.getId(), position);
+                    NewMotionProcessor.updateState(motionState, position, minDistance, minDuration, stopGap);
+                    if (!motionState.getEvents().isEmpty()) {
+                        for (Event event : motionState.getEvents()) {
+                            event.set("maxSpeed", maxSpeed);
+                            events.add(event);
+                        }
+                        maxSpeed = 0;
+                    }
+                    motionPositions.add(position);
+                    while (motionPositions.size() > 1) {
+                        var iterator = motionPositions.iterator();
+                        iterator.next();
+                        Position second = iterator.next();
+                        Position last = motionPositions.peekLast();
+                        if (last.getFixTime().getTime() - second.getFixTime().getTime() >= minDuration) {
+                            motionPositions.poll();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                MotionState motionState = new MotionState();
+                motionState.setMotionStreak(initialValue);
+                motionState.setMotionState(initialValue);
+
+                for (int i = 0; i < positions.size(); i++) {
+                    Position last = i > 0 ? positions.get(i - 1) : null;
+                    Position position = positions.get(i);
+                    maxSpeed = Math.max(maxSpeed, position.getSpeed());
+                    positionMap.put(position.getId(), position);
+                    boolean motion = position.getBoolean(Position.KEY_MOTION);
+                    MotionProcessor.updateState(motionState, last, positions.get(i), motion, tripsConfig);
+                    if (motionState.getEvent() != null) {
+                        motionState.getEvent().set("maxSpeed", maxSpeed);
+                        events.add(motionState.getEvent());
+                        maxSpeed = 0;
+                    }
                 }
             }
         }

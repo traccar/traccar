@@ -144,9 +144,8 @@ public class CacheManager implements BroadcastInterface {
                 if (position != null) {
                     var positions = devicePositions.computeIfAbsent(deviceId, k -> new ConcurrentLinkedDeque<>());
                     if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
-                        long minimalTripDuration = AttributeUtil.lookup(
-                                this, Keys.REPORT_TRIP_MINIMAL_TRIP_DURATION, deviceId) * 1000;
-                        var from = new Date(position.getFixTime().getTime() - minimalTripDuration);
+                        long minDuration = AttributeUtil.lookup(this, Keys.REPORT_TRIP_MIN_DURATION, deviceId) * 1000;
+                        var from = new Date(position.getFixTime().getTime() - minDuration);
                         var to = position.getFixTime();
                         try (var positionsStream =
                                 PositionUtil.getPositionsStreamWithExtra(storage, deviceId, from, to)) {
@@ -178,14 +177,14 @@ public class CacheManager implements BroadcastInterface {
             var positions = devicePositions.computeIfAbsent(key, k -> new ConcurrentLinkedDeque<>());
             positions.add(position);
             if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
-                long minimalTripDuration = AttributeUtil.lookup(
-                        this, Keys.REPORT_TRIP_MINIMAL_TRIP_DURATION, key) * 1000;
+                long minDuration = AttributeUtil.lookup(
+                        this, Keys.REPORT_TRIP_MIN_DURATION, key) * 1000;
                 while (positions.size() > 1) {
                     var iterator = positions.iterator();
                     iterator.next();
                     Position second = iterator.next();
                     Position last = positions.peekLast();
-                    if (last.getFixTime().getTime() - second.getFixTime().getTime() >= minimalTripDuration) {
+                    if (last.getFixTime().getTime() - second.getFixTime().getTime() >= minDuration) {
                         positions.poll();
                     } else {
                         break;
