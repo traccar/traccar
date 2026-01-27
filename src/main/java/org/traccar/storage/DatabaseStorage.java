@@ -220,6 +220,8 @@ public class DatabaseStorage extends Storage {
         List<Object> results = new ArrayList<>();
         if (genericCondition instanceof Condition.Compare condition) {
             results.add(condition.getValue());
+        } else if (genericCondition instanceof Condition.EqualsCitext condition) {
+            results.add(condition.getValue());
         } else if (genericCondition instanceof Condition.Between condition) {
             results.add(condition.getFromValue());
             results.add(condition.getToValue());
@@ -260,6 +262,11 @@ public class DatabaseStorage extends Storage {
                 result.append(" ");
                 result.append(condition.getOperator());
                 result.append(" ?");
+
+            } else if (genericCondition instanceof Condition.EqualsCitext condition) {
+
+                result.append(condition.getColumn());
+                result.append(" = CAST(? AS CITEXT)");
 
             } else if (genericCondition instanceof Condition.Between condition) {
 
