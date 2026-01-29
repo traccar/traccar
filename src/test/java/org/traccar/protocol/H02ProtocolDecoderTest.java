@@ -276,6 +276,18 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
                 "*HQ,5226073533,SMS,ST906(70SACD)_TQ_V_2.0 2024/06/07\nID:5226073533\nIP:1.2.3.4 5013\nUT:30,30,300\nVOLT:12.9V\nAPN:internet.example.com\nGPS:A-24-23\nGSM:26#"),
                 Position.KEY_RESULT, "ST906(70SACD)_TQ_V_2.0 2024/06/07\nID:5226073533\nIP:1.2.3.4 5013\nUT:30,30,300\nVOLT:12.9V\nAPN:internet.example.com\nGPS:A-24-23\nGSM:26");
 
+        // Test V3 with count higher than actual values (bounds checking)
+        verifyAttributes(decoder, buffer(
+                "*HQ,353111080001055,V3,044855,28403,10,001450,011473,158,-62,0292,0,X,030817,FFFFFBFF#"));
+
+        // Test VP1 with malformed cell data containing empty segments (bounds checking)
+        verifyNotNull(decoder, buffer(
+                "*hq,356327081001239,VP1,V,470,002,Y92,3565,0Y#"));
+
+        // Test VP1 with cell segment having fewer than 3 values (bounds checking)
+        verifyNotNull(decoder, buffer(
+                "*hq,356327081001239,VP1,V,470,002,92,3565Y92Y#"));
+
     }
 
     @Test
