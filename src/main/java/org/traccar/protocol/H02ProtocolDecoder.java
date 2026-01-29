@@ -516,7 +516,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         int count = parser.nextInt();
         Network network = new Network();
         String[] values = parser.next().split(",");
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < count && i * 4 + 1 < values.length; i++) {
             network.addCellTower(CellTower.from(
                     mcc, mnc, Integer.parseInt(values[i * 4]), Integer.parseInt(values[i * 4 + 1])));
         }
@@ -580,8 +580,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             Network network = new Network();
             for (String cell : parser.next().split("Y")) {
                 String[] values = cell.split(",");
-                network.addCellTower(CellTower.from(mcc, mnc,
-                        Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2])));
+                if (values.length >= 3) {
+                    network.addCellTower(CellTower.from(mcc, mnc,
+                            Integer.parseInt(values[0]), Integer.parseInt(values[1]), Integer.parseInt(values[2])));
+                }
             }
 
             position.setNetwork(network);
