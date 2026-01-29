@@ -171,6 +171,38 @@ public class WatchProtocolDecoderTest extends ProtocolTest {
         verifyPosition(decoder, buffer(
                 "[3G*8800000015*00DD*UD,010120,025946,V,0.0,N,0.0,E,22.0,0,-1,0,100,98,0,0,00000000,0,5,eduroam,f4:db:e6:d2:a8:00,-53,eduroam,f4:db:e6:da:d0:80,-79,eduroam,78:0c:f0:24:f9:80,-82,Lions,b0:be:76:0a:05:9a,-82,tubs-guest,f4:db:e6:d2:a8:01,-53,0.0]"));
 
+        // Test position with cellCount > actual cell data (bounds checking)
+        verifyPosition(decoder, buffer(
+                "[3G*9031853319*0040*UD2,220322,055105,A,22.761162,N,114.360192,E,0,0,47,14,100,64,0,0,00000008,10,1,460,0,1234]"));
+
+        // Test position with wifiCount > actual WiFi data (bounds checking)
+        verifyPosition(decoder, buffer(
+                "[3G*9031853319*0050*UD2,220322,055105,A,22.761162,N,114.360192,E,0,0,47,14,100,64,0,0,00000008,0,0,10,wifi1,aa:bb:cc:dd:ee:ff,-50]"));
+
+        // Test TEMP with empty data (bounds checking)
+        verifyNull(decoder, buffer(
+                "[ZJ*5678901234*0001*0004*TEMP]"));
+
+        // Test btemp2 with missing temperature value after flag (bounds checking)
+        verifyNotNull(decoder, buffer(
+                "[3G*2104326058*0008*btemp2,1]"));
+
+        // Test oxygen with missing oxygen level (bounds checking)
+        verifyNotNull(decoder, buffer(
+                "[3G*9705141740*0008*oxygen,0]"));
+
+        // Test BLOOD with missing pressureLow (bounds checking)
+        verifyNotNull(decoder, buffer(
+                "[ZJ*357653059860416*0007*0009*BLOOD,109]"));
+
+        // Test JXTK with truncated header - missing commas (bounds checking)
+        verifyNull(decoder, buffer(
+                "[3G*1234567890*0010*JXTK,0,test]"));
+
+        // Test JXTK with insufficient values in header (bounds checking)
+        verifyNull(decoder, buffer(
+                "[3G*1234567890*0015*JXTK,0,name,1]"));
+
     }
 
     @Test
