@@ -150,7 +150,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 int mcc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
                 int mnc = !values[index].isEmpty() ? Integer.parseInt(values[index++]) : 0;
 
-                for (int i = 0; i < cellCount; i++) {
+                for (int i = 0; i < cellCount && index + 2 < values.length; i++) {
                     int lac = Integer.parseInt(values[index], StringUtil.containsHex(values[index++]) ? 16 : 10);
                     int cid = Integer.parseInt(values[index], StringUtil.containsHex(values[index++]) ? 16 : 10);
                     String rssi = values[index++];
@@ -165,7 +165,7 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
             if (index < values.length && !values[index].isEmpty()) {
                 int wifiCount = Integer.parseInt(values[index++]);
 
-                for (int i = 0; i < wifiCount; i++) {
+                for (int i = 0; i < wifiCount && index + 2 < values.length; i++) {
                     index += 1; // wifi name
                     String macAddress = values[index++];
                     String rssi = values[index++];
@@ -298,16 +298,17 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
                 String[] values = buf.toString(StandardCharsets.US_ASCII).split(",");
                 int valueIndex = 0;
 
-                if (type.equalsIgnoreCase("TEMP")) {
+                if (type.equalsIgnoreCase("TEMP") && values.length > 0) {
                     position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(values[valueIndex]));
-                } else if (type.equalsIgnoreCase("btemp2")) {
-                    if (Integer.parseInt(values[valueIndex++]) > 0) {
+                } else if (type.equalsIgnoreCase("btemp2") && values.length > 0) {
+                    if (Integer.parseInt(values[valueIndex++]) > 0 && valueIndex < values.length) {
                         position.set(Position.PREFIX_TEMP + 1, Double.parseDouble(values[valueIndex]));
                     }
-                } else if (type.equalsIgnoreCase("oxygen")) {
+                } else if (type.equalsIgnoreCase("oxygen") && values.length > 1) {
                     position.set("bloodOxygen", Integer.parseInt(values[++valueIndex]));
                 } else {
-                    if (type.equalsIgnoreCase("BPHRT") || type.equalsIgnoreCase("BLOOD")) {
+                    if ((type.equalsIgnoreCase("BPHRT") || type.equalsIgnoreCase("BLOOD"))
+                            && values.length > 1) {
                         position.set("pressureHigh", values[valueIndex++]);
                         position.set("pressureLow", values[valueIndex++]);
                     }
@@ -336,8 +337,14 @@ public class WatchProtocolDecoder extends BaseProtocolDecoder {
         } else if (type.equals("JXTK")) {
 
             int dataIndex = BufferUtil.indexOf(buf, buf.readerIndex(), buf.writerIndex(), (byte) ',', 4) + 1;
+            if (dataIndex <= buf.readerIndex()) {
+                return null;
+            }
             String[] values = buf.readCharSequence(
                     dataIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString().split(",");
+            if (values.length < 4) {
+                return null;
+            }
 
             int current = Integer.parseInt(values[2]);
             int total = Integer.parseInt(values[3]);
