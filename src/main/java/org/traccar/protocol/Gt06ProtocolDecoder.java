@@ -117,6 +117,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_PERIPHERAL = 0xF2;         // VL842
     public static final int MSG_STATUS_3 = 0xA3;           // GL21L
     public static final int MSG_GPS_LBS_8 = 0x38;
+    public static final int MSG_IBUTTON = 0x61;
 
     private enum Variant {
         VXT01,
@@ -372,7 +373,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         if (cellType >= 3 || type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7 || variant == Variant.SL4X
                 || type == MSG_GPS_LBS_STATUS_5) {
             cid = buf.readLong();
-        } else if (type == MSG_GPS_LBS_6 || variant == Variant.SEEWORLD) {
+        } else if (type == MSG_GPS_LBS_6 || type == MSG_IBUTTON || variant == Variant.SEEWORLD) {
             cid = buf.readUnsignedInt();
         } else {
             cid = buf.readUnsignedMedium();
@@ -803,6 +804,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             int value = buf.readUnsignedShort();
             double temperature = BitUtil.to(value, 15) * 0.1;
             position.set(Position.PREFIX_TEMP + 1, BitUtil.check(value, 15) ? temperature : -temperature);
+
+        } else if (type == MSG_IBUTTON) {
+
+            buf.skipBytes(8); // imei
+
+            decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
+
+            decodeLbs(position, buf, type, false);
+
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readLong()));
 
         } else if (isSupported(type, model)) {
 
