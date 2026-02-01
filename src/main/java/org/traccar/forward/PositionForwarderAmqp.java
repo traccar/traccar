@@ -16,6 +16,7 @@
 package org.traccar.forward;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -31,7 +32,7 @@ public class PositionForwarderAmqp implements PositionForwarder {
         String connectionUrl = config.getString(Keys.FORWARD_URL);
         String exchange = config.getString(Keys.FORWARD_EXCHANGE);
         String topic = config.getString(Keys.FORWARD_TOPIC);
-        amqpClient = new AmqpClient(connectionUrl, exchange, topic);
+        this.amqpClient = new AmqpClient(connectionUrl, exchange, topic);
         this.objectMapper = objectMapper;
     }
 
@@ -39,10 +40,21 @@ public class PositionForwarderAmqp implements PositionForwarder {
     public void forward(PositionData positionData, ResultHandler resultHandler) {
         try {
             String value = objectMapper.writeValueAsString(positionData);
-            amqpClient.publishMessage(value);
+            String routingKey = buildRoutingKey(positionData);
+            amqpClient.publishMessage(value, routingKey);
             resultHandler.onResult(true, null);
         } catch (IOException e) {
             resultHandler.onResult(false, e);
         }
     }
+
+    private String buildRoutingKey(PositionData positionData) {
+        ObjectNode root = objectMapper.createObjectNode();
+
+        root.set("position", objectMapper.valueToTree(positionData.getPosition()));
+        root.set("device", objectMapper.valueToTree(positionData.getDevice()));
+
+        return amqpClient.resolveRoutingKey(root);
+    }
+
 }
