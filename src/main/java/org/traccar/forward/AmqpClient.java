@@ -15,6 +15,7 @@
  */
 package org.traccar.forward;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -26,8 +27,12 @@ import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AmqpClient {
+    private final Pattern PLACEHOLDER_PATTERN = Pattern.compile("\\{\\{([^}]+)}}");
+
     private final Channel channel;
     private final String exchange;
     private final String topic;
@@ -52,7 +57,41 @@ public class AmqpClient {
         }
     }
 
-    public void publishMessage(String message) throws IOException {
-        channel.basicPublish(exchange, topic, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+    public void publishMessage(String message, String routingKey) throws IOException {
+        channel.basicPublish(exchange, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+    }
+
+    public String resolveRoutingKey(JsonNode root) {
+        Matcher matcher = PLACEHOLDER_PATTERN.matcher(topic);
+        StringBuilder result = new StringBuilder();
+
+        while (matcher.find()) {
+            String path = matcher.group(1).trim();
+            String value = resolvePath(root, path);
+
+            matcher.appendReplacement(
+                    result,
+                    Matcher.quoteReplacement(value)
+            );
+        }
+
+        matcher.appendTail(result);
+        return result.toString();
+    }
+
+    private String resolvePath(JsonNode root, String path) {
+        String[] parts = path.split("\\.");
+        JsonNode current = root;
+
+        for (String part : parts) {
+            if (current == null) {
+                return "null";
+            }
+            current = current.get(part);
+        }
+
+        return (current != null && !current.isNull())
+                ? current.asText()
+                : "null";
     }
 }
