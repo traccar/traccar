@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     static {
         Predicate<String> any = (m) -> true;
-        Predicate<String> fmbXXX = (m) -> m != null && (m.startsWith("FM") || m.equals("MTB100") || m.equals("MSP500"));
+        Predicate<String> fmbXXX = (m) -> m != null && m.matches("FM[B-Z]...|MTB100|MSP500");
         Predicate<String> fmb6XX = (m) -> m != null && m.matches("FM.6..");
 
         register(1, any, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
