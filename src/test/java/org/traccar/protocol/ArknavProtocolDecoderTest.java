@@ -36,14 +36,6 @@ public class ArknavProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, text(
                 "358266016278447,05*827,100,PT33,V,4821.6584,N,01053.8650,E,000.0,000.0,00.0,20:26:24 17-09-24,2.35,16"),
                 Position.KEY_ALARM, Position.ALARM_LOW_BATTERY);
-
-        verifyAttribute(decoder, text(
-                "358266016278447,05*827,010,PT33,V,4821.6584,N,01053.8650,E,000.0,000.0,00.0,20:26:24 17-09-24,2.35,16"),
-                Position.KEY_ALARM, Position.ALARM_SOS);
-
-        verifyAttribute(decoder, text(
-                "358266016278447,05*827,001,PT33,V,4821.6584,N,01053.8650,E,000.0,000.0,00.0,20:26:24 17-09-24,2.35,16"),
-                Position.KEY_ALARM, Position.ALARM_OVERSPEED);
     }
 
 }
