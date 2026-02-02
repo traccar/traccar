@@ -36,7 +36,7 @@ public class ArknavProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+),")                     // imei
             .expression(".{6},")                 // id code
             .number("(ddd),")                    // status
-            .expression("(.{4}),")               // unit number
+            .expression("(.{4}),")               // device model
             .expression("([AV]),")               // validity
             .number("(dd)(dd.d+),")              // latitude
             .expression("([NS]),")
