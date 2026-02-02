@@ -254,7 +254,7 @@ public class MegastekProtocolDecoder extends BaseProtocolDecoder {
             .number("(d+.d+)?,")                 // odometer
             .number("(d+)?,")                    // mcc
             .number("(d+)?,")                    // mnc
-            .number("(xxxx)?,")                  // lac
+            .number("(x+)?,")                    // lac
             .number("(x+)?,")                    // cid
             .number("(d+)?,")                    // gsm
             .groupBegin()

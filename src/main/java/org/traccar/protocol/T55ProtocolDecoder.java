@@ -477,6 +477,8 @@ public class T55ProtocolDecoder extends BaseProtocolDecoder {
             getDeviceSession(channel, remoteAddress, sentence.substring(5));
         } else if (sentence.startsWith("$IMEI")) {
             getDeviceSession(channel, remoteAddress, sentence.substring(6));
+        } else if (sentence.startsWith("$PSIWMDID")) {
+            getDeviceSession(channel, remoteAddress, sentence.substring(10, sentence.lastIndexOf('*')));
         } else if (sentence.startsWith("$GPFID")) {
             deviceSession = getDeviceSession(channel, remoteAddress, sentence.substring(7));
             if (deviceSession != null && position != null) {

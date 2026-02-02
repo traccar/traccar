@@ -11,6 +11,9 @@ public class T55ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new T55ProtocolDecoder(null));
 
+        verifyNull(decoder, text(
+                "$PSIWMDID,6Q5161694402B133*2F"));
+
         verifyAttributes(decoder, text(
                 "$GPTXT,NET,1003,A1,-53,232 01*77"));
 

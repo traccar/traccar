@@ -434,7 +434,7 @@ public class Gl200TextProtocolDecoder extends BaseProtocolDecoder {
             index += 1; // csq ber
         }
 
-        if (!v[index++].isEmpty()) {
+        if (!model.equals("GL320M") && !v[index++].isEmpty()) {
             int appendMask = Integer.parseInt(v[index - 1]);
             if (BitUtil.check(appendMask, 0)) {
                 position.set(Position.KEY_SATELLITES, Integer.parseInt(v[index++]));

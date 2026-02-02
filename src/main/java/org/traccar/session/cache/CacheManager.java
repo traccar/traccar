@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ import org.slf4j.LoggerFactory;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
 import org.traccar.config.Config;
+import org.traccar.config.Keys;
+import org.traccar.helper.model.AttributeUtil;
+import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Attribute;
 import org.traccar.model.BaseModel;
 import org.traccar.model.Calendar;
@@ -44,10 +47,13 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import java.util.Date;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -66,7 +72,7 @@ public class CacheManager implements BroadcastInterface {
     private final CacheGraph graph = new CacheGraph();
 
     private volatile Server server;
-    private final Map<Long, Position> devicePositions = new ConcurrentHashMap<>();
+    private final Map<Long, ConcurrentLinkedDeque<Position>> devicePositions = new ConcurrentHashMap<>();
     private final Map<Long, HashSet<Object>> deviceReferences = new ConcurrentHashMap<>();
 
     @Inject
@@ -97,6 +103,11 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public Position getPosition(long deviceId) {
+        var positions = devicePositions.get(deviceId);
+        return positions != null ? positions.peekLast() : null;
+    }
+
+    public Deque<Position> getPositions(long deviceId) {
         return devicePositions.get(deviceId);
     }
 
@@ -131,7 +142,18 @@ public class CacheManager implements BroadcastInterface {
                 Position position = storage.getObject(Position.class, new Request(
                         new Columns.All(), new Condition.Equals("id", device.getPositionId())));
                 if (position != null) {
-                    devicePositions.put(deviceId, position);
+                    var positions = devicePositions.computeIfAbsent(deviceId, k -> new ConcurrentLinkedDeque<>());
+                    if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
+                        long minDuration = AttributeUtil.lookup(this, Keys.REPORT_TRIP_MIN_DURATION, deviceId) * 1000;
+                        var from = new Date(position.getFixTime().getTime() - minDuration);
+                        var to = position.getFixTime();
+                        try (var positionsStream =
+                                PositionUtil.getPositionsStreamWithExtra(storage, deviceId, from, to)) {
+                            positionsStream.forEach(positions::add);
+                        }
+                    } else {
+                        positions.add(position);
+                    }
                 }
             }
         }
@@ -152,7 +174,27 @@ public class CacheManager implements BroadcastInterface {
 
     public void updatePosition(Position position) {
         deviceReferences.computeIfPresent(position.getDeviceId(), (key, oldValue) -> {
-            devicePositions.put(key, position);
+            var positions = devicePositions.computeIfAbsent(key, k -> new ConcurrentLinkedDeque<>());
+            positions.add(position);
+            if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {
+                long minDuration = AttributeUtil.lookup(
+                        this, Keys.REPORT_TRIP_MIN_DURATION, key) * 1000;
+                while (positions.size() > 1) {
+                    var iterator = positions.iterator();
+                    iterator.next();
+                    Position second = iterator.next();
+                    Position last = positions.peekLast();
+                    if (last.getFixTime().getTime() - second.getFixTime().getTime() >= minDuration) {
+                        positions.poll();
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                while (positions.size() > 1) {
+                    positions.poll();
+                }
+            }
             return oldValue;
         });
     }

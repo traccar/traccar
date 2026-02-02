@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,7 +194,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
 
     static {
         Predicate<String> any = (m) -> true;
-        Predicate<String> fmbXXX = (m) -> m != null && (m.startsWith("FM") || m.equals("MTB100") || m.equals("MSP500"));
+        Predicate<String> fmbXXX = (m) -> m != null && m.matches("FM[B-Z]...|MTB100|MSP500");
         Predicate<String> fmb6XX = (m) -> m != null && m.matches("FM.6..");
 
         register(1, any, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
@@ -235,14 +235,14 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
                 p.set(Position.KEY_DRIVER_UNIQUE_ID, String.format("%016X", driverUniqueId));
             }
         });
-        register(80, fmbXXX, (p, b) -> p.set("dataMode", b.readUnsignedByte()));
-        register(81, fmbXXX, (p, b) -> p.set(Position.KEY_OBD_SPEED, b.readUnsignedByte()));
-        register(82, fmbXXX, (p, b) -> p.set(Position.KEY_THROTTLE, b.readUnsignedByte()));
-        register(83, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() * 0.1));
-        register(84, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL, b.readUnsignedShort() * 0.1));
-        register(85, fmbXXX, (p, b) -> p.set(Position.KEY_RPM, b.readUnsignedShort()));
-        register(87, fmbXXX, (p, b) -> p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt()));
-        register(89, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_LEVEL, b.readUnsignedByte()));
+        register(80, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set("dataMode", b.readUnsignedByte()));
+        register(81, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_OBD_SPEED, b.readUnsignedByte()));
+        register(82, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_THROTTLE, b.readUnsignedByte()));
+        register(83, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() * 0.1));
+        register(84, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_FUEL, b.readUnsignedShort() * 0.1));
+        register(85, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_RPM, b.readUnsignedShort()));
+        register(87, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_OBD_ODOMETER, b.readUnsignedInt()));
+        register(89, fmbXXX.and(fmb6XX.negate()), (p, b) -> p.set(Position.KEY_FUEL_LEVEL, b.readUnsignedByte()));
         register(107, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_USED, b.readUnsignedInt() * 0.1));
         register(110, fmbXXX, (p, b) -> p.set(Position.KEY_FUEL_CONSUMPTION, b.readUnsignedShort() * 0.1));
         register(113, fmbXXX, (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));

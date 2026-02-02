@@ -81,6 +81,7 @@ public class UserResource extends BaseObjectResource<User> {
         }
         if (deviceId > 0) {
             permissionsService.checkManager(getUserId());
+            permissionsService.checkPermission(Device.class, getUserId(), deviceId);
             conditions.add(new Condition.Permission(User.class, Device.class, deviceId).excludeGroups());
         }
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
