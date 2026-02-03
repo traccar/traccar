@@ -38,7 +38,8 @@ public class PositionForwarderMqtt implements PositionForwarder {
     public void forward(PositionData positionData, ResultHandler resultHandler) {
         try {
             String payload = objectMapper.writeValueAsString(positionData);
-            mqttClient.publish(topic, payload, (message, e) -> resultHandler.onResult(e == null, e));
+            String resolvedTopic = Interpolator.resolve(topic, positionData);
+            mqttClient.publish(resolvedTopic, payload, (message, e) -> resultHandler.onResult(e == null, e));
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);
         }

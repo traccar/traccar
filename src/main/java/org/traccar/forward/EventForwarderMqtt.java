@@ -38,7 +38,8 @@ public class EventForwarderMqtt implements EventForwarder {
     public void forward(EventData eventData, ResultHandler resultHandler) {
         try {
             String payload = objectMapper.writeValueAsString(eventData);
-            mqttClient.publish(topic, payload, (message, e) -> resultHandler.onResult(e == null, e));
+            String resolvedTopic = Interpolator.resolve(topic, eventData);
+            mqttClient.publish(resolvedTopic, payload, (message, e) -> resultHandler.onResult(e == null, e));
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);
         }

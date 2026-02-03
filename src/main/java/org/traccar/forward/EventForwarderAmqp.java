@@ -16,7 +16,6 @@
 package org.traccar.forward;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
@@ -27,34 +26,25 @@ public class EventForwarderAmqp implements EventForwarder {
 
     private final AmqpClient amqpClient;
     private final ObjectMapper objectMapper;
+    private final String topic;
 
     public EventForwarderAmqp(Config config, ObjectMapper objectMapper) {
         String connectionUrl = config.getString(Keys.EVENT_FORWARD_URL);
         String exchange = config.getString(Keys.EVENT_FORWARD_EXCHANGE);
-        String topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
+        this.topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
         this.objectMapper = objectMapper;
-        this.amqpClient = new AmqpClient(connectionUrl, exchange, topic);
+        this.amqpClient = new AmqpClient(connectionUrl, exchange);
     }
 
     @Override
     public void forward(EventData eventData, ResultHandler resultHandler) {
         try {
             String value = objectMapper.writeValueAsString(eventData);
-            String routingKey = buildRoutingKey(eventData);
+            String routingKey = Interpolator.resolve(topic, eventData);
             amqpClient.publishMessage(value, routingKey);
             resultHandler.onResult(true, null);
         } catch (IOException e) {
             resultHandler.onResult(false, e);
         }
     }
-
-    private String buildRoutingKey(EventData eventData) {
-        ObjectNode root = objectMapper.createObjectNode();
-
-        root.set("event", objectMapper.valueToTree(eventData.getEvent()));
-        root.set("device", objectMapper.valueToTree(eventData.getDevice()));
-
-        return amqpClient.resolveRoutingKey(root);
-    }
-
 }
