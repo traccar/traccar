@@ -586,6 +586,12 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "78783c22010357789648774484180c06142038180c06142038cb03313ee4061fe98300185e090000000000000000460984284c000200000000017101d6f35d0d0a"),
                 Position.KEY_HOURS, 22140000);
 
+        decoder.setModelOverride("G18");
+
+        verifyAttribute(decoder, binary(
+                "787825161a011c141001cf00bc62e0043533a231113808028005006800124b470603300204baa49a0d0a"),
+                Position.KEY_ALARM, Position.ALARM_BRAKING);
+
     }
 
 }

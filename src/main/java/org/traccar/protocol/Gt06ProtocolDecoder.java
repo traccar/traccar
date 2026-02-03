@@ -480,7 +480,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         boolean modelLW = model != null && model.toUpperCase().startsWith("LW");
         boolean modelSW = "SEEWORLD".equalsIgnoreCase(model);
         boolean modelNT20 = "NT20".equalsIgnoreCase(model);
-        boolean modelVL = model != null && Set.of("VL103", "LL303", "VL512").contains(model);
+        boolean modelVL = model != null && Set.of("VL103", "LL303", "VL512", "G18").contains(model);
 
         if (type == MSG_LOGIN) {
 
