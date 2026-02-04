@@ -31,9 +31,9 @@ public class EventForwarderAmqp implements EventForwarder {
     public EventForwarderAmqp(Config config, ObjectMapper objectMapper) {
         String connectionUrl = config.getString(Keys.EVENT_FORWARD_URL);
         String exchange = config.getString(Keys.EVENT_FORWARD_EXCHANGE);
-        this.topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
+        topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
         this.objectMapper = objectMapper;
-        this.amqpClient = new AmqpClient(connectionUrl, exchange);
+        amqpClient = new AmqpClient(connectionUrl, exchange);
     }
 
     @Override

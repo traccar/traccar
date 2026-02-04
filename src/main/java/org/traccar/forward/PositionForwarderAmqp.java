@@ -31,8 +31,8 @@ public class PositionForwarderAmqp implements PositionForwarder {
     public PositionForwarderAmqp(Config config, ObjectMapper objectMapper) {
         String connectionUrl = config.getString(Keys.FORWARD_URL);
         String exchange = config.getString(Keys.FORWARD_EXCHANGE);
-        this.topic = config.getString(Keys.FORWARD_TOPIC);
-        this.amqpClient = new AmqpClient(connectionUrl, exchange);
+        topic = config.getString(Keys.FORWARD_TOPIC);
+        amqpClient = new AmqpClient(connectionUrl, exchange);
         this.objectMapper = objectMapper;
     }
 
