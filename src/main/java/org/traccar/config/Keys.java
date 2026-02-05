@@ -661,7 +661,8 @@ public final class Keys {
 
     /**
      * List of OpenID Connect clients for the built-in provider.
-     * Value should be a comma-separated list of 'clientId:clientSecret' pairs.
+     * Value should be a comma-separated list of 'clientId:clientSecret:redirectUri' entries.
+     * Multiple redirect URIs can be specified using '|' as a separator.
      */
     public static final ConfigKey<String> OPENID_CLIENTS = new StringConfigKey(
             "openid.clients",

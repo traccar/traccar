@@ -43,16 +43,21 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Path("oidc")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class OidcResource extends BaseResource {
+
+    private record ClientConfig(String secret, Set<URI> redirectUris) {
+    }
 
     @Inject
     private Config config;
@@ -76,11 +81,16 @@ public class OidcResource extends BaseResource {
             @QueryParam("code_challenge_method") String codeChallengeMethod,
             @QueryParam("nonce") String nonce) {
 
-        if (!getClients().containsKey(clientId)) {
+        ClientConfig client = getClients().get(clientId);
+        if (client == null) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
         URI target = URI.create(redirectUri);
+        if (!client.redirectUris().contains(target)) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+
         String code = sessionManager.issueCode(
                 getUserId(), clientId, target, scope, nonce, codeChallenge, codeChallengeMethod);
 
@@ -112,8 +122,8 @@ public class OidcResource extends BaseResource {
             clientSecret = credentials[1];
         }
 
-        String expectedSecret = getClients().get(clientId);
-        if (expectedSecret == null || !expectedSecret.equals(clientSecret)) {
+        ClientConfig client = getClients().get(clientId);
+        if (client == null || !client.secret().equals(clientSecret)) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
@@ -157,15 +167,17 @@ public class OidcResource extends BaseResource {
         return sessionManager.getJwks();
     }
 
-    private Map<String, String> getClients() {
+    private Map<String, ClientConfig> getClients() {
         String value = config.getString(Keys.OPENID_CLIENTS);
         if (value == null || value.isBlank()) {
             return Collections.emptyMap();
         }
-        Map<String, String> clients = new LinkedHashMap<>();
+        Map<String, ClientConfig> clients = new LinkedHashMap<>();
         for (String entry : value.split(",")) {
-            String[] values = entry.split(":");
-            clients.put(values[0], values[1]);
+            String[] values = entry.split(":", 3);
+            clients.put(values[0], new ClientConfig(values[1], Arrays.stream(values[2].split("\\|"))
+                    .map(URI::create)
+                    .collect(Collectors.toSet())));
         }
         return clients;
     }

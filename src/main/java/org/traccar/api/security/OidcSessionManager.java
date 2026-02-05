@@ -110,8 +110,8 @@ public class OidcSessionManager {
         if (!data.clientId().equals(clientId)) {
             return null;
         }
-        if (redirectUri != null) {
-            if (data.redirectUri() == null || !data.redirectUri().equals(redirectUri)) {
+        if (data.redirectUri() != null) {
+            if (redirectUri == null || !data.redirectUri().equals(redirectUri)) {
                 return null;
             }
         }
