@@ -31,7 +31,7 @@ public class PositionForwarderRedis implements PositionForwarder {
     public PositionForwarderRedis(Config config, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.url = config.getString(Keys.FORWARD_URL);
-        key = config.getString(Keys.FORWARD_REDIS_KEY);
+        key = config.getString(Keys.FORWARD_TOPIC);
     }
 
     @Override

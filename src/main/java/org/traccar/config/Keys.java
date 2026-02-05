@@ -921,14 +921,6 @@ public final class Keys {
             "positions");
 
     /**
-     * Position forwarding Redis key.
-     */
-    public static final ConfigKey<String> FORWARD_REDIS_KEY = new StringConfigKey(
-            "forward.topic",
-            List.of(KeyType.CONFIG),
-            "positions.{uniqueId}");
-
-    /**
      * URL to forward positions. Data is passed through URL parameters. For example, {uniqueId} for device identifier,
      * {latitude} and {longitude} for coordinates.
      */
