@@ -39,10 +39,12 @@ public class HttpSmsClient implements SmsManager {
     private final String authorization;
     private final String template;
     private final MediaType mediaType;
+    private final String method;
 
     public HttpSmsClient(Config config, Client client) {
         this.client = client;
         url = config.getString(Keys.SMS_HTTP_URL);
+        method = config.getString(Keys.SMS_HTTP_METHOD);
         authorizationHeader = config.getString(Keys.SMS_HTTP_AUTHORIZATION_HEADER);
         if (config.hasKey(Keys.SMS_HTTP_AUTHORIZATION)) {
             authorization = config.getString(Keys.SMS_HTTP_AUTHORIZATION);
@@ -86,8 +88,14 @@ public class HttpSmsClient implements SmsManager {
         }
     }
 
-    private Invocation.Builder getRequestBuilder() {
-        Invocation.Builder builder = client.target(url).request();
+    private Invocation.Builder getRequestBuilder(String phone, String message) {
+        String targetUrl = url;
+        if ("GET".equalsIgnoreCase(method)) {
+            // For GET requests, append template as query parameters
+            String queryParams = preparePayload(phone, message);
+            targetUrl = url + (url.contains("?") ? "&" : "?") + queryParams;
+        }
+        Invocation.Builder builder = client.target(targetUrl).request();
         if (authorization != null) {
             builder = builder.header(authorizationHeader, authorization);
         }
@@ -96,8 +104,14 @@ public class HttpSmsClient implements SmsManager {
 
     @Override
     public void sendMessage(String phone, String message, boolean command) throws MessageException {
-        try (Response response = getRequestBuilder().post(
-                Entity.entity(preparePayload(phone, message), mediaType.withCharset(StandardCharsets.UTF_8.name())))) {
+        Response response;
+        if ("GET".equalsIgnoreCase(method)) {
+            response = getRequestBuilder(phone, message).get();
+        } else {
+            response = getRequestBuilder(phone, message).post(
+                    Entity.entity(preparePayload(phone, message), mediaType.withCharset(StandardCharsets.UTF_8.name())));
+        }
+        try (response) {
             if (response.getStatus() / 100 != 2) {
                 throw new MessageException(response.readEntity(String.class));
             }
