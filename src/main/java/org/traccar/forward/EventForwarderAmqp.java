@@ -40,8 +40,7 @@ public class EventForwarderAmqp implements EventForwarder {
     public void forward(EventData eventData, ResultHandler resultHandler) {
         try {
             String value = objectMapper.writeValueAsString(eventData);
-            String routingKey = Interpolator.resolve(topic, eventData);
-            amqpClient.publishMessage(value, routingKey);
+            amqpClient.publishMessage(value, Interpolator.resolve(topic, eventData));
             resultHandler.onResult(true, null);
         } catch (IOException e) {
             resultHandler.onResult(false, e);

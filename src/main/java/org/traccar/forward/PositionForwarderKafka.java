@@ -49,8 +49,7 @@ public class PositionForwarderKafka implements PositionForwarder {
         try {
             String key = Long.toString(positionData.getDevice().getId());
             String value = objectMapper.writeValueAsString(positionData);
-            String resolvedTopic = Interpolator.resolve(topic, positionData);
-            producer.send(new ProducerRecord<>(resolvedTopic, key, value));
+            producer.send(new ProducerRecord<>(Interpolator.resolve(topic, positionData), key, value));
             resultHandler.onResult(true, null);
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);

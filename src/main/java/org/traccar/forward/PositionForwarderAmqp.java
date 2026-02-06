@@ -40,8 +40,7 @@ public class PositionForwarderAmqp implements PositionForwarder {
     public void forward(PositionData positionData, ResultHandler resultHandler) {
         try {
             String value = objectMapper.writeValueAsString(positionData);
-            String routingKey = Interpolator.resolve(topic, positionData);
-            amqpClient.publishMessage(value, routingKey);
+            amqpClient.publishMessage(value, Interpolator.resolve(topic, positionData));
             resultHandler.onResult(true, null);
         } catch (IOException e) {
             resultHandler.onResult(false, e);

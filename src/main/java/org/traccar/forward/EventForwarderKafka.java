@@ -48,8 +48,7 @@ public class EventForwarderKafka implements EventForwarder {
         try {
             String key = Long.toString(eventData.getDevice().getId());
             String value = objectMapper.writeValueAsString(eventData);
-            String resolvedTopic = Interpolator.resolve(topic, eventData);
-            producer.send(new ProducerRecord<>(resolvedTopic, key, value));
+            producer.send(new ProducerRecord<>(Interpolator.resolve(topic, eventData), key, value));
             resultHandler.onResult(true, null);
         } catch (JsonProcessingException e) {
             resultHandler.onResult(false, e);

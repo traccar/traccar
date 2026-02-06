@@ -24,24 +24,23 @@ import redis.clients.jedis.Jedis;
 public class PositionForwarderRedis implements PositionForwarder {
 
     private final String url;
-    private final String key;
+    private final String topic;
 
     private final ObjectMapper objectMapper;
 
     public PositionForwarderRedis(Config config, ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
         this.url = config.getString(Keys.FORWARD_URL);
-        key = config.getString(Keys.FORWARD_TOPIC);
+        topic = config.getString(Keys.FORWARD_TOPIC);
     }
 
     @Override
     public void forward(PositionData positionData, ResultHandler resultHandler) {
 
         try {
-            String resolvedKey = Interpolator.resolve(key, positionData);
             String value = objectMapper.writeValueAsString(positionData.getPosition());
             try (Jedis jedis = new Jedis(url)) {
-                jedis.lpush(resolvedKey, value);
+                jedis.lpush(Interpolator.resolve(topic, positionData), value);
             }
             resultHandler.onResult(true, null);
         } catch (JsonProcessingException e) {

@@ -50,7 +50,7 @@ public class AmqpClient {
         }
     }
 
-    public void publishMessage(String message, String routingKey) throws IOException {
-        channel.basicPublish(exchange, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
+    public void publishMessage(String message, String topic) throws IOException {
+        channel.basicPublish(exchange, topic, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
     }
 }
