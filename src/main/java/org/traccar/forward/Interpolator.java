@@ -21,7 +21,7 @@ public final class Interpolator {
     }
 
     public static String resolve(String template, EventData data) {
-        String uniqueId = data.getDevice().getUniqueId() ;
+        String uniqueId = data.getDevice().getUniqueId();
         String protocol = data.getPosition() != null ? data.getPosition().getProtocol() : "";
         String eventType = data.getEvent().getType();
 
