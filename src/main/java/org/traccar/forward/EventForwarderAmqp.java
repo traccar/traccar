@@ -26,20 +26,21 @@ public class EventForwarderAmqp implements EventForwarder {
 
     private final AmqpClient amqpClient;
     private final ObjectMapper objectMapper;
+    private final String topic;
 
     public EventForwarderAmqp(Config config, ObjectMapper objectMapper) {
         String connectionUrl = config.getString(Keys.EVENT_FORWARD_URL);
         String exchange = config.getString(Keys.EVENT_FORWARD_EXCHANGE);
-        String topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
+        topic = config.getString(Keys.EVENT_FORWARD_TOPIC);
         this.objectMapper = objectMapper;
-        amqpClient = new AmqpClient(connectionUrl, exchange, topic);
+        amqpClient = new AmqpClient(connectionUrl, exchange);
     }
 
     @Override
     public void forward(EventData eventData, ResultHandler resultHandler) {
         try {
             String value = objectMapper.writeValueAsString(eventData);
-            amqpClient.publishMessage(value);
+            amqpClient.publishMessage(value, Interpolator.resolve(topic, eventData));
             resultHandler.onResult(true, null);
         } catch (IOException e) {
             resultHandler.onResult(false, e);
