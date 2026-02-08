@@ -49,3 +49,35 @@ Please read [build from source documentation](https://www.traccar.org/build/) on
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
+
+
+## HOW TO
+Front:
+wget http://localhost:8082/
+http://localhost:8082/register
+email: sweetword
+password: sweetword
+
+Positions: select protocol,deviceid,valid,latitude,longitude,speed,accuracy,network,geofenceids from tc_positions;
+User: select name,email,hashedpassword  from tc_users;
+Device: select name,positionid,status,lastupdate from tc_devices;
+
+## Test
+make test-topin-protocole
+(imei 358655600695588)
+
+make send-h02-trail
+(imei 358655600007040)
+
+# Open port so far
+ho2: 5013
+ZhongXun Topin (tipin protocole): 5199
+istartek (positrex protocole):5252
+Frontend: 8082
+
+# LOG
+make log (tracker log)
+make logs (docker comopose log)
+
+# Remove database
+sudo rm -rf /opt/traccar/data

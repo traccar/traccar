@@ -10,18 +10,26 @@ services:
       TIMESCALEDB_TELEMETRY: "off"
     volumes:
       - /opt/traccar/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U traccar -d traccar"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
   traccar:
     image: traccar/traccar:latest
     restart: unless-stopped
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     environment:
       CONFIG_USE_ENVIRONMENT_VARIABLES: "true"
       DATABASE_DRIVER: org.postgresql.Driver
       DATABASE_URL: jdbc:postgresql://database:5432/traccar
       DATABASE_USER: traccar
       DATABASE_PASSWORD: traccar
+      LOGGER_LEVEL: INFO
     healthcheck:
       test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8082/api/health" ]
       interval: 2m
@@ -29,10 +37,15 @@ services:
       start_period: 1h
       retries: 3
     ports:
-      - "8082:8082"
-      - "5000-5500:5000-5500"
+      - "8082:8082"   # Traccar web UI / API
+      - "5013:5013"   # ho2
+      - "5199:5199"   # ZhongXun Topin
+      - "5252:5252"   # Istartek
+      - "5222:5222"   # Istartek
+      # - "5000-5500:5000-5500"
     volumes:
       - /opt/traccar/logs:/opt/traccar/logs
+      #- /opt/traccar/conf/traccar.xml:/opt/traccar/conf/traccar.xml:ro
 
   autoheal:
     image: willfarrell/autoheal:latest
