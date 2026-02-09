@@ -96,7 +96,7 @@ public class LoginService {
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
                 new Condition.Or(
-                        new Condition.Equals("email", email),
+                        new Condition.EqualsCitext("email", email),
                         new Condition.Equals("login", email))));
         if (user != null) {
             if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
@@ -119,7 +119,7 @@ public class LoginService {
     public LoginResult login(String email, String name, boolean administrator) throws StorageException {
         User user = storage.getObject(User.class, new Request(
             new Columns.All(),
-            new Condition.Equals("email", email)));
+            new Condition.EqualsCitext("email", email)));
 
         if (user == null) {
             user = new User();

@@ -39,6 +39,24 @@ public interface Condition {
         }
     }
 
+    class EqualsCitext implements Condition {
+        private final String column;
+        private final String value;
+
+        public EqualsCitext(String column, String value) {
+            this.column = column;
+            this.value = value;
+        }
+
+        public String getColumn() {
+            return column;
+        }
+
+        public String getValue() {
+            return value;
+        }
+    }
+
     class Compare implements Condition {
         private final String column;
         private final String operator;
