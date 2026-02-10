@@ -30,6 +30,7 @@ import org.traccar.storage.query.Request;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -85,6 +86,7 @@ public class GeofenceReportProvider {
                 }
             }
         }
+        result.sort(Comparator.comparing(GeofenceReportItem::getStartTime));
         return result;
     }
 
