@@ -592,6 +592,11 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 "787825161a011c141001cf00bc62e0043533a231113808028005006800124b470603300204baa49a0d0a"),
                 Position.KEY_ALARM, Position.ALARM_BRAKING);
 
+        decoder.setModelOverride("QH302R");
+
+        verifyPosition(decoder, binary(
+                "7878271208667030665022971a020c0a1e32c601727c1c0f89af002c14fa01366e000100010c003c1fdd0d0a"));
+
     }
 
 }
