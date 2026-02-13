@@ -1,0 +1,12 @@
+#set($subject = "$device.name: Çevrimiçi")
+#set($digest = "$device.name online at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Cihaz: $device.name<br>
+Çevrimiçi<br>
+Zaman: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Bildirim Aboneliğini İptal Et</a>
+</body>
+</html>

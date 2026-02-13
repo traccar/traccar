@@ -1,0 +1,13 @@
+#set($subject = "$device.name: Διακόπτης κλειστός")
+#set($digest = "Ο κινητήρας της συσκευής $device.name έσβησε στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Συσκευή: $device.name<br>
+Εσβησε ο κινητήρας<br>
+Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Σημείο: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Απεγγραφή</a>
+</body>
+</html>

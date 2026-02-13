@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+  <include file="changelog-4.0-clean.xml" relativeToChangelogFile="true" />
+
+  <include file="changelog-4.1.xml" relativeToChangelogFile="true" />
+  <include file="changelog-4.7.xml" relativeToChangelogFile="true" />
+  <include file="changelog-4.9.xml" relativeToChangelogFile="true" />
+  <include file="changelog-4.10.xml" relativeToChangelogFile="true" />
+  <include file="changelog-4.11.xml" relativeToChangelogFile="true" />
+  <include file="changelog-4.13.xml" relativeToChangelogFile="true" />
+  <include file="changelog-4.15.xml" relativeToChangelogFile="true" />
+
+  <include file="changelog-5.0.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.1.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.2.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.3.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.4.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.5.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.6.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.7.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.8.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.9.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.10.xml" relativeToChangelogFile="true" />
+  <include file="changelog-5.11.xml" relativeToChangelogFile="true" />
+
+  <include file="changelog-6.2.xml" relativeToChangelogFile="true" />
+  <include file="changelog-6.3.xml" relativeToChangelogFile="true" />
+  <include file="changelog-6.6.xml" relativeToChangelogFile="true" />
+  <include file="changelog-6.7.0.xml" relativeToChangelogFile="true" />
+  <include file="changelog-6.8.0.xml" relativeToChangelogFile="true" />
+  <include file="changelog-6.9.0.xml" relativeToChangelogFile="true" />
+  <include file="changelog-6.11.0.xml" relativeToChangelogFile="true" />
+
+</databaseChangeLog>

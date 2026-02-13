@@ -1,0 +1,83 @@
+package org.traccar.protocol;
+
+import org.junit.jupiter.api.Test;
+import org.traccar.ProtocolTest;
+import org.traccar.model.Position;
+
+public class EasyTrackProtocolDecoderTest extends ProtocolTest {
+
+    @Test
+    public void testDecode() throws Exception {
+
+        var decoder = inject(new EasyTrackProtocolDecoder(null));
+
+        verifyAttributes(decoder, text(
+                "*ET,358162092884226,OB,BD$V13.6;R01510;S023;P034.9;O035.2;C085;L000.0;XM035.170;M4.25;F001.197;T0000730;A09;B00;D00;GX0;GY0;GZ0;"));
+
+        verifyAttributes(decoder, text(
+                "*ET,358999999999916,OB,BD$V14.2;R08258;S166;P058.4;O079.2;C025;L081.5;XM091.393;M722379;F352.956;T0037184;A01;B00;D00;GX3;GY-6;GZ-268;@4#"));
+
+        verifyNotNull(decoder, text(
+                "*ET,354522180593498,JZ,0,20222,262,724,4#"));
+
+        verifyNull(decoder, text(
+                "*ET,358155100132943,MQ"));
+
+        verifyNull(decoder, text(
+                "*ET,354522180045564,TX,V,14070E,122336"));
+
+        verifyPosition(decoder, text(
+                "*ET,135790246811221,HB,A,050915,0C2A27,00CE5954,04132263,0000,F000,01000000,20,4,0000,00F123,100,4845423835,0091564212,0B45,10.00,9"));
+
+        verifyPosition(decoder, text(
+                "*ET,358155100054249,HB,A,100b06,053318,803a0b51,03d507c9,0017,0000,00400000,07,100,0000,1435,63"));
+
+        verifyNull(decoder, text(
+                "*ET,358155100054249,MQ"));
+
+        verifyNull(decoder, text(
+                "*ET,358155100054249,TX,A,100b06,053230"));
+
+        verifyPosition(decoder, text(
+                "*ET,358155100054249,HB,A,100b06,053212,803a0b20,03d507a2,0054,0000,40400000,06,100,0000,1435,44"));
+
+        verifyNull(decoder, text(
+                "*ET,135790246811221,GZ,0001,0005"));
+
+        verifyPosition(decoder, text(
+                "*ET,135790246811221,DW,A,0A090D,101C0D,00CF27C6,0413FA4E,0000,0000,00000000,20,4,0000,00F123"),
+                position("2010-09-13 16:28:13.000", true, 22.62689, 114.03021));
+
+        verifyNull(decoder, text(
+                "*ET,358155100048430,CC,0.0,V,100603,141817,80d77ae8,81ab1ffd,0000,6b08,40000000,19,99,0000,fa9,918"));
+
+        verifyPosition(decoder, text(
+                "*ET,135790246811221,DW,A,050915,0C2A27,00CE5954,04132263,0000,0000,01000000,20,4,0000,001254"));
+
+        verifyPosition(decoder, text(
+                "*ET,135790246811221,DW,A,0A090D,101C0D,00CF27C6,0413FA4E,0000,0000,00000000,20,4,0000,00F123,100"));
+
+        verifyPosition(decoder, text(
+                "*ET,135790246811221,DW,A,0A090D,101C0D,00CF27C6,8413FA4E,0000,0000,00000000,20,4,0000,00F123,100"));
+
+        verifyPosition(decoder, text(
+                "*ET,358155100003016,HB,A,0d081e,07381e,8038ee09,03d2e9be,004f,0000,40c00000,0f,100,0000,00037c,29"));
+
+        verifyPosition(decoder, text(
+                "*ET,358155100003016,HB,A,0d081e,073900,8038ee2f,03d2e9fd,0114,0000,40c00000,12,100,0000,00037c,32"));
+
+        verifyPosition(decoder, text(
+                "*ET,135790246811221,HB,A,050915,0C2A27,00CE5954,04132263,0000,0000,01000000,20,4,0000,00F123,100,200"));
+
+        decoder.setModelOverride("E3+4G");
+
+        verifyPosition(decoder, text(
+                "*ET,135790246811221,HB,A,050915,0C2A27,00CE5954,04132263,0000,F000,01000000,20,4,000,00F123,100,4845423835,0091564212,0B45,10.00,9"));
+
+        verifyAttribute(decoder, text(
+                "*ET,135790246811221,DW,A,180709,16081C,80D74F8D,81ACFAD6,04B0,1C20,00800000,23,0,0348,004491,725,0000000000,00181A8C,0DAC,13.41,15"),
+                Position.KEY_HOURS, 94779600000L);
+
+    }
+
+}

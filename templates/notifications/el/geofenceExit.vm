@@ -1,0 +1,13 @@
+#set($subject = "Η Συσκευή $device.name: έχει εξέλθει από των γεωφραχτη")
+#set($digest = "Η Συσκευή $device.name έχει εξέλθει από των γεωφραχτη: $geofence.name στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Συσκευή: $device.name<br>
+χει εξέλθει από των γεωφραχτη: $geofence.name<br>
+Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Σημείο: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Απεγγραφή</a>
+</body>
+</html>

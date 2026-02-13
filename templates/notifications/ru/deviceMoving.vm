@@ -1,0 +1,13 @@
+#set($subject = "$device.name: движется")
+#set($digest = "$device.name движется с $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Устройство: $device.name<br>
+Движется<br>
+Время: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Координаты: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Отписаться</a>
+</body>
+</html>

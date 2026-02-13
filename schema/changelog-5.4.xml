@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-5.4">
+
+  <changeSet author="author" id="changelog-5.4">
+
+    <addColumn tableName="tc_devices">
+      <column name="motionstate" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="motiontime" type="TIMESTAMP" />
+      <column name="motiondistance" type="DOUBLE" defaultValueNumeric="0" />
+      <column name="overspeedstate" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="overspeedtime" type="TIMESTAMP" />
+      <column name="overspeedgeofenceid" type="INT" defaultValueNumeric="0" />
+    </addColumn>
+
+    <createTable tableName="tc_commands_queue">
+      <column autoIncrement="true" name="id" type="INT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="description" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="textchannel" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint
+            baseTableName="tc_commands_queue"
+            baseColumnNames="deviceid"
+            constraintName="fk_commands_queue_deviceid"
+            onDelete="CASCADE"
+            referencedColumnNames="id"
+            referencedTableName="tc_devices" />
+
+    <createIndex tableName="tc_commands_queue" indexName="idx_commands_queue_deviceid">
+      <column name="deviceid" />
+    </createIndex>
+
+  </changeSet>
+
+</databaseChangeLog>

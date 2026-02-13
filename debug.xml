@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
+<properties>
+
+    <entry key='web.path'>./traccar-web/simple</entry>
+    <entry key='web.localizationPath'>./traccar-web/src/resources/l10n</entry>
+    <entry key='web.debug'>true</entry>
+    <entry key='web.console'>true</entry>
+    <entry key='web.mcp.enable'>true</entry>
+
+    <entry key='geocoder.type'>pluscodes</entry>
+
+    <entry key='media.path'>./target/media</entry>
+
+    <entry key='logger.console'>true</entry>
+    <entry key='logger.queries'>false</entry>
+    <entry key='logger.fullStackTraces'>true</entry>
+
+    <entry key='mail.debug'>true</entry>
+
+    <entry key='database.driver'>org.h2.Driver</entry>
+    <entry key='database.url'>jdbc:h2:./target/database</entry>
+    <entry key='database.user'>sa</entry>
+    <entry key='database.password'></entry>
+
+    <!--<entry key='server.instantAcknowledgement'>true</entry>
+    <entry key='server.buffering.threshold'>5000</entry>-->
+
+    <entry key='atrack.custom'>true</entry>
+    <entry key='intellitrac.port'>6037</entry>
+
+</properties>
