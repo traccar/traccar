@@ -155,6 +155,11 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         processStatus(position, buf.readUnsignedInt());
 
+        if (buf.readableBytes() >= 3) {
+            buf.skipBytes(buf.readableBytes() - 3);
+            position.set(Position.KEY_POWER, buf.readUnsignedShort() / 10.0);
+        }
+
         if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
             sendResponse(channel, remoteAddress, id, "R12");
         }
