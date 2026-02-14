@@ -1330,6 +1330,33 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Minimum duration in milliseconds to consider as idle time. Default 60 seconds.
+     * Periods shorter than this are ignored (e.g., traffic lights, brief stops).
+     */
+    public static final ConfigKey<Long> REPORT_IDLE_MIN_DURATION = new LongConfigKey(
+            "report.idle.minDuration",
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            60000L);
+
+    /**
+     * Maximum gap in milliseconds between positions to consider for idle time calculation.
+     * Gaps larger than this are ignored to avoid unrealistic calculations. Default 5 minutes.
+     */
+    public static final ConfigKey<Long> REPORT_IDLE_MAX_GAP = new LongConfigKey(
+            "report.idle.maxGap",
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            300000L);
+
+    /**
+     * Minimum RPM threshold to consider engine as running for idle time calculation.
+     * Default 0 RPM (engine running at any RPM above 0).
+     */
+    public static final ConfigKey<Double> REPORT_IDLE_RPM_THRESHOLD = new DoubleConfigKey(
+            "report.idle.rpmThreshold",
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
+            0.0);
+
+    /**
      * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
      * By default, there is no limit.
      */

@@ -42,4 +42,13 @@ public class SummaryReportItem extends BaseReportItem {
         this.endHours = endHours;
     }
 
+    private long idleTime; // milliseconds
+
+    public long getIdleTime() {
+        return idleTime;
+    }
+    public void setIdleTime(long idleTime) {
+        this.idleTime = idleTime;
+    }
+
 }
