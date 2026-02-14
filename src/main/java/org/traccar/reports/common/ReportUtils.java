@@ -171,6 +171,83 @@ public class ReportUtils {
         transformer.write();
     }
 
+    private long calculateIdleTime(long deviceId, Date from, Date to) throws StorageException {
+        // Get configurable thresholds
+        final long minIdleDuration = config.getLong(Keys.REPORT_IDLE_MIN_DURATION);
+        final long maxGapDuration = config.getLong(Keys.REPORT_IDLE_MAX_GAP);
+        final double idleRpmThreshold = config.getDouble(Keys.REPORT_IDLE_RPM_THRESHOLD);
+
+        long idleTime = 0;
+        var positions = PositionUtil.getPositions(storage, deviceId, from, to);
+
+        if (positions.isEmpty()) {
+            return 0;
+        }
+
+        Position previousPosition = null;
+        boolean wasIdle = false;
+        long idleStartTime = 0;
+
+        for (Position position : positions) {
+            boolean isIdle = false;
+
+
+            Boolean ignition = position.getBoolean(Position.KEY_IGNITION);
+            Boolean motion = position.getBoolean(Position.KEY_MOTION);
+            Double rpm = position.getDouble(Position.KEY_RPM);
+
+
+            boolean engineRunning = false;
+            if (rpm != null && rpm > idleRpmThreshold) {
+                engineRunning = true;
+            } else if (ignition != null && ignition) {
+                engineRunning = true;
+            }
+
+
+            if (engineRunning && motion != null && !motion) {
+                isIdle = true;
+            }
+
+            if (previousPosition != null) {
+                long currentTime = position.getFixTime().getTime();
+                long duration = currentTime - previousPosition.getFixTime().getTime();
+
+                if (wasIdle && isIdle) {
+
+                    if (duration > 0 && duration < maxGapDuration) {
+                        idleTime += duration;
+                    }
+                } else if (wasIdle && !isIdle) {
+
+                    long totalIdleDuration = currentTime - idleStartTime;
+                    if (totalIdleDuration < minIdleDuration) {
+                        // Remove idle time that doesn't meet minimum threshold
+                        idleTime = Math.max(0, idleTime - totalIdleDuration);
+                    }
+                } else if (!wasIdle && isIdle) {
+
+                    idleStartTime = currentTime;
+                }
+            }
+
+            previousPosition = position;
+            wasIdle = isIdle;
+        }
+
+
+        if (wasIdle && previousPosition != null) {
+            long totalIdleDuration = previousPosition.getFixTime().getTime() - idleStartTime;
+            if (totalIdleDuration < minIdleDuration) {
+                // Remove idle time that doesn't meet minimum threshold
+                idleTime = Math.max(0, idleTime - totalIdleDuration);
+            }
+        }
+
+
+        return Math.max(0, idleTime);
+    }
+
     private TripReportItem calculateTrip(
             Device device, Position startTrip, Position endTrip, double maxSpeed,
             boolean ignoreOdometer) throws StorageException {
@@ -212,6 +289,10 @@ public class ReportUtils {
 
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));
         trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
+
+
+        long idleTime = calculateIdleTime(deviceId, startTrip.getFixTime(), endTrip.getFixTime());
+        trip.setIdleTime(idleTime);
 
         if (!ignoreOdometer
                 && startTrip.getDouble(Position.KEY_ODOMETER) != 0

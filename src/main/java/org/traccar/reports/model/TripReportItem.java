@@ -127,4 +127,14 @@ public class TripReportItem extends BaseReportItem {
     public void setDriverName(String driverName) {
         this.driverName = driverName;
     }
+
+    private long idleTime; // milliseconds
+
+    public long getIdleTime() {
+        return idleTime;
+    }
+
+    public void setIdleTime(long idleTime) {
+        this.idleTime = idleTime;
+    }
 }
