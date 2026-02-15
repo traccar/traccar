@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,9 +87,13 @@ public class BufferingManager {
     private Timeout scheduleTimeout(Holder holder) {
         return timer.newTimeout(
                 timeout -> {
-                    LOGGER.info("released {}", holder.position.getFixTime());
-                    buffer.get(holder.position.getDeviceId()).remove(holder);
-                    callback.onReleased(holder.context, holder.position);
+                    LOGGER.debug("released {}", holder.position.getFixTime());
+                    synchronized (buffer) {
+                        buffer.get(holder.position.getDeviceId()).remove(holder);
+                    }
+                    holder.context.executor().execute(() -> {
+                        callback.onReleased(holder.context, holder.position);
+                    });
                 },
                 threshold, TimeUnit.MILLISECONDS);
     }
@@ -97,12 +101,12 @@ public class BufferingManager {
     public void accept(ChannelHandlerContext context, Position position) {
         if (threshold > 0) {
             synchronized (buffer) {
-                LOGGER.info("queued {}", position.getFixTime());
+                LOGGER.debug("queued {}", position.getFixTime());
                 var queue = buffer.computeIfAbsent(position.getDeviceId(), k -> new TreeSet<>());
                 Holder holder = new Holder(context, position);
                 holder.timeout = scheduleTimeout(holder);
                 queue.add(holder);
-                queue.tailSet(holder).forEach(h -> {
+                queue.tailSet(holder, false).forEach(h -> {
                     h.timeout.cancel();
                     h.timeout = scheduleTimeout(h);
                 });

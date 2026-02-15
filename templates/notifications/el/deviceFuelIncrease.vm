@@ -1,0 +1,14 @@
+#set($subject = "$device.name: Αύξηση Καυσίμου")
+#set($digest = "Αυξήθηκαν τα καύσιμα στη συσκευή $device.name στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Συσκευή: $device.name<br>
+Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Ποσότητα πριν: $event.attributes.before<br>
+Ποσότητα μετά: $event.attributes.after<br>
+Σημείο: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Απεγγραφή</a>
+</body>
+</html>

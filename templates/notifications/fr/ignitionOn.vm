@@ -1,0 +1,13 @@
+#set($subject = "$device.name: contact mis")
+#set($digest = "$device.name contact mis à $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Appareil: $device.name<br>
+Contact mis<br>
+Heure: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Point: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Se désabonner</a>
+</body>
+</html>

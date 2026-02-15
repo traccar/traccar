@@ -42,6 +42,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
@@ -114,6 +115,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_MULTIMEDIA = 0x41;         // WD-209
     public static final int MSG_ALARM = 0x95;              // JC100
     public static final int MSG_PERIPHERAL = 0xF2;         // VL842
+    public static final int MSG_STATUS_3 = 0xA3;           // GL21L
+    public static final int MSG_GPS_LBS_8 = 0x38;
+    public static final int MSG_IBUTTON = 0x61;
 
     private enum Variant {
         VXT01,
@@ -161,11 +165,11 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             .number("(dd):(dd):(dd)")            // time
             .compile();
 
-    private static boolean isSupported(int type, String model) {
+    private boolean isSupported(int type, String model) {
         return hasGps(type) || hasLbs(type) || hasStatus(type, model);
     }
 
-    private static boolean hasGps(int type) {
+    private boolean hasGps(int type) {
         switch (type) {
             case MSG_GPS:
             case MSG_GPS_LBS_1:
@@ -183,15 +187,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_EXTEND:
             case MSG_GPS_LBS_7:
             case MSG_GPS_LBS_RFID:
-            case MSG_FENCE_SINGLE:
             case MSG_FENCE_MULTI:
                 return true;
+            case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
+                return variant != Variant.SEEWORLD;
             default:
                 return false;
         }
     }
 
-    private static boolean hasLbs(int type) {
+    private boolean hasLbs(int type) {
         switch (type) {
             case MSG_LBS_STATUS:
             case MSG_GPS_LBS_1:
@@ -207,17 +212,18 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_GPS_LBS_STATUS_5:
             case MSG_GPS_LBS_7:
             case MSG_GPS_LBS_RFID:
-            case MSG_FENCE_SINGLE:
             case MSG_FENCE_MULTI:
             case MSG_LBS_ALARM:
             case MSG_LBS_ADDRESS:
                 return true;
+            case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
+                return variant != Variant.SEEWORLD;
             default:
                 return false;
         }
     }
 
-    private static boolean hasStatus(int type, String model) {
+    private boolean hasStatus(int type, String model) {
         switch (type) {
             case MSG_STATUS:
             case MSG_STATUS_2:
@@ -232,6 +238,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 return true;
             case MSG_GPS_LBS_2:
                 return "NT20".equalsIgnoreCase(model);
+            case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
+                return variant == Variant.SEEWORLD;
             default:
                 return false;
         }
@@ -347,6 +355,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
+        int cellType = type == MSG_GPS_LBS_8 ? buf.readUnsignedByte() : 0;
         int mcc = buf.readUnsignedShort();
         int mnc;
         if (BitUtil.check(mcc, 15) || type == MSG_GPS_LBS_6 || variant == Variant.SL4X) {
@@ -355,18 +364,24 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             mnc = buf.readUnsignedByte();
         }
         int lac;
-        if (type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7 || type == MSG_GPS_LBS_STATUS_5) {
+        if (cellType >= 3 || type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7 || type == MSG_GPS_LBS_STATUS_5) {
             lac = buf.readInt();
         } else {
             lac = buf.readUnsignedShort();
         }
         long cid;
-        if (type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7 || variant == Variant.SL4X || type == MSG_GPS_LBS_STATUS_5) {
+        if (cellType >= 3 || type == MSG_LBS_ALARM || type == MSG_GPS_LBS_7 || variant == Variant.SL4X
+                || type == MSG_GPS_LBS_STATUS_5) {
             cid = buf.readLong();
-        } else if (type == MSG_GPS_LBS_6 || variant == Variant.SEEWORLD) {
+        } else if (type == MSG_GPS_LBS_6 || type == MSG_IBUTTON || variant == Variant.SEEWORLD) {
             cid = buf.readUnsignedInt();
         } else {
             cid = buf.readUnsignedMedium();
+        }
+        if (cellType >= 3) {
+            buf.readUnsignedShort(); // rssi
+        } else if (type == MSG_GPS_LBS_8) {
+            buf.readUnsignedByte(); // rssi
         }
 
         position.setNetwork(new Network(CellTower.from(BitUtil.to(mcc, 15), mnc, lac, cid)));
@@ -415,14 +430,15 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         }
     }
 
-    private String decodeAlarm(short value, boolean modelLW, boolean modelSW) {
+    private String decodeAlarm(int value, boolean modelLW, boolean modelSW, boolean modelVL) {
         return switch (value) {
             case 0x01 -> Position.ALARM_SOS;
             case 0x02 -> Position.ALARM_POWER_CUT;
-            case 0x03, 0x09 -> Position.ALARM_VIBRATION;
+            case 0x03 -> Position.ALARM_VIBRATION;
             case 0x04 -> Position.ALARM_GEOFENCE_ENTER;
             case 0x05 -> Position.ALARM_GEOFENCE_EXIT;
             case 0x06 -> Position.ALARM_OVERSPEED;
+            case 0x09 -> modelVL ? Position.ALARM_TOW : Position.ALARM_VIBRATION;
             case 0x0E, 0x0F -> Position.ALARM_LOW_BATTERY;
             case 0x11 -> Position.ALARM_POWER_OFF;
             case 0x0C, 0x13, 0x25 -> Position.ALARM_TAMPERING;
@@ -436,7 +452,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case 0x28 -> modelSW ? Position.ALARM_CORNERING : Position.ALARM_BRAKING;
             case 0x29 -> modelSW ? Position.ALARM_ACCIDENT : Position.ALARM_ACCELERATION;
             case 0x2C -> Position.ALARM_ACCIDENT;
-            case 0x30 -> Position.ALARM_JAMMING;
+            case 0x30 -> modelVL ? Position.ALARM_BRAKING : Position.ALARM_JAMMING;
             default -> null;
         };
     }
@@ -464,6 +480,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         boolean modelLW = model != null && model.toUpperCase().startsWith("LW");
         boolean modelSW = "SEEWORLD".equalsIgnoreCase(model);
         boolean modelNT20 = "NT20".equalsIgnoreCase(model);
+        boolean modelVL = model != null && Set.of("VL103", "LL303", "VL512", "G18").contains(model);
 
         if (type == MSG_LOGIN) {
 
@@ -788,6 +805,16 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             double temperature = BitUtil.to(value, 15) * 0.1;
             position.set(Position.PREFIX_TEMP + 1, BitUtil.check(value, 15) ? temperature : -temperature);
 
+        } else if (type == MSG_IBUTTON) {
+
+            buf.skipBytes(8); // imei
+
+            decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
+
+            decodeLbs(position, buf, type, false);
+
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readLong()));
+
         } else if (isSupported(type, model)) {
 
             if (type == MSG_LBS_STATUS && variant == Variant.SPACE10X) {
@@ -796,6 +823,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_TYPE, type);
 
+            if (type == MSG_GPS_LBS_1 && "QH302R".equals(model)) {
+                buf.skipBytes(8); // imei
+            }
             if (type == MSG_GPS_LBS_2 && modelNT20) {
                 buf.readUnsignedByte(); // location source type
                 buf.skipBytes(8); // imei
@@ -827,7 +857,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     int satellites = BitUtil.between(signal, 10, 15) + BitUtil.between(signal, 5, 10);
                     position.set(Position.KEY_SATELLITES, satellites);
                     position.set(Position.KEY_RSSI, BitUtil.to(signal, 5));
-                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW));
+                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, modelVL));
                     buf.readUnsignedByte(); // language
                     position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     int mode = buf.readUnsignedByte();
@@ -858,18 +888,25 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     if (type == MSG_STATUS && modelLW) {
                         position.set(Position.KEY_POWER, BitUtil.to(buf.readUnsignedShort(), 12) / 10.0);
                     } else {
-                        short extension = buf.readUnsignedByte();
+                        int extension = buf.readUnsignedByte();
+                        if (type == MSG_GPS_LBS_STATUS_3 || type == MSG_FENCE_MULTI) {
+                            extension += (buf.getUnsignedByte(buf.readerIndex()) & 0xf) << 8;
+                        }
                         if (type == MSG_STATUS && modelSW) {
                             position.set(Position.KEY_POWER, (double) extension);
                         } else if (variant != Variant.VXT01) {
-                            position.addAlarm(decodeAlarm(extension, modelLW, modelSW));
+                            position.addAlarm(decodeAlarm(extension, modelLW, modelSW, modelVL));
                         }
                     }
                 }
             }
 
-            if (type == MSG_STATUS_2) {
+            if (type == MSG_STATUS_2 || type == MSG_GPS_LBS_STATUS_5 || type == MSG_GPS_LBS_STATUS_3
+                    || type == MSG_FENCE_MULTI || modelNT20 && type == MSG_GPS_LBS_2) {
                 buf.readUnsignedByte(); // language
+            }
+
+            if (type == MSG_STATUS_2) {
                 while (buf.readableBytes() > 6) {
                     int moduleType = buf.readUnsignedShort();
                     int moduleLength = buf.readUnsignedByte();
@@ -883,7 +920,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (type == MSG_GPS_LBS_STATUS_5) {
-                buf.readUnsignedByte(); // language
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
                 position.set(Position.KEY_HOURS, buf.readUnsignedInt() * 1000);
                 buf.skipBytes(8); // terminal id
@@ -924,7 +960,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     decodeStatus(position, buf);
                     position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW));
+                    position.addAlarm(decodeAlarm(buf.readUnsignedByte(), modelLW, modelSW, modelVL));
                     position.set("oil", buf.readUnsignedShort());
                     int temperature = buf.readUnsignedByte();
                     if (BitUtil.check(temperature, 7)) {
@@ -990,7 +1026,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (modelNT20 && type == MSG_GPS_LBS_2) {
-                buf.readUnsignedByte(); // language
                 position.set(Position.KEY_ODOMETER, buf.readMedium());
                 position.set(Position.KEY_HOURS, buf.readMedium() * 60 * 1000);
             }
@@ -1086,7 +1121,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
 
-        buf.readUnsignedShort(); // length
+        int length = buf.readUnsignedShort();
         int type = buf.readUnsignedByte();
 
         if (type == MSG_STRING_INFO) {
@@ -1169,7 +1204,12 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             } else if (subType == 0x0b) {
 
-                position.set("networkTechnology", buf.readByte() > 0 ? "4G" : "2G");
+                int dataLength = length - 6;
+                if (dataLength == 1) {
+                    position.set("networkTechnology", buf.readByte() > 0 ? "4G" : "2G");
+                } else if (dataLength == 2) {
+                    position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
+                }
                 return position;
 
             } else if (subType == 0x0d) {
@@ -1185,7 +1225,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 position.set(Position.PREFIX_TEMP + 1, parser.nextDouble(0));
-                position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble(0));
+                position.set(Position.KEY_FUEL, parser.nextDouble(0));
 
                 return position;
 
@@ -1201,6 +1241,13 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // checksum
                     buf.readUnsignedByte(); // footer
                 }
+                return position;
+
+            } else if (subType == 0x1e) {
+
+                position.set(Position.PREFIX_TEMP + 1, buf.readInt() / 10.0);
+                position.set(Position.KEY_HUMIDITY, buf.readInt() / 10.0);
+
                 return position;
 
             }
@@ -1265,7 +1312,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 if (values.length >= 2) {
                     switch (Integer.parseInt(values[0].substring(0, 2), 16)) {
                         case 40 -> position.set(Position.KEY_ODOMETER, Integer.parseInt(values[1], 16) * 0.01);
-                        case 43 -> position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[1], 16) * 0.01);
+                        case 43 -> position.set(Position.KEY_FUEL, Integer.parseInt(values[1], 16) * 0.01);
                         case 45 -> position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[1], 16) * 0.01);
                         case 53 -> position.set(Position.KEY_OBD_SPEED, Integer.parseInt(values[1], 16) * 0.01);
                         case 54 -> position.set(Position.KEY_RPM, Integer.parseInt(values[1], 16) * 0.01);
@@ -1355,6 +1402,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_EVENT, buf.readUnsignedByte());
                         buf.readUnsignedIntLE(); // time
                         buf.skipBytes(buf.readUnsignedByte()); // content
+                    }
+                    case 0x7f -> {
+                        position.set("tag1Id", ByteBufUtil.hexDump(buf.readSlice(6)));
+                        position.set("tag1Battery", buf.readUnsignedShort() / 1000.0);
+                        position.set("tag1BatteryLevel", buf.readUnsignedByte());
+                        position.set("tag1Temp", buf.readShort() / 10.0);
+                        position.set("tag1Humidity", buf.readShort());
+                        position.set("tag1Status", buf.readUnsignedByte());
                     }
                     default -> buf.skipBytes(moduleLength);
                 }
@@ -1463,6 +1518,17 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             return position;
 
+        } else if (type == MSG_GPS_LBS_8) {
+
+            decodeGps(position, buf, false, deviceSession.get(DeviceSession.KEY_TIMEZONE));
+
+            buf.readUnsignedByte(); // data upload mode
+            buf.readUnsignedByte(); // re-upload
+
+            decodeLbs(position, buf, type, false);
+
+            return position;
+
         }
 
         return null;
@@ -1513,6 +1579,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         } else if (header == 0x7878 && type == MSG_GPS_LBS_2 && length == 0x2f) {
             variant = Variant.SEEWORLD;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_STATUS_1 && length == 0x26) {
+            variant = Variant.SEEWORLD;
+        } else if (header == 0x7878 && type == MSG_STATUS_3 && length == 0x0c) {
             variant = Variant.SEEWORLD;
         } else if (header == 0x7878 && type == MSG_GPS_LBS_RFID && length == 0x28) {
             variant = Variant.RFID;

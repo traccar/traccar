@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.traccar.storage.StorageException;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
@@ -84,16 +85,21 @@ public class SecurityRequestFilter implements ContainerRequestFilter {
                     throw new WebApplicationException(e);
                 }
 
-            } else if (request.getSession() != null) {
+            } else {
 
-                Long userId = (Long) request.getSession().getAttribute(SessionHelper.USER_ID_KEY);
-                Date expiration = (Date) request.getSession().getAttribute(SessionHelper.EXPIRATION_KEY);
-                if (userId != null) {
-                    User user = injector.getInstance(PermissionsService.class).getUser(userId);
-                    if (user != null) {
-                        user.checkDisabled();
-                        statisticsManager.registerRequest(userId);
-                        securityContext = new UserSecurityContext(new UserPrincipal(userId, expiration));
+                if (SessionHelper.isSessionOriginValid(request)) {
+                    HttpSession session = request.getSession(false);
+                    Long userId = (Long) session.getAttribute(SessionHelper.USER_ID_KEY);
+                    Date expiration = (Date) session.getAttribute(SessionHelper.EXPIRATION_KEY);
+                    if (expiration != null && expiration.before(new Date())) {
+                        session.invalidate();
+                    } else if (userId != null) {
+                        User user = injector.getInstance(PermissionsService.class).getUser(userId);
+                        if (user != null) {
+                            user.checkDisabled();
+                            statisticsManager.registerRequest(userId);
+                            securityContext = new UserSecurityContext(new UserPrincipal(userId, expiration));
+                        }
                     }
                 }
 

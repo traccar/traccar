@@ -41,7 +41,7 @@ public class BehaviorEventHandler extends BaseEventHandler {
     public void onPosition(Position position, Callback callback) {
 
         Position lastPosition = cacheManager.getPosition(position.getDeviceId());
-        if (lastPosition != null && position.getFixTime().equals(lastPosition.getFixTime())) {
+        if (lastPosition != null && !position.getFixTime().equals(lastPosition.getFixTime())) {
             double acceleration = UnitsConverter.mpsFromKnots(position.getSpeed() - lastPosition.getSpeed()) * 1000
                     / (position.getFixTime().getTime() - lastPosition.getFixTime().getTime());
             if (accelerationThreshold != 0 && acceleration >= accelerationThreshold) {

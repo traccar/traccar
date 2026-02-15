@@ -198,7 +198,6 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         PORTS.put("autotrack", 5172);
         PORTS.put("tek", 5173);
         PORTS.put("wristband", 5174);
-        PORTS.put("lacak", 5175);
         PORTS.put("milesmate", 5176);
         PORTS.put("anytrek", 5177);
         PORTS.put("smartsole", 5178);
@@ -281,6 +280,10 @@ public class PortConfigSuffix extends ConfigSuffix<Integer> {
         PORTS.put("valtrack", 5255);
         PORTS.put("snapper", 5256);
         PORTS.put("gl601", 5257);
+        PORTS.put("hyn600", 5258);
+        PORTS.put("jmak", 5259);
+        PORTS.put("bws", 5260);
+        PORTS.put("ttnhttp", 5261);
     }
 
     PortConfigSuffix(String key, List<KeyType> types) {

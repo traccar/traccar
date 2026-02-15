@@ -387,7 +387,11 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
             position.setAltitude(buf.readFloatLE());
             position.setLongitude(buf.readFloatLE());
             position.setLatitude(buf.readFloatLE());
-            position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) * 0.1));
+            if (header == 0x2626) {
+                buf.readUnsignedShort(); // reserved or hdop
+            } else {
+                position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) * 0.1));
+            }
             position.setCourse(buf.readUnsignedShort());
 
         } else {
@@ -448,10 +452,15 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
 
         } else {
 
+            String model = getDeviceModel(deviceSession);
+            if ("TLW2-2BL".equals(model)) {
+                position.set(Position.KEY_BATTERY, BcdUtil.readInteger(buf, 4) / 100.0);
+            }
             if (buf.readableBytes() >= 2) {
-                position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) * 0.01);
+                position.set(Position.KEY_POWER, BcdUtil.readInteger(buf, 4) / 100.0);
             }
             if (buf.readableBytes() >= 19) {
+                position.setSpeed(UnitsConverter.knotsFromKph(BcdUtil.readInteger(buf, 4) / 10.0));
                 position.set(Position.KEY_OBD_SPEED, BcdUtil.readInteger(buf, 4) * 0.01);
                 position.set(Position.KEY_FUEL_USED, buf.readUnsignedInt() * 0.001);
                 position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt() * 0.001);
@@ -477,7 +486,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_THROTTLE, value);
                 }
                 if (value != 0xff) {
-                    position.set(Position.KEY_FUEL_LEVEL, value);
+                    position.set(Position.KEY_FUEL, value);
                 }
             }
         }

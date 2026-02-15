@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ import java.util.regex.Pattern;
 import java.util.Set;
 
 public class TrvProtocolDecoder extends BaseProtocolDecoder {
+
+    private static final Set<String> IGNORE_RESPONSE = Set.of(
+        "AP12", "AP14", "AP33", "AP34", "AP40", "AP76", "AP77", "AP84", "AP85", "AP86", "AP87");
 
     public TrvProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -181,14 +184,15 @@ public class TrvProtocolDecoder extends BaseProtocolDecoder {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + "," + time + ",0#", remoteAddress));
             } else if (type.equals("AP14") && !id.equals("IW")) {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + ",0.000,0.000#", remoteAddress));
-            } else if (!Set.of("AP12", "AP14", "AP33", "AP34", "AP40", "AP76", "AP77", "AP84", "AP85").contains(type)
+            } else if (!IGNORE_RESPONSE.contains(type)
                     && !sentence.substring(responseHeader.length() + 1).matches("^\\d{6}$")) {
                 channel.writeAndFlush(new NetworkMessage(responseHeader + "#", remoteAddress));
             }
         }
 
         if (type.equals("AP00")) {
-            getDeviceSession(channel, remoteAddress, sentence.substring(id.length() + type.length()));
+            String imei = sentence.split(",")[0].substring(id.length() + type.length());
+            getDeviceSession(channel, remoteAddress, imei);
             return null;
         }
 

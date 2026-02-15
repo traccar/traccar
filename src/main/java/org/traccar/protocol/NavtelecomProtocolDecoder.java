@@ -177,6 +177,18 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
 
                 sendResponse(channel, remoteAddress, receiver, sender, payload);
 
+            } else if (type.startsWith("*@C")) {
+
+                DeviceSession deviceSession = getDeviceSession(channel, remoteAddress);
+                if (deviceSession == null) {
+                    return null;
+                }
+
+                Position position = new Position(getProtocolName());
+                position.setDeviceId(deviceSession.getDeviceId());
+                position.set(Position.KEY_RESULT, buf.readCharSequence(length, StandardCharsets.US_ASCII).toString());
+                return position;
+
             }
 
         } else {
@@ -293,11 +305,11 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 43:
                                     value = buf.readUnsignedShortLE();
                                     position.set(
-                                            Position.KEY_FUEL_LEVEL + (j + 1 - 38), (value < 65500) ? value : null);
+                                            Position.KEY_FUEL + (j + 1 - 38), (value < 65500) ? value : null);
                                     break;
                                 case 44:
                                     value = buf.readUnsignedShortLE();
-                                    position.set(Position.KEY_FUEL_LEVEL, (value < 65500) ? value : null);
+                                    position.set(Position.KEY_FUEL, (value < 65500) ? value : null);
                                     break;
                                 case 45:
                                 case 46:

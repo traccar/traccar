@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,15 +57,16 @@ import java.util.List;
 public class NotificatorFirebase extends Notificator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificatorFirebase.class);
+
     private final Storage storage;
     private final CacheManager cacheManager;
+    private final FirebaseMessaging firebaseMessaging;
 
     @Inject
     public NotificatorFirebase(
             Config config, NotificationFormatter notificationFormatter,
             Storage storage, CacheManager cacheManager) throws IOException {
-
-        super(notificationFormatter, "short");
+        super(notificationFormatter);
         this.storage = storage;
         this.cacheManager = cacheManager;
 
@@ -76,7 +77,8 @@ public class NotificatorFirebase extends Notificator {
                 .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                 .build();
 
-        FirebaseApp.initializeApp(options);
+        firebaseMessaging = FirebaseMessaging.getInstance(
+                FirebaseApp.initializeApp(options, "manager"));
     }
 
     @Override
@@ -86,21 +88,24 @@ public class NotificatorFirebase extends Notificator {
             List<String> registrationTokens = new ArrayList<>(
                     Arrays.asList(user.getString("notificationTokens").split("[, ]")));
 
+            var androidConfig = AndroidConfig.builder()
+                    .setNotification(AndroidNotification.builder().setSound("default").build());
+
+            var apnsConfig = ApnsConfig.builder()
+                    .setAps(Aps.builder().setSound("default").build());
+
+            if (message.priority()) {
+                androidConfig.setPriority(AndroidConfig.Priority.HIGH);
+                apnsConfig.putHeader("apns-priority", "10");
+            }
+
             var messageBuilder = MulticastMessage.builder()
                     .setNotification(com.google.firebase.messaging.Notification.builder()
-                            .setTitle(message.getSubject())
-                            .setBody(message.getBody())
+                            .setTitle(message.subject())
+                            .setBody(message.digest())
                             .build())
-                    .setAndroidConfig(AndroidConfig.builder()
-                            .setNotification(AndroidNotification.builder()
-                                    .setSound("default")
-                                    .build())
-                            .build())
-                    .setApnsConfig(ApnsConfig.builder()
-                            .setAps(Aps.builder()
-                                    .setSound("default")
-                                    .build())
-                            .build())
+                    .setAndroidConfig(androidConfig.build())
+                    .setApnsConfig(apnsConfig.build())
                     .addAllTokens(registrationTokens);
 
             if (event != null) {
@@ -108,7 +113,7 @@ public class NotificatorFirebase extends Notificator {
             }
 
             try {
-                var result = FirebaseMessaging.getInstance().sendEachForMulticast(messageBuilder.build());
+                var result = firebaseMessaging.sendEachForMulticast(messageBuilder.build());
                 List<String> failedTokens = new LinkedList<>();
                 var iterator = result.getResponses().listIterator();
                 while (iterator.hasNext()) {
@@ -125,7 +130,7 @@ public class NotificatorFirebase extends Notificator {
                 if (!failedTokens.isEmpty()) {
                     registrationTokens.removeAll(failedTokens);
                     if (registrationTokens.isEmpty()) {
-                        user.getAttributes().remove("notificationTokens");
+                        user.removeAttribute("notificationTokens");
                     } else {
                         user.set("notificationTokens", String.join(",", registrationTokens));
                     }

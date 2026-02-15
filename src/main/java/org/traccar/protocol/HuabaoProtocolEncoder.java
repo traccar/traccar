@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Set;
 
 public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
 
@@ -49,11 +50,24 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
 
             switch (command.getType()) {
                 case Command.TYPE_CUSTOM:
-                    data.writeByte(1); // flag
-                    Charset charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
-                    data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
-                    return HuabaoProtocolDecoder.formatMessage(
-                            0x7e, HuabaoProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
+                    String model = getDeviceModel(command.getDeviceId());
+                    if (model != null && Set.of("AL300", "GL100", "VL300").contains(model)) {
+                        data.writeByte(1); // number of parameters
+                        data.writeInt(0xF030); // AT command transparent transmission
+                        int length = command.getString(Command.KEY_DATA).length();
+                        data.writeByte(length);
+                        data.writeCharSequence(command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII);
+                        return HuabaoProtocolDecoder.formatMessage(
+                                0x7e, HuabaoProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
+                    } else if ("BSJ".equals(model)) {
+                        data.writeByte(1); // flag
+                        var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
+                        data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
+                        return HuabaoProtocolDecoder.formatMessage(
+                                0x7e, HuabaoProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
+                    } else {
+                        return Unpooled.wrappedBuffer(DataConverter.parseHex(command.getString(Command.KEY_DATA)));
+                    }
                 case Command.TYPE_REBOOT_DEVICE:
                     data.writeByte(1); // number of parameters
                     data.writeByte(0x23); // parameter id
@@ -86,7 +100,12 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                         return HuabaoProtocolDecoder.formatMessage(
                                 0x7e, HuabaoProtocolDecoder.MSG_OIL_CONTROL, id, false, data);
                     } else {
-                        data.writeByte(command.getType().equals(Command.TYPE_ENGINE_STOP) ? 0xf0 : 0xf1);
+                        if ("VL300".equals(getDeviceModel(command.getDeviceId()))) {
+                            data.writeCharSequence(command.getType().equals(Command.TYPE_ENGINE_STOP) ? "#0;1" : "#0;0",
+                                    StandardCharsets.US_ASCII);
+                        } else {
+                            data.writeByte(command.getType().equals(Command.TYPE_ENGINE_STOP) ? 0xf0 : 0xf1);
+                        }
                         return HuabaoProtocolDecoder.formatMessage(
                                 0x7e, HuabaoProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                     }

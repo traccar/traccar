@@ -20,8 +20,8 @@ public class GeofenceCircleTest {
     @Test
     public void testContainsCircle() throws ParseException {
         GeofenceGeometry geofenceGeometry = new GeofenceCircle("CIRCLE (55.75414 37.6204, 100)");
-        assertTrue(geofenceGeometry.containsPoint(null, null, 55.75477, 37.62025));
-        assertFalse(geofenceGeometry.containsPoint(null, null, 55.75545, 37.61921));
+        assertTrue(geofenceGeometry.containsPoint(55.75477, 37.62025));
+        assertFalse(geofenceGeometry.containsPoint(55.75545, 37.61921));
     }
 
 }

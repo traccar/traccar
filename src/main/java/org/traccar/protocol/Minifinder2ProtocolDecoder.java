@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2019 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     int endIndex = buf.readUnsignedByte() + buf.readerIndex();
                     int key = buf.readUnsignedByte();
                     switch (key) {
-                        case 0x11, 0x21, 0x22 -> {
+                        case 0x11 -> {
                             body.writeByte(9 + 1); // length
                             body.writeByte(key);
                             body.writeIntLE(0); // latitude
@@ -78,13 +78,16 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     buf.readerIndex(endIndex);
                 }
-            } else {
-                body.writeByte(1); // key length
-                body.writeByte(0); // success
             }
 
             ByteBuf content = Unpooled.buffer();
-            content.writeByte(type == MSG_SERVICES ? type : MSG_RESPONSE);
+            if (body.isReadable()) {
+                content.writeByte(MSG_SERVICES);
+            } else {
+                content.writeByte(MSG_RESPONSE);
+                body.writeByte(1); // key length
+                body.writeByte(0); // success
+            }
             content.writeBytes(body);
             body.release();
 
@@ -165,11 +168,24 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (BitUtil.check(alarm, 2)) {
                             position.addAlarm(Position.ALARM_FALL_DOWN);
                         }
+                        for (int i = 0; i < 4; i++) {
+                            if (BitUtil.check(alarm, i + 4)) {
+                                if (BitUtil.check(alarm, i + 26)) {
+                                    position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+                                } else {
+                                    position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                                }
+                                position.set(Position.KEY_GEOFENCE, i + 1);
+                            }
+                        }
                         if (BitUtil.check(alarm, 8)) {
                             position.addAlarm(Position.ALARM_POWER_OFF);
                         }
                         if (BitUtil.check(alarm, 9)) {
                             position.addAlarm(Position.ALARM_POWER_ON);
+                        }
+                        if (BitUtil.check(alarm, 10)) {
+                            position.addAlarm(Position.ALARM_MOVEMENT);
                         }
                         if (BitUtil.check(alarm, 12)) {
                             position.addAlarm(Position.ALARM_SOS);
@@ -180,6 +196,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (length == 5) {
                             position.setDeviceTime(new Date(buf.readUnsignedIntLE() * 1000));
                         }
+                        position.set(Position.KEY_EVENT, alarm);
                         break;
                     case 0x14:
                         position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
@@ -216,6 +233,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             position.getNetwork().addCellTower(CellTower.from(mcc, mnc, lac, cid, rssi));
                         }
                         break;
+                    case 0x19:
                     case 0x22:
                         if (position.getNetwork() == null) {
                             position.setNetwork(new Network());
@@ -225,6 +243,9 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
                             position.getNetwork().addWifiAccessPoint(WifiAccessPoint.from(
                                     mac.substring(0, mac.length() - 1), rssi));
+                            if (key == 0x19) {
+                                buf.skipBytes(buf.readUnsignedByte()); // name
+                            }
                         }
                         break;
                     case 0x23:
@@ -259,6 +280,14 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY_LEVEL, BitUtil.from(status, 24));
                         position.set(Position.KEY_STATUS, status);
                         break;
+                    case 0x25:
+                        position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
+                        position.set("callStatus", buf.readUnsignedByte());
+                        position.set("callDuration", buf.readUnsignedShortLE());
+                        position.set("callResult", buf.readUnsignedByte());
+                        position.set(Position.KEY_PHONE, buf.readCharSequence(
+                                endIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString());
+                        break;
                     case 0x27:
                         position.setLatitude(buf.readIntLE() * 0.0000001);
                         position.setLongitude(buf.readIntLE() * 0.0000001);
@@ -267,18 +296,31 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         position.setAltitude(buf.readShortLE());
                         break;
                     case 0x28:
+                    case 0x2c:
                         int beaconFlags = buf.readUnsignedByte();
                         position.set("tagId", readTagId(buf));
                         position.set("tagRssi", (int) buf.readByte());
                         position.set("tag1mRssi", (int) buf.readByte());
+                        if (key == 0x2c) {
+                            position.set("tagBattery", buf.readUnsignedByte());
+                        }
                         if (BitUtil.check(beaconFlags, 7)) {
                             position.setLatitude(buf.readIntLE() * 0.0000001);
                             position.setLongitude(buf.readIntLE() * 0.0000001);
                             position.setValid(true);
                         }
                         if (BitUtil.check(beaconFlags, 6)) {
+                            int descriptionLength;
+                            if (key == 0x2c) {
+                                descriptionLength = buf.readUnsignedByte();
+                            } else {
+                                descriptionLength = endIndex - buf.readerIndex();
+                            }
                             position.set("description", buf.readCharSequence(
-                                    endIndex - buf.readerIndex(), StandardCharsets.US_ASCII).toString());
+                                    descriptionLength, StandardCharsets.US_ASCII).toString());
+                        }
+                        if (key == 0x2c) {
+                            position.set("tagTemp", buf.readShort() / 10.0);
                         }
                         break;
                     case 0x2A:

@@ -10,6 +10,9 @@ public class Tr20ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Tr20ProtocolDecoder(null));
 
+        verifyNull(decoder, text(
+                "%%0630,A,250523152852,N0951.6838W08357.0221,000,000,T0;F2,00020000,108,CFG:0.00|"));
+
         verifyPosition(decoder, text(
                 "%%0561,A,241025160359,N0951.6626W08357.0266,000,025,F0.0,00020000,108,CFG:0.12|"));
 

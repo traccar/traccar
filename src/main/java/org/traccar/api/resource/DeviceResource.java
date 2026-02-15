@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,9 @@
  */
 package org.traccar.api.resource;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseObjectResource;
 import org.traccar.api.signature.TokenManager;
 import org.traccar.broadcast.BroadcastService;
@@ -53,10 +55,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -84,34 +86,43 @@ public class DeviceResource extends BaseObjectResource<Device> {
     @Inject
     private TokenManager tokenManager;
 
+    @Inject
+    private LogAction actionLogger;
+
+    @Context
+    private HttpServletRequest request;
+
     public DeviceResource() {
         super(Device.class);
     }
 
     @GET
-    public Collection<Device> get(
+    public Stream<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds) throws StorageException {
+            @QueryParam("id") List<Long> deviceIds,
+            @QueryParam("excludeAttributes") boolean excludeAttributes) throws StorageException {
+
+        Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
 
         if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
 
             List<Device> result = new LinkedList<>();
             for (String uniqueId : uniqueIds) {
                 result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
+                        columns,
                         new Condition.And(
                                 new Condition.Equals("uniqueId", uniqueId),
                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
             }
             for (Long deviceId : deviceIds) {
                 result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
+                        columns,
                         new Condition.And(
                                 new Condition.Equals("id", deviceId),
                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
             }
-            return result;
+            return result.stream();
 
         } else {
 
@@ -130,8 +141,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 }
             }
 
-            return storage.getObjects(baseClass, new Request(
-                    new Columns.All(), Condition.merge(conditions), new Order("name")));
+            return storage.getObjectsStream(baseClass, new Request(
+                    columns, Condition.merge(conditions), new Order("name")));
 
         }
     }
@@ -172,7 +183,7 @@ public class DeviceResource extends BaseObjectResource<Device> {
             throw new IllegalArgumentException();
         }
 
-        LogAction.resetAccumulators(getUserId(), entity.getDeviceId());
+        actionLogger.resetAccumulators(request, getUserId(), entity.getDeviceId());
         return Response.noContent().build();
     }
 
@@ -182,7 +193,6 @@ public class DeviceResource extends BaseObjectResource<Device> {
             case "image/png" -> "png";
             case "image/gif" -> "gif";
             case "image/webp" -> "webp";
-            case "image/svg+xml" -> "svg";
             default -> throw new IllegalArgumentException("Unsupported image type");
         };
     }

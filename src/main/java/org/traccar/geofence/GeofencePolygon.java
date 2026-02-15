@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2020 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,47 +17,30 @@ package org.traccar.geofence;
 
 import org.locationtech.spatial4j.context.SpatialContext;
 import org.locationtech.spatial4j.context.jts.JtsSpatialContextFactory;
+import org.locationtech.spatial4j.distance.DistanceUtils;
 import org.locationtech.spatial4j.shape.ShapeFactory;
 import org.locationtech.spatial4j.shape.jts.JtsShapeFactory;
-import org.traccar.config.Config;
-import org.traccar.model.Geofence;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-
-import static org.locationtech.spatial4j.distance.DistanceUtils.DEG_TO_KM;
+import java.util.List;
 
 public class GeofencePolygon extends GeofenceGeometry {
 
-    public GeofencePolygon() {
-    }
+    private final List<Coordinate> coordinates;
+
+    private final double[] constant;
+    private final double[] multiple;
+
+    private final boolean needNormalize;
 
     public GeofencePolygon(String wkt) throws ParseException {
-        fromWkt(wkt);
-    }
-
-    private ArrayList<Coordinate> coordinates;
-
-    private double[] constant;
-    private double[] multiple;
-
-    private boolean needNormalize = false;
-
-    private void preCalculate() {
-        if (coordinates == null) {
-            return;
-        }
+        coordinates = fromWkt(wkt);
+        calculateBoundary(coordinates, 0);
 
         int polyCorners = coordinates.size();
         int i;
         int j = polyCorners - 1;
-
-        if (constant != null) {
-            constant = null;
-        }
-        if (multiple != null) {
-            multiple = null;
-        }
 
         constant = new double[polyCorners];
         multiple = new double[polyCorners];
@@ -65,26 +48,26 @@ public class GeofencePolygon extends GeofenceGeometry {
         boolean hasNegative = false;
         boolean hasPositive = false;
         for (i = 0; i < polyCorners; i++) {
-            if (coordinates.get(i).getLon() > 90) {
+            if (coordinates.get(i).lon() > 90) {
                 hasPositive = true;
-            } else if (coordinates.get(i).getLon() < -90) {
+            } else if (coordinates.get(i).lon() < -90) {
                 hasNegative = true;
             }
         }
         needNormalize = hasPositive && hasNegative;
 
         for (i = 0; i < polyCorners; j = i++) {
-            if (normalizeLon(coordinates.get(j).getLon()) == normalizeLon(coordinates.get(i).getLon())) {
-                constant[i] = coordinates.get(i).getLat();
+            if (normalizeLon(coordinates.get(j).lon()) == normalizeLon(coordinates.get(i).lon())) {
+                constant[i] = coordinates.get(i).lon();
                 multiple[i] = 0;
             } else {
-                constant[i] = coordinates.get(i).getLat()
-                        - (normalizeLon(coordinates.get(i).getLon()) * coordinates.get(j).getLat())
-                        / (normalizeLon(coordinates.get(j).getLon()) - normalizeLon(coordinates.get(i).getLon()))
-                        + (normalizeLon(coordinates.get(i).getLon()) * coordinates.get(i).getLat())
-                        / (normalizeLon(coordinates.get(j).getLon()) - normalizeLon(coordinates.get(i).getLon()));
-                multiple[i] = (coordinates.get(j).getLat() - coordinates.get(i).getLat())
-                        / (normalizeLon(coordinates.get(j).getLon()) - normalizeLon(coordinates.get(i).getLon()));
+                constant[i] = coordinates.get(i).lat()
+                        - (normalizeLon(coordinates.get(i).lon()) * coordinates.get(j).lat())
+                        / (normalizeLon(coordinates.get(j).lon()) - normalizeLon(coordinates.get(i).lon()))
+                        + (normalizeLon(coordinates.get(i).lon()) * coordinates.get(i).lat())
+                        / (normalizeLon(coordinates.get(j).lon()) - normalizeLon(coordinates.get(i).lon()));
+                multiple[i] = (coordinates.get(j).lat() - coordinates.get(i).lat())
+                        / (normalizeLon(coordinates.get(j).lon()) - normalizeLon(coordinates.get(i).lon()));
             }
         }
     }
@@ -97,7 +80,7 @@ public class GeofencePolygon extends GeofenceGeometry {
     }
 
     @Override
-    public boolean containsPoint(Config config, Geofence geofence, double latitude, double longitude) {
+    protected boolean containsPointInternal(double latitude, double longitude) {
 
         int polyCorners = coordinates.size();
         int i;
@@ -106,10 +89,10 @@ public class GeofencePolygon extends GeofenceGeometry {
         boolean oddNodes = false;
 
         for (i = 0; i < polyCorners; j = i++) {
-            if (normalizeLon(coordinates.get(i).getLon()) < longitudeNorm
-                    && normalizeLon(coordinates.get(j).getLon()) >= longitudeNorm
-                    || normalizeLon(coordinates.get(j).getLon()) < longitudeNorm
-                    && normalizeLon(coordinates.get(i).getLon()) >= longitudeNorm) {
+            if (normalizeLon(coordinates.get(i).lon()) < longitudeNorm
+                    && normalizeLon(coordinates.get(j).lon()) >= longitudeNorm
+                    || normalizeLon(coordinates.get(j).lon()) < longitudeNorm
+                    && normalizeLon(coordinates.get(i).lon()) >= longitudeNorm) {
                 oddNodes ^= longitudeNorm * multiple[i] + constant[i] < latitude;
             }
         }
@@ -121,9 +104,9 @@ public class GeofencePolygon extends GeofenceGeometry {
         JtsShapeFactory jtsShapeFactory = new JtsSpatialContextFactory().newSpatialContext().getShapeFactory();
         ShapeFactory.PolygonBuilder polygonBuilder = jtsShapeFactory.polygon();
         for (Coordinate coordinate : coordinates) {
-            polygonBuilder.pointXY(coordinate.getLon(), coordinate.getLat());
+            polygonBuilder.pointXY(coordinate.lon(), coordinate.lat());
         }
-        return polygonBuilder.build().getArea(SpatialContext.GEO) * DEG_TO_KM * DEG_TO_KM;
+        return polygonBuilder.build().getArea(SpatialContext.GEO) * DistanceUtils.DEG_TO_KM * DistanceUtils.DEG_TO_KM;
     }
 
     @Override
@@ -131,21 +114,16 @@ public class GeofencePolygon extends GeofenceGeometry {
         StringBuilder buf = new StringBuilder();
         buf.append("POLYGON ((");
         for (Coordinate coordinate : coordinates) {
-            buf.append(coordinate.getLat());
+            buf.append(coordinate.lat());
             buf.append(" ");
-            buf.append(coordinate.getLon());
+            buf.append(coordinate.lon());
             buf.append(", ");
         }
         return buf.substring(0, buf.length() - 2) + "))";
     }
 
-    @Override
-    public void fromWkt(String wkt) throws ParseException {
-        if (coordinates == null) {
-            coordinates = new ArrayList<>();
-        } else {
-            coordinates.clear();
-        }
+    public List<Coordinate> fromWkt(String wkt) throws ParseException {
+        List<Coordinate> coordinates = new ArrayList<>();
 
         if (!wkt.startsWith("POLYGON")) {
             throw new ParseException("Mismatch geometry type", 0);
@@ -164,21 +142,22 @@ public class GeofencePolygon extends GeofenceGeometry {
             if (tokens.length != 2) {
                 throw new ParseException("Here must be two coordinates: " + commaToken, 0);
             }
-            Coordinate coordinate = new Coordinate();
+            double lat;
             try {
-                coordinate.setLat(Double.parseDouble(tokens[0]));
+                lat = Double.parseDouble(tokens[0]);
             } catch (NumberFormatException e) {
                 throw new ParseException(tokens[0] + " is not a double", 0);
             }
+            double lon;
             try {
-                coordinate.setLon(Double.parseDouble(tokens[1]));
+                lon = Double.parseDouble(tokens[1]);
             } catch (NumberFormatException e) {
                 throw new ParseException(tokens[1] + " is not a double", 0);
             }
-            coordinates.add(coordinate);
+            coordinates.add(new Coordinate(lat, lon));
         }
 
-        preCalculate();
+        return coordinates;
     }
 
 }

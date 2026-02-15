@@ -163,7 +163,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
                 yield true;
             }
             case "fuel.level", "can.fuel.level" -> {
-                position.set(Position.KEY_FUEL_LEVEL, ((JsonNumber) value).doubleValue());
+                position.set(Position.KEY_FUEL, ((JsonNumber) value).doubleValue());
                 yield true;
             }
             case "engine.rpm", "can.engine.rpm" -> {
@@ -263,6 +263,12 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             case "hood.open.status" -> {
                 if (value == JsonValue.TRUE) {
                     position.addAlarm(Position.ALARM_BONNET);
+                }
+                yield true;
+            }
+            case "external.powersource.status" -> {
+                if (value == JsonValue.TRUE) {
+                    position.addAlarm(Position.ALARM_POWER_CUT);
                 }
                 yield true;
             }

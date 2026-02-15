@@ -1,0 +1,14 @@
+#set($subject = "$device.name: Mediendatei empfangen")
+#set($digest = "$device.name $event.getString('media') empfangen: $event.getString('file') am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr")
+<!DOCTYPE html>
+<html>
+<body>
+Ger&auml;t: $device.name<br>
+Typ: $event.getString('media')<br>
+Datei: <a href="$webUrl/api/media/$device.uniqueId/$event.getString('file')">$event.getString('file')</a><br>
+am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr<br>
+Link: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+</body>
+</html>

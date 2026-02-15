@@ -34,14 +34,14 @@ public class NotificatorMail extends Notificator {
 
     @Inject
     public NotificatorMail(MailManager mailManager, NotificationFormatter notificationFormatter) {
-        super(notificationFormatter, "full");
+        super(notificationFormatter);
         this.mailManager = mailManager;
     }
 
     @Override
     public void send(User user, NotificationMessage message, Event event, Position position) throws MessageException {
         try {
-            mailManager.sendMessage(user, false, message.getSubject(), message.getBody());
+            mailManager.sendMessage(user, false, message.subject(), message.body());
         } catch (MessagingException e) {
             throw new MessageException(e);
         }

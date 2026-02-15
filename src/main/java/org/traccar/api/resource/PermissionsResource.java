@@ -16,6 +16,8 @@
  */
 package org.traccar.api.resource;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Permission;
@@ -44,6 +46,12 @@ public class PermissionsResource  extends BaseResource {
 
     @Inject
     private CacheManager cacheManager;
+
+    @Inject
+    private LogAction actionLogger;
+
+    @Context
+    private HttpServletRequest request;
 
     private void checkPermission(Permission permission) throws StorageException {
         if (permissionsService.notAdmin(getUserId())) {
@@ -76,7 +84,7 @@ public class PermissionsResource  extends BaseResource {
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId(),
                     true);
-            LogAction.link(getUserId(),
+            actionLogger.link(request, getUserId(),
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }
@@ -102,7 +110,7 @@ public class PermissionsResource  extends BaseResource {
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId(),
                     false);
-            LogAction.unlink(getUserId(),
+            actionLogger.unlink(request, getUserId(),
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
         }

@@ -17,6 +17,8 @@ package org.traccar.protocol;
 
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
+import org.traccar.model.CellTower;
+import org.traccar.model.Network;
 import org.traccar.session.DeviceSession;
 import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
@@ -140,11 +142,7 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                     String key = paramParser.group(1).toLowerCase();
                     String value = paramParser.group(2);
                     try {
-                        if (key.equals("accuracy")) {
-                            position.setAccuracy(Double.parseDouble(value));
-                        } else {
-                            position.set(key, Double.parseDouble(value));
-                        }
+                        position.set(key, Double.parseDouble(value));
                     } catch (NumberFormatException e) {
                         if (value.equalsIgnoreCase("true")) {
                             position.set(key, true);
@@ -156,9 +154,48 @@ public class WialonProtocolDecoder extends BaseProtocolDecoder {
                     }
                 }
             }
+
+            if (position.hasAttribute("accuracy")) {
+                position.setAccuracy(position.removeDouble("accuracy"));
+            }
+
+            if (position.hasAttribute("bat")) {
+                position.set(Position.KEY_BATTERY_LEVEL, position.removeInteger("bat"));
+            }
+
+            if (position.hasAttribute("temp")) {
+                position.set(Position.KEY_DEVICE_TEMP, position.removeInteger("temp"));
+            }
+
+            Network network = new Network();
+            decodeCellData(position, network, "");
+            for (int i = 1; i <= 9; i++) {
+                if (!decodeCellData(position, network, String.valueOf(i))) {
+                    break;
+                }
+            }
+
+            if (network.getCellTowers() != null) {
+                position.setNetwork(network);
+            }
         }
 
         return position;
+    }
+
+    private static boolean decodeCellData(Position position, Network network, String suffix) {
+        if (position.hasAttribute("mnc" + suffix)
+                && position.hasAttribute("mcc" + suffix)
+                && position.hasAttribute("lac" + suffix)
+                && position.hasAttribute("cell_id" + suffix)) {
+            network.addCellTower(CellTower.from(
+                    position.removeInteger("mcc" + suffix),
+                    position.removeInteger("mnc" + suffix),
+                    position.removeInteger("lac" + suffix),
+                    position.getLong("cell_id" + suffix)));
+            return true;
+        }
+        return false;
     }
 
     @Override

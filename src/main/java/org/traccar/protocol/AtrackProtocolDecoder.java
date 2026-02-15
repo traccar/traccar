@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
     private boolean longDate;
     private boolean decimalFuel;
     private boolean custom;
+    private int frameMask;
     private String form;
 
     private ByteBuf photo;
@@ -71,6 +72,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
         decimalFuel = getConfig().getBoolean(Keys.PROTOCOL_DECIMAL_FUEL.withPrefix(getProtocolName()));
 
         custom = getConfig().getBoolean(Keys.PROTOCOL_CUSTOM.withPrefix(getProtocolName()));
+        frameMask = getConfig().getInteger(Keys.PROTOCOL_FRAME_MASK.withPrefix(getProtocolName()));
         form = getConfig().getString(Keys.PROTOCOL_FORM.withPrefix(getProtocolName()));
         if (form != null) {
             custom = true;
@@ -94,6 +96,10 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
 
     public void setCustom(boolean custom) {
         this.custom = custom;
+    }
+
+    public void setFrameMask(int frameMask) {
+        this.frameMask = frameMask;
     }
 
     public void setForm(String form) {
@@ -216,7 +222,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "VN" -> position.set(Position.KEY_VIN, values[i]);
                 case "TR" -> position.set(Position.KEY_THROTTLE, Integer.parseInt(values[i]));
                 case "ET" -> position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[i]));
-                case "FL" -> position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[i]));
+                case "FL" -> position.set(Position.KEY_FUEL, Integer.parseInt(values[i]));
                 case "FC" -> position.set(Position.KEY_FUEL_CONSUMPTION, Integer.parseInt(values[i]));
                 case "AV1" -> position.set(Position.PREFIX_ADC + 1, Integer.parseInt(values[i]));
                 case "CD" -> position.set(Position.KEY_ICCID, values[i]);
@@ -241,10 +247,27 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 }
                 case "MT" -> position.set(Position.KEY_MOTION, Integer.parseInt(values[i]) > 0);
                 case "BC" -> {
-                    String[] beaconValues = values[i].split(":");
-                    decodeBeaconData(
-                            position, Integer.parseInt(beaconValues[0]), Integer.parseInt(beaconValues[1]),
-                            Unpooled.wrappedBuffer(DataConverter.parseHex(beaconValues[2])));
+                    if (frameMask == 1) {
+                        ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(values[i]));
+                        int index = 1;
+                        while (buf.isReadable()) {
+                            int length = buf.readUnsignedByte();
+                            int id = buf.readUnsignedByte();
+                            buf.skipBytes(6); // mac
+                            if (id == 0xE0) {
+                                position.set("tag" + index + "Temp", buf.readShort() / 100.0);
+                                buf.skipBytes(length - 1 - 6 - 2);
+                            } else {
+                                buf.skipBytes(length - 1 - 6);
+                            }
+                            index += 1;
+                        }
+                    } else {
+                        String[] beaconValues = values[i].split(":");
+                        decodeBeaconData(
+                                position, Integer.parseInt(beaconValues[0]), Integer.parseInt(beaconValues[1]),
+                                Unpooled.wrappedBuffer(DataConverter.parseHex(beaconValues[2])));
+                    }
                 }
                 default -> {
                 }
@@ -289,7 +312,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "EL" -> buf.readUnsignedByte(); // engine load
                 case "TR" -> position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
                 case "ET" -> position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort());
-                case "FL" -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                case "FL" -> position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                 case "ML" -> buf.readUnsignedByte(); // mil status
                 case "FC" -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt());
                 case "CI" -> readString(buf); // format string
@@ -317,7 +340,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "ZO7" -> buf.readUnsignedByte(); // cruise control status
                 case "ZO8" -> buf.readUnsignedByte(); // accelector pedal position
                 case "ZO9" -> position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte() * 0.5);
-                case "ZO10" -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.5);
+                case "ZO10" -> position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.5);
                 case "ZO11" -> buf.readUnsignedByte(); // engine oil pressure
                 case "ZO12" -> buf.readUnsignedByte(); // boost pressure
                 case "ZO13" -> buf.readUnsignedByte(); // intake temperature
@@ -337,7 +360,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "JO2" -> buf.readUnsignedByte(); // power takeoff device
                 case "JO3" -> buf.readUnsignedByte(); // accelector pedal position
                 case "JO4" -> position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
-                case "JO5" -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
+                case "JO5" -> position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.4);
                 case "JO6" -> buf.readUnsignedByte(); // fms vehicle interface
                 case "JO7" -> buf.readUnsignedByte(); // driver 2
                 case "JO8" -> buf.readUnsignedByte(); // driver 1
@@ -646,7 +669,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 Matcher matcher = pattern.matcher(message);
                 if (matcher.find()) {
                     int value = Integer.parseInt(matcher.group(3), decimalFuel ? 10 : 16);
-                    position.set(Position.KEY_FUEL_LEVEL, value * 0.1);
+                    position.set(Position.KEY_FUEL, value * 0.1);
                 } else {
                     position.set("message", message);
                 }

@@ -1,0 +1,22 @@
+#set($subject = "Η Συσκευή $device.name υπερβαίνει την ταχύτητα")
+#if($speedUnit == "χλμ/ώρα")
+#set($speedValue = $position.speed * 1.852)
+#set($speedString = $numberTool.format('0.0 km/h', $speedValue))
+#elseif($speedUnit == "μίλια/ώρα")
+#set($speedValue = $position.speed * 1.15078)
+#set($speedString = $numberTool.format('0.0 mph', $speedValue))
+#else
+#set($speedString = $numberTool.format('0.0 kn', $position.speed))
+#end
+#set($digest = "Η Συσκευή $device.name ξεπέρασε το όριο ταχύτητας $speedString#{if}($geofence) σε $geofence.name#{else}#{end} στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Συσκευή: $device.name<br>
+Υπερέβη την ταχύτητα: $speedString#{if}($geofence) in $geofence.name#{else}#{end}<br>
+Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Σημείο: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Απεγγραφή</a>
+</body>
+</html>

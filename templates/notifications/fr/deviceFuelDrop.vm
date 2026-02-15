@@ -1,0 +1,14 @@
+#set($subject = "$device.name : baisse de carburant")
+#set($digest = "Baisse de carburant pour $device.name à $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Appareil : $device.name<br>
+Heure : $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Quantité avant : $event.attributes.before<br>
+Quantité après : $event.attributes.after<br>
+Point : <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Se désabonner</a>
+</body>
+</html>

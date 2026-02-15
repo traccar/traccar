@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,9 +107,9 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
                 SpeedLimitHandler.class,
                 MotionHandler.class,
                 ComputedAttributesHandler.Late.class,
-                EngineHoursHandler.class,
                 DriverHandler.class,
                 CopyAttributesHandler.class,
+                EngineHoursHandler.class,
                 PositionForwardingHandler.class,
                 DatabaseHandler.class)
                 .map((clazz) -> (BasePositionHandler) injector.getInstance(clazz))
@@ -138,6 +138,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof Position position) {
+            cacheManager.addDevice(position.getDeviceId(), position);
             bufferingManager.accept(ctx, position);
         } else {
             super.channelRead(ctx, msg);
@@ -153,11 +154,6 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
             queue.offer(position);
         }
         if (!queued) {
-            try {
-                cacheManager.addDevice(position.getDeviceId(), position.getDeviceId());
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
             processPositionHandlers(context, position);
         }
     }
@@ -167,14 +163,21 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
         iterator.next().handlePosition(position, new BasePositionHandler.Callback() {
             @Override
             public void processed(boolean filtered) {
-                if (!filtered) {
-                    if (iterator.hasNext()) {
-                        iterator.next().handlePosition(position, this);
+                Runnable continuation = () -> {
+                    if (!filtered) {
+                        if (iterator.hasNext()) {
+                            iterator.next().handlePosition(position, this);
+                        } else {
+                            processEventHandlers(ctx, position);
+                        }
                     } else {
-                        processEventHandlers(ctx, position);
+                        finishedProcessing(ctx, position, true);
                     }
+                };
+                if (ctx.executor().inEventLoop()) {
+                    continuation.run();
                 } else {
-                    finishedProcessing(ctx, position, true);
+                    ctx.executor().execute(continuation);
                 }
             }
         });
@@ -197,6 +200,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
             ctx.writeAndFlush(new AcknowledgementHandler.EventHandled(position));
             processNextPosition(ctx, position.getDeviceId());
         }
+        cacheManager.removeDevice(position.getDeviceId(), position);
     }
 
     private void processNextPosition(ChannelHandlerContext ctx, long deviceId) {
@@ -207,9 +211,7 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
             nextPosition = queue.peek();
         }
         if (nextPosition != null) {
-            processPositionHandlers(ctx, nextPosition);
-        } else {
-            cacheManager.removeDevice(deviceId, deviceId);
+            ctx.executor().execute(() -> processPositionHandlers(ctx, nextPosition));
         }
     }
 

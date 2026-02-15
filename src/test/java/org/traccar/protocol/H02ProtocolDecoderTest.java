@@ -12,6 +12,10 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         var decoder = inject(new H02ProtocolDecoder(null));
 
         verifyPosition(decoder, buffer(
+                "*HQ,9001000002,V8,213945,A,3542.2043,N,38.6508,W,0.00,170,221025,FBFFF9FF,0,0,0,0,22,31,126,0#"),
+                position("2025-10-22 21:39:45.000", true, 35.70340, -0.64418));
+
+        verifyPosition(decoder, buffer(
                 "*HQ,3177718238,V6,002926,V,3514.4088,N,9733.2842,W,0.00,0.00,151222,FFF7FBFF,310,260,32936,13641,8944501311217563382F,#"));
 
         verifyPosition(decoder, buffer(
@@ -267,6 +271,10 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
         
         verifyPosition(decoder, binary(
                 "24971305007205201916101533335008000073206976000000effffbffff000252776566060000000000000000000049"));
+
+        verifyAttribute(decoder, buffer(
+                "*HQ,5226073533,SMS,ST906(70SACD)_TQ_V_2.0 2024/06/07\nID:5226073533\nIP:1.2.3.4 5013\nUT:30,30,300\nVOLT:12.9V\nAPN:internet.example.com\nGPS:A-24-23\nGSM:26#"),
+                Position.KEY_RESULT, "ST906(70SACD)_TQ_V_2.0 2024/06/07\nID:5226073533\nIP:1.2.3.4 5013\nUT:30,30,300\nVOLT:12.9V\nAPN:internet.example.com\nGPS:A-24-23\nGSM:26");
 
     }
 

@@ -1,0 +1,8 @@
+#set($subject = "Wygaśnięcie urządzenia")
+#set($digest = "Twoje urządzenie $device.name wygasło")
+<!DOCTYPE html>
+<html>
+<body>
+Twoje urządzenie $device.name wygasło.
+</body>
+</html>

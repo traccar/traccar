@@ -1,0 +1,22 @@
+#set($subject = "$device.name: excedeu a velocidade")
+#if($speedUnit == "kmh")
+#set($speedValue = $position.speed * 1.852)
+#set($speedString = $numberTool.format('0.0 km/h', $speedValue))
+#elseif($speedUnit == "mph")
+#set($speedValue = $position.speed * 1.15078)
+#set($speedString = $numberTool.format('0.0 mph', $speedValue))
+#else
+#set($speedString = $numberTool.format('0.0 kn', $position.speed))
+#end
+#set($digest = "$device.name excedeu a velocidade $speedString#{if}($geofence) em $geofence.name#{else}#{end} às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $device.name<br>
+Excedeu a velocidade: $speedString#{if}($geofence) en $geofence.name#{else}#{end}<br>
+Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Local: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Cancelar subscrição</a>
+</body>
+</html>

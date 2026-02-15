@@ -11,6 +11,46 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new Gl200TextProtocolDecoder(null));
 
+        verifyPositions(decoder, buffer(
+                "+RESP:GTERI,C30209,860201067200000,,00000080,0,16,1,1,47.2,245,169.3,-122.234955,47.906141,20260131234254,0310,0260,2CA2,014A2E17,,27,,20260131234255,51D8$"));
+
+        verifyPosition(decoder, buffer(
+                "+RESP:GTIGN,BD0221,861778061565387,CV200,,0,140944,0,0.0,358,17.6,-2.223488,51.882342,20251222020123,0234,0015,6093,000F830E,,,5810.9,20251222070035,20251222070035,C60E$"));
+
+        verifyPositions(decoder, buffer(
+                "+RESP:GTERI,C30303,860201068142036,,00000100,0,0,1,1,0.0,0,219.7,8.111111,50.111111,20251221144733,,,,,,97,1,32.4,20251221144735,18B6$"));
+
+        verifyPositions(decoder, buffer(
+                "+RESP:GTERI,80201E0100,860201067144330,,00000100,,10,1,1,0.0,0,30.2,121.348427,31.163316,20251126093749,0460,0000,1807,00775892,00,0.0,,,,,99,210100,,1,00,6,4,0D1C099A,283F,WMS301_Test,7805414BA78A,1,3453,24,33,24.58,100,20251126093751,77E4$"));
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTDAT,270B01,867162027893742,gv300w,1,,,>I:5014|DB|607|0|0.00|0.00|0.00|0|0|0|0|1679|4|<,0,37.6,184,1940.4,-101.041169,22.143452,20240726234344,0334,0020,2F03,BDB2E4B,00,,,,,20240726234346,4CFE$"),
+                "data", ">I:5014|DB|607|0|0.00|0.00|0.00|0|0|0|0|1679|4|<");
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTPNA,710402,867292060140006,,2,20250516120427,0121$"),
+                Position.KEY_BATTERY_LEVEL, null);
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTERI,F10415,862599050680717,GV350M,00000001,,50,1,1,0.0,274,2963.1,-78.691767,-0.951295,20250512214226,,,,,,0.0,,,100,210100,,1,1,1,01DF,20250512214226,009D$"),
+                Position.KEY_FUEL, 479);
+
+        verifyPositions(decoder, buffer(
+                "+RESP:GTERI,6E0A03,868589060745174,,00000100,,10,1,1,0.0,0,1509.0,-90.544928,14.584461,20250307182819,0704,0001,13A7,000B60AB,01,12,358.6,,,,,100,1A0000,0,2,00,6,5,0E7109BB,283F,SENTEMP1,7805412CF2DD,1,3466,24,36,24.91,100,01,6,2,,083F,SENTEMP2,7805412CF25C,0,,,,,20250307182820,1ABC$"));
+
+        verifyAttributes(decoder, buffer(
+                "+BUFF:GTIGF,840502,867963063190000,,0,0,,,,,,,0268,0006,22C4,13E5,00,,,20250116170541,22D0$"));
+
+        verifyPositions(decoder, buffer(
+                "+BUFF:GTERI,6E0A03,868589060742171,,00000005,,10,1,1,0.0,0,225.6,-90.795241,14.261515,20250301071037,0704,0001,10B9,00105915,01,12,0.0,,F0,F0,,100,1A0201,0,,0,0,20250301071038,062C$"));
+
+        verifyPositions(decoder, buffer(
+                "+RESP:GTERI,6E0A03,868589060076166,,00000100,,10,1,1,0.1,0,1510.4,-90.544955,14.584449,20250228072652,0704,0001,13A7,000B60AB,01,10,0.0,,,F0,,100,210100,0,1,00,6,5,,283F,SENTEMP1,7805412CF2DD,0,,,,,,20250228072654,3F94$"));
+
+        verifyAttribute(decoder, buffer(
+                "+RESP:GTHBM,BD0214,869409069481243,cv100,,12,1,1,5.6,344,274.7,-1.601826,6.666228,20250114094616,0620,0001,3EE8,00016E04,,,20250114094616,20250114094616,2862$"),
+                Position.KEY_ALARM, Position.ALARM_CORNERING);
+
         verifyAttribute(decoder, buffer(
                 "+BUFF:GTCAN,8020050402,867488060267845,,00,1,E00FFFFF,YS2K4X20001928588,1,H149381,4236.08,0,0,58,,P94.80,,0,529.00,0.03,0.33,0.77,8688,0008,0042,00,00,001FFFFF,P100.00,5571,,,0,0,,,20,7,0,0.36,0.00,0.00,0,E E05653940B000003,,C*********,,4054MTX,0000,,,1,0.0,101,698.5,-3.647673,40.481997,20241213113715,0214,0003,04D2,B801,00,20241213113715,1A47$"),
                 "adBlueLevel", 100.0);
@@ -87,14 +127,14 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, buffer(
                 "+RESP:GTDTT,410502,864802030541621,,,,1,35,45637561747261636b0d0a434f4d422c302c39342e302c2d312e302c2c2c4844430d0a,20230421034626,EA2E$"),
-                Position.KEY_FUEL_LEVEL, 94.0);
+                Position.KEY_FUEL, 94.0);
 
-        verifyNull(decoder, buffer(
+        verifyPosition(decoder, buffer(
                 "+RESP:GTFRI,5E0100,862061048023666,,,12940,10,1,1,0.0,97,179.8,-90.366478,38.735379,20230616183231,0310,0410,6709,03ADF710,00,6223.7,,,,,110000,,,,202306161834$"));
 
         verifyAttribute(decoder, buffer(
                 "+BUFF:GTERI,410502,864802030794634,,00000001,,10,1,1,0.0,0,3027.8,-78.706612,-0.955699,20230418170736,0740,0002,A08C,2AB72D,00,0.0,,,,100,110000,1,0099,20230418171004,8B98$"),
-                Position.KEY_FUEL_LEVEL, 153);
+                Position.KEY_FUEL, 153);
 
         verifyPositions(decoder, false, buffer(
                 "+BUFF:GTFRI,2E0503,861106050005423,,,0,1,,,,,,,,,,,,0,0,,98,1,0,,,20200101000001,0083$"));
@@ -159,7 +199,7 @@ public class Gl200TextProtocolDecoderTest extends ProtocolTest {
                 "+RESP:GTPNA,F50201,866425030235982,GL300M,20190208124909,0BD5$"),
                 Position.KEY_ALARM, Position.ALARM_POWER_ON);
 
-        verifyAttributes(decoder, buffer(
+        verifyNotNull(decoder, buffer(
                 "+BUFF:GTSTC,410301,864802030022424,,,0,,,,,,,0228,0002,4EE8,1BFF489,00,20181207134332,EC90$"));
 
         verifyPositions(decoder, buffer(

@@ -1,0 +1,12 @@
+#set($subject = "$device.name: Befehl in Warteschlange gesendet")
+#set($digest = "Warteschlangenbefehl an $device.name am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr gesendet")
+<!DOCTYPE html>
+<html>
+<body>
+Ger&auml;t: $device.name<br>
+Befehl in Warteschlange gesendet<br>
+am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr gesendet<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+</body>
+</html>

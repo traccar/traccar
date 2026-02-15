@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.traccar.api.resource;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.model.ObjectOperation;
 import org.traccar.config.Config;
@@ -83,6 +85,12 @@ public class ServerResource extends BaseResource {
     @Nullable
     private Geocoder geocoder;
 
+    @Inject
+    private LogAction actionLogger;
+
+    @Context
+    private HttpServletRequest request;
+
     @PermitAll
     @GET
     public Server get() throws StorageException {
@@ -110,7 +118,7 @@ public class ServerResource extends BaseResource {
                 new Columns.Exclude("id"),
                 new Condition.Equals("id", server.getId())));
         cacheManager.invalidateObject(true, Server.class, server.getId(), ObjectOperation.UPDATE);
-        LogAction.edit(getUserId(), server);
+        actionLogger.edit(request, getUserId(), server);
         return Response.ok(server).build();
     }
 
@@ -151,6 +159,14 @@ public class ServerResource extends BaseResource {
         try (var input = new FileInputStream(inputFile); var output = new FileOutputStream(outputPath.toFile())) {
             input.transferTo(output);
         }
+        return Response.ok().build();
+    }
+
+    @Path("gc")
+    @GET
+    public Response gc() throws StorageException {
+        permissionsService.checkAdmin(getUserId());
+        System.gc();
         return Response.ok().build();
     }
 

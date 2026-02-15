@@ -114,7 +114,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
     protected Object decode(
             Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
-        Parser parser = new Parser(PATTERN, (String) msg);
+        Parser parser = new Parser(PATTERN, ((String) msg).trim());
         if (!parser.matches()) {
             return null;
         }
@@ -174,7 +174,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                 case "#BATC#" -> position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(data[i]));
                 case "#BATH#" -> position.set("batteryHealth", Integer.parseInt(data[i]));
                 case "#TVI#" -> position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(data[i]));
-                case "#CFL#" -> position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(data[i]));
+                case "#CFL#" -> position.set(Position.KEY_FUEL, Integer.parseInt(data[i]));
                 case "#CFL2#" -> position.set("fuel2", Integer.parseInt(data[i]));
                 case "#IN1#", "#IN2#", "#IN3#", "#IN4#" -> position.set(
                         Position.PREFIX_IN + dataTags[i].charAt(3), Integer.parseInt(data[i]));
@@ -204,6 +204,8 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                 case "#STRT#" -> position.set("starter", Double.parseDouble(data[i]));
                 case "#TS1#" -> position.set("sensor1State", Integer.parseInt(data[i]));
                 case "#TS2#" -> position.set("sensor2State", Integer.parseInt(data[i]));
+                case "#V3#" -> position.set(Position.PREFIX_ADC + 1, Double.parseDouble(data[i]));
+                case "#V4#" -> position.set(Position.PREFIX_ADC + 2, Double.parseDouble(data[i]));
                 case "#TD1#", "#TD2#" -> {
                     StarLinkMessage.mEventReport_TDx message =
                             StarLinkMessage.mEventReport_TDx.parseFrom(DataConverter.parseBase64(data[i]));

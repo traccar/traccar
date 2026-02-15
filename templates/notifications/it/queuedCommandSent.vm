@@ -1,0 +1,12 @@
+#set($subject = "$device.name: Comando Inviato")
+#set($digest = "Il comando in coda è stato inviato al dispositivo $device.name il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Dispositivo: $device.name<br>
+comando in coda inviato<br>
+Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Annulla iscrizione</a>
+</body>
+</html>

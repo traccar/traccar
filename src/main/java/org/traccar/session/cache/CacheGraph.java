@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2023 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,19 @@
  */
 package org.traccar.session.cache;
 
+import org.traccar.helper.ConcurrentWeakValueMap;
 import org.traccar.model.BaseModel;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class CacheGraph {
 
-    private final Map<CacheKey, CacheNode> roots = new HashMap<>();
-    private final WeakValueMap<CacheKey, CacheNode> nodes = new WeakValueMap<>();
+    private final Map<CacheKey, CacheNode> roots = new ConcurrentHashMap<>();
+    private final ConcurrentWeakValueMap<CacheKey, CacheNode> nodes = new ConcurrentWeakValueMap<>();
 
     void addObject(BaseModel value) {
         CacheKey key = new CacheKey(value);
@@ -38,7 +40,7 @@ public class CacheGraph {
         CacheKey key = new CacheKey(clazz, id);
         CacheNode node = nodes.remove(key);
         if (node != null) {
-            node.getAllLinks(false).forEach(child -> child.getLinks(key.clazz(), true).remove(node));
+            node.getAllLinks(true).forEach(child -> child.getLinks(key.clazz(), false).remove(node));
         }
         roots.remove(key);
     }
@@ -88,18 +90,19 @@ public class CacheGraph {
 
     boolean addLink(
             Class<? extends BaseModel> fromClazz, long fromId,
-            BaseModel toValue) {
+            Class<? extends BaseModel> toClazz, long toId,
+            Supplier<? extends BaseModel> objectSupplier) {
         boolean stop = true;
         CacheNode fromNode = nodes.get(new CacheKey(fromClazz, fromId));
         if (fromNode != null) {
-            CacheKey toKey = new CacheKey(toValue);
+            CacheKey toKey = new CacheKey(toClazz, toId);
             CacheNode toNode = nodes.get(toKey);
             if (toNode == null) {
                 stop = false;
-                toNode = new CacheNode(toValue);
+                toNode = new CacheNode(objectSupplier.get());
                 nodes.put(toKey, toNode);
             }
-            fromNode.getLinks(toValue.getClass(), true).add(toNode);
+            fromNode.getLinks(toClazz, true).add(toNode);
             toNode.getLinks(fromClazz, false).add(fromNode);
         }
         return stop;

@@ -11,6 +11,12 @@ public class TaipProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new TaipProtocolDecoder(null));
 
+        verifyNull(decoder, text(
+                ">RAL19500+00230+00012;ID=3168;*48<"));
+
+        verifyNull(decoder, text(
+                ">RLN19500000+337885218-0857685155+000753940000+000000000800000000000000000000000000000000000000000012;ID=3168;*4D<"));
+
         verifyAttributes(decoder, text(
                 ">RUS00,010170000000+0000000+000000000000001009999000011060074755268EF,0001139503871486,01,ZZZZZZZZZZ;ID=11817;#LOG:6AE4;*2C<"));
 

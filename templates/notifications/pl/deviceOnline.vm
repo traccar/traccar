@@ -1,0 +1,12 @@
+#set($subject = "$device.name: jest online")
+#set($digest = "$device.name jest online od $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Urządzenie: $device.name<br>
+Jest online<br>
+Czas: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+</body>
+</html>

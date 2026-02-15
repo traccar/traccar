@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,10 @@
 package org.traccar.api;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.eclipse.jetty.websocket.api.Callback;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.WebSocketAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.helper.model.PositionUtil;
@@ -30,12 +31,13 @@ import org.traccar.session.ConnectionManager;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 
+import java.nio.channels.ClosedChannelException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.UpdateListener {
+public class AsyncSocket implements Session.Listener.AutoDemanding, ConnectionManager.UpdateListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncSocket.class);
 
@@ -50,6 +52,7 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     private final long userId;
 
     private boolean includeLogs;
+    private Session session;
 
     public AsyncSocket(ObjectMapper objectMapper, ConnectionManager connectionManager, Storage storage, long userId) {
         this.objectMapper = objectMapper;
@@ -59,9 +62,8 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     }
 
     @Override
-    public void onWebSocketConnect(Session session) {
-        super.onWebSocketConnect(session);
-
+    public void onWebSocketOpen(Session session) {
+        this.session = session;
         try {
             Map<String, Collection<?>> data = new HashMap<>();
             data.put(KEY_POSITIONS, PositionUtil.getLatestPositions(storage, userId));
@@ -73,20 +75,28 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     }
 
     @Override
-    public void onWebSocketClose(int statusCode, String reason) {
-        super.onWebSocketClose(statusCode, reason);
-
+    public void onWebSocketClose(int statusCode, String reason, Callback callback) {
         connectionManager.removeListener(userId, this);
+        session = null;
+        callback.succeed();
     }
 
     @Override
     public void onWebSocketText(String message) {
-        super.onWebSocketText(message);
-
         try {
-            includeLogs = objectMapper.readTree(message).get("logs").asBoolean();
+            JsonNode json = objectMapper.readTree(message);
+            if (json.hasNonNull("logs")) {
+                includeLogs = json.get("logs").asBoolean();
+            }
         } catch (JsonProcessingException e) {
             LOGGER.warn("Socket JSON parsing error", e);
+        }
+    }
+
+    @Override
+    public void onWebSocketError(Throwable cause) {
+        if (!(cause instanceof ClosedChannelException)) {
+            LOGGER.warn("WebSocket error", cause);
         }
     }
 
@@ -118,9 +128,9 @@ public class AsyncSocket extends WebSocketAdapter implements ConnectionManager.U
     }
 
     private void sendData(Map<String, Collection<?>> data) {
-        if (isConnected()) {
+        if (session != null && session.isOpen()) {
             try {
-                getRemote().sendString(objectMapper.writeValueAsString(data), null);
+                session.sendText(objectMapper.writeValueAsString(data), Callback.NOOP);
             } catch (JsonProcessingException e) {
                 LOGGER.warn("Socket JSON formatting error", e);
             }

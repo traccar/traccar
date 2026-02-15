@@ -155,6 +155,10 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
 
         processStatus(position, buf.readUnsignedInt());
 
+        if (getConfig().getBoolean(Keys.PROTOCOL_ACK.withPrefix(getProtocolName()))) {
+            sendResponse(channel, remoteAddress, id, "R12");
+        }
+
         return position;
     }
 
@@ -177,14 +181,14 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .number("-(d+)-(d+.d+),([NS]),")     // latitude
             .or()
-            .number("(d+)(dd.d+),([NS]),")       // latitude
+            .number("(d*)(dd.d+),([NS]),")       // latitude
             .or()
             .number("(d+)(dd)(d{4}),([NS]),")    // latitude
             .groupEnd()
             .groupBegin()
             .number("-(d+)-(d+.d+),([EW]),")     // longitude
             .or()
-            .number("(d+)(dd.d+),([EW]),")       // longitude
+            .number("(d*)(dd.d+),([EW]),")       // longitude
             .or()
             .number("(d+)(dd)(d{4}),([EW]),")    // longitude
             .groupEnd()
@@ -296,6 +300,14 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .any()
             .compile();
 
+    private static final Pattern PATTERN_SMS = new PatternBuilder()
+            .text("*HQ,")
+            .number("(d+),")                     // id
+            .text("SMS,")
+            .expression("(.+)")
+            .text("#")
+            .compile();
+
     private void sendResponse(Channel channel, SocketAddress remoteAddress, String id, String type) {
         if (channel != null && id != null) {
             String response;
@@ -353,7 +365,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(3)) {
             position.setLatitude(parser.nextCoordinate());
         }
-        if (parser.hasNext(3)) {
+        if (parser.hasNextAny(3)) {
             position.setLatitude(parser.nextCoordinate());
         }
         if (parser.hasNext(4)) {
@@ -363,7 +375,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(3)) {
             position.setLongitude(parser.nextCoordinate());
         }
-        if (parser.hasNext(3)) {
+        if (parser.hasNextAny(3)) {
             position.setLongitude(parser.nextCoordinate());
         }
         if (parser.hasNext(4)) {
@@ -387,7 +399,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(6)) {
             position.set(Position.KEY_ODOMETER, parser.nextInt(0));
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
-            position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble(0));
+            position.set(Position.KEY_FUEL, parser.nextDouble(0));
 
             position.setAltitude(parser.nextInt(0));
 
@@ -521,6 +533,28 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         return position;
     }
 
+    private Position decodeSms(String sentence, Channel channel, SocketAddress remoteAddress) {
+
+        Parser parser = new Parser(PATTERN_SMS, sentence);
+        if (!parser.matches()) {
+            return null;
+        }
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, parser.next());
+        if (deviceSession == null) {
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        getLastLocation(position, null);
+
+        position.set(Position.KEY_RESULT, parser.next());
+
+        return position;
+    }
+
     private Position decodeVp1(String sentence, Channel channel, SocketAddress remoteAddress) {
 
         Parser parser = new Parser(PATTERN_VP1, sentence);
@@ -619,6 +653,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
                         case "LINK" -> decodeLink(sentence, channel, remoteAddress);
                         case "V3" -> decodeV3(sentence, channel, remoteAddress);
                         case "VP1" -> decodeVp1(sentence, channel, remoteAddress);
+                        case "SMS" -> decodeSms(sentence, channel, remoteAddress);
                         default -> decodeText(sentence, channel, remoteAddress);
                     };
                 } else {

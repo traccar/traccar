@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ package org.traccar.api;
 import com.google.inject.Provider;
 import org.traccar.api.security.PermissionsService;
 import org.traccar.database.StatisticsManager;
-import org.traccar.helper.Log;
 import org.traccar.helper.SessionHelper;
 import org.traccar.model.Device;
 import org.traccar.storage.Storage;
@@ -62,9 +61,9 @@ public class MediaFilter implements Filter {
 
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         try {
-            HttpSession session = ((HttpServletRequest) request).getSession(false);
             Long userId = null;
-            if (session != null) {
+            if (SessionHelper.isSessionOriginValid((HttpServletRequest) request)) {
+                HttpSession session = ((HttpServletRequest) request).getSession(false);
                 userId = (Long) session.getAttribute(SessionHelper.USER_ID_KEY);
                 if (userId != null) {
                     statisticsManager.registerRequest(userId);
@@ -90,7 +89,7 @@ public class MediaFilter implements Filter {
             httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
         } catch (SecurityException | StorageException e) {
             httpResponse.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            httpResponse.getWriter().println(Log.exceptionStack(e));
+            e.printStackTrace(httpResponse.getWriter());
         }
     }
 

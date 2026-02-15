@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,11 @@
  */
 package org.traccar.storage.query;
 
-import org.traccar.storage.QueryIgnore;
+import org.traccar.helper.ReflectionCache;
 
-import java.beans.Introspector;
-import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,17 +28,10 @@ public abstract class Columns {
     public abstract List<String> getColumns(Class<?> clazz, String type);
 
     protected List<String> getAllColumns(Class<?> clazz, String type) {
-        List<String> columns = new LinkedList<>();
-        Method[] methods = clazz.getMethods();
-        for (Method method : methods) {
-            int parameterCount = type.equals("set") ? 1 : 0;
-            if (method.getName().startsWith(type) && method.getParameterTypes().length == parameterCount
-                    && !method.isAnnotationPresent(QueryIgnore.class)
-                    && !method.getName().equals("getClass")) {
-                columns.add(Introspector.decapitalize(method.getName().substring(3)));
-            }
-        }
-        return columns;
+        return ReflectionCache.getProperties(clazz, type).entrySet().stream()
+                .filter(entry -> !entry.getValue().queryIgnore())
+                .map(Map.Entry::getKey)
+                .toList();
     }
 
     public static class All extends Columns {

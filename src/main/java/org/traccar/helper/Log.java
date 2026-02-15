@@ -151,14 +151,14 @@ public final class Log {
                     StringWriter stringWriter = new StringWriter();
                     PrintWriter printWriter = new PrintWriter(stringWriter);
                     record.getThrown().printStackTrace(printWriter);
-                    message.append(System.lineSeparator()).append(stringWriter.toString());
+                    message.append(System.lineSeparator()).append(stringWriter);
                 } else {
                     message.append(exceptionStack(record.getThrown()));
                 }
             }
 
             return String.format("%1$tF %1$tT %2$5s: %3$s%n",
-                    new Date(record.getMillis()), formatLevel(record.getLevel()), message.toString());
+                    new Date(record.getMillis()), formatLevel(record.getLevel()), message);
         }
 
     }

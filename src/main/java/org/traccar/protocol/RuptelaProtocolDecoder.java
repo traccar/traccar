@@ -90,8 +90,8 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private void decodeDriver(Position position, String part1, String part2) {
-        Long driverIdPart1 = (Long) position.getAttributes().remove(part1);
-        Long driverIdPart2 = (Long) position.getAttributes().remove(part2);
+        Long driverIdPart1 = position.removeLong(part1);
+        Long driverIdPart2 = position.removeLong(part2);
         if (driverIdPart1 != null && driverIdPart2 != null) {
             ByteBuf driverId = Unpooled.copyLong(driverIdPart1, driverIdPart2);
             position.set(Position.KEY_DRIVER_UNIQUE_ID, driverId.toString(StandardCharsets.US_ASCII));
@@ -122,7 +122,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             }
             case 94 -> position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.25);
             case 95 -> position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false));
-            case 98 -> position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false) * 100 / 255.0);
+            case 98 -> position.set(Position.KEY_FUEL, readValue(buf, length, false) * 100 / 255.0);
             case 100 -> position.set(Position.KEY_FUEL_CONSUMPTION, readValue(buf, length, false) / 20.0);
             case 134 -> {
                 if (readValue(buf, length, false) > 0) {
@@ -140,7 +140,7 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
             case 165 -> position.set(Position.KEY_OBD_SPEED, readValue(buf, length, false) / 256.0);
             case 166, 197 -> position.set(Position.KEY_RPM, readValue(buf, length, false) * 0.125);
             case 170 -> position.set(Position.KEY_CHARGE, readValue(buf, length, false) > 0);
-            case 205 -> position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false));
+            case 205 -> position.set(Position.KEY_FUEL, readValue(buf, length, false));
             case 207 -> position.set(Position.KEY_FUEL_LEVEL, readValue(buf, length, false) * 0.4);
             case 208 -> position.set(Position.KEY_FUEL_USED, readValue(buf, length, false) * 0.5);
             case 251, 409 -> position.set(Position.KEY_IGNITION, readValue(buf, length, false) > 0);
@@ -268,8 +268,8 @@ public class RuptelaProtocolDecoder extends BaseProtocolDecoder {
                 decodeDriver(position, Position.PREFIX_IO + 126, Position.PREFIX_IO + 127); // can driver
                 decodeDriver(position, Position.PREFIX_IO + 155, Position.PREFIX_IO + 156); // tco driver
 
-                Long tagIdPart1 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 760);
-                Long tagIdPart2 = (Long) position.getAttributes().remove(Position.PREFIX_IO + 761);
+                Long tagIdPart1 = position.removeLong(Position.PREFIX_IO + 760);
+                Long tagIdPart2 = position.removeLong(Position.PREFIX_IO + 761);
                 if (tagIdPart1 != null && tagIdPart2 != null) {
                     position.set("tagId", Long.toHexString(tagIdPart1) + Long.toHexString(tagIdPart2));
                 }

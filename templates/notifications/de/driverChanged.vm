@@ -1,0 +1,18 @@
+#set($subject = "$device.name: Fahrer hat gewechselt")
+#if($driver)
+#set($driverName = $driver.name)
+#else
+#set($driverName = $event.getString('driverUniqueId'))
+#end
+#set($digest = "Fahrer $driverName hat in $device.name am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr gewechselt")
+<!DOCTYPE html>
+<html>
+<body>
+Ger&auml;t: $device.name<br>
+am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr<br>
+Position: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+Fahrer: $driverName<br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Unsubscribe</a>
+</body>
+</html>

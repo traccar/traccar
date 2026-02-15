@@ -9,7 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: '6.6'
+  version: '6.11.1'
 servers:
   - url: https://demo.traccar.org/api
     description: Demo Server 1
@@ -69,7 +69,29 @@ tags:
     description: Calendar management
   - name: Statistics
     description: Retrieving server statistics
+  - name: Health
+    description: Checking server health status
+  - name: Orders
+    description: Order management
 paths:
+  /health:
+    get:
+      summary: Check server health
+      description: Return plain text status for basic uptime monitoring
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: OK
+        '500':
+          description: Service is unavailable
+          content: {}
   /commands:
     get:
       summary: Fetch a list of Saved Commands
@@ -183,6 +205,7 @@ paths:
           description: >-
             Standard users can use this only with _deviceId_s, they have access
             to
+          required: true
           schema:
             type: integer
       responses:
@@ -202,6 +225,12 @@ paths:
       description: Dispatch a new command or Saved Command if _body.id_ set
       tags:
         - Commands
+      parameters:
+        - name: groupId
+          in: query
+          description: Send the command to all devices in the group
+          schema:
+            type: integer
       requestBody:
         content:
           application/json:
@@ -220,7 +249,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Command'
+                anyOf:
+                  - $ref: '#/components/schemas/QueuedCommand'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/QueuedCommand'
         '400':
           description: >-
             Could happen when the user doesn't have permission or an incorrect
@@ -242,11 +275,6 @@ paths:
             reported some locations
           schema:
             type: integer
-        - name: protocol
-          in: query
-          description: Protocol name. Can be used instead of device id
-          schema:
-            type: string
         - name: textChannel
           in: query
           description: >-
@@ -267,6 +295,94 @@ paths:
           description: >-
             Could happen when trying to fetch from a device the user does not
             have permission
+          content: {}
+  /orders:
+    get:
+      summary: Fetch a list of Orders
+      description: Without params, it returns a list of Orders the user has access to
+      tags:
+        - Orders
+      parameters:
+        - name: all
+          in: query
+          description: Can only be used by admins or managers to fetch all entities
+          schema:
+            type: boolean
+        - name: userId
+          in: query
+          description: Standard users can use this only with their own _userId_
+          schema:
+            type: integer
+        - name: excludeAttributes
+          in: query
+          description: Skip returning the attributes map
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+    post:
+      summary: Create an Order
+      tags:
+        - Orders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+      x-codegen-request-body-name: body
+  /orders/{id}:
+    put:
+      summary: Update an Order
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Order'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+      x-codegen-request-body-name: body
+    delete:
+      summary: Delete an Order
+      tags:
+        - Orders
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
           content: {}
   /devices:
     get:
@@ -531,13 +647,13 @@ paths:
             type: integer
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           schema:
             type: string
             format: date-time
@@ -581,14 +697,14 @@ paths:
           required: true
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           schema:
             type: string
             format: date-time
           required: true
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           schema:
             type: string
             format: date-time
@@ -600,11 +716,30 @@ paths:
         '400':
           description: Bad Request
           content: {}
+  /positions/{id}:
+    delete:
+      summary: Delete a Position
+      tags:
+        - Positions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '404':
+          description: Not Found
+          content: {}
   /server:
     get:
       summary: Fetch Server information
       tags:
         - Server
+      security: []
       responses:
         '200':
           description: OK
@@ -635,6 +770,7 @@ paths:
       summary: Fetch Session information
       tags:
         - Session
+      security: []
       parameters:
         - name: token
           in: query
@@ -654,6 +790,7 @@ paths:
       summary: Create a new Session
       tags:
         - Session
+      security: []
       requestBody:
         content:
           application/x-www-form-urlencoded:
@@ -685,6 +822,49 @@ paths:
       responses:
         '204':
           description: No Content
+          content: {}
+  /session/token:
+    post:
+      summary: Generate Session Token
+      tags:
+        - Session
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                expiration:
+                  type: string
+                  format: date-time
+        required: false
+      responses:
+        '200':
+          description: Token string
+          content:
+            text/plain:
+              schema:
+                type: string
+  /session/token/revoke:
+    post:
+      summary: Revoke Session Token
+      tags:
+        - Session
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              required:
+                - token
+              properties:
+                token:
+                  type: string
+        required: true
+      responses:
+        '204':
+          description: No Content
+          content: {}
+        '400':
+          description: Bad Request
           content: {}
   /session/openid/auth:
     get:
@@ -913,6 +1093,38 @@ paths:
         '400':
           description: Could happen if sending has failed
           content: {}
+  /notifications/send/{notificator}:
+    post:
+      summary: Send a custom notification to selected users using the specified notificator
+      tags:
+        - Notifications
+      parameters:
+        - name: notificator
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: query
+          description: Optional list of user ids to send the notification to; if omitted, sends to all permitted users
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationMessage'
+        required: true
+      responses:
+        '204':
+          description: Successful sending
+          content: {}
+        '400':
+          description: Could happen if sending has failed
+          content: {}
   /geofences:
     get:
       summary: Fetch a list of Geofences
@@ -1016,6 +1228,8 @@ paths:
           content: {}
   /events/{id}:
     get:
+      summary: Get event by id
+      description: Retrieve a single event record with full context for the specified identifier
       tags:
         - Events
       parameters:
@@ -1058,14 +1272,14 @@ paths:
               type: integer
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1118,14 +1332,14 @@ paths:
               type: string
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1144,6 +1358,62 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Event'
+  /reports/geofences:
+    get:
+      summary: >-
+        Fetch geofence enter/exit intervals within the time period for Devices
+        or Groups
+      description: At least one _deviceId_ or one _groupId_ must be passed
+      tags:
+        - Reports
+      parameters:
+        - name: deviceId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: groupId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: geofenceId
+          in: query
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+        - name: from
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportGeofences'
   /reports/summary:
     get:
       summary: >-
@@ -1171,14 +1441,14 @@ paths:
               type: integer
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1224,14 +1494,14 @@ paths:
               type: integer
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1277,14 +1547,14 @@ paths:
               type: integer
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1311,14 +1581,14 @@ paths:
       parameters:
         - name: from
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
             format: date-time
         - name: to
           in: query
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           required: true
           schema:
             type: string
@@ -1725,249 +1995,367 @@ components:
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique position record identifier
         deviceId:
           type: integer
+          format: int64
+          description: Identifier of the device that reported this position
         protocol:
           type: string
+          description: Device protocol name that produced the message
         deviceTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         fixTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         serverTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
-        outdated:
-          type: boolean
         valid:
           type: boolean
+          description: Indicates whether the position was marked as valid by the device
         latitude:
           type: number
+          description: Latitude in decimal degrees
         longitude:
           type: number
+          description: Longitude in decimal degrees
         altitude:
           type: number
+          description: Altitude above sea level in meters
         speed:
           type: number
           description: in knots
         course:
           type: number
+          description: Heading in degrees (0-360) where 0 is true north
         address:
           type: string
+          description: Resolved reverse-geocoded address if available
         accuracy:
           type: number
+          description: Estimated positional accuracy in meters when provided
         network:
           type: object
+          description: Network metadata (e.g. cell or Wi‑Fi data) supplied by the device
           properties: {}
         geofenceIds:
           type: array
           items:
             type: integer
+          description: List of geofence ids applicable to this position
         attributes:
           type: object
+          description: Custom key-value attributes sent by the device or enrichments
           properties: {}
     User:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique user identifier
         name:
           type: string
+          description: User display name
         email:
           type: string
+          description: Email address used for login and notifications
         phone:
           type: string
           nullable: true
+          description: Contact phone number for alerts
         readonly:
           type: boolean
+          description: When true, the user cannot change settings
         administrator:
           type: boolean
+          description: Grants full administrative privileges when enabled
         map:
           type: string
           nullable: true
+          description: Preferred default map layer for the user
         latitude:
           type: number
+          description: Default map center latitude for this user
         longitude:
           type: number
+          description: Default map center longitude for this user
         zoom:
           type: integer
+          description: Default map zoom level on login
         password:
           type: string
+          description: Password for user authentication
         coordinateFormat:
           type: string
           nullable: true
+          description: Preferred coordinate display format
         disabled:
           type: boolean
+          description: Indicates whether the user account is disabled
         expirationTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
           nullable: true
         deviceLimit:
           type: integer
+          description: Maximum number of devices the user can manage
         userLimit:
           type: integer
+          description: Maximum number of subordinate users
         deviceReadonly:
           type: boolean
+          description: Restricts user from modifying device attributes
         limitCommands:
           type: boolean
+          description: Prevents user from sending unsupported commands
         fixedEmail:
           type: boolean
+          description: Locks the email field to avoid changes
         poiLayer:
           type: string
           nullable: true
+          description: External POI layer configured for the user
         attributes:
           type: object
+          description: Additional custom user attributes
           properties: {}
     Server:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique server configuration identifier
         registration:
           type: boolean
+          description: Whether new user registrations are allowed
         readonly:
           type: boolean
+          description: When true only administrators can modify server-wide settings
         deviceReadonly:
           type: boolean
+          description: Disallow device attribute changes for non-admins
         limitCommands:
           type: boolean
+          description: Restrict command execution to supported protocol commands
         map:
           type: string
+          description: Default map layer identifier
         bingKey:
           type: string
+          description: Bing Maps API key used when Bing is selected as a provider
         mapUrl:
           type: string
+          description: Custom tile server URL template if configured
         poiLayer:
           type: string
+          description: External point-of-interest layer configuration
+        announcement:
+          type: string
+          description: Message displayed to all users in the web application
         latitude:
           type: number
+          description: Default map center latitude
         longitude:
           type: number
+          description: Default map center longitude
         zoom:
           type: integer
+          description: Default map zoom level
         version:
           type: string
+          description: Traccar server version string
         forceSettings:
           type: boolean
+          description: Forces users to use the server-wide settings instead of their own
         coordinateFormat:
           type: string
+          description: Default coordinate format for displaying positions
         openIdEnabled:
           type: boolean
+          description: Indicates whether OpenID authentication is available
         openIdForce:
           type: boolean
+          description: Require OpenID authentication for all users when enabled
         attributes:
           type: object
+          description: Additional server-level configuration values
           properties: {}
     Command:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique saved command identifier
         deviceId:
           type: integer
+          format: int64
+          description: Target device identifier when the command is bound to one device
         description:
           type: string
+          description: User friendly label displayed in the UI
         type:
           type: string
+          description: Command type as defined by the device protocol
+        textChannel:
+          type: boolean
+          description: Whether to send the command using the SMS channel
         attributes:
           type: object
+          description: Additional parameters required by the command type
+          properties: {}
+    QueuedCommand:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Identifier of the queued command job
+        deviceId:
+          type: integer
+          format: int64
+          description: Device identifier the queued command will be delivered to
+        type:
+          type: string
+          description: Command type that will be executed
+        textChannel:
+          type: boolean
+          description: Indicates whether the queued command uses SMS delivery
+        attributes:
+          type: object
+          description: Stored parameters for the queued command
           properties: {}
     Device:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique identifier assigned by Traccar
         name:
           type: string
+          description: Human friendly device label
         uniqueId:
           type: string
+          description: Hardware or protocol specific unique identifier
         status:
           type: string
+          description: Current connection status such as `online`, `offline`, or `unknown`
         disabled:
           type: boolean
+          description: Whether the device is disabled by an administrator
         lastUpdate:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
           nullable: true
         positionId:
           type: integer
+          format: int64
           nullable: true
+          description: Identifier of the last known position
         groupId:
           type: integer
+          format: int64
           nullable: true
+          description: Parent group identifier when the device is assigned to a group
         phone:
           type: string
           nullable: true
+          description: Contact phone number used for SMS commands
         model:
           type: string
           nullable: true
+          description: Device model or hardware revision
         contact:
           type: string
           nullable: true
+          description: Responsible person's contact information
         category:
           type: string
           nullable: true
+          description: Free form category used for grouping devices in the UI
         attributes:
           type: object
+          description: Custom attributes for protocol or business specific data
           properties: {}
     Group:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique group identifier
         name:
           type: string
+          description: Group display name
         groupId:
           type: integer
+          format: int64
+          description: Parent group identifier for nested grouping
         attributes:
           type: object
+          description: Arbitrary metadata attached to the group
           properties: {}
     Permission:
       type: object
       properties:
         userId:
           type: integer
+          format: int64
           description: User id, can be only first parameter
         deviceId:
           type: integer
+          format: int64
           description: >-
             Device id, can be first parameter or second only in combination with
             userId
         groupId:
           type: integer
+          format: int64
           description: >-
             Group id, can be first parameter or second only in combination with
             userId
         geofenceId:
           type: integer
+          format: int64
           description: Geofence id, can be second parameter only
         notificationId:
           type: integer
+          format: int64
           description: Notification id, can be second parameter only
         calendarId:
           type: integer
+          format: int64
           description: >-
             Calendar id, can be second parameter only and only in combination
             with userId
         attributeId:
           type: integer
+          format: int64
           description: Computed attribute id, can be second parameter only
         driverId:
           type: integer
+          format: int64
           description: Driver id, can be second parameter only
         managedUserId:
           type: integer
+          format: int64
           description: >-
             User id, can be second parameter only and only in combination with
             userId
         commandId:
           type: integer
+          format: int64
           description: Saved command id, can be second parameter only
       description: >-
         This is a permission map that contain two object indexes. It is used to
@@ -1978,76 +2366,129 @@ components:
       properties:
         type:
           type: string
+          description: Command type identifier
     Geofence:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique identifier for the geofence
         name:
           type: string
+          description: Human-readable name shown in lists and maps
         description:
           type: string
+          description: Details about the geofence for display in the UI
         area:
           type: string
+          description: Geofence area definition encoded as a WKT string
         calendarId:
           type: integer
+          format: int64
+          description: Calendar identifier limiting when the geofence is active
         attributes:
           type: object
           properties: {}
+          description: Custom key-value pairs for integrations or UI overrides
     Notification:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique identifier for the notification
         type:
           type: string
+          description: Notification category such as geofenceEnter or ignitionOn
+        description:
+          type: string
+          nullable: true
+          description: User-defined text describing the notification
         always:
           type: boolean
-        web:
-          type: boolean
-        mail:
-          type: boolean
-        sms:
-          type: boolean
+          description: Whether the notification triggers regardless of schedule
+        commandId:
+          type: integer
+          format: int64
+          description: Identifier of the command to send when the notification triggers
+        notificators:
+          type: string
+          description: Comma-separated delivery channels (for example, web, mail)
         calendarId:
           type: integer
+          format: int64
+          description: Calendar identifier restricting when the notification is active
         attributes:
           type: object
           properties: {}
+          description: Additional custom attributes used by notificators or templates
+    NotificationMessage:
+      type: object
+      properties:
+        subject:
+          type: string
+          description: Subject or title of the notification
+        digest:
+          type: string
+          description: Short summary shown in compact contexts; defaults to the body when omitted
+        body:
+          type: string
+          description: Full notification text
+        priority:
+          type: boolean
+          description: Whether the message should be treated as high priority
+      required:
+        - body
     NotificationType:
       type: object
       properties:
         type:
           type: string
+          description: Notification type identifier
     Event:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique event identifier
         type:
           type: string
+          description: Event type name
         eventTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         deviceId:
           type: integer
+          format: int64
+          description: Device associated with the event
         positionId:
           type: integer
+          format: int64
+          description: Position record linked to the event when applicable
         geofenceId:
           type: integer
+          format: int64
+          description: Geofence referenced by the event if any
         maintenanceId:
           type: integer
+          description: Maintenance record tied to the event
         attributes:
           type: object
           properties: {}
+          description: Additional event-specific attributes
     ReportSummary:
       type: object
       properties:
         deviceId:
           type: integer
+          format: int64
+          description: Device identifier for the summary row
         deviceName:
           type: string
+          description: Human readable device name
         maxSpeed:
           type: number
           description: in knots
@@ -2062,13 +2503,39 @@ components:
           description: in liters
         engineHours:
           type: integer
+          description: Engine hours accumulated for the report period
+    ReportGeofences:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+          format: int64
+          description: Device identifier for the geofence interval
+        deviceName:
+          type: string
+          description: Human readable device name
+        geofenceId:
+          type: integer
+          format: int64
+          description: Geofence identifier
+        startTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
+        endTime:
+          type: string
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
+          format: date-time
     ReportTrips:
       type: object
       properties:
         deviceId:
           type: integer
+          format: int64
+          description: Device identifier for the trip
         deviceName:
           type: string
+          description: Human readable device name
         maxSpeed:
           type: number
           description: in knots
@@ -2083,109 +2550,143 @@ components:
           description: in liters
         duration:
           type: integer
+          description: Trip duration in seconds
         startTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         startAddress:
           type: string
+          description: Address where the trip started
         startLat:
           type: number
+          description: Starting latitude in decimal degrees
         startLon:
           type: number
+          description: Starting longitude in decimal degrees
         endTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         endAddress:
           type: string
+          description: Address where the trip ended
         endLat:
           type: number
+          description: Ending latitude in decimal degrees
         endLon:
           type: number
+          description: Ending longitude in decimal degrees
         driverUniqueId:
-          type: integer
+          type: string
+          description: Unique identifier of the driver assigned to the trip
         driverName:
           type: string
+          description: Name of the driver assigned to the trip
     ReportStops:
       type: object
       properties:
         deviceId:
           type: integer
+          format: int64
+          description: Device identifier for the stop
         deviceName:
           type: string
+          description: Human readable device name
         duration:
           type: integer
+          description: Stop duration in seconds
         startTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         address:
           type: string
+          description: Address where the stop occurred
         lat:
           type: number
+          description: Stop latitude in decimal degrees
         lon:
           type: number
+          description: Stop longitude in decimal degrees
         endTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         spentFuel:
           type: number
           description: in liters
         engineHours:
           type: integer
+          description: Engine hours accumulated during the stop
     Statistics:
       type: object
       properties:
         captureTime:
           type: string
-          description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+          description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
           format: date-time
         activeUsers:
           type: integer
+          description: Number of active users in the capture period
         activeDevices:
           type: integer
+          description: Number of active devices in the capture period
         requests:
           type: integer
+          description: Total API requests processed
         messagesReceived:
           type: integer
+          description: Number of device messages received
         messagesStored:
           type: integer
+          description: Number of device messages stored to the database
     DeviceAccumulators:
       type: object
       properties:
         deviceId:
           type: integer
+          format: int64
+          description: Device identifier for the accumulator entry
         totalDistance:
           type: number
           description: in meters
         hours:
           type: number
+          description: Total engine hours recorded by the device
     Calendar:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique calendar identifier
         name:
           type: string
+          description: Calendar display name
         data:
           type: string
           description: base64 encoded in iCalendar format
         attributes:
           type: object
           properties: {}
+          description: Custom calendar attributes
     Attribute:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique computed attribute identifier
         description:
           type: string
+          description: Human readable name of the attribute
         attribute:
           type: string
+          description: Attribute name used in expressions
         expression:
           type: string
+          description: Expression that defines how the attribute is calculated
         type:
           type: string
           description: String|Number|Boolean
@@ -2194,36 +2695,73 @@ components:
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique driver identifier
         name:
           type: string
+          description: Driver full name
         uniqueId:
           type: string
+          description: Unique external identifier for the driver
         attributes:
           type: object
           properties: {}
+          description: Custom driver attributes
     Maintenance:
       type: object
       properties:
         id:
           type: integer
+          format: int64
+          description: Unique maintenance item identifier
         name:
           type: string
+          description: Maintenance task name
         type:
           type: string
+          description: Metric the maintenance is based on
         start:
           type: number
+          description: Current accumulated value when maintenance tracking starts
         period:
           type: number
+          description: Threshold value after which maintenance is due
         attributes:
           type: object
           properties: {}
+          description: Custom maintenance attributes
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique order identifier
+        uniqueId:
+          type: string
+          description: External order identifier used by clients
+        description:
+          type: string
+          description: Additional details about the order assignment
+        fromAddress:
+          type: string
+          description: Pickup location address
+        toAddress:
+          type: string
+          description: Destination address
+        attributes:
+          type: object
+          properties: {}
+          description: Custom order attributes
   parameters:
     entityId:
       name: id
       in: path
+      description: Unique identifier of the entity
       required: true
       schema:
         type: integer
+        format: int64
     all:
       name: all
       in: query
@@ -2233,6 +2771,7 @@ components:
     refresh:
       name: refresh
       in: query
+      description: Force refreshed values instead of cached results
       schema:
         type: boolean
     userId:
@@ -2241,40 +2780,47 @@ components:
       description: Standard users can use this only with their own _userId_
       schema:
         type: integer
+        format: int64
     deviceId:
       name: deviceId
       in: query
       description: Standard users can use this only with _deviceId_s, they have access to
       schema:
         type: integer
+        format: int64
     groupId:
       name: groupId
       in: query
       description: Standard users can use this only with _groupId_s, they have access to
       schema:
         type: integer
+        format: int64
     deviceIdArray:
       name: deviceId
       in: query
       style: form
       explode: true
+      description: List of device identifiers to include
       schema:
         type: array
         items:
           type: integer
+          format: int64
     groupIdArray:
       name: groupId
       in: query
       style: form
       explode: true
+      description: List of group identifiers to include
       schema:
         type: array
         items:
           type: integer
+          format: int64
     fromTime:
       name: from
       in: query
-      description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+      description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
       required: true
       schema:
         type: string
@@ -2282,7 +2828,7 @@ components:
     toTime:
       name: to
       in: query
-      description: in IS0 8601 format. eg. `1963-11-22T18:30:00Z`
+      description: in ISO 8601 format. eg. `1963-11-22T18:30:00Z`
       required: true
       schema:
         type: string

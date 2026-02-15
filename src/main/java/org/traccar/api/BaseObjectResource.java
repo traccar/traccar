@@ -16,6 +16,8 @@
  */
 package org.traccar.api;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Context;
 import org.traccar.api.security.ServiceAccountUser;
 import org.traccar.model.ObjectOperation;
 import org.traccar.helper.LogAction;
@@ -47,6 +49,12 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
     @Inject
     private ConnectionManager connectionManager;
 
+    @Inject
+    private LogAction actionLogger;
+
+    @Context
+    private HttpServletRequest request;
+
     protected final Class<T> baseClass;
 
     public BaseObjectResource(Class<T> baseClass) {
@@ -71,13 +79,13 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         permissionsService.checkEdit(getUserId(), entity, true, false);
 
         entity.setId(storage.addObject(entity, new Request(new Columns.Exclude("id"))));
-        LogAction.create(getUserId(), entity);
+        actionLogger.create(request, getUserId(), entity);
 
         if (getUserId() != ServiceAccountUser.ID) {
             storage.addPermission(new Permission(User.class, getUserId(), baseClass, entity.getId()));
             cacheManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId(), true);
             connectionManager.invalidatePermission(true, User.class, getUserId(), baseClass, entity.getId(), true);
-            LogAction.link(getUserId(), User.class, getUserId(), baseClass, entity.getId());
+            actionLogger.link(request, getUserId(), User.class, getUserId(), baseClass, entity.getId());
         }
 
         return Response.ok(entity).build();
@@ -92,7 +100,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         if (entity instanceof User after) {
             User before = storage.getObject(User.class, new Request(
                     new Columns.All(), new Condition.Equals("id", entity.getId())));
-            permissionsService.checkUserUpdate(getUserId(), before, (User) entity);
+            permissionsService.checkUserUpdate(getUserId(), before, after);
             skipReadonly = permissionsService.getUser(getUserId())
                     .compare(after, "notificationTokens", "termsAccepted");
         } else if (entity instanceof Group group) {
@@ -114,7 +122,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
             }
         }
         cacheManager.invalidateObject(true, entity.getClass(), entity.getId(), ObjectOperation.UPDATE);
-        LogAction.edit(getUserId(), entity);
+        actionLogger.edit(request, getUserId(), entity);
 
         return Response.ok(entity).build();
     }
@@ -128,7 +136,7 @@ public abstract class BaseObjectResource<T extends BaseModel> extends BaseResour
         storage.removeObject(baseClass, new Request(new Condition.Equals("id", id)));
         cacheManager.invalidateObject(true, baseClass, id, ObjectOperation.DELETE);
 
-        LogAction.remove(getUserId(), baseClass, id);
+        actionLogger.remove(request, getUserId(), baseClass, id);
 
         return Response.noContent().build();
     }

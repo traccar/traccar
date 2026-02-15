@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,19 +21,17 @@ import org.traccar.api.security.PermissionsService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.UnitsConverter;
+import org.traccar.helper.model.AttributeUtil;
 import org.traccar.helper.model.DeviceUtil;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.helper.model.UserUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.reports.common.ReportUtils;
+import org.traccar.reports.common.TripsConfig;
 import org.traccar.reports.model.SummaryReportItem;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Order;
-import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import java.io.File;
@@ -66,15 +64,6 @@ public class SummaryReportProvider {
         this.storage = storage;
     }
 
-    private Position getEdgePosition(long deviceId, Date from, Date to, boolean end) throws StorageException {
-        return storage.getObject(Position.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("deviceId", deviceId),
-                        new Condition.Between("fixTime", "from", from, "to", to)),
-                new Order("fixTime", end, 1)));
-    }
-
     private Collection<SummaryReportItem> calculateDeviceResult(
             Device device, Date from, Date to, boolean fast) throws StorageException {
 
@@ -85,8 +74,8 @@ public class SummaryReportProvider {
         Position first = null;
         Position last = null;
         if (fast) {
-            first = getEdgePosition(device.getId(), from, to, false);
-            last = getEdgePosition(device.getId(), from, to, true);
+            first = PositionUtil.getEdgePosition(storage, device.getId(), from, to, false);
+            last = PositionUtil.getEdgePosition(storage, device.getId(), from, to, true);
         } else {
             var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
             for (Position position : positions) {
@@ -101,9 +90,11 @@ public class SummaryReportProvider {
         }
 
         if (first != null && last != null) {
-            boolean ignoreOdometer = config.getBoolean(Keys.REPORT_IGNORE_ODOMETER);
+            TripsConfig tripsConfig = new TripsConfig(
+                    new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
+            boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
             result.setDistance(PositionUtil.calculateDistance(first, last, !ignoreOdometer));
-            result.setSpentFuel(reportUtils.calculateFuel(first, last));
+            result.setSpentFuel(reportUtils.calculateFuel(first, last, device));
 
             if (first.hasAttribute(Position.KEY_HOURS) && last.hasAttribute(Position.KEY_HOURS)) {
                 result.setStartHours(first.getLong(Position.KEY_HOURS));

@@ -56,6 +56,10 @@ public final class UserUtil {
         return timezone != null ? TimeZone.getTimeZone(timezone) : TimeZone.getDefault();
     }
 
+    public static String getLanguage(Server server, User user) {
+        return lookupStringAttribute(server, user, "language", null);
+    }
+
     private static String lookupStringAttribute(Server server, User user, String key, String defaultValue) {
         String preference;
         String serverPreference = server.getString(key);

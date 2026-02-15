@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.ReflectionCache;
 import org.traccar.model.Permission;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -35,12 +35,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 @SuppressWarnings("UnusedReturnValue")
 public final class QueryBuilder {
@@ -50,7 +54,6 @@ public final class QueryBuilder {
     private final Config config;
     private final ObjectMapper objectMapper;
 
-    private final Map<String, List<Integer>> indexMap = new HashMap<>();
     private Connection connection;
     private PreparedStatement statement;
     private final String query;
@@ -65,74 +68,17 @@ public final class QueryBuilder {
         this.returnGeneratedKeys = returnGeneratedKeys;
         if (query != null) {
             connection = dataSource.getConnection();
-            String parsedQuery = parse(query.trim(), indexMap);
             try {
                 if (returnGeneratedKeys) {
-                    statement = connection.prepareStatement(parsedQuery, Statement.RETURN_GENERATED_KEYS);
+                    statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS);
                 } else {
-                    statement = connection.prepareStatement(parsedQuery);
+                    statement = connection.prepareStatement(query);
                 }
             } catch (SQLException error) {
                 connection.close();
                 throw error;
             }
         }
-    }
-
-    private static String parse(String query, Map<String, List<Integer>> paramMap) {
-
-        int length = query.length();
-        StringBuilder parsedQuery = new StringBuilder(length);
-        boolean inSingleQuote = false;
-        boolean inDoubleQuote = false;
-        int index = 1;
-
-        for (int i = 0; i < length; i++) {
-
-            char c = query.charAt(i);
-
-            // String end
-            if (inSingleQuote) {
-                if (c == '\'') {
-                    inSingleQuote = false;
-                }
-            } else if (inDoubleQuote) {
-                if (c == '"') {
-                    inDoubleQuote = false;
-                }
-            } else {
-
-                // String begin
-                if (c == '\'') {
-                    inSingleQuote = true;
-                } else if (c == '"') {
-                    inDoubleQuote = true;
-                } else if (c == ':' && i + 1 < length
-                        && Character.isJavaIdentifierStart(query.charAt(i + 1))) {
-
-                    // Identifier name
-                    int j = i + 2;
-                    while (j < length && Character.isJavaIdentifierPart(query.charAt(j))) {
-                        j++;
-                    }
-
-                    String name = query.substring(i + 1, j);
-                    c = '?';
-                    i += name.length();
-                    name = name.toLowerCase();
-
-                    // Add to list
-                    List<Integer> indexList = paramMap.computeIfAbsent(name, k -> new LinkedList<>());
-                    indexList.add(index);
-
-                    index++;
-                }
-            }
-
-            parsedQuery.append(c);
-        }
-
-        return parsedQuery.toString();
     }
 
     public static QueryBuilder create(
@@ -146,165 +92,115 @@ public final class QueryBuilder {
         return new QueryBuilder(config, dataSource, objectMapper, query, returnGeneratedKeys);
     }
 
-    private List<Integer> indexes(String name) {
-        name = name.toLowerCase();
-        List<Integer> result = indexMap.get(name);
-        if (result == null) {
-            result = new LinkedList<>();
-        }
-        return result;
+    private interface ValueSetter {
+        void invoke() throws SQLException;
     }
 
-    public QueryBuilder setBoolean(String name, boolean value) throws SQLException {
-        for (int i : indexes(name)) {
-            try {
-                statement.setBoolean(i, value);
-            } catch (SQLException error) {
-                statement.close();
-                connection.close();
-                throw error;
-            }
+    private QueryBuilder setValue(ValueSetter setter) throws SQLException {
+        try {
+            setter.invoke();
+        } catch (SQLException error) {
+            statement.close();
+            connection.close();
+            throw error;
         }
         return this;
     }
 
-    public QueryBuilder setInteger(String name, int value) throws SQLException {
-        for (int i : indexes(name)) {
-            try {
-                statement.setInt(i, value);
-            } catch (SQLException error) {
-                statement.close();
-                connection.close();
-                throw error;
+    public QueryBuilder setBoolean(int index, boolean value) throws SQLException {
+        return setValue(() -> statement.setBoolean(index + 1, value));
+    }
+
+    public QueryBuilder setInteger(int index, int value) throws SQLException {
+        return setValue(() -> statement.setInt(index + 1, value));
+    }
+
+    public QueryBuilder setLong(int index, long value) throws SQLException {
+        return setLong(index, value, false);
+    }
+
+    public QueryBuilder setLong(int index, long value, boolean nullIfZero) throws SQLException {
+        return setValue(() -> {
+            if (value == 0 && nullIfZero) {
+                statement.setNull(index + 1, Types.BIGINT);
+            } else {
+                statement.setLong(index + 1, value);
             }
-        }
-        return this;
+        });
     }
 
-    public QueryBuilder setLong(String name, long value) throws SQLException {
-        return setLong(name, value, false);
+    public QueryBuilder setDouble(int index, double value) throws SQLException {
+        return setValue(() -> statement.setDouble(index + 1, value));
     }
 
-    public QueryBuilder setLong(String name, long value, boolean nullIfZero) throws SQLException {
-        for (int i : indexes(name)) {
-            try {
-                if (value == 0 && nullIfZero) {
-                    statement.setNull(i, Types.INTEGER);
-                } else {
-                    statement.setLong(i, value);
-                }
-            } catch (SQLException error) {
-                statement.close();
-                connection.close();
-                throw error;
+    public QueryBuilder setString(int index, String value) throws SQLException {
+        return setValue(() -> {
+            if (value == null) {
+                statement.setNull(index + 1, Types.VARCHAR);
+            } else {
+                statement.setString(index + 1, value);
             }
-        }
-        return this;
+        });
     }
 
-    public QueryBuilder setDouble(String name, double value) throws SQLException {
-        for (int i : indexes(name)) {
-            try {
-                statement.setDouble(i, value);
-            } catch (SQLException error) {
-                statement.close();
-                connection.close();
-                throw error;
+    public QueryBuilder setDate(int index, Date value) throws SQLException {
+        return setValue(() -> {
+            if (value == null) {
+                statement.setNull(index + 1, Types.TIMESTAMP);
+            } else {
+                statement.setTimestamp(index + 1, new Timestamp(value.getTime()));
             }
-        }
-        return this;
+        });
     }
 
-    public QueryBuilder setString(String name, String value) throws SQLException {
-        for (int i : indexes(name)) {
-            try {
-                if (value == null) {
-                    statement.setNull(i, Types.VARCHAR);
-                } else {
-                    statement.setString(i, value);
-                }
-            } catch (SQLException error) {
-                statement.close();
-                connection.close();
-                throw error;
+    public QueryBuilder setBlob(int index, byte[] value) throws SQLException {
+        return setValue(() -> {
+            if (value == null) {
+                statement.setNull(index + 1, Types.BLOB);
+            } else {
+                statement.setBytes(index + 1, value);
             }
-        }
-        return this;
+        });
     }
 
-    public QueryBuilder setDate(String name, Date value) throws SQLException {
-        for (int i : indexes(name)) {
-            try {
-                if (value == null) {
-                    statement.setNull(i, Types.TIMESTAMP);
-                } else {
-                    statement.setTimestamp(i, new Timestamp(value.getTime()));
-                }
-            } catch (SQLException error) {
-                statement.close();
-                connection.close();
-                throw error;
-            }
-        }
-        return this;
-    }
-
-    public QueryBuilder setBlob(String name, byte[] value) throws SQLException {
-        for (int i : indexes(name)) {
-            try {
-                if (value == null) {
-                    statement.setNull(i, Types.BLOB);
-                } else {
-                    statement.setBytes(i, value);
-                }
-            } catch (SQLException error) {
-                statement.close();
-                connection.close();
-                throw error;
-            }
-        }
-        return this;
-    }
-
-    public QueryBuilder setValue(String name, Object value) throws SQLException {
+    public QueryBuilder setValue(int index, Object value) throws SQLException {
         if (value instanceof Boolean booleanValue) {
-            setBoolean(name, booleanValue);
+            setBoolean(index, booleanValue);
         } else if (value instanceof Integer integerValue) {
-            setInteger(name, integerValue);
+            setInteger(index, integerValue);
         } else if (value instanceof Long longValue) {
-            setLong(name, longValue);
+            setLong(index, longValue);
         } else if (value instanceof Double doubleValue) {
-            setDouble(name, doubleValue);
+            setDouble(index, doubleValue);
         } else if (value instanceof String stringValue) {
-            setString(name, stringValue);
+            setString(index, stringValue);
         } else if (value instanceof Date dateValue) {
-            setDate(name, dateValue);
+            setDate(index, dateValue);
         }
         return this;
     }
 
     public QueryBuilder setObject(Object object, List<String> columns) throws SQLException {
-
         try {
-            for (String column : columns) {
-                Method method = object.getClass().getMethod(
-                        "get" + Character.toUpperCase(column.charAt(0)) + column.substring(1));
+            for (int index = 0; index < columns.size(); index++) {
+                String column = columns.get(index);
+                Method method = ReflectionCache.getProperties(object.getClass(), "get").get(column).method();
                 if (method.getReturnType().equals(boolean.class)) {
-                    setBoolean(column, (Boolean) method.invoke(object));
+                    setBoolean(index, (Boolean) method.invoke(object));
                 } else if (method.getReturnType().equals(int.class)) {
-                    setInteger(column, (Integer) method.invoke(object));
+                    setInteger(index, (Integer) method.invoke(object));
                 } else if (method.getReturnType().equals(long.class)) {
-                    setLong(column, (Long) method.invoke(object), column.endsWith("Id"));
+                    setLong(index, (Long) method.invoke(object), column.endsWith("Id"));
                 } else if (method.getReturnType().equals(double.class)) {
-                    setDouble(column, (Double) method.invoke(object));
+                    setDouble(index, (Double) method.invoke(object));
                 } else if (method.getReturnType().equals(String.class)) {
-                    setString(column, (String) method.invoke(object));
+                    setString(index, (String) method.invoke(object));
                 } else if (method.getReturnType().equals(Date.class)) {
-                    setDate(column, (Date) method.invoke(object));
+                    setDate(index, (Date) method.invoke(object));
                 } else if (method.getReturnType().equals(byte[].class)) {
-                    setBlob(column, (byte[]) method.invoke(object));
+                    setBlob(index, (byte[]) method.invoke(object));
                 } else {
-                    setString(column, objectMapper.writeValueAsString(method.invoke(object)));
+                    setString(index, objectMapper.writeValueAsString(method.invoke(object)));
                 }
             }
         } catch (ReflectiveOperationException | JsonProcessingException e) {
@@ -315,81 +211,36 @@ public final class QueryBuilder {
     }
 
     private interface ResultSetProcessor<T> {
-        void process(T object, ResultSet resultSet) throws SQLException;
+        void process(T object, ResultSet resultSet) throws ReflectiveOperationException, IOException, SQLException;
     }
 
     private <T> void addProcessors(
             List<ResultSetProcessor<T>> processors,
             final Class<?> parameterType, final Method method, final String name) {
-
         if (parameterType.equals(boolean.class)) {
-            processors.add((object, resultSet) -> {
-                try {
-                    method.invoke(object, resultSet.getBoolean(name));
-                } catch (IllegalAccessException | InvocationTargetException error) {
-                    LOGGER.warn("Set property error", error);
-                }
-            });
+            processors.add((object, resultSet) -> method.invoke(object, resultSet.getBoolean(name)));
         } else if (parameterType.equals(int.class)) {
-            processors.add((object, resultSet) -> {
-                try {
-                    method.invoke(object, resultSet.getInt(name));
-                } catch (IllegalAccessException | InvocationTargetException error) {
-                    LOGGER.warn("Set property error", error);
-                }
-            });
+            processors.add((object, resultSet) -> method.invoke(object, resultSet.getInt(name)));
         } else if (parameterType.equals(long.class)) {
-            processors.add((object, resultSet) -> {
-                try {
-                    method.invoke(object, resultSet.getLong(name));
-                } catch (IllegalAccessException | InvocationTargetException error) {
-                    LOGGER.warn("Set property error", error);
-                }
-            });
+            processors.add((object, resultSet) -> method.invoke(object, resultSet.getLong(name)));
         } else if (parameterType.equals(double.class)) {
-            processors.add((object, resultSet) -> {
-                try {
-                    method.invoke(object, resultSet.getDouble(name));
-                } catch (IllegalAccessException | InvocationTargetException error) {
-                    LOGGER.warn("Set property error", error);
-                }
-            });
+            processors.add((object, resultSet) -> method.invoke(object, resultSet.getDouble(name)));
         } else if (parameterType.equals(String.class)) {
-            processors.add((object, resultSet) -> {
-                try {
-                    method.invoke(object, resultSet.getString(name));
-                } catch (IllegalAccessException | InvocationTargetException error) {
-                    LOGGER.warn("Set property error", error);
-                }
-            });
+            processors.add((object, resultSet) -> method.invoke(object, resultSet.getString(name)));
         } else if (parameterType.equals(Date.class)) {
             processors.add((object, resultSet) -> {
-                try {
-                    Timestamp timestamp = resultSet.getTimestamp(name);
-                    if (timestamp != null) {
-                        method.invoke(object, new Date(timestamp.getTime()));
-                    }
-                } catch (IllegalAccessException | InvocationTargetException error) {
-                    LOGGER.warn("Set property error", error);
+                Timestamp timestamp = resultSet.getTimestamp(name);
+                if (timestamp != null) {
+                    method.invoke(object, new Date(timestamp.getTime()));
                 }
             });
         } else if (parameterType.equals(byte[].class)) {
-            processors.add((object, resultSet) -> {
-                try {
-                    method.invoke(object, resultSet.getBytes(name));
-                } catch (IllegalAccessException | InvocationTargetException error) {
-                    LOGGER.warn("Set property error", error);
-                }
-            });
+            processors.add((object, resultSet) -> method.invoke(object, (Object) resultSet.getBytes(name)));
         } else {
             processors.add((object, resultSet) -> {
                 String value = resultSet.getString(name);
                 if (value != null && !value.isEmpty()) {
-                    try {
-                        method.invoke(object, objectMapper.readValue(value, parameterType));
-                    } catch (InvocationTargetException | IllegalAccessException | IOException error) {
-                        LOGGER.warn("Set property error", error);
-                    }
+                    method.invoke(object, objectMapper.readValue(value, parameterType));
                 }
             });
         }
@@ -402,75 +253,92 @@ public final class QueryBuilder {
     }
 
     public <T> List<T> executeQuery(Class<T> clazz) throws SQLException {
-        List<T> result = new LinkedList<>();
+        try (var stream = executeQueryStreamed(clazz)) {
+            return stream.toList();
+        }
+    }
 
-        if (query != null) {
+    public <T> Stream<T> executeQueryStreamed(Class<T> clazz) throws SQLException {
+        if (query == null) {
+            return Stream.empty();
+        }
+        ResultSet resultSet = null;
+        try {
+            logQuery();
 
-            try {
+            resultSet = statement.executeQuery();
+            ResultSetMetaData resultMetaData = resultSet.getMetaData();
 
-                logQuery();
-
-                try (ResultSet resultSet = statement.executeQuery()) {
-
-                    ResultSetMetaData resultMetaData = resultSet.getMetaData();
-
-                    List<ResultSetProcessor<T>> processors = new LinkedList<>();
-
-                    Method[] methods = clazz.getMethods();
-
-                    for (final Method method : methods) {
-                        if (method.getName().startsWith("set") && method.getParameterTypes().length == 1) {
-
-                            final String name = method.getName().substring(3);
-
-                            // Check if column exists
-                            boolean column = false;
-                            for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
-                                if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
-                                    column = true;
-                                    break;
-                                }
-                            }
-                            if (!column) {
-                                continue;
-                            }
-
-                            addProcessors(processors, method.getParameterTypes()[0], method, name);
-                        }
-                    }
-
-                    while (resultSet.next()) {
-                        try {
-                            T object = clazz.getDeclaredConstructor().newInstance();
-                            for (ResultSetProcessor<T> processor : processors) {
-                                processor.process(object, resultSet);
-                            }
-                            result.add(object);
-                        } catch (ReflectiveOperationException e) {
-                            throw new IllegalArgumentException();
-                        }
+            List<ResultSetProcessor<T>> processors = new ArrayList<>();
+            for (var entry : ReflectionCache.getProperties(clazz, "set").entrySet()) {
+                final String name = entry.getKey();
+                boolean column = false;
+                for (int i = 1; i <= resultMetaData.getColumnCount(); i++) {
+                    if (name.equalsIgnoreCase(resultMetaData.getColumnLabel(i))) {
+                        column = true;
+                        break;
                     }
                 }
-
-            } finally {
-                statement.close();
-                connection.close();
+                if (column) {
+                    Method method = entry.getValue().method();
+                    addProcessors(processors, method.getParameterTypes()[0], method, name);
+                }
             }
-        }
 
-        return result;
+            final ResultSet retainedResultSet = resultSet;
+            return StreamSupport.stream(
+                    new Spliterators.AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
+                        @Override
+                        public boolean tryAdvance(Consumer<? super T> action) {
+                            try {
+                                if (retainedResultSet.next()) {
+                                    T object = clazz.getDeclaredConstructor().newInstance();
+                                    for (ResultSetProcessor<T> processor : processors) {
+                                        try {
+                                            processor.process(object, retainedResultSet);
+                                        } catch (ReflectiveOperationException | IOException error) {
+                                            LOGGER.warn("Set property error", error);
+                                        }
+                                    }
+                                    action.accept(object);
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            } catch (SQLException | ReflectiveOperationException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }, false)
+                    .onClose(() -> close(retainedResultSet));
+        } catch (Exception e) {
+            close(resultSet);
+            throw e;
+        }
+    }
+
+    private void close(ResultSet resultSet) {
+        try {
+            if (resultSet != null) {
+                resultSet.close();
+            }
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public long executeUpdate() throws SQLException {
-
         if (query != null) {
             try {
                 logQuery();
                 statement.execute();
                 if (returnGeneratedKeys) {
-                    ResultSet resultSet = statement.getGeneratedKeys();
-                    if (resultSet.next()) {
-                        return resultSet.getLong(1);
+                    try (ResultSet resultSet = statement.getGeneratedKeys()) {
+                        if (resultSet.next()) {
+                            return resultSet.getLong(1);
+                        }
                     }
                 }
             } finally {

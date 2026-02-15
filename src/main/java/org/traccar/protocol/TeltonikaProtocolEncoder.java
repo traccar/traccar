@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2019 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,17 +51,19 @@ public class TeltonikaProtocolEncoder extends BaseProtocolEncoder {
 
     @Override
     protected Object encodeCommand(Command command) {
-
-        if (command.getType().equals(Command.TYPE_CUSTOM)) {
-            String data = command.getString(Command.KEY_DATA);
-            if (data.matches("(\\p{XDigit}{2})+")) {
-                return encodeContent(DataConverter.parseHex(data));
-            } else {
-                return encodeContent((data + "\r\n").getBytes(StandardCharsets.US_ASCII));
+        return switch (command.getType()) {
+            case Command.TYPE_ENGINE_STOP -> encodeContent("setdigout 1".getBytes(StandardCharsets.US_ASCII));
+            case Command.TYPE_ENGINE_RESUME -> encodeContent("setdigout 0".getBytes(StandardCharsets.US_ASCII));
+            case Command.TYPE_CUSTOM -> {
+                String data = command.getString(Command.KEY_DATA);
+                if (data.matches("(\\p{XDigit}{2})+")) {
+                    yield encodeContent(DataConverter.parseHex(data));
+                } else {
+                    yield encodeContent(data.getBytes(StandardCharsets.US_ASCII));
+                }
             }
-        } else {
-            return null;
-        }
+            default -> null;
+        };
     }
 
 }

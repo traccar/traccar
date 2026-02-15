@@ -70,7 +70,7 @@ public class CellocatorProtocolEncoder extends BaseProtocolEncoder {
     protected Object encodeCommand(Command command) {
 
         if (command.getType().equals(Command.TYPE_OUTPUT_CONTROL)) {
-            int data = Integer.parseInt(command.getString(Command.KEY_DATA)) << 4
+            int data = (Integer.parseInt(command.getString(Command.KEY_DATA)) << 4)
                     + command.getInteger(Command.KEY_INDEX);
             return encodeCommand(command.getDeviceId(), 0x03, data, 0);
         }

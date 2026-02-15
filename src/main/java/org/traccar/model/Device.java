@@ -53,9 +53,6 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
     }
 
     public void setUniqueId(String uniqueId) {
-        if (uniqueId.contains("..")) {
-            throw new IllegalArgumentException("Invalid unique id");
-        }
         this.uniqueId = uniqueId.trim();
     }
 
@@ -184,6 +181,19 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
     @JsonIgnore
     public void setMotionState(boolean motionState) {
         this.motionState = motionState;
+    }
+
+    private long motionPositionId;
+
+    @QueryIgnore
+    @JsonIgnore
+    public long getMotionPositionId() {
+        return motionPositionId;
+    }
+
+    @JsonIgnore
+    public void setMotionPositionId(long motionPositionId) {
+        this.motionPositionId = motionPositionId;
     }
 
     private Date motionTime;

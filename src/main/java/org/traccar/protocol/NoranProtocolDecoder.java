@@ -72,12 +72,9 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
         } else if (type == MSG_UPLOAD_POSITION || type == MSG_UPLOAD_POSITION_NEW
                 || type == MSG_CONTROL_RESPONSE || type == MSG_ALARM) {
 
-            boolean newFormat = false;
-            if (type == MSG_UPLOAD_POSITION && buf.readableBytes() == 48
+            boolean newFormat = type == MSG_UPLOAD_POSITION && buf.readableBytes() == 48
                     || type == MSG_ALARM && buf.readableBytes() == 48
-                    || type == MSG_CONTROL_RESPONSE && buf.readableBytes() == 57) {
-                newFormat = true;
-            }
+                    || type == MSG_CONTROL_RESPONSE && buf.readableBytes() == 57;
 
             Position position = new Position(getProtocolName());
 
@@ -139,7 +136,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             if (!newFormat) {
                 position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte());
-                position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                position.set(Position.KEY_FUEL, buf.readUnsignedByte());
             } else if (type == MSG_UPLOAD_POSITION_NEW) {
                 position.set(Position.PREFIX_TEMP + 1, buf.readShortLE());
                 position.set(Position.KEY_ODOMETER, buf.readFloatLE());

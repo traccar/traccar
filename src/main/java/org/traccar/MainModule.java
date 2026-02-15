@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.traccar;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsonp.JSONPModule;
+import com.fasterxml.jackson.module.blackbird.BlackbirdModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.name.Names;
+import com.nimbusds.oauth2.sdk.GeneralException;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import org.apache.velocity.app.VelocityEngine;
@@ -73,13 +75,14 @@ import org.traccar.geocoder.GeocodeJsonGeocoder;
 import org.traccar.geolocation.GeolocationProvider;
 import org.traccar.geolocation.GoogleGeolocationProvider;
 import org.traccar.geolocation.OpenCellIdGeolocationProvider;
+import org.traccar.geolocation.UniversalGeolocationProvider;
 import org.traccar.geolocation.UnwiredGeolocationProvider;
 import org.traccar.handler.CopyAttributesHandler;
 import org.traccar.handler.FilterHandler;
 import org.traccar.handler.GeocoderHandler;
 import org.traccar.handler.GeolocationHandler;
 import org.traccar.handler.SpeedLimitHandler;
-import org.traccar.handler.TimeHandler;
+import org.traccar.helper.LogAction;
 import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.helper.WebHelper;
 import org.traccar.mail.LogMailManager;
@@ -103,7 +106,6 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.ClientBuilder;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.http.HttpClient;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -142,10 +144,10 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static ObjectMapper provideObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JSONPModule());
-        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        return objectMapper;
+        return new ObjectMapper()
+                .registerModule(new JSONPModule())
+                .registerModule(new BlackbirdModule())
+                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }
 
     @Singleton
@@ -187,16 +189,17 @@ public class MainModule extends AbstractModule {
     @Singleton
     @Provides
     public static OpenIdProvider provideOpenIDProvider(
-        Config config, LoginService loginService, ObjectMapper objectMapper
-        ) throws InterruptedException, IOException, URISyntaxException {
+            Config config, LoginService loginService, LogAction actionLogger)
+            throws IOException, URISyntaxException, GeneralException {
         if (config.hasKey(Keys.OPENID_CLIENT_ID)) {
-            return new OpenIdProvider(config, loginService, HttpClient.newHttpClient(), objectMapper);
+            return new OpenIdProvider(config, loginService, actionLogger);
         }
         return null;
     }
 
     @Provides
-    public static WebServer provideWebServer(Injector injector, Config config) {
+    public static WebServer provideWebServer(
+            Injector injector, Config config) throws IOException {
         if (config.getInteger(Keys.WEB_PORT) > 0) {
             return new WebServer(injector, config);
         }
@@ -253,6 +256,7 @@ public class MainModule extends AbstractModule {
             return switch (type) {
                 case "opencellid" -> new OpenCellIdGeolocationProvider(client, url, key);
                 case "unwired" -> new UnwiredGeolocationProvider(client, url, key);
+                case "universal" -> new UniversalGeolocationProvider(client, url, key);
                 default -> new GoogleGeolocationProvider(client, key);
             };
         }
@@ -318,15 +322,6 @@ public class MainModule extends AbstractModule {
             Config config, CacheManager cacheManager, Storage storage, StatisticsManager statisticsManager) {
         if (config.getBoolean(Keys.FILTER_ENABLE)) {
             return new FilterHandler(config, cacheManager, storage, statisticsManager);
-        }
-        return null;
-    }
-
-    @Singleton
-    @Provides
-    public static TimeHandler provideTimeHandler(Config config) {
-        if (config.hasKey(Keys.TIME_OVERRIDE)) {
-            return new TimeHandler(config);
         }
         return null;
     }

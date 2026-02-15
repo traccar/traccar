@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,15 @@ package org.traccar.protocol;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.QueryStringDecoder;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import org.traccar.BaseHttpProtocolDecoder;
+import org.traccar.config.Keys;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.session.DeviceSession;
 import org.traccar.Protocol;
 import org.traccar.helper.DateUtil;
@@ -30,6 +36,7 @@ import org.traccar.model.Network;
 import org.traccar.model.Position;
 import org.traccar.model.WifiAccessPoint;
 
+import java.io.StringReader;
 import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -40,14 +47,32 @@ import java.util.Map;
 
 public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
 
+    private double minAccuracy;
+
     public OsmAndProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    @Override
+    protected void init() {
+        minAccuracy = getConfig().getDouble(Keys.OSMAND_MIN_ACCURACY);
     }
 
     @Override
     protected Object decode(Channel channel, SocketAddress remoteAddress, Object msg) throws Exception {
 
         FullHttpRequest request = (FullHttpRequest) msg;
+        String contentType = request.headers().get(HttpHeaderNames.CONTENT_TYPE);
+        if (contentType != null && contentType.startsWith(HttpHeaderValues.APPLICATION_JSON.toString())) {
+            return decodeJson(channel, remoteAddress, request);
+        } else {
+            return decodeQuery(channel, remoteAddress, request);
+        }
+    }
+
+    private Object decodeQuery(
+            Channel channel, SocketAddress remoteAddress, FullHttpRequest request) throws Exception {
+
         QueryStringDecoder decoder = new QueryStringDecoder(request.uri());
         Map<String, List<String>> params = decoder.parameters();
         if (params.isEmpty()) {
@@ -73,6 +98,11 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
                             return null;
                         }
                         position.setDeviceId(deviceSession.getDeviceId());
+                        break;
+                    case "notificationToken":
+                        if (position.getDeviceId() > 0) {
+                            getCommandsManager().updateNotificationToken(position.getDeviceId(), value);
+                        }
                         break;
                     case "valid":
                         position.setValid(Boolean.parseBoolean(value) || "1".equals(value));
@@ -191,6 +221,86 @@ public class OsmAndProtocolDecoder extends BaseHttpProtocolDecoder {
             sendResponse(channel, HttpResponseStatus.BAD_REQUEST);
             return null;
         }
+    }
+
+    private Object decodeJson(
+            Channel channel, SocketAddress remoteAddress, FullHttpRequest request) throws Exception {
+
+        String content = request.content().toString(StandardCharsets.UTF_8);
+        JsonObject root = Json.createReader(new StringReader(content)).readObject();
+
+        DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, root.getString("device_id"));
+        if (deviceSession == null) {
+            sendResponse(channel, HttpResponseStatus.NOT_FOUND);
+            return null;
+        }
+
+        Position position = new Position(getProtocolName());
+        position.setDeviceId(deviceSession.getDeviceId());
+
+        JsonObject location = root.getJsonObject("location");
+
+        position.setTime(DateUtil.parseDate(location.getString("timestamp")));
+
+        if (location.containsKey("coords")) {
+            JsonObject coordinates = location.getJsonObject("coords");
+            position.setValid(true);
+            position.setLatitude(coordinates.getJsonNumber("latitude").doubleValue());
+            position.setLongitude(coordinates.getJsonNumber("longitude").doubleValue());
+            double speed = coordinates.getJsonNumber("speed").doubleValue();
+            if (speed >= 0) {
+                position.setSpeed(UnitsConverter.knotsFromMps(speed));
+            }
+            double heading = coordinates.getJsonNumber("heading").doubleValue();
+            if (heading >= 0) {
+                position.setCourse(heading);
+            }
+            double accuracy = coordinates.getJsonNumber("accuracy").doubleValue();
+            if (accuracy >= minAccuracy) {
+                position.setAccuracy(accuracy);
+            }
+            position.setAltitude(coordinates.getJsonNumber("altitude").doubleValue());
+        } else {
+            getLastLocation(position, null);
+        }
+
+        if (location.containsKey("event")) {
+            position.set(Position.KEY_EVENT, location.getString("event"));
+        }
+        if (location.containsKey("is_moving")) {
+            position.set(Position.KEY_MOTION, location.getBoolean("is_moving"));
+        }
+        if (location.containsKey("odometer")) {
+            position.set(Position.KEY_ODOMETER, location.getInt("odometer"));
+        }
+        if (location.containsKey("mock")) {
+            position.set("mock", location.getBoolean("mock"));
+        }
+        if (location.containsKey("activity")) {
+            position.set("activity", location.getJsonObject("activity").getString("type"));
+        }
+        if (location.containsKey("battery")) {
+            JsonObject battery = location.getJsonObject("battery");
+            double level = battery.getJsonNumber("level").doubleValue();
+            if (level >= 0) {
+                position.set(Position.KEY_BATTERY_LEVEL, (int) (level * 100));
+            }
+            if (battery.getBoolean("is_charging")) {
+                position.set(Position.KEY_CHARGE, true);
+            }
+        }
+
+        if (location.containsKey("alarm")) {
+            position.set(Position.KEY_ALARM, location.getString("alarm"));
+        } else if (location.containsKey("extras")) {
+            JsonObject extras = location.getJsonObject("extras");
+            if (extras.containsKey("alarm")) {
+                position.set(Position.KEY_ALARM, extras.getString("alarm"));
+            }
+        }
+
+        sendResponse(channel, HttpResponseStatus.OK);
+        return position;
     }
 
     @Override

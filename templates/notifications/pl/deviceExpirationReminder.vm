@@ -1,0 +1,8 @@
+#set($subject = "Przypomnienie o wygaśnięciu urządzenia")
+#set($digest = "Twoje urządzenie: $device.name wygaśnie: $dateTool.format('dd-MM-yyyy', $expiration, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Twoje urządzenie $device.name wygaśnie: $dateTool.format('dd-MM-yyyy', $expiration, $locale, $timezone).
+</body>
+</html>
