@@ -70,8 +70,7 @@ public final class NewMotionProcessor {
             long duration = position.getFixTime().getTime() - oldest.getFixTime().getTime();
             if (duration >= minDuration) {
                 state.setMotionStreak(false);
-                Position stopPosition = findStopPosition(positions, minAverageSpeed);
-                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, stopPosition);
+                addEvent(state, events, Event.TYPE_DEVICE_STOPPED, position);
             }
         } else {
             double distance = DistanceCalculator.distance(
@@ -79,37 +78,9 @@ public final class NewMotionProcessor {
                     position.getLatitude(), position.getLongitude());
             if (distance >= minDistance) {
                 state.setMotionStreak(true);
-                Position motionPosition = findMotionPosition(positions, position, minDistance);
-                addEvent(state, events, Event.TYPE_DEVICE_MOVING, motionPosition);
+                addEvent(state, events, Event.TYPE_DEVICE_MOVING, position);
             }
         }
-    }
-
-    private static Position findStopPosition(Deque<Position> positions, double minAverageSpeed) {
-        var iterator = positions.iterator();
-        Position previous = iterator.next();
-        while (iterator.hasNext()) {
-            Position next = iterator.next();
-            if (averageSpeed(previous, next) < minAverageSpeed) {
-                return previous;
-            }
-            previous = next;
-        }
-        return previous;
-    }
-
-    private static Position findMotionPosition(
-            Deque<Position> positions, Position current, double minDistance) {
-        for (Position candidate : positions) {
-            double distance = DistanceCalculator.distance(
-                    candidate.getLatitude(), candidate.getLongitude(),
-                    current.getLatitude(), current.getLongitude());
-            if (distance >= minDistance) {
-                return candidate;
-            }
-        }
-        Position oldest = positions.peekFirst();
-        return oldest != null ? oldest : current;
     }
 
     private static double averageSpeed(Position from, Position to) {
