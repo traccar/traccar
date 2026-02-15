@@ -9,8 +9,10 @@ import org.traccar.model.Position;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.List;
 import java.util.TimeZone;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -203,6 +205,51 @@ public class NewMotionProcessorTest extends BaseTest {
         assertEquals(Event.TYPE_DEVICE_MOVING, state.getEvents().get(0).getType());
         assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvents().get(1).getType());
         assertFalse(state.getMotionStreak());
+    }
+
+    @Test
+    public void testEventsAreChronological() throws ParseException {
+        double minDistance = 200;
+        long minDuration = 180000;
+        long stopGap = 3600000;
+
+        double latitude = 0.0;
+
+        List<Position> input = List.of(
+                position("2017-01-01 00:00:00", latitude, DistanceCalculator.getLongitudeDelta(0, latitude)),
+                position("2017-01-01 00:01:00", latitude, DistanceCalculator.getLongitudeDelta(100, latitude)),
+                position("2017-01-01 00:02:00", latitude, DistanceCalculator.getLongitudeDelta(60, latitude)),
+                position("2017-01-01 00:03:00", latitude, DistanceCalculator.getLongitudeDelta(180, latitude)),
+                position("2017-01-01 00:04:00", latitude, DistanceCalculator.getLongitudeDelta(180, latitude)),
+                position("2017-01-01 00:05:00", latitude, DistanceCalculator.getLongitudeDelta(260, latitude)),
+                position("2017-01-01 00:06:00", latitude, DistanceCalculator.getLongitudeDelta(260, latitude)),
+                position("2017-01-01 00:07:00", latitude, DistanceCalculator.getLongitudeDelta(320, latitude)));
+
+        Deque<Position> positions = new ArrayDeque<>();
+        NewMotionState state = new NewMotionState();
+        state.setPositions(positions);
+        state.setMotionStreak(false);
+        state.setEventPosition(input.get(0));
+
+        List<Event> events = new ArrayList<>();
+        for (Position current : input) {
+            NewMotionProcessor.updateState(state, current, minDistance, minDuration, stopGap);
+            events.addAll(state.getEvents());
+
+            positions.add(current);
+            while (positions.size() > 1) {
+                var iterator = positions.iterator();
+                iterator.next();
+                if (positions.peekLast().getFixTime().getTime() - iterator.next().getFixTime().getTime() >= minDuration) {
+                    positions.poll();
+                } else {
+                    break;
+                }
+            }
+        }
+
+        assertEquals(2, events.size());
+        assertFalse(events.get(1).getEventTime().before(events.get(0).getEventTime()));
     }
 
 }

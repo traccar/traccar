@@ -79,7 +79,7 @@ public final class NewMotionProcessor {
                     position.getLatitude(), position.getLongitude());
             if (distance >= minDistance) {
                 state.setMotionStreak(true);
-                Position motionPosition = findMotionPosition(positions, position, minAverageSpeed);
+                Position motionPosition = findMotionPosition(positions, position, minDistance);
                 addEvent(state, events, Event.TYPE_DEVICE_MOVING, motionPosition);
             }
         }
@@ -99,17 +99,17 @@ public final class NewMotionProcessor {
     }
 
     private static Position findMotionPosition(
-            Deque<Position> positions, Position current, double minAverageSpeed) {
-        var iterator = positions.descendingIterator();
-        Position previous = current;
-        while (iterator.hasNext()) {
-            Position next = iterator.next();
-            if (averageSpeed(next, previous) >= minAverageSpeed) {
-                return next;
+            Deque<Position> positions, Position current, double minDistance) {
+        for (Position candidate : positions) {
+            double distance = DistanceCalculator.distance(
+                    candidate.getLatitude(), candidate.getLongitude(),
+                    current.getLatitude(), current.getLongitude());
+            if (distance >= minDistance) {
+                return candidate;
             }
-            previous = next;
         }
-        return current;
+        Position oldest = positions.peekFirst();
+        return oldest != null ? oldest : current;
     }
 
     private static double averageSpeed(Position from, Position to) {
