@@ -294,6 +294,38 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(10833, fmbXXX, (p, b) -> p.set("eyeRoll2", b.readShort()));
         register(10834, fmbXXX, (p, b) -> p.set("eyeRoll3", b.readShort()));
         register(10835, fmbXXX, (p, b) -> p.set("eyeRoll4", b.readShort()));
+
+        // CAN/OBD Engine and Oil parameters
+        register(58, fmbXXX, (p, b) -> p.set("oilTemperature", b.readUnsignedByte()));
+        register(102, fmbXXX, (p, b) -> p.set(Position.KEY_HOURS, b.readUnsignedInt() * 60000L));
+        register(103, fmbXXX, (p, b) -> p.set(Position.KEY_HOURS, b.readUnsignedInt() * 60000L));
+        register(1158, fmbXXX, (p, b) -> p.set("oilPressure", b.readUnsignedShort()));
+        register(1159, fmbXXX, (p, b) -> p.set("oilLevel", b.readUnsignedByte()));
+        register(1270, fmbXXX, (p, b) -> p.set("oilTemperature", b.readByte()));
+
+        // CAN Axle load parameters (kg)
+        register(118, fmbXXX, (p, b) -> p.set("axle1Load", b.readUnsignedShort()));
+        register(119, fmbXXX, (p, b) -> p.set("axle2Load", b.readUnsignedShort()));
+        register(120, fmbXXX, (p, b) -> p.set("axle3Load", b.readUnsignedShort()));
+        register(121, fmbXXX, (p, b) -> p.set("axle4Load", b.readUnsignedShort()));
+        register(122, fmbXXX, (p, b) -> p.set("axle5Load", b.readUnsignedShort()));
+        register(1342, fmbXXX, (p, b) -> p.set("axle6Load", b.readUnsignedShort()));
+
+        // AdBlue / DEF fluid level (%)
+        register(1335, fmbXXX, (p, b) -> p.set("adBlueLevel", b.readUnsignedByte()));
+
+        // CAN Air suspension bellow pressures (kPa)
+        register(1336, fmbXXX, (p, b) -> p.set("bellowPressureFR", b.readUnsignedShort() * 0.1));
+        register(1337, fmbXXX, (p, b) -> p.set("bellowPressureFL", b.readUnsignedShort() * 0.1));
+        register(1338, fmbXXX, (p, b) -> p.set("bellowPressureRR", b.readUnsignedShort() * 0.1));
+        register(1339, fmbXXX, (p, b) -> p.set("bellowPressureRL", b.readUnsignedShort() * 0.1));
+
+        // LLS / Escort fuel sensor temperatures (°C, signed)
+        register(202, fmbXXX, (p, b) -> p.set("lls1FuelTemp", b.readByte()));
+        register(204, fmbXXX, (p, b) -> p.set("lls2FuelTemp", b.readByte()));
+        register(211, fmbXXX, (p, b) -> p.set("lls3FuelTemp", b.readByte()));
+        register(213, fmbXXX, (p, b) -> p.set("lls4FuelTemp", b.readByte()));
+        register(215, fmbXXX, (p, b) -> p.set("lls5FuelTemp", b.readByte()));
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
