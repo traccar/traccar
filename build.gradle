@@ -89,6 +89,7 @@ dependencies {
     implementation "com.kohlschutter.junixsocket:junixsocket-core:$junixsocketVersion"
     implementation "com.kohlschutter.junixsocket:junixsocket-mysql:$junixsocketVersion"
     implementation "com.microsoft.sqlserver:mssql-jdbc:13.2.1.jre11"
+    implementation "com.azure:azure-identity:1.18.2"
     implementation "com.zaxxer:HikariCP:7.0.2"
     implementation "io.netty:netty-buffer:$nettyVersion"
     implementation "io.netty:netty-codec:$nettyVersion"
