@@ -1535,6 +1535,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
+        '404':
+          description: Not Found
+          content: {}
   /reports/route:
     get:
       summary: >-
