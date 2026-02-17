@@ -1188,6 +1188,7 @@ paths:
       summary: Create a User
       tags:
         - Users
+      security: []
       requestBody:
         content:
           application/json:
