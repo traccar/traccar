@@ -732,6 +732,11 @@ paths:
             `id=31&id=42`
           schema:
             type: integer
+        - name: geofenceId
+          in: query
+          description: Optional geofence filter when fetching positions by device and time range
+          schema:
+            type: integer
       responses:
         '200':
           description: OK
