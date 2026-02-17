@@ -1295,6 +1295,35 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * WhatsApp Cloud API permanent access token.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_WHATSAPP_TOKEN = new StringConfigKey(
+            "notificator.whatsapp.token",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * WhatsApp Cloud API phone number id.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_WHATSAPP_PHONE_NUMBER_ID = new StringConfigKey(
+            "notificator.whatsapp.phoneNumberId",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * WhatsApp Cloud API template name.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_WHATSAPP_TEMPLATE_NAME = new StringConfigKey(
+            "notificator.whatsapp.templateName",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * WhatsApp Cloud API template language code. Default value is "en_US".
+     */
+    public static final ConfigKey<String> NOTIFICATOR_WHATSAPP_TEMPLATE_LANGUAGE = new StringConfigKey(
+            "notificator.whatsapp.templateLanguage",
+            List.of(KeyType.CONFIG),
+            "en_US");
+
+    /**
      * Enable user expiration email notification.
      */
     public static final ConfigKey<Boolean> NOTIFICATION_EXPIRATION_USER = new BooleanConfigKey(
