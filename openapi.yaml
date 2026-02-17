@@ -702,15 +702,16 @@ paths:
         API](https://www.traccar.org/traccar-api/) instead of periodically
         polling positions endpoint. Without any params, it returns a list of
         last known positions for all the user's Devices. _from_ and _to_ fields
-        are not required with _id_.
+        are not required with _id_. When _deviceId_ is provided without _from_
+        and _to_, the latest position is returned.
       tags:
         - Positions
       parameters:
         - name: deviceId
           in: query
           description: >-
-            _deviceId_ is optional, but requires the _from_ and _to_ parameters
-            when used
+            Optional device filter. Use _from_ and _to_ to fetch a time range;
+            omit them to fetch the latest position
           schema:
             type: integer
         - name: from
