@@ -702,15 +702,16 @@ paths:
         API](https://www.traccar.org/traccar-api/) instead of periodically
         polling positions endpoint. Without any params, it returns a list of
         last known positions for all the user's Devices. _from_ and _to_ fields
-        are not required with _id_.
+        are not required with _id_. When _deviceId_ is provided without _from_
+        and _to_, the latest position is returned.
       tags:
         - Positions
       parameters:
         - name: deviceId
           in: query
           description: >-
-            _deviceId_ is optional, but requires the _from_ and _to_ parameters
-            when used
+            Optional device filter. Use _from_ and _to_ to fetch a time range;
+            omit them to fetch the latest position
           schema:
             type: integer
         - name: from
@@ -730,6 +731,11 @@ paths:
           description: >-
             To fetch one or more positions. Multiple params can be passed like
             `id=31&id=42`
+          schema:
+            type: integer
+        - name: geofenceId
+          in: query
+          description: Optional geofence filter when fetching positions by device and time range
           schema:
             type: integer
       responses:
@@ -1156,7 +1162,17 @@ paths:
           in: query
           description: Can only be used by admin or manager users
           schema:
-            type: string
+            type: integer
+        - name: deviceId
+          in: query
+          description: Manager-only; filters users linked to a specific device
+          schema:
+            type: integer
+        - name: excludeAttributes
+          in: query
+          description: Skip returning the attributes map
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
@@ -1173,6 +1189,7 @@ paths:
       summary: Create a User
       tags:
         - Users
+      security: []
       requestBody:
         content:
           application/json:
@@ -1520,6 +1537,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Event'
+        '404':
+          description: Not Found
+          content: {}
   /reports/route:
     get:
       summary: >-
