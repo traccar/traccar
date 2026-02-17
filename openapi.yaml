@@ -1156,7 +1156,7 @@ paths:
           in: query
           description: Can only be used by admin or manager users
           schema:
-            type: string
+            type: integer
       responses:
         '200':
           description: OK
