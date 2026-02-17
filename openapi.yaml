@@ -1157,6 +1157,16 @@ paths:
           description: Can only be used by admin or manager users
           schema:
             type: integer
+        - name: deviceId
+          in: query
+          description: Manager-only; filters users linked to a specific device
+          schema:
+            type: integer
+        - name: excludeAttributes
+          in: query
+          description: Skip returning the attributes map
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
