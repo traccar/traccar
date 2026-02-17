@@ -415,6 +415,11 @@ paths:
             `uniqueId=333331&uniqieId=44442`
           schema:
             type: string
+        - name: excludeAttributes
+          in: query
+          description: Exclude attributes field from device payload
+          schema:
+            type: boolean
       responses:
         '200':
           description: OK
@@ -506,6 +511,69 @@ paths:
           description: No Content
           content: {}
       x-codegen-request-body-name: body
+  /devices/{id}/image:
+    post:
+      summary: Upload/Update Device image
+      tags:
+        - Devices
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          image/*:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: device.png
+        '400':
+          description: Invalid image type or size
+          content: {}
+        '404':
+          description: Device not found
+          content: {}
+  /devices/share:
+    post:
+      summary: Share device location
+      tags:
+        - Devices
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - deviceId
+                - expiration
+              properties:
+                deviceId:
+                  type: integer
+                expiration:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: eyJhbGciOi...
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
   /groups:
     get:
       summary: Fetch a list of Groups
@@ -734,6 +802,103 @@ paths:
         '404':
           description: Not Found
           content: {}
+  /positions/kml:
+    get:
+      summary: Export Positions as KML
+      tags:
+        - Positions
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/vnd.google-earth.kml+xml:
+              schema:
+                type: string
+                format: binary
+  /positions/csv:
+    get:
+      summary: Export Positions as CSV
+      tags:
+        - Positions
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: geofenceId
+          in: query
+          schema:
+            type: integer
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+  /positions/gpx:
+    get:
+      summary: Export Positions as GPX
+      tags:
+        - Positions
+      parameters:
+        - name: deviceId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            application/gpx+xml:
+              schema:
+                type: string
+                format: binary
   /server:
     get:
       summary: Fetch Server information
@@ -765,6 +930,103 @@ paths:
               schema:
                 $ref: '#/components/schemas/Server'
       x-codegen-request-body-name: body
+  /server/geocode:
+    get:
+      summary: Reverse geocode coordinates
+      tags:
+        - Server
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+        - name: longitude
+          in: query
+          required: true
+          schema:
+            type: number
+            format: double
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+        '500':
+          description: Reverse geocoding is not enabled
+          content: {}
+  /server/timezones:
+    get:
+      summary: Fetch available timezones
+      tags:
+        - Server
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /server/file/{path}:
+    post:
+      summary: Upload a server file
+      tags:
+        - Server
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+        required: true
+      responses:
+        '200':
+          description: OK
+          content: {}
+        '400':
+          description: Bad Request
+          content: {}
+  /server/gc:
+    get:
+      summary: Trigger garbage collection
+      tags:
+        - Server
+      responses:
+        '200':
+          description: OK
+          content: {}
+  /server/cache:
+    get:
+      summary: Fetch cache diagnostics
+      tags:
+        - Server
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+  /server/reboot:
+    post:
+      summary: Reboot the server process
+      tags:
+        - Server
+      responses:
+        '200':
+          description: OK
+          content: {}
   /session:
     get:
       summary: Fetch Session information
@@ -925,6 +1187,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
       x-codegen-request-body-name: body
+  /users/totp:
+    post:
+      summary: Generate TOTP secret
+      tags:
+        - Users
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
   /users/{id}:
     put:
       summary: Update a User
