@@ -199,7 +199,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                             int physicalInputs = buf.readUnsignedShortLE(); // bytes[2-3]
                             position.set("virtualignition", BitUtil.check(virtualSensors, 0));
                             position.set("callButton", BitUtil.check(virtualSensors, 1));
-                            position.set(Position.KEY_INPUT, physicalInputs);
+                            position.set(Position.PREFIX_IN, physicalInputs);
                             break;
                         }
                         case 0x06: {
@@ -217,7 +217,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                         case 0x08: {
                             int inputNum = buf.readUnsignedByte();
                             int value    = buf.readUnsignedShortLE();
-                            position.set("adc" + inputNum, value / 1000.0);
+                            position.set(Position.PREFIX_ADC + inputNum, value / 1000.0);
                             break;
                         }
                         default:
@@ -270,9 +270,8 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 // ── TAG 0x34 (52) – CAN total engine operating time ──────────────
                 // Value = hours * 100
                 case 0x34: {
-                    long engHours100 = buf.readUnsignedIntLE();
-                    // Traccar KEY_HOURS expects milliseconds
-                    position.set(Position.KEY_HOURS, (long) (engHours100 / 100.0 * 3600 * 1000));
+                    long engineHours100 = buf.readUnsignedIntLE();
+                    position.set(Position.KEY_HOURS, (long) (engineHours100 / 100.0 * 3600 * 1000));// Traccar KEY_HOURS expects milliseconds
                     break;
                 }
 
@@ -280,25 +279,24 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 // Value = km * 100
                 case 0x35: {
                     long odo100 = buf.readUnsignedIntLE();
-                    // Traccar KEY_ODOMETER expects metres
-                    position.set(Position.KEY_ODOMETER, (long) (odo100 / 100.0 * 1000));
+                    position.set(Position.KEY_ODOMETER, (long) (odo100 / 100.0 * 1000));// Traccar KEY_ODOMETER expects metres
                     break;
                 }
 
                 // ── TAG 0x36 (54) – CAN total fuel consumed ─────────────────────
                 // Value = litres * 10
                 case 0x36: {
-                    long fuel10 = buf.readUnsignedIntLE();
-                    position.set(Position.KEY_FUEL_USED, fuel10 / 10.0);
+                    long fuelused = buf.readUnsignedIntLE();
+                    position.set(Position.KEY_FUEL_USED, fuelused / 10.0);
                     break;
                 }
 
                 // ── TAG 0x37 (55) – CAN fuel level in tank (%) ──────────────────
                 // Value = percent * 10  (e.g. 594 → 59.4 %)
                 case 0x37: {
-                    int fuelPct10 = buf.readUnsignedShortLE();
+                    int fuel = buf.readUnsignedShortLE();
                     buf.skipBytes(2);
-                    position.set(Position.KEY_FUEL_LEVEL, fuelPct10 / 10.0);
+                    position.set(Position.KEY_FUEL_LEVEL, fuel / 10.0);
                     break;
                 }
 
@@ -317,17 +315,17 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x3A (58) – CAN engine coolant temperature (°C) ─────────
+                // ── TAG 0x3A (58) – CAN engine temperature (°C) ─────────
                 case 0x3A: {
-                    int coolant = (int) buf.readUnsignedIntLE();
-                    position.set(Position.KEY_COOLANT_TEMP, coolant);
+                    int enginetemp = (int) buf.readUnsignedIntLE();
+                    position.set(Position.KEY_ENGINE_TEMP, enginetemp);
                     break;
                 }
 
                 // ── TAG 0x3B (59) – CAN vehicle speed (km/h) ────────────────────
                 case 0x3B: {
                     int canSpeed = (int) buf.readUnsignedIntLE();
-                    position.set("canSpeed", canSpeed);
+                    position.set(Position.KEY_OBD_SPEED, canSpeed);
                     break;
                 }
 
