@@ -767,7 +767,12 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                 case 0xE1:
                 case 0xE9:
                     if (length == 1) {
-                        position.set(Position.KEY_BATTERY_LEVEL, Math.min(buf.readUnsignedByte(), 100));
+                        int batteryLevel = buf.readUnsignedByte();
+                        if (batteryLevel == 0xff) {
+                            position.set(Position.KEY_CHARGE, true);
+                        } else {
+                            position.set(Position.KEY_BATTERY_LEVEL, batteryLevel);
+                        }
                     } else {
                         position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedInt()));
                     }
