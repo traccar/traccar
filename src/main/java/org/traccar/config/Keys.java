@@ -284,6 +284,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Smartcar management token used for webhook verification.
+     */
+    public static final ConfigKey<String> SMARTCAR_MANAGEMENT_TOKEN = new StringConfigKey(
+            "smartcar.managementToken",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Minimum accuracy to include. If the value is lower, it will be set to zero.
      */
     public static final ConfigKey<Double> OSMAND_MIN_ACCURACY = new DoubleConfigKey(
