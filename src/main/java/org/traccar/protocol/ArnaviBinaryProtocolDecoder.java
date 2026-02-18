@@ -346,11 +346,11 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 // Byte 1: engine load (0–100 %)
                 // Bytes 2-3: motion characteristic bitmask (cfm16..cfm31)
                 case 0x45: {
-                    int pedalPct      = buf.readUnsignedByte();
+                    int throttle      = buf.readUnsignedByte();
                     int engineLoadPct = buf.readUnsignedByte();
                     int motionBits    = buf.readUnsignedShortLE();
                     position.set(Position.KEY_ENGINE_LOAD, engineLoadPct);
-                    position.set(Position.KEY_THROTTLE, pedalPct);
+                    position.set(Position.KEY_THROTTLE, throttle);
                     position.set("motionState", motionBits);
                     break;
                 }
