@@ -15,6 +15,7 @@
  */
 package org.traccar.session.state;
 
+import org.traccar.model.Device;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 
@@ -23,6 +24,13 @@ import java.util.Deque;
 import java.util.List;
 
 public class NewMotionState {
+
+    public static NewMotionState fromDevice(Device device) {
+        NewMotionState state = new NewMotionState();
+        state.motionStreak = device.getMotionStreak();
+        state.events = new java.util.ArrayList<>();
+        return state;
+    }
 
     private boolean changed;
 

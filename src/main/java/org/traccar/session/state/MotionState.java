@@ -111,4 +111,37 @@ public class MotionState {
         this.event = event;
     }
 
+    // Idle time tracking fields
+    private long idleTime;
+
+    public long getIdleTime() {
+        return idleTime;
+    }
+
+    public void setIdleTime(long idleTime) {
+        this.idleTime = idleTime;
+    }
+
+    private boolean idleState;
+
+    public boolean getIdleState() {
+        return idleState;
+    }
+
+    public void setIdleState(boolean idleState) {
+        this.idleState = idleState;
+    }
+
+    private Date idleStartTime;
+
+    public Date getIdleStartTime() {
+        return idleStartTime;
+    }
+
+    public void setIdleStartTime(Date idleStartTime) {
+        this.idleStartTime = idleStartTime;
+    }
+
+
+
 }

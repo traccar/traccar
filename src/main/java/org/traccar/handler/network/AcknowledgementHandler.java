@@ -88,15 +88,12 @@ public class AcknowledgementHandler extends ChannelOutboundHandlerAdapter {
         synchronized (this) {
             if (msg instanceof Event) {
                 if (msg instanceof EventReceived) {
-                    LOGGER.debug("Event received");
                     if (queue == null) {
                         queue = new LinkedList<>();
                     }
                 } else if (msg instanceof EventDecoded event) {
-                    LOGGER.debug("Event decoded {}", event.getObjects().size());
                     waiting.addAll(event.getObjects());
                 } else if (msg instanceof EventHandled event) {
-                    LOGGER.debug("Event handled");
                     waiting.remove(event.getObject());
                 }
                 if (!(msg instanceof EventReceived) && waiting.isEmpty()) {
@@ -104,10 +101,8 @@ public class AcknowledgementHandler extends ChannelOutboundHandlerAdapter {
                     queue = null;
                 }
             } else if (queue != null) {
-                LOGGER.debug("Message queued");
                 queue.add(new Entry(msg, promise));
             } else {
-                LOGGER.debug("Message sent");
                 output.add(new Entry(msg, promise));
             }
         }

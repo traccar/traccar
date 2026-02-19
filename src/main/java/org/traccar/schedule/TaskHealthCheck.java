@@ -78,7 +78,6 @@ public class TaskHealthCheck implements ScheduleTask {
 
     @Override
     public void run() {
-        LOGGER.debug("Health check running");
         if (System.currentTimeMillis() > gracePeriod) {
             int status = client.target(getUrl()).request().get().getStatus();
             if (status == 200) {

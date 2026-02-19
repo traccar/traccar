@@ -64,7 +64,22 @@ public class SummaryReportProvider {
         this.storage = storage;
     }
 
-
+    /**
+     * Calculates idle time for a device over a period based on position data.
+     *
+     * Idle time is defined as periods when:
+     * - Engine is running (RPM > 0 OR ignition = true)
+     * - Vehicle is not moving (motion = false)
+     * - Duration meets minimum threshold (configurable, default 60 seconds)
+     *
+     * This follows industry standards (e.g., Geotab) for idle time detection.
+     *
+     * @param deviceId Device identifier
+     * @param from Start time of period
+     * @param to End time of period
+     * @return Total idle time in milliseconds
+     * @throws StorageException if database access fails
+     */
     private long calculateIdleTime(long deviceId, Date from, Date to) throws StorageException {
 
         final long minIdleDuration = config.getLong(Keys.REPORT_IDLE_MIN_DURATION);
@@ -90,7 +105,7 @@ public class SummaryReportProvider {
             Boolean motion = position.getBoolean(Position.KEY_MOTION);
             Double rpm = position.getDouble(Position.KEY_RPM);
 
-
+            // Enhanced validation: engine must be running (RPM > threshold or ignition=true)
             boolean engineRunning = false;
             if (rpm != null && rpm > idleRpmThreshold) {
                 engineRunning = true;
@@ -116,11 +131,11 @@ public class SummaryReportProvider {
 
                     long totalIdleDuration = currentTime - idleStartTime;
                     if (totalIdleDuration < minIdleDuration) {
-
+                        // Remove idle time that doesn't meet minimum threshold
                         idleTime = Math.max(0, idleTime - totalIdleDuration);
                     }
                 } else if (!wasIdle && isIdle) {
-
+                    // Start new idle period
                     idleStartTime = currentTime;
                 }
             }
@@ -133,12 +148,12 @@ public class SummaryReportProvider {
         if (wasIdle && previousPosition != null) {
             long totalIdleDuration = previousPosition.getFixTime().getTime() - idleStartTime;
             if (totalIdleDuration < minIdleDuration) {
-
+                // Remove idle time that doesn't meet minimum threshold
                 idleTime = Math.max(0, idleTime - totalIdleDuration);
             }
         }
 
-
+        // Ensure idle time is never negative
         return Math.max(0, idleTime);
     }
 

@@ -158,7 +158,6 @@ public class CacheManager implements BroadcastInterface {
             }
         }
         references.add(key);
-        LOGGER.debug("Cache add device {} references {} key {}", deviceId, references.size(), key);
     }
 
     public synchronized void removeDevice(long deviceId, Object key) {
@@ -169,7 +168,6 @@ public class CacheManager implements BroadcastInterface {
             devicePositions.remove(deviceId);
             deviceReferences.remove(deviceId);
         }
-        LOGGER.debug("Cache remove device {} references {} key {}", deviceId, references.size(), key);
     }
 
     public void updatePosition(Position position) {

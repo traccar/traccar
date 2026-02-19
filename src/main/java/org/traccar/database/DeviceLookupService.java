@@ -64,7 +64,6 @@ public class DeviceLookupService {
 
         @Override
         public void run(Timeout timeout) {
-            LOGGER.debug("Device lookup expired {}", uniqueId);
             synchronized (DeviceLookupService.this) {
                 identifierMap.remove(uniqueId);
             }
@@ -111,7 +110,6 @@ public class DeviceLookupService {
             }
             info.lastQuery = System.currentTimeMillis();
             info.timeout = timer.newTimeout(new IdentifierTask(uniqueId), INFO_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-            LOGGER.debug("Device lookup {} throttled for {} ms", uniqueId, info.delay);
         }
     }
 
@@ -129,7 +127,7 @@ public class DeviceLookupService {
                         lookupFailed(uniqueId);
                     }
                 } else {
-                    LOGGER.debug("Device lookup throttled {}", uniqueId);
+                    // throttled - skip lookup
                 }
             }
         } catch (StorageException e) {

@@ -68,8 +68,8 @@ public class TripsReportProvider {
     }
 
     public void getExcel(OutputStream outputStream,
-            long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
-            Date from, Date to) throws StorageException, IOException {
+                         long userId, Collection<Long> deviceIds, Collection<Long> groupIds,
+                         Date from, Date to) throws StorageException, IOException {
         reportUtils.checkPeriodLimit(from, to);
 
         ArrayList<DeviceReportSection> devicesTrips = new ArrayList<>();

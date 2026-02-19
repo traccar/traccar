@@ -171,63 +171,94 @@ public class ReportUtils {
         transformer.write();
     }
 
+
+    /**
+     * Calculates idle time directly from positions.
+     * Uses engineHours as primary detection method.
+     */
     private long calculateIdleTime(long deviceId, Date from, Date to) throws StorageException {
-        // Get configurable thresholds
         final long minIdleDuration = config.getLong(Keys.REPORT_IDLE_MIN_DURATION);
         final long maxGapDuration = config.getLong(Keys.REPORT_IDLE_MAX_GAP);
-        final double idleRpmThreshold = config.getDouble(Keys.REPORT_IDLE_RPM_THRESHOLD);
 
-        long idleTime = 0;
         var positions = PositionUtil.getPositions(storage, deviceId, from, to);
 
         if (positions.isEmpty()) {
             return 0;
         }
 
+        long totalIdleTime = 0;
         Position previousPosition = null;
         boolean wasIdle = false;
-        long idleStartTime = 0;
+        long accumulatedIdle = 0;
+        int idlePeriodsDetected = 0;
 
         for (Position position : positions) {
-            boolean isIdle = false;
-
-
+            // Get all possible engine indicators
             Boolean ignition = position.getBoolean(Position.KEY_IGNITION);
-            Boolean motion = position.getBoolean(Position.KEY_MOTION);
             Double rpm = position.getDouble(Position.KEY_RPM);
+            Boolean motion = position.getBoolean(Position.KEY_MOTION);
+            double speed = position.getSpeed();
+            Long hours = position.getLong(Position.KEY_HOURS);
 
-
+            // ENGINE RUNNING detection (multiple methods)
             boolean engineRunning = false;
-            if (rpm != null && rpm > idleRpmThreshold) {
-                engineRunning = true;
-            } else if (ignition != null && ignition) {
+
+            // Method 1: Hours increasing (BEST for your GPS!)
+            if (hours != null && previousPosition != null) {
+                Long prevHours = previousPosition.getLong(Position.KEY_HOURS);
+                if (prevHours != null && hours > prevHours) {
+                    engineRunning = true;
+                }
+            }
+
+            // Method 2: RPM
+            if (rpm != null && rpm > 0) {
                 engineRunning = true;
             }
 
-
-            if (engineRunning && motion != null && !motion) {
-                isIdle = true;
+            // Method 3: Ignition
+            if (ignition != null && ignition) {
+                engineRunning = true;
             }
+
+            // STOPPED detection
+            boolean isStopped = false;
+            if (motion != null && !motion) {
+                isStopped = true;
+            } else if (speed < 1) {
+                isStopped = true;
+            }
+
+            // IDLE = engine running AND stopped
+            boolean isIdle = engineRunning && isStopped;
 
             if (previousPosition != null) {
                 long currentTime = position.getFixTime().getTime();
-                long duration = currentTime - previousPosition.getFixTime().getTime();
+                long previousTime = previousPosition.getFixTime().getTime();
+                long gap = currentTime - previousTime;
 
                 if (wasIdle && isIdle) {
-
-                    if (duration > 0 && duration < maxGapDuration) {
-                        idleTime += duration;
-                    }
-                } else if (wasIdle && !isIdle) {
-
-                    long totalIdleDuration = currentTime - idleStartTime;
-                    if (totalIdleDuration < minIdleDuration) {
-                        // Remove idle time that doesn't meet minimum threshold
-                        idleTime = Math.max(0, idleTime - totalIdleDuration);
+                    // Continue idle
+                    if (gap > 0 && gap < maxGapDuration) {
+                        accumulatedIdle += gap;
+                    } else if (gap >= maxGapDuration) {
+                        // Gap too large, save and reset
+                        if (accumulatedIdle >= minIdleDuration) {
+                            totalIdleTime += accumulatedIdle;
+                            idlePeriodsDetected++;
+                        }
+                        accumulatedIdle = 0;
                     }
                 } else if (!wasIdle && isIdle) {
-
-                    idleStartTime = currentTime;
+                    // Start idle
+                    accumulatedIdle = 0;
+                } else if (wasIdle && !isIdle) {
+                    // End idle
+                    if (accumulatedIdle >= minIdleDuration) {
+                        totalIdleTime += accumulatedIdle;
+                        idlePeriodsDetected++;
+                    }
+                    accumulatedIdle = 0;
                 }
             }
 
@@ -235,18 +266,15 @@ public class ReportUtils {
             wasIdle = isIdle;
         }
 
-
-        if (wasIdle && previousPosition != null) {
-            long totalIdleDuration = previousPosition.getFixTime().getTime() - idleStartTime;
-            if (totalIdleDuration < minIdleDuration) {
-                // Remove idle time that doesn't meet minimum threshold
-                idleTime = Math.max(0, idleTime - totalIdleDuration);
-            }
+        // Check final period
+        if (wasIdle && accumulatedIdle >= minIdleDuration) {
+            totalIdleTime += accumulatedIdle;
+            idlePeriodsDetected++;
         }
 
-
-        return Math.max(0, idleTime);
+        return totalIdleTime;
     }
+
 
     private TripReportItem calculateTrip(
             Device device, Position startTrip, Position endTrip, double maxSpeed,

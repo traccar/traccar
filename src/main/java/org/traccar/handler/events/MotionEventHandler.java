@@ -80,9 +80,9 @@ public class MotionEventHandler extends BaseEventHandler {
 
     private void handleNewLogic(
             Device device, Position position, double minDistance, long minDuration, long stopGap, Callback callback) {
-        NewMotionState state = new NewMotionState();
-        state.setMotionStreak(device.getMotionStreak());
-        state.setPositions(cacheManager.getPositions(device.getId()));
+        NewMotionState state = NewMotionState.fromDevice(device);
+        var positions = cacheManager.getPositions(device.getId());
+        state.setPositions(positions != null ? positions : new java.util.ArrayDeque<>());
         if (device.hasAttribute(KEY_MOTION_TIME)) {
             state.setEventPosition(
                     new Date(device.getLong(KEY_MOTION_TIME)),

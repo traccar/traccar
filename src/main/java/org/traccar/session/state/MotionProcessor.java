@@ -29,6 +29,11 @@ public final class MotionProcessor {
 
         state.setEvent(null);
 
+        // Calculate idle time for this position if we have a previous position
+        if (last != null) {
+            calculateIdleTime(state, last, position, tripsConfig);
+        }
+
         if (last != null) {
             long oldTime = last.getFixTime().getTime();
             long newTime = position.getFixTime().getTime();
@@ -38,7 +43,15 @@ public final class MotionProcessor {
                 state.setMotionPositionId(0);
                 state.setMotionTime(null);
                 state.setMotionDistance(0);
-                state.setEvent(new Event(Event.TYPE_DEVICE_STOPPED, last));
+
+                Event event = new Event(Event.TYPE_DEVICE_STOPPED, last);
+                event.set("idleTime", state.getIdleTime());
+                state.setEvent(event);
+
+                // Reset idle time for next period
+                state.setIdleTime(0);
+                state.setIdleState(false);
+                state.setIdleStartTime(null);
                 return;
             }
         }
@@ -81,6 +94,11 @@ public final class MotionProcessor {
                     state.setMotionDistance(0);
                     state.setEvent(event);
 
+                    // Reset idle time for next period
+                    state.setIdleTime(0);
+                    state.setIdleState(false);
+                    state.setIdleStartTime(null);
+
                 }
             }
         } else {
@@ -94,6 +112,57 @@ public final class MotionProcessor {
                 state.setMotionTime(position.getFixTime());
                 state.setMotionDistance(position.getDouble(Position.KEY_TOTAL_DISTANCE));
             }
+        }
+    }
+
+    private static void calculateIdleTime(
+            MotionState state, Position previous, Position current, TripsConfig tripsConfig) {
+
+        // Detect if current position represents an idle state
+        Boolean ignition = current.getBoolean(Position.KEY_IGNITION);
+        Boolean motion = current.getBoolean(Position.KEY_MOTION);
+        Double rpm = current.getDouble(Position.KEY_RPM);
+
+        // Multi-sensor detection: engine running = RPM > threshold OR ignition = true
+        double rpmThreshold = tripsConfig.getIdleRpmThreshold();
+        boolean engineRunning = (rpm != null && rpm > rpmThreshold)
+                || (ignition != null && ignition);
+
+        // Idle = engine running + not moving
+        boolean isIdle = engineRunning && motion != null && !motion;
+
+        long currentTime = current.getFixTime().getTime();
+        long previousTime = previous.getFixTime().getTime();
+        long duration = currentTime - previousTime;
+
+        boolean wasIdle = state.getIdleState();
+
+        if (wasIdle && isIdle) {
+            // Continue existing idle period
+            long maxGap = tripsConfig.getIdleMaxGap();
+
+            // Only count if gap between positions is reasonable (not offline period)
+            if (duration > 0 && duration < maxGap) {
+                state.setIdleTime(state.getIdleTime() + duration);
+            }
+        } else if (!wasIdle && isIdle) {
+            // Start new idle period
+            state.setIdleState(true);
+            state.setIdleStartTime(current.getFixTime());
+        } else if (wasIdle && !isIdle) {
+            // End idle period - validate it meets minimum duration
+            if (state.getIdleStartTime() != null) {
+                long totalIdleDuration = currentTime - state.getIdleStartTime().getTime();
+                long minDuration = tripsConfig.getIdleMinDuration();
+
+                if (totalIdleDuration < minDuration) {
+                    // Period too short - subtract what we've counted
+                    long correctedIdle = Math.max(0, state.getIdleTime() - totalIdleDuration);
+                    state.setIdleTime(correctedIdle);
+                }
+            }
+            state.setIdleState(false);
+            state.setIdleStartTime(null);
         }
     }
 
