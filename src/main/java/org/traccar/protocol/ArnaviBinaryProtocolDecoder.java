@@ -83,11 +83,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 // N=4 (4 bytes of unixtime follow after CS)
                 response.writeByte(0x04);
                 response.writeByte(0x00); // parcel number 0x00 = HEADER
-                
-                //ByteBuf time = Unpooled.buffer();
-                //time.writeBytes(time);
-                //response.writeByte(Checksum.modulo256(time.nioBuffer())); // пустой буфер
-                //response.writeBytes(time); // пустой — 0 байт
 
                 long unixTime = System.currentTimeMillis() / 1000;
                 ByteBuf timeBytes = Unpooled.buffer(4);
