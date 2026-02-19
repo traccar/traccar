@@ -125,12 +125,12 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
             switch (tag) {
 
                 // ── TAG 0x01 – External voltage (mV) + internal battery (mV) ────
-                // Bytes 0-1: external voltage LE uint16; 0x0000 = not connected
-                // Bytes 2-3: battery voltage LE uint16; 0x0000 = not connected, 0xFFFF = error
+                // Bytes 0-1: battery voltage LE uint16; 0x0000 = not connected
+                // Bytes 2-3: external voltage LE uint16; 0x0000 = not connected, 0xFFFF = error
                 case 0x01: {
-                    int extMv = buf.readUnsignedShortLE();
                     int batMv = buf.readUnsignedShortLE();
-                    if (extMv != 0x0000) {
+                    int extMv = buf.readUnsignedShortLE();
+                    if (extMv != 0x0000 && extMv != 0xFFFF) {
                         position.set(Position.KEY_POWER, extMv / 1000.0);
                     }
                     if (batMv != 0x0000 && batMv != 0xFFFF) {
@@ -143,9 +143,9 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 // Positive = North, negative = South
                 case 0x03: {
                     float latitude = buf.readFloatLE();
-                    if (latitude > -90 && latitude < 90 && latitude != 0) {
-                    position.setLatitude(latitude);
-                    position.setValid(true);
+                    if (Float.compare(latitude, 0.0f) != 0
+                            && latitude >= -90.0f && latitude <= 90.0f) {
+                        position.setLatitude(latitude);
                     }
                     break;
                 }
@@ -154,9 +154,9 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 // Positive = East, negative = West
                 case 0x04: {
                     float longitude = buf.readFloatLE();
-                    if (longitude > -180 && longitude < 180 && longitude != 0) {
-                    position.setLongitude(longitude);
-                    position.setValid(true);
+                    if (Float.compare(longitude, 0.0f) != 0
+                            && longitude >= -180.0f && longitude <= 180.0f) {
+                        position.setLongitude(longitude);
                     }
                     break;
                 }
@@ -173,16 +173,19 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     int satByte    = buf.readUnsignedByte();
                     int speedKnots = buf.readUnsignedByte();
 
-                    position.setCourse(course);
-                    position.setAltitude(altitude);
-
-                    if (satByte != 0xFE && satByte != 0xFF) {
+                    if (satByte == 0xFE || satByte == 0xFF) {
+                        // Coordinates come from LBS or WiFi — mark as invalid GPS
+                        position.setValid(false);
+                    } else {
                         int gpsSat = satByte & 0x0F;
                         int gloSat = (satByte >> 4) & 0x0F;
                         position.set(Position.KEY_SATELLITES, gpsSat + gloSat);
+                        position.setCourse(course);
+                        position.setAltitude(altitude);
+                        position.setSpeed(speedKnots);
+                        position.setValid(true);
                     }
 
-                    position.setSpeed(speedKnots);
                     break;
                 }
 
@@ -191,13 +194,18 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 // Byte 1: input number (irrelevant for mode 0x01)
                 // Bytes 2-3: value LE uint16
                 case 0x06: {
-                    int mode = buf.readUnsignedByte();
+                    int mode = buf.readIntLE();
 
                     switch (mode) {
                         case 0x01: {
                             int virtualSensors = buf.readUnsignedByte();  // byte[1]
                             int physicalInputs = buf.readUnsignedShortLE(); // bytes[2-3]
                             position.set("virtualignition", BitUtil.check(virtualSensors, 0));
+                            //position.set(Position.KEY_IGNITION, virtualIgnition); //optional | опционально, лучше использовать вычисляемый атрибут
+                            //Недокументированные особенности работы virtual ignition:
+                            //1 - Зажигание по напряжению, если нет, то:
+                            //2 - зажигание по CAN, если нет, то:
+                            //3 - зажигание по состоянию входа с типом "Зажигание"
                             position.set("callButton", BitUtil.check(virtualSensors, 1));
                             position.set(Position.PREFIX_IN, physicalInputs);
                             break;
@@ -256,6 +264,35 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case 0x09: {
                     long status = buf.readUnsignedIntLE();
                     position.set(Position.KEY_STATUS, status);
+                    
+                    //Digital IN IN0–IN7 (bits 0–7)
+                    int inputs = (int) (status & 0xFF);
+                    position.set(Position.KEY_INPUT, inputs);
+
+                    // Digital OUT OUT0–OUT3 (bits 8–11)
+                    int outputs = (int) ((status >> 8) & 0x0F);
+                    position.set(Position.KEY_OUTPUT, outputs);
+
+                    // Состояние GSM модема (bits 12–13)
+                    int gsmState = (int) ((status >> 12) & 0x03);
+                    position.set("gsmState", gsmState);
+
+                    // Состояние GPS/ГЛОНАСС (bits 14–15)
+                    int gpsState = (int) ((status >> 14) & 0x03);
+                    position.set("gpsState", gpsState);
+
+                    // Датчик движения (bit 16)
+                    position.set(Position.KEY_MOTION, BitUtil.check(status, 16));
+
+                    // Наличие SIM (bit 18)
+                    position.set("simPresent", BitUtil.check(status, 18));
+
+                    // st0 режим охраны (bit 19)
+                    position.set("guardMode", BitUtil.check(status, 19));
+
+                    // st1 SOS/тревога (bit 20)
+                    position.set("alarm", BitUtil.check(status, 20)
+                                ? Position.ALARM_SOS : null);
                     break;
                 }
 
@@ -263,7 +300,15 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 // Bitmask; store raw for downstream processing
                 case 0x33: {
                     long flags = buf.readUnsignedIntLE();
-                    position.set("canSecurityState", flags);
+                    position.set("doorDriver",      BitUtil.check(flags, 8));
+                    position.set("doorPassenger",   BitUtil.check(flags, 9));
+                    position.set("trunkOpen",       BitUtil.check(flags, 10));
+                    position.set("hoodOpen",        BitUtil.check(flags, 11));
+                    position.set("handbrake",       BitUtil.check(flags, 12));
+                    position.set("brakePedal",      BitUtil.check(flags, 13));
+                    position.set("engineRunning",   BitUtil.check(flags, 14));
+                    position.set("canIgnition",     BitUtil.check(flags, 16));
+                    position.set("keyInIgnition",   BitUtil.check(flags, 19));
                     break;
                 }
 
@@ -348,28 +393,32 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case 0x45: {
                     int throttle      = buf.readUnsignedByte();
                     int engineLoadPct = buf.readUnsignedByte();
-                    int motionBits    = buf.readUnsignedShortLE();
+                    int motionBits    = buf.readUnsignedShortLE(); //по документации используется только в сельхоз технике, для обычного транспорта всегда 0
                     position.set(Position.KEY_ENGINE_LOAD, engineLoadPct);
                     position.set(Position.KEY_THROTTLE, throttle);
-                    position.set("motionState", motionBits);
+                    
+                    if (motionBits !=0) {
+                        position.set("motionState", motionBits);   
+                    }
                     break;
                 }
 
-                // ── TAGs 0x5B–0x60 (91–96) – LLS fuel-level sensors 0–5 ─────────
+                // ── TAGs 0x5C–0x60 (91–96) – LLS fuel-level sensors 1–5 ─────────
                 // Bytes 0-1: level raw value (LE uint16)
+                // 0xFFFF = sensor disconnected or error — skip entirely
                 // Bytes 2-3: temperature raw; decoded as (raw - 100) / 10 °C
-                //case 0x5B:
+                // 0xFFFF = temperature not available
                 case 0x5C:
                 case 0x5D:
                 case 0x5E:
                 case 0x5F:
                 case 0x60: {
                     int idx     = tag - 0x5B;
-                    int level   = buf.readUnsignedShortLE();
-                    int tempRaw = buf.readUnsignedShortLE();
+                    int level   = buf.readUnsignedShortLE() & 0xFFFF;
+                    int tempRaw = buf.readUnsignedShortLE() >> 16 & 0xFFFF;
+                    if (level != 0x0000 && level != 0xFFFF) {
                     position.set(Position.KEY_FUEL + idx, level);
-                    if (tempRaw != 0xFFFF) {
-                        position.set(Position.PREFIX_TEMP + idx, (tempRaw - 100.0) / 10.0);
+                    position.set(Position.PREFIX_TEMP + idx, (tempRaw - 100.0) / 10.0);
                     }
                     break;
                 }
