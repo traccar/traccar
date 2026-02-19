@@ -410,7 +410,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case 0x60: {
                     int idx     = tag - 0x5B;
                     int level   = buf.readUnsignedShortLE() & 0xFFFF;
-                    int tempRaw = buf.readUnsignedShortLE() >> 16 & 0xFFFF;
+                    int tempRaw = buf.readUnsignedShortLE() & 0xFFFF;
                     if (level != 0x0000 && level != 0xFFFF) {
                     position.set(Position.KEY_FUEL + idx, level);
                     position.set(Position.PREFIX_TEMP + idx, (tempRaw - 100.0) / 10.0);
