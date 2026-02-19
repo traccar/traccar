@@ -189,7 +189,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 // Byte 1: input number (irrelevant for mode 0x01)
                 // Bytes 2-3: value LE uint16
                 case 0x06: {
-                    int mode = buf.readIntLE();
+                    int mode = buf.readUnsignedByte();
 
                     switch (mode) {
                         case 0x01: {
