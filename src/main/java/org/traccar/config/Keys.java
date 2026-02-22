@@ -23,7 +23,7 @@ public final class Keys {
     }
 
     /**
-     * Network interface for the protocol. If not specified, server will bind all interfaces.
+     * Network interface for the protocol. If not specified, the server will bind to all interfaces.
      */
     public static final ConfigSuffix<String> PROTOCOL_ADDRESS = new StringConfigSuffix(
             ".address",
@@ -38,8 +38,8 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * List of devices for polling protocols. List should contain unique ids separated by commas. Used only for polling
-     * protocols.
+     * List of devices for polling protocols. The list should contain unique IDs separated by commas. Used only for
+     * polling protocols.
      */
     public static final ConfigSuffix<String> PROTOCOL_DEVICES = new StringConfigSuffix(
             ".devices",
@@ -60,24 +60,24 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Connection timeout value in seconds. Because sometimes there is no way to detect lost TCP connection old
-     * connections stay in open state. On most systems there is a limit on number of open connection, so this leads to
-     * problems with establishing new connections when number of devices is high or devices data connections are
-     * unstable.
+     * Connection timeout value in seconds. Because sometimes there is no way to detect a lost TCP connection, old
+     * connections stay in an open state. On most systems there is a limit on the number of open connections, so this
+     * leads to problems with establishing new connections when the number of devices is high or device data
+     * connections are unstable.
      */
     public static final ConfigSuffix<Integer> PROTOCOL_TIMEOUT = new IntegerConfigSuffix(
             ".timeout",
             List.of(KeyType.CONFIG));
 
     /**
-     * Device password. Commonly used in some protocol for sending commands.
+     * Device password. Commonly used in some protocols for sending commands.
      */
     public static final ConfigKey<String> DEVICE_PASSWORD = new StringConfigKey(
             "devicePassword",
             List.of(KeyType.DEVICE));
 
     /**
-     * Device password. Commonly used in some protocol for sending commands.
+     * Device password. Commonly used in some protocols for sending commands.
      */
     public static final ConfigSuffix<String> PROTOCOL_DEVICE_PASSWORD = new StringConfigSuffix(
             ".devicePassword",
@@ -120,7 +120,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Indicates whether server acknowledgement is required. Only applicable for some protocols.
+     * Indicates whether server acknowledgment is required. Only applicable for some protocols.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_ACK = new BooleanConfigSuffix(
             ".ack",
@@ -128,7 +128,7 @@ public final class Keys {
             false);
 
     /**
-     * Ignore device reported fix time. Useful in case some devices report invalid time. Currently only available for
+     * Ignore device-reported fix time. Useful in case some devices report invalid time. Currently only available for
      * GL200 protocol.
      */
     public static final ConfigSuffix<Boolean> PROTOCOL_IGNORE_FIX_TIME = new BooleanConfigSuffix(
@@ -354,8 +354,8 @@ public final class Keys {
             0);
 
     /**
-     * Address for uploading aggregated anonymous usage statistics. Uploaded information is the same you can see on the
-     * statistics screen in the web app. It does not include any sensitive (e.g. locations).
+     * Address for uploading aggregated anonymous usage statistics. Uploaded information is the same as what you can
+     * see on the statistics screen in the web app. It does not include any sensitive data (e.g. locations).
      */
     public static final ConfigKey<String> SERVER_STATISTICS = new StringConfigKey(
             "server.statistics",
@@ -363,8 +363,8 @@ public final class Keys {
             "https://www.traccar.org/analytics/");
 
     /**
-     * Fuel drop threshold value. When fuel level drops from one position to another for more the value, an event is
-     * generated.
+     * Fuel drop threshold value. When fuel level drops from one position to another by more than this value, an event
+     * is generated.
      */
     public static final ConfigKey<Double> EVENT_FUEL_DROP_THRESHOLD = new DoubleConfigKey(
             "fuelDropThreshold",
@@ -372,8 +372,8 @@ public final class Keys {
             0.0);
 
     /**
-     * Fuel increase threshold value. When fuel level increases from one position to another for more the value, an
-     * event is generated.
+     * Fuel increase threshold value. When fuel level increases from one position to another by more than this value,
+     * an event is generated.
      */
     public static final ConfigKey<Double> EVENT_FUEL_INCREASE_THRESHOLD = new DoubleConfigKey(
             "fuelIncreaseThreshold",
@@ -412,7 +412,7 @@ public final class Keys {
             1.0);
 
     /**
-     * Minimal over speed duration to trigger the event. Value in seconds.
+     * Minimal overspeed duration to trigger the event. Value in seconds.
      */
     public static final ConfigKey<Long> EVENT_OVERSPEED_MINIMAL_DURATION = new LongConfigKey(
             "event.overspeed.minimalDuration",
@@ -440,7 +440,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Do not generate alert event if same alert was present in last known location.
+     * Do not generate an alert event if the same alert was present in the last known location.
      */
     public static final ConfigKey<Boolean> EVENT_IGNORE_DUPLICATE_ALERTS = new BooleanConfigKey(
             "event.ignoreDuplicateAlerts",
@@ -587,7 +587,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * LDAP server URL. For more info check <a href="https://www.traccar.org/ldap/">LDAP config</a>.
+     * LDAP server URL. For more info, check <a href="https://www.traccar.org/ldap/">LDAP config</a>.
      */
     public static final ConfigKey<String> LDAP_URL = new StringConfigKey(
             "ldap.url",
@@ -720,7 +720,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
     /**
      * OpenID Connect Token URL.
-     * This can be found in the same ways at openid.authUrl.
+     * This can be found the same way as openid.authUrl.
      * Required to enable SSO if openid.issuerUrl is not set.
      */
     public static final ConfigKey<String> OPENID_TOKEN_URL = new StringConfigKey(
@@ -729,7 +729,7 @@ public final class Keys {
 
     /**
      * OpenID Connect User Info URL.
-     * This can be found in the same ways at openid.authUrl.
+     * This can be found the same way as openid.authUrl.
      * Required to enable SSO if openid.issuerUrl is not set.
      */
     public static final ConfigKey<String> OPENID_USERINFO_URL = new StringConfigKey(
@@ -738,7 +738,7 @@ public final class Keys {
 
     /**
      * OpenID Connect group scope claim name.
-     * If this is not provided, Traccar will use name "groups" scope.
+     * If this is not provided, Traccar will use the "groups" scope name.
      */
     public static final ConfigKey<String> OPENID_GROUPS_CLAIM_NAME = new StringConfigKey(
             "openid.groupsClaimName",
@@ -782,7 +782,7 @@ public final class Keys {
 
     /**
      * Path to the media folder. Server stores audio, video and photo files in that folder. Sub-folders will be
-     * automatically created for each device by unique id.
+     * automatically created for each device by unique ID.
      */
     public static final ConfigKey<String> MEDIA_PATH = new StringConfigKey(
             "media.path",
@@ -790,8 +790,8 @@ public final class Keys {
             "./media");
 
     /**
-     * Optional parameter to specify network interface for web interface to bind to. By default server will bind to all
-     * available interfaces.
+     * Optional parameter to specify a network interface for the web interface to bind to. By default, the server will
+     * bind to all available interfaces.
      */
     public static final ConfigKey<String> WEB_ADDRESS = new StringConfigKey(
             "web.address",
@@ -831,7 +831,7 @@ public final class Keys {
             300000L);
 
     /**
-     * Authentication sessions timeout in seconds. By default no timeout.
+     * Authentication session timeout in seconds. By default, there is no timeout.
      */
     public static final ConfigKey<Integer> WEB_SESSION_TIMEOUT = new IntegerConfigKey(
             "web.sessionTimeout",
@@ -853,8 +853,8 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * A token to login as a virtual admin account. Can be used to restore access in case of issues with regular admin
-     * login. For example, if password is lost and can't be restored.
+     * A token to log in as a virtual admin account. Can be used to restore access in case of issues with regular
+     * admin login. For example, if a password is lost and can't be restored.
      */
     public static final ConfigKey<String> WEB_SERVICE_ACCOUNT_TOKEN = new StringConfigKey(
             "web.serviceAccountToken",
@@ -921,7 +921,7 @@ public final class Keys {
             "traccar");
 
     /**
-     * Position forwarding Kafka topic or AQMP Routing Key.
+     * Position forwarding Kafka topic or AMQP routing key.
      */
     public static final ConfigKey<String> FORWARD_TOPIC = new StringConfigKey(
             "forward.topic",
@@ -937,18 +937,18 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
-     * Additional HTTP header, can be used for authorization.
+     * Additional HTTP header that can be used for authorization.
      */
     public static final ConfigKey<String> FORWARD_HEADER = new StringConfigKey(
             "forward.header",
             List.of(KeyType.CONFIG));
 
     /**
-     * Position forwarding retrying enable. When enabled, additional attempts are made to deliver positions. If initial
-     * delivery fails, because of an unreachable server or an HTTP response different from '2xx', the software waits
+     * Enable position forwarding retries. When enabled, additional attempts are made to deliver positions. If initial
+     * delivery fails because of an unreachable server or an HTTP response different from '2xx', the software waits
      * for 'forward.retry.delay' milliseconds to retry delivery. On subsequent failures, this delay is duplicated.
      * If forwarding is retried for 'forward.retry.count', retrying is canceled and the position is dropped. Positions
-     * pending to be delivered are limited to 'forward.retry.limit'. If this limit is reached, positions get discarded.
+     * pending delivery are limited to 'forward.retry.limit'. If this limit is reached, positions are discarded.
      */
     public static final ConfigKey<Boolean> FORWARD_RETRY_ENABLE = new BooleanConfigKey(
             "forward.retry.enable",
@@ -998,7 +998,7 @@ public final class Keys {
             "traccar");
 
     /**
-     * Events forwarding Kafka topic or AQMP Routing Key.
+     * Events forwarding Kafka topic or AMQP routing key.
      */
     public static final ConfigKey<String> EVENT_FORWARD_TOPIC = new StringConfigKey(
             "event.forward.topic",
@@ -1206,7 +1206,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Command sender type for the device. This overrides standard data or text commands with an API-based commands.
+     * Command sender type for the device. This overrides standard data or text commands with API-based commands.
      * For example, it can be Traccar Client push commands.
      */
     public static final ConfigKey<String> COMMAND_SENDER = new StringConfigKey(
@@ -1366,8 +1366,8 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Maximum time period for reports in seconds. Can be useful to prevent users to request unreasonably long reports.
-     * By default, there is no limit.
+     * Maximum time period for reports in seconds. Can be useful to prevent users from requesting unreasonably long
+     * reports. By default, there is no limit.
      */
     public static final ConfigKey<Long> REPORT_PERIOD_LIMIT = new LongConfigKey(
             "report.periodLimit",
@@ -1391,7 +1391,7 @@ public final class Keys {
             true);
 
     /**
-     * Distance above min are considered as trips.
+     * Distances above the minimum are considered trips.
      */
     public static final ConfigKey<Long> REPORT_TRIP_MIN_DISTANCE = new LongConfigKey(
             "report.trip.minDistance",
@@ -1399,7 +1399,7 @@ public final class Keys {
             200L);
 
     /**
-     * If device doesn't move for min duration, it is considered a stop.
+     * If the device doesn't move for the minimum duration, it is considered a stop.
      */
     public static final ConfigKey<Long> REPORT_TRIP_MIN_DURATION = new LongConfigKey(
             "report.trip.minDuration",
@@ -1432,7 +1432,7 @@ public final class Keys {
             300L);
 
     /**
-     * Parking less than minimal duration does not cut trip. Default 300 seconds.
+     * Parking shorter than the minimum duration does not split a trip. Default is 300 seconds.
      */
     public static final ConfigKey<Long> REPORT_TRIP_MINIMAL_PARKING_DURATION = new LongConfigKey(
             "report.trip.minimalParkingDuration",
@@ -1480,8 +1480,8 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Filter zero coordinates. Zero latitude and longitude are theoretically valid values, but it practice it usually
-     * indicates invalid GPS data.
+     * Filter zero coordinates. Zero latitude and longitude are theoretically valid values, but in practice they
+     * usually indicate invalid GPS data.
      */
     public static final ConfigKey<Boolean> FILTER_ZERO = new BooleanConfigKey(
             "filter.zero",
@@ -1541,8 +1541,8 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Filter records by distance. The values is specified in meters. If the new position is less far than this value
-     * from the last one it gets filtered out.
+     * Filter records by distance. The value is specified in meters. If the new position is closer than this value to
+     * the last one, it gets filtered out.
      */
     public static final ConfigKey<Integer> FILTER_DISTANCE = new IntegerConfigKey(
             "filter.distance",
@@ -1573,7 +1573,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Throttling interval if the limit exceeded. The value is in seconds.
+     * Throttling interval if the limit is exceeded. The value is in seconds.
      */
     public static final ConfigKey<Integer> FILTER_DAILY_LIMIT_INTERVAL = new IntegerConfigKey(
             "filter.dailyLimitInterval",
@@ -1581,18 +1581,19 @@ public final class Keys {
 
     /**
      * If false, the server expects all locations to come sequentially (for each device). Filter checks for duplicates,
-     * distance, speed, or time period only against the location that was last received by server.
-     * If true, the server expects locations to come at random order (since tracking device might go offline).
-     * Filter checks for duplicates, distance, speed, or time period against the preceding Position's.
-     * Important: setting to true can cause potential performance issues.
+     * distance, speed, or time period only against the location that was last received by the server.
+     * If true, the server expects locations to come in random order (since a tracking device might go offline).
+     * Filter checks for duplicates, distance, speed, or time period against the preceding position.
+     * Important: setting this to true can cause potential performance issues.
      */
     public static final ConfigKey<Boolean> FILTER_RELATIVE = new BooleanConfigKey(
             "filter.relative",
             List.of(KeyType.CONFIG));
 
     /**
-     * Time limit for the filtering in seconds. If the time difference between the last position was received by server
-     * and a new position is received by server is more than this limit, the new position will not be filtered out.
+     * Time limit for filtering in seconds. If the time difference between when the last position was received by the
+     * server and when a new position is received by the server is greater than this limit, the new position will not
+     * be filtered out.
      */
     public static final ConfigKey<Long> FILTER_SKIP_LIMIT = new LongConfigKey(
             "filter.skipLimit",
@@ -1623,7 +1624,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * List of protocols to enable. If not specified, Traccar enabled all protocols that have port numbers listed.
+     * List of protocols to enable. If not specified, Traccar enables all protocols that have port numbers listed.
      * The value is a comma-separated list of protocol names.
      * Example value: teltonika,osmand
      */
@@ -1632,38 +1633,38 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * List of protocols for overriding time. If not specified override is applied globally. List consist of protocol
-     * names that can be separated by comma or single space character.
+     * List of protocols for overriding time. If not specified, override is applied globally. The list consists of
+     * protocol names that can be separated by a comma or a single space character.
      */
     public static final ConfigKey<String> TIME_PROTOCOLS = new StringConfigKey(
             "time.protocols",
             List.of(KeyType.CONFIG));
 
     /**
-     * Replaces coordinates with last known if change is less than a 'coordinates.minError' meters
-     * or more than a 'coordinates.maxError' meters. Helps to avoid coordinates jumps during parking period
-     * or jumps to zero coordinates.
+     * Replaces coordinates with the last known coordinates if the change is less than 'coordinates.minError' meters
+     * or more than 'coordinates.maxError' meters. Helps avoid coordinate jumps during parking periods or jumps to zero
+     * coordinates.
      */
     public static final ConfigKey<Boolean> COORDINATES_FILTER = new BooleanConfigKey(
             "coordinates.filter",
             List.of(KeyType.CONFIG));
 
     /**
-     * Distance in meters. Distances below this value gets handled like explained in 'coordinates.filter'.
+     * Distance in meters. Distances below this value get handled as explained in 'coordinates.filter'.
      */
     public static final ConfigKey<Integer> COORDINATES_MIN_ERROR = new IntegerConfigKey(
             "coordinates.minError",
             List.of(KeyType.CONFIG));
 
     /**
-     * Distance in meters. Distances above this value gets handled like explained in 'coordinates.filter'.
+     * Distance in meters. Distances above this value get handled as explained in 'coordinates.filter'.
      */
     public static final ConfigKey<Integer> COORDINATES_MAX_ERROR = new IntegerConfigKey(
             "coordinates.maxError",
             List.of(KeyType.CONFIG));
 
     /**
-     * Enable to save device IP addresses information. Disabled by default.
+     * Enable saving device IP address information. Disabled by default.
      */
     public static final ConfigKey<Boolean> PROCESSING_REMOTE_ADDRESS_ENABLE = new BooleanConfigKey(
             "processing.remoteAddress.enable",
@@ -1714,15 +1715,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Enable loops processing.
+     * Enable loop processing.
      */
     public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_LOOPS = new BooleanConfigKey(
             "processing.computedAttributes.loops",
             List.of(KeyType.CONFIG));
 
     /**
-     * Enable new instances creation.
-     * When disabled, parsing a script/expression using 'new(...)' will throw a parsing exception;
+     * Enable new instance creation.
+     * When disabled, parsing a script/expression using 'new(...)' will throw a parsing exception.
      */
     public static final ConfigKey<Boolean> PROCESSING_COMPUTED_ATTRIBUTES_NEW_INSTANCE_CREATION = new BooleanConfigKey(
             "processing.computedAttributes.newInstanceCreation",
@@ -1805,8 +1806,8 @@ public final class Keys {
             true);
 
     /**
-     * Boolean flag to enable LBS location resolution. Some devices send cell towers information and WiFi point when GPS
-     * location is not available. Traccar can determine coordinates based on that information using third party
+     * Boolean flag to enable LBS location resolution. Some devices send cell tower information and Wi-Fi points when
+     * GPS location is not available. Traccar can determine coordinates based on that information using third-party
      * services. Default value is false.
      */
     public static final ConfigKey<Boolean> GEOLOCATION_ENABLE = new BooleanConfigKey(
@@ -1815,8 +1816,8 @@ public final class Keys {
 
     /**
      * Provider to use for LBS location. Available options: google, unwired and opencellid. By default, google is
-     * used. You have to supply a key that you get from corresponding provider. For more information see LBS geolocation
-     * documentation.
+     * used. You have to supply a key that you get from the corresponding provider. For more information, see LBS
+     * geolocation documentation.
      */
     public static final ConfigKey<String> GEOLOCATION_TYPE = new StringConfigKey(
             "geolocation.type",
@@ -1917,7 +1918,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Jetty Request Log Path.
+     * Jetty request log path.
      * The path must include the string "yyyy_mm_dd", which is replaced with the actual date when creating and rolling
      * over the file.
      * Example: ./logs/jetty-yyyy_mm_dd.request.log
@@ -1941,9 +1942,10 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * If this parameter is set, Traccar will monitor drops in the number of stored messages. If it drops more than
-     * the threshold, it will mark service as failing for systemd. Threshold is a value from 0.0 to 1.0. For example,
-     * value 0.7 means that the number of messages in the last period is only 70% of what it was in the previous.
+     * If this parameter is set, Traccar will monitor drops in the number of stored messages. If it drops by more
+     * than the threshold, it will mark the service as failing for systemd. Threshold is a value from 0.0 to 1.0. For
+     * example, value 0.7 means that the number of messages in the last period is only 70% of what it was in the
+     * previous period.
      */
     public static final ConfigKey<Double> WEB_HEALTH_CHECK_DROP_THRESHOLD = new DoubleConfigKey(
             "web.healthCheck.dropThreshold",
@@ -1958,14 +1960,14 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Enables persisting Jetty session to the database
+     * Enables persisting Jetty sessions to the database.
      */
     public static final ConfigKey<Boolean> WEB_PERSIST_SESSION = new BooleanConfigKey(
             "web.persistSession",
             List.of(KeyType.CONFIG));
 
     /**
-     * Public URL for the web app. Used for notification, report link and OpenID Connect.
+     * Public URL for the web app. Used for notifications, report links, and OpenID Connect.
      * If not provided, Traccar will attempt to get a URL from the server IP address, but it might be a local address.
      */
     public static final ConfigKey<String> WEB_URL = new StringConfigKey(
@@ -2015,7 +2017,7 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Log file name. For rotating logs, a date is added at the end of the file name for non-current logs.
+     * Log file name. For rotating logs, a date is added to the end of the file name for non-current logs.
      */
     public static final ConfigKey<String> LOGGER_FILE = new StringConfigKey(
             "logger.file",
@@ -2056,9 +2058,9 @@ public final class Keys {
             true);
 
     /**
-     * Log file rotation interval, the default rotation interval is once a day.
-     * This option is ignored if 'logger.rotate' = false
-     * Available options: day, hour
+     * Log file rotation interval. The default rotation interval is once a day.
+     * This option is ignored if 'logger.rotate' = false.
+     * Available options: day, hour.
      */
     public static final ConfigKey<String> LOGGER_ROTATE_INTERVAL = new StringConfigKey(
             "logger.rotate.interval",
