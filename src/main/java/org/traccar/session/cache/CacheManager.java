@@ -108,7 +108,7 @@ public class CacheManager implements BroadcastInterface {
     }
 
     public Deque<Position> getPositions(long deviceId) {
-        return devicePositions.get(deviceId);
+        return devicePositions.computeIfAbsent(deviceId, k -> new ConcurrentLinkedDeque<>());
     }
 
     public Server getServer() {
