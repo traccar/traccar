@@ -1,9 +1,9 @@
-#set($subject = "$device.name: em movimento")
-#set($digest = "$device.name em movimento às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): em movimento")
+#set($digest = "$esc.html($device.name) em movimento às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
+Dispositivo: $esc.html($device.name)<br>
 Em movimento<br>
 Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Local: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>

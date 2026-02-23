@@ -1,11 +1,11 @@
-#set($subject = "$device.name: media dosyası alındı")
-#set($digest = "$device.name $event.getString('media') alındı: $event.getString('file') zaman $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): media dosyası alındı")
+#set($digest = "$esc.html($device.name) $esc.html($event.getString('media')) alındı: $esc.html($event.getString('file')) zaman $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Cihaz: $device.name<br>
-Type: $event.getString('media')<br>
-Dosya: <a href="$webUrl/api/media/$device.uniqueId/$event.getString('file')">$event.getString('file')</a><br>
+Cihaz: $esc.html($device.name)<br>
+Type: $esc.html($event.getString('media'))<br>
+Dosya: <a href="$webUrl/api/media/$device.uniqueId/$esc.html($event.getString('file'))">$esc.html($event.getString('file'))</a><br>
 Zaman: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Link: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
 <br>

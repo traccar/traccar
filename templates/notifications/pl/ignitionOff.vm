@@ -1,9 +1,9 @@
-#set($subject = "$device.name: zapłon wyłączony")
-#set($digest = "$device.name zapłon wyłączony o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): zapłon wyłączony")
+#set($digest = "$esc.html($device.name) zapłon wyłączony o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Urządzenie: $device.name<br>
+Urządzenie: $esc.html($device.name)<br>
 Wyłączony zapłon<br>
 Czas: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Lokalizacja: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>

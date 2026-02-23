@@ -1,9 +1,9 @@
-#set($subject = "$device.name: offline")
-#set($digest = "$device.name offline at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): offline")
+#set($digest = "$esc.html($device.name) offline at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Device: $device.name<br>
+Device: $esc.html($device.name)<br>
 Offline<br>
 Time: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

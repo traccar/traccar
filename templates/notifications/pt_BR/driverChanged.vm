@@ -1,17 +1,17 @@
-#set($subject = "$device.name: troca de Condutor")
+#set($subject = "$esc.html($device.name): troca de Condutor")
 #if($driver)
 #set($driverName = $driver.name)
 #else
 #set($driverName = $event.getString('driverUniqueId'))
 #end
-#set($digest = "o condutor $driverName foi trocado em $device.name às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "o condutor $esc.html($driverName) foi trocado em $esc.html($device.name) às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
+Dispositivo: $esc.html($device.name)<br>
 Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Local: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
-Condutor: $driverName<br>
+Condutor: $esc.html($driverName)<br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Cancelar subscrição</a>
 </body>

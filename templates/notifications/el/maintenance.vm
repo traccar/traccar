@@ -1,10 +1,10 @@
-#set($subject = "$device.name: Απαιτείται συντήρηση")
-#set($digest = "Η Συσκευή $device.name χρειάζεται συντήρηση: $maintenance.name στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): Απαιτείται συντήρηση")
+#set($digest = "Η Συσκευή $esc.html($device.name) χρειάζεται συντήρηση: $esc.html($maintenance.name) στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Συσκευή: $device.name<br>
-Απαιτείται συντήρηση: $maintenance.name<br>
+Συσκευή: $esc.html($device.name)<br>
+Απαιτείται συντήρηση: $esc.html($maintenance.name)<br>
 Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Σημείο: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

@@ -1,9 +1,9 @@
-#set($subject = "$device.name: desconectado")
-#set($digest = "$device.name desconectado às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): desconectado")
+#set($digest = "$esc.html($device.name) desconectado às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
+Dispositivo: $esc.html($device.name)<br>
 Desconectado<br>
 Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

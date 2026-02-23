@@ -1,9 +1,9 @@
-#set($subject = "$device.name: Connesso")
-#set($digest = "$device.name si è Connesso il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): Connesso")
+#set($digest = "$esc.html($device.name) si è Connesso il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
+Dispositivo: $esc.html($device.name)<br>
 si è Connesso<br>
 Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

@@ -1,9 +1,9 @@
-#set($subject = "$device.name: Acceso il Veicolo")
-#set($digest = "$device.name ha acceso il veicolo il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): Acceso il Veicolo")
+#set($digest = "$esc.html($device.name) ha acceso il veicolo il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
+Dispositivo: $esc.html($device.name)<br>
 acceso il veicolo<br>
 Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Indirizzo: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>

@@ -1,10 +1,10 @@
-#set($subject = "$device.name: opuścił geostrefę")
-#set($digest = "$device.name opuścił geostrefę: $geofence.name o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): opuścił geostrefę")
+#set($digest = "$esc.html($device.name) opuścił geostrefę: $esc.html($geofence.name) o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Urządzenie: $device.name<br>
-Opuściło geostrefę: $geofence.name<br>
+Urządzenie: $esc.html($device.name)<br>
+Opuściło geostrefę: $esc.html($geofence.name)<br>
 Czas: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Lokalizacja: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

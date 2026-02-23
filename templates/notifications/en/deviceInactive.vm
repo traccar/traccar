@@ -1,11 +1,11 @@
-#set($subject = "$device.name: inactive")
+#set($subject = "$esc.html($device.name): inactive")
 #set($lastUpdate = $dateTool.getDate())
 #set($ignore = $lastUpdate.setTime($event.getLong('lastUpdate')))
-#set($digest = "$device.name inactive from $dateTool.format('yyyy-MM-dd HH:mm:ss', $lastUpdate, $locale, $timezone)")
+#set($digest = "$esc.html($device.name) inactive from $dateTool.format('yyyy-MM-dd HH:mm:ss', $lastUpdate, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Device: $device.name<br>
+Device: $esc.html($device.name)<br>
 Inactive<br>
 Last Update: $dateTool.format('yyyy-MM-dd HH:mm:ss', $lastUpdate, $locale, $timezone)<br>
 Link: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>

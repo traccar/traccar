@@ -1,12 +1,12 @@
-#set($subject = "$device.name: тревога!")
+#set($subject = "$esc.html($device.name): тревога!")
 #set($alarmKey = $event.getString('alarm'))
 #set($alarmName = $translations.get("alarm${alarmKey.substring(0, 1).toUpperCase()}${alarmKey.substring(1)}"))
-#set($digest = "$device.name тревога: $alarmName в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$esc.html($device.name) тревога: $esc.html($alarmName) в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Устройство: $device.name<br>
-Тревога: $alarmName<br>
+Устройство: $esc.html($device.name)<br>
+Тревога: $esc.html($alarmName)<br>
 Время: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Координаты: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

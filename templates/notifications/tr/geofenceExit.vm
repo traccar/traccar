@@ -1,10 +1,10 @@
-#set($subject = "$device.name: Bölge Çıkışı")
-#set($digest = "$device.name Bölge Çıkışı $geofence.name Zaman $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): Bölge Çıkışı")
+#set($digest = "$esc.html($device.name) Bölge Çıkışı $esc.html($geofence.name) Zaman $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Cihaz: $device.name<br>
-Bölge Çıkışı: $geofence.name<br>
+Cihaz: $esc.html($device.name)<br>
+Bölge Çıkışı: $esc.html($geofence.name)<br>
 Zaman: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Konum: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

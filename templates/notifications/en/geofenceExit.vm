@@ -1,10 +1,10 @@
-#set($subject = "$device.name: has exited geofence")
-#set($digest = "$device.name has exited geofence $geofence.name at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): has exited geofence")
+#set($digest = "$esc.html($device.name) has exited geofence $esc.html($geofence.name) at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Device: $device.name<br>
-Has exited geofence: $geofence.name<br>
+Device: $esc.html($device.name)<br>
+Has exited geofence: $esc.html($geofence.name)<br>
 Time: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Point: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

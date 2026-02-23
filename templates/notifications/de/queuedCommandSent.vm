@@ -1,9 +1,9 @@
-#set($subject = "$device.name: Befehl in Warteschlange gesendet")
-#set($digest = "Warteschlangenbefehl an $device.name am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr gesendet")
+#set($subject = "$esc.html($device.name): Befehl in Warteschlange gesendet")
+#set($digest = "Warteschlangenbefehl an $esc.html($device.name) am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr gesendet")
 <!DOCTYPE html>
 <html>
 <body>
-Ger&auml;t: $device.name<br>
+Ger&auml;t: $esc.html($device.name)<br>
 Befehl in Warteschlange gesendet<br>
 am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr gesendet<br>
 <br>

@@ -1,9 +1,9 @@
-#set($subject = "$device.name: Comando Inviato")
-#set($digest = "Il comando in coda è stato inviato al dispositivo $device.name il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): Comando Inviato")
+#set($digest = "Il comando in coda è stato inviato al dispositivo $esc.html($device.name) il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
+Dispositivo: $esc.html($device.name)<br>
 comando in coda inviato<br>
 Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

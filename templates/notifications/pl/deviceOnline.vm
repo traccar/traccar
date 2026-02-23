@@ -1,9 +1,9 @@
-#set($subject = "$device.name: jest online")
-#set($digest = "$device.name jest online od $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): jest online")
+#set($digest = "$esc.html($device.name) jest online od $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Urządzenie: $device.name<br>
+Urządzenie: $esc.html($device.name)<br>
 Jest online<br>
 Czas: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

@@ -1,12 +1,12 @@
-#set($subject = "$device.name: alarm!")
+#set($subject = "$esc.html($device.name): alarm!")
 #set($alarmKey = $event.getString('alarm'))
 #set($alarmName = $translations.get("alarm${alarmKey.substring(0, 1).toUpperCase()}${alarmKey.substring(1)}"))
-#set($digest = "$device.name alarm: $alarmName at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$esc.html($device.name) alarm: $esc.html($alarmName) at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Cihaz: $device.name<br>
-Alarm: $alarmName<br>
+Cihaz: $esc.html($device.name)<br>
+Alarm: $esc.html($alarmName)<br>
 Zaman: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Konum: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

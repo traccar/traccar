@@ -1,17 +1,17 @@
-#set($subject = "$device.name: водитель изменился")
+#set($subject = "$esc.html($device.name): водитель изменился")
 #if($driver)
 #set($driverName = $driver.name)
 #else
 #set($driverName = $event.getString('driverUniqueId'))
 #end
-#set($digest = "Водитель $driverName изменился на $device.name с $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Водитель $esc.html($driverName) изменился на $esc.html($device.name) с $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Устройство: $device.name<br>
+Устройство: $esc.html($device.name)<br>
 Время: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Координаты: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
-Водитель: $driverName<br>
+Водитель: $esc.html($driverName)<br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Отписаться</a>
 </body>

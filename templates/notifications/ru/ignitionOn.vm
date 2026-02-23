@@ -1,9 +1,9 @@
-#set($subject = "$device.name: Зажигание ВКЛЮЧЕНО")
-#set($digest = "$device.name Зажигание ВКЛЮЧЕНО в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): Зажигание ВКЛЮЧЕНО")
+#set($digest = "$esc.html($device.name) Зажигание ВКЛЮЧЕНО в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Устройство: $device.name<br>
+Устройство: $esc.html($device.name)<br>
 Зажигание ВКЛЮЧЕНО<br>
 Время: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Координаты: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>

@@ -1,17 +1,17 @@
-#set($subject = "Υπήρξε αλλαγή οδηγού στο όχημα $device.name")
+#set($subject = "Υπήρξε αλλαγή οδηγού στο όχημα $esc.html($device.name)")
 #if($driver)
 #set($driverName = $driver.name)
 #else
 #set($driverName = $event.getString('driverUniqueId'))
 #end
-#set($digest = "ο Οδηγός $driverName έχει τοποθετηθεί στο όχημα $device.name στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "ο Οδηγός $esc.html($driverName) έχει τοποθετηθεί στο όχημα $esc.html($device.name) στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Συσκευή: $device.name<br>
+Συσκευή: $esc.html($device.name)<br>
 Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Σημείο: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
-Οδηγός: $driverName<br>
+Οδηγός: $esc.html($driverName)<br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Απεγγραφή</a>
 </body>

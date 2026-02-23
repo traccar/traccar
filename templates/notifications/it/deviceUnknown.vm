@@ -1,9 +1,9 @@
-#set($subject = "$device.name: Sconosciuto")
-#set($digest = "$device.name lo stato è sconosciuto dal $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): Sconosciuto")
+#set($digest = "$esc.html($device.name) lo stato è sconosciuto dal $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
+Dispositivo: $esc.html($device.name)<br>
 lo stato è sconosciuto<br>
 Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

@@ -1,10 +1,10 @@
-#set($subject = "$device.name: Λήφθηκε εντολή")
-#set($digest = "Λήφθηκε αποτέλεσμα εντολής από τη συσκευή $device.name $position.getString('result') στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): Λήφθηκε εντολή")
+#set($digest = "Λήφθηκε αποτέλεσμα εντολής από τη συσκευή $esc.html($device.name) $esc.html($position.getString('result')) στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Συσκευή: $device.name<br>
-Αποτέλεσμα: $position.getString('result')<br>
+Συσκευή: $esc.html($device.name)<br>
+Αποτέλεσμα: $esc.html($position.getString('result'))<br>
 Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Σύνδεσμος: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
 <br>

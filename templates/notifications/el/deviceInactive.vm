@@ -1,11 +1,11 @@
-#set($subject = "$device.name: Αδρανής")
+#set($subject = "$esc.html($device.name): Αδρανής")
 #set($lastUpdate = $dateTool.getDate())
 #set($ignore = $lastUpdate.setTime($event.getLong('lastUpdate')))
-#set($digest = "Η Συσκευή $device.name Eίναι σε αδράνια απο τις $dateTool.format('dd-MM-yyyy HH:mm:ss', $lastUpdate, $locale, $timezone)")
+#set($digest = "Η Συσκευή $esc.html($device.name) Eίναι σε αδράνια απο τις $dateTool.format('dd-MM-yyyy HH:mm:ss', $lastUpdate, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Συσκευή: $device.name<br>
+Συσκευή: $esc.html($device.name)<br>
 Aδρανής<br>
 Τελευταία Ενημέρωση: $dateTool.format('dd-MM-yyyy HH:mm:ss', $lastUpdate, $locale, $timezone)<br>
 Σύνδεσμος: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>

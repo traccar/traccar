@@ -1,9 +1,9 @@
-#set($subject = "$device.name: Στάλθηκε εντολή ")
-#set($digest = "Η εντολή στη συσκευή $device.name στάλθηκε επιτυχώς στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): Στάλθηκε εντολή ")
+#set($digest = "Η εντολή στη συσκευή $esc.html($device.name) στάλθηκε επιτυχώς στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Συσκευή: $device.name<br>
+Συσκευή: $esc.html($device.name)<br>
 Στάλθηκε εντολή<br>
 Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

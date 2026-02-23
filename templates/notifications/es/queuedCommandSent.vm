@@ -1,9 +1,9 @@
-#set($subject = "$device.name: comando en cola enviado")
-#set($digest = "Comando en cola enviado a $device.name a las $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): comando en cola enviado")
+#set($digest = "Comando en cola enviado a $esc.html($device.name) a las $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
+Dispositivo: $esc.html($device.name)<br>
 Comando en cola enviado<br>
 Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

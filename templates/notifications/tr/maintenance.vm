@@ -1,10 +1,10 @@
-#set($subject = "$device.name: Bakım Gerekli")
-#set($digest = "$device.name Bakım: $maintenance.name Bakım Gerekli $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): Bakım Gerekli")
+#set($digest = "$esc.html($device.name) Bakım: $esc.html($maintenance.name) Bakım Gerekli $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Cihaz: $device.name<br>
-Bakım Gerekli: $maintenance.name<br>
+Cihaz: $esc.html($device.name)<br>
+Bakım Gerekli: $esc.html($maintenance.name)<br>
 Zaman: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Konum: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

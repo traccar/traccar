@@ -1,9 +1,9 @@
-#set($subject = "$device.name: comando enfileirado enviado")
-#set($digest = "comando enfileirado enviado ao veículo $device.name às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): comando enfileirado enviado")
+#set($digest = "comando enfileirado enviado ao veículo $esc.html($device.name) às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
+Dispositivo: $esc.html($device.name)<br>
 Comando enfileirado enviado<br>
 Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

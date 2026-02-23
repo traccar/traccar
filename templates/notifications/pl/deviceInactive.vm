@@ -1,11 +1,11 @@
-#set($subject = "$device.name: jest nieaktywny")
+#set($subject = "$esc.html($device.name): jest nieaktywny")
 #set($lastUpdate = $dateTool.getDate())
 #set($ignore = $lastUpdate.setTime($event.getLong('lastUpdate')))
-#set($digest = "$device.name jest nieaktywny od $dateTool.format('dd-MM-yyyy HH:mm:ss', $lastUpdate, $locale, $timezone)")
+#set($digest = "$esc.html($device.name) jest nieaktywny od $dateTool.format('dd-MM-yyyy HH:mm:ss', $lastUpdate, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Urządzenie: $device.name<br>
+Urządzenie: $esc.html($device.name)<br>
 Jest nieaktywne<br>
 Ostatnio widziane: $dateTool.format('dd-MM-yyyy HH:mm:ss', $lastUpdate, $locale, $timezone)<br>
 Link: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>

@@ -1,8 +1,8 @@
 #set($subject = "Λήξη συσκευής")
-#set($digest = "Η Συσκευή $device.name έληξε")
+#set($digest = "Η Συσκευή $esc.html($device.name) έληξε")
 <!DOCTYPE html>
 <html>
 <body>
-Η συσκευή σας $device.name έχει λήξει.
+Η συσκευή σας $esc.html($device.name) έχει λήξει.
 </body>
 </html>

@@ -1,11 +1,11 @@
-#set($subject = "$device.name: неактивно")
+#set($subject = "$esc.html($device.name): неактивно")
 #set($lastUpdate = $dateTool.getDate())
 #set($ignore = $lastUpdate.setTime($event.getLong('lastUpdate')))
-#set($digest = "$device.name неактивно с $dateTool.format('yyyy-MM-dd HH:mm:ss', $lastUpdate, $locale, $timezone)")
+#set($digest = "$esc.html($device.name) неактивно с $dateTool.format('yyyy-MM-dd HH:mm:ss', $lastUpdate, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Устройство: $device.name<br>
+Устройство: $esc.html($device.name)<br>
 Неактивно<br>
 Последнее обновление: $dateTool.format('yyyy-MM-dd HH:mm:ss', $lastUpdate, $locale, $timezone)<br>
 Ссылка: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>

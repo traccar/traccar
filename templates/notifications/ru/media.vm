@@ -1,11 +1,11 @@
-#set($subject = "$device.name: получен медиафайл")
-#set($digest = "$device.name $event.getString('media') получен: $event.getString('file') в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): получен медиафайл")
+#set($digest = "$esc.html($device.name) $esc.html($event.getString('media')) получен: $esc.html($event.getString('file')) в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Устройство: $device.name<br>
-Тип: $event.getString('media')<br>
-Файл: <a href="$webUrl/api/media/$device.uniqueId/$event.getString('file')">$event.getString('file')</a><br>
+Устройство: $esc.html($device.name)<br>
+Тип: $esc.html($event.getString('media'))<br>
+Файл: <a href="$webUrl/api/media/$device.uniqueId/$esc.html($event.getString('file'))">$esc.html($event.getString('file'))</a><br>
 Время: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Ссылка: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
 <br>

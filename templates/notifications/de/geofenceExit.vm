@@ -1,10 +1,10 @@
-#set($subject = "$device.name: hat den Geozaun verlassen")
-#set($digest = "$device.name hat den Geozaun $geofence.name am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr verlassen")
+#set($subject = "$esc.html($device.name): hat den Geozaun verlassen")
+#set($digest = "$esc.html($device.name) hat den Geozaun $esc.html($geofence.name) am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr verlassen")
 <!DOCTYPE html>
 <html>
 <body>
-Ger&auml;t: $device.name<br>
-Hat den Geozaun verlassen: $geofence.name<br>
+Ger&auml;t: $esc.html($device.name)<br>
+Hat den Geozaun verlassen: $esc.html($geofence.name)<br>
 am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr<br>
 Position: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

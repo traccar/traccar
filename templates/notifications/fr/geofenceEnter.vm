@@ -1,10 +1,10 @@
-#set($subject = "$device.name: est entré dans la zone géographique")
-#set($digest = "$device.name est entré dans la zone géographique $geofence.name à $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): est entré dans la zone géographique")
+#set($digest = "$esc.html($device.name) est entré dans la zone géographique $esc.html($geofence.name) à $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Appareil: $device.name<br>
-Est entré dans la zone géographique: $geofence.name<br>
+Appareil: $esc.html($device.name)<br>
+Est entré dans la zone géographique: $esc.html($geofence.name)<br>
 Heure: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Point: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

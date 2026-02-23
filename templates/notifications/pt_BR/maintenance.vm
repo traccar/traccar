@@ -1,10 +1,10 @@
-#set($subject = "$device.name: manutenção requerida")
-#set($digest = "Manutenção requerida $maintenance.name em $device.name às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): manutenção requerida")
+#set($digest = "Manutenção requerida $esc.html($maintenance.name) em $esc.html($device.name) às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
-Manutenção requerida: $maintenance.name<br>
+Dispositivo: $esc.html($device.name)<br>
+Manutenção requerida: $esc.html($maintenance.name)<br>
 Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Local: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

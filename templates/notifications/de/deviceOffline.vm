@@ -1,9 +1,9 @@
-#set($subject = "$device.name: offline")
-#set($digest = "$device.name ist seit $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr offline")
+#set($subject = "$esc.html($device.name): offline")
+#set($digest = "$esc.html($device.name) ist seit $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr offline")
 <!DOCTYPE html>
 <html>
 <body>
-Ger&auml;t: $device.name<br>
+Ger&auml;t: $esc.html($device.name)<br>
 Offline<br>
 seit $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr<br>
 <br>

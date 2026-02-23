@@ -1,10 +1,10 @@
-#set($subject = "$device.name: entrou na geocerca")
-#set($digest = "$device.name entrou na geocerca $geofence.name às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): entrou na geocerca")
+#set($digest = "$esc.html($device.name) entrou na geocerca $esc.html($geofence.name) às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
-Entrou na geocerca: $geofence.name<br>
+Dispositivo: $esc.html($device.name)<br>
+Entrou na geocerca: $esc.html($geofence.name)<br>
 Hora: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Local: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

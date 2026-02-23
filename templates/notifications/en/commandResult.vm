@@ -1,10 +1,10 @@
-#set($subject = "$device.name: command result received")
-#set($digest = "$device.name command result received: $position.getString('result') at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): command result received")
+#set($digest = "$esc.html($device.name) command result received: $esc.html($position.getString('result')) at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Device: $device.name<br>
-Result: $position.getString('result')<br>
+Device: $esc.html($device.name)<br>
+Result: $esc.html($position.getString('result'))<br>
 Time: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Link: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
 <br>

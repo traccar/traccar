@@ -1,9 +1,9 @@
-#set($subject = "$device.name: queued command sent")
-#set($digest = "Queued command sent to $device.name at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): queued command sent")
+#set($digest = "Queued command sent to $esc.html($device.name) at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Device: $device.name<br>
+Device: $esc.html($device.name)<br>
 Queued command sent<br>
 Time: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

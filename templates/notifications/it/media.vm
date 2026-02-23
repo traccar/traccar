@@ -1,11 +1,11 @@
-#set($subject = "$device.name: File Multimediale Ricevuto")
-#set($digest = "$device.name $event.getString('media') è stato ricevuto: $event.getString('file') il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): File Multimediale Ricevuto")
+#set($digest = "$esc.html($device.name) $esc.html($event.getString('media')) è stato ricevuto: $esc.html($event.getString('file')) il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Dispositivo: $device.name<br>
-Tipo: $event.getString('media')<br>
-File: <a href="$webUrl/api/media/$device.uniqueId/$event.getString('file')">$event.getString('file')</a><br>
+Dispositivo: $esc.html($device.name)<br>
+Tipo: $esc.html($event.getString('media'))<br>
+File: <a href="$webUrl/api/media/$device.uniqueId/$esc.html($event.getString('file'))">$esc.html($event.getString('file'))</a><br>
 Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Collegamento: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
 <br>

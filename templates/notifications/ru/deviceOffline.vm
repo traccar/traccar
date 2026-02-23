@@ -1,9 +1,9 @@
-#set($subject = "$device.name: не в сети")
-#set($digest = "$device.name не в сети с $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): не в сети")
+#set($digest = "$esc.html($device.name) не в сети с $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
-Устройство: $device.name<br>
+Устройство: $esc.html($device.name)<br>
 Не в сети<br>
 Время: $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>

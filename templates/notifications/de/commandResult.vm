@@ -1,10 +1,10 @@
-#set($subject = "$device.name: Befehlsergebnis empfangen")
-#set($digest = "$device.name Befehlsergebnis empfangen: $position.getString('result') am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr")
+#set($subject = "$esc.html($device.name): Befehlsergebnis empfangen")
+#set($digest = "$esc.html($device.name) Befehlsergebnis empfangen: $esc.html($position.getString('result')) am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr")
 <!DOCTYPE html>
 <html>
 <body>
-Ger&auml;t: $device.name<br>
-Befehlsergebnis: $position.getString('result')<br>
+Ger&auml;t: $esc.html($device.name)<br>
+Befehlsergebnis: $esc.html($position.getString('result'))<br>
 am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr<br>
 Link: <a href="$webUrl/event/$event.id">$webUrl/event/$event.id</a><br>
 <br>
