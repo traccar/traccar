@@ -35,6 +35,7 @@ import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.Objects;
 
 @Singleton
 public class LoginService {
@@ -130,18 +131,16 @@ public class LoginService {
             user.setFixedEmail(true);
             user.setAdministrator(administrator);
             user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
-        } else {
 
-            if (!java.util.Objects.equals(name, user.getName())
-                    || user.getAdministrator() != administrator) {
+        } else if (!Objects.equals(name, user.getName())
+                || user.getAdministrator() != administrator) {
 
-                user.setName(name);
-                user.setAdministrator(administrator);
+            user.setName(name);
+            user.setAdministrator(administrator);
 
-                storage.updateObject(user, new Request(
-                        new Columns.Include("name", "administrator"),
-                        new Condition.Equals("id", user.getId())));
-            }
+            storage.updateObject(user, new Request(
+                    new Columns.Include("name", "administrator"),
+                    new Condition.Equals("id", user.getId())));
         }
 
         checkUserEnabled(user);
