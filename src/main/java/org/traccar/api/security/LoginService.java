@@ -124,6 +124,7 @@ public class LoginService {
                 new Condition.Equals("email", email)));
 
         if (user == null) {
+
             user = new User();
             UserUtil.setUserDefaults(user, config);
             user.setName(name);
@@ -132,8 +133,7 @@ public class LoginService {
             user.setAdministrator(administrator);
             user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
 
-        } else if (!Objects.equals(name, user.getName())
-                || user.getAdministrator() != administrator) {
+        } else if (!Objects.equals(name, user.getName()) || user.getAdministrator() != administrator) {
 
             user.setName(name);
             user.setAdministrator(administrator);
