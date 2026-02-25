@@ -34,18 +34,15 @@ import java.util.List;
 
 public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
-    // Frame markers
     private static final int HEADER_START_SIGN  = 0xFF;
     private static final int PACKAGE_START_SIGN = 0x5B;
     private static final int PACKAGE_END_SIGN   = 0x5D;
 
-    // HEADER protocol versions
-    private static final int HEADER_VERSION_1 = 0x22; // legacy
-    private static final int HEADER_VERSION_2 = 0x23; // GSM/GPRS
-    private static final int HEADER_VERSION_3 = 0x24; // EXT ID (has extra 8-byte WiFi ID)
-    private static final int HEADER_VERSION_4 = 0x25; // WiFi
-
-    // PACKET content types
+    private static final int HEADER_VERSION_1 = 0x22;
+    private static final int HEADER_VERSION_2 = 0x23;
+    private static final int HEADER_VERSION_3 = 0x24;
+    private static final int HEADER_VERSION_4 = 0x25;
+    
     private static final int RECORD_PING   = 0x00;
     private static final int RECORD_DATA   = 0x01;
     private static final int RECORD_TEXT   = 0x03;
@@ -102,7 +99,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
             switch (tag) {
 
-                // ── TAG 0x01 – External voltage (mV) + internal battery (mV) ────
                 case 1: {
                     int batMv = buf.readUnsignedShortLE();
                     int extMv = buf.readUnsignedShortLE();
@@ -115,7 +111,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x03 – Latitude, IEEE 754 float LE ──────────────────────
                 case 3: {
                     float latitude = buf.readFloatLE();
                     if (latitude > -90.0f && latitude < 90.0f) {
@@ -124,7 +119,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x04 – Longitude, IEEE 754 float LE ─────────────────────
                 case 4: {
                     float longitude = buf.readFloatLE();
                     if (longitude > -180.0f && longitude < 180.0f) {
@@ -133,7 +127,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x05 – Navigation parameters ────────────────────────────
                 case 5: {
                     int course     = buf.readUnsignedByte() * 2;
                     int altitude   = buf.readUnsignedByte() * 10;
@@ -141,7 +134,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     int speedKnots = buf.readUnsignedByte();
 
                     if (satByte == 0xFE || satByte == 0xFF) {
-                        // Coordinates come from LBS or WiFi — mark as invalid GPS
                         position.setValid(false);
                     } else {
                         int gpsSat = satByte & 0x0F;
@@ -156,7 +148,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x06 – Digital I/O: PIN / IMPS / FREQ / VOLT ────────────
                 case 6: {
                     int mode = buf.readUnsignedByte();
 
@@ -196,7 +187,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x07 – SIM1 LAC + CID ───────────────────────────────────
                 case 7: {
                     int cid = buf.readUnsignedShortLE();
                     int lac = buf.readUnsignedShortLE();
@@ -205,7 +195,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x08 – SIM1 GSM signal + MCC + MNC ──────────────────────
                 case 8: {
                     int mnc    = buf.readUnsignedByte();
                     int mcc    = buf.readUnsignedShortLE();
@@ -216,7 +205,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x09 – Device Status (DS) bitmask ───────────────────────
                 case 9: {
                     long status = buf.readUnsignedIntLE();
                     position.set(Position.KEY_STATUS, status);
@@ -240,7 +228,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x33 (51) – CAN security / status flags ─────────────────
                 case 51: {
                     long flags = buf.readUnsignedIntLE();
                     position.set("doorDriver",      BitUtil.check(flags, 8));
@@ -255,28 +242,24 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x34 (52) – CAN total engine operating time ──────────────
                 case 52: {
                     long engineHours100 = buf.readUnsignedIntLE();
                     position.set(Position.KEY_HOURS, (long) (engineHours100 / 100.0 * 3600 * 1000));
                     break;
                 }
 
-                // ── TAG 0x35 (53) – CAN total odometer ──────────────────────────
                 case 53: {
                     long odo100 = buf.readUnsignedIntLE();
                     position.set(Position.KEY_ODOMETER, (long) (odo100 / 100.0 * 1000));
                     break;
                 }
 
-                // ── TAG 0x36 (54) – CAN total fuel consumed ─────────────────────
                 case 54: {
                     long fuelused = buf.readUnsignedIntLE();
                     position.set(Position.KEY_FUEL_USED, fuelused / 10.0);
                     break;
                 }
 
-                // ── TAG 0x37 (55) – CAN fuel level in tank (%) ──────────────────
                 case 55: {
                     int fuel = buf.readUnsignedShortLE();
                     buf.skipBytes(2);
@@ -284,14 +267,12 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x38 (56) – CAN fuel level in tank (litres) ─────────────
                 case 56: {
                     long fuelL = buf.readUnsignedIntLE();
                     position.set("fuelLitres", fuelL);
                     break;
                 }
 
-                // ── TAG 0x39 (57) – CAN engine speed (RPM) ──────────────────────
                 case 57: {
                     int rpm = buf.readUnsignedShortLE();
                     buf.skipBytes(2);
@@ -299,21 +280,18 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x3A (58) – CAN engine temperature (°C) ─────────
                 case 58: {
                     int enginetemp = (int) buf.readUnsignedIntLE();
                     position.set(Position.KEY_ENGINE_TEMP, enginetemp);
                     break;
                 }
 
-                // ── TAG 0x3B (59) – CAN vehicle speed (km/h) ────────────────────
                 case 59: {
                     int canSpeed = (int) buf.readUnsignedIntLE();
                     position.set(Position.KEY_OBD_SPEED, canSpeed);
                     break;
                 }
 
-                // ── TAGs 0x3C–0x40 (60–64) – CAN axle load 1–5 (kg) ────────────
                 case 60:
                 case 61:
                 case 62:
@@ -330,7 +308,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     
                 }
 
-                // ── TAG 0x45 (69) – CAN driving state / engine load ─────────────
                 case 69: {
                     int throttle      = buf.readUnsignedByte();
                     int engineLoadPct = buf.readUnsignedByte();
@@ -343,8 +320,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 }
-
-                // ── TAGs (71–79) – LLS fuel-level sensors ─────────
+                    
                 case 71:
                 case 72:
                 case 73:
@@ -364,7 +340,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── TAG 0x97 (151) – Dilution of Precision (HDOP) ───────────────
                 case 151: {
                     int hdopRaw = buf.readUnsignedShortLE();
                     buf.skipBytes(2); // reserved
@@ -372,7 +347,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
                 }
 
-                // ── All unknown tags: skip 4 value bytes ─────────────────────────
                 default:
                     buf.skipBytes(4);
                     break;
@@ -395,7 +369,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
         int startSign = buf.readUnsignedByte();
 
-        // ── HEADER (device identification at session start) ─────────────────────
         if (startSign == HEADER_START_SIGN) {
 
             int version = buf.readUnsignedByte();
@@ -414,7 +387,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        // ── PACKAGE frame (0x5B … 0x5D) ────────────────────────────────────────
         if (startSign != PACKAGE_START_SIGN) {
             return null;
         }
