@@ -34,19 +34,19 @@ import java.util.List;
 
 public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
-    private static final int HEADER_START_SIGN  = 0xFF;
+    private static final int HEADER_START_SIGN = 0xFF;
     private static final int PACKAGE_START_SIGN = 0x5B;
-    private static final int PACKAGE_END_SIGN   = 0x5D;
+    private static final int PACKAGE_END_SIGN = 0x5D;
 
     private static final int HEADER_VERSION_1 = 0x22;
     private static final int HEADER_VERSION_2 = 0x23;
     private static final int HEADER_VERSION_3 = 0x24;
     private static final int HEADER_VERSION_4 = 0x25;
-    
-    private static final int RECORD_PING   = 0x00;
-    private static final int RECORD_DATA   = 0x01;
-    private static final int RECORD_TEXT   = 0x03;
-    private static final int RECORD_FILE   = 0x04;
+
+    private static final int RECORD_PING = 0x00;
+    private static final int RECORD_DATA = 0x01;
+    private static final int RECORD_TEXT = 0x03;
+    private static final int RECORD_FILE = 0x04;
     private static final int RECORD_BINARY = 0x06;
 
     public ArnaviBinaryProtocolDecoder(Protocol protocol) {
@@ -128,9 +128,9 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 case 5: {
-                    int course     = buf.readUnsignedByte() * 2;
-                    int altitude   = buf.readUnsignedByte() * 10;
-                    int satByte    = buf.readUnsignedByte();
+                    int course = buf.readUnsignedByte() * 2;
+                    int altitude = buf.readUnsignedByte() * 10;
+                    int satByte = buf.readUnsignedByte();
                     int speedKnots = buf.readUnsignedByte();
 
                     if (satByte == 0xFE || satByte == 0xFF) {
@@ -158,25 +158,25 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                             position.set("virtualignition", BitUtil.check(virtualSensors, 0));
                             position.set("callButton", BitUtil.check(virtualSensors, 1));
                             for (int i = 0; i < 8; i++) {
-                            position.set(Position.PREFIX_IN + (i + 1), (physicalInputs & (1 << i)) != 0);
+                                position.set(Position.PREFIX_IN + (i + 1), (physicalInputs & (1 << i)) != 0);
                             }
                             break;
                         }
                         case 0x06: {
                             int inputNum = buf.readUnsignedByte();
-                            int value    = buf.readUnsignedShortLE();
+                            int value = buf.readUnsignedShortLE();
                             position.set("pulses" + inputNum, value);
                             break;
                         }
                         case 0x07: {
                             int inputNum = buf.readUnsignedByte();
-                            int value    = buf.readUnsignedShortLE();
+                            int value = buf.readUnsignedShortLE();
                             position.set("freq" + inputNum, value);
                             break;
                         }
                         case 0x08: {
                             int inputNum = buf.readUnsignedByte();
-                            int value    = buf.readUnsignedShortLE();
+                            int value = buf.readUnsignedShortLE();
                             position.set(Position.PREFIX_ADC + inputNum, value / 1000.0);
                             break;
                         }
@@ -196,8 +196,8 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 case 8: {
-                    int mnc    = buf.readUnsignedByte();
-                    int mcc    = buf.readUnsignedShortLE();
+                    int mnc = buf.readUnsignedByte();
+                    int mcc = buf.readUnsignedShortLE();
                     int signal = buf.readUnsignedByte();
                     position.set(Position.KEY_RSSI, signal);
                     position.set("mcc", mcc);
@@ -224,21 +224,22 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     position.set("simPresent", BitUtil.check(status, 18));
                     position.set("guardMode", BitUtil.check(status, 19));
                     position.set("alarm", BitUtil.check(status, 20)
-                                ? Position.ALARM_SOS : null);
+                            ? Position.ALARM_SOS
+                            : null);
                     break;
                 }
 
                 case 51: {
                     long flags = buf.readUnsignedIntLE();
-                    position.set("doorDriver",      BitUtil.check(flags, 8));
-                    position.set("doorPassenger",   BitUtil.check(flags, 9));
-                    position.set("trunkOpen",       BitUtil.check(flags, 10));
-                    position.set("hoodOpen",        BitUtil.check(flags, 11));
-                    position.set("handbrake",       BitUtil.check(flags, 12));
-                    position.set("brakePedal",      BitUtil.check(flags, 13));
-                    position.set("engineRunning",   BitUtil.check(flags, 14));
-                    position.set("canIgnition",     BitUtil.check(flags, 16));
-                    position.set("keyInIgnition",   BitUtil.check(flags, 19));
+                    position.set("doorDriver", BitUtil.check(flags, 8));
+                    position.set("doorPassenger", BitUtil.check(flags, 9));
+                    position.set("trunkOpen", BitUtil.check(flags, 10));
+                    position.set("hoodOpen", BitUtil.check(flags, 11));
+                    position.set("handbrake", BitUtil.check(flags, 12));
+                    position.set("brakePedal", BitUtil.check(flags, 13));
+                    position.set("engineRunning", BitUtil.check(flags, 14));
+                    position.set("canIgnition", BitUtil.check(flags, 16));
+                    position.set("keyInIgnition", BitUtil.check(flags, 19));
                     break;
                 }
 
@@ -302,25 +303,25 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     if (axleIndex == 2) {
                         position.set(Position.KEY_AXLE_WEIGHT, axleLoad);
                     } else {
-                    position.set("axleLoad" + axleIndex, axleLoad);
+                        position.set("axleLoad" + axleIndex, axleLoad);
                     }
                     break;
-                    
+
                 }
 
                 case 69: {
-                    int throttle      = buf.readUnsignedByte();
+                    int throttle = buf.readUnsignedByte();
                     int engineLoadPct = buf.readUnsignedByte();
-                    int motionBits    = buf.readUnsignedShortLE();
+                    int motionBits = buf.readUnsignedShortLE();
                     position.set(Position.KEY_ENGINE_LOAD, engineLoadPct);
                     position.set(Position.KEY_THROTTLE, throttle);
-                    
-                    if (motionBits !=0) {
-                        position.set("motionState", motionBits);   
+
+                    if (motionBits != 0) {
+                        position.set("motionState", motionBits);
                     }
                     break;
                 }
-                    
+
                 case 71:
                 case 72:
                 case 73:
@@ -329,20 +330,20 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case 76:
                 case 77:
                 case 78:
-                case 79:{
-                    int idx     = tag - 70;
-                    int level   = buf.readUnsignedShortLE();
+                case 79: {
+                    int idx = tag - 70;
+                    int level = buf.readUnsignedShortLE();
                     int tempRaw = buf.readUnsignedShortLE();
                     if (level != 0x0000 && level != 0xFFFF) {
-                    position.set(Position.KEY_FUEL + idx, level);
-                    position.set(Position.PREFIX_TEMP + idx, (tempRaw - 100.0) / 10.0);
+                        position.set(Position.KEY_FUEL + idx, level);
+                        position.set(Position.PREFIX_TEMP + idx, (tempRaw - 100.0) / 10.0);
                     }
                     break;
                 }
 
                 case 151: {
                     int hdopRaw = buf.readUnsignedShortLE();
-                    buf.skipBytes(2); // reserved
+                    buf.skipBytes(2);
                     position.set(Position.KEY_HDOP, hdopRaw / 100.0);
                     break;
                 }
@@ -414,7 +415,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case RECORD_FILE:
                 case RECORD_BINARY: {
                     int length = buf.readUnsignedShortLE();
-                    Date time  = new Date(buf.readUnsignedIntLE() * 1000L);
+                    Date time = new Date(buf.readUnsignedIntLE() * 1000L);
 
                     if (recordType == RECORD_DATA && length > 0) {
                         positions.add(decodePosition(deviceSession, buf, length, time));
