@@ -132,17 +132,12 @@ public class LoginService {
             user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
         } else {
 
-            boolean updated = false;
+            if (!java.util.Objects.equals(name, user.getName())
+                    || user.getAdministrator() != administrator) {
 
-            if (!name.equals(user.getName())) {
                 user.setName(name);
-                updated = true;
-            }
-            if (user.getAdministrator() != administrator) {
                 user.setAdministrator(administrator);
-                updated = true;
-            }
-            if (updated) {
+
                 storage.updateObject(user, new Request(
                         new Columns.Include("name", "administrator"),
                         new Condition.Equals("id", user.getId())));
@@ -152,7 +147,6 @@ public class LoginService {
         checkUserEnabled(user);
         return new LoginResult(user);
     }
-
     private void checkUserEnabled(User user) throws SecurityException {
         if (user == null) {
             throw new SecurityException("Unknown account");
