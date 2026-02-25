@@ -35,6 +35,7 @@ import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.util.Objects;
 
 @Singleton
 public class LoginService {
@@ -117,9 +118,10 @@ public class LoginService {
     }
 
     public LoginResult login(String email, String name, boolean administrator) throws StorageException {
+
         User user = storage.getObject(User.class, new Request(
-            new Columns.All(),
-            new Condition.Equals("email", email)));
+                new Columns.All(),
+                new Condition.Equals("email", email)));
 
         if (user == null) {
             user = new User();
@@ -129,11 +131,21 @@ public class LoginService {
             user.setFixedEmail(true);
             user.setAdministrator(administrator);
             user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
+
+        } else if (!Objects.equals(name, user.getName())
+                || user.getAdministrator() != administrator) {
+
+            user.setName(name);
+            user.setAdministrator(administrator);
+
+            storage.updateObject(user, new Request(
+                    new Columns.Include("name", "administrator"),
+                    new Condition.Equals("id", user.getId())));
         }
+
         checkUserEnabled(user);
         return new LoginResult(user);
     }
-
     private void checkUserEnabled(User user) throws SecurityException {
         if (user == null) {
             throw new SecurityException("Unknown account");
