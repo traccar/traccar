@@ -114,6 +114,7 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
                     case "sats" -> position.set(Position.KEY_SATELLITES, payload.getJsonNumber(key).intValue());
                     case "speed" -> position.setSpeed(convertSpeed(payload.getJsonNumber(key).doubleValue(), "kn"));
                     case "heading" -> position.setCourse(payload.getJsonNumber(key).doubleValue());
+                    case "time" -> position.setTime(DateUtil.parseDate(payload.getString(key)));
                     case "wifi" -> {
                         JsonObject networksObject = payload.getJsonObject(key);
                         for (String macAddress : networksObject.keySet()) {
