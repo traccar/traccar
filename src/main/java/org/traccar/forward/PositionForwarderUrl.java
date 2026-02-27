@@ -106,6 +106,8 @@ public class PositionForwarderUrl implements PositionForwarder {
                 .replace("{speed}", String.valueOf(position.getSpeed()))
                 .replace("{course}", String.valueOf(position.getCourse()))
                 .replace("{accuracy}", String.valueOf(position.getAccuracy()))
+                .replace("{batteryLevel}", String.valueOf(position.getAttributes().get(Position.KEY_BATTERY_LEVEL)))
+                .replace("{charge}", String.valueOf(position.getAttributes().get(Position.KEY_CHARGE)))
                 .replace("{statusCode}", calculateStatus(position));
 
         if (position.getAddress() != null) {
