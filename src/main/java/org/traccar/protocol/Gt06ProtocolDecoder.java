@@ -813,7 +813,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             decodeLbs(position, buf, type, false);
 
-            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readLong()));
+            long driverUniqueId = (buf.readUnsignedInt() << 16) | buf.readUnsignedShort();
+            position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(driverUniqueId));
 
         } else if (isSupported(type, model)) {
 
