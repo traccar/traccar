@@ -161,7 +161,7 @@ jar {
     manifest {
         attributes(
                 "Main-Class": "org.traccar.Main",
-                "Implementation-Version": "6.12.1",
+                "Implementation-Version": "6.12.2",
                 "Class-Path": configurations.runtimeClasspath.files.collect { "lib/$it.name" }.join(" "))
     }
 }
