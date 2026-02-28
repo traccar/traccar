@@ -1616,6 +1616,15 @@ public final class Keys {
             List.of(KeyType.CONFIG, KeyType.DEVICE),
             "");
 
+   /**
+     * Filter messages that do have GPS location before 2026.the
+     * positioning time resets to start from January 1, 2006, and the positioning status
+     * cannot remain stable continuously location.
+     */
+    public static final ConfigKey<Boolean> FILTER_MT333 = new BooleanConfigKey(
+            "filter.mt3333",
+            List.of(KeyType.CONFIG));
+
     /**
      * Override device time. Possible values are 'deviceTime' and 'serverTime'
      */
