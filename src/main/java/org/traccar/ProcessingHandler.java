@@ -207,12 +207,11 @@ public class ProcessingHandler extends ChannelInboundHandlerAdapter implements B
         Queue<Position> queue = getQueue(deviceId);
         Position nextPosition;
         synchronized (queue) {
-            queue.poll(); // remove current position
+            queue.remove(); // remove current position
             nextPosition = queue.peek();
         }
         if (nextPosition != null) {
             ctx.executor().execute(() -> processPositionHandlers(ctx, nextPosition));
         }
     }
-
 }
