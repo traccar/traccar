@@ -28,7 +28,9 @@ import jakarta.json.JsonValue;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.DateUtil;
+import org.traccar.model.Network;
 import org.traccar.model.Position;
+import org.traccar.model.WifiAccessPoint;
 import org.traccar.session.DeviceSession;
 
 import java.io.StringReader;
@@ -63,6 +65,8 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
+
+        Network network = new Network();
 
         JsonObject message = root.getJsonObject("uplink_message");
         if (message == null) {
@@ -110,6 +114,18 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
                     case "sats" -> position.set(Position.KEY_SATELLITES, payload.getJsonNumber(key).intValue());
                     case "speed" -> position.setSpeed(convertSpeed(payload.getJsonNumber(key).doubleValue(), "kn"));
                     case "heading" -> position.setCourse(payload.getJsonNumber(key).doubleValue());
+                    case "time" -> position.setTime(DateUtil.parseDate(payload.getString(key)));
+                    case "wifi" -> {
+                        JsonObject networksObject = payload.getJsonObject(key);
+                        for (String macAddress : networksObject.keySet()) {
+                            JsonObject networkObject = networksObject.getJsonObject(macAddress);
+                            WifiAccessPoint ap = WifiAccessPoint.from(macAddress, networkObject.getInt("rssi"));
+                            if (networkObject.containsKey("channel")) {
+                                ap.setChannel(networkObject.getInt("channel"));
+                            }
+                            network.addWifiAccessPoint(ap);
+                        }
+                    }
                     default -> decodeJsonValue(position, key, payload.get(key));
                 }
             }
@@ -119,6 +135,10 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
             position.setValid(true);
         } else {
             getLastLocation(position, null);
+        }
+
+        if (network.getWifiAccessPoints() != null) {
+            position.setNetwork(network);
         }
 
         sendResponse(channel, HttpResponseStatus.OK);
