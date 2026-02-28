@@ -1,11 +1,11 @@
-#set($subject = "$esc.html($device.name): Sconosciuto")
-#set($digest = "$esc.html($device.name) lo stato è sconosciuto dal $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): stato sconosciuto")
+#set($digest = "$esc.html($device.name) stato sconosciuto alle $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
 Dispositivo: $esc.html($device.name)<br>
-lo stato è sconosciuto<br>
-Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Stato sconosciuto<br>
+Orario: $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Annulla iscrizione</a>
 </body>

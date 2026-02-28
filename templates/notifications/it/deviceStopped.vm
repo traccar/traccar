@@ -1,12 +1,12 @@
-#set($subject = "$esc.html($device.name): Fermato")
-#set($digest = "$esc.html($device.name) si e' fermato il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): fermo")
+#set($digest = "$esc.html($device.name) fermo alle $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
 Dispositivo: $esc.html($device.name)<br>
-si e' fermato<br>
-Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
-Indirizzo: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+Fermo<br>
+Orario: $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Posizione: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Annulla iscrizione</a>
 </body>

@@ -1,12 +1,12 @@
-#set($subject = "$esc.html($device.name): Spegnimento Veicolo")
-#set($digest = "$esc.html($device.name) ha spento il veicolo il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($subject = "$esc.html($device.name): spegnimento")
+#set($digest = "$esc.html($device.name) spegnimento alle $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
 Dispositivo: $esc.html($device.name)<br>
-ha spento il veicolo<br>
-Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
-Indirizzo: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+Spegnimento<br>
+Orario: $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Posizione: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Annulla iscrizione</a>
 </body>
