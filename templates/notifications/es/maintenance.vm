@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): mantenimiento requerido")
-#set($digest = "Se requiere mantenimiento $esc.html($maintenance.name) en $esc.html($device.name) a las $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Se requiere mantenimiento $maintenance.name en $device.name a las $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

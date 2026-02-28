@@ -1,5 +1,5 @@
 #set($subject = "Η Συσκευή $esc.html($device.name) έχει εισέλθει στων γεωφραχτη")
-#set($digest = "Η Συσκευή $esc.html($device.name) Έχει εισέλθει στον γεωφράχτη: $esc.html($geofence.name) στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Η Συσκευή $device.name Έχει εισέλθει στον γεωφράχτη: $geofence.name στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

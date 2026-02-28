@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): Bölge Girişi")
-#set($digest = "$esc.html($device.name) Bölge Girişi $esc.html($geofence.name) Zaman $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name Bölge Girişi $geofence.name Zaman $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

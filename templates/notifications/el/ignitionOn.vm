@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): Διακόπτης Ανοιχτός")
-#set($digest = "Ο κινητήρας της συσκευής $esc.html($device.name) πήρε μπροστά στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Ο κινητήρας της συσκευής $device.name πήρε μπροστά στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

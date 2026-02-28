@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): Πτώση Καυσίμου")
-#set($digest = "Πτώση Καυσίμου στη συσκευή $esc.html($device.name) στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Πτώση Καυσίμου στη συσκευή $device.name στις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

@@ -4,7 +4,7 @@
 #else
 #set($driverName = $event.getString('driverUniqueId'))
 #end
-#set($digest = "Sürücü $esc.html($driverName) Cihaz $esc.html($device.name) Zaman $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Sürücü $driverName Cihaz $device.name Zaman $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

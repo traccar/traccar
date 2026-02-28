@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): Fermato")
-#set($digest = "$esc.html($device.name) si e' fermato il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name si e' fermato il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

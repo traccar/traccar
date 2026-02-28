@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): stopped")
-#set($digest = "$esc.html($device.name) stopped at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name stopped at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

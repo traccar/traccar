@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): fichier média reçu")
-#set($digest = "$esc.html($device.name) $esc.html($event.getString('media')) reçu: $esc.html($event.getString('file')) à $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name $event.getString('media') reçu: $event.getString('file') à $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

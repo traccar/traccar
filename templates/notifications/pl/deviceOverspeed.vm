@@ -8,7 +8,7 @@
 #else
 #set($speedString = $numberTool.format('0.0 kn', $position.speed))
 #end
-#set($digest = "$esc.html($device.name) przekroczył prędkość $speedString#{if}($geofence) w $esc.html($geofence.name)#{else}#{end} o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name przekroczył prędkość $speedString#{if}($geofence) w $geofence.name#{else}#{end} o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

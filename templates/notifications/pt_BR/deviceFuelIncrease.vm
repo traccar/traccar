@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): aumento de combustível")
-#set($digest = "Aumento de combustível de $esc.html($device.name) às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Aumento de combustível de $device.name às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): Kuyruktaki Komut Gönderildi")
-#set($digest = "Kuyruktaki Komut Gönderildi $esc.html($device.name) zaman $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Kuyruktaki Komut Gönderildi $device.name zaman $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): Wartung erforderlich")
-#set($digest = "$esc.html($device.name) Wartung $esc.html($maintenance.name) ist erforderlich am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr")
+#set($digest = "$device.name Wartung $maintenance.name ist erforderlich am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr")
 <!DOCTYPE html>
 <html>
 <body>

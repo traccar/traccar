@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): est sorti de la zone géographique")
-#set($digest = "$esc.html($device.name) est sorti de la zone géographique $esc.html($geofence.name) à $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name est sorti de la zone géographique $geofence.name à $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

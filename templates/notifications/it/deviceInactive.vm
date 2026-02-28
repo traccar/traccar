@@ -1,7 +1,7 @@
 #set($subject = "$esc.html($device.name): Inattivo")
 #set($lastUpdate = $dateTool.getDate())
 #set($ignore = $lastUpdate.setTime($event.getLong('lastUpdate')))
-#set($digest = "$esc.html($device.name) e' inattivo dal $dateTool.format('dd-MM-YYYY HH:mm:ss', $lastUpdate, $locale, $timezone)")
+#set($digest = "$device.name e' inattivo dal $dateTool.format('dd-MM-YYYY HH:mm:ss', $lastUpdate, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

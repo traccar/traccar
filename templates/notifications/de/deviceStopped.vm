@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): angehalten")
-#set($digest = "$esc.html($device.name) ist am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr angehalten")
+#set($digest = "$device.name ist am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr angehalten")
 <html>
 <body>
 Ger&auml;t: $esc.html($device.name)<br>

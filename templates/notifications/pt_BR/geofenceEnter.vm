@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): entrou na geocerca")
-#set($digest = "$esc.html($device.name) entrou na geocerca $esc.html($geofence.name) às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name entrou na geocerca $geofence.name às $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

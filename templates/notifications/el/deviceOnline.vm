@@ -1,5 +1,5 @@
 #set($subject = "Η Συσκευή $esc.html($device.name) είναι σε σύνδεση")
-#set($digest = "Η Συσκευή $esc.html($device.name) είναι σε σύνδεση από τις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Η Συσκευή $device.name είναι σε σύνδεση από τις $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

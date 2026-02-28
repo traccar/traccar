@@ -4,7 +4,7 @@
 #else
 #set($driverName = $event.getString('driverUniqueId'))
 #end
-#set($digest = "Kierowca $esc.html($driverName) zmienił się w $esc.html($device.name) o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Kierowca $driverName zmienił się w $device.name o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
