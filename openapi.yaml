@@ -1877,6 +1877,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Statistics'
+  /metrics:
+    get:
+      summary: Fetch Prometheus Metrics
+      tags:
+        - Statistics
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
   /calendars:
     get:
       summary: Fetch a list of Calendars
