@@ -27,6 +27,7 @@ import jakarta.json.JsonString;
 import jakarta.json.JsonValue;
 import org.traccar.BaseHttpProtocolDecoder;
 import org.traccar.Protocol;
+import org.traccar.config.Keys;
 import org.traccar.helper.DateUtil;
 import org.traccar.model.Device;
 import org.traccar.model.Network;
@@ -66,11 +67,17 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
 
         Device device = getCacheManager().getObject(Device.class, deviceSession.getDeviceId());
         if (device != null) {
-            for (String header : new String[] {"X-Downlink-Apikey", "X-Downlink-Push", "X-Downlink-Replace"}) {
-                String value = request.headers().get(header);
-                if (value != null) {
-                    device.set(header, value);
-                }
+            String apiKey = request.headers().get("X-Downlink-Apikey");
+            if (apiKey != null) {
+                device.set(Keys.COMMAND_TTNHTTP_APIKEY.getKey(), apiKey);
+            }
+            String push = request.headers().get("X-Downlink-Push");
+            if (push != null) {
+                device.set(Keys.COMMAND_TTNHTTP_PUSHURL.getKey(), push);
+            }
+            String replace = request.headers().get("X-Downlink-Replace");
+            if (replace != null) {
+                device.set(Keys.COMMAND_TTNHTTP_REPLACEURL.getKey(), replace);
             }
         }
 

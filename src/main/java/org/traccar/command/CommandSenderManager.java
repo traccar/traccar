@@ -52,7 +52,7 @@ public class CommandSenderManager {
             } else if (config.hasKey(Keys.NOTIFICATOR_TRACCAR_KEY)) {
                 return injector.getInstance(TraccarCommandSender.class);
             }
-        } else if (device.hasAttribute("X-Downlink-Apikey")) {
+        } else if (device.hasAttribute(Keys.COMMAND_TTNHTTP_APIKEY.getKey())) {
             return injector.getInstance(TtnHttpCommandSender.class);
         }
         return null;

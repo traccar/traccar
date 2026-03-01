@@ -24,6 +24,7 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 
@@ -50,17 +51,22 @@ public class TtnHttpCommandSender implements CommandSender {
 
     @Override
     public void sendCommand(Device device, Command command) throws Exception {
-        if (!device.hasAttribute("X-Downlink-Apikey")) {
-            throw new RuntimeException("Missing X-Downlink-Apikey header");
+        if (!device.hasAttribute(Keys.COMMAND_TTNHTTP_APIKEY.getKey())) {
+            throw new RuntimeException("Missing " + Keys.COMMAND_TTNHTTP_APIKEY.getKey() + " attribute");
         }
-        String key = device.getString("X-Downlink-Apikey");
+        String key = device.getString(Keys.COMMAND_TTNHTTP_APIKEY.getKey());
 
-        String url = device.getString("X-Downlink-Push");
-        if (command.getBoolean(Command.KEY_NO_QUEUE) && device.hasAttribute("X-Downlink-Replace")) {
-            url = device.getString("X-Downlink-Replace");
-        }
-        if (url == null) {
-            throw new RuntimeException("Missing X-Downlink-Push or X-Downlink-Replace header");
+        String url;
+        if (command.getBoolean(Command.KEY_NO_QUEUE)) {
+            url = device.getString(Keys.COMMAND_TTNHTTP_REPLACEURL.getKey());
+            if (url == null) {
+                throw new RuntimeException("Missing " + Keys.COMMAND_TTNHTTP_REPLACEURL.getKey() + " attribute");
+            }
+        } else {
+            url = device.getString(Keys.COMMAND_TTNHTTP_PUSHURL.getKey());
+            if (url == null) {
+                throw new RuntimeException("Missing " + Keys.COMMAND_TTNHTTP_PUSHURL.getKey() + " attribute");
+            }
         }
 
         String data = command.getString(Command.KEY_DATA);
