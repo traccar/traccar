@@ -68,11 +68,11 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
         Device device = getCacheManager().getObject(Device.class, deviceSession.getDeviceId());
         if (device != null) {
             String apiKey = request.headers().get("X-Downlink-Apikey");
-            if (apiKey != null) {
+            if (apiKey != null && !apiKey.equals(device.getString(Keys.COMMAND_TTNHTTP_APIKEY.getKey()))) {
                 device.set(Keys.COMMAND_TTNHTTP_APIKEY.getKey(), apiKey);
             }
             String push = request.headers().get("X-Downlink-Push");
-            if (push != null) {
+            if (push != null && !push.equals(device.getString(Keys.COMMAND_TTNHTTP_PUSHURL.getKey()))) {
                 device.set(Keys.COMMAND_TTNHTTP_PUSHURL.getKey(), push);
             }
         }
