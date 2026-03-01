@@ -30,7 +30,8 @@ public class CommandSenderManager {
     private static final Map<String, Class<? extends CommandSender>> SENDERS_ALL = Map.of(
             "firebase", FirebaseCommandSender.class,
             "traccar", TraccarCommandSender.class,
-            "findHub", FindHubCommandSender.class);
+            "findHub", FindHubCommandSender.class,
+            "ttnhttp", TtnHttpCommandSender.class);
 
     private final Config config;
     private final Injector injector;
@@ -51,6 +52,8 @@ public class CommandSenderManager {
             } else if (config.hasKey(Keys.NOTIFICATOR_TRACCAR_KEY)) {
                 return injector.getInstance(TraccarCommandSender.class);
             }
+        } else if (device.hasAttribute("X-Downlink-Apikey")) {
+            return injector.getInstance(TtnHttpCommandSender.class);
         }
         return null;
     }
