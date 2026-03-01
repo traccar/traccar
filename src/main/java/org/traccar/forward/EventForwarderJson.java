@@ -38,7 +38,7 @@ public class EventForwarderJson implements EventForwarder {
 
     @Override
     public void forward(EventData eventData, ResultHandler resultHandler) {
-        var requestBuilder = client.target(url).request();
+        var requestBuilder = client.target(Interpolator.resolve(url, eventData)).request();
 
         if (header != null && !header.isEmpty()) {
             for (String line: header.split("\\r?\\n")) {

@@ -52,7 +52,7 @@ public class PositionForwarderJson implements PositionForwarder {
             return;
         }
 
-        var requestBuilder = client.target(url).request();
+        var requestBuilder = client.target(Interpolator.resolve(url, positionData)).request();
 
         MediaType mediaType = MediaType.APPLICATION_JSON_TYPE;
         if (header != null && !header.isEmpty()) {
