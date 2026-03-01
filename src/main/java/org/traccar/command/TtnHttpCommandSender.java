@@ -56,17 +56,9 @@ public class TtnHttpCommandSender implements CommandSender {
         }
         String key = device.getString(Keys.COMMAND_TTNHTTP_APIKEY.getKey());
 
-        String url;
-        if (command.getBoolean(Command.KEY_NO_QUEUE)) {
-            url = device.getString(Keys.COMMAND_TTNHTTP_REPLACEURL.getKey());
-            if (url == null) {
-                throw new RuntimeException("Missing " + Keys.COMMAND_TTNHTTP_REPLACEURL.getKey() + " attribute");
-            }
-        } else {
-            url = device.getString(Keys.COMMAND_TTNHTTP_PUSHURL.getKey());
-            if (url == null) {
-                throw new RuntimeException("Missing " + Keys.COMMAND_TTNHTTP_PUSHURL.getKey() + " attribute");
-            }
+        String url = device.getString(Keys.COMMAND_TTNHTTP_PUSHURL.getKey());
+        if (url == null) {
+            throw new RuntimeException("Missing " + Keys.COMMAND_TTNHTTP_PUSHURL.getKey() + " attribute");
         }
 
         String data = command.getString(Command.KEY_DATA);

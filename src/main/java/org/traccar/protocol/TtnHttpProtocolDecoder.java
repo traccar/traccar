@@ -75,10 +75,6 @@ public class TtnHttpProtocolDecoder extends BaseHttpProtocolDecoder {
             if (push != null) {
                 device.set(Keys.COMMAND_TTNHTTP_PUSHURL.getKey(), push);
             }
-            String replace = request.headers().get("X-Downlink-Replace");
-            if (replace != null) {
-                device.set(Keys.COMMAND_TTNHTTP_REPLACEURL.getKey(), replace);
-            }
         }
 
         Position position = new Position(getProtocolName());
