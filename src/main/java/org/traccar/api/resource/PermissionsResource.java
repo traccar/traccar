@@ -20,10 +20,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.LogAction;
+import org.traccar.helper.model.GeofenceUtil;
+import org.traccar.model.Device;
+import org.traccar.model.Geofence;
 import org.traccar.model.Permission;
+import org.traccar.model.Position;
 import org.traccar.model.UserRestrictions;
+import org.traccar.session.ConnectionManager;
 import org.traccar.session.cache.CacheManager;
 import org.traccar.storage.StorageException;
+import org.traccar.storage.query.Columns;
+import org.traccar.storage.query.Condition;
+import org.traccar.storage.query.Request;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
@@ -48,10 +56,43 @@ public class PermissionsResource  extends BaseResource {
     private CacheManager cacheManager;
 
     @Inject
+    private ConnectionManager connectionManager;
+
+    @Inject
     private LogAction actionLogger;
 
     @Context
     private HttpServletRequest request;
+
+    private void refreshPositionGeofenceIds(Permission permission) throws Exception {
+        long deviceId = 0;
+        if (permission.getOwnerClass().equals(Device.class) && permission.getPropertyClass().equals(Geofence.class)) {
+            deviceId = permission.getOwnerId();
+        } else if (permission.getOwnerClass().equals(Geofence.class)
+                && permission.getPropertyClass().equals(Device.class)) {
+            deviceId = permission.getPropertyId();
+        }
+
+        if (deviceId == 0) {
+            return;
+        }
+
+        Position position = storage.getObject(Position.class, new Request(
+                new Columns.All(), new Condition.LatestPositions(deviceId)));
+        if (position == null) {
+            return;
+        }
+
+        var geofenceIds = GeofenceUtil.getCurrentGeofences(cacheManager, position);
+        position.setGeofenceIds(geofenceIds.isEmpty() ? null : geofenceIds);
+
+        storage.updateObject(position, new Request(
+                new Columns.Include("geofenceIds"),
+                new Condition.Equals("id", position.getId())));
+
+        cacheManager.updatePosition(position);
+        connectionManager.updatePosition(true, position);
+    }
 
     private void checkPermission(Permission permission) throws StorageException {
         if (permissionsService.notAdmin(getUserId())) {
@@ -84,6 +125,7 @@ public class PermissionsResource  extends BaseResource {
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId(),
                     true);
+            refreshPositionGeofenceIds(permission);
             actionLogger.link(request, getUserId(),
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
@@ -110,6 +152,7 @@ public class PermissionsResource  extends BaseResource {
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId(),
                     false);
+            refreshPositionGeofenceIds(permission);
             actionLogger.unlink(request, getUserId(),
                     permission.getOwnerClass(), permission.getOwnerId(),
                     permission.getPropertyClass(), permission.getPropertyId());
