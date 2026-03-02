@@ -311,7 +311,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
             readBytes += 5;
         }
 
-        position.setNetwork(new Network(CellTower.from(cid, lac, rssi, mcc, mnc)));
+        position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
 
         return position;
     }
@@ -356,13 +356,9 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
             int recordType = buf.readUnsignedByte();
 
             switch (recordType) {
-                case RECORD_PING:
-                case RECORD_DATA:
-                case RECORD_TEXT:
-                case RECORD_FILE:
-                case RECORD_BINARY: {
+                case RECORD_PING, RECORD_DATA, RECORD_TEXT, RECORD_FILE, RECORD_BINARY: {
                     int length = buf.readUnsignedShortLE();
-                    Date time = new Date(buf.readUnsignedIntLE() * 1000L);
+                    Date time = new Date(buf.readUnsignedIntLE() * 1000);
                     if (recordType == RECORD_DATA && length > 0) {
                         positions.add(decodePosition(deviceSession, buf, length, time));
                     } else {
