@@ -1,4 +1,4 @@
-#set($subject = "promemoria scadenza account")
+#set($subject = "Promemoria Scadenza Account")
 #set($digest = "Il tuo account utente scadrà il $dateTool.format('dd/MM/yyyy', $expiration, $locale, $timezone)")
 <!DOCTYPE html>
 <html>

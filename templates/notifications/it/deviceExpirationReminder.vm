@@ -1,5 +1,5 @@
-#set($subject = "promemoria scadenza dispositivo")
-#set($digest = "Il dispositivo $esc.html($device.name) scadrà il $dateTool.format('dd/MM/yyyy', $expiration, $locale, $timezone)")
+#set($subject = "Promemoria Scadenza del Dispositivo")
+#set($digest = "Il tuo dispositivo $device.name scadrà il $dateTool.format('dd/MM/yyyy', $expiration, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
