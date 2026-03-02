@@ -359,7 +359,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case RECORD_PING, RECORD_DATA, RECORD_TEXT, RECORD_FILE, RECORD_BINARY: {
                     int length = buf.readUnsignedShortLE();
                     Date time = new Date(buf.readUnsignedIntLE() * 1000);
-                    if (recordType == RECORD_DATA && length > 0) {
+                    if (recordType == RECORD_DATA) {
                         positions.add(decodePosition(deviceSession, buf, length, time));
                     } else {
                         buf.skipBytes(length);
