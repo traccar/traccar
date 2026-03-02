@@ -144,10 +144,12 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case 6: {
                     switch (buf.readUnsignedByte()) {
                         case 0x01: {
-                            position.set("virtualIgnition", BitUtil.check(buf.readUnsignedByte(), 0));
-                            position.set("callButton", BitUtil.check(buf.readUnsignedByte(), 1));
+                            int virtualSensors = buf.readUnsignedByte();
+                            int physicalInputs = buf.readUnsignedShortLE();
+                            position.set("virtualIgnition", BitUtil.check(virtualSensors, 0));
+                            position.set("callButton", BitUtil.check(virtualSensors, 1));
                             for (int i = 0; i < 8; i++) {
-                                position.set(Position.PREFIX_IN + (i + 1), BitUtil.check(buf.readUnsignedShortLE(), i));
+                                position.set(Position.PREFIX_IN + (i + 1), BitUtil.check(physicalInputs, i));
                             }
                             break;
                         }
