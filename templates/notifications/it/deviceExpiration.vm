@@ -1,4 +1,4 @@
-#set($subject = "scadenza dispositivo")
+#set($subject = "Scadenza dispositivo")
 #set($digest = "Il dispositivo $esc.html($device.name) è scaduto")
 <!DOCTYPE html>
 <html>
