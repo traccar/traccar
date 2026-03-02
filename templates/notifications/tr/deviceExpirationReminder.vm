@@ -1,5 +1,5 @@
 #set($subject = "Cihaz Süre Hatırlatma")
-#set($digest = "Cihaz $esc.html($device.name) Bitiş Tarihi: $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
+#set($digest = "Cihaz $device.name Bitiş Tarihi: $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

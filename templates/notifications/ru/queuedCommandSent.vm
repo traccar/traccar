@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): отправленная команда в очереди")
-#set($digest = "Команда, поставленная в очередь, отправлена на устройство $esc.html($device.name) в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Команда, поставленная в очередь, отправлена на устройство $device.name в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

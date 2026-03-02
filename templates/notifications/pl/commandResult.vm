@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): otrzymano wynik polecenia")
-#set($digest = "$esc.html($device.name) otrzymano wynik polecenia: $esc.html($position.getString('result')) at $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name otrzymano wynik polecenia: $position.getString('result') at $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

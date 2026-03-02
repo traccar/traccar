@@ -1,7 +1,7 @@
 #set($subject = "$esc.html($device.name): Aktif değil")
 #set($lastUpdate = $dateTool.getDate())
 #set($ignore = $lastUpdate.setTime($event.getLong('lastUpdate')))
-#set($digest = "$esc.html($device.name) İnaktif: $dateTool.format('yyyy-MM-dd HH:mm:ss', $lastUpdate, $locale, $timezone)")
+#set($digest = "$device.name İnaktif: $dateTool.format('yyyy-MM-dd HH:mm:ss', $lastUpdate, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

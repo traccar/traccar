@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): has exited geofence")
-#set($digest = "$esc.html($device.name) has exited geofence $esc.html($geofence.name) at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name has exited geofence $geofence.name at $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

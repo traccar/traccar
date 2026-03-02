@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): zapłon wyłączony")
-#set($digest = "$esc.html($device.name) zapłon wyłączony o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name zapłon wyłączony o $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

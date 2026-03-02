@@ -44,7 +44,9 @@ public final class NewMotionProcessor {
         Position last = positions.peekLast();
         if (last != null) {
             long gap = position.getFixTime().getTime() - last.getFixTime().getTime();
-            if (gap > stopGap && averageSpeed(last, position) < minAverageSpeed) {
+            double gapDistance = position.getDouble(Position.KEY_DISTANCE);
+            double gapAverageSpeed = gap > 0 ? gapDistance / gap : Double.NaN;
+            if (gap > stopGap && gapDistance >= minDistance && gapAverageSpeed > minAverageSpeed) {
                 if (state.getMotionStreak()) {
                     addEvent(state, events, Event.TYPE_DEVICE_STOPPED, last);
                 }
@@ -81,17 +83,6 @@ public final class NewMotionProcessor {
                 addEvent(state, events, Event.TYPE_DEVICE_MOVING, position);
             }
         }
-    }
-
-    private static double averageSpeed(Position from, Position to) {
-        long duration = to.getFixTime().getTime() - from.getFixTime().getTime();
-        if (duration <= 0) {
-            return Double.NaN;
-        }
-        double distance = DistanceCalculator.distance(
-                from.getLatitude(), from.getLongitude(),
-                to.getLatitude(), to.getLongitude());
-        return distance / duration;
     }
 
     private static void addEvent(NewMotionState state, List<Event> events, String type, Position position) {

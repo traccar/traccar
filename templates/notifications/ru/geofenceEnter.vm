@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): вошёл в геозону")
-#set($digest = "$esc.html($device.name) вошёл в геозону $esc.html($geofence.name) в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name вошёл в геозону $geofence.name в $dateTool.format('yyyy-MM-dd HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>

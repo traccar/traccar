@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): hat den Geozaun verlassen")
-#set($digest = "$esc.html($device.name) hat den Geozaun $esc.html($geofence.name) am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr verlassen")
+#set($digest = "$device.name hat den Geozaun $geofence.name am $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr verlassen")
 <!DOCTYPE html>
 <html>
 <body>

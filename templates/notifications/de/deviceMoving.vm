@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): bewegt sich")
-#set($digest = "$esc.html($device.name) bewegt sich seit $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr")
+#set($digest = "$device.name bewegt sich seit $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr")
 <!DOCTYPE html>
 <html>
 <body>

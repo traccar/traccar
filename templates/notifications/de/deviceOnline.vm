@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): online")
-#set($digest = "$esc.html($device.name) ist seit $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr online")
+#set($digest = "$device.name ist seit $dateTool.format('dd.MM.yyyy', $event.eventTime, $locale, $timezone) um $dateTool.format('HH:mm:ss', $event.eventTime, $locale, $timezone) Uhr online")
 <!DOCTYPE html>
 <html>
 <body>
