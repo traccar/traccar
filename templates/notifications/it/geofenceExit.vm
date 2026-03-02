@@ -1,4 +1,4 @@
-#set($subject = "$esc.html($device.name): Uscita dalla GeoArea")
+#set($subject = "$esc.html($device.name): Uscito dalla GeoArea")
 #set($digest = "$device.name è uscito dalla GeoArea $geofence.name dal $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>

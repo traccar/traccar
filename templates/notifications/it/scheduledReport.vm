@@ -1,4 +1,4 @@
-#set($subject = "rapporto programmato")
+#set($subject = "Rapporto Programmato")
 #set($digest = "Il rapporto programmato è pronto: $webUrl$reportUrl")
 <!DOCTYPE html>
 <html>
