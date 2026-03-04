@@ -148,9 +148,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                             int physicalInputs = buf.readUnsignedShortLE();
                             position.set("virtualIgnition", BitUtil.check(virtualSensors, 0));
                             position.set("callButton", BitUtil.check(virtualSensors, 1));
-                            for (int i = 0; i < 8; i++) {
-                                position.set(Position.PREFIX_IN + (i + 1), BitUtil.check(physicalInputs, i));
-                            }
+                            position.set(Position.PREFIX_IN, physicalInputs);
                             break;
                         }
                         case 0x06: {
@@ -187,29 +185,12 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 }
 
                 case 9: {
-                    long status = buf.readUnsignedIntLE();
-                    position.set(Position.KEY_STATUS, status);
-                    position.set(Position.KEY_OUTPUT, BitUtil.between(status, 8, 12));
-                    position.set("gsmState", BitUtil.between(status, 12, 14));
-                    position.set("gpsState", BitUtil.between(status, 14, 16));
-                    position.set(Position.KEY_MOTION, BitUtil.check(status, 16));
-                    position.set("simPresent", BitUtil.check(status, 18));
-                    position.set("guardMode", BitUtil.check(status, 19));
-                    position.set("alarm", BitUtil.check(status, 20) ? Position.ALARM_SOS : null);
+                    position.set(Position.KEY_STATUS, (long) buf.readUnsignedIntLE());
                     break;
                 }
 
                 case 51: {
-                    long flags = buf.readUnsignedIntLE();
-                    position.set("doorDriver", BitUtil.check(flags, 8));
-                    position.set("doorPassenger", BitUtil.check(flags, 9));
-                    position.set("trunkOpen", BitUtil.check(flags, 10));
-                    position.set("hoodOpen", BitUtil.check(flags, 11));
-                    position.set("handbrake", BitUtil.check(flags, 12));
-                    position.set("brakePedal", BitUtil.check(flags, 13));
-                    position.set("engineRunning", BitUtil.check(flags, 14));
-                    position.set("canIgnition", BitUtil.check(flags, 16));
-                    position.set("keyInIgnition", BitUtil.check(flags, 19));
+                    position.set("canStatus", buf.readUnsignedIntLE());
                     break;
                 }
 
