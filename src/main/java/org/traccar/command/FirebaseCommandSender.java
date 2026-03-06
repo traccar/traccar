@@ -86,6 +86,7 @@ public class FirebaseCommandSender implements CommandSender {
 
         MulticastMessage message = MulticastMessage.builder()
                 .putData("command", command.getType())
+                .putData("deviceId", device.getUniqueId())
                 .setAndroidConfig(androidConfig)
                 .setApnsConfig(apnsConfig)
                 .addAllTokens(registrationTokens)

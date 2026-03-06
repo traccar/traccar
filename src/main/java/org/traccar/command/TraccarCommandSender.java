@@ -76,7 +76,7 @@ public class TraccarCommandSender implements CommandSender {
         Message message = new Message();
         message.type = "client";
         message.tokens = device.getString("notificationTokens").split("[, ]");
-        message.data = Map.of("command", command.getType());
+        message.data = Map.of("command", command.getType(), "deviceId", device.getUniqueId());
 
         var request = client.target(url).request().header("Authorization", "key=" + key);
         try {
