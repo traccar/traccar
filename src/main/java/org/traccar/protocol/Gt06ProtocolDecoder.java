@@ -1123,20 +1123,29 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         return dateBuilder.getDate();
     }
 
+    // private static Date getCurrentTimeAccordingToDeviceTimezone(DeviceSession deviceSession) {
+    //     Instant instant = Instant.now();
+    //     TimeZone tz = (TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE);
+
+    //     int offsetSeconds = tz.getRawOffset() / 1000;
+    //     ZoneOffset offset = ZoneOffset.ofTotalSeconds(offsetSeconds);
+
+    //     LocalDateTime localTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+
+    //     OffsetDateTime odt = OffsetDateTime.of(localTime, offset);
+
+    //     Instant resultInstant = odt.withOffsetSameInstant(ZoneOffset.UTC).toInstant();
+
+    //     return Date.from(resultInstant);
+    // }
+
     private static Date getCurrentTimeAccordingToDeviceTimezone(DeviceSession deviceSession) {
-        Instant instant = Instant.now();
         TimeZone tz = (TimeZone) deviceSession.get(DeviceSession.KEY_TIMEZONE);
+        ZoneId zoneId = tz.toZoneId();
 
-        int offsetSeconds = tz.getRawOffset() / 1000;
-        ZoneOffset offset = ZoneOffset.ofTotalSeconds(offsetSeconds);
+        ZonedDateTime now = ZonedDateTime.now(zoneId);
 
-        LocalDateTime localTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
-
-        OffsetDateTime odt = OffsetDateTime.of(localTime, offset);
-
-        Instant resultInstant = odt.withOffsetSameInstant(ZoneOffset.UTC).toInstant();
-
-        return Date.from(resultInstant);
+        return Date.from(now.toInstant());
     }
 
     private Object decodeExtended(Channel channel, SocketAddress remoteAddress, ByteBuf buf)
