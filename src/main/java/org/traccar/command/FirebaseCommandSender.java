@@ -84,9 +84,15 @@ public class FirebaseCommandSender implements CommandSender {
                 .putHeader("apns-priority", "10")
                 .build();
 
-        MulticastMessage message = MulticastMessage.builder()
+        var messageBuilder = MulticastMessage.builder()
                 .putData("command", command.getType())
-                .putData("deviceId", device.getUniqueId())
+                .putData("deviceId", device.getUniqueId());
+
+        if (command.getType().equals(Command.TYPE_POSITION_PERIODIC)) {
+            messageBuilder.putData("interval", String.valueOf(command.getInteger(Command.KEY_FREQUENCY)));
+        }
+
+        MulticastMessage message = messageBuilder
                 .setAndroidConfig(androidConfig)
                 .setApnsConfig(apnsConfig)
                 .addAllTokens(registrationTokens)
