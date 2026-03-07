@@ -1,10 +1,10 @@
 #set($subject = "$esc.html($device.name): Connesso")
-#set($digest = "$device.name online il $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name connesso il $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
 Dispositivo: $esc.html($device.name)<br>
-online<br>
+connesso<br>
 Orario: $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Annulla iscrizione</a>
