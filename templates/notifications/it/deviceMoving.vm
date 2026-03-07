@@ -1,5 +1,5 @@
 #set($subject = "$esc.html($device.name): Movimento")
-#set($digest = "$device.name in movimento dal $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name in movimento il $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
