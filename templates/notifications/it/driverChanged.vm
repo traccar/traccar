@@ -4,12 +4,12 @@
 #else
 #set($driverName = $event.getString('driverUniqueId'))
 #end
-#set($digest = "Il Conducente $driverName è cambiato dal $device.name at $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "Il Conducente $driverName è cambiato su $device.name il $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
 Dispositivo: $esc.html($device.name)<br>
-Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Orario: $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Indirizzo: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 Conducente: $esc.html($driverName)<br>
 <br>
