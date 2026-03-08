@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,12 +93,12 @@ public class LoginService {
             return null;
         }
 
-        email = email.trim();
+        email = email.trim().toLowerCase();
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
                 new Condition.Or(
-                        new Condition.Equals("email", email),
-                        new Condition.Equals("login", email))));
+                        new Condition.Equals("LOWER(email)", email),
+                        new Condition.Equals("LOWER(login)", email))));
         if (user != null) {
             if (ldapProvider != null && user.getLogin() != null && ldapProvider.login(user.getLogin(), password)
                     || !forceLdap && user.isPasswordValid(password)) {
@@ -121,7 +121,7 @@ public class LoginService {
 
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
-                new Condition.Equals("email", email)));
+                new Condition.Equals("LOWER(email)", email.toLowerCase())));
 
         if (user == null) {
 
