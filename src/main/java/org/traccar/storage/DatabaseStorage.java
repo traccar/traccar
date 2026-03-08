@@ -311,12 +311,18 @@ public class DatabaseStorage extends Storage {
             }
             if (order.getLimit() > 0) {
                 if (databaseType.equals("Microsoft SQL Server")) {
-                    result.append(" OFFSET 0 ROWS FETCH FIRST ");
+                    result.append(" OFFSET ");
+                    result.append(order.getOffset());
+                    result.append(" ROWS FETCH FIRST ");
                     result.append(order.getLimit());
                     result.append(" ROWS ONLY");
                 } else {
                     result.append(" LIMIT ");
                     result.append(order.getLimit());
+                    if (order.getOffset() > 0) {
+                        result.append(" OFFSET ");
+                        result.append(order.getOffset());
+                    }
                 }
             }
         }
