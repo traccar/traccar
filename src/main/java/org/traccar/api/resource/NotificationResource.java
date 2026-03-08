@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,7 +61,7 @@ public class NotificationResource extends ExtendedObjectResource<Notification> {
     private NotificatorManager notificatorManager;
 
     public NotificationResource() {
-        super(Notification.class, "description");
+        super(Notification.class, "description", List.of("description"));
     }
 
     @GET

@@ -28,22 +28,26 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.QueryParam;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResource<T> {
 
     private final String sortField;
+    private final List<String> searchColumns;
 
-    public SimpleObjectResource(Class<T> baseClass, String sortField) {
+    public SimpleObjectResource(Class<T> baseClass, String sortField, List<String> searchColumns) {
         super(baseClass);
         this.sortField = sortField;
+        this.searchColumns = searchColumns;
     }
 
     @GET
     public Stream<T> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("excludeAttributes") boolean excludeAttributes,
-            @QueryParam("limit") int limit, @QueryParam("offset") int offset) throws StorageException {
+            @QueryParam("limit") int limit, @QueryParam("offset") int offset,
+            @QueryParam("searchKeyword") String searchKeyword) throws StorageException {
 
         var conditions = new LinkedList<Condition>();
 
@@ -58,6 +62,10 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
                 permissionsService.checkUser(getUserId(), userId);
             }
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
+        }
+
+        if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            conditions.add(new Condition.Contains(searchColumns, searchKeyword));
         }
 
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();

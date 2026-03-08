@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2023 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,7 +99,7 @@ public class ReportResource extends SimpleObjectResource<Report> {
     private HttpServletRequest request;
 
     public ReportResource() {
-        super(Report.class, "description");
+        super(Report.class, "description", List.of("description"));
     }
 
     private Response executeReport(long userId, boolean mail, ReportExecutor executor) {

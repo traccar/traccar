@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Anton Tananaev (anton@traccar.org)
+ * Copyright 2021 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.traccar.api.resource;
 
+import java.util.List;
+
 import org.traccar.api.SimpleObjectResource;
 import org.traccar.model.Order;
 
@@ -29,7 +31,7 @@ import jakarta.ws.rs.core.MediaType;
 public class OrderResource extends SimpleObjectResource<Order> {
 
     public OrderResource() {
-        super(Order.class, "description");
+        super(Order.class, "description", List.of("description"));
     }
 
 }

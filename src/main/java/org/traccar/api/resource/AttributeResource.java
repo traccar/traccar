@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +28,8 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.List;
+
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Attribute;
 import org.traccar.model.Device;
@@ -50,7 +52,7 @@ public class AttributeResource extends ExtendedObjectResource<Attribute> {
     private ComputedAttributesHandler.Late computedAttributesHandler;
 
     public AttributeResource() {
-        super(Attribute.class, "description");
+        super(Attribute.class, "description", List.of("description"));
     }
 
     @POST

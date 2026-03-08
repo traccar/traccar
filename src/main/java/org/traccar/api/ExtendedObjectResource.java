@@ -29,15 +29,18 @@ import org.traccar.storage.query.Request;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.QueryParam;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResource<T> {
 
-    private  final String sortField;
+    private final String sortField;
+    private final List<String> searchColumns;
 
-    public ExtendedObjectResource(Class<T> baseClass, String sortField) {
+    public ExtendedObjectResource(Class<T> baseClass, String sortField, List<String> searchColumns) {
         super(baseClass);
         this.sortField = sortField;
+        this.searchColumns = searchColumns;
     }
 
     @GET
@@ -45,7 +48,8 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("groupId") long groupId, @QueryParam("deviceId") long deviceId,
             @QueryParam("excludeAttributes") boolean excludeAttributes,
-            @QueryParam("limit") int limit, @QueryParam("offset") int offset) throws StorageException {
+            @QueryParam("limit") int limit, @QueryParam("offset") int offset,
+            @QueryParam("searchKeyword") String searchKeyword) throws StorageException {
 
         var conditions = new LinkedList<Condition>();
 
@@ -69,6 +73,10 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
         if (deviceId > 0) {
             permissionsService.checkPermission(Device.class, getUserId(), deviceId);
             conditions.add(new Condition.Permission(Device.class, deviceId, baseClass).excludeGroups());
+        }
+
+        if (searchKeyword != null && !searchKeyword.isEmpty()) {
+            conditions.add(new Condition.Contains(searchColumns, searchKeyword));
         }
 
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
