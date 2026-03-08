@@ -125,6 +125,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -318,6 +333,21 @@ paths:
           description: Skip returning the attributes map
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -420,6 +450,21 @@ paths:
           description: Exclude attributes field from device payload
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter (searches name, uniqueId, phone, model, contact)
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -591,6 +636,21 @@ paths:
           description: Standard users can use this only with their own _userId_
           schema:
             type: integer
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1157,6 +1217,21 @@ paths:
           description: Can only be used by admin or manager users
           schema:
             type: string
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter (searches name, email)
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1276,6 +1351,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1435,6 +1525,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1894,6 +1999,21 @@ paths:
           description: Standard users can use this only with their own _userId_
           schema:
             type: integer
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1995,6 +2115,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -2096,6 +2231,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -2197,6 +2347,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK

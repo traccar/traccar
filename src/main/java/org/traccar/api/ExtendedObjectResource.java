@@ -49,7 +49,7 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             @QueryParam("groupId") long groupId, @QueryParam("deviceId") long deviceId,
             @QueryParam("excludeAttributes") boolean excludeAttributes,
             @QueryParam("limit") int limit, @QueryParam("offset") int offset,
-            @QueryParam("searchKeyword") String searchKeyword) throws StorageException {
+            @QueryParam("keyword") String keyword) throws StorageException {
 
         var conditions = new LinkedList<Condition>();
 
@@ -75,8 +75,8 @@ public class ExtendedObjectResource<T extends BaseModel> extends BaseObjectResou
             conditions.add(new Condition.Permission(Device.class, deviceId, baseClass).excludeGroups());
         }
 
-        if (searchKeyword != null && !searchKeyword.isEmpty()) {
-            conditions.add(new Condition.Contains(searchColumns, searchKeyword));
+        if (keyword != null && !keyword.isEmpty()) {
+            conditions.add(new Condition.Contains(searchColumns, keyword));
         }
 
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();

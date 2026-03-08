@@ -47,7 +47,7 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("excludeAttributes") boolean excludeAttributes,
             @QueryParam("limit") int limit, @QueryParam("offset") int offset,
-            @QueryParam("searchKeyword") String searchKeyword) throws StorageException {
+            @QueryParam("keyword") String keyword) throws StorageException {
 
         var conditions = new LinkedList<Condition>();
 
@@ -64,8 +64,8 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
 
-        if (searchKeyword != null && !searchKeyword.isEmpty()) {
-            conditions.add(new Condition.Contains(searchColumns, searchKeyword));
+        if (keyword != null && !keyword.isEmpty()) {
+            conditions.add(new Condition.Contains(searchColumns, keyword));
         }
 
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();

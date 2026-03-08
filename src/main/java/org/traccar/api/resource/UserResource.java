@@ -74,7 +74,7 @@ public class UserResource extends BaseObjectResource<User> {
             @QueryParam("userId") long userId, @QueryParam("deviceId") long deviceId,
             @QueryParam("excludeAttributes") boolean excludeAttributes,
             @QueryParam("limit") int limit, @QueryParam("offset") int offset,
-            @QueryParam("searchKeyword") String searchKeyword) throws StorageException {
+            @QueryParam("keyword") String keyword) throws StorageException {
         var conditions = new LinkedList<Condition>();
         if (userId > 0) {
             permissionsService.checkUser(getUserId(), userId);
@@ -87,8 +87,8 @@ public class UserResource extends BaseObjectResource<User> {
             permissionsService.checkPermission(Device.class, getUserId(), deviceId);
             conditions.add(new Condition.Permission(User.class, Device.class, deviceId).excludeGroups());
         }
-        if (searchKeyword != null && !searchKeyword.isEmpty()) {
-            conditions.add(new Condition.Contains(List.of("name", "email"), searchKeyword));
+        if (keyword != null && !keyword.isEmpty()) {
+            conditions.add(new Condition.Contains(List.of("name", "email"), keyword));
         }
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
         return storage.getObjectsStream(baseClass, new Request(
