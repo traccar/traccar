@@ -1,11 +1,11 @@
 #set($subject = "$esc.html($device.name): Rifornimento di Carburante")
-#set($digest = "$device.name ha effettuato un rifornimento di carburante il $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)")
+#set($digest = "$device.name ha effettuato un rifornimento di carburante il $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
 <!DOCTYPE html>
 <html>
 <body>
 Dispositivo: $esc.html($device.name)<br>
 ha effettuato un rifornimento di carburante<br>
-Orario: $dateTool.format('dd-MM-YYYY HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Orario: $dateTool.format('dd/MM/yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Quantità prima: $esc.html($event.attributes.before)<br>
 Quantità dopo: $esc.html($event.attributes.after)<br>
 Indirizzo: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
