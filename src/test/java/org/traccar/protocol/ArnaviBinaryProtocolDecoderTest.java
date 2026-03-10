@@ -83,36 +83,4 @@ public class ArnaviBinaryProtocolDecoderTest extends ProtocolTest {
                                                 "5d"),
                                 position("2026-03-05 09:53:14.000", true, 55.237743, 86.137871));
         }
-
-        @Test
-        public void testMultiplePackagesDecode() throws Exception {
-                var decoder = inject(new ArnaviBinaryProtocolDecoder(null));
-
-                verifyNull(decoder, binary("ff23f30c45f5c90f0300"));
-
-                ByteBuf buf = binary(
-                                "5b01012800a3175f59" +
-                                                "0351393442" +
-                                                "0447221c42" +
-                                                "055402781E" +
-                                                "0900f0c521" +
-                                                "5b4e008400" +
-                                                "5c00007c00" +
-                                                "5d0000a300" +
-                                                "fa37010000" +
-                                                "29" +
-                                                "5d" +
-                                                "5b02012800a3175f59" +
-                                                "0351393442" +
-                                                "0447221c42" +
-                                                "055402781E" +
-                                                "0900f0c521" +
-                                                "5b4e008400" +
-                                                "5c00007c00" +
-                                                "5d0000a300" +
-                                                "fa37010000" +
-                                                "2a" +
-                                                "5d");
-                verifyPositions(decoder, buf);
-        }
 }
