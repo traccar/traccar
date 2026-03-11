@@ -45,6 +45,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -127,6 +128,9 @@ public class TaskReports extends SingleScheduleTask {
         }
         if (!groupIdsPart.isEmpty()) {
             url.append(groupIdsPart).append('&');
+        }
+        if (Objects.equals(report.getType(), "summary") && report.hasAttribute("daily")) {
+            url.append("daily=").append(report.getAttributes().get("daily")).append('&');
         }
         url.append("from=").append(URLEncoder.encode(DateUtil.formatDate(from, true), StandardCharsets.UTF_8));
         url.append('&');
