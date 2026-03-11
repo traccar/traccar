@@ -130,7 +130,7 @@ public class TaskReports extends SingleScheduleTask {
             url.append(groupIdsPart).append('&');
         }
         if (Objects.equals(report.getType(), "summary") && report.hasAttribute("daily")) {
-            url.append("daily=").append(report.getAttributes().get("daily")).append('&');
+            url.append("daily=").append(report.getBoolean("daily")).append('&');
         }
         url.append("from=").append(URLEncoder.encode(DateUtil.formatDate(from, true), StandardCharsets.UTF_8));
         url.append('&');
