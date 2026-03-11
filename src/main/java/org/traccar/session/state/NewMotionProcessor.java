@@ -60,9 +60,7 @@ public final class NewMotionProcessor {
         if (state.getMotionStreak()) {
             for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
                 Position candidate = iterator.next();
-                double distance = DistanceCalculator.distance(
-                        candidate.getLatitude(), candidate.getLongitude(),
-                        position.getLatitude(), position.getLongitude());
+                double distance = DistanceCalculator.distance(candidate, position);
                 if (distance >= minDistance) {
                     return;
                 }
@@ -80,7 +78,21 @@ public final class NewMotionProcessor {
                     position.getLatitude(), position.getLongitude());
             if (distance >= minDistance) {
                 state.setMotionStreak(true);
-                addEvent(state, events, Event.TYPE_DEVICE_MOVING, position);
+                Position startPosition = position;
+                Position next = position;
+                for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
+                    Position candidate = iterator.next();
+                    boolean beforeStop = !candidate.getFixTime().after(state.getEventTime());
+                    double legDistance = DistanceCalculator.distance(candidate, next);
+                    long legDuration = next.getFixTime().getTime() - candidate.getFixTime().getTime();
+                    boolean legMoving = legDuration > 0 && legDistance / legDuration > minAverageSpeed;
+                    if (beforeStop || next != position && !legMoving) {
+                        break;
+                    }
+                    startPosition = candidate;
+                    next = candidate;
+                }
+                addEvent(state, events, Event.TYPE_DEVICE_MOVING, startPosition);
             }
         }
     }
