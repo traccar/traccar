@@ -1,7 +1,11 @@
 package org.traccar.protocol;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
+import org.traccar.model.CellTower;
+import org.traccar.model.Position;
 
 public class ArnaviBinaryProtocolDecoderTest extends ProtocolTest {
 
@@ -42,13 +46,14 @@ public class ArnaviBinaryProtocolDecoderTest extends ProtocolTest {
         }
 
         @Test
-        public void testFullTagsDecode() throws Exception {
+        public void testFullTagsAttributes() throws Exception {
                 var decoder = inject(new ArnaviBinaryProtocolDecoder(null));
 
                 verifyNull(decoder, binary("ff23ae52a969f30c45f5"));
 
-                verifyPositions(decoder, binary(
-                                "5bae0191008a52a969" +
+                Object result = decoder.decode(null, null, binary(
+                                "5bae01" + "9600" +
+                                                "8a52a969" +
                                                 "0373f35c42" +
                                                 "049746ac42" +
                                                 "0574147529" +
@@ -60,6 +65,7 @@ public class ArnaviBinaryProtocolDecoderTest extends ProtocolTest {
                                                 "6353801a02" +
                                                 "01b50f5d6c" +
                                                 "0601010000" +
+                                                "474e000000" +
                                                 "5b4e000000" +
                                                 "5c00001700" +
                                                 "5d00001700" +
@@ -79,7 +85,53 @@ public class ArnaviBinaryProtocolDecoderTest extends ProtocolTest {
                                                 "45002d0000" +
                                                 "fa3b010000" +
                                                 "d7" +
-                                                "5d"),
-                                position("2026-03-05 09:53:14.000", true, 55.237743, 86.137871));
+                                                "5d"));
+
+                assertNotNull(result);
+                Position p = (Position) ((java.util.List<?>) result).get(0);
+
+                assertEquals("2026-03-05 09:53:14.000", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS") {
+                        {
+                                setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                        }
+                }.format(p.getFixTime()));
+                assertTrue(p.getValid());
+                assertEquals(55.237743, p.getLatitude(), 0.00001);
+                assertEquals(86.137871, p.getLongitude(), 0.00001);
+                assertEquals(232.0, p.getCourse(), 0.1);
+                assertEquals(200.0, p.getAltitude(), 0.1);
+                assertEquals(41.0, p.getSpeed(), 0.1);
+
+                assertEquals(12, ((Number) p.getAttributes().get(Position.KEY_SATELLITES)).intValue());
+                assertEquals(0.62, ((Number) p.getAttributes().get(Position.KEY_HDOP)).doubleValue(), 0.01);
+
+                assertEquals(27.741, ((Number) p.getAttributes().get(Position.KEY_POWER)).doubleValue(), 0.01);
+                assertEquals(4.021, ((Number) p.getAttributes().get(Position.KEY_BATTERY)).doubleValue(), 0.01);
+
+                assertEquals(1130496L, ((Number) p.getAttributes().get("canStatus")).longValue());
+                assertEquals(974, ((Number) p.getAttributes().get(Position.KEY_RPM)).intValue());
+                assertEquals(76.0, ((Number) p.getAttributes().get(Position.KEY_ENGINE_TEMP)).doubleValue(), 0.1);
+                assertEquals(78.0, ((Number) p.getAttributes().get(Position.KEY_OBD_SPEED)).doubleValue(), 0.1);
+                assertEquals(45.1, ((Number) p.getAttributes().get(Position.KEY_FUEL_LEVEL)).doubleValue(), 0.1);
+                assertEquals(59352.0, ((Number) p.getAttributes().get(Position.KEY_FUEL_USED)).doubleValue(), 0.1);
+                assertEquals(0, ((Number) p.getAttributes().get(Position.KEY_ENGINE_LOAD)).intValue());
+                assertEquals(45, ((Number) p.getAttributes().get(Position.KEY_THROTTLE)).intValue());
+
+                assertEquals(12348000000L, ((Number) p.getAttributes().get(Position.KEY_HOURS)).longValue());
+                assertEquals(189213370L, ((Number) p.getAttributes().get(Position.KEY_ODOMETER)).longValue());
+
+                assertEquals(65930L, ((Number) p.getAttributes().get("axleLoad1")).longValue());
+                assertEquals(43960L, ((Number) p.getAttributes().get(Position.KEY_AXLE_WEIGHT)).longValue());
+                assertEquals(332L, ((Number) p.getAttributes().get("axleLoad5")).longValue());
+
+                assertEquals(78, ((Number) p.getAttributes().get("rawFuelLevel1")).intValue());
+                assertEquals(-10.0, ((Number) p.getAttributes().get("llsTemperture1")).doubleValue(), 0.1);
+
+                CellTower cell = p.getNetwork().getCellTowers().iterator().next();
+                assertEquals(250, (int) cell.getMobileCountryCode());
+                assertEquals(30, (int) cell.getMobileNetworkCode());
+                assertEquals(45148, (int) cell.getLocationAreaCode());
+                assertEquals(13002, (long) cell.getCellId());
+                assertEquals(-99, (int) cell.getSignalStrength());
         }
 }

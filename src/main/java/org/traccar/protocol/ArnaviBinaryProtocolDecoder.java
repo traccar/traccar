@@ -92,7 +92,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
         position.setDeviceId(deviceSession.getDeviceId());
         position.setTime(time);
 
-        boolean hasCellInfo = false;
         int cid = 0, lac = 0, mnc = 0, mcc = 0, rssi = 0;
 
         int readBytes = 0;
@@ -294,7 +293,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
             readBytes += 5;
         }
-        if (hasCellInfo) {
+        if (mcc != 0 || mnc != 0 || lac != 0 || cid != 0 || rssi != 0) {
             position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
         }
         return position;
