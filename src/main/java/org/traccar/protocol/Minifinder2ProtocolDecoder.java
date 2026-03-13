@@ -319,7 +319,7 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                             position.set("description", buf.readCharSequence(
                                     descriptionLength, StandardCharsets.US_ASCII).toString());
                         }
-                        if (key == 0x2c) {
+                        if (key == 0x2c && buf.readerIndex() < endIndex) {
                             position.set("tagTemp", buf.readShort() / 10.0);
                         }
                         break;
