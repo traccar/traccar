@@ -2,7 +2,6 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
-import org.traccar.model.Position;
 
 public class Xexun2ProtocolDecoderTest extends ProtocolTest {
 
@@ -31,14 +30,9 @@ public class Xexun2ProtocolDecoderTest extends ProtocolTest {
                 position("2022-07-21 07:47:00.000", true, 51.68715, 0.06103));
 
         // Negative longitude (West): DDMM.MMMM -12138.7186, 3705.8632 → -121.64531°, 37.09772°
-        // Assert only lat/lon/valid (no fix time) so test is independent of decoder timestamp handling
-        Position expectedNegativeLon = new Position();
-        expectedNegativeLon.setValid(true);
-        expectedNegativeLon.setLatitude(37.09772);
-        expectedNegativeLon.setLongitude(-121.64531);
         verifyPositions(decoder, binary(
                 "FAAF0014000086220505123456700016F86F0100130065F0B2C200000002010Ac63daae045679dd0FAAF"),
-                expectedNegativeLon);
+                position("2024-03-12 19:53:38.000", true, 37.09772, -121.64531));
 
     }
 
