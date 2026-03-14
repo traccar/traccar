@@ -30,6 +30,10 @@ public class NewMotionState {
         return changed;
     }
 
+    public void setChanged(boolean changed) {
+        this.changed = changed;
+    }
+
     private boolean motionStreak;
 
     public boolean getMotionStreak() {
@@ -38,7 +42,6 @@ public class NewMotionState {
 
     public void setMotionStreak(boolean motionStreak) {
         this.motionStreak = motionStreak;
-        changed = true;
     }
 
     private Deque<Position> positions;
