@@ -78,7 +78,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
     }
 
     private double convertCoordinate(double value) {
-        double degrees = Math.floor(value / 100);
+        double degrees = (int) (value / 100);
         double minutes = value - degrees * 100;
         return degrees + minutes / 60;
     }
