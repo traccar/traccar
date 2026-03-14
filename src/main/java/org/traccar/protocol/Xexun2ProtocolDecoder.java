@@ -77,13 +77,7 @@ public class Xexun2ProtocolDecoder extends BaseProtocolDecoder {
         return null;
     }
 
-    /**
-     * Convert DDMM.MMMM (degrees + decimal minutes * 100) to decimal degrees.
-     * Must truncate toward zero for degrees so negative longitudes (West) are correct.
-     * Math.floor would make -121.38° → -122° and misplot ~1° east.
-     * Package-private for unit testing.
-     */
-    double convertCoordinate(double value) {
+    private double convertCoordinate(double value) {
         double degrees = (int) (value / 100);
         double minutes = value - degrees * 100;
         return degrees + minutes / 60;

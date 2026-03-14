@@ -2,21 +2,9 @@ package org.traccar.protocol;
 
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.traccar.model.Position;
 
 public class Xexun2ProtocolDecoderTest extends ProtocolTest {
-
-    @Test
-    public void testConvertCoordinateNegativeLongitude() {
-        Xexun2ProtocolDecoder decoder = new Xexun2ProtocolDecoder(null);
-        // DDMM.MMMM: -121° 38.7186' → -121.64531° (West). Must truncate toward zero, not floor.
-        assertEquals(-121.64531, decoder.convertCoordinate(-12138.7186), 0.00001);
-        // 37° 5.8632' → 37.09772° (Megastek reference latitude)
-        assertEquals(37.09772, decoder.convertCoordinate(3705.8632), 0.00001);
-        // Positive longitude (East) unchanged
-        assertEquals(121.64531, decoder.convertCoordinate(12138.7186), 0.00001);
-    }
 
     @Test
     public void testDecode() throws Exception {
@@ -41,6 +29,16 @@ public class Xexun2ProtocolDecoderTest extends ProtocolTest {
         verifyPositions(decoder, binary(
                 "FAAF0014000C8622050512345670002DF3A001002A0062D9047400005E0280001E47001B400D4BA732DF505E40B4153AAF78FEF00109000000000042B36666FAAF"),
                 position("2022-07-21 07:47:00.000", true, 51.68715, 0.06103));
+
+        // Negative longitude (West): DDMM.MMMM -12138.7186, 3705.8632 → -121.64531°, 37.09772°
+        // Assert only lat/lon/valid (no fix time) so test is independent of decoder timestamp handling
+        Position expectedNegativeLon = new Position();
+        expectedNegativeLon.setValid(true);
+        expectedNegativeLon.setLatitude(37.09772);
+        expectedNegativeLon.setLongitude(-121.64531);
+        verifyPositions(decoder, binary(
+                "FAAF0014000086220505123456700016F86F0100130065F0B2C200000002010Ac63daae045679dd0FAAF"),
+                expectedNegativeLon);
 
     }
 
