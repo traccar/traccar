@@ -3,7 +3,20 @@ package org.traccar.protocol;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public class Xexun2ProtocolDecoderTest extends ProtocolTest {
+
+    @Test
+    public void testConvertCoordinateNegativeLongitude() {
+        Xexun2ProtocolDecoder decoder = new Xexun2ProtocolDecoder(null);
+        // DDMM.MMMM: -121° 38.7186' → -121.64531° (West). Must truncate toward zero, not floor.
+        assertEquals(-121.64531, decoder.convertCoordinate(-12138.7186), 0.00001);
+        // 37° 5.8632' → 37.09772° (Megastek reference latitude)
+        assertEquals(37.09772, decoder.convertCoordinate(3705.8632), 0.00001);
+        // Positive longitude (East) unchanged
+        assertEquals(121.64531, decoder.convertCoordinate(12138.7186), 0.00001);
+    }
 
     @Test
     public void testDecode() throws Exception {
