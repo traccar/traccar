@@ -91,7 +91,7 @@ public class PositionForwarderUrl implements PositionForwarder {
         Position position = positionData.getPosition();
         Device device = positionData.getDevice();
 
-        String request = url
+        String request = Interpolator.resolve(url, positionData)
                 .replace("{name}", URLEncoder.encode(device.getName(), StandardCharsets.UTF_8))
                 .replace("{uniqueId}", device.getUniqueId())
                 .replace("{status}", device.getStatus())

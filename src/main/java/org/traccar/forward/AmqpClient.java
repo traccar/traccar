@@ -30,11 +30,9 @@ import java.util.concurrent.TimeoutException;
 public class AmqpClient {
     private final Channel channel;
     private final String exchange;
-    private final String topic;
 
-    AmqpClient(String connectionUrl, String exchange, String topic) {
+    AmqpClient(String connectionUrl, String exchange) {
         this.exchange = exchange;
-        this.topic = topic;
 
         ConnectionFactory factory = new ConnectionFactory();
         try {
@@ -52,7 +50,7 @@ public class AmqpClient {
         }
     }
 
-    public void publishMessage(String message) throws IOException {
+    public void publishMessage(String message, String topic) throws IOException {
         channel.basicPublish(exchange, topic, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
     }
 }

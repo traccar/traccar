@@ -26,12 +26,13 @@ public class PositionForwarderAmqp implements PositionForwarder {
 
     private final AmqpClient amqpClient;
     private final ObjectMapper objectMapper;
+    private final String topic;
 
     public PositionForwarderAmqp(Config config, ObjectMapper objectMapper) {
         String connectionUrl = config.getString(Keys.FORWARD_URL);
         String exchange = config.getString(Keys.FORWARD_EXCHANGE);
-        String topic = config.getString(Keys.FORWARD_TOPIC);
-        amqpClient = new AmqpClient(connectionUrl, exchange, topic);
+        topic = config.getString(Keys.FORWARD_TOPIC);
+        amqpClient = new AmqpClient(connectionUrl, exchange);
         this.objectMapper = objectMapper;
     }
 
@@ -39,7 +40,7 @@ public class PositionForwarderAmqp implements PositionForwarder {
     public void forward(PositionData positionData, ResultHandler resultHandler) {
         try {
             String value = objectMapper.writeValueAsString(positionData);
-            amqpClient.publishMessage(value);
+            amqpClient.publishMessage(value, Interpolator.resolve(topic, positionData));
             resultHandler.onResult(true, null);
         } catch (IOException e) {
             resultHandler.onResult(false, e);
