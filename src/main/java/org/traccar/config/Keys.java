@@ -1184,6 +1184,15 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * SMS HTTP method. Can be 'GET' or 'POST'. Default is 'POST'.
+     * When using GET, the template is appended as query parameters to the URL.
+     */
+    public static final ConfigKey<String> SMS_HTTP_METHOD = new StringConfigKey(
+            "sms.http.method",
+            List.of(KeyType.CONFIG),
+            "POST");
+
+    /**
      * AWS Access Key with SNS permission.
      */
     public static final ConfigKey<String> SMS_AWS_ACCESS = new StringConfigKey(
