@@ -193,9 +193,18 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     }
 
     static {
+        // Important Information about PID
+        // Model predicates control which PID handler runs per device.
+        // Same PID can have different meanings and byte sizes across models.
+        // If device model is null/unrecognized, only "any" handlers run (safe fallback).
+        // To add a new model: create a predicate, register its PIDs in a labeled section below.
+        // Reference: https://wiki.teltonika-gps.com/view/<MODEL>_Teltonika_Data_Sending_Parameters_ID
         Predicate<String> any = (m) -> true;
         Predicate<String> fmbXXX = (m) -> m != null && m.matches("FM[B-Z]...|MTB100|MSP500");
         Predicate<String> fmb6XX = (m) -> m != null && m.matches("FM.6..");
+
+        // Verified FTC models - byte sizes confirmed against Teltonika wiki / TCT Config Tool
+        Predicate<String> ftc9XX = (m) -> m != null && (m.equals("FTC921") || m.equals("FTC305"));
 
         register(1, any, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
         register(2, any, (p, b) -> p.set(Position.PREFIX_IN + 2, b.readUnsignedByte() > 0));
@@ -294,6 +303,110 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(10833, fmbXXX, (p, b) -> p.set("eyeRoll2", b.readShort()));
         register(10834, fmbXXX, (p, b) -> p.set("eyeRoll3", b.readShort()));
         register(10835, fmbXXX, (p, b) -> p.set("eyeRoll4", b.readShort()));
+
+        // =====================================================================
+        // Model-specific PIDs below. Each section is verified against the
+        // Teltonika wiki and TCT Config Tool for that model. To add a new model:
+        //   1. Create a predicate: Predicate<String> myModel = "MODEL"::equals;
+        //   2. Add a section with register() calls for that model's PIDs
+        //   3. Reference: https://wiki.teltonika-gps.com/view/<MODEL>_Teltonika_Data_Sending_Parameters_ID
+        // =====================================================================
+
+        // --- FTC921 ---
+        // https://wiki.teltonika-gps.com/view/FTC921_Teltonika_Data_Sending_Parameters_ID
+        Predicate<String> ftc921 = "FTC921"::equals;
+        register(9, ftc921, (p, b) -> p.set(Position.PREFIX_ADC + 1, b.readUnsignedShort() * 0.001));
+        register(68, ftc921, (p, b) -> p.set("batteryCurrent", b.readUnsignedShort() * 0.001));
+        register(69, ftc921, (p, b) -> p.set("gnssStatus", b.readUnsignedByte()));
+        register(70, ftc921, (p, b) -> p.set("pcbTemp", b.readShort() * 0.1));
+        register(113, ftc921, (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));
+        register(175, ftc921, (p, b) -> {
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT);
+        });
+        register(200, ftc921, (p, b) -> p.set("sleepMode", b.readUnsignedByte()));
+        register(205, ftc921, (p, b) -> p.set("cid2g", b.readUnsignedInt()));
+        register(206, ftc921, (p, b) -> p.set("lac", b.readUnsignedShort()));
+        register(237, ftc921, (p, b) -> p.set("networkType", b.readUnsignedByte()));
+        register(246, ftc921, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_TOW : null));
+        register(249, ftc921, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null));
+        register(250, ftc921, (p, b) -> p.set("tripMode", b.readUnsignedByte()));
+        register(251, ftc921, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_IDLE : null));
+        register(252, ftc921, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null));
+        register(254, ftc921, (p, b) -> p.set("ecoScore", b.readUnsignedByte()));
+        register(255, ftc921, (p, b) -> p.set("overSpeeding", b.readUnsignedByte()));
+        register(303, ftc921, (p, b) -> p.set("instantMovement", b.readUnsignedByte() > 0));
+        register(383, ftc921, (p, b) -> p.set("accelerometerCalibration", b.readUnsignedByte()));
+
+        register(449, ftc921, (p, b) -> p.set("ignitionOnCounter", b.readUnsignedInt()));
+        register(636, ftc921, (p, b) -> p.set("cid4g", b.readUnsignedInt()));
+        register(800, ftc921, (p, b) -> p.set(Position.KEY_POWER, b.readUnsignedInt() * 0.001));
+        register(841, ftc921, (p, b) -> p.set("dout1Overcurrent", b.readUnsignedByte() > 0));
+        register(1148, ftc921, (p, b) -> {
+            long value = b.readUnsignedInt();
+            p.set("rssi4g", (int) ((value >> 24) & 0xFF));
+            p.set("rsrp", (int) ((value >> 16) & 0xFF));
+            p.set("sinr", ((int) ((value >> 8) & 0xFF)) * 0.2 - 20);
+            p.set("rsrq", (int) (value & 0xFF));
+        });
+        register(13266, ftc921, (p, b) -> p.set("gpsOdometer", b.readUnsignedByte()));
+        register(13267, ftc921, (p, b) -> p.set("gpsOdometerType", b.readUnsignedByte()));
+        register(13361, ftc921, (p, b) -> p.set("incomingCall", b.readUnsignedByte() > 0));
+
+        // --- FTC305 ---
+        // https://wiki.teltonika-gps.com/view/FTC305_Teltonika_Data_Sending_Parameters_ID
+        Predicate<String> ftc305 = "FTC305"::equals;
+        register(9, ftc305, (p, b) -> p.set(Position.PREFIX_ADC + 1, b.readUnsignedShort() * 0.001));
+        register(68, ftc305, (p, b) -> p.set("batteryCurrent", b.readUnsignedShort() * 0.001));
+        register(69, ftc305, (p, b) -> p.set("gnssStatus", b.readUnsignedByte()));
+        register(70, ftc305, (p, b) -> p.set("pcbTemp", b.readShort() * 0.1));
+        register(113, ftc305, (p, b) -> p.set(Position.KEY_BATTERY_LEVEL, b.readUnsignedByte()));
+        register(175, ftc305, (p, b) -> {
+            p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT);
+        });
+        register(200, ftc305, (p, b) -> p.set("sleepMode", b.readUnsignedByte()));
+        register(205, ftc305, (p, b) -> p.set("cid2g", b.readUnsignedInt()));
+        register(206, ftc305, (p, b) -> p.set("lac", b.readUnsignedShort()));
+        register(237, ftc305, (p, b) -> p.set("networkType", b.readUnsignedByte()));
+        register(246, ftc305, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_TOW : null));
+        register(249, ftc305, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_JAMMING : null));
+        register(250, ftc305, (p, b) -> p.set("tripMode", b.readUnsignedByte()));
+        register(251, ftc305, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_IDLE : null));
+        register(252, ftc305, (p, b) -> p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_POWER_CUT : null));
+        register(254, ftc305, (p, b) -> p.set("ecoScore", b.readUnsignedByte()));
+        register(255, ftc305, (p, b) -> p.set("overSpeeding", b.readUnsignedByte()));
+        register(303, ftc305, (p, b) -> p.set("instantMovement", b.readUnsignedByte() > 0));
+        register(383, ftc305, (p, b) -> p.set("accelerometerCalibration", b.readUnsignedByte()));
+        register(386, ftc305, (p, b) -> p.set("lastFixTime", b.readUnsignedShort()));
+        register(449, ftc305, (p, b) -> p.set("ignitionOnCounter", b.readUnsignedInt()));
+        register(636, ftc305, (p, b) -> p.set("cid4g", b.readUnsignedInt()));
+        register(800, ftc305, (p, b) -> p.set(Position.KEY_POWER, b.readUnsignedInt() * 0.001));
+        register(71, ftc305, (p, b) -> p.set("dallasId4", String.format("%016X", b.readLong())));
+        register(72, ftc305, (p, b) -> p.set(Position.PREFIX_TEMP + 1, b.readInt() * 0.1));
+        register(73, ftc305, (p, b) -> p.set(Position.PREFIX_TEMP + 2, b.readInt() * 0.1));
+        register(74, ftc305, (p, b) -> p.set(Position.PREFIX_TEMP + 3, b.readInt() * 0.1));
+        register(75, ftc305, (p, b) -> p.set(Position.PREFIX_TEMP + 4, b.readInt() * 0.1));
+        register(76, ftc305, (p, b) -> p.set("dallasId1", String.format("%016X", b.readLong())));
+        register(77, ftc305, (p, b) -> p.set("dallasId2", String.format("%016X", b.readLong())));
+        register(79, ftc305, (p, b) -> p.set("dallasId3", String.format("%016X", b.readLong())));
+        register(668, ftc305, (p, b) -> p.set("dallasId5", String.format("%016X", b.readLong())));
+        register(669, ftc305, (p, b) -> p.set(Position.PREFIX_TEMP + 5, b.readInt() * 0.1));
+        register(248, ftc305, (p, b) -> p.set("immobilizer", b.readUnsignedByte() > 0));
+        register(841, ftc305, (p, b) -> p.set("dout1Overcurrent", b.readUnsignedByte() > 0));
+        register(842, ftc305, (p, b) -> p.set("dout2Overcurrent", b.readUnsignedByte() > 0));
+        register(1148, ftc305, (p, b) -> {
+            long value = b.readUnsignedInt();
+            p.set("rssi4g", (int) ((value >> 24) & 0xFF));
+            p.set("rsrp", (int) ((value >> 16) & 0xFF));
+            p.set("sinr", ((int) ((value >> 8) & 0xFF)) * 0.2 - 20);
+            p.set("rsrq", (int) (value & 0xFF));
+        });
+        register(13266, ftc305, (p, b) -> p.set("gpsOdometer", b.readUnsignedByte()));
+        register(13267, ftc305, (p, b) -> p.set("gpsOdometerType", b.readUnsignedByte()));
+        register(1149, ftc305, (p, b) -> p.set("currentLteBand", b.readUnsignedShort()));
+        register(13361, ftc305, (p, b) -> p.set("incomingCall", b.readUnsignedByte() > 0));
+
+        // --- To add a new model, copy a section above and adjust ---
+        // --- Verify PIDs against: https://wiki.teltonika-gps.com/view/<MODEL>_Teltonika_Data_Sending_Parameters_ID or TCT Config Tool ---
     }
 
     private void decodeGh3000Parameter(Position position, int id, ByteBuf buf, int length) {
@@ -539,7 +652,10 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
             for (int j = 0; j < cnt; j++) {
                 int id = buf.readUnsignedShort();
                 int length = buf.readUnsignedShort();
-                if (id == 256 || id == 325) {
+                if (id == 641) {
+                    position.set(Position.KEY_ICCID,
+                            buf.readSlice(length).toString(StandardCharsets.US_ASCII).trim());
+                } else if (id == 256 || id == 325) {
                     position.set(Position.KEY_VIN,
                             buf.readSlice(length).toString(StandardCharsets.US_ASCII));
                 } else if (id == 281) {
