@@ -190,6 +190,12 @@ public class Minifinder2ProtocolDecoder extends BaseProtocolDecoder {
                         if (BitUtil.check(alarm, 12)) {
                             position.addAlarm(Position.ALARM_SOS);
                         }
+                        if (BitUtil.check(alarm, 13)) {
+                            position.set("button1", true);
+                        }
+                        if (BitUtil.check(alarm, 14)) {
+                            position.set("button2", true);
+                        }
                         if (BitUtil.check(alarm, 31)) {
                             position.set("bark", true);
                         }
