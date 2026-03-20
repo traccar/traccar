@@ -69,7 +69,7 @@ public class LoginService {
             case "basic":
                 byte[] decodedBytes = DataConverter.parseBase64(credentials);
                 String[] auth = new String(decodedBytes, StandardCharsets.US_ASCII).split(":", 2);
-                return login(auth[0], auth[1], null);
+                return login(auth[0], auth[1], (Integer) null);
             default:
                 throw new SecurityException("Unsupported authorization scheme");
         }
@@ -117,7 +117,7 @@ public class LoginService {
         return null;
     }
 
-    public LoginResult login(String email, String name, boolean administrator) throws StorageException {
+    public LoginResult login(String email, String name, Boolean administrator) throws StorageException {
 
         User user = storage.getObject(User.class, new Request(
                 new Columns.All(),
@@ -130,14 +130,18 @@ public class LoginService {
             user.setName(name);
             user.setEmail(email);
             user.setFixedEmail(true);
-            user.setAdministrator(administrator);
+            if (administrator != null) {
+                user.setAdministrator(administrator);
+            }
             user.setId(storage.addObject(user, new Request(new Columns.Exclude("id"))));
 
-        } else if (!Objects.equals(name, user.getName()) || user.getAdministrator() != administrator) {
+        } else if (!Objects.equals(name, user.getName())
+                || administrator != null && user.getAdministrator() != administrator) {
 
             user.setName(name);
-            user.setAdministrator(administrator);
-
+            if (administrator != null) {
+                user.setAdministrator(administrator);
+            }
             storage.updateObject(user, new Request(
                     new Columns.Include("name", "administrator"),
                     new Condition.Equals("id", user.getId())));
