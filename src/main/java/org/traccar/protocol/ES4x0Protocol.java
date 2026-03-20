@@ -15,8 +15,6 @@
  */
 package org.traccar.protocol;
 
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.codec.string.StringEncoder;
 import org.traccar.BaseProtocol;
 import org.traccar.PipelineBuilder;
 import org.traccar.TrackerServer;
@@ -63,11 +61,10 @@ public class ES4x0Protocol extends BaseProtocol {
                 pipeline.addLast(new ES4x0ProtocolDecoder(ES4x0Protocol.this));
             }
         });
-        
+
         addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new ES4x0FrameDecoder());
                 pipeline.addLast(new ES4x0ProtocolEncoder(ES4x0Protocol.this));
                 pipeline.addLast(new ES4x0ProtocolDecoder(ES4x0Protocol.this));
             }

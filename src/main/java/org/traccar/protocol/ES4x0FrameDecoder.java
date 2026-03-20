@@ -19,16 +19,14 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
+import org.traccar.helper.BitUtil;
 
 public class ES4x0FrameDecoder extends BaseFrameDecoder {
 
     private static final int MESSAGE_HEADER_LENGTH = 5;
     private static final int IMEI_LENGTH = 8;
     private static final int MESSAGE_TYPE_OFFSET = MESSAGE_HEADER_LENGTH + IMEI_LENGTH;
-    
-    private static final int REGULAR_REPORT_MIN_LENGTH = 55;
-    private static final int MAINTENANCE_REPORT_MIN_LENGTH = 95;
-    private static final int OBD_REPORT_MIN_LENGTH = 46;
+    private static final int MIN_MESSAGE_LENGTH = MESSAGE_HEADER_LENGTH + IMEI_LENGTH + 1 + 1 + 4 + 2 + 2;
 
     private static final byte MESSAGE_TYPE_REGULAR = 0x52; // R
     private static final byte MESSAGE_TYPE_MAINTENANCE = 0x4D; // M
@@ -38,13 +36,13 @@ public class ES4x0FrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
-        
-        if (buf.readableBytes() < MESSAGE_HEADER_LENGTH + IMEI_LENGTH + 1) {
+
+        if (buf.readableBytes() < MIN_MESSAGE_LENGTH) {
             return null;
         }
 
         int readerIndex = buf.readerIndex();
-        
+
         boolean validHeader = true;
         for (int i = 0; i < MESSAGE_HEADER_LENGTH; i++) {
             if (buf.getByte(readerIndex + i) != MESSAGE_HEADER[i]) {
@@ -64,22 +62,117 @@ public class ES4x0FrameDecoder extends BaseFrameDecoder {
         }
 
         byte messageType = buf.getByte(readerIndex + MESSAGE_TYPE_OFFSET);
-        
-        int messageLength;
-        switch (messageType) {
-            case MESSAGE_TYPE_REGULAR:
-                messageLength = REGULAR_REPORT_MIN_LENGTH;
-                break;
-            case MESSAGE_TYPE_MAINTENANCE:
-                messageLength = MAINTENANCE_REPORT_MIN_LENGTH;
-                break;
-            case MESSAGE_TYPE_OBD:
-                messageLength = OBD_REPORT_MIN_LENGTH;
-                break;
-            default:
-                buf.readerIndex(readerIndex + 1);
-                return null;
+
+        if (messageType != MESSAGE_TYPE_REGULAR
+                && messageType != MESSAGE_TYPE_MAINTENANCE
+                && messageType != MESSAGE_TYPE_OBD) {
+            buf.readerIndex(readerIndex + 1);
+            return null;
         }
+
+        int mask = buf.getUnsignedShort(readerIndex + MESSAGE_TYPE_OFFSET + 2);
+        int dataLength = 0;
+
+        if (messageType == MESSAGE_TYPE_REGULAR) {
+            if (BitUtil.check(mask, 0)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 1)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 2)) {
+                dataLength += 4;
+            }
+            if (BitUtil.check(mask, 3)) {
+                dataLength += 4;
+            }
+            if (BitUtil.check(mask, 4)) {
+                dataLength += 4;
+            }
+            if (BitUtil.check(mask, 5)) {
+                dataLength += 4;
+            }
+            if (BitUtil.check(mask, 6)) {
+                dataLength += 2;
+            }
+            if (BitUtil.check(mask, 7)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 8)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 9)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 10)) {
+                dataLength += 4;
+            }
+            if (BitUtil.check(mask, 11)) {
+                dataLength += 2;
+            }
+            if (BitUtil.check(mask, 12)) {
+                dataLength += 2;
+            }
+            if (BitUtil.check(mask, 13)) {
+                dataLength += 2;
+            }
+            if (BitUtil.check(mask, 14)) {
+                dataLength += 1;
+            }
+        } else if (messageType == MESSAGE_TYPE_MAINTENANCE) {
+            if (BitUtil.check(mask, 0)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 1)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 2)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 3)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 4)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 5)) {
+                dataLength += 20;
+            }
+            if (BitUtil.check(mask, 6)) {
+                dataLength += 35;
+            }
+            if (BitUtil.check(mask, 7)) {
+                dataLength += 14;
+            }
+        } else if (messageType == MESSAGE_TYPE_OBD) {
+            if (BitUtil.check(mask, 0)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 1)) {
+                dataLength += 17;
+            }
+            if (BitUtil.check(mask, 2)) {
+                dataLength += 2;
+            }
+            if (BitUtil.check(mask, 3)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 4)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 5)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 6)) {
+                dataLength += 1;
+            }
+            if (BitUtil.check(mask, 7)) {
+                int dtcCount = buf.getUnsignedByte(readerIndex + MESSAGE_TYPE_OFFSET + 4 + dataLength);
+                dataLength += 1 + dtcCount * 5;
+            }
+        }
+
+        int messageLength = MIN_MESSAGE_LENGTH + dataLength;
 
         if (buf.readableBytes() >= messageLength) {
             return buf.readRetainedSlice(messageLength);
