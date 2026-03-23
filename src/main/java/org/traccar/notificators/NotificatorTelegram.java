@@ -139,7 +139,9 @@ public class NotificatorTelegram extends Notificator {
         }
         try (InputStream stream = connection.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST
                 ? connection.getErrorStream() : connection.getInputStream()) {
-            // Trigger the request and close the response stream.
+            if (stream != null) {
+                stream.transferTo(OutputStream.nullOutputStream());
+            }
         } finally {
             connection.disconnect();
         }
