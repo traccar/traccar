@@ -11,6 +11,10 @@ public class H02ProtocolDecoderTest extends ProtocolTest {
 
         var decoder = inject(new H02ProtocolDecoder(null));
 
+        verifyAttribute(decoder, binary(
+                "24720104244110373303112551337904060000794834000000fffff9ffff001b0a00000ee600ea0f00000000007601"),
+                Position.KEY_POWER, 11.8);
+
         verifyPosition(decoder, buffer(
                 "*HQ,9001000002,V8,213945,A,3542.2043,N,38.6508,W,0.00,170,221025,FBFFF9FF,0,0,0,0,22,31,126,0#"),
                 position("2025-10-22 21:39:45.000", true, 35.70340, -0.64418));
