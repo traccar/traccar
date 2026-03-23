@@ -77,11 +77,12 @@ public class NotificatorTelegram extends Notificator {
 
         String proxyHost = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_HOST);
         if (proxyHost != null) {
+            int proxyPort = config.getInteger(Keys.NOTIFICATOR_TELEGRAM_PROXY_PORT);
             ClientBuilder clientBuilder = ClientBuilder.newBuilder()
                     .register(objectMapperContextResolver)
                     .property(
                             ClientProperties.PROXY_URI,
-                            String.format("http://%s:%d", proxyHost, config.getInteger(Keys.NOTIFICATOR_TELEGRAM_PROXY_PORT)));
+                            String.format("http://%s:%d", proxyHost, proxyPort));
             String proxyUser = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_USER);
             if (proxyUser != null) {
                 clientBuilder.property(ClientProperties.PROXY_USERNAME, proxyUser);
