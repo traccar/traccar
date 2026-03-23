@@ -20,9 +20,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
+import org.glassfish.jersey.client.ClientProperties;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
@@ -62,15 +65,35 @@ public class NotificatorTelegram extends Notificator {
     }
 
     @Inject
-    public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter, Client client) {
+    public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter,
+            Client client, ObjectMapperContextResolver objectMapperContextResolver) {
         super(notificationFormatter);
-        this.client = client;
         urlSendText = String.format(
                 "https://api.telegram.org/bot%s/sendMessage", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         urlSendLocation = String.format(
                 "https://api.telegram.org/bot%s/sendLocation", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         chatId = config.getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
         sendLocation = config.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
+
+        String proxyHost = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_HOST);
+        if (proxyHost != null) {
+            int proxyPort = config.getInteger(Keys.NOTIFICATOR_TELEGRAM_PROXY_PORT);
+            ClientBuilder clientBuilder = ClientBuilder.newBuilder()
+                    .register(objectMapperContextResolver)
+                    .property(
+                            ClientProperties.PROXY_URI,
+                            String.format("http://%s:%d", proxyHost, proxyPort));
+            String proxyUser = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_USER);
+            if (proxyUser != null) {
+                clientBuilder.property(ClientProperties.PROXY_USERNAME, proxyUser);
+                clientBuilder.property(
+                        ClientProperties.PROXY_PASSWORD,
+                        config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_PASSWORD, ""));
+            }
+            this.client = clientBuilder.build();
+        } else {
+            this.client = client;
+        }
     }
 
     private LocationMessage createLocationMessage(String messageChatId, Position position) {
