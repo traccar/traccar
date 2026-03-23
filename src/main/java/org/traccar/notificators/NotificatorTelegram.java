@@ -17,6 +17,7 @@
 package org.traccar.notificators;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.client.Client;
@@ -29,10 +30,24 @@ import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
+import java.net.Proxy;
+import java.net.URL;
+import javax.net.ssl.HttpsURLConnection;
+
 @Singleton
 public class NotificatorTelegram extends Notificator {
 
     private final Client client;
+    private final ObjectMapper objectMapper;
+    private final Proxy proxy;
+    private final Authenticator authenticator;
 
     private final String urlSendText;
     private final String urlSendLocation;
@@ -62,15 +77,42 @@ public class NotificatorTelegram extends Notificator {
     }
 
     @Inject
-    public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter, Client client) {
+    public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter,
+            Client client, ObjectMapper objectMapper) {
         super(notificationFormatter);
         this.client = client;
+        this.objectMapper = objectMapper;
         urlSendText = String.format(
                 "https://api.telegram.org/bot%s/sendMessage", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         urlSendLocation = String.format(
                 "https://api.telegram.org/bot%s/sendLocation", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         chatId = config.getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
         sendLocation = config.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
+
+        String proxyHost = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_HOST);
+        if (proxyHost != null) {
+            int proxyPort = config.getInteger(Keys.NOTIFICATOR_TELEGRAM_PROXY_PORT);
+            boolean isSocks = "socks5".equalsIgnoreCase(config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_TYPE));
+            proxy = new Proxy(
+                    isSocks ? Proxy.Type.SOCKS : Proxy.Type.HTTP,
+                    new InetSocketAddress(proxyHost, proxyPort));
+            String proxyUser = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_USER);
+            if (proxyUser != null) {
+                String proxyPassword = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_PASSWORD);
+                char[] password = proxyPassword != null ? proxyPassword.toCharArray() : new char[0];
+                authenticator = new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(proxyUser, password);
+                    }
+                };
+            } else {
+                authenticator = null;
+            }
+        } else {
+            proxy = null;
+            authenticator = null;
+        }
     }
 
     private LocationMessage createLocationMessage(String messageChatId, Position position) {
@@ -83,6 +125,34 @@ public class NotificatorTelegram extends Notificator {
         return locationMessage;
     }
 
+    private void postWithProxy(String url, Object payload) throws IOException {
+        byte[] body = objectMapper.writeValueAsBytes(payload);
+        HttpsURLConnection connection = (HttpsURLConnection) new URL(url).openConnection(proxy);
+        if (authenticator != null) {
+            connection.setAuthenticator(authenticator);
+        }
+        connection.setDoOutput(true);
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        try (OutputStream os = connection.getOutputStream()) {
+            os.write(body);
+        }
+        try (InputStream stream = connection.getResponseCode() >= HttpURLConnection.HTTP_BAD_REQUEST
+                ? connection.getErrorStream() : connection.getInputStream()) {
+            // Trigger the request and close the response stream.
+        } finally {
+            connection.disconnect();
+        }
+    }
+
+    private void post(String url, Object payload) throws IOException {
+        if (proxy != null) {
+            postWithProxy(url, payload);
+        } else {
+            client.target(url).request().post(Entity.json(payload)).close();
+        }
+    }
+
     @Override
     public void send(User user, NotificationMessage shortMessage, Event event, Position position) {
 
@@ -92,10 +162,14 @@ public class NotificatorTelegram extends Notificator {
             message.chatId = chatId;
         }
         message.text = shortMessage.digest();
-        client.target(urlSendText).request().post(Entity.json(message)).close();
-        if (sendLocation && position != null) {
-            client.target(urlSendLocation).request().post(
-                    Entity.json(createLocationMessage(message.chatId, position))).close();
+
+        try {
+            post(urlSendText, message);
+            if (sendLocation && position != null) {
+                post(urlSendLocation, createLocationMessage(message.chatId, position));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

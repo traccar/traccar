@@ -1302,6 +1302,42 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Telegram notification proxy host.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_PROXY_HOST = new StringConfigKey(
+            "notificator.telegram.proxy.host",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Telegram notification proxy port.
+     */
+    public static final ConfigKey<Integer> NOTIFICATOR_TELEGRAM_PROXY_PORT = new IntegerConfigKey(
+            "notificator.telegram.proxy.port",
+            List.of(KeyType.CONFIG),
+            1080);
+
+    /**
+     * Telegram notification proxy type (http or socks5).
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_PROXY_TYPE = new StringConfigKey(
+            "notificator.telegram.proxy.type",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Telegram notification proxy username.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_PROXY_USER = new StringConfigKey(
+            "notificator.telegram.proxy.user",
+            List.of(KeyType.CONFIG));
+
+    /**
+     * Telegram notification proxy password.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_PROXY_PASSWORD = new StringConfigKey(
+            "notificator.telegram.proxy.password",
+            List.of(KeyType.CONFIG));
+
+    /**
      * WhatsApp Cloud API permanent access token.
      */
     public static final ConfigKey<String> NOTIFICATOR_WHATSAPP_TOKEN = new StringConfigKey(
