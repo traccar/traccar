@@ -1302,6 +1302,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Telegram notification proxy URL.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_PROXY_URL = new StringConfigKey(
+            "notificator.telegram.proxy.url",
+            List.of(KeyType.CONFIG));
+
+    /**
      * WhatsApp Cloud API permanent access token.
      */
     public static final ConfigKey<String> NOTIFICATOR_WHATSAPP_TOKEN = new StringConfigKey(
