@@ -1314,14 +1314,7 @@ public final class Keys {
     public static final ConfigKey<Integer> NOTIFICATOR_TELEGRAM_PROXY_PORT = new IntegerConfigKey(
             "notificator.telegram.proxy.port",
             List.of(KeyType.CONFIG),
-            1080);
-
-    /**
-     * Telegram notification proxy type (http or socks5).
-     */
-    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_PROXY_TYPE = new StringConfigKey(
-            "notificator.telegram.proxy.type",
-            List.of(KeyType.CONFIG));
+            8080);
 
     /**
      * Telegram notification proxy username.
