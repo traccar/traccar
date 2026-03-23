@@ -32,6 +32,8 @@ import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
 
+import java.net.URI;
+
 @Singleton
 public class NotificatorTelegram extends Notificator {
 
@@ -75,20 +77,18 @@ public class NotificatorTelegram extends Notificator {
         chatId = config.getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
         sendLocation = config.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
 
-        String proxyHost = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_HOST);
-        if (proxyHost != null) {
-            int proxyPort = config.getInteger(Keys.NOTIFICATOR_TELEGRAM_PROXY_PORT);
+        String proxyUrl = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_URL);
+        if (proxyUrl != null) {
             ClientBuilder clientBuilder = ClientBuilder.newBuilder()
                     .register(objectMapperContextResolver)
-                    .property(
-                            ClientProperties.PROXY_URI,
-                            String.format("http://%s:%d", proxyHost, proxyPort));
-            String proxyUser = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_USER);
-            if (proxyUser != null) {
-                clientBuilder.property(ClientProperties.PROXY_USERNAME, proxyUser);
-                clientBuilder.property(
-                        ClientProperties.PROXY_PASSWORD,
-                        config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_PASSWORD, ""));
+                    .property(ClientProperties.PROXY_URI, proxyUrl);
+            String userInfo = URI.create(proxyUrl).getUserInfo();
+            if (userInfo != null) {
+                String[] credentials = userInfo.split(":", 2);
+                clientBuilder.property(ClientProperties.PROXY_USERNAME, credentials[0]);
+                if (credentials.length > 1) {
+                    clientBuilder.property(ClientProperties.PROXY_PASSWORD, credentials[1]);
+                }
             }
             this.client = clientBuilder.build();
         } else {

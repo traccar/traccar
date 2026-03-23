@@ -1302,32 +1302,10 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
-     * Telegram notification proxy host.
+     * Telegram notification proxy URL.
      */
-    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_PROXY_HOST = new StringConfigKey(
-            "notificator.telegram.proxy.host",
-            List.of(KeyType.CONFIG));
-
-    /**
-     * Telegram notification proxy port.
-     */
-    public static final ConfigKey<Integer> NOTIFICATOR_TELEGRAM_PROXY_PORT = new IntegerConfigKey(
-            "notificator.telegram.proxy.port",
-            List.of(KeyType.CONFIG),
-            8080);
-
-    /**
-     * Telegram notification proxy username.
-     */
-    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_PROXY_USER = new StringConfigKey(
-            "notificator.telegram.proxy.user",
-            List.of(KeyType.CONFIG));
-
-    /**
-     * Telegram notification proxy password.
-     */
-    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_PROXY_PASSWORD = new StringConfigKey(
-            "notificator.telegram.proxy.password",
+    public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_PROXY_URL = new StringConfigKey(
+            "notificator.telegram.proxy.url",
             List.of(KeyType.CONFIG));
 
     /**
