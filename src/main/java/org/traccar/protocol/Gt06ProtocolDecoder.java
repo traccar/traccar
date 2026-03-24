@@ -1028,7 +1028,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
 
             if (modelNT20 && type == MSG_GPS_LBS_2) {
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
-                position.set(Position.KEY_HOURS, (long) buf.readUnsignedMedium() * 60 * 1000);
+                position.set(Position.KEY_HOURS, buf.readUnsignedMedium() * 60 * 1000L);
             }
 
             if (buf.readableBytes() == 3 + 6 || buf.readableBytes() == 3 + 4 + 6) {
