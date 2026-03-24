@@ -43,6 +43,8 @@ tags:
     description: Device management
   - name: Groups
     description: Group management
+  - name: Share
+    description: Share devices and groups
   - name: Users
     description: User management
   - name: Permissions
@@ -588,11 +590,11 @@ paths:
         '404':
           description: Device not found
           content: {}
-  /devices/share:
+  /share/device:
     post:
       summary: Share device location
       tags:
-        - Devices
+        - Share
       requestBody:
         required: true
         content:
@@ -604,6 +606,37 @@ paths:
                 - expiration
               properties:
                 deviceId:
+                  type: integer
+                expiration:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: eyJhbGciOi...
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+  /share/group:
+    post:
+      summary: Share group devices
+      tags:
+        - Share
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - groupId
+                - expiration
+              properties:
+                groupId:
                   type: integer
                 expiration:
                   type: string
