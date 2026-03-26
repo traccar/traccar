@@ -781,6 +781,16 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Grace period in seconds before a deviceOffline event is emitted. If the device reconnects within this window,
+     * no offline notification is sent. Useful to suppress spurious alerts caused by brief SIM reconnects or network
+     * resets that last only a few seconds. Default is 0 (disabled — current behaviour unchanged).
+     */
+    public static final ConfigKey<Long> EVENT_DEVICE_OFFLINE_MIN_DURATION = new LongConfigKey(
+            "event.deviceOffline.minDuration",
+            List.of(KeyType.CONFIG),
+            0L);
+
+    /**
      * Path to the media folder. Server stores audio, video and photo files in that folder. Sub-folders will be
      * automatically created for each device by unique ID.
      */
