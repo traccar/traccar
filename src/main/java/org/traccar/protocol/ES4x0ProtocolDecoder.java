@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -104,8 +104,9 @@ public class ES4x0ProtocolDecoder extends BaseProtocolDecoder {
         }
         if (BitUtil.check(mask, 2)) {
             long time = buf.readUnsignedInt();
-            position.setDeviceTime(new Date(time * 1000));
-            position.setFixTime(new Date(time * 1000));
+            Date deviceTime = new Date(time * 1000);
+            position.setDeviceTime(deviceTime);
+            position.setFixTime(deviceTime);
         }
         if (BitUtil.check(mask, 3)) {
             position.setLatitude(buf.readInt() / 10000000.0);
@@ -177,19 +178,15 @@ public class ES4x0ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // message queue
         }
         if (BitUtil.check(mask, 5)) {
-            byte[] iccidBytes = new byte[20];
-            buf.readBytes(iccidBytes);
-            position.set(Position.KEY_ICCID, new String(iccidBytes, StandardCharsets.US_ASCII).trim());
+            position.set(Position.KEY_ICCID, buf.readCharSequence(20, StandardCharsets.US_ASCII).toString().trim());
         }
         if (BitUtil.check(mask, 6)) {
-            byte[] fwBytes = new byte[35];
-            buf.readBytes(fwBytes);
-            position.set(Position.KEY_VERSION_FW, new String(fwBytes, StandardCharsets.US_ASCII).trim());
+            position.set(Position.KEY_VERSION_FW, 
+            buf.readCharSequence(35, StandardCharsets.US_ASCII).toString().trim());
         }
         if (BitUtil.check(mask, 7)) {
-            byte[] hwBytes = new byte[14];
-            buf.readBytes(hwBytes);
-            position.set(Position.KEY_VERSION_HW, new String(hwBytes, StandardCharsets.US_ASCII).trim());
+            position.set(Position.KEY_VERSION_HW,
+             buf.readCharSequence(14, StandardCharsets.US_ASCII).toString().trim());
         }
 
         getLastLocation(position, null);
@@ -207,9 +204,7 @@ public class ES4x0ProtocolDecoder extends BaseProtocolDecoder {
             }
         }
         if (BitUtil.check(mask, 1)) {
-            byte[] vinBytes = new byte[17];
-            buf.readBytes(vinBytes);
-            position.set(Position.KEY_VIN, new String(vinBytes, StandardCharsets.US_ASCII).trim());
+            position.set(Position.KEY_VIN, buf.readCharSequence(17, StandardCharsets.US_ASCII).toString().trim());
         }
         if (BitUtil.check(mask, 2)) {
             position.set(Position.KEY_RPM, (double) buf.readUnsignedShort());
@@ -231,9 +226,8 @@ public class ES4x0ProtocolDecoder extends BaseProtocolDecoder {
             if (dtcCount > 0) {
                 StringBuilder dtcs = new StringBuilder();
                 for (int i = 0; i < dtcCount; i++) {
-                    byte[] dtcBytes = new byte[5];
-                    buf.readBytes(dtcBytes);
-                    String dtc = new String(dtcBytes, StandardCharsets.US_ASCII).trim();
+                    String dtc = buf.readCharSequence(5, StandardCharsets.US_ASCII)
+                            .toString().trim();
                     if (i > 0) {
                         dtcs.append(",");
                     }
