@@ -181,7 +181,7 @@ public class ES4x0ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_ICCID, buf.readCharSequence(20, StandardCharsets.US_ASCII).toString().trim());
         }
         if (BitUtil.check(mask, 6)) {
-            position.set(Position.KEY_VERSION_FW, 
+            position.set(Position.KEY_VERSION_FW,
             buf.readCharSequence(35, StandardCharsets.US_ASCII).toString().trim());
         }
         if (BitUtil.check(mask, 7)) {
