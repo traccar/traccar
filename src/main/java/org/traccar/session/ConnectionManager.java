@@ -115,7 +115,7 @@ public class ConnectionManager implements BroadcastInterface {
 
     @PreDestroy
     public void shutdown() {
-        offlineGraceScheduler.shutdownNow();
+        offlineGraceScheduler.shutdown();
     }
 
     public DeviceSession getDeviceSession(long deviceId) {
@@ -219,11 +219,7 @@ public class ConnectionManager implements BroadcastInterface {
                             if (existing != null) {
                                 existing.cancel(false);
                             }
-                            // Fetch device now while it's still in cache, so the lambda
-                            // does not fall back to a DB query when the grace period fires.
-                            Device cachedDevice = cacheManager.getObject(Device.class, deviceId);
                             ScheduledFuture<?> task = offlineGraceScheduler.schedule(() -> {
-                                // Atomic check: only proceed if this task was not already cancelled
                                 if (pendingOfflineTasks.remove(deviceId) != null) {
                                     updateDevice(deviceId, Device.STATUS_OFFLINE, null);
                                 }
