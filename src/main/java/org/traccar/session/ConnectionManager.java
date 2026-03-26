@@ -40,6 +40,7 @@ import org.traccar.storage.query.Columns;
 import org.traccar.storage.query.Condition;
 import org.traccar.storage.query.Request;
 
+import jakarta.annotation.PreDestroy;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import java.net.InetSocketAddress;
@@ -88,7 +89,11 @@ public class ConnectionManager implements BroadcastInterface {
 
     private final long offlineGracePeriod;
     private final Map<Long, ScheduledFuture<?>> pendingOfflineTasks = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService offlineGraceScheduler = Executors.newSingleThreadScheduledExecutor();
+    private final ScheduledExecutorService offlineGraceScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "offline-grace-scheduler");
+        t.setDaemon(true);
+        return t;
+    });
 
     @Inject
     public ConnectionManager(
@@ -106,6 +111,11 @@ public class ConnectionManager implements BroadcastInterface {
         offlineGracePeriod = config.getLong(Keys.EVENT_DEVICE_OFFLINE_MIN_DURATION);
         showUnknownDevices = config.getBoolean(Keys.WEB_SHOW_UNKNOWN_DEVICES);
         broadcastService.registerListener(this);
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        offlineGraceScheduler.shutdownNow();
     }
 
     public DeviceSession getDeviceSession(long deviceId) {
@@ -202,24 +212,29 @@ public class ConnectionManager implements BroadcastInterface {
             Map<String, DeviceSession> endpointSessions = sessionsByEndpoint.remove(connectionKey);
             if (endpointSessions != null) {
                 for (DeviceSession deviceSession : endpointSessions.values()) {
+                    long deviceId = deviceSession.getDeviceId();
                     if (supportsOffline) {
-                        long deviceId = deviceSession.getDeviceId();
                         if (offlineGracePeriod > 0) {
                             ScheduledFuture<?> existing = pendingOfflineTasks.remove(deviceId);
                             if (existing != null) {
                                 existing.cancel(false);
                             }
+                            // Fetch device now while it's still in cache, so the lambda
+                            // does not fall back to a DB query when the grace period fires.
+                            Device cachedDevice = cacheManager.getObject(Device.class, deviceId);
                             ScheduledFuture<?> task = offlineGraceScheduler.schedule(() -> {
-                                pendingOfflineTasks.remove(deviceId);
-                                updateDevice(deviceId, Device.STATUS_OFFLINE, null);
+                                // Atomic check: only proceed if this task was not already cancelled
+                                if (pendingOfflineTasks.remove(deviceId) != null) {
+                                    updateDevice(deviceId, Device.STATUS_OFFLINE, null);
+                                }
                             }, offlineGracePeriod, TimeUnit.SECONDS);
                             pendingOfflineTasks.put(deviceId, task);
                         } else {
                             updateDevice(deviceId, Device.STATUS_OFFLINE, null);
                         }
                     }
-                    sessionsByDeviceId.remove(deviceSession.getDeviceId());
-                    cacheManager.removeDevice(deviceSession.getDeviceId(), connectionKey);
+                    sessionsByDeviceId.remove(deviceId);
+                    cacheManager.removeDevice(deviceId, connectionKey);
                 }
             }
             unknownByEndpoint.remove(connectionKey);
