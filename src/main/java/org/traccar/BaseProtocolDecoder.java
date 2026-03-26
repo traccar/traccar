@@ -108,7 +108,7 @@ public abstract class BaseProtocolDecoder extends ExtendedObjectDecoder {
     }
 
     protected double convertSpeed(double value, String defaultUnits) {
-        return switch (getConfig().getString(getProtocolName() + ".speed", defaultUnits)) {
+        return switch (getConfig().getString(Keys.PROTOCOL_SPEED.withPrefix(getProtocolName()), defaultUnits)) {
             case "kmh" -> UnitsConverter.knotsFromKph(value);
             case "mps" -> UnitsConverter.knotsFromMps(value);
             case "mph" -> UnitsConverter.knotsFromMph(value);
