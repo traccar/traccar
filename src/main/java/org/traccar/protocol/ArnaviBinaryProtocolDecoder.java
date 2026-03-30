@@ -148,7 +148,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                             int physicalInputs = buf.readUnsignedShortLE();
                             position.set("virtualIgnition", BitUtil.check(virtualSensors, 0));
                             position.set("callButton", BitUtil.check(virtualSensors, 1));
-                            position.set(Position.PREFIX_IN, physicalInputs);
+                            position.set(Position.KEY_INPUT, physicalInputs);
                             break;
                         }
                         case 0x06: {
