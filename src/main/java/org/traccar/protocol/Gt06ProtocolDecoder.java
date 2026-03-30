@@ -237,7 +237,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_LBS_ALARM:
                 return true;
             case MSG_GPS_LBS_2:
-                return "NT20".equalsIgnoreCase(model);
+                return "NT20".equalsIgnoreCase(model) || "VL100"".equalsIgnoreCase(model);
             case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
                 return variant == Variant.SEEWORLD;
             default:
@@ -479,7 +479,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         String model = deviceSession != null ? getDeviceModel(deviceSession) : null;
         boolean modelLW = model != null && model.toUpperCase().startsWith("LW");
         boolean modelSW = "SEEWORLD".equalsIgnoreCase(model);
-        boolean modelNT20 = "NT20".equalsIgnoreCase(model);
+        boolean modelNT20 = "NT20".equalsIgnoreCase(model) || "VL100".equalsIgnoreCase(model);
         boolean modelVL = model != null && Set.of("VL103", "LL303", "VL512", "G18").contains(model);
 
         if (type == MSG_LOGIN) {
