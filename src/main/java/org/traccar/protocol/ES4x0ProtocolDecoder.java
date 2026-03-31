@@ -28,9 +28,9 @@ import java.net.SocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
-public class ES4x0ProtocolDecoder extends BaseProtocolDecoder {
+public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
 
-    public ES4x0ProtocolDecoder(Protocol protocol) {
+    public Es4x0ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

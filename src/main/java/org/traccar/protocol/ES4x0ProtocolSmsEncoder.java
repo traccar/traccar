@@ -19,9 +19,9 @@ import org.traccar.Protocol;
 import org.traccar.StringProtocolEncoder;
 import org.traccar.model.Command;
 
-public class ES4x0ProtocolSmsEncoder extends StringProtocolEncoder {
+public class Es4x0ProtocolSmsEncoder extends StringProtocolEncoder {
 
-    public ES4x0ProtocolSmsEncoder(Protocol protocol) {
+    public Es4x0ProtocolSmsEncoder(Protocol protocol) {
         super(protocol);
     }
 

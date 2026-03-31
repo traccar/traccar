@@ -22,26 +22,26 @@ import org.traccar.config.Config;
 
 import jakarta.inject.Inject;
 
-public class ES4x0Protocol extends BaseProtocol {
+public class Es4x0Protocol extends BaseProtocol {
 
     @Inject
-    public ES4x0Protocol(Config config) {
+    public Es4x0Protocol(Config config) {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new ES4x0FrameDecoder());
-                pipeline.addLast(new ES4x0ProtocolDecoder(ES4x0Protocol.this));
+                pipeline.addLast(new Es4x0FrameDecoder());
+                pipeline.addLast(new Es4x0ProtocolDecoder(Es4x0Protocol.this));
             }
         });
 
         addServer(new TrackerServer(config, getName(), true) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new ES4x0ProtocolDecoder(ES4x0Protocol.this));
+                pipeline.addLast(new Es4x0ProtocolDecoder(Es4x0Protocol.this));
             }
         });
 
-        setTextCommandEncoder(new ES4x0ProtocolSmsEncoder(this));
+        setTextCommandEncoder(new Es4x0ProtocolSmsEncoder(this));
     }
 
 }

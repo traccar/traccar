@@ -21,7 +21,7 @@ import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
 import org.traccar.helper.BitUtil;
 
-public class ES4x0FrameDecoder extends BaseFrameDecoder {
+public class Es4x0FrameDecoder extends BaseFrameDecoder {
 
     public static final int MSG_REGULAR = 0x52;
     public static final int MSG_MAINTENANCE = 0x4D;
