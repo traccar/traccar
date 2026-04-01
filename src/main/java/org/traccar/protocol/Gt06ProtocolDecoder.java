@@ -237,7 +237,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_LBS_ALARM:
                 return true;
             case MSG_GPS_LBS_2:
-                return "NT20".equalsIgnoreCase(model);
+                return model != null && Set.of("NT20", "VL100").contains(model.toUpperCase());
             case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
                 return variant == Variant.SEEWORLD;
             default:
@@ -479,7 +479,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         String model = deviceSession != null ? getDeviceModel(deviceSession) : null;
         boolean modelLW = model != null && model.toUpperCase().startsWith("LW");
         boolean modelSW = "SEEWORLD".equalsIgnoreCase(model);
-        boolean modelNT20 = "NT20".equalsIgnoreCase(model);
+        boolean modelNT = model != null && Set.of("NT20", "VL100").contains(model.toUpperCase());
         boolean modelVL = model != null && Set.of("VL103", "LL303", "VL512", "G18").contains(model);
 
         if (type == MSG_LOGIN) {
@@ -827,7 +827,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             if (type == MSG_GPS_LBS_1 && "QH302R".equals(model)) {
                 buf.skipBytes(8); // imei
             }
-            if (type == MSG_GPS_LBS_2 && modelNT20) {
+            if (type == MSG_GPS_LBS_2 && modelNT) {
                 buf.readUnsignedByte(); // location source type
                 buf.skipBytes(8); // imei
                 position.setDeviceTime(decodeDate(buf, deviceSession));
@@ -869,14 +869,14 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.PREFIX_TEMP + 1, buf.readShort() / 10.0);
                     }
                 } else {
-                    if (type == MSG_GPS_LBS_STATUS_5 || (modelNT20 && type == MSG_GPS_LBS_2)) {
+                    if (type == MSG_GPS_LBS_STATUS_5 || (modelNT && type == MSG_GPS_LBS_2)) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     }
                     if (type == MSG_STATUS && "R11".equals(model)) {
                         position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
                     } else {
                         int battery = buf.readUnsignedByte();
-                        if (modelNT20 && type == MSG_GPS_LBS_2) {
+                        if (modelNT && type == MSG_GPS_LBS_2) {
                             battery = battery / 10;
                         }
                         if (battery <= 6) {
@@ -903,7 +903,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if (type == MSG_STATUS_2 || type == MSG_GPS_LBS_STATUS_5 || type == MSG_GPS_LBS_STATUS_3
-                    || type == MSG_FENCE_MULTI || modelNT20 && type == MSG_GPS_LBS_2) {
+                    || type == MSG_FENCE_MULTI || modelNT && type == MSG_GPS_LBS_2) {
                 buf.readUnsignedByte(); // language
             }
 
@@ -998,7 +998,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             }
 
             if ((type == MSG_GPS_LBS_2 || type == MSG_GPS_LBS_3 || type == MSG_GPS_LBS_4 || type == MSG_GPS_LBS_5)
-                    && buf.readableBytes() >= 3 + 6 && !modelNT20) {
+                    && buf.readableBytes() >= 3 + 6 && !modelNT) {
                 position.set(Position.KEY_IGNITION, buf.readUnsignedByte() > 0);
                 position.set(Position.KEY_EVENT, buf.readUnsignedByte()); // reason
                 position.set(Position.KEY_ARCHIVE, buf.readUnsignedByte() > 0);
@@ -1026,7 +1026,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 buf.readUnsignedByte(); // validity
             }
 
-            if (modelNT20 && type == MSG_GPS_LBS_2) {
+            if (modelNT && type == MSG_GPS_LBS_2) {
                 position.set(Position.KEY_ODOMETER, buf.readUnsignedMedium());
                 position.set(Position.KEY_HOURS, buf.readUnsignedMedium() * 60 * 1000L);
             }
