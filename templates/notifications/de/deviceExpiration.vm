@@ -3,6 +3,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-Dein Ger&auml;t $device.name ist abgelaufen.
+Dein Ger&auml;t $esc.html($device.name) ist abgelaufen.
 </body>
 </html>

@@ -3,6 +3,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-O dispositivo $device.name está expirado.
+O dispositivo $esc.html($device.name) está expirado.
 </body>
 </html>

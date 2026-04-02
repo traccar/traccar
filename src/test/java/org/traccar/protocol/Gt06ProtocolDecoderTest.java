@@ -19,7 +19,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "78782e610869412070143950190a1e0d3806c802b0eb0f0561ecdc00d80002d404000004215f0e000001395581000d1ca60d0a"),
-                Position.KEY_DRIVER_UNIQUE_ID, "1345759281165");
+                Position.KEY_DRIVER_UNIQUE_ID, "20534657");
 
         verifyAttribute(decoder, binary(
                 "7979001f70002c00046919c641007f000ec4a82841074a7fff64012201dc071ea430360d0a"),
@@ -584,7 +584,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "78783c22010357789648774484180c06142038180c06142038cb03313ee4061fe98300185e090000000000000000460984284c000200000000017101d6f35d0d0a"),
-                Position.KEY_HOURS, 22140000);
+                Position.KEY_HOURS, 22140000L);
 
         decoder.setModelOverride("G18");
 

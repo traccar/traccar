@@ -222,6 +222,32 @@ public class Device extends GroupedModel implements Disableable, Schedulable {
         this.motionDistance = motionDistance;
     }
 
+    private double motionLatitude;
+
+    @QueryIgnore
+    @JsonIgnore
+    public double getMotionLatitude() {
+        return motionLatitude;
+    }
+
+    @JsonIgnore
+    public void setMotionLatitude(double motionLatitude) {
+        this.motionLatitude = motionLatitude;
+    }
+
+    private double motionLongitude;
+
+    @QueryIgnore
+    @JsonIgnore
+    public double getMotionLongitude() {
+        return motionLongitude;
+    }
+
+    @JsonIgnore
+    public void setMotionLongitude(double motionLongitude) {
+        this.motionLongitude = motionLongitude;
+    }
+
     private boolean overspeedState;
 
     @QueryIgnore

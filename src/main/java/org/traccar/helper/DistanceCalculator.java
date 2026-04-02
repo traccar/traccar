@@ -16,6 +16,8 @@
  */
 package org.traccar.helper;
 
+import org.traccar.model.Position;
+
 public final class DistanceCalculator {
 
     private DistanceCalculator() {
@@ -23,6 +25,10 @@ public final class DistanceCalculator {
 
     private static final double EQUATORIAL_EARTH_RADIUS = 6378137.0;
     private static final double DEG_TO_RAD = Math.PI / 180;
+
+    public static double distance(Position p1, Position p2) {
+        return distance(p1.getLatitude(), p1.getLongitude(), p2.getLatitude(), p2.getLongitude());
+    }
 
     public static double distance(double lat1, double lon1, double lat2, double lon2) {
         double dlong = (lon2 - lon1) * DEG_TO_RAD;

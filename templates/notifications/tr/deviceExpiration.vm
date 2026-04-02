@@ -3,6 +3,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-Mevcut Cihazınız: $device.name Geçerlilik tarihi sona ermiştir.
+Mevcut Cihazınız: $esc.html($device.name) Geçerlilik tarihi sona ermiştir.
 </body>
 </html>

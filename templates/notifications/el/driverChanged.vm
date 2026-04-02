@@ -1,4 +1,4 @@
-#set($subject = "Υπήρξε αλλαγή οδηγού στο όχημα $device.name")
+#set($subject = "Υπήρξε αλλαγή οδηγού στο όχημα $esc.html($device.name)")
 #if($driver)
 #set($driverName = $driver.name)
 #else
@@ -8,10 +8,10 @@
 <!DOCTYPE html>
 <html>
 <body>
-Συσκευή: $device.name<br>
+Συσκευή: $esc.html($device.name)<br>
 Ώρα: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Σημείο: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
-Οδηγός: $driverName<br>
+Οδηγός: $esc.html($driverName)<br>
 <br>
 <a href="$webUrl/settings/notifications?token=$token">Απεγγραφή</a>
 </body>

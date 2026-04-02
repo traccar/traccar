@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,12 @@
 package org.traccar.api.resource;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseObjectResource;
-import org.traccar.api.signature.TokenManager;
-import org.traccar.broadcast.BroadcastService;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
-import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
@@ -54,8 +48,6 @@ import jakarta.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -69,22 +61,13 @@ public class DeviceResource extends BaseObjectResource<Device> {
     private static final int IMAGE_SIZE_LIMIT = 500000;
 
     @Inject
-    private Config config;
-
-    @Inject
     private CacheManager cacheManager;
 
     @Inject
     private ConnectionManager connectionManager;
 
     @Inject
-    private BroadcastService broadcastService;
-
-    @Inject
     private MediaManager mediaManager;
-
-    @Inject
-    private TokenManager tokenManager;
 
     @Inject
     private LogAction actionLogger;
@@ -101,7 +84,9 @@ public class DeviceResource extends BaseObjectResource<Device> {
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
             @QueryParam("id") List<Long> deviceIds,
-            @QueryParam("excludeAttributes") boolean excludeAttributes) throws StorageException {
+            @QueryParam("excludeAttributes") boolean excludeAttributes,
+            @QueryParam("limit") int limit, @QueryParam("offset") int offset,
+            @QueryParam("keyword") String keyword) throws StorageException {
 
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
 
@@ -141,8 +126,13 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 }
             }
 
+            if (keyword != null && !keyword.isEmpty()) {
+                conditions.add(new Condition.Contains(
+                        List.of("name", "uniqueId", "phone", "model", "contact"), keyword));
+            }
+
             return storage.getObjectsStream(baseClass, new Request(
-                    columns, Condition.merge(conditions), new Order("name")));
+                    columns, Condition.merge(conditions), new Order("name", false, limit, offset)));
 
         }
     }
@@ -229,52 +219,6 @@ public class DeviceResource extends BaseObjectResource<Device> {
             return Response.ok(name + "." + extension).build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
-    }
-
-    @Path("share")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @POST
-    public String shareDevice(
-            @FormParam("deviceId") long deviceId,
-            @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-
-        User user = permissionsService.getUser(getUserId());
-        if (permissionsService.getServer().getBoolean(Keys.DEVICE_SHARE_DISABLE.getKey())) {
-            throw new SecurityException("Sharing is disabled");
-        }
-        if (user.getTemporary()) {
-            throw new SecurityException("Temporary user");
-        }
-        if (user.getExpirationTime() != null && user.getExpirationTime().before(expiration)) {
-            expiration = user.getExpirationTime();
-        }
-
-        Device device = storage.getObject(Device.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("id", deviceId),
-                        new Condition.Permission(User.class, user.getId(), Device.class))));
-
-        String shareEmail = user.getEmail() + ":" + device.getUniqueId();
-        User share = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("email", shareEmail)));
-
-        if (share == null) {
-            share = new User();
-            share.setName(device.getName());
-            share.setEmail(shareEmail);
-            share.setExpirationTime(expiration);
-            share.setTemporary(true);
-            share.setReadonly(true);
-            share.setLimitCommands(user.getLimitCommands() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
-            share.setDisableReports(user.getDisableReports() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
-
-            share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
-
-            storage.addPermission(new Permission(User.class, share.getId(), Device.class, deviceId));
-        }
-
-        return tokenManager.generateToken(share.getId(), expiration);
     }
 
 }

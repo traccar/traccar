@@ -44,7 +44,9 @@ public final class NewMotionProcessor {
         Position last = positions.peekLast();
         if (last != null) {
             long gap = position.getFixTime().getTime() - last.getFixTime().getTime();
-            if (gap > stopGap && averageSpeed(last, position) < minAverageSpeed) {
+            double gapDistance = position.getDouble(Position.KEY_DISTANCE);
+            double gapAverageSpeed = gap > 0 ? gapDistance / gap : Double.NaN;
+            if (gap > stopGap && gapDistance >= minDistance && gapAverageSpeed > minAverageSpeed) {
                 if (state.getMotionStreak()) {
                     addEvent(state, events, Event.TYPE_DEVICE_STOPPED, last);
                 }
@@ -58,9 +60,7 @@ public final class NewMotionProcessor {
         if (state.getMotionStreak()) {
             for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
                 Position candidate = iterator.next();
-                double distance = DistanceCalculator.distance(
-                        candidate.getLatitude(), candidate.getLongitude(),
-                        position.getLatitude(), position.getLongitude());
+                double distance = DistanceCalculator.distance(candidate, position);
                 if (distance >= minDistance) {
                     return;
                 }
@@ -78,20 +78,23 @@ public final class NewMotionProcessor {
                     position.getLatitude(), position.getLongitude());
             if (distance >= minDistance) {
                 state.setMotionStreak(true);
-                addEvent(state, events, Event.TYPE_DEVICE_MOVING, position);
+                Position startPosition = position;
+                Position next = position;
+                for (var iterator = positions.descendingIterator(); iterator.hasNext();) {
+                    Position candidate = iterator.next();
+                    boolean beforeStop = !candidate.getFixTime().after(state.getEventTime());
+                    double legDistance = DistanceCalculator.distance(candidate, next);
+                    long legDuration = next.getFixTime().getTime() - candidate.getFixTime().getTime();
+                    boolean legMoving = legDuration > 0 && legDistance / legDuration > minAverageSpeed;
+                    if (beforeStop || next != position && !legMoving) {
+                        break;
+                    }
+                    startPosition = candidate;
+                    next = candidate;
+                }
+                addEvent(state, events, Event.TYPE_DEVICE_MOVING, startPosition);
             }
         }
-    }
-
-    private static double averageSpeed(Position from, Position to) {
-        long duration = to.getFixTime().getTime() - from.getFixTime().getTime();
-        if (duration <= 0) {
-            return Double.NaN;
-        }
-        double distance = DistanceCalculator.distance(
-                from.getLatitude(), from.getLongitude(),
-                to.getLatitude(), to.getLongitude());
-        return distance / duration;
     }
 
     private static void addEvent(NewMotionState state, List<Event> events, String type, Position position) {

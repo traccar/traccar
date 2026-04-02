@@ -3,6 +3,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-Η Συσκευή σας $device.name θα λήξει στις $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+Η Συσκευή σας $esc.html($device.name) θα λήξει στις $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
 </body>
 </html>

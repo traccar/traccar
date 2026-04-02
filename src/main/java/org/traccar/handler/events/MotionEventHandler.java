@@ -42,10 +42,6 @@ public class MotionEventHandler extends BaseEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MotionEventHandler.class);
 
-    private static final String KEY_MOTION_TIME = "motionTime";
-    private static final String KEY_MOTION_LAT = "motionLat";
-    private static final String KEY_MOTION_LON = "motionLon";
-
     private final Config config;
     private final CacheManager cacheManager;
     private final Storage storage;
@@ -83,23 +79,32 @@ public class MotionEventHandler extends BaseEventHandler {
         NewMotionState state = new NewMotionState();
         state.setMotionStreak(device.getMotionStreak());
         state.setPositions(cacheManager.getPositions(device.getId()));
-        if (device.hasAttribute(KEY_MOTION_TIME)) {
+        if (device.hasAttribute("motionTime")) {
+            // TODO temporary migration path
             state.setEventPosition(
-                    new Date(device.getLong(KEY_MOTION_TIME)),
-                    device.getDouble(KEY_MOTION_LAT),
-                    device.getDouble(KEY_MOTION_LON));
+                    new Date(((Number) device.getAttributes().remove("motionTime")).longValue()),
+                    ((Number) device.getAttributes().remove("motionLat")).doubleValue(),
+                    ((Number) device.getAttributes().remove("motionLon")).doubleValue());
+            state.setChanged(true);
+        } else if (device.getMotionTime() != null) {
+            state.setEventPosition(
+                    device.getMotionTime(),
+                    device.getMotionLatitude(),
+                    device.getMotionLongitude());
         } else {
             state.setEventPosition(position);
         }
         NewMotionProcessor.updateState(state, position, minDistance, minDuration, stopGap);
         if (state.isChanged()) {
             device.setMotionStreak(state.getMotionStreak());
-            device.set(KEY_MOTION_TIME, state.getEventTime().getTime());
-            device.set(KEY_MOTION_LAT, state.getEventLatitude());
-            device.set(KEY_MOTION_LON, state.getEventLongitude());
+            device.setMotionTime(state.getEventTime());
+            device.setMotionLatitude(state.getEventLatitude());
+            device.setMotionLongitude(state.getEventLongitude());
             try {
                 storage.updateObject(device, new Request(
-                        new Columns.Include("motionStreak", "attributes"),
+                        new Columns.Include(
+                                "motionStreak", "motionTime", "motionLatitude", "motionLongitude",
+                                "attributes"),
                         new Condition.Equals("id", device.getId())));
             } catch (StorageException e) {
                 LOGGER.warn("Update device motion error", e);

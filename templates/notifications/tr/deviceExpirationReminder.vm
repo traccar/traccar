@@ -3,6 +3,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-Mevcut Cihazınız: $device.name şu tarihte süresi bitecektir: $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
+Mevcut Cihazınız: $esc.html($device.name) şu tarihte süresi bitecektir: $dateTool.format('yyyy-MM-dd', $expiration, $locale, $timezone).
 </body>
 </html>

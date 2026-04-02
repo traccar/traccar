@@ -21,6 +21,7 @@ import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.tools.generic.DateTool;
+import org.apache.velocity.tools.generic.EscapeTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,6 +76,7 @@ public class TextTemplateFormatter {
 
         velocityContext.put("webUrl", velocityEngine.getProperty("web.url"));
         velocityContext.put("dateTool", new DateTool());
+        velocityContext.put("esc", new EscapeTool());
         velocityContext.put("numberTool", new NumberTool());
         velocityContext.put("locale", Locale.getDefault());
         velocityContext.put("language", UserUtil.getLanguage(server, user));

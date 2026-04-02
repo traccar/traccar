@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,18 @@ public class CsvExportProvider {
         this.permissionsService = permissionsService;
     }
 
+    static String formatCell(Object value) {
+        if (value instanceof String) {
+            String trimmed = ((String) value).trim();
+            if (!trimmed.isEmpty()) {
+                char c = trimmed.charAt(0);
+                return c == '=' || c == '+' || c == '-' || c == '@' ? "" : trimmed;
+            }
+            return trimmed;
+        }
+        return Objects.toString(value, "");
+    }
+
     public void generate(
             OutputStream outputStream, long userId, long deviceId, long geofenceId,
             Date from, Date to) throws StorageException {
@@ -87,7 +99,7 @@ public class CsvExportProvider {
         try (PrintWriter writer = new PrintWriter(outputStream)) {
             writer.println(String.join(",", properties.keySet()));
             positions.forEach(position -> writer.println(properties.values().stream()
-                    .map(f -> Objects.toString(f.apply(position), ""))
+                    .map(f -> formatCell(f.apply(position)))
                     .collect(Collectors.joining(","))));
         }
     }

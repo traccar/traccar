@@ -1,4 +1,4 @@
-#set($subject = "$device.name: przekroczył prędkość")
+#set($subject = "$esc.html($device.name): przekroczył prędkość")
 #if($speedUnit == "kmh")
 #set($speedValue = $position.speed * 1.852)
 #set($speedString = $numberTool.format('0.0 km/h', $speedValue))
@@ -12,8 +12,8 @@
 <!DOCTYPE html>
 <html>
 <body>
-Urządzenie: $device.name<br>
-Przekroczyło prędkość: $speedString#{if}($geofence) in $geofence.name#{else}#{end}<br>
+Urządzenie: $esc.html($device.name)<br>
+Przekroczyło prędkość: $speedString#{if}($geofence) in $esc.html($geofence.name)#{else}#{end}<br>
 Czas: $dateTool.format('dd-MM-yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
 Lokalizacja: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
 <br>

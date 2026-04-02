@@ -9,7 +9,7 @@ info:
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
-  version: '6.11.1'
+  version: '6.12.2'
 servers:
   - url: https://demo.traccar.org/api
     description: Demo Server 1
@@ -43,6 +43,8 @@ tags:
     description: Device management
   - name: Groups
     description: Group management
+  - name: Share
+    description: Share devices and groups
   - name: Users
     description: User management
   - name: Permissions
@@ -125,6 +127,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -318,6 +335,21 @@ paths:
           description: Skip returning the attributes map
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -420,6 +452,21 @@ paths:
           description: Exclude attributes field from device payload
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter (searches name, uniqueId, phone, model, contact)
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -543,11 +590,11 @@ paths:
         '404':
           description: Device not found
           content: {}
-  /devices/share:
+  /share/device:
     post:
       summary: Share device location
       tags:
-        - Devices
+        - Share
       requestBody:
         required: true
         content:
@@ -559,6 +606,37 @@ paths:
                 - expiration
               properties:
                 deviceId:
+                  type: integer
+                expiration:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: eyJhbGciOi...
+        '403':
+          description: Sharing is disabled or temporary user
+          content: {}
+  /share/group:
+    post:
+      summary: Share group devices
+      tags:
+        - Share
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - groupId
+                - expiration
+              properties:
+                groupId:
                   type: integer
                 expiration:
                   type: string
@@ -591,6 +669,21 @@ paths:
           description: Standard users can use this only with their own _userId_
           schema:
             type: integer
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1157,6 +1250,21 @@ paths:
           description: Can only be used by admin or manager users
           schema:
             type: string
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter (searches name, email)
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1276,6 +1384,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1435,6 +1558,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1894,6 +2032,21 @@ paths:
           description: Standard users can use this only with their own _userId_
           schema:
             type: integer
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -1995,6 +2148,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -2096,6 +2264,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -2197,6 +2380,21 @@ paths:
           in: query
           schema:
             type: boolean
+        - name: limit
+          in: query
+          description: Limit the number of returned results
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          description: Offset for pagination
+          schema:
+            type: integer
+        - name: keyword
+          in: query
+          description: Search keyword filter
+          schema:
+            type: string
       responses:
         '200':
           description: OK

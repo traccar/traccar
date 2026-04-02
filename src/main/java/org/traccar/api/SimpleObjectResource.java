@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,21 +28,26 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.QueryParam;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.stream.Stream;
 
 public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResource<T> {
 
     private final String sortField;
+    private final List<String> searchColumns;
 
-    public SimpleObjectResource(Class<T> baseClass, String sortField) {
+    public SimpleObjectResource(Class<T> baseClass, String sortField, List<String> searchColumns) {
         super(baseClass);
         this.sortField = sortField;
+        this.searchColumns = searchColumns;
     }
 
     @GET
     public Stream<T> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
-            @QueryParam("excludeAttributes") boolean excludeAttributes) throws StorageException {
+            @QueryParam("excludeAttributes") boolean excludeAttributes,
+            @QueryParam("limit") int limit, @QueryParam("offset") int offset,
+            @QueryParam("keyword") String keyword) throws StorageException {
 
         var conditions = new LinkedList<Condition>();
 
@@ -59,9 +64,13 @@ public class SimpleObjectResource<T extends BaseModel> extends BaseObjectResourc
             conditions.add(new Condition.Permission(User.class, userId, baseClass));
         }
 
+        if (keyword != null && !keyword.isEmpty()) {
+            conditions.add(new Condition.Contains(searchColumns, keyword));
+        }
+
         Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
-        return storage.getObjectsStream(baseClass, new Request(
-                columns, Condition.merge(conditions), sortField != null ? new Order(sortField) : null));
+        Order order = new Order(sortField != null ? sortField : "id", false, limit, offset);
+        return storage.getObjectsStream(baseClass, new Request(columns, Condition.merge(conditions), order));
     }
 
 }

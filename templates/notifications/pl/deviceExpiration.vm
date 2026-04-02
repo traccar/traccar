@@ -3,6 +3,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-Twoje urządzenie $device.name wygasło.
+Twoje urządzenie $esc.html($device.name) wygasło.
 </body>
 </html>

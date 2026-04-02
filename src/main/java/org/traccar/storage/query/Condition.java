@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,6 +171,24 @@ public interface Condition {
             boolean ownerGroupModel = GroupedModel.class.isAssignableFrom(ownerClass);
             boolean propertyGroupModel = GroupedModel.class.isAssignableFrom(propertyClass);
             return (ownerGroupModel || propertyGroupModel) && !excludeGroups;
+        }
+    }
+
+    class Contains implements Condition {
+        private final List<String> columns;
+        private final String value;
+
+        public Contains(List<String> columns, String value) {
+            this.columns = columns;
+            this.value = value;
+        }
+
+        public List<String> getColumns() {
+            return columns;
+        }
+
+        public String getValue() {
+            return value;
         }
     }
 

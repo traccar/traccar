@@ -3,6 +3,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-Twoje urządzenie $device.name wygaśnie: $dateTool.format('dd-MM-yyyy', $expiration, $locale, $timezone).
+Twoje urządzenie $esc.html($device.name) wygaśnie: $dateTool.format('dd-MM-yyyy', $expiration, $locale, $timezone).
 </body>
 </html>

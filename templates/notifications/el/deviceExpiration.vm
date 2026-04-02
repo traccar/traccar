@@ -3,6 +3,6 @@
 <!DOCTYPE html>
 <html>
 <body>
-Η συσκευή σας $device.name έχει λήξει.
+Η συσκευή σας $esc.html($device.name) έχει λήξει.
 </body>
 </html>

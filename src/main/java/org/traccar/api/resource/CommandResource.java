@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
@@ -81,7 +81,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     private HttpServletRequest request;
 
     public CommandResource() {
-        super(Command.class, "description");
+        super(Command.class, "description", List.of("description"));
     }
 
     private BaseProtocol getDeviceProtocol(long deviceId) throws StorageException {
