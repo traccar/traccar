@@ -41,7 +41,6 @@ public class Es4x0Protocol extends BaseProtocol {
             }
         });
 
-        setTextCommandEncoder(new Es4x0ProtocolSmsEncoder(this));
     }
 
 }

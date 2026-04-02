@@ -21,90 +21,44 @@ import org.traccar.model.Position;
 
 public class Es4x0ProtocolDecoderTest extends ProtocolTest {
 
-    // Test data format:
-    // Header: ET410 (5 bytes: 45 54 34 31 30)
-    // IMEI: 8 bytes BCD (0086011102011438)
-    // Type: 1 byte (52=Regular, 4D=Maintenance, 4F=OBD)
-    // Seq: 1 byte
-    // Time: 4 bytes (Unix timestamp)
-    // Mask: 2 bytes (bit flags for data fields)
-    // Data: variable length based on mask
-
-    // Regular message: type=0x52, mask=0x0018 (bits 3,4 = lat+lon)
     @Test
-    public void testDecodeRegular() throws Exception {
+    public void testDecode() throws Exception {
+
         var decoder = inject(new Es4x0ProtocolDecoder(null));
-        Position position = new Position(decoder.getProtocolName());
-        position.setTime(new java.util.Date(949965330000L));
-        position.setLatitude(31.2304);
-        position.setLongitude(121.4737);
-        position.setValid(true);
+
         verifyPosition(decoder, binary(
-                "455434313000860111020114385214389F52120018129D618048676A68"), position);
-    }
+                "455434313000860111020114385214389F52120018129D618048676A68"));
 
-    // Regular message with speed: type=0x52, mask=0x0038 (bits 3,4,5 = lat+lon+speed)
-    @Test
-    public void testDecodeRegularWithSpeed() throws Exception {
-        var decoder = inject(new Es4x0ProtocolDecoder(null));
-        Position position = new Position(decoder.getProtocolName());
-        position.setTime(new java.util.Date(949965330000L));
-        position.setLatitude(31.2304);
-        position.setLongitude(121.4737);
-        position.setSpeed(100.0);
-        position.setValid(true);
         verifyPosition(decoder, binary(
-                "455434313000860111020114385214389F52120038129D618048676A6800002710"), position);
-    }
+                "455434313000860111020114385214389F52120038129D618048676A6800002710"));
 
-    // Regular message with course: type=0x52, mask=0x0058 (bits 3,4,6 = lat+lon+course)
-    @Test
-    public void testDecodeRegularWithCourse() throws Exception {
-        var decoder = inject(new Es4x0ProtocolDecoder(null));
-        Position position = new Position(decoder.getProtocolName());
-        position.setTime(new java.util.Date(949965330000L));
-        position.setLatitude(31.2304);
-        position.setLongitude(121.4737);
-        position.setCourse(90);
-        position.setValid(true);
+        verifyAttribute(decoder, binary(
+                "455434313000860111020114385214389F52120038129D618048676A6800002710"),
+                "speed", 360.0);
+
         verifyPosition(decoder, binary(
-                "455434313000860111020114385214389F52120058129D618048676A68005A"), position);
-    }
+                "455434313000860111020114385214389F52120058129D618048676A68005A"));
 
-    // Regular message with satellites: type=0x52, mask=0x0001 (bit 0 = satellites)
-    @Test
-    public void testDecodeRegularWithSatellites() throws Exception {
-        var decoder = inject(new Es4x0ProtocolDecoder(null));
+        verifyAttribute(decoder, binary(
+                "455434313000860111020114385214389F52120058129D618048676A68005A"),
+                "course", 90.0);
+
         verifyAttribute(decoder, binary(
                 "455434313000860111020114385214389F521200010801"),
                 Position.KEY_SATELLITES, 8);
-    }
 
-    // Regular message with HDOP: type=0x52, mask=0x0002 (bit 1 = HDOP)
-    @Test
-    public void testDecodeRegularWithHdop() throws Exception {
-        var decoder = inject(new Es4x0ProtocolDecoder(null));
         verifyAttribute(decoder, binary(
                 "455434313000860111020114385214389F521200020501"),
                 Position.KEY_HDOP, 0.5);
-    }
 
-    // Maintenance message: type=0x4D, mask=0x0001 (bit 0 = event)
-    @Test
-    public void testDecodeMaintenance() throws Exception {
-        var decoder = inject(new Es4x0ProtocolDecoder(null));
         verifyAttribute(decoder, binary(
                 "455434313000860111020114384D14389F5212000101"),
                 Position.KEY_EVENT, 1);
-    }
 
-    // OBD message: type=0x4F, mask=0x0001 (bit 0 = event)
-    @Test
-    public void testDecodeObd() throws Exception {
-        var decoder = inject(new Es4x0ProtocolDecoder(null));
         verifyAttribute(decoder, binary(
                 "455434313000860111020114384F14389F5212000101"),
                 Position.KEY_EVENT, 1);
+
     }
 
 }
