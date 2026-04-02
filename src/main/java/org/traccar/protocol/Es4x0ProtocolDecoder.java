@@ -240,8 +240,8 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
         getLastLocation(position, null);
     }
 
-    private String decodeAlarm(int eventId) {
-        return switch (eventId) {
+    private String decodeAlarm(int event) {
+        return switch (event) {
             case 0x04 -> Position.ALARM_GENERAL;
             case 0x15 -> Position.ALARM_OVERSPEED;
             case 0x0B, 0x17 -> Position.ALARM_LOW_BATTERY;
