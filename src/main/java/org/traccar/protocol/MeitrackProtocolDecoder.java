@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -360,7 +360,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             Network network = new Network();
 
-            buf.readUnsignedShortLE(); // length
+            int dataLength = buf.readUnsignedShortLE();
+            int dataEnd = buf.readerIndex() + dataLength;
             buf.readUnsignedShortLE(); // index
 
             int paramCount = buf.readUnsignedByte();
@@ -491,6 +492,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     default -> buf.skipBytes(length);
                 }
             }
+
+            buf.readerIndex(dataEnd);
 
             if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
                 position.setNetwork(network);
