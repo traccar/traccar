@@ -18,7 +18,6 @@ package org.traccar.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
-import org.traccar.NetworkMessage;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
 import org.traccar.model.Position;
@@ -84,11 +83,6 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
             default:
                 return null;
         }
-
-        if (channel != null) {
-            channel.writeAndFlush(new NetworkMessage(buf.retain(), remoteAddress));
-        }
-
         return position;
     }
 
