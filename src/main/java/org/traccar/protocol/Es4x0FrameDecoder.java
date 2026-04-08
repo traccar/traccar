@@ -23,49 +23,36 @@ import org.traccar.helper.BitUtil;
 
 public class Es4x0FrameDecoder extends BaseFrameDecoder {
 
-    public static final int MSG_REGULAR = 0x52;
-    public static final int MSG_MAINTENANCE = 0x4D;
-    public static final int MSG_OBD = 0x4F;
 
-    private static final byte[] HEADER = new byte[]{0x45, 0x54, 0x34, 0x31, 0x30};
 
-    private static final int HEADER_LENGTH = 5;
-    private static final int IMEI_LENGTH = 8;
-    private static final int MESSAGE_TYPE_OFFSET = HEADER_LENGTH + IMEI_LENGTH;
-    private static final int MASK_OFFSET = MESSAGE_TYPE_OFFSET + 6;
-    private static final int MESSAGE_HEADER_LENGTH = MASK_OFFSET + 2;
+    private static final int MESSAGE_HEADER_LENGTH = 21;
 
     @Override
     protected Object decode(
             ChannelHandlerContext ctx, Channel channel, ByteBuf buf) throws Exception {
 
-        int headerIndex = buf.indexOf(buf.readerIndex(), buf.writerIndex(), HEADER[0]);
-        if (headerIndex < 0) {
+
+        if (buf.readableBytes() < 5) {
             return null;
         }
 
-        buf.skipBytes(headerIndex - buf.readerIndex());
-
-        if (buf.readableBytes() < HEADER_LENGTH) {
-            return null;
-        }
-
-        for (int i = 0; i < HEADER.length; i++) {
-            if (buf.getByte(buf.readerIndex() + i) != HEADER[i]) {
-                buf.skipBytes(1);
-                return null;
-            }
-        }
+        if (buf.getByte(buf.readerIndex()) != 0x45
+        || buf.getByte(buf.readerIndex() + 1) != 0x54
+        || buf.getByte(buf.readerIndex() + 2) != 0x34
+        || buf.getByte(buf.readerIndex() + 3) != 0x31
+        || buf.getByte(buf.readerIndex() + 4) != 0x30) {
+    buf.skipBytes(1);
+    return null;
+}
 
         if (buf.readableBytes() < MESSAGE_HEADER_LENGTH) {
             return null;
         }
 
-        int readerIndex = buf.readerIndex();
-        int messageType = buf.getUnsignedByte(readerIndex + MESSAGE_TYPE_OFFSET);
-        int mask = buf.getUnsignedShort(readerIndex + MASK_OFFSET);
+        int messageType = buf.getUnsignedByte(buf.readerIndex() + 13);
+        int mask = buf.getUnsignedShort(buf.readerIndex() + 19);
 
-        int dataLength = calculateDataLength(messageType, mask, buf, readerIndex);
+        int dataLength = calculateDataLength(messageType, mask, buf, buf.readerIndex());
 
         int totalLength = MESSAGE_HEADER_LENGTH + dataLength;
 
@@ -78,11 +65,11 @@ public class Es4x0FrameDecoder extends BaseFrameDecoder {
 
     private int calculateDataLength(int messageType, int mask, ByteBuf buf, int readerIndex) {
         switch (messageType) {
-            case MSG_REGULAR:
+            case 0x52:
                 return calculateRegularDataLength(mask);
-            case MSG_MAINTENANCE:
+            case 0x4D:
                 return calculateMaintenanceDataLength(mask);
-            case MSG_OBD:
+            case 0x4F:
                 return calculateObdDataLength(mask, buf, readerIndex);
             default:
                 return 0;
@@ -172,41 +159,38 @@ public class Es4x0FrameDecoder extends BaseFrameDecoder {
         return length;
     }
 
-    private int calculateObdDataLength(int mask, ByteBuf buf, int readerIndex) {
-        int length = 0;
+private int calculateObdDataLength(int mask, ByteBuf buf, int readerIndex) {
+    int length = 0;
 
-        int fixedLength = 0;
-        if (BitUtil.check(mask, 0)) {
-            fixedLength += 1;
-        }
-        if (BitUtil.check(mask, 1)) {
-            fixedLength += 17;
-        }
-        if (BitUtil.check(mask, 2)) {
-            fixedLength += 2;
-        }
-        if (BitUtil.check(mask, 3)) {
-            fixedLength += 1;
-        }
-        if (BitUtil.check(mask, 4)) {
-            fixedLength += 1;
-        }
-        if (BitUtil.check(mask, 5)) {
-            fixedLength += 1;
-        }
-        if (BitUtil.check(mask, 6)) {
-            fixedLength += 1;
-        }
-
-        length += fixedLength;
-
-        if (BitUtil.check(mask, 7)) {
-            int dtcCountOffset = readerIndex + MESSAGE_HEADER_LENGTH + fixedLength;
-            int dtcCount = buf.getUnsignedByte(dtcCountOffset);
-            length += 1 + dtcCount * 5;
-        }
-
-        return length;
+    if (BitUtil.check(mask, 0)) {
+        length += 1;
     }
+    if (BitUtil.check(mask, 1)) {
+        length += 17;
+    }
+    if (BitUtil.check(mask, 2)) {
+        length += 2;
+    }
+    if (BitUtil.check(mask, 3)) {
+        length += 1;
+    }
+    if (BitUtil.check(mask, 4)) {
+        length += 1;
+    }
+    if (BitUtil.check(mask, 5)) {
+        length += 1;
+    }
+    if (BitUtil.check(mask, 6)) {
+        length += 1;
+    }
+
+    if (BitUtil.check(mask, 7)) {
+        int dtcCountOffset = readerIndex + MESSAGE_HEADER_LENGTH + length;
+        int dtcCount = buf.getUnsignedByte(dtcCountOffset);
+        length += 1 + dtcCount * 5;
+    }
+
+    return length;
+}
 
 }

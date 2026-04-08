@@ -65,12 +65,11 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         int type = buf.readUnsignedByte();
-        buf.readUnsignedByte(); // sequence
-        long messageTime = buf.readUnsignedInt();
+        buf.readUnsignedByte(); // index
 
         Position position = new Position(getProtocolName());
         position.setDeviceId(deviceSession.getDeviceId());
-        position.setTime(new Date(messageTime * 1000));
+        position.setTime(new Date(buf.readUnsignedInt() * 1000));
 
         switch (type) {
             case MSG_REGULAR:
@@ -103,18 +102,15 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_HDOP, buf.readUnsignedByte() / 10.0);
         }
         if (BitUtil.check(mask, 2)) {
-            long time = buf.readUnsignedInt();
-            Date deviceTime = new Date(time * 1000);
-            position.setDeviceTime(deviceTime);
-            position.setFixTime(deviceTime);
+            position.setTime(new Date(buf.readUnsignedInt() * 1000));
         }
         if (BitUtil.check(mask, 3)) {
             position.setLatitude(buf.readInt() / 10000000.0);
         }
         if (BitUtil.check(mask, 4)) {
             position.setLongitude(buf.readInt() / 10000000.0);
+            position.setValid(true);
         }
-        position.setValid(position.getLatitude() != 0 || position.getLongitude() != 0);
         if (BitUtil.check(mask, 5)) {
             position.setSpeed(buf.readInt() / 100.0 * 3.6);
         }
@@ -130,18 +126,15 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.KEY_OUTPUT, buf.readUnsignedByte());
         }
         if (BitUtil.check(mask, 9)) {
-            int eventId = buf.readUnsignedByte();
-            position.set(Position.KEY_EVENT, eventId);
-            String alarm = decodeAlarm(eventId);
-            if (alarm != null) {
-                position.addAlarm(alarm);
-            }
+            int event = buf.readUnsignedByte();
+            position.set(Position.KEY_EVENT, event);
+            position.addAlarm(decodeAlarm(event));
         }
         if (BitUtil.check(mask, 10)) {
             position.set(Position.KEY_ODOMETER, buf.readUnsignedInt());
         }
         if (BitUtil.check(mask, 11)) {
-            position.set("adc", buf.readUnsignedShort() / 100.0);
+            position.set(Position.PREFIX_ADC + 1, buf.readUnsignedShort() / 100.0);
         }
         if (BitUtil.check(mask, 12)) {
             position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
@@ -158,12 +151,9 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
         int mask = buf.readUnsignedShort();
 
         if (BitUtil.check(mask, 0)) {
-            int eventId = buf.readUnsignedByte();
-            position.set(Position.KEY_EVENT, eventId);
-            String alarm = decodeAlarm(eventId);
-            if (alarm != null) {
-                position.addAlarm(alarm);
-            }
+            int event = buf.readUnsignedByte();
+            position.set(Position.KEY_EVENT, event);
+            position.addAlarm(decodeAlarm(event));
         }
         if (BitUtil.check(mask, 1)) {
             position.set(Position.KEY_RSSI, buf.readUnsignedByte());
@@ -178,15 +168,16 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // message queue
         }
         if (BitUtil.check(mask, 5)) {
-            position.set(Position.KEY_ICCID, buf.readCharSequence(20, StandardCharsets.US_ASCII).toString().trim());
+            position.set(Position.KEY_ICCID,
+            buf.readCharSequence(20, StandardCharsets.US_ASCII).toString());
         }
         if (BitUtil.check(mask, 6)) {
             position.set(Position.KEY_VERSION_FW,
-            buf.readCharSequence(35, StandardCharsets.US_ASCII).toString().trim());
+            buf.readCharSequence(35, StandardCharsets.US_ASCII).toString());
         }
         if (BitUtil.check(mask, 7)) {
             position.set(Position.KEY_VERSION_HW,
-             buf.readCharSequence(14, StandardCharsets.US_ASCII).toString().trim());
+            buf.readCharSequence(14, StandardCharsets.US_ASCII).toString());
         }
 
         getLastLocation(position, null);
@@ -196,18 +187,15 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
         int mask = buf.readUnsignedShort();
 
         if (BitUtil.check(mask, 0)) {
-            int eventId = buf.readUnsignedByte();
-            position.set(Position.KEY_EVENT, eventId);
-            String alarm = decodeAlarm(eventId);
-            if (alarm != null) {
-                position.addAlarm(alarm);
-            }
+            int event = buf.readUnsignedByte();
+            position.set(Position.KEY_EVENT, event);
+            position.addAlarm(decodeAlarm(event));
         }
         if (BitUtil.check(mask, 1)) {
-            position.set(Position.KEY_VIN, buf.readCharSequence(17, StandardCharsets.US_ASCII).toString().trim());
+            position.set(Position.KEY_VIN, buf.readCharSequence(17, StandardCharsets.US_ASCII).toString());
         }
         if (BitUtil.check(mask, 2)) {
-            position.set(Position.KEY_RPM, (double) buf.readUnsignedShort());
+            position.set(Position.KEY_RPM, buf.readUnsignedShort());
         }
         if (BitUtil.check(mask, 3)) {
             position.set(Position.KEY_OBD_SPEED, buf.readUnsignedByte());
@@ -227,7 +215,7 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
                 StringBuilder dtcs = new StringBuilder();
                 for (int i = 0; i < dtcCount; i++) {
                     String dtc = buf.readCharSequence(5, StandardCharsets.US_ASCII)
-                            .toString().trim();
+                            .toString();
                     if (i > 0) {
                         dtcs.append(",");
                     }
