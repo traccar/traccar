@@ -23,7 +23,6 @@ public class Es4x0ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
-
         var decoder = inject(new Es4x0ProtocolDecoder(null));
 
         verifyPosition(decoder, binary(
@@ -34,7 +33,7 @@ public class Es4x0ProtocolDecoderTest extends ProtocolTest {
 
         verifyAttribute(decoder, binary(
                 "455434313000860111020114385214389F52120038129D618048676A6800002710"),
-                "speed", 360.0);
+                "speed", 194.38444900000002);
 
         verifyPosition(decoder, binary(
                 "455434313000860111020114385214389F52120058129D618048676A68005A"));
@@ -58,7 +57,6 @@ public class Es4x0ProtocolDecoderTest extends ProtocolTest {
         verifyAttribute(decoder, binary(
                 "455434313000860111020114384F14389F5212000101"),
                 Position.KEY_EVENT, 1);
-
     }
 
 }

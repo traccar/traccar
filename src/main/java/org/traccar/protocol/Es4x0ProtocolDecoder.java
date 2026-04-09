@@ -20,6 +20,7 @@ import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.helper.BitUtil;
+import org.traccar.helper.UnitsConverter;
 import org.traccar.model.Position;
 import org.traccar.session.DeviceSession;
 
@@ -83,11 +84,14 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
             default:
                 return null;
         }
+
         return position;
     }
 
     private void decodeRegular(Position position, ByteBuf buf) {
+
         int mask = buf.readUnsignedShort();
+        boolean valid = false;
 
         if (BitUtil.check(mask, 0)) {
             position.set(Position.KEY_SATELLITES, buf.readUnsignedByte());
@@ -100,13 +104,14 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
         }
         if (BitUtil.check(mask, 3)) {
             position.setLatitude(buf.readInt() / 10000000.0);
+            valid = true;
         }
         if (BitUtil.check(mask, 4)) {
             position.setLongitude(buf.readInt() / 10000000.0);
-            position.setValid(true);
+            valid = true;
         }
         if (BitUtil.check(mask, 5)) {
-            position.setSpeed(buf.readInt() / 100.0 * 3.6);
+            position.setSpeed(UnitsConverter.knotsFromCps(buf.readInt()));
         }
         if (BitUtil.check(mask, 6)) {
             position.setCourse(buf.readUnsignedShort());
@@ -139,9 +144,12 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
         if (BitUtil.check(mask, 14)) {
             position.set(Position.KEY_RSSI, buf.readUnsignedByte());
         }
+
+        position.setValid(valid);
     }
 
     private void decodeMaintenance(Position position, ByteBuf buf) {
+
         int mask = buf.readUnsignedShort();
 
         if (BitUtil.check(mask, 0)) {
@@ -162,22 +170,20 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // message queue
         }
         if (BitUtil.check(mask, 5)) {
-            position.set(Position.KEY_ICCID,
-            buf.readCharSequence(20, StandardCharsets.US_ASCII).toString());
+            position.set(Position.KEY_ICCID, buf.readCharSequence(20, StandardCharsets.US_ASCII).toString());
         }
         if (BitUtil.check(mask, 6)) {
-            position.set(Position.KEY_VERSION_FW,
-            buf.readCharSequence(35, StandardCharsets.US_ASCII).toString());
+            position.set(Position.KEY_VERSION_FW, buf.readCharSequence(35, StandardCharsets.US_ASCII).toString());
         }
         if (BitUtil.check(mask, 7)) {
-            position.set(Position.KEY_VERSION_HW,
-            buf.readCharSequence(14, StandardCharsets.US_ASCII).toString());
+            position.set(Position.KEY_VERSION_HW, buf.readCharSequence(14, StandardCharsets.US_ASCII).toString());
         }
 
         getLastLocation(position, null);
     }
 
     private void decodeObd(Position position, ByteBuf buf) {
+
         int mask = buf.readUnsignedShort();
 
         if (BitUtil.check(mask, 0)) {
@@ -208,8 +214,7 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
             if (dtcCount > 0) {
                 StringBuilder dtcs = new StringBuilder();
                 for (int i = 0; i < dtcCount; i++) {
-                    String dtc = buf.readCharSequence(5, StandardCharsets.US_ASCII)
-                            .toString();
+                    String dtc = buf.readCharSequence(5, StandardCharsets.US_ASCII).toString();
                     if (i > 0) {
                         dtcs.append(",");
                     }
@@ -226,7 +231,8 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
         return switch (event) {
             case 0x04 -> Position.ALARM_GENERAL;
             case 0x15 -> Position.ALARM_OVERSPEED;
-            case 0x0B, 0x17 -> Position.ALARM_LOW_BATTERY;
+            case 0x0B -> Position.ALARM_LOW_BATTERY;
+            case 0x17 -> Position.ALARM_LOW_POWER;
             case 0x02 -> Position.ALARM_POWER_CUT;
             case 0x20 -> Position.ALARM_BRAKING;
             case 0x21 -> Position.ALARM_ACCELERATION;
