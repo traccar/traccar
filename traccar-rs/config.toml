@@ -1,0 +1,35 @@
+# Traccar GPS Tracking Server Configuration
+
+[web]
+port = 8082
+address = "0.0.0.0"
+
+[database]
+url = "sqlite:traccar.db"
+max_connections = 10
+
+[logger]
+console = true
+level = "info"
+
+[geocoder]
+enable = false
+
+[server]
+registration = true
+
+# Protocol ports (uncomment to enable)
+# [protocols.gps103]
+# port = 5001
+#
+# [protocols.gt06]
+# port = 5023
+#
+# [protocols.h02]
+# port = 5013
+#
+# [protocols.osmand]
+# port = 5055
+#
+# [protocols.teltonika]
+# port = 5027

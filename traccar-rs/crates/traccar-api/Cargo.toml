@@ -1,0 +1,25 @@
+[package]
+name = "traccar-api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+traccar-model = { path = "../traccar-model" }
+traccar-storage = { path = "../traccar-storage" }
+traccar-handler = { path = "../traccar-handler" }
+axum.workspace = true
+tokio.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+async-trait.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+jsonwebtoken.workspace = true
+bcrypt.workspace = true
+uuid.workspace = true
+dashmap.workspace = true
+futures.workspace = true
+toml.workspace = true

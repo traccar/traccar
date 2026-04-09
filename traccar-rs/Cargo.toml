@@ -1,0 +1,76 @@
+[workspace]
+members = [
+    ".",
+    "crates/traccar-model",
+    "crates/traccar-storage",
+    "crates/traccar-protocol",
+    "crates/traccar-api",
+    "crates/traccar-handler",
+    "crates/traccar-notify",
+    "crates/traccar-geocoder",
+    "crates/traccar-forward",
+    "crates/traccar-report",
+    "crates/traccar-broadcast",
+    "crates/traccar-schedule",
+    "crates/traccar-helper",
+]
+resolver = "2"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.7", features = ["ws"] }
+sqlx = { version = "0.8", features = ["runtime-tokio", "sqlite", "postgres", "mysql", "chrono", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tokio-util = { version = "0.7", features = ["codec"] }
+bytes = "1"
+thiserror = "2"
+anyhow = "1"
+reqwest = { version = "0.12", features = ["json"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+dashmap = "6"
+toml = "0.8"
+lettre = { version = "0.11", features = ["tokio1-native-tls"] }
+geo = "0.29"
+prost = "0.13"
+tera = "1"
+uuid = { version = "1", features = ["v4"] }
+bcrypt = "0.16"
+jsonwebtoken = "9"
+async-trait = "0.1"
+futures = "0.3"
+regex = "1"
+hex = "0.4"
+
+[package]
+name = "traccar"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+traccar-model = { path = "crates/traccar-model" }
+traccar-storage = { path = "crates/traccar-storage" }
+traccar-protocol = { path = "crates/traccar-protocol" }
+traccar-api = { path = "crates/traccar-api" }
+traccar-handler = { path = "crates/traccar-handler" }
+traccar-notify = { path = "crates/traccar-notify" }
+traccar-geocoder = { path = "crates/traccar-geocoder" }
+traccar-forward = { path = "crates/traccar-forward" }
+traccar-report = { path = "crates/traccar-report" }
+traccar-broadcast = { path = "crates/traccar-broadcast" }
+traccar-schedule = { path = "crates/traccar-schedule" }
+traccar-helper = { path = "crates/traccar-helper" }
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+toml.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+axum.workspace = true
+thiserror.workspace = true
+sqlx.workspace = true

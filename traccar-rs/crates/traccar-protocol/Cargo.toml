@@ -1,0 +1,24 @@
+[package]
+name = "traccar-protocol"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+traccar-model = { path = "../traccar-model" }
+traccar-storage = { path = "../traccar-storage" }
+traccar-helper = { path = "../traccar-helper" }
+traccar-handler = { path = "../traccar-handler" }
+tokio.workspace = true
+tokio-util.workspace = true
+bytes.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+async-trait.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+futures.workspace = true
+dashmap.workspace = true
+regex.workspace = true
+hex.workspace = true
+reqwest.workspace = true

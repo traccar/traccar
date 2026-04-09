@@ -1,0 +1,17 @@
+[package]
+name = "traccar-notify"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+traccar-model = { path = "../traccar-model" }
+traccar-storage = { path = "../traccar-storage" }
+serde.workspace = true
+serde_json.workspace = true
+async-trait.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tokio.workspace = true
+reqwest.workspace = true
+lettre.workspace = true
+tera.workspace = true

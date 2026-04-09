@@ -1,0 +1,18 @@
+[package]
+name = "traccar-handler"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+traccar-model = { path = "../traccar-model" }
+traccar-storage = { path = "../traccar-storage" }
+traccar-helper = { path = "../traccar-helper" }
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+async-trait.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tokio.workspace = true
+geo.workspace = true
+reqwest.workspace = true

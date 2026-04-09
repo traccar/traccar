@@ -1,0 +1,15 @@
+[package]
+name = "traccar-schedule"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+traccar-model = { path = "../traccar-model" }
+traccar-storage = { path = "../traccar-storage" }
+serde.workspace = true
+chrono.workspace = true
+async-trait.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tokio.workspace = true
+futures.workspace = true
