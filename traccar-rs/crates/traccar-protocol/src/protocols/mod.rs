@@ -537,5 +537,12 @@ pub fn register_all(_registry: &mut ProtocolRegistry) {
     //   - xt013 (xt013::Xt013Decoder)
     //   - xt2400 (xt2400::Xt2400Decoder)
     //   - ywt (ywt::YwtDecoder)
-    tracing::info!("Protocol modules loaded (implementations pending)");
+    // Register fully implemented protocols
+    gps103::register(registry);
+    gt06::register(registry);
+    h02::register(registry);
+    osmand::register(registry);
+    teltonika::register(registry);
+
+    tracing::info!("Registered 5 protocol implementations, {} stub modules loaded", 258);
 }
