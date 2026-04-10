@@ -170,10 +170,10 @@ public class Es4x0ProtocolDecoder extends BaseProtocolDecoder {
             buf.readUnsignedByte(); // message queue
         }
         if (BitUtil.check(mask, 5)) {
-           position.set(Position.KEY_ICCID, buf.readCharSequence(20, StandardCharsets.US_ASCII).toString());
+            position.set(Position.KEY_ICCID, buf.readCharSequence(20, StandardCharsets.US_ASCII).toString());
         }
         if (BitUtil.check(mask, 6)) {
-             position.set(Position.KEY_VERSION_FW, buf.readCharSequence(35, StandardCharsets.US_ASCII).toString());
+            position.set(Position.KEY_VERSION_FW, buf.readCharSequence(35, StandardCharsets.US_ASCII).toString());
         }
         if (BitUtil.check(mask, 7)) {
             position.set(Position.KEY_VERSION_HW, buf.readCharSequence(14, StandardCharsets.US_ASCII).toString());
