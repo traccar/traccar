@@ -101,7 +101,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
             switch (tag) {
 
-                case 1: {
+                case 1:
                     int batMv = buf.readUnsignedShortLE();
                     int extMv = buf.readUnsignedShortLE();
                     if (extMv != 0x0000 && extMv != 0xFFFF) {
@@ -111,19 +111,16 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                         position.set(Position.KEY_BATTERY, batMv / 1000.0);
                     }
                     break;
-                }
 
-                case 3: {
+                case 3:
                     position.setLatitude(buf.readFloatLE());
                     break;
-                }
 
-                case 4: {
+                case 4:
                     position.setLongitude(buf.readFloatLE());
                     break;
-                }
 
-                case 5: {
+                case 5:
                     int course = buf.readUnsignedByte() * 2;
                     int altitude = buf.readUnsignedByte() * 10;
                     int satByte = buf.readUnsignedByte();
@@ -139,9 +136,8 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                         position.setValid(true);
                     }
                     break;
-                }
 
-                case 6: {
+                case 6:
                     switch (buf.readUnsignedByte()) {
                         case 0x01: {
                             int virtualSensors = buf.readUnsignedByte();
@@ -169,78 +165,65 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                             break;
                     }
                     break;
-                }
 
-                case 7: {
+                case 7:
                     cid = buf.readUnsignedShortLE();
                     lac = buf.readUnsignedShortLE();
                     break;
-                }
 
-                case 8: {
+                case 8:
                     rssi = buf.readUnsignedByte();
                     mcc = buf.readUnsignedShortLE();
                     mnc = buf.readUnsignedByte();
                     break;
-                }
 
-                case 9: {
+                case 9:
                     position.set(Position.KEY_STATUS, (long) buf.readUnsignedIntLE());
                     break;
-                }
 
-                case 51: {
+                case 51:
                     position.set("canStatus", buf.readUnsignedIntLE());
                     break;
-                }
 
-                case 52: {
+                case 52:
                     position.set(Position.KEY_HOURS, (long) (buf.readUnsignedIntLE() / 100.0 * 3600 * 1000));
                     break;
-                }
 
-                case 53: {
+                case 53:
                     position.set(Position.KEY_ODOMETER, (long) (buf.readUnsignedIntLE() / 100.0 * 1000));
                     break;
-                }
 
-                case 54: {
+                case 54:
                     position.set(Position.KEY_FUEL_USED, buf.readUnsignedIntLE() / 10.0);
                     break;
-                }
 
-                case 55: {
+                case 55:
                     position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShortLE() / 10.0);
                     buf.skipBytes(2);
                     break;
-                }
 
-                case 56: {
+                case 56:
                     position.set("fuelLitres", buf.readUnsignedIntLE());
                     break;
-                }
 
-                case 57: {
+                case 57:
                     position.set(Position.KEY_RPM, buf.readUnsignedShortLE());
                     buf.skipBytes(2);
                     break;
-                }
 
-                case 58: {
+                case 58:
                     position.set(Position.KEY_ENGINE_TEMP, buf.readUnsignedIntLE());
                     break;
-                }
 
-                case 59: {
+                case 59:
                     position.set(Position.KEY_OBD_SPEED, buf.readUnsignedIntLE());
                     break;
-                }
 
                 case 60:
                 case 61:
                 case 62:
                 case 63:
-                case 64: {
+                case 64:
                     int axleIndex = tag - 60 + 1;
                     if (axleIndex == 2) {
                         position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedIntLE());
@@ -249,9 +232,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
 
-                }
-
-                case 69: {
+                case 69:
                     position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
                     position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
                     int motionBits = buf.readUnsignedShortLE();
@@ -259,7 +240,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                         position.set("motionState", motionBits);
                     }
                     break;
-                }
 
                 case 71:
                 case 72:
@@ -269,7 +249,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case 76:
                 case 77:
                 case 78:
-                case 79: {
+                case 79:
                     int idx = tag - 70;
                     int level = buf.readUnsignedShortLE();
                     int tempRaw = buf.readUnsignedShortLE();
@@ -278,13 +258,11 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                         position.set("llsTemperture" + idx, (tempRaw - 100.0) / 10.0);
                     }
                     break;
-                }
 
-                case 151: {
+                case 151:
                     position.set(Position.KEY_HDOP, buf.readUnsignedShortLE() / 100.0);
                     buf.skipBytes(2);
                     break;
-                }
 
                 default:
                     buf.skipBytes(4);
