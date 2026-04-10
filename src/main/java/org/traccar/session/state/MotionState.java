@@ -26,6 +26,7 @@ public class MotionState {
         MotionState state = new MotionState();
         state.motionStreak = device.getMotionStreak();
         state.motionState = device.getMotionState();
+        state.motionPositionId = device.getMotionPositionId();
         state.motionTime = device.getMotionTime();
         state.motionDistance = device.getMotionDistance();
         return state;
@@ -34,6 +35,7 @@ public class MotionState {
     public void toDevice(Device device) {
         device.setMotionStreak(motionStreak);
         device.setMotionState(motionState);
+        device.setMotionPositionId(motionPositionId);
         device.setMotionTime(motionTime);
         device.setMotionDistance(motionDistance);
     }

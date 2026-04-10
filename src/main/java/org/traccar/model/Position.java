@@ -55,9 +55,10 @@ public class Position extends Message {
     public static final String KEY_POWER = "power"; // volts
     public static final String KEY_BATTERY = "battery"; // volts
     public static final String KEY_BATTERY_LEVEL = "batteryLevel"; // percentage
-    public static final String KEY_FUEL_LEVEL = "fuel"; // liters
+    public static final String KEY_FUEL = "fuel"; // liters
     public static final String KEY_FUEL_USED = "fuelUsed"; // liters
     public static final String KEY_FUEL_CONSUMPTION = "fuelConsumption"; // liters/hour
+    public static final String KEY_FUEL_LEVEL = "fuelLevel"; // percentage
 
     public static final String KEY_VERSION_FW = "versionFw";
     public static final String KEY_VERSION_HW = "versionHw";
@@ -206,11 +207,13 @@ public class Position extends Message {
 
     private boolean outdated;
 
+    @JsonIgnore
     @QueryIgnore
     public boolean getOutdated() {
         return outdated;
     }
 
+    @JsonIgnore
     @QueryIgnore
     public void setOutdated(boolean outdated) {
         this.outdated = outdated;

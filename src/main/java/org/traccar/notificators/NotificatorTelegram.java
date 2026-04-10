@@ -20,14 +20,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
+import org.glassfish.jersey.client.ClientProperties;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.traccar.helper.ObjectMapperContextResolver;
 import org.traccar.model.Event;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.notification.NotificationFormatter;
 import org.traccar.notification.NotificationMessage;
+
+import java.net.URI;
 
 @Singleton
 public class NotificatorTelegram extends Notificator {
@@ -62,15 +67,33 @@ public class NotificatorTelegram extends Notificator {
     }
 
     @Inject
-    public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter, Client client) {
+    public NotificatorTelegram(Config config, NotificationFormatter notificationFormatter,
+            Client client, ObjectMapperContextResolver objectMapperContextResolver) {
         super(notificationFormatter);
-        this.client = client;
         urlSendText = String.format(
                 "https://api.telegram.org/bot%s/sendMessage", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         urlSendLocation = String.format(
                 "https://api.telegram.org/bot%s/sendLocation", config.getString(Keys.NOTIFICATOR_TELEGRAM_KEY));
         chatId = config.getString(Keys.NOTIFICATOR_TELEGRAM_CHAT_ID);
         sendLocation = config.getBoolean(Keys.NOTIFICATOR_TELEGRAM_SEND_LOCATION);
+
+        String proxyUrl = config.getString(Keys.NOTIFICATOR_TELEGRAM_PROXY_URL);
+        if (proxyUrl != null) {
+            ClientBuilder clientBuilder = ClientBuilder.newBuilder()
+                    .register(objectMapperContextResolver)
+                    .property(ClientProperties.PROXY_URI, proxyUrl);
+            String userInfo = URI.create(proxyUrl).getUserInfo();
+            if (userInfo != null) {
+                String[] credentials = userInfo.split(":", 2);
+                clientBuilder.property(ClientProperties.PROXY_USERNAME, credentials[0]);
+                if (credentials.length > 1) {
+                    clientBuilder.property(ClientProperties.PROXY_PASSWORD, credentials[1]);
+                }
+            }
+            this.client = clientBuilder.build();
+        } else {
+            this.client = client;
+        }
     }
 
     private LocationMessage createLocationMessage(String messageChatId, Position position) {

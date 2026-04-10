@@ -236,7 +236,7 @@ public class Mta6ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         if (BitUtil.check(flags, 3)) {
-            position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShort());
+            position.set(Position.KEY_FUEL, buf.readUnsignedShort());
             position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShort());
             position.set(Position.PREFIX_ADC + 3, buf.readUnsignedShort());
             position.set(Position.PREFIX_ADC + 4, buf.readUnsignedShort());

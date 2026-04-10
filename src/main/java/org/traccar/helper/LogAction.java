@@ -92,6 +92,16 @@ public final class LogAction {
         logLoginAction(request, ACTION_LOGOUT, userId);
     }
 
+    public void token(HttpServletRequest request, long userId, long tokenId) {
+        Action action = new Action();
+        action.setAddress(WebHelper.retrieveRemoteAddress(request));
+        action.setUserId(userId);
+        action.setActionType(ACTION_CREATE);
+        action.setObjectType("token");
+        action.setObjectId(tokenId);
+        storeAction(action);
+    }
+
     public void failedLogin(HttpServletRequest request) {
         Action action = new Action();
         action.setAddress(WebHelper.retrieveRemoteAddress(request));

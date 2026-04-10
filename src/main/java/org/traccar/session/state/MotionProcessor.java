@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,11 +32,14 @@ public final class MotionProcessor {
         if (last != null) {
             long oldTime = last.getFixTime().getTime();
             long newTime = position.getFixTime().getTime();
-            if (newTime - oldTime >= tripsConfig.getMinimalNoDataDuration()) {
+            if (newTime - oldTime >= tripsConfig.getMinimalNoDataDuration() && state.getMotionStreak()) {
                 state.setMotionStreak(false);
+                state.setMotionState(false);
+                state.setMotionPositionId(0);
                 state.setMotionTime(null);
                 state.setMotionDistance(0);
                 state.setEvent(new Event(Event.TYPE_DEVICE_STOPPED, last));
+                return;
             }
         }
 

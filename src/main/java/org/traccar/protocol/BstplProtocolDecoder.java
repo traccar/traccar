@@ -163,7 +163,7 @@ public class BstplProtocolDecoder extends BaseProtocolDecoder {
 
             position.set(Position.KEY_RPM, parser.nextInt());
             position.set(Position.KEY_OBD_ODOMETER, parser.nextInt());
-            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+            position.set(Position.KEY_FUEL, parser.nextInt());
             position.set("gear", parser.nextInt());
             position.set(Position.KEY_ENGINE_TEMP, parser.nextDouble());
             position.set(Position.KEY_COOLANT_TEMP, parser.nextDouble());

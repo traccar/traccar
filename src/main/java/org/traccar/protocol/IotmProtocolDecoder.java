@@ -86,7 +86,7 @@ public class IotmProtocolDecoder extends BaseMqttProtocolDecoder {
             case 0x2000 -> position.set(Position.KEY_OBD_SPEED, record.readUnsignedByte());
             case 0x2001 -> position.set(Position.KEY_SATELLITES, record.readUnsignedByte());
             case 0x2006 -> position.set(Position.KEY_THROTTLE, record.readUnsignedByte());
-            case 0x2007 -> position.set(Position.KEY_FUEL_LEVEL, record.readUnsignedByte());
+            case 0x2007 -> position.set(Position.KEY_FUEL, record.readUnsignedByte());
             case 0x2008 -> position.set(Position.KEY_COOLANT_TEMP, record.readUnsignedByte());
             case 0x2009 -> position.set("fuel2", record.readUnsignedByte());
             case 0x200A -> position.set(Position.KEY_ENGINE_LOAD, record.readUnsignedByte());

@@ -62,6 +62,18 @@ public final class PositionUtil {
         }
     }
 
+    public static Stream<Position> getPositionsStreamWithExtra(
+            Storage storage, long deviceId, Date from, Date to) throws StorageException {
+        Stream<Position> extraStream = storage.getObjectsStream(Position.class, new Request(
+                new Columns.All(),
+                new Condition.And(
+                        new Condition.Equals("deviceId", deviceId),
+                        new Condition.Compare("fixTime", "<", from)),
+                new Order("fixTime", true, 1)));
+        Stream<Position> positions = getPositionsStream(storage, deviceId, from, to);
+        return Stream.concat(extraStream, positions);
+    }
+
     public static Stream<Position> getPositionsStream(
             Storage storage, long deviceId, Date from, Date to) throws StorageException {
         return storage.getObjectsStream(Position.class, new Request(

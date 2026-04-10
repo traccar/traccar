@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,12 @@
 package org.traccar.api.resource;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.core.Context;
 import org.traccar.api.BaseObjectResource;
-import org.traccar.api.signature.TokenManager;
-import org.traccar.broadcast.BroadcastService;
-import org.traccar.config.Config;
-import org.traccar.config.Keys;
 import org.traccar.database.MediaManager;
 import org.traccar.helper.LogAction;
 import org.traccar.model.Device;
 import org.traccar.model.DeviceAccumulators;
-import org.traccar.model.Permission;
 import org.traccar.model.Position;
 import org.traccar.model.User;
 import org.traccar.session.ConnectionManager;
@@ -54,11 +48,9 @@ import jakarta.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Collection;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Path("devices")
 @Produces(MediaType.APPLICATION_JSON)
@@ -69,22 +61,13 @@ public class DeviceResource extends BaseObjectResource<Device> {
     private static final int IMAGE_SIZE_LIMIT = 500000;
 
     @Inject
-    private Config config;
-
-    @Inject
     private CacheManager cacheManager;
 
     @Inject
     private ConnectionManager connectionManager;
 
     @Inject
-    private BroadcastService broadcastService;
-
-    @Inject
     private MediaManager mediaManager;
-
-    @Inject
-    private TokenManager tokenManager;
 
     @Inject
     private LogAction actionLogger;
@@ -97,29 +80,34 @@ public class DeviceResource extends BaseObjectResource<Device> {
     }
 
     @GET
-    public Collection<Device> get(
+    public Stream<Device> get(
             @QueryParam("all") boolean all, @QueryParam("userId") long userId,
             @QueryParam("uniqueId") List<String> uniqueIds,
-            @QueryParam("id") List<Long> deviceIds) throws StorageException {
+            @QueryParam("id") List<Long> deviceIds,
+            @QueryParam("excludeAttributes") boolean excludeAttributes,
+            @QueryParam("limit") int limit, @QueryParam("offset") int offset,
+            @QueryParam("keyword") String keyword) throws StorageException {
+
+        Columns columns = excludeAttributes ? new Columns.Exclude("attributes") : new Columns.All();
 
         if (!uniqueIds.isEmpty() || !deviceIds.isEmpty()) {
 
             List<Device> result = new LinkedList<>();
             for (String uniqueId : uniqueIds) {
                 result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
+                        columns,
                         new Condition.And(
                                 new Condition.Equals("uniqueId", uniqueId),
                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
             }
             for (Long deviceId : deviceIds) {
                 result.addAll(storage.getObjects(Device.class, new Request(
-                        new Columns.All(),
+                        columns,
                         new Condition.And(
                                 new Condition.Equals("id", deviceId),
                                 new Condition.Permission(User.class, getUserId(), Device.class)))));
             }
-            return result;
+            return result.stream();
 
         } else {
 
@@ -138,8 +126,13 @@ public class DeviceResource extends BaseObjectResource<Device> {
                 }
             }
 
-            return storage.getObjects(baseClass, new Request(
-                    new Columns.All(), Condition.merge(conditions), new Order("name")));
+            if (keyword != null && !keyword.isEmpty()) {
+                conditions.add(new Condition.Contains(
+                        List.of("name", "uniqueId", "phone", "model", "contact"), keyword));
+            }
+
+            return storage.getObjectsStream(baseClass, new Request(
+                    columns, Condition.merge(conditions), new Order("name", false, limit, offset)));
 
         }
     }
@@ -190,7 +183,6 @@ public class DeviceResource extends BaseObjectResource<Device> {
             case "image/png" -> "png";
             case "image/gif" -> "gif";
             case "image/webp" -> "webp";
-            case "image/svg+xml" -> "svg";
             default -> throw new IllegalArgumentException("Unsupported image type");
         };
     }
@@ -227,52 +219,6 @@ public class DeviceResource extends BaseObjectResource<Device> {
             return Response.ok(name + "." + extension).build();
         }
         return Response.status(Response.Status.NOT_FOUND).build();
-    }
-
-    @Path("share")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @POST
-    public String shareDevice(
-            @FormParam("deviceId") long deviceId,
-            @FormParam("expiration") Date expiration) throws StorageException, GeneralSecurityException, IOException {
-
-        User user = permissionsService.getUser(getUserId());
-        if (permissionsService.getServer().getBoolean(Keys.DEVICE_SHARE_DISABLE.getKey())) {
-            throw new SecurityException("Sharing is disabled");
-        }
-        if (user.getTemporary()) {
-            throw new SecurityException("Temporary user");
-        }
-        if (user.getExpirationTime() != null && user.getExpirationTime().before(expiration)) {
-            expiration = user.getExpirationTime();
-        }
-
-        Device device = storage.getObject(Device.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("id", deviceId),
-                        new Condition.Permission(User.class, user.getId(), Device.class))));
-
-        String shareEmail = user.getEmail() + ":" + device.getUniqueId();
-        User share = storage.getObject(User.class, new Request(
-                new Columns.All(), new Condition.Equals("email", shareEmail)));
-
-        if (share == null) {
-            share = new User();
-            share.setName(device.getName());
-            share.setEmail(shareEmail);
-            share.setExpirationTime(expiration);
-            share.setTemporary(true);
-            share.setReadonly(true);
-            share.setLimitCommands(user.getLimitCommands() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_COMMANDS));
-            share.setDisableReports(user.getDisableReports() || !config.getBoolean(Keys.WEB_SHARE_DEVICE_REPORTS));
-
-            share.setId(storage.addObject(share, new Request(new Columns.Exclude("id"))));
-
-            storage.addPermission(new Permission(User.class, share.getId(), Device.class, deviceId));
-        }
-
-        return tokenManager.generateToken(share.getId(), expiration);
     }
 
 }

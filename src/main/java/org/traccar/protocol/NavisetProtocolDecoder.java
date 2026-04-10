@@ -170,7 +170,7 @@ public class NavisetProtocolDecoder extends BaseProtocolDecoder {
                         position.set("fuel2", buf.readUnsignedShortLE());
                     }
                     if (BitUtil.check(dataMask, 2)) {
-                        position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShortLE());
+                        position.set(Position.KEY_FUEL, buf.readUnsignedShortLE());
                     }
                     if (BitUtil.check(dataMask, 3)) {
                         buf.skipBytes(18);

@@ -596,7 +596,7 @@ public class Tk103ProtocolDecoder extends BaseProtocolDecoder {
                 }
             }
 
-            position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+            position.set(Position.KEY_FUEL, parser.nextHexInt());
             position.set(Position.KEY_ODOMETER, parser.nextLong(16, 0));
         }
 

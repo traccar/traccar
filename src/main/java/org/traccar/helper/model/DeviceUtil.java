@@ -47,6 +47,11 @@ public final class DeviceUtil {
         var devices = storage.getObjects(Device.class, new Request(
                 new Columns.All(),
                 new Condition.Permission(User.class, userId, Device.class)));
+
+        if (deviceIds.isEmpty() && groupIds.isEmpty()) {
+            return devices;
+        }
+
         var deviceById = devices.stream()
                 .collect(Collectors.toUnmodifiableMap(Device::getId, x -> x));
         var devicesByGroup = devices.stream()

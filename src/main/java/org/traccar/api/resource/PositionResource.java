@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.traccar.api.resource;
 import org.traccar.api.BaseResource;
 import org.traccar.helper.model.PositionUtil;
 import org.traccar.model.Device;
+import org.traccar.model.Geofence;
 import org.traccar.model.Position;
 import org.traccar.model.UserRestrictions;
 import org.traccar.reports.CsvExportProvider;
@@ -41,6 +42,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
+import javax.xml.stream.XMLStreamException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -64,7 +66,7 @@ public class PositionResource extends BaseResource {
     @GET
     public Stream<Position> getJson(
             @QueryParam("deviceId") long deviceId, @QueryParam("id") List<Long> positionIds,
-            @QueryParam("from") Date from, @QueryParam("to") Date to)
+            @QueryParam("geofenceId") long geofenceId, @QueryParam("from") Date from, @QueryParam("to") Date to)
             throws StorageException {
         if (!positionIds.isEmpty()) {
             var positions = new ArrayList<Position>();
@@ -79,7 +81,12 @@ public class PositionResource extends BaseResource {
             permissionsService.checkPermission(Device.class, getUserId(), deviceId);
             if (from != null && to != null) {
                 permissionsService.checkRestriction(getUserId(), UserRestrictions::getDisableReports);
-                return PositionUtil.getPositionsStream(storage, deviceId, from, to);
+
+                Geofence geofence = geofenceId == 0 ? null : storage.getObject(Geofence.class, new Request(
+                        new Columns.All(), new Condition.Equals("id", geofenceId)));
+
+                return PositionUtil.getPositionsStream(storage, deviceId, from, to)
+                        .filter(position -> geofence == null || geofence.containsPosition(position));
             } else {
                 return storage.getObjectsStream(Position.class, new Request(
                         new Columns.All(), new Condition.LatestPositions(deviceId)));
@@ -131,7 +138,7 @@ public class PositionResource extends BaseResource {
         StreamingOutput stream = output -> {
             try {
                 kmlExportProvider.generate(output, deviceId, from, to);
-            } catch (StorageException e) {
+            } catch (XMLStreamException | StorageException e) {
                 throw new WebApplicationException(e);
             }
         };
@@ -143,12 +150,12 @@ public class PositionResource extends BaseResource {
     @GET
     @Produces("text/csv")
     public Response getCsv(
-            @QueryParam("deviceId") long deviceId,
+            @QueryParam("deviceId") long deviceId, @QueryParam("geofenceId") long geofenceId,
             @QueryParam("from") Date from, @QueryParam("to") Date to) throws StorageException {
         permissionsService.checkPermission(Device.class, getUserId(), deviceId);
         StreamingOutput stream = output -> {
             try {
-                csvExportProvider.generate(output, deviceId, from, to);
+                csvExportProvider.generate(output, getUserId(), deviceId, geofenceId, from, to);
             } catch (StorageException e) {
                 throw new WebApplicationException(e);
             }
@@ -167,7 +174,7 @@ public class PositionResource extends BaseResource {
         StreamingOutput stream = output -> {
             try {
                 gpxExportProvider.generate(output, deviceId, from, to);
-            } catch (StorageException e) {
+            } catch (XMLStreamException | StorageException e) {
                 throw new WebApplicationException(e);
             }
         };

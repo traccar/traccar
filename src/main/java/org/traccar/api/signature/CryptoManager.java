@@ -78,6 +78,13 @@ public class CryptoManager {
         return originalData;
     }
 
+    public KeyPair getKeyPair() throws GeneralSecurityException, StorageException {
+        if (publicKey == null) {
+            initializeKeys();
+        }
+        return new KeyPair(publicKey, privateKey);
+    }
+
     private void initializeKeys() throws StorageException, GeneralSecurityException {
         KeystoreModel model = storage.getObject(KeystoreModel.class, new Request(new Columns.All()));
         if (model != null) {

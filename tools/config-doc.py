@@ -3,6 +3,7 @@
 import re
 import os
 import argparse
+import json
 
 _KEYS_FILE = os.path.join(
     os.path.dirname(__file__), "../src/main/java/org/traccar/config/Keys.java"
@@ -32,7 +33,7 @@ def get_config_keys():
                 default = lines[index].strip()[:-2]
                 index -= 1
             types_match = types_match_re.search(lines[index])
-            types = map(lambda x: x[8:].lower(), types_match[1].split(", "))
+            types = [x[8:].lower() for x in types_match[1].split(", ")]
             index -= 1
             key = lines[index].strip()[1:-2]
             key = "[protocol]" + key if key.startswith('.') else key
@@ -67,16 +68,10 @@ def get_html():
     )
 
 
-def get_pug():
-    return ("\n").join(
-        [
-            f"""  div(class='card mt-3')
-    div(class='card-body')
-      h5(class='card-title') {x["key"]} {" ".join(map("#[span(class='badge badge-dark') {:}]".format, x["types"]))}
-      p(class='card-text') {x["description"]}{f"\n      p(class='card-text') Default value: {x["default"]}" if x["default"] is not None else ""}"""
-            for x in get_config_keys()
-        ]
-    )
+def get_js():
+    keys = get_config_keys()
+    payload = json.dumps(keys, indent=2, sort_keys=True)
+    return f"const configKeys = {payload};\n\nexport default configKeys;\n"
 
 
 if __name__ == "__main__":
@@ -84,14 +79,14 @@ if __name__ == "__main__":
         description="Parses Keys.java to extract keys to be used in configuration files"
     )
     parser.add_argument(
-        "--format", choices=["pug", "html"], default="pug", help="default: 'pug'"
+        "--format", choices=["js", "html"], default="js", help="default: 'js'"
     )
     args = parser.parse_args()
 
     def get_output():
-        if args.format == 'html':
+        if args.format == "html":
             return get_html()
-        
-        return get_pug()
+
+        return get_js()
 
     print(get_output())

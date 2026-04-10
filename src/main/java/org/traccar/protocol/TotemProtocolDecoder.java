@@ -531,7 +531,7 @@ public class TotemProtocolDecoder extends BaseProtocolDecoder {
         position.set("intakeTemp", parser.nextInt());
         position.set(Position.KEY_ENGINE_LOAD, parser.nextInt());
         position.set(Position.KEY_THROTTLE, parser.nextInt());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        position.set(Position.KEY_FUEL, parser.nextInt());
 
         return position;
     }

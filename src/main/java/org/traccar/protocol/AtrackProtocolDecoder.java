@@ -222,7 +222,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "VN" -> position.set(Position.KEY_VIN, values[i]);
                 case "TR" -> position.set(Position.KEY_THROTTLE, Integer.parseInt(values[i]));
                 case "ET" -> position.set(Position.KEY_COOLANT_TEMP, Integer.parseInt(values[i]));
-                case "FL" -> position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(values[i]));
+                case "FL" -> position.set(Position.KEY_FUEL, Integer.parseInt(values[i]));
                 case "FC" -> position.set(Position.KEY_FUEL_CONSUMPTION, Integer.parseInt(values[i]));
                 case "AV1" -> position.set(Position.PREFIX_ADC + 1, Integer.parseInt(values[i]));
                 case "CD" -> position.set(Position.KEY_ICCID, values[i]);
@@ -312,7 +312,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "EL" -> buf.readUnsignedByte(); // engine load
                 case "TR" -> position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
                 case "ET" -> position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedShort());
-                case "FL" -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                case "FL" -> position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                 case "ML" -> buf.readUnsignedByte(); // mil status
                 case "FC" -> position.set(Position.KEY_FUEL_CONSUMPTION, buf.readUnsignedInt());
                 case "CI" -> readString(buf); // format string
@@ -340,7 +340,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "ZO7" -> buf.readUnsignedByte(); // cruise control status
                 case "ZO8" -> buf.readUnsignedByte(); // accelector pedal position
                 case "ZO9" -> position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte() * 0.5);
-                case "ZO10" -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.5);
+                case "ZO10" -> position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.5);
                 case "ZO11" -> buf.readUnsignedByte(); // engine oil pressure
                 case "ZO12" -> buf.readUnsignedByte(); // boost pressure
                 case "ZO13" -> buf.readUnsignedByte(); // intake temperature
@@ -360,7 +360,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 case "JO2" -> buf.readUnsignedByte(); // power takeoff device
                 case "JO3" -> buf.readUnsignedByte(); // accelector pedal position
                 case "JO4" -> position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
-                case "JO5" -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
+                case "JO5" -> position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.4);
                 case "JO6" -> buf.readUnsignedByte(); // fms vehicle interface
                 case "JO7" -> buf.readUnsignedByte(); // driver 2
                 case "JO8" -> buf.readUnsignedByte(); // driver 1
@@ -669,7 +669,7 @@ public class AtrackProtocolDecoder extends BaseProtocolDecoder {
                 Matcher matcher = pattern.matcher(message);
                 if (matcher.find()) {
                     int value = Integer.parseInt(matcher.group(3), decimalFuel ? 10 : 16);
-                    position.set(Position.KEY_FUEL_LEVEL, value * 0.1);
+                    position.set(Position.KEY_FUEL, value * 0.1);
                 } else {
                     position.set("message", message);
                 }

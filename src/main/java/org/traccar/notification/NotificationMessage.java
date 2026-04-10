@@ -17,4 +17,9 @@
 package org.traccar.notification;
 
 public record NotificationMessage(String subject, String digest, String body, boolean priority) {
+    public NotificationMessage {
+        if (digest == null) {
+            digest = body;
+        }
+    }
 }

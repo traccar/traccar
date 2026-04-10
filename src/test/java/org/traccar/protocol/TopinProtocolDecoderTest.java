@@ -28,6 +28,10 @@ public class TopinProtocolDecoderTest extends ProtocolTest {
                 "787801940D0A"),
                 Position.KEY_ALARM, Position.ALARM_VIBRATION);
 
+        verifyAttribute(decoder, binary(
+                "787801990D0A"),
+                Position.KEY_ALARM, Position.ALARM_SOS);
+
         verifyAttributes(decoder, binary(
                 "78780A13424008196400041F000D0A"));
 

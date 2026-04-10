@@ -486,7 +486,7 @@ public class T800xProtocolDecoder extends BaseProtocolDecoder {
                     position.set(Position.KEY_THROTTLE, value);
                 }
                 if (value != 0xff) {
-                    position.set(Position.KEY_FUEL_LEVEL, value);
+                    position.set(Position.KEY_FUEL, value);
                 }
             }
         }

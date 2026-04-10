@@ -173,7 +173,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0x90 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
             case 0xc0 -> position.set("fuelTotal", buf.readUnsignedIntLE() * 0.5);
             case 0xc1 -> {
-                position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
+                position.set(Position.KEY_FUEL, buf.readUnsignedByte() * 0.4);
                 position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
                 position.set(Position.KEY_RPM, buf.readUnsignedShortLE() * 0.125);
             }

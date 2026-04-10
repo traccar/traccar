@@ -20,8 +20,8 @@ import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.broadcast.BroadcastInterface;
 import org.traccar.broadcast.BroadcastService;
+import org.traccar.command.CommandSender;
 import org.traccar.command.CommandSenderManager;
-import org.traccar.config.Keys;
 import org.traccar.model.Command;
 import org.traccar.model.Device;
 import org.traccar.model.Event;
@@ -95,9 +95,9 @@ public class CommandsManager implements BroadcastInterface {
                 throw new RuntimeException("Command " + command.getType() + " is not supported");
             }
         } else {
-            String sender = device.getString(Keys.COMMAND_SENDER.getKey());
+            CommandSender sender = commandSenderManager.getSender(device);
             if (sender != null) {
-                commandSenderManager.getSender(sender).sendCommand(device, command);
+                sender.sendCommand(device, command);
             } else {
                 DeviceSession deviceSession = connectionManager.getDeviceSession(deviceId);
                 if (deviceSession != null && deviceSession.supportsLiveCommands()) {

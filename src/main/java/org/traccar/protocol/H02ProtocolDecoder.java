@@ -181,14 +181,14 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
             .groupBegin()
             .number("-(d+)-(d+.d+),([NS]),")     // latitude
             .or()
-            .number("(d+)(dd.d+),([NS]),")       // latitude
+            .number("(d*)(dd.d+),([NS]),")       // latitude
             .or()
             .number("(d+)(dd)(d{4}),([NS]),")    // latitude
             .groupEnd()
             .groupBegin()
             .number("-(d+)-(d+.d+),([EW]),")     // longitude
             .or()
-            .number("(d+)(dd.d+),([EW]),")       // longitude
+            .number("(d*)(dd.d+),([EW]),")       // longitude
             .or()
             .number("(d+)(dd)(d{4}),([EW]),")    // longitude
             .groupEnd()
@@ -365,7 +365,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(3)) {
             position.setLatitude(parser.nextCoordinate());
         }
-        if (parser.hasNext(3)) {
+        if (parser.hasNextAny(3)) {
             position.setLatitude(parser.nextCoordinate());
         }
         if (parser.hasNext(4)) {
@@ -375,7 +375,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(3)) {
             position.setLongitude(parser.nextCoordinate());
         }
-        if (parser.hasNext(3)) {
+        if (parser.hasNextAny(3)) {
             position.setLongitude(parser.nextCoordinate());
         }
         if (parser.hasNext(4)) {
@@ -399,7 +399,7 @@ public class H02ProtocolDecoder extends BaseProtocolDecoder {
         if (parser.hasNext(6)) {
             position.set(Position.KEY_ODOMETER, parser.nextInt(0));
             position.set(Position.PREFIX_TEMP + 1, parser.nextInt(0));
-            position.set(Position.KEY_FUEL_LEVEL, parser.nextDouble(0));
+            position.set(Position.KEY_FUEL, parser.nextDouble(0));
 
             position.setAltitude(parser.nextInt(0));
 

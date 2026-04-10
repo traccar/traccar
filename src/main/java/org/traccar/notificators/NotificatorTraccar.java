@@ -65,6 +65,8 @@ public class NotificatorTraccar extends Notificator {
     }
 
     public static class Message {
+        @JsonProperty("type")
+        private String type;
         @JsonProperty("registration_ids")
         private String[] tokens;
         @JsonProperty("notification")
@@ -96,6 +98,7 @@ public class NotificatorTraccar extends Notificator {
             List<String> registrationTokens = new ArrayList<>(Arrays.asList(tokenArray));
 
             Message message = new Message();
+            message.type = "manager";
             message.tokens = user.getString("notificationTokens").split("[, ]");
             message.notification = item;
 
@@ -129,7 +132,7 @@ public class NotificatorTraccar extends Notificator {
                     cacheManager.invalidateObject(true, User.class, user.getId(), ObjectOperation.UPDATE);
                 }
             } catch (Exception e) {
-                LOGGER.warn("Push error", e);
+                LOGGER.warn("Notification push error", e);
             }
         }
     }

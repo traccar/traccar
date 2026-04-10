@@ -20,8 +20,8 @@ import jakarta.inject.Singleton;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.tools.generic.DateTool;
+import org.apache.velocity.tools.generic.EscapeTool;
 import org.apache.velocity.tools.generic.NumberTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +37,7 @@ import org.traccar.storage.StorageException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.util.Locale;
 
@@ -75,6 +76,7 @@ public class TextTemplateFormatter {
 
         velocityContext.put("webUrl", velocityEngine.getProperty("web.url"));
         velocityContext.put("dateTool", new DateTool());
+        velocityContext.put("esc", new EscapeTool());
         velocityContext.put("numberTool", new NumberTool());
         velocityContext.put("locale", Locale.getDefault());
         velocityContext.put("language", UserUtil.getLanguage(server, user));
@@ -84,16 +86,16 @@ public class TextTemplateFormatter {
 
     public NotificationMessage formatMessage(VelocityContext velocityContext, String name, boolean priority) {
         StringWriter writer = new StringWriter();
-        try {
-            String language = (String) velocityContext.get("language");
-            String filePath = localeManager.getTemplateFile(templatesRoot, "notifications", language, name + ".vm");
-            Template template = velocityEngine.getTemplate(filePath, StandardCharsets.UTF_8.name());
+        String language = (String) velocityContext.get("language");
+        Path filePath = localeManager.getTemplateFile(templatesRoot, "notifications", language, name + ".vm");
+        if (filePath != null) {
+            Template template = velocityEngine.getTemplate(filePath.toString(), StandardCharsets.UTF_8.name());
             template.merge(velocityContext, writer);
             return new NotificationMessage(
                     (String) velocityContext.get("subject"), (String) velocityContext.get("digest"),
                     writer.toString(), priority);
-        } catch (ResourceNotFoundException e) {
-            return new NotificationMessage("undefined", "undefined", "undefined", priority);
+        } else {
+            return new NotificationMessage(name, name, name, priority);
         }
     }
 

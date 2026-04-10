@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2018 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +21,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 
+import java.util.List;
+
 import org.traccar.api.ExtendedObjectResource;
 import org.traccar.model.Maintenance;
 
@@ -30,7 +32,7 @@ import org.traccar.model.Maintenance;
 public class MaintenanceResource extends ExtendedObjectResource<Maintenance> {
 
     public MaintenanceResource() {
-        super(Maintenance.class, "name");
+        super(Maintenance.class, "name", List.of("name"));
     }
 
 }

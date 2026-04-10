@@ -93,7 +93,7 @@ public class EnvotechProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_BATTERY, parser.nextInt() * 0.01);
         position.set(Position.KEY_INPUT, parser.nextHexInt());
         position.set(Position.PREFIX_OUT, parser.nextHexInt());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextHexInt());
+        position.set(Position.KEY_FUEL, parser.nextHexInt());
         position.set("weight", parser.nextHexInt());
         position.set(Position.KEY_STATUS, parser.nextHexLong());
 

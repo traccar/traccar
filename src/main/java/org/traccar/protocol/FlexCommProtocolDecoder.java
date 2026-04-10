@@ -113,7 +113,7 @@ public class FlexCommProtocolDecoder extends BaseProtocolDecoder {
             position.set(Position.PREFIX_OUT + i, parser.nextInt());
         }
 
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        position.set(Position.KEY_FUEL, parser.nextInt());
         position.set(Position.PREFIX_TEMP + 1, parseSignedValue(parser, 0));
         position.set(Position.KEY_BATTERY_LEVEL, parser.nextInt());
         position.set(Position.KEY_POWER, parser.nextInt() * 0.1);

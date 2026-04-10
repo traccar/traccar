@@ -1,0 +1,8 @@
+#set($subject = "Expiração da conta")
+#set($digest = "A conta expirou")
+<!DOCTYPE html>
+<html>
+<body>
+Sua conta de usuário expirou.
+</body>
+</html>

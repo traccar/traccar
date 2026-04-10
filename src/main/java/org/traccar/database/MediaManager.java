@@ -40,15 +40,19 @@ public class MediaManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MediaManager.class);
 
-    private final String path;
+    private final Path path;
 
     @Inject
     public MediaManager(Config config) {
-        path = config.getString(Keys.MEDIA_PATH);
+        String configuredPath = config.getString(Keys.MEDIA_PATH);
+        path = configuredPath != null ? Paths.get(configuredPath).toAbsolutePath().normalize() : null;
     }
 
     private File createFile(String uniqueId, String name) throws IOException {
-        Path filePath = Paths.get(path, uniqueId, name);
+        Path filePath = path.resolve(uniqueId).resolve(name).normalize();
+        if (!filePath.startsWith(path)) {
+            throw new IOException("Invalid media path");
+        }
         Path directoryPath = filePath.getParent();
         if (directoryPath != null) {
             Files.createDirectories(directoryPath);

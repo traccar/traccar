@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 - 2018 Andrey Kunitsyn (andrey@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -105,6 +105,14 @@ public class NotificationManager {
                                     .contains(event.getString(Position.KEY_ALARM));
                         }
                         return false;
+                    }
+                    return true;
+                })
+                .filter(notification -> {
+                    String geofenceIdsString = notification.getString("geofenceIds");
+                    if (geofenceIdsString != null) {
+                        return Arrays.stream(geofenceIdsString.split(",")).map(Long::parseLong)
+                                .anyMatch(geofenceId -> geofenceId == event.getGeofenceId());
                     }
                     return true;
                 })

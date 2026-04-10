@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,20 +30,18 @@ public class GeocoderHandler extends BasePositionHandler {
     private final Geocoder geocoder;
     private final CacheManager cacheManager;
     private final boolean ignorePositions;
-    private final boolean processInvalidPositions;
     private final int reuseDistance;
 
     public GeocoderHandler(Config config, Geocoder geocoder, CacheManager cacheManager) {
         this.geocoder = geocoder;
         this.cacheManager = cacheManager;
         ignorePositions = config.getBoolean(Keys.GEOCODER_IGNORE_POSITIONS);
-        processInvalidPositions = config.getBoolean(Keys.GEOCODER_PROCESS_INVALID_POSITIONS);
         reuseDistance = config.getInteger(Keys.GEOCODER_REUSE_DISTANCE, 0);
     }
 
     @Override
     public void onPosition(Position position, Callback callback) {
-        if (!ignorePositions && (processInvalidPositions || position.getValid())) {
+        if (!ignorePositions) {
             if (reuseDistance != 0) {
                 Position lastPosition = cacheManager.getPosition(position.getDeviceId());
                 if (lastPosition != null && lastPosition.getAddress() != null

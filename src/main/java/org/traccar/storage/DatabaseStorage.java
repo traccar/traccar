@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2022 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import jakarta.inject.Inject;
 import javax.sql.DataSource;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -226,6 +227,9 @@ public class DatabaseStorage extends Storage {
         } else if (genericCondition instanceof Condition.Binary condition) {
             results.addAll(getConditionVariables(condition.getFirst()));
             results.addAll(getConditionVariables(condition.getSecond()));
+        } else if (genericCondition instanceof Condition.Contains condition) {
+            String value = "%" + condition.getValue().toLowerCase() + "%";
+            results.addAll(Collections.nCopies(condition.getColumns().size(), value));
         } else if (genericCondition instanceof Condition.Permission condition) {
             long conditionId = condition.getOwnerId() > 0 ? condition.getOwnerId() : condition.getPropertyId();
             results.add(conditionId);
@@ -286,6 +290,14 @@ public class DatabaseStorage extends Storage {
                 result.append(formatPermissionQuery(condition));
                 result.append(")");
 
+            } else if (genericCondition instanceof Condition.Contains condition) {
+
+                result.append('(');
+                result.append(condition.getColumns().stream()
+                        .map(column -> "LOWER(" + column + ") LIKE ?")
+                        .collect(Collectors.joining(" OR ")));
+                result.append(')');
+
             } else if (genericCondition instanceof Condition.LatestPositions condition) {
 
                 result.append("id IN (");
@@ -311,12 +323,18 @@ public class DatabaseStorage extends Storage {
             }
             if (order.getLimit() > 0) {
                 if (databaseType.equals("Microsoft SQL Server")) {
-                    result.append(" OFFSET 0 ROWS FETCH FIRST ");
+                    result.append(" OFFSET ");
+                    result.append(order.getOffset());
+                    result.append(" ROWS FETCH FIRST ");
                     result.append(order.getLimit());
                     result.append(" ROWS ONLY");
                 } else {
                     result.append(" LIMIT ");
                     result.append(order.getLimit());
+                    if (order.getOffset() > 0) {
+                        result.append(" OFFSET ");
+                        result.append(order.getOffset());
+                    }
                 }
             }
         }

@@ -85,22 +85,63 @@ public class ReportUtilsTest extends BaseTest {
         startPosition.set(Position.KEY_TOTAL_DISTANCE, 500.0);
         Position endPosition = new Position();
         endPosition.set(Position.KEY_TOTAL_DISTANCE, 700.0);
-        assertEquals(PositionUtil.calculateDistance(startPosition, endPosition, true), 200.0, 10);
+        assertEquals(200.0, PositionUtil.calculateDistance(startPosition, endPosition, true), 10);
         startPosition.set(Position.KEY_ODOMETER, 50000);
         endPosition.set(Position.KEY_ODOMETER, 51000);
-        assertEquals(PositionUtil.calculateDistance(startPosition, endPosition, true), 1000.0, 10);
+        assertEquals(1000.0, PositionUtil.calculateDistance(startPosition, endPosition, true), 10);
     }
 
     @Test
-    public void testCalculateSpentFuel() {
+    public void testCalculateSpentFuelWithNoFuelData() {
         ReportUtils reportUtils = new ReportUtils(
                 mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
+        Device device = mock(Device.class);
         Position startPosition = new Position();
         Position endPosition = new Position();
-        assertEquals(reportUtils.calculateFuel(startPosition, endPosition), 0.0, 0.01);
-        startPosition.set(Position.KEY_FUEL_LEVEL, 0.7);
-        endPosition.set(Position.KEY_FUEL_LEVEL, 0.5);
-        assertEquals(reportUtils.calculateFuel(startPosition, endPosition), 0.2, 0.01);
+
+        assertEquals(0.0, reportUtils.calculateFuel(startPosition, endPosition, device), 0.01);
+    }
+
+    @Test
+    public void testCalculateSpentFuelWithFuel() {
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
+        Device device = mock(Device.class);
+        Position startPosition = new Position();
+        Position endPosition = new Position();
+
+        startPosition.set(Position.KEY_FUEL, 0.7);
+        endPosition.set(Position.KEY_FUEL, 0.5);
+        assertEquals(0.2, reportUtils.calculateFuel(startPosition, endPosition, device), 0.01);
+    }
+
+    @Test
+    public void testCalculateSpentFuelWithFuelUsed() {
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
+        Device device = mock(Device.class);
+        Position startPosition = new Position();
+        Position endPosition = new Position();
+
+        startPosition.set(Position.KEY_FUEL_USED, 10.0);
+        endPosition.set(Position.KEY_FUEL_USED, 15.0);
+        assertEquals(5.0, reportUtils.calculateFuel(startPosition, endPosition, device), 0.01);
+    }
+
+    @Test
+    public void testCalculateSpentFuelWithFuelLevel() {
+        ReportUtils reportUtils = new ReportUtils(
+                mock(Config.class), storage, mock(PermissionsService.class), mock(VelocityEngine.class), null);
+        Device deviceWithCapacity = mock(Device.class);
+        when(deviceWithCapacity.hasAttribute(Keys.FUEL_CAPACITY.getKey())).thenReturn(true);
+        when(deviceWithCapacity.getDouble(Keys.FUEL_CAPACITY.getKey())).thenReturn(100.0);
+
+        Position startPosition = new Position();
+        Position endPosition = new Position();
+
+        startPosition.set(Position.KEY_FUEL_LEVEL, 80.0);
+        endPosition.set(Position.KEY_FUEL_LEVEL, 60.0);
+        assertEquals(20.0, reportUtils.calculateFuel(startPosition, endPosition, deviceWithCapacity), 0.01);
     }
 
     @Test

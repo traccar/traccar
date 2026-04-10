@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2024 - 2025 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,12 @@ import jakarta.inject.Inject;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
 
+import java.time.Instant;
 import java.util.Date;
 
 public class OutdatedHandler extends BasePositionHandler {
+
+    public static final long GPS_EPOCH = Instant.parse("1980-01-06T00:00:00Z").toEpochMilli();
 
     private final CacheManager cacheManager;
 
@@ -44,7 +47,7 @@ public class OutdatedHandler extends BasePositionHandler {
                 position.setCourse(last.getCourse());
                 position.setAccuracy(last.getAccuracy());
             } else {
-                position.setFixTime(new Date(315964819000L)); // gps epoch 1980-01-06
+                position.setFixTime(new Date(GPS_EPOCH));
             }
             if (position.getDeviceTime() == null) {
                 position.setDeviceTime(position.getServerTime());

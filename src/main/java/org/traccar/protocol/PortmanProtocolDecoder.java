@@ -91,7 +91,7 @@ public class PortmanProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.PREFIX_TEMP + 1, parser.next());
         position.set(Position.KEY_STATUS, parser.nextHexLong());
         if (parser.hasNext()) {
-            position.set(Position.KEY_FUEL_LEVEL, parser.nextInt() * 0.1);
+            position.set(Position.KEY_FUEL, parser.nextInt() * 0.1);
         }
         position.set(Position.KEY_DRIVER_UNIQUE_ID, parser.next());
 
@@ -106,7 +106,7 @@ public class PortmanProtocolDecoder extends BaseProtocolDecoder {
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);
         position.set(Position.KEY_RSSI, parser.nextInt());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        position.set(Position.KEY_FUEL, parser.nextInt());
 
         return position;
     }
@@ -157,7 +157,7 @@ public class PortmanProtocolDecoder extends BaseProtocolDecoder {
         position.setCourse(parser.nextInt());
 
         position.set(Position.PREFIX_TEMP + 1, parser.next());
-        position.set(Position.KEY_FUEL_LEVEL, parser.nextInt());
+        position.set(Position.KEY_FUEL, parser.nextInt());
         position.set(Position.KEY_SATELLITES, parser.nextInt());
         position.set(Position.KEY_RSSI, parser.nextInt());
         position.set(Position.KEY_ODOMETER, parser.nextDouble() * 1000);

@@ -16,6 +16,7 @@
 package org.traccar.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -32,7 +33,12 @@ import java.util.stream.Stream;
 @Produces(MediaType.APPLICATION_JSON)
 public class StreamWriter implements MessageBodyWriter<Stream<?>> {
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
+
+    @Inject
+    public StreamWriter(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public boolean isWriteable(Class<?> type, Type genericType, Annotation[] annotations, MediaType mediaType) {

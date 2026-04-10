@@ -1,5 +1,5 @@
 /*
- * Copyright 2012 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2012 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,7 +222,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
         if (parser.hasNext()) {
             String fuel = parser.next();
-            position.set(Position.KEY_FUEL_LEVEL,
+            position.set(Position.KEY_FUEL,
                     Integer.parseInt(fuel.substring(0, 2), 16) + Integer.parseInt(fuel.substring(2), 16) * 0.01);
         }
 
@@ -360,7 +360,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
 
             Network network = new Network();
 
-            buf.readUnsignedShortLE(); // length
+            int dataLength = buf.readUnsignedShortLE();
+            int dataEnd = buf.readerIndex() + dataLength;
             buf.readUnsignedShortLE(); // index
 
             int paramCount = buf.readUnsignedByte();
@@ -381,7 +382,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
                     case 0x97 -> position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
-                    case 0x9D -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                    case 0x9D -> position.set(Position.KEY_FUEL, buf.readUnsignedByte());
                     case 0xFE69 -> position.set(Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                     default -> buf.readUnsignedByte();
                 }
@@ -400,7 +401,7 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     case 0x17 -> position.set(Position.PREFIX_ADC + 2, buf.readUnsignedShortLE() * 0.01);
                     case 0x19 -> position.set(Position.KEY_BATTERY, buf.readUnsignedShortLE() * 0.01);
                     case 0x1A -> position.set(Position.KEY_POWER, buf.readUnsignedShortLE() * 0.01);
-                    case 0x29 -> position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedShortLE() * 0.01);
+                    case 0x29 -> position.set(Position.KEY_FUEL, buf.readUnsignedShortLE() * 0.01);
                     case 0x40 -> position.set(Position.KEY_EVENT, buf.readUnsignedShortLE());
                     case 0x91, 0x92 -> position.set(Position.KEY_OBD_SPEED, buf.readUnsignedShortLE());
                     case 0x98 -> position.set(Position.KEY_FUEL_USED, buf.readUnsignedShortLE());
@@ -491,6 +492,8 @@ public class MeitrackProtocolDecoder extends BaseProtocolDecoder {
                     default -> buf.skipBytes(length);
                 }
             }
+
+            buf.readerIndex(dataEnd);
 
             if (network.getCellTowers() != null || network.getWifiAccessPoints() != null) {
                 position.setNetwork(network);

@@ -395,7 +395,7 @@ public class EelinkProtocolDecoder extends BaseProtocolDecoder {
             switch (pid) {
                 case 0x89 -> position.set(Position.KEY_FUEL_CONSUMPTION, value);
                 case 0x8a -> position.set(Position.KEY_ODOMETER, value * 1000L);
-                case 0x8b -> position.set(Position.KEY_FUEL_LEVEL, value / 10);
+                case 0x8b -> position.set(Position.KEY_FUEL, value / 10);
             }
         }
 

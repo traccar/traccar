@@ -305,11 +305,11 @@ public class NavtelecomProtocolDecoder extends BaseProtocolDecoder {
                                 case 43:
                                     value = buf.readUnsignedShortLE();
                                     position.set(
-                                            Position.KEY_FUEL_LEVEL + (j + 1 - 38), (value < 65500) ? value : null);
+                                            Position.KEY_FUEL + (j + 1 - 38), (value < 65500) ? value : null);
                                     break;
                                 case 44:
                                     value = buf.readUnsignedShortLE();
-                                    position.set(Position.KEY_FUEL_LEVEL, (value < 65500) ? value : null);
+                                    position.set(Position.KEY_FUEL, (value < 65500) ? value : null);
                                     break;
                                 case 45:
                                 case 46:

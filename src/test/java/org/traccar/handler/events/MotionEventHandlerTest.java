@@ -109,4 +109,44 @@ public class MotionEventHandlerTest extends BaseTest {
         verifyState(state, false, 0);
     }
 
+    @Test
+    public void testStopWithGap() throws ParseException {
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 600000, false, false);
+
+        MotionState state = new MotionState();
+        state.setMotionState(true);
+        state.setMotionStreak(true);
+
+        Position lastPosition = position("2017-01-01 00:00:00", false, 100, null);
+        MotionProcessor.updateState(state, null, lastPosition, false, tripsConfig);
+        assertNull(state.getEvent());
+
+        Position currentPosition = position("2017-01-01 00:10:00", false, 100, null);
+        MotionProcessor.updateState(state, lastPosition, currentPosition, false, tripsConfig);
+        assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvent().getType());
+        assertEquals(lastPosition.getDeviceTime(), state.getEvent().getEventTime());
+    }
+
+    @Test
+    public void testStopWithDoubleGap() throws ParseException {
+        TripsConfig tripsConfig = new TripsConfig(500, 300000, 300000, 600000, false, false);
+
+        MotionState state = new MotionState();
+        state.setMotionState(true);
+        state.setMotionStreak(true);
+
+        Position firstPosition = position("2017-01-01 00:00:00", false, 100, null);
+        MotionProcessor.updateState(state, null, firstPosition, false, tripsConfig);
+        assertNull(state.getEvent());
+
+        Position secondPosition = position("2017-01-01 00:10:00", false, 100, null);
+        MotionProcessor.updateState(state, firstPosition, secondPosition, false, tripsConfig);
+        assertEquals(Event.TYPE_DEVICE_STOPPED, state.getEvent().getType());
+        assertEquals(firstPosition.getDeviceTime(), state.getEvent().getEventTime());
+
+        Position thirdPosition = position("2017-01-01 00:20:00", false, 100, null);
+        MotionProcessor.updateState(state, secondPosition, thirdPosition, false, tripsConfig);
+        assertNull(state.getEvent());
+    }
+
 }

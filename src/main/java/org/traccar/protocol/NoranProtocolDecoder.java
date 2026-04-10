@@ -136,7 +136,7 @@ public class NoranProtocolDecoder extends BaseProtocolDecoder {
 
             if (!newFormat) {
                 position.set(Position.PREFIX_IO + 1, buf.readUnsignedByte());
-                position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte());
+                position.set(Position.KEY_FUEL, buf.readUnsignedByte());
             } else if (type == MSG_UPLOAD_POSITION_NEW) {
                 position.set(Position.PREFIX_TEMP + 1, buf.readShortLE());
                 position.set(Position.KEY_ODOMETER, buf.readFloatLE());

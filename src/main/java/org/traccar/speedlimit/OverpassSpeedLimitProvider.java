@@ -33,7 +33,7 @@ public class OverpassSpeedLimitProvider implements SpeedLimitProvider {
     public OverpassSpeedLimitProvider(Config config, Client client, String url) {
         int accuracy = config.getInteger(Keys.SPEED_LIMIT_ACCURACY);
         this.client = client;
-        this.url = url + "?data=[out:json];way[maxspeed](around:" + accuracy + ",%f,%f);out%%20tags;";
+        this.url = url + "?data=[out:json];way[highway][maxspeed](around:" + accuracy + ",%f,%f);out%%20tags;";
     }
 
     private Double parseSpeed(String value) {

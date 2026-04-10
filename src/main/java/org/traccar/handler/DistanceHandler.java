@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2016 - 2025 Anton Tananaev (anton@traccar.org)
  * Copyright 2015 Amila Silva
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,13 +51,11 @@ public class DistanceHandler extends BasePositionHandler {
         if (last != null) {
             totalDistance = last.getDouble(Position.KEY_TOTAL_DISTANCE);
             if (!position.hasAttribute(Position.KEY_DISTANCE)) {
-                distance = DistanceCalculator.distance(
-                        position.getLatitude(), position.getLongitude(),
-                        last.getLatitude(), last.getLongitude());
+                distance = DistanceCalculator.distance(position, last);
             }
             if (filter && last.getLatitude() != 0 && last.getLongitude() != 0) {
                 boolean satisfiesMin = minError == 0 || distance > minError;
-                boolean satisfiesMax = maxError == 0 || distance < maxError || position.getValid();
+                boolean satisfiesMax = maxError == 0 || distance < maxError;
                 if (!satisfiesMin || !satisfiesMax) {
                     position.setValid(last.getValid());
                     position.setLatitude(last.getLatitude());

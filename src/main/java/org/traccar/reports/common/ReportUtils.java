@@ -47,6 +47,8 @@ import org.traccar.reports.model.StopReportItem;
 import org.traccar.reports.model.TripReportItem;
 import org.traccar.session.state.MotionProcessor;
 import org.traccar.session.state.MotionState;
+import org.traccar.session.state.NewMotionProcessor;
+import org.traccar.session.state.NewMotionState;
 import org.traccar.storage.Storage;
 import org.traccar.storage.StorageException;
 import org.traccar.storage.query.Columns;
@@ -58,8 +60,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Duration;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -84,13 +88,16 @@ public class ReportUtils {
         this.geocoder = geocoder;
     }
 
-    public <T extends BaseModel> T getObject(
-            long userId, Class<T> clazz, long objectId) throws StorageException, SecurityException {
-        return storage.getObject(clazz, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("id", objectId),
-                        new Condition.Permission(User.class, userId, clazz))));
+    public <T extends BaseModel> T getObject(long userId, Class<T> clazz, long objectId) {
+        try {
+            return storage.getObject(clazz, new Request(
+                    new Columns.All(),
+                    new Condition.And(
+                            new Condition.Equals("id", objectId),
+                            new Condition.Permission(User.class, userId, clazz))));
+        } catch (StorageException e) {
+            return null;
+        }
     }
 
     public void checkPeriodLimit(Date from, Date to) {
@@ -100,11 +107,15 @@ public class ReportUtils {
         }
     }
 
-    public double calculateFuel(Position first, Position last) {
+    public double calculateFuel(Position first, Position last, Device device) {
         if (first.hasAttribute(Position.KEY_FUEL_USED) && last.hasAttribute(Position.KEY_FUEL_USED)) {
             return last.getDouble(Position.KEY_FUEL_USED) - first.getDouble(Position.KEY_FUEL_USED);
-        } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL) && last.hasAttribute(Position.KEY_FUEL_LEVEL)) {
-            return first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL);
+        } else if (first.hasAttribute(Position.KEY_FUEL) && last.hasAttribute(Position.KEY_FUEL)) {
+            return first.getDouble(Position.KEY_FUEL) - last.getDouble(Position.KEY_FUEL);
+        } else if (first.hasAttribute(Position.KEY_FUEL_LEVEL) && last.hasAttribute(Position.KEY_FUEL_LEVEL)
+                && device.hasAttribute(Keys.FUEL_CAPACITY.getKey())) {
+            return ((first.getDouble(Position.KEY_FUEL_LEVEL) - last.getDouble(Position.KEY_FUEL_LEVEL)) / 100)
+                    * device.getDouble(Keys.FUEL_CAPACITY.getKey());
         }
         return 0;
     }
@@ -197,7 +208,7 @@ public class ReportUtils {
             trip.setAverageSpeed(UnitsConverter.knotsFromMps(trip.getDistance() * 1000 / tripDuration));
         }
         trip.setMaxSpeed(maxSpeed);
-        trip.setSpentFuel(calculateFuel(startTrip, endTrip));
+        trip.setSpentFuel(calculateFuel(startTrip, endTrip, device));
 
         trip.setDriverUniqueId(findDriver(startTrip, endTrip));
         trip.setDriverName(findDriverName(trip.getDriverUniqueId()));
@@ -238,7 +249,7 @@ public class ReportUtils {
 
         long stopDuration = endStop.getFixTime().getTime() - startStop.getFixTime().getTime();
         stop.setDuration(stopDuration);
-        stop.setSpentFuel(calculateFuel(startStop, endStop));
+        stop.setSpentFuel(calculateFuel(startStop, endStop, device));
 
         if (startStop.hasAttribute(Position.KEY_HOURS) && endStop.hasAttribute(Position.KEY_HOURS)) {
             stop.setEngineHours(endStop.getLong(Position.KEY_HOURS) - startStop.getLong(Position.KEY_HOURS));
@@ -270,21 +281,6 @@ public class ReportUtils {
         }
     }
 
-    private boolean isMoving(List<Position> positions, int index, TripsConfig tripsConfig) {
-        if (tripsConfig.getMinimalNoDataDuration() > 0) {
-            boolean beforeGap = index < positions.size() - 1
-                    && positions.get(index + 1).getFixTime().getTime() - positions.get(index).getFixTime().getTime()
-                    >= tripsConfig.getMinimalNoDataDuration();
-            boolean afterGap = index > 0
-                    && positions.get(index).getFixTime().getTime() - positions.get(index - 1).getFixTime().getTime()
-                    >= tripsConfig.getMinimalNoDataDuration();
-            if (beforeGap || afterGap) {
-                return false;
-            }
-        }
-        return positions.get(index).getBoolean(Position.KEY_MOTION);
-    }
-
     public <T extends BaseReportItem> List<T> detectTripsAndStops(
             Device device, Date from, Date to, Class<T> reportClass) throws StorageException {
 
@@ -300,10 +296,11 @@ public class ReportUtils {
             Device device, Date from, Date to, Class<T> reportClass) throws StorageException {
 
         List<T> result = new ArrayList<>();
-        TripsConfig tripsConfig = new TripsConfig(
-                new AttributeUtil.StorageProvider(config, storage, permissionsService, device));
+        var attributeProvider = new AttributeUtil.StorageProvider(config, storage, permissionsService, device);
+        TripsConfig tripsConfig = new TripsConfig(attributeProvider);
         boolean ignoreOdometer = tripsConfig.getIgnoreOdometer();
         boolean trips = reportClass.equals(TripReportItem.class);
+        boolean useNewLogic = config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC);
 
         List<Event> events = new ArrayList<>();
         Map<Long, Position> positionMap = new HashMap<>();
@@ -311,26 +308,63 @@ public class ReportUtils {
         double maxSpeed = 0;
         var positions = PositionUtil.getPositions(storage, device.getId(), from, to);
         if (!positions.isEmpty()) {
-            MotionState motionState = new MotionState();
             boolean initialValue = positions.get(0).getBoolean(Position.KEY_MOTION);
-            motionState.setMotionStreak(initialValue);
-            motionState.setMotionState(initialValue);
             if (initialValue == trips) {
                 startPosition = positions.get(0);
                 maxSpeed = startPosition.getSpeed();
             }
 
-            for (int i = 0; i < positions.size(); i++) {
-                Position last = i > 0 ? positions.get(i - 1) : null;
-                Position position = positions.get(i);
-                maxSpeed = Math.max(maxSpeed, position.getSpeed());
-                positionMap.put(position.getId(), position);
-                boolean motion = position.getBoolean(Position.KEY_MOTION);
-                MotionProcessor.updateState(motionState, last, positions.get(i), motion, tripsConfig);
-                if (motionState.getEvent() != null) {
-                    motionState.getEvent().set("maxSpeed", maxSpeed);
-                    events.add(motionState.getEvent());
-                    maxSpeed = 0;
+            if (useNewLogic) {
+                double minDistance = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DISTANCE);
+                long minDuration = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_MIN_DURATION) * 1000;
+                long stopGap = AttributeUtil.lookup(attributeProvider, Keys.REPORT_TRIP_STOP_GAP) * 1000;
+                Deque<Position> motionPositions = new ArrayDeque<>();
+                NewMotionState motionState = new NewMotionState();
+                motionState.setPositions(motionPositions);
+                motionState.setMotionStreak(initialValue);
+                motionState.setEventPosition(positions.get(0));
+
+                for (Position position : positions) {
+                    maxSpeed = Math.max(maxSpeed, position.getSpeed());
+                    positionMap.put(position.getId(), position);
+                    NewMotionProcessor.updateState(motionState, position, minDistance, minDuration, stopGap);
+                    if (!motionState.getEvents().isEmpty()) {
+                        for (Event event : motionState.getEvents()) {
+                            event.set("maxSpeed", maxSpeed);
+                            events.add(event);
+                        }
+                        maxSpeed = 0;
+                    }
+                    motionPositions.add(position);
+                    while (motionPositions.size() > 1) {
+                        var iterator = motionPositions.iterator();
+                        iterator.next();
+                        Position second = iterator.next();
+                        Position last = motionPositions.peekLast();
+                        if (last.getFixTime().getTime() - second.getFixTime().getTime() >= minDuration) {
+                            motionPositions.poll();
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            } else {
+                MotionState motionState = new MotionState();
+                motionState.setMotionStreak(initialValue);
+                motionState.setMotionState(initialValue);
+
+                for (int i = 0; i < positions.size(); i++) {
+                    Position last = i > 0 ? positions.get(i - 1) : null;
+                    Position position = positions.get(i);
+                    maxSpeed = Math.max(maxSpeed, position.getSpeed());
+                    positionMap.put(position.getId(), position);
+                    boolean motion = position.getBoolean(Position.KEY_MOTION);
+                    MotionProcessor.updateState(motionState, last, positions.get(i), motion, tripsConfig);
+                    if (motionState.getEvent() != null) {
+                        motionState.getEvent().set("maxSpeed", maxSpeed);
+                        events.add(motionState.getEvent());
+                        maxSpeed = 0;
+                    }
                 }
             }
         }

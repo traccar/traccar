@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  * Copyright 2016 Gabor Somogyi (gabor.g.somogyi@gmail.com)
  * Copyright 2017 Andrey Kunitsyn (andrey@traccar.org)
  *
@@ -24,8 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.traccar.BaseProtocol;
 import org.traccar.ServerManager;
 import org.traccar.api.ExtendedObjectResource;
+import org.traccar.command.CommandSender;
 import org.traccar.command.CommandSenderManager;
-import org.traccar.config.Keys;
 import org.traccar.database.CommandsManager;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.model.DeviceUtil;
@@ -81,7 +81,7 @@ public class CommandResource extends ExtendedObjectResource<Command> {
     private HttpServletRequest request;
 
     public CommandResource() {
-        super(Command.class, "description");
+        super(Command.class, "description", List.of("description"));
     }
 
     private BaseProtocol getDeviceProtocol(long deviceId) throws StorageException {
@@ -168,10 +168,9 @@ public class CommandResource extends ExtendedObjectResource<Command> {
 
             Device device = storage.getObject(Device.class, new Request(
                     new Columns.All(), new Condition.Equals("id", deviceId)));
-            String sender = device.getString(Keys.COMMAND_SENDER.getKey());
+            CommandSender sender = commandSenderManager.getSender(device);
             if (sender != null) {
-                return commandSenderManager.getSender(sender).getSupportedCommands()
-                        .stream().map(Typed::new).toList();
+                return sender.getSupportedCommands().stream().map(Typed::new).toList();
             }
 
             BaseProtocol protocol = getDeviceProtocol(deviceId);

@@ -174,7 +174,7 @@ public class StarLinkProtocolDecoder extends BaseProtocolDecoder {
                 case "#BATC#" -> position.set(Position.KEY_BATTERY_LEVEL, Integer.parseInt(data[i]));
                 case "#BATH#" -> position.set("batteryHealth", Integer.parseInt(data[i]));
                 case "#TVI#" -> position.set(Position.KEY_DEVICE_TEMP, Double.parseDouble(data[i]));
-                case "#CFL#" -> position.set(Position.KEY_FUEL_LEVEL, Integer.parseInt(data[i]));
+                case "#CFL#" -> position.set(Position.KEY_FUEL, Integer.parseInt(data[i]));
                 case "#CFL2#" -> position.set("fuel2", Integer.parseInt(data[i]));
                 case "#IN1#", "#IN2#", "#IN3#", "#IN4#" -> position.set(
                         Position.PREFIX_IN + dataTags[i].charAt(3), Integer.parseInt(data[i]));
