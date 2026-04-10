@@ -139,27 +139,27 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
                 case 6:
                     switch (buf.readUnsignedByte()) {
-                        case 0x01: {
+                        case 0x01:
                             int virtualSensors = buf.readUnsignedByte();
                             int physicalInputs = buf.readUnsignedShortLE();
                             position.set("virtualIgnition", BitUtil.check(virtualSensors, 0));
                             position.set("callButton", BitUtil.check(virtualSensors, 1));
                             position.set(Position.KEY_INPUT, physicalInputs);
                             break;
-                        }
-                        case 0x06: {
+
+                        case 0x06:
                             position.set("pulses" + buf.readUnsignedByte(), buf.readUnsignedShortLE());
                             break;
-                        }
-                        case 0x07: {
+
+                        case 0x07:
                             position.set("freq" + buf.readUnsignedByte(), buf.readUnsignedShortLE());
                             break;
-                        }
-                        case 0x08: {
+
+                        case 0x08:
                             position.set(Position.PREFIX_ADC + buf.readUnsignedByte(),
                                     buf.readUnsignedShortLE() / 1000.0);
                             break;
-                        }
+
                         default:
                             buf.skipBytes(3);
                             break;
@@ -317,7 +317,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
             int recordType = buf.readUnsignedByte();
 
             switch (recordType) {
-                case RECORD_PING, RECORD_DATA, RECORD_TEXT, RECORD_FILE, RECORD_BINARY: {
+                case RECORD_PING, RECORD_DATA, RECORD_TEXT, RECORD_FILE, RECORD_BINARY:
                     int length = buf.readUnsignedShortLE();
                     Date time = new Date(buf.readUnsignedIntLE() * 1000);
                     if (recordType == RECORD_DATA) {
@@ -327,7 +327,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     }
                     buf.readUnsignedByte();
                     break;
-                }
+
                 default:
                     return positions.isEmpty() ? null : positions;
             }
