@@ -22,9 +22,6 @@ import org.traccar.BaseFrameDecoder;
 import org.traccar.helper.BitUtil;
 
 public class Es4x0FrameDecoder extends BaseFrameDecoder {
-
-
-
     private static final int MESSAGE_HEADER_LENGTH = 21;
 
     @Override
@@ -189,8 +186,6 @@ private int calculateObdDataLength(int mask, ByteBuf buf, int readerIndex) {
         int dtcCount = buf.getUnsignedByte(dtcCountOffset);
         length += 1 + dtcCount * 5;
     }
-
     return length;
 }
-
 }
