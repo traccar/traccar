@@ -321,7 +321,7 @@ public class MainModule extends AbstractModule {
     public static FilterHandler provideFilterHandler(
             Config config, CacheManager cacheManager, StatisticsManager statisticsManager) {
         if (config.getBoolean(Keys.FILTER_ENABLE)) {
-            return new FilterHandler(config, cacheManager, statisticsManager);
+            return new FilterHandler(cacheManager, statisticsManager);
         }
         return null;
     }

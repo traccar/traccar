@@ -1515,7 +1515,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> FILTER_INVALID = new BooleanConfigKey(
             "filter.invalid",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Filter zero coordinates. Zero latitude and longitude are theoretically valid values, but in practice they
@@ -1523,14 +1523,14 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> FILTER_ZERO = new BooleanConfigKey(
             "filter.zero",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Filter duplicate records (duplicates are detected by time value).
      */
     public static final ConfigKey<Boolean> FILTER_DUPLICATE = new BooleanConfigKey(
             "filter.duplicate",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Filter messages that do not have GPS location. If they are not filtered, they will include the last known
@@ -1538,7 +1538,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> FILTER_OUTDATED = new BooleanConfigKey(
             "filter.outdated",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Filter records with fix time in the future. The value is specified in seconds. Records that have fix time more
@@ -1546,7 +1546,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> FILTER_FUTURE = new LongConfigKey(
             "filter.future",
-            List.of(KeyType.CONFIG),
+            List.of(KeyType.CONFIG, KeyType.DEVICE),
             86400L);
 
     /**
@@ -1555,28 +1555,28 @@ public final class Keys {
      */
     public static final ConfigKey<Long> FILTER_PAST = new LongConfigKey(
             "filter.past",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Filter positions with accuracy less than specified value in meters.
      */
     public static final ConfigKey<Integer> FILTER_ACCURACY = new IntegerConfigKey(
             "filter.accuracy",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Filter cell and wifi locations that are coming from geolocation provider.
      */
     public static final ConfigKey<Boolean> FILTER_APPROXIMATE = new BooleanConfigKey(
             "filter.approximate",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Filter positions with exactly zero speed values.
      */
     public static final ConfigKey<Boolean> FILTER_STATIC = new BooleanConfigKey(
             "filter.static",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Filter records by distance. The value is specified in meters. If the new position is closer than this value to
@@ -1584,7 +1584,7 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FILTER_DISTANCE = new IntegerConfigKey(
             "filter.distance",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Filter records by Maximum Speed value in knots. Can be used to filter jumps to far locations even if Position
@@ -1594,28 +1594,28 @@ public final class Keys {
      */
     public static final ConfigKey<Integer> FILTER_MAX_SPEED = new IntegerConfigKey(
             "filter.maxSpeed",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Filter position if time from previous position is less than specified value in seconds.
      */
     public static final ConfigKey<Integer> FILTER_MIN_PERIOD = new IntegerConfigKey(
             "filter.minPeriod",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Throttle positions if the daily limit is exceeded for the device.
      */
     public static final ConfigKey<Integer> FILTER_DAILY_LIMIT = new IntegerConfigKey(
             "filter.dailyLimit",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Throttling interval if the limit is exceeded. The value is in seconds.
      */
     public static final ConfigKey<Integer> FILTER_DAILY_LIMIT_INTERVAL = new IntegerConfigKey(
             "filter.dailyLimitInterval",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Time limit for filtering in seconds. If the time difference between when the last position was received by the
@@ -1624,7 +1624,7 @@ public final class Keys {
      */
     public static final ConfigKey<Long> FILTER_SKIP_LIMIT = new LongConfigKey(
             "filter.skipLimit",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Enable attributes skipping. Attribute skipping can be enabled in the config or device attributes.
@@ -1632,7 +1632,7 @@ public final class Keys {
      */
     public static final ConfigKey<Boolean> FILTER_SKIP_ATTRIBUTES_ENABLE = new BooleanConfigKey(
             "filter.skipAttributes.enable",
-            List.of(KeyType.CONFIG));
+            List.of(KeyType.CONFIG, KeyType.DEVICE));
 
     /**
      * Attribute skipping can be enabled in the config or device attributes.
