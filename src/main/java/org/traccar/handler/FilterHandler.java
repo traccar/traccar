@@ -27,14 +27,6 @@ import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
-import org.traccar.storage.Storage;
-import org.traccar.storage.StorageException;
-import org.traccar.storage.query.Columns;
-import org.traccar.storage.query.Condition;
-import org.traccar.storage.query.Order;
-import org.traccar.storage.query.Request;
-
-import java.util.Date;
 
 public class FilterHandler extends BasePositionHandler {
 
@@ -54,17 +46,15 @@ public class FilterHandler extends BasePositionHandler {
     private final long filterMinPeriod;
     private final int filterDailyLimit;
     private final long filterDailyLimitInterval;
-    private final boolean filterRelative;
     private final long skipLimit;
     private final boolean skipAttributes;
 
     private final CacheManager cacheManager;
-    private final Storage storage;
     private final StatisticsManager statisticsManager;
 
     @Inject
     public FilterHandler(
-            Config config, CacheManager cacheManager, Storage storage, StatisticsManager statisticsManager) {
+            Config config, CacheManager cacheManager, StatisticsManager statisticsManager) {
         filterInvalid = config.getBoolean(Keys.FILTER_INVALID);
         filterZero = config.getBoolean(Keys.FILTER_ZERO);
         filterDuplicate = config.getBoolean(Keys.FILTER_DUPLICATE);
@@ -79,21 +69,10 @@ public class FilterHandler extends BasePositionHandler {
         filterMinPeriod = config.getInteger(Keys.FILTER_MIN_PERIOD) * 1000L;
         filterDailyLimit = config.getInteger(Keys.FILTER_DAILY_LIMIT);
         filterDailyLimitInterval = config.getInteger(Keys.FILTER_DAILY_LIMIT_INTERVAL) * 1000L;
-        filterRelative = config.getBoolean(Keys.FILTER_RELATIVE);
         skipLimit = config.getLong(Keys.FILTER_SKIP_LIMIT) * 1000;
         skipAttributes = config.getBoolean(Keys.FILTER_SKIP_ATTRIBUTES_ENABLE);
         this.cacheManager = cacheManager;
-        this.storage = storage;
         this.statisticsManager = statisticsManager;
-    }
-
-    private Position getPrecedingPosition(long deviceId, Date date) throws StorageException {
-        return storage.getObject(Position.class, new Request(
-                new Columns.All(),
-                new Condition.And(
-                        new Condition.Equals("deviceId", deviceId),
-                        new Condition.Compare("fixTime", "<=", date)),
-                new Order("fixTime", true, 1)));
     }
 
     private boolean filterInvalid(Position position) {
@@ -224,38 +203,24 @@ public class FilterHandler extends BasePositionHandler {
 
         // filter out excessive data
         long deviceId = position.getDeviceId();
-        if (filterDuplicate || filterStatic
-                || filterDistance > 0 || filterMaxSpeed > 0 || filterMinPeriod > 0 || filterDailyLimit > 0) {
-            Position preceding;
-            if (filterRelative) {
-                try {
-                    Date newFixTime = position.getFixTime();
-                    preceding = getPrecedingPosition(deviceId, newFixTime);
-                } catch (StorageException e) {
-                    LOGGER.warn("Error retrieving preceding position; fall backing to last received position.", e);
-                    preceding = cacheManager.getPosition(deviceId);
-                }
-            } else {
-                preceding = cacheManager.getPosition(deviceId);
-            }
-            if (filterDuplicate(position, preceding) && !skipLimit(position, preceding) && !skipAttributes(position)) {
-                filterType.append("Duplicate ");
-            }
-            if (filterStatic(position) && !skipLimit(position, preceding) && !skipAttributes(position)) {
-                filterType.append("Static ");
-            }
-            if (filterDistance(position, preceding) && !skipLimit(position, preceding) && !skipAttributes(position)) {
-                filterType.append("Distance ");
-            }
-            if (filterMaxSpeed(position, preceding)) {
-                filterType.append("MaxSpeed ");
-            }
-            if (filterMinPeriod(position, preceding)) {
-                filterType.append("MinPeriod ");
-            }
-            if (filterDailyLimit(position, preceding)) {
-                filterType.append("DailyLimit ");
-            }
+        Position last = cacheManager.getPosition(deviceId);
+        if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+            filterType.append("Duplicate ");
+        }
+        if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
+            filterType.append("Static ");
+        }
+        if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
+            filterType.append("Distance ");
+        }
+        if (filterMaxSpeed(position, last)) {
+            filterType.append("MaxSpeed ");
+        }
+        if (filterMinPeriod(position, last)) {
+            filterType.append("MinPeriod ");
+        }
+        if (filterDailyLimit(position, last)) {
+            filterType.append("DailyLimit ");
         }
 
         Device device = cacheManager.getObject(Device.class, deviceId);
