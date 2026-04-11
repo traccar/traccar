@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2014 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,9 @@ import org.traccar.model.Calendar;
 import org.traccar.model.Device;
 import org.traccar.model.Position;
 import org.traccar.session.cache.CacheManager;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class FilterHandler extends BasePositionHandler {
 
@@ -176,63 +179,64 @@ public class FilterHandler extends BasePositionHandler {
 
     protected boolean filter(Position position) {
 
-        StringBuilder filterType = new StringBuilder();
+        List<String> filterTypes = new LinkedList<>();
 
         // filter out invalid data
         if (filterInvalid(position)) {
-            filterType.append("Invalid ");
+            filterTypes.add("Invalid");
         }
         if (filterZero(position)) {
-            filterType.append("Zero ");
+            filterTypes.add("Zero");
         }
         if (filterOutdated(position)) {
-            filterType.append("Outdated ");
+            filterTypes.add("Outdated");
         }
         if (filterFuture(position)) {
-            filterType.append("Future ");
+            filterTypes.add("Future");
         }
         if (filterPast(position)) {
-            filterType.append("Past ");
+            filterTypes.add("Past");
         }
         if (filterAccuracy(position)) {
-            filterType.append("Accuracy ");
+            filterTypes.add("Accuracy");
         }
         if (filterApproximate(position)) {
-            filterType.append("Approximate ");
+            filterTypes.add("Approximate");
         }
 
         // filter out excessive data
         long deviceId = position.getDeviceId();
         Position last = cacheManager.getPosition(deviceId);
         if (filterDuplicate(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
-            filterType.append("Duplicate ");
+            filterTypes.add("Duplicate");
         }
         if (filterStatic(position) && !skipLimit(position, last) && !skipAttributes(position)) {
-            filterType.append("Static ");
+            filterTypes.add("Static");
         }
         if (filterDistance(position, last) && !skipLimit(position, last) && !skipAttributes(position)) {
-            filterType.append("Distance ");
+            filterTypes.add("Distance");
         }
         if (filterMaxSpeed(position, last)) {
-            filterType.append("MaxSpeed ");
+            filterTypes.add("MaxSpeed");
         }
         if (filterMinPeriod(position, last)) {
-            filterType.append("MinPeriod ");
+            filterTypes.add("MinPeriod");
         }
         if (filterDailyLimit(position, last)) {
-            filterType.append("DailyLimit ");
+            filterTypes.add("DailyLimit");
         }
 
         Device device = cacheManager.getObject(Device.class, deviceId);
         if (device.getCalendarId() > 0) {
             Calendar calendar = cacheManager.getObject(Calendar.class, device.getCalendarId());
             if (!calendar.checkMoment(position.getFixTime())) {
-                filterType.append("Calendar ");
+                filterTypes.add("Calendar");
             }
         }
 
-        if (!filterType.isEmpty()) {
-            LOGGER.info("Position filtered by {}filters from device: {}", filterType, device.getUniqueId());
+        if (!filterTypes.isEmpty()) {
+            LOGGER.info("Position filtered by {} filters from device: {}",
+                    String.join(" ", filterTypes), device.getUniqueId());
             return true;
         }
 
