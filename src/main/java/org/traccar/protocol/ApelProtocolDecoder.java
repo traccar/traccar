@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2018 Anton Tananaev (anton@traccar.org)
+ * Copyright 2013 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
         ByteBuf request = Unpooled.buffer(8);
         request.writeShortLE(type);
         request.writeShortLE(0);
-        request.writeIntLE(Checksum.crc32(request.nioBuffer(0, 4)));
+        request.writeIntLE(Checksum.crc32(Checksum.CRC32_STANDARD, request.nioBuffer(0, 4)));
         channel.writeAndFlush(new NetworkMessage(request, channel.remoteAddress()));
     }
 
@@ -83,7 +83,7 @@ public class ApelProtocolDecoder extends BaseProtocolDecoder {
             request.writeShortLE(6);
             request.writeIntLE((int) lastIndex);
             request.writeShortLE(512);
-            request.writeIntLE(Checksum.crc32(request.nioBuffer(0, 10)));
+            request.writeIntLE(Checksum.crc32(Checksum.CRC32_STANDARD, request.nioBuffer(0, 10)));
             channel.writeAndFlush(new NetworkMessage(request, channel.remoteAddress()));
         }
     }

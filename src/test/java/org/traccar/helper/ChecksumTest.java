@@ -32,6 +32,14 @@ public class ChecksumTest {
     }
 
     @Test
+    public void testCrc32() {
+        ByteBuf buf = Unpooled.copiedBuffer("123456789", StandardCharsets.US_ASCII);
+
+        assertEquals(0xcbf43926, Checksum.crc32(Checksum.CRC32_STANDARD, buf.nioBuffer()));
+        assertEquals(0x0376e6e7, Checksum.crc32(Checksum.CRC32_MPEG2, buf.nioBuffer()));
+    }
+
+    @Test
     public void testLuhn() {
         assertEquals(7, Checksum.luhn(12345678901234L));
         assertEquals(0, Checksum.luhn(63070019470771L));
