@@ -41,7 +41,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
     private static final int HEADER_VERSION_1 = 0x22;
     private static final int HEADER_VERSION_2 = 0x23;
     private static final int HEADER_VERSION_3 = 0x24;
-    // private static final int HEADER_VERSION_4 = 0x25;
 
     private static final int RECORD_PING = 0x00;
     private static final int RECORD_DATA = 0x01;
@@ -53,19 +52,15 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
         super(protocol);
     }
 
-    private void sendResponse(Channel channel, int version, int packageNumber) {
-        if (channel == null) {
-            return;
-        }
+    private void sendResponse(Channel channel, int version, int index) {
+        if (channel != null) {
+            ByteBuf response = Unpooled.buffer();
+            response.writeByte(0x7B);
 
-        ByteBuf response = Unpooled.buffer();
-        response.writeByte(0x7B);
-
-        if (packageNumber == 0) {
             if (version == HEADER_VERSION_1) {
                 response.writeByte(0x00);
-                response.writeByte(0x00);
-            } else {
+                response.writeByte((byte) index);
+            } else if (version == HEADER_VERSION_2) {
                 response.writeByte(0x04);
                 response.writeByte(0x00);
 
@@ -77,13 +72,11 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 response.writeBytes(timeBytes);
                 timeBytes.release();
             }
-        } else {
-            response.writeByte(0x00);
-            response.writeByte((byte) packageNumber);
+            response.writeByte(0x7D);
+            channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
 
-        response.writeByte(0x7D);
-        channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
+
     }
 
     private Position decodePosition(DeviceSession deviceSession, ByteBuf buf, int length, Date time) {
@@ -282,10 +275,6 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        if (!buf.isReadable()) {
-            return null;
-        }
-
         int startSign = buf.readUnsignedByte();
 
         if (startSign == HEADER_START_SIGN) {
@@ -310,7 +299,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
         }
 
         List<Position> positions = new LinkedList<>();
-        int packageNumber = buf.readUnsignedByte();
+        int index = buf.readUnsignedByte();
 
         while (buf.readableBytes() > 1) {
 
@@ -333,7 +322,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
             }
         }
 
-        sendResponse(channel, HEADER_VERSION_2, packageNumber);
+        sendResponse(channel, HEADER_VERSION_1, index);
 
         return positions.isEmpty() ? null : positions;
     }
