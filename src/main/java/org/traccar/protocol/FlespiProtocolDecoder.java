@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2022 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -268,7 +268,7 @@ public class FlespiProtocolDecoder extends BaseHttpProtocolDecoder {
             }
             case "external.powersource.status" -> {
                 if (value == JsonValue.TRUE) {
-                    position.addAlarm(Position.ALARM_POWER_CUT);
+                    position.set(Position.KEY_CHARGE, true);
                 }
                 yield true;
             }
