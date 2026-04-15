@@ -1312,6 +1312,13 @@ public final class Keys {
             List.of(KeyType.CONFIG));
 
     /**
+     * Pushover notification sound.
+     */
+    public static final ConfigKey<String> NOTIFICATOR_PUSHOVER_SOUND = new StringConfigKey(
+            "notificator.pushover.sound",
+            List.of(KeyType.CONFIG));
+
+    /**
      * Telegram notification API key.
      */
     public static final ConfigKey<String> NOTIFICATOR_TELEGRAM_KEY = new StringConfigKey(

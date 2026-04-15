@@ -36,6 +36,7 @@ public class NotificatorPushover extends Notificator {
     private final String url;
     private final String token;
     private final String user;
+    private final String sound;
 
     public static class Message {
         @JsonProperty("token")
@@ -48,6 +49,8 @@ public class NotificatorPushover extends Notificator {
         private String title;
         @JsonProperty("message")
         private String message;
+        @JsonProperty("sound")
+        private String sound;
     }
 
     @Inject
@@ -57,6 +60,7 @@ public class NotificatorPushover extends Notificator {
         url = "https://api.pushover.net/1/messages.json";
         token = config.getString(Keys.NOTIFICATOR_PUSHOVER_TOKEN);
         user = config.getString(Keys.NOTIFICATOR_PUSHOVER_USER);
+        sound = config.getString(Keys.NOTIFICATOR_PUSHOVER_SOUND);
     }
 
     @Override
@@ -72,6 +76,12 @@ public class NotificatorPushover extends Notificator {
 
         if (user.hasAttribute("pushoverDeviceNames")) {
             message.device = user.getString("pushoverDeviceNames").replaceAll(" *, *", ",");
+        }
+
+        if (user.hasAttribute("pushoverNotificationSound")) {
+            message.sound = user.getString("pushoverNotificationSound");
+        } else {
+            message.sound = this.sound;
         }
 
         message.title = shortMessage.subject();
