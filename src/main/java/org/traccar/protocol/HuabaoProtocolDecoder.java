@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 - 2024 Anton Tananaev (anton@traccar.org)
+ * Copyright 2015 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,8 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_CONFIGURATION_PARAMETERS = 0x8103;
     public static final int MSG_COMMAND_RESPONSE = 0x0701;
     public static final int MSG_DRIVER_IDENTITY = 0x0702;
+    public static final int MSG_VIDEO_REQUEST = 0x9101;
+    public static final int MSG_VIDEO_CONTROL = 0x9102;
 
     public static final int RESULT_SUCCESS = 0;
 

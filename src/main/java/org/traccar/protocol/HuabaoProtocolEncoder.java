@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 - 2025 Anton Tananaev (anton@traccar.org)
+ * Copyright 2017 - 2026 Anton Tananaev (anton@traccar.org)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.traccar.BaseProtocol;
 import org.traccar.BaseProtocolEncoder;
 import org.traccar.Protocol;
 import org.traccar.config.Keys;
@@ -24,6 +25,7 @@ import org.traccar.helper.DataConverter;
 import org.traccar.helper.model.AttributeUtil;
 import org.traccar.model.Command;
 
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -109,6 +111,28 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                         return HuabaoProtocolDecoder.formatMessage(
                                 0x7e, HuabaoProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                     }
+                case Command.TYPE_VIDEO_START:
+                    var config = getCacheManager().getConfig();
+                    String host = URI.create(config.getString(Keys.WEB_URL)).getHost();
+                    int port = config.getInteger(
+                            Keys.PROTOCOL_PORT.withPrefix(BaseProtocol.nameFromClass(Jt1078Protocol.class)));
+                    int channel = command.getInteger(Command.KEY_INDEX);
+                    data.writeByte(host.length());
+                    data.writeCharSequence(host, StandardCharsets.US_ASCII);
+                    data.writeShort(port); // tcp port
+                    data.writeShort(0); // udp port
+                    data.writeByte(channel);
+                    data.writeByte(1); // video only
+                    data.writeByte(0); // main stream
+                    return HuabaoProtocolDecoder.formatMessage(
+                            0x7e, HuabaoProtocolDecoder.MSG_VIDEO_REQUEST, id, false, data);
+                case Command.TYPE_VIDEO_STOP:
+                    data.writeByte(command.getInteger(Command.KEY_INDEX)); // channel
+                    data.writeByte(0); // close audio/video transmission
+                    data.writeByte(0); // close both audio and video
+                    data.writeByte(0); // main stream
+                    return HuabaoProtocolDecoder.formatMessage(
+                            0x7e, HuabaoProtocolDecoder.MSG_VIDEO_CONTROL, id, false, data);
                 default:
                     return null;
             }
