@@ -36,7 +36,7 @@ import java.util.List;
 
 public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
-    private static final int HEADER_START_SIGN = 0xFF;
+    private static final int HEADER_START_SIGN = 0xff;
 
     private static final int HEADER_VERSION_1 = 0x22;
     private static final int HEADER_VERSION_2 = 0x23;
@@ -55,7 +55,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
     private void sendResponse(Channel channel, int version, int index) {
         if (channel != null) {
             ByteBuf response = Unpooled.buffer();
-            response.writeByte(0x7B);
+            response.writeByte(0x7b);
 
             if (version == HEADER_VERSION_1) {
                 response.writeByte(0x00);
@@ -63,20 +63,15 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
             } else if (version == HEADER_VERSION_2) {
                 response.writeByte(0x04);
                 response.writeByte(0x00);
-
-                long unixTime = System.currentTimeMillis() / 1000;
                 ByteBuf timeBytes = Unpooled.buffer(4);
-                timeBytes.writeIntLE((int) unixTime);
-
+                timeBytes.writeIntLE((int) (System.currentTimeMillis() / 1000));
                 response.writeByte(Checksum.modulo256(timeBytes.nioBuffer()));
                 response.writeBytes(timeBytes);
                 timeBytes.release();
             }
-            response.writeByte(0x7D);
+            response.writeByte(0x7d);
             channel.writeAndFlush(new NetworkMessage(response, channel.remoteAddress()));
         }
-
-
     }
 
     private Position decodePosition(DeviceSession deviceSession, ByteBuf buf, int length, Date time) {
@@ -87,21 +82,19 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
         int cid = 0, lac = 0, mnc = 0, mcc = 0, rssi = 0;
 
-        int readBytes = 0;
-        while (readBytes < length) {
-
+        int endIndex = buf.readerIndex() + length;
+        while (buf.readerIndex() < endIndex) {
             int tag = buf.readUnsignedByte();
-
             switch (tag) {
 
                 case 1:
-                    int batMv = buf.readUnsignedShortLE();
-                    int extMv = buf.readUnsignedShortLE();
-                    if (extMv != 0x0000 && extMv != 0xFFFF) {
-                        position.set(Position.KEY_POWER, extMv / 1000.0);
+                    int battery = buf.readUnsignedShortLE();
+                    if (battery != 0x0000 && battery != 0xffff) {
+                        position.set(Position.KEY_BATTERY, battery / 1000.0);
                     }
-                    if (batMv != 0x0000 && batMv != 0xFFFF) {
-                        position.set(Position.KEY_BATTERY, batMv / 1000.0);
+                    int power = buf.readUnsignedShortLE();
+                    if (power != 0x0000 && power != 0xffff) {
+                        position.set(Position.KEY_POWER, power / 1000.0);
                     }
                     break;
 
@@ -114,48 +107,28 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case 5:
-                    int course = buf.readUnsignedByte() * 2;
-                    int altitude = buf.readUnsignedByte() * 10;
-                    int satByte = buf.readUnsignedByte();
-                    int speed = buf.readUnsignedByte();
-                    if (satByte == 0xFE || satByte == 0xFF) {
-                        position.setValid(false);
-                    } else {
-                        position.setCourse(course);
-                        position.setAltitude(altitude);
-                        position.setSpeed(speed);
-                        position.set(Position.KEY_SATELLITES,
-                                BitUtil.between(satByte, 0, 4) + BitUtil.between(satByte, 4, 8));
-                        position.setValid(true);
-                    }
+                    position.setCourse(buf.readUnsignedByte() * 2);
+                    position.setAltitude(buf.readUnsignedByte() * 10);
+                    int satellites = buf.readUnsignedByte();
+                    position.setValid(satellites != 0xfe && satellites != 0xff);
+                    position.set(Position.KEY_SATELLITES,
+                            BitUtil.between(satellites, 0, 4) + BitUtil.between(satellites, 4, 8));
+                    position.setSpeed(buf.readUnsignedByte());
                     break;
 
                 case 6:
                     switch (buf.readUnsignedByte()) {
-                        case 0x01:
-                            int virtualSensors = buf.readUnsignedByte();
-                            int physicalInputs = buf.readUnsignedShortLE();
-                            position.set("virtualIgnition", BitUtil.check(virtualSensors, 0));
-                            position.set("callButton", BitUtil.check(virtualSensors, 1));
-                            position.set(Position.KEY_INPUT, physicalInputs);
-                            break;
-
-                        case 0x06:
-                            position.set("pulses" + buf.readUnsignedByte(), buf.readUnsignedShortLE());
-                            break;
-
-                        case 0x07:
-                            position.set("freq" + buf.readUnsignedByte(), buf.readUnsignedShortLE());
-                            break;
-
-                        case 0x08:
-                            position.set(Position.PREFIX_ADC + buf.readUnsignedByte(),
-                                    buf.readUnsignedShortLE() / 1000.0);
-                            break;
-
-                        default:
-                            buf.skipBytes(3);
-                            break;
+                        case 0x01 -> {
+                            int flags = buf.readUnsignedByte();
+                            position.set(Position.KEY_IGNITION, BitUtil.check(flags, 0));
+                            position.set("callButton", BitUtil.check(flags, 1));
+                            position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
+                        }
+                        case 0x06 -> position.set("pulses" + buf.readUnsignedByte(), buf.readUnsignedShortLE());
+                        case 0x07 -> position.set("freq" + buf.readUnsignedByte(), buf.readUnsignedShortLE());
+                        case 0x08 -> position.set(
+                                Position.PREFIX_ADC + buf.readUnsignedByte(), buf.readUnsignedShortLE() / 1000.0);
+                        default -> buf.skipBytes(3);
                     }
                     break;
 
@@ -171,7 +144,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case 9:
-                    position.set(Position.KEY_STATUS, (long) buf.readUnsignedIntLE());
+                    position.set(Position.KEY_STATUS, buf.readUnsignedIntLE());
                     break;
 
                 case 51:
@@ -179,11 +152,11 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case 52:
-                    position.set(Position.KEY_HOURS, (long) (buf.readUnsignedIntLE() / 100.0 * 3600 * 1000));
+                    position.set(Position.KEY_HOURS, buf.readUnsignedIntLE() * 3600000 / 100);
                     break;
 
                 case 53:
-                    position.set(Position.KEY_ODOMETER, (long) (buf.readUnsignedIntLE() / 100.0 * 1000));
+                    position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE() * 10);
                     break;
 
                 case 54:
@@ -196,7 +169,7 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     break;
 
                 case 56:
-                    position.set("fuelLitres", buf.readUnsignedIntLE());
+                    position.set(Position.KEY_FUEL, buf.readUnsignedIntLE());
                     break;
 
                 case 57:
@@ -217,20 +190,15 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case 62:
                 case 63:
                 case 64:
-                    int axleIndex = tag - 60 + 1;
-                    if (axleIndex == 2) {
-                        position.set(Position.KEY_AXLE_WEIGHT, buf.readUnsignedIntLE());
-                    } else {
-                        position.set("axleLoad" + axleIndex, buf.readUnsignedIntLE());
-                    }
+                    position.set("axleLoad" + (tag - 59), buf.readUnsignedIntLE());
                     break;
 
                 case 69:
                     position.set(Position.KEY_ENGINE_LOAD, buf.readUnsignedByte());
                     position.set(Position.KEY_THROTTLE, buf.readUnsignedByte());
-                    int motionBits = buf.readUnsignedShortLE();
-                    if (motionBits != 0) {
-                        position.set("motionState", motionBits);
+                    int motionStatus = buf.readUnsignedShortLE();
+                    if (motionStatus != 0) {
+                        position.set("motionStatus", motionStatus);
                     }
                     break;
 
@@ -243,12 +211,10 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                 case 77:
                 case 78:
                 case 79:
-                    int idx = tag - 70;
                     int level = buf.readUnsignedShortLE();
-                    int tempRaw = buf.readUnsignedShortLE();
-                    if (level != 0x0000 && level != 0xFFFF) {
-                        position.set("rawFuelLevel" + idx, level);
-                        position.set("llsTemperture" + idx, (tempRaw - 100.0) / 10.0);
+                    if (level != 0x0000 && level != 0xffff) {
+                        position.set("llsLevel" + (tag - 70), level);
+                        position.set("llsTemp" + (tag - 70), (buf.readUnsignedShortLE() - 100.0) / 10.0);
                     }
                     break;
 
@@ -261,12 +227,12 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
                     buf.skipBytes(4);
                     break;
             }
-
-            readBytes += 5;
         }
+
         if (mcc != 0 || mnc != 0 || lac != 0 || cid != 0 || rssi != 0) {
             position.setNetwork(new Network(CellTower.from(mcc, mnc, lac, cid, rssi)));
         }
+
         return position;
     }
 
@@ -275,21 +241,17 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
         ByteBuf buf = (ByteBuf) msg;
 
-        int startSign = buf.readUnsignedByte();
+        int header = buf.readUnsignedByte();
 
-        if (startSign == HEADER_START_SIGN) {
+        if (header == HEADER_START_SIGN) {
 
             int version = buf.readUnsignedByte();
-            long imeiLong = buf.readLongLE();
-
-            if (version == HEADER_VERSION_3 && buf.readableBytes() >= 8) {
-                buf.skipBytes(8);
-            }
-
-            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, String.valueOf(imeiLong));
+            String imei = String.valueOf(buf.readLongLE());
+            DeviceSession deviceSession = getDeviceSession(channel, remoteAddress, imei);
             if (deviceSession != null) {
                 sendResponse(channel, version, 0);
             }
+
             return null;
         }
 
@@ -303,22 +265,23 @@ public class ArnaviBinaryProtocolDecoder extends BaseProtocolDecoder {
 
         while (buf.readableBytes() > 1) {
 
-            int recordType = buf.readUnsignedByte();
+            int type = buf.readUnsignedByte();
 
-            switch (recordType) {
-                case RECORD_PING, RECORD_DATA, RECORD_TEXT, RECORD_FILE, RECORD_BINARY:
+            switch (type) {
+                case RECORD_PING, RECORD_DATA, RECORD_TEXT, RECORD_FILE, RECORD_BINARY -> {
                     int length = buf.readUnsignedShortLE();
                     Date time = new Date(buf.readUnsignedIntLE() * 1000);
-                    if (recordType == RECORD_DATA) {
+                    if (type == RECORD_DATA) {
                         positions.add(decodePosition(deviceSession, buf, length, time));
                     } else {
                         buf.skipBytes(length);
                     }
                     buf.readUnsignedByte();
-                    break;
+                }
 
-                default:
+                default -> {
                     return positions.isEmpty() ? null : positions;
+                }
             }
         }
 
