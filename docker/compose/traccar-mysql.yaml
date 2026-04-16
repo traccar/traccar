@@ -5,9 +5,9 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-      MYSQL_DATABASE: traccar
-      MYSQL_USER: traccar
-      MYSQL_PASSWORD: traccar
+      MYSQL_DATABASE: ${TRACCAR_DB}
+      MYSQL_USER: ${TRACCAR_DB_USER}
+      MYSQL_PASSWORD: ${TRACCAR_DB_PASSWORD}
     volumes:
       - /opt/traccar/data:/var/lib/mysql
 
@@ -20,7 +20,7 @@ services:
       CONFIG_USE_ENVIRONMENT_VARIABLES: "true"
       DATABASE_DRIVER: com.mysql.cj.jdbc.Driver
       DATABASE_URL: >-
-        jdbc:mysql://database:3306/traccar
+        jdbc:mysql://database:3306/${TRACCAR_DB}
         ?zeroDateTimeBehavior=round
         &serverTimezone=UTC
         &allowPublicKeyRetrieval=true
@@ -30,10 +30,10 @@ services:
         &useUnicode=yes
         &characterEncoding=UTF-8
         &sessionVariables=sql_mode=''
-      DATABASE_USER: traccar
-      DATABASE_PASSWORD: traccar
+      DATABASE_USER: ${TRACCAR_DB_USER}
+      DATABASE_PASSWORD: ${TRACCAR_DB_PASSWORD}
     healthcheck:
-      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8082/api/health" ]
+      test: [ "CMD", "wget", "-q", "--spider", "http://${TRACCAR_BASE_URL}/api/health" ]
       interval: 2m
       timeout: 5s
       start_period: 1h
