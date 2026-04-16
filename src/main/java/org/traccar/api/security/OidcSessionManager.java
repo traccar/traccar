@@ -69,14 +69,28 @@ public class OidcSessionManager {
             String codeChallengeMethod) {
     }
 
+    public record PendingAuthorize(
+            String clientId,
+            URI redirectUri,
+            String state,
+            String scope,
+            String nonce,
+            String codeChallenge,
+            String codeChallengeMethod,
+            Instant expiration) {
+    }
+
     public static final JWSAlgorithm ID_TOKEN_ALGORITHM = JWSAlgorithm.ES256;
     private static final Duration DEFAULT_LIFETIME = Duration.ofMinutes(5);
+    private static final Duration PENDING_LIFETIME = Duration.ofMinutes(10);
+    private static final int TOKEN_BYTES = 32;
 
     private final Config config;
     private final CryptoManager cryptoManager;
     private volatile ECKey signingKey;
 
     private final ConcurrentMap<String, AuthorizationCode> codes = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, PendingAuthorize> pendingAuthorizes = new ConcurrentHashMap<>();
 
     @Inject
     public OidcSessionManager(Config config, CryptoManager cryptoManager) {
@@ -100,6 +114,37 @@ public class OidcSessionManager {
                 scope == null || scope.isBlank() ? "openid" : scope,
                 Instant.now().plus(DEFAULT_LIFETIME), nonce, codeChallenge, codeChallengeMethod));
         return code;
+    }
+
+    public String storePending(
+            String clientId,
+            URI redirectUri,
+            String state,
+            String scope,
+            String nonce,
+            String codeChallenge,
+            String codeChallengeMethod) {
+        PendingAuthorize entry = new PendingAuthorize(
+                clientId, redirectUri, state, scope, nonce, codeChallenge, codeChallengeMethod,
+                Instant.now().plus(PENDING_LIFETIME));
+        String token;
+        byte[] random = new byte[TOKEN_BYTES];
+        do {
+            ThreadLocalRandom.current().nextBytes(random);
+            token = Base64.encodeBase64URLSafeString(random);
+        } while (pendingAuthorizes.putIfAbsent(token, entry) != null);
+        return token;
+    }
+
+    public PendingAuthorize consumePending(String token) {
+        if (token == null) {
+            return null;
+        }
+        PendingAuthorize pending = pendingAuthorizes.remove(token);
+        if (pending == null || Instant.now().isAfter(pending.expiration())) {
+            return null;
+        }
+        return pending;
     }
 
     public AuthorizationCode consumeCode(String code, String clientId, URI redirectUri, String codeVerifier) {

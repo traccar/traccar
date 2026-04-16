@@ -28,6 +28,7 @@ import com.nimbusds.jose.JOSEException;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
@@ -37,6 +38,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
 import java.io.IOException;
@@ -91,6 +93,15 @@ public class OidcResource extends BaseResource {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
+        if (getUserId() == 0) {
+            // Not authenticated — store pending auth server-side, redirect to login page
+            String pendingToken = sessionManager.storePending(
+                    clientId, target, state, scope, nonce, codeChallenge, codeChallengeMethod);
+            NewCookie pendingCookie = new NewCookie.Builder("oidc_pending")
+                    .value(pendingToken).path("/api/oidc").maxAge(600).httpOnly(true).build();
+            return Response.seeOther(URI.create("/")).cookie(pendingCookie).build();
+        }
+
         String code = sessionManager.issueCode(
                 getUserId(), clientId, target, scope, nonce, codeChallenge, codeChallengeMethod);
 
@@ -100,6 +111,42 @@ public class OidcResource extends BaseResource {
         }
 
         return Response.seeOther(redirectBuilder.build()).build();
+    }
+
+    @GET
+    @Path("authorize/resume")
+    public Response resume(@CookieParam("oidc_pending") String pendingToken)
+            throws StorageException, IOException, GeneralSecurityException, JOSEException {
+        NewCookie clearCookie = new NewCookie.Builder("oidc_pending")
+                .value("").path("/api/oidc").maxAge(0).build();
+
+        if (getUserId() == 0) {
+            return Response.status(Response.Status.UNAUTHORIZED).cookie(clearCookie).build();
+        }
+
+        OidcSessionManager.PendingAuthorize pending = sessionManager.consumePending(pendingToken);
+
+        if (pending == null) {
+            return Response.noContent().cookie(clearCookie).build();
+        }
+
+        ClientConfig client = getClients().get(pending.clientId());
+        if (client == null || !client.redirectUris().contains(pending.redirectUri())) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+
+        String code = sessionManager.issueCode(
+                getUserId(), pending.clientId(), pending.redirectUri(),
+                pending.scope(), pending.nonce(), pending.codeChallenge(), pending.codeChallengeMethod());
+
+        UriBuilder redirectBuilder = UriBuilder.fromUri(pending.redirectUri()).queryParam("code", code);
+        if (pending.state() != null) {
+            redirectBuilder.queryParam("state", pending.state());
+        }
+
+        Map<String, String> result = new LinkedHashMap<>();
+        result.put("location", redirectBuilder.build().toString());
+        return Response.ok(result).cookie(clearCookie).build();
     }
 
     @PermitAll
