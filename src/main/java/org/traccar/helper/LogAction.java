@@ -123,7 +123,7 @@ public final class LogAction {
         storeAction(action);
     }
 
-    public void command(HttpServletRequest request, long userId, long groupId, long deviceId, String type) {
+    public void command(HttpServletRequest request, long userId, long groupId, long deviceId, String type, String data, String response) {
         Action action = new Action();
         action.setAddress(WebHelper.retrieveRemoteAddress(request));
         action.setUserId(userId);
@@ -135,6 +135,9 @@ public final class LogAction {
             action.setObjectType(Introspector.decapitalize(Device.class.getSimpleName()));
             action.setObjectId(deviceId);
         }
+        action.set("response", response);
+        action.set("type", type);
+        action.set("data", data);
         storeAction(action);
     }
 

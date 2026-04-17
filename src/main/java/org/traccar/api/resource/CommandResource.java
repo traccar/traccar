@@ -144,17 +144,19 @@ public class CommandResource extends ExtendedObjectResource<Command> {
                 }
             }
             if (!queuedCommands.isEmpty()) {
+                actionLogger.command(request, getUserId(), groupId, entity.getDeviceId(), entity.getType(), entity.getString("data"), "QUEUE");
                 return Response.accepted(queuedCommands).build();
             }
         } else {
             permissionsService.checkPermission(Device.class, getUserId(), entity.getDeviceId());
             QueuedCommand queuedCommand = commandsManager.sendCommand(entity);
             if (queuedCommand != null) {
+                actionLogger.command(request, getUserId(), groupId, entity.getDeviceId(), entity.getType(), entity.getString("data"), "QUEUE");
                 return Response.accepted(queuedCommand).build();
             }
         }
 
-        actionLogger.command(request, getUserId(), groupId, entity.getDeviceId(), entity.getType());
+        actionLogger.command(request, getUserId(), groupId, entity.getDeviceId(), entity.getType(), entity.getString("data"), "OK");
         return Response.ok(entity).build();
     }
 
