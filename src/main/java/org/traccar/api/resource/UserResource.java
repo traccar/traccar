@@ -99,6 +99,22 @@ public class UserResource extends BaseObjectResource<User> {
     @PermitAll
     @POST
     public Response add(User entity) throws StorageException {
+
+        String inputKey = (String) entity.getAttributes().get("keycode");
+        String serverKey = (String) permissionsService.getServer().getAttributes().get("regiskey");
+
+        if (serverKey == null) {
+            throw new SecurityException("Registration disabled");
+        }
+
+        if (inputKey == null || !inputKey.equals(serverKey)) {
+            throw new SecurityException("Registration disabled");
+        }
+
+        if (entity.getAttributes() != null) {
+            entity.getAttributes().remove("keycode");
+        }
+
         User currentUser = getUserId() > 0 ? permissionsService.getUser(getUserId()) : null;
         if (currentUser == null || !currentUser.getAdministrator()) {
             permissionsService.checkUserUpdate(getUserId(), new User(), entity);
