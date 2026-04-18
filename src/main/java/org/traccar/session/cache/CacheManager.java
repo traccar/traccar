@@ -140,7 +140,10 @@ public class CacheManager implements BroadcastInterface {
             initializeCache(device);
             if (device.getPositionId() > 0) {
                 Position position = storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", device.getPositionId())));
+                        new Columns.All(),
+                        new Condition.And(
+                                new Condition.Equals("deviceId", deviceId),
+                                new Condition.Equals("id", device.getPositionId()))));
                 if (position != null) {
                     var positions = devicePositions.computeIfAbsent(deviceId, k -> new ConcurrentLinkedDeque<>());
                     if (config.getBoolean(Keys.REPORT_TRIP_NEW_LOGIC)) {

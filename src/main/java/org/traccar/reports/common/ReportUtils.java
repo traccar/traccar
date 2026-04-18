@@ -421,10 +421,16 @@ public class ReportUtils {
             boolean motion = event.getType().equals(Event.TYPE_DEVICE_MOVING);
             if (motion == trips) {
                 startPosition = storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", event.getPositionId())));
+                        new Columns.All(),
+                        new Condition.And(
+                                new Condition.Equals("deviceId", device.getId()),
+                                new Condition.Equals("id", event.getPositionId()))));
             } else if (startPosition != null) {
                 Position endPosition = storage.getObject(Position.class, new Request(
-                        new Columns.All(), new Condition.Equals("id", event.getPositionId())));
+                        new Columns.All(),
+                        new Condition.And(
+                                new Condition.Equals("deviceId", device.getId()),
+                                new Condition.Equals("id", event.getPositionId()))));
                 if (endPosition != null) {
                     result.add(calculateTripOrStop(
                             device, startPosition, endPosition, 0, ignoreOdometer, reportClass));

@@ -150,7 +150,10 @@ public class EventsReportProvider {
                 long positionId = event.getPositionId();
                 if (positionId > 0) {
                     Position position = storage.getObject(Position.class, new Request(
-                            new Columns.All(), new Condition.Equals("id", positionId)));
+                            new Columns.All(),
+                            new Condition.And(
+                                    new Condition.Equals("deviceId", device.getId()),
+                                    new Condition.Equals("id", positionId))));
                     positions.put(positionId, position);
                 }
             }
