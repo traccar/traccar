@@ -241,10 +241,12 @@ public class DatabaseStorage extends Storage {
         } else if (genericCondition instanceof Condition.LatestPositions condition) {
             if (condition.getDeviceId() > 0) {
                 results.add(condition.getDeviceId());
-            }
-            long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
-            if (period > 0) {
-                results.add(new Date(System.currentTimeMillis() - period * 1000));
+                results.add(condition.getDeviceId());
+            } else {
+                long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
+                if (period > 0) {
+                    results.add(new Date(System.currentTimeMillis() - period * 1000));
+                }
             }
         }
         return results;
@@ -306,6 +308,14 @@ public class DatabaseStorage extends Storage {
 
             } else if (genericCondition instanceof Condition.LatestPositions condition) {
 
+                if (condition.getDeviceId() > 0) {
+                    result.append("deviceId = ? AND ");
+                } else {
+                    long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
+                    if (period > 0) {
+                        result.append("fixTime > ? AND ");
+                    }
+                }
                 result.append("id IN (");
                 result.append("SELECT positionId FROM ");
                 result.append(getStorageName(Device.class));
@@ -313,10 +323,6 @@ public class DatabaseStorage extends Storage {
                     result.append(" WHERE id = ?");
                 }
                 result.append(")");
-                long period = config.getLong(Keys.DATABASE_POSITION_PERIOD);
-                if (period > 0) {
-                    result.append(" AND fixTime > ?");
-                }
 
             }
         }
