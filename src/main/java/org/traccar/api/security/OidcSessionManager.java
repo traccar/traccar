@@ -20,6 +20,7 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyUse;
@@ -42,6 +43,7 @@ import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -69,28 +71,14 @@ public class OidcSessionManager {
             String codeChallengeMethod) {
     }
 
-    public record PendingAuthorize(
-            String clientId,
-            URI redirectUri,
-            String state,
-            String scope,
-            String nonce,
-            String codeChallenge,
-            String codeChallengeMethod,
-            Instant expiration) {
-    }
-
     public static final JWSAlgorithm ID_TOKEN_ALGORITHM = JWSAlgorithm.ES256;
     private static final Duration DEFAULT_LIFETIME = Duration.ofMinutes(5);
-    private static final Duration PENDING_LIFETIME = Duration.ofMinutes(10);
-    private static final int TOKEN_BYTES = 32;
 
     private final Config config;
     private final CryptoManager cryptoManager;
     private volatile ECKey signingKey;
 
     private final ConcurrentMap<String, AuthorizationCode> codes = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, PendingAuthorize> pendingAuthorizes = new ConcurrentHashMap<>();
 
     @Inject
     public OidcSessionManager(Config config, CryptoManager cryptoManager) {
@@ -116,35 +104,78 @@ public class OidcSessionManager {
         return code;
     }
 
-    public String storePending(
+    public String createAuthRequest(
             String clientId,
             URI redirectUri,
             String state,
             String scope,
             String nonce,
             String codeChallenge,
-            String codeChallengeMethod) {
-        PendingAuthorize entry = new PendingAuthorize(
-                clientId, redirectUri, state, scope, nonce, codeChallenge, codeChallengeMethod,
-                Instant.now().plus(PENDING_LIFETIME));
-        String token;
-        byte[] random = new byte[TOKEN_BYTES];
-        do {
-            ThreadLocalRandom.current().nextBytes(random);
-            token = Base64.encodeBase64URLSafeString(random);
-        } while (pendingAuthorizes.putIfAbsent(token, entry) != null);
-        return token;
+            String codeChallengeMethod) throws GeneralSecurityException, JOSEException, StorageException {
+
+        ECKey key = getSigningKey();
+
+        JWTClaimsSet.Builder claims = new JWTClaimsSet.Builder()
+                .issuer(WebHelper.retrieveWebUrl(config) + "/api/oidc")
+                .expirationTime(Date.from(Instant.now().plus(DEFAULT_LIFETIME)))
+                .claim("client_id", clientId);
+
+        if (redirectUri != null) {
+            claims.claim("redirect_uri", redirectUri.toString());
+        }
+        if (state != null) {
+            claims.claim("state", state);
+        }
+        if (scope != null) {
+            claims.claim("scope", scope);
+        }
+        if (nonce != null) {
+            claims.claim("nonce", nonce);
+        }
+        if (codeChallenge != null) {
+            claims.claim("code_challenge", codeChallenge);
+        }
+        if (codeChallengeMethod != null) {
+            claims.claim("code_challenge_method", codeChallengeMethod);
+        }
+
+        SignedJWT jwt = new SignedJWT(
+                new JWSHeader.Builder(ID_TOKEN_ALGORITHM)
+                        .type(JOSEObjectType.JWT)
+                        .keyID(key.getKeyID())
+                        .build(),
+                claims.build());
+        jwt.sign(new ECDSASigner(key));
+        return jwt.serialize();
     }
 
-    public PendingAuthorize consumePending(String token) {
+    public JWTClaimsSet getAuthRequest(String token) {
         if (token == null) {
             return null;
         }
-        PendingAuthorize pending = pendingAuthorizes.remove(token);
-        if (pending == null || Instant.now().isAfter(pending.expiration())) {
+        try {
+            SignedJWT jwt = SignedJWT.parse(token);
+
+            if (!jwt.getHeader().getAlgorithm().equals(ID_TOKEN_ALGORITHM)) {
+                return null;
+            }
+
+            ECKey key = getSigningKey();
+            if (!jwt.verify(new ECDSAVerifier(key.toECPublicKey()))) {
+                return null;
+            }
+
+            JWTClaimsSet claims = jwt.getJWTClaimsSet();
+
+            Date expirationTime = claims.getExpirationTime();
+            if (expirationTime == null || expirationTime.before(new Date())) {
+                return null;
+            }
+
+            return claims;
+        } catch (GeneralSecurityException | JOSEException | StorageException | ParseException e) {
             return null;
         }
-        return pending;
     }
 
     public AuthorizationCode consumeCode(String code, String clientId, URI redirectUri, String codeVerifier) {

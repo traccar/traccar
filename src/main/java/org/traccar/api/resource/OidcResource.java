@@ -24,6 +24,7 @@ import org.traccar.config.Keys;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.JWTClaimsSet;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
@@ -37,14 +38,17 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Base64;
@@ -60,6 +64,9 @@ public class OidcResource extends BaseResource {
 
     private record ClientConfig(String secret, Set<URI> redirectUris) {
     }
+
+    @Context
+    private UriInfo uriInfo;
 
     @Inject
     private Config config;
@@ -81,7 +88,48 @@ public class OidcResource extends BaseResource {
             @QueryParam("response_type") String responseType,
             @QueryParam("code_challenge") String codeChallenge,
             @QueryParam("code_challenge_method") String codeChallengeMethod,
-            @QueryParam("nonce") String nonce) {
+            @QueryParam("nonce") String nonce,
+            @CookieParam("oidc_auth_state") String authStateToken) throws GeneralSecurityException, JOSEException, StorageException, ParseException {
+
+        if (clientId == null && authStateToken != null) {
+            JWTClaimsSet claims = sessionManager.getAuthRequest(authStateToken);
+            if (claims == null) {
+                throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            }
+            clientId = claims.getStringClaim("client_id");
+            redirectUri = claims.getStringClaim("redirect_uri");
+            state = claims.getStringClaim("state");
+            scope = claims.getStringClaim("scope");
+            nonce = claims.getStringClaim("nonce");
+            codeChallenge = claims.getStringClaim("code_challenge");
+            codeChallengeMethod = claims.getStringClaim("code_challenge_method");
+
+            NewCookie clearCookie = new NewCookie.Builder("oidc_auth_state")
+                    .path("/api/oidc").maxAge(0).build();
+
+            if (getUserId() == 0) {
+                return Response.status(Response.Status.UNAUTHORIZED).cookie(clearCookie).build();
+            }
+
+            ClientConfig client = getClients().get(clientId);
+            if (client == null || redirectUri == null) {
+                throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            }
+            URI target = URI.create(redirectUri);
+            if (!client.redirectUris().contains(target)) {
+                throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            }
+
+            String code = sessionManager.issueCode(
+                    getUserId(), clientId, target, scope, nonce, codeChallenge, codeChallengeMethod);
+
+            UriBuilder redirectBuilder = UriBuilder.fromUri(target).queryParam("code", code);
+            if (state != null) {
+                redirectBuilder.queryParam("state", state);
+            }
+
+            return Response.seeOther(redirectBuilder.build()).cookie(clearCookie).build();
+        }
 
         ClientConfig client = getClients().get(clientId);
         if (client == null) {
@@ -94,12 +142,23 @@ public class OidcResource extends BaseResource {
         }
 
         if (getUserId() == 0) {
-            // Not authenticated — store pending auth server-side, redirect to login page
-            String pendingToken = sessionManager.storePending(
+            String token = sessionManager.createAuthRequest(
                     clientId, target, state, scope, nonce, codeChallenge, codeChallengeMethod);
-            NewCookie pendingCookie = new NewCookie.Builder("oidc_pending")
-                    .value(pendingToken).path("/api/oidc").maxAge(600).httpOnly(true).build();
-            return Response.seeOther(URI.create("/")).cookie(pendingCookie).build();
+            
+            boolean isSecure = uriInfo.getRequestUri().getScheme().equalsIgnoreCase("https");
+
+            NewCookie authCookie = new NewCookie.Builder("oidc_auth_state")
+                    .value(token)
+                    .path("/api/oidc")
+                    .maxAge(300)
+                    .httpOnly(true)
+                    .secure(isSecure)
+                    .sameSite(NewCookie.SameSite.LAX)
+                    .build();
+
+            return Response.seeOther(UriBuilder.fromPath("/")
+                    .queryParam("return", "/api/oidc/authorize").build())
+                    .cookie(authCookie).build();
         }
 
         String code = sessionManager.issueCode(
@@ -111,42 +170,6 @@ public class OidcResource extends BaseResource {
         }
 
         return Response.seeOther(redirectBuilder.build()).build();
-    }
-
-    @GET
-    @Path("authorize/resume")
-    public Response resume(@CookieParam("oidc_pending") String pendingToken)
-            throws StorageException, IOException, GeneralSecurityException, JOSEException {
-        NewCookie clearCookie = new NewCookie.Builder("oidc_pending")
-                .value("").path("/api/oidc").maxAge(0).build();
-
-        if (getUserId() == 0) {
-            return Response.status(Response.Status.UNAUTHORIZED).cookie(clearCookie).build();
-        }
-
-        OidcSessionManager.PendingAuthorize pending = sessionManager.consumePending(pendingToken);
-
-        if (pending == null) {
-            return Response.noContent().cookie(clearCookie).build();
-        }
-
-        ClientConfig client = getClients().get(pending.clientId());
-        if (client == null || !client.redirectUris().contains(pending.redirectUri())) {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        }
-
-        String code = sessionManager.issueCode(
-                getUserId(), pending.clientId(), pending.redirectUri(),
-                pending.scope(), pending.nonce(), pending.codeChallenge(), pending.codeChallengeMethod());
-
-        UriBuilder redirectBuilder = UriBuilder.fromUri(pending.redirectUri()).queryParam("code", code);
-        if (pending.state() != null) {
-            redirectBuilder.queryParam("state", pending.state());
-        }
-
-        Map<String, String> result = new LinkedHashMap<>();
-        result.put("location", redirectBuilder.build().toString());
-        return Response.ok(result).cookie(clearCookie).build();
     }
 
     @PermitAll
