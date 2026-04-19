@@ -58,6 +58,7 @@ public class VideoStreamManager {
         private final LinkedHashMap<Integer, ByteBuf> segments = new LinkedHashMap<>();
         private ByteBuf currentSegment;
         private int segmentIndex;
+        private long firstTimestamp;
 
         synchronized void addFrame(ByteBuf nalData, long timestamp, boolean isKeyFrame) {
             if (isKeyFrame && currentSegment != null) {
@@ -66,9 +67,12 @@ public class VideoStreamManager {
 
             if (currentSegment == null) {
                 currentSegment = Unpooled.buffer();
+                if (firstTimestamp == 0) {
+                    firstTimestamp = timestamp;
+                }
             }
 
-            writer.write(currentSegment, nalData, timestamp, isKeyFrame);
+            writer.write(currentSegment, nalData, timestamp - firstTimestamp, isKeyFrame);
         }
 
         private void finalizeSegment() {

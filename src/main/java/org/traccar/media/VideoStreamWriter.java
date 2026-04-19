@@ -36,8 +36,9 @@ public class VideoStreamWriter {
             writePmt(output);
         }
 
-        ByteBuf pesPacket = createPes(nalData, pts);
-        writePesPackets(output, pesPacket, isKeyFrame, pts * 90);
+        long pts90k = pts * 90;
+        ByteBuf pesPacket = createPes(nalData, pts90k);
+        writePesPackets(output, pesPacket, isKeyFrame, pts90k);
         pesPacket.release();
     }
 
@@ -113,8 +114,7 @@ public class VideoStreamWriter {
         }
     }
 
-    private ByteBuf createPes(ByteBuf nalData, long pts) {
-        long pts90k = pts * 90; // convert ms to 90kHz
+    private ByteBuf createPes(ByteBuf nalData, long pts90k) {
 
         ByteBuf pes = Unpooled.buffer();
 
