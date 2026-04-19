@@ -48,7 +48,6 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                 DataConverter.parseHex(getUniqueId(command.getDeviceId())));
         try {
             ByteBuf data = Unpooled.buffer();
-            byte[] time = DataConverter.parseHex(new SimpleDateFormat("yyMMddHHmmss").format(new Date()));
 
             switch (command.getType()) {
                 case Command.TYPE_CUSTOM:
@@ -98,7 +97,8 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                 case Command.TYPE_ENGINE_RESUME:
                     if (alternative) {
                         data.writeByte(command.getType().equals(Command.TYPE_ENGINE_STOP) ? 0x01 : 0x00);
-                        data.writeBytes(time);
+                        data.writeBytes(DataConverter.parseHex(
+                                new SimpleDateFormat("yyMMddHHmmss").format(new Date())));
                         return HuabaoProtocolDecoder.formatMessage(
                                 0x7e, HuabaoProtocolDecoder.MSG_OIL_CONTROL, id, false, data);
                     } else {
