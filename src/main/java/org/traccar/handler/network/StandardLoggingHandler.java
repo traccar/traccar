@@ -23,26 +23,34 @@ import io.netty.channel.ChannelPromise;
 import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.traccar.BaseProtocol;
 import org.traccar.NetworkMessage;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
 import org.traccar.helper.BufferUtil;
 import org.traccar.helper.NetworkUtil;
 import org.traccar.model.LogRecord;
+import org.traccar.protocol.Jt1078Protocol;
 import org.traccar.session.ConnectionManager;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 public class StandardLoggingHandler extends ChannelDuplexHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StandardLoggingHandler.class);
 
     private final String protocol;
+    private final int logLimit;
     private ConnectionManager connectionManager;
     private boolean decodeTextData;
+    private int logCount;
 
     public StandardLoggingHandler(String protocol) {
         this.protocol = protocol;
+        this.logLimit = Set.of(
+                BaseProtocol.nameFromClass(Jt1078Protocol.class))
+                .contains(protocol) ? 50 : 0;
     }
 
     @Inject
@@ -91,14 +99,19 @@ public class StandardLoggingHandler extends ChannelDuplexHandler {
 
     private void log(ChannelHandlerContext ctx, boolean downstream, LogRecord record) {
         if (record != null) {
-            StringBuilder message = new StringBuilder();
-            message.append("[").append(NetworkUtil.session(ctx.channel())).append(": ");
-            message.append(protocol);
-            message.append(downstream ? " > " : " < ");
-            message.append(record.getAddress().getHostString());
-            message.append("] ");
-            message.append(record.getData());
-            LOGGER.info(message.toString());
+            if (logLimit > 0 && ++logCount == logLimit + 1) {
+                LOGGER.info("[{}] logging throttled", NetworkUtil.session(ctx.channel()));
+            }
+            if (logLimit <= 0 || logCount <= logLimit) {
+                StringBuilder message = new StringBuilder();
+                message.append("[").append(NetworkUtil.session(ctx.channel())).append(": ");
+                message.append(protocol);
+                message.append(downstream ? " > " : " < ");
+                message.append(record.getAddress().getHostString());
+                message.append("] ");
+                message.append(record.getData());
+                LOGGER.info(message.toString());
+            }
         }
     }
 
