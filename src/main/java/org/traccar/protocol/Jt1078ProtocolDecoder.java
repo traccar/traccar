@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
+import org.traccar.database.DeviceLookupService;
 import org.traccar.helper.BitUtil;
 import org.traccar.media.VideoStreamManager;
 
@@ -27,10 +28,16 @@ import java.net.SocketAddress;
 
 public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
 
+    private DeviceLookupService deviceLookupService;
     private VideoStreamManager streamManager;
 
     public Jt1078ProtocolDecoder(Protocol protocol) {
         super(protocol);
+    }
+
+    @Inject
+    public void setDeviceLookupService(DeviceLookupService deviceLookupService) {
+        this.deviceLookupService = deviceLookupService;
     }
 
     @Inject
@@ -66,7 +73,9 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
 
         boolean isKeyFrame = dataType == 0; // i-frame
 
-        getDeviceSession(channel, remoteAddress, uniqueId);
+        if (deviceLookupService.lookup(new String[]{uniqueId}) == null) {
+            return null;
+        }
 
         streamManager.handleFrame(uniqueId, logicalChannel, buf.readSlice(bodyLength), timestamp, isKeyFrame);
 
