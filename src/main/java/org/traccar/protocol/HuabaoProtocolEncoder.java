@@ -38,25 +38,13 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
         super(protocol);
     }
 
-    private ByteBuf encodeId(String uniqueId) {
-        if (uniqueId.length() % 2 == 0) {
-            return Unpooled.wrappedBuffer(DataConverter.parseHex(uniqueId));
-        } else {
-            long imei = Long.parseLong(uniqueId.substring(0, uniqueId.length() - 1));
-            ByteBuf buf = Unpooled.buffer(6);
-            buf.writeShort((int) (imei >> 32));
-            buf.writeInt((int) imei);
-            return buf;
-        }
-    }
-
     @Override
     protected Object encodeCommand(Command command) {
 
         boolean alternative = AttributeUtil.lookup(
                 getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()), command.getDeviceId());
 
-        ByteBuf id = encodeId(getUniqueId(command.getDeviceId()));
+        ByteBuf id = HuabaoProtocolDecoder.encodeId(getUniqueId(command.getDeviceId()));
         try {
             ByteBuf data = Unpooled.buffer();
 

@@ -16,7 +16,6 @@
 package org.traccar.protocol;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.Channel;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
@@ -50,7 +49,7 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // M/PT
         buf.readUnsignedShort(); // index
 
-        String uniqueId = ByteBufUtil.hexDump(buf.readSlice(6));
+        String uniqueId = HuabaoProtocolDecoder.decodeId(buf.readSlice(6));
         int logicalChannel = buf.readUnsignedByte();
         int dataType = BitUtil.from(buf.readUnsignedByte(), 4);
         long timestamp = buf.readLong();

@@ -28,6 +28,7 @@ import org.traccar.Protocol;
 import org.traccar.helper.BcdUtil;
 import org.traccar.helper.BitUtil;
 import org.traccar.helper.Checksum;
+import org.traccar.helper.DataConverter;
 import org.traccar.helper.DateBuilder;
 import org.traccar.helper.UnitsConverter;
 import org.traccar.model.CellTower;
@@ -198,7 +199,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
         return dateBuilder.getDate();
     }
 
-    private String decodeId(ByteBuf id) {
+    static String decodeId(ByteBuf id) {
         String serial = ByteBufUtil.hexDump(id);
         if (serial.matches("[0-9]+")) {
             return serial;
@@ -206,6 +207,18 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
             long imei = id.getUnsignedShort(0);
             imei = (imei << 32) + id.getUnsignedInt(2);
             return String.valueOf(imei) + Checksum.luhn(imei);
+        }
+    }
+
+    static ByteBuf encodeId(String uniqueId) {
+        if (uniqueId.length() % 2 == 0) {
+            return Unpooled.wrappedBuffer(DataConverter.parseHex(uniqueId));
+        } else {
+            long imei = Long.parseLong(uniqueId.substring(0, uniqueId.length() - 1));
+            ByteBuf buf = Unpooled.buffer(6);
+            buf.writeShort((int) (imei >> 32));
+            buf.writeInt((int) imei);
+            return buf;
         }
     }
 
