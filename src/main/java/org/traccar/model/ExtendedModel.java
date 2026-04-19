@@ -109,6 +109,10 @@ public class ExtendedModel extends BaseModel {
         return parseAsBoolean(attributes.get(key), false);
     }
 
+    public int getInteger(String key, int defaultValue) {
+        return parseAsInteger(attributes.get(key), defaultValue);
+    }
+
     public int getInteger(String key) {
         return parseAsInteger(attributes.get(key), 0);
     }

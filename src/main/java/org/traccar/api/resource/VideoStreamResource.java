@@ -17,6 +17,7 @@ package org.traccar.api.resource;
 
 import io.netty.buffer.ByteBuf;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -36,7 +37,7 @@ public class VideoStreamResource extends BaseResource {
     @Path("{uniqueId}/live.m3u8")
     public Response playlist(
             @PathParam("uniqueId") String uniqueId,
-            @QueryParam("channel") int channel) {
+            @QueryParam("channel") @DefaultValue("1") int channel) {
 
         return Response.ok(streamManager.getPlaylist(uniqueId, channel), "application/vnd.apple.mpegurl").build();
     }
@@ -46,7 +47,7 @@ public class VideoStreamResource extends BaseResource {
     public Response segment(
             @PathParam("uniqueId") String uniqueId,
             @PathParam("index") int index,
-            @QueryParam("channel") int channel) {
+            @QueryParam("channel") @DefaultValue("1") int channel) {
 
         ByteBuf data = streamManager.getSegment(uniqueId, channel, index);
         StreamingOutput stream = output -> data.getBytes(data.readerIndex(), output, data.readableBytes());
