@@ -100,19 +100,23 @@ public abstract class BaseProtocol implements Protocol {
 
     @Override
     public void sendDataCommand(Channel channel, SocketAddress remoteAddress, Command command) {
+        Object message;
         if (supportedDataCommands.contains(command.getType())) {
-            channel.writeAndFlush(new NetworkMessage(command, remoteAddress));
+            message = command;
         } else if (command.getType().equals(Command.TYPE_CUSTOM)) {
             String data = command.getString(Command.KEY_DATA);
             if (BasePipelineFactory.getHandler(channel.pipeline(), StringEncoder.class) != null) {
-                channel.writeAndFlush(new NetworkMessage(
-                        data.replace("\\r", "\r").replace("\\n", "\n"), remoteAddress));
+                message = data.replace("\\r", "\r").replace("\\n", "\n");
             } else {
-                ByteBuf buf = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
-                channel.writeAndFlush(new NetworkMessage(buf, remoteAddress));
+                message = Unpooled.wrappedBuffer(DataConverter.parseHex(data));
             }
         } else {
             throw new RuntimeException("Command " + command.getType() + " is not supported in protocol " + getName());
+        }
+        try {
+            channel.writeAndFlush(new NetworkMessage(message, remoteAddress)).sync();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
