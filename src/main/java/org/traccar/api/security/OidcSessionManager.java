@@ -20,7 +20,6 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.KeyUse;
@@ -43,7 +42,6 @@ import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -102,80 +100,6 @@ public class OidcSessionManager {
                 scope == null || scope.isBlank() ? "openid" : scope,
                 Instant.now().plus(DEFAULT_LIFETIME), nonce, codeChallenge, codeChallengeMethod));
         return code;
-    }
-
-    public String createAuthRequest(
-            String clientId,
-            URI redirectUri,
-            String state,
-            String scope,
-            String nonce,
-            String codeChallenge,
-            String codeChallengeMethod) throws GeneralSecurityException, JOSEException, StorageException {
-
-        ECKey key = getSigningKey();
-
-        JWTClaimsSet.Builder claims = new JWTClaimsSet.Builder()
-                .issuer(WebHelper.retrieveWebUrl(config) + "/api/oidc")
-                .expirationTime(Date.from(Instant.now().plus(DEFAULT_LIFETIME)))
-                .claim("client_id", clientId);
-
-        if (redirectUri != null) {
-            claims.claim("redirect_uri", redirectUri.toString());
-        }
-        if (state != null) {
-            claims.claim("state", state);
-        }
-        if (scope != null) {
-            claims.claim("scope", scope);
-        }
-        if (nonce != null) {
-            claims.claim("nonce", nonce);
-        }
-        if (codeChallenge != null) {
-            claims.claim("code_challenge", codeChallenge);
-        }
-        if (codeChallengeMethod != null) {
-            claims.claim("code_challenge_method", codeChallengeMethod);
-        }
-
-        SignedJWT jwt = new SignedJWT(
-                new JWSHeader.Builder(ID_TOKEN_ALGORITHM)
-                        .type(JOSEObjectType.JWT)
-                        .keyID(key.getKeyID())
-                        .build(),
-                claims.build());
-        jwt.sign(new ECDSASigner(key));
-        return jwt.serialize();
-    }
-
-    public JWTClaimsSet getAuthRequest(String token) {
-        if (token == null) {
-            return null;
-        }
-        try {
-            SignedJWT jwt = SignedJWT.parse(token);
-
-            if (!jwt.getHeader().getAlgorithm().equals(ID_TOKEN_ALGORITHM)) {
-                return null;
-            }
-
-            ECKey key = getSigningKey();
-            if (!jwt.verify(new ECDSAVerifier(key.toECPublicKey()))) {
-                return null;
-            }
-
-            JWTClaimsSet claims = jwt.getJWTClaimsSet();
-
-            Date expirationTime = claims.getExpirationTime();
-            if (expirationTime == null || expirationTime.before(new Date())) {
-                return null;
-            }
-
-            return claims;
-        } catch (GeneralSecurityException | JOSEException | StorageException | ParseException e) {
-            return null;
-        }
     }
 
     public AuthorizationCode consumeCode(String code, String clientId, URI redirectUri, String codeVerifier) {

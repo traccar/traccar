@@ -24,12 +24,10 @@ import org.traccar.config.Keys;
 import org.traccar.model.User;
 import org.traccar.storage.StorageException;
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jwt.JWTClaimsSet;
 
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.CookieParam;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
@@ -40,18 +38,15 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
-import jakarta.ws.rs.core.UriInfo;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
-import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -64,9 +59,6 @@ public class OidcResource extends BaseResource {
 
     private record ClientConfig(String secret, Set<URI> redirectUris) {
     }
-
-    @Context
-    private UriInfo uriInfo;
 
     @Inject
     private Config config;
@@ -88,48 +80,7 @@ public class OidcResource extends BaseResource {
             @QueryParam("response_type") String responseType,
             @QueryParam("code_challenge") String codeChallenge,
             @QueryParam("code_challenge_method") String codeChallengeMethod,
-            @QueryParam("nonce") String nonce,
-            @CookieParam("oidc_auth_state") String authStateToken) throws GeneralSecurityException, JOSEException, StorageException, ParseException {
-
-        if (clientId == null && authStateToken != null) {
-            JWTClaimsSet claims = sessionManager.getAuthRequest(authStateToken);
-            if (claims == null) {
-                throw new WebApplicationException(Response.Status.BAD_REQUEST);
-            }
-            clientId = claims.getStringClaim("client_id");
-            redirectUri = claims.getStringClaim("redirect_uri");
-            state = claims.getStringClaim("state");
-            scope = claims.getStringClaim("scope");
-            nonce = claims.getStringClaim("nonce");
-            codeChallenge = claims.getStringClaim("code_challenge");
-            codeChallengeMethod = claims.getStringClaim("code_challenge_method");
-
-            NewCookie clearCookie = new NewCookie.Builder("oidc_auth_state")
-                    .path("/api/oidc").maxAge(0).build();
-
-            if (getUserId() == 0) {
-                return Response.status(Response.Status.UNAUTHORIZED).cookie(clearCookie).build();
-            }
-
-            ClientConfig client = getClients().get(clientId);
-            if (client == null || redirectUri == null) {
-                throw new WebApplicationException(Response.Status.BAD_REQUEST);
-            }
-            URI target = URI.create(redirectUri);
-            if (!client.redirectUris().contains(target)) {
-                throw new WebApplicationException(Response.Status.BAD_REQUEST);
-            }
-
-            String code = sessionManager.issueCode(
-                    getUserId(), clientId, target, scope, nonce, codeChallenge, codeChallengeMethod);
-
-            UriBuilder redirectBuilder = UriBuilder.fromUri(target).queryParam("code", code);
-            if (state != null) {
-                redirectBuilder.queryParam("state", state);
-            }
-
-            return Response.seeOther(redirectBuilder.build()).cookie(clearCookie).build();
-        }
+            @QueryParam("nonce") String nonce) throws GeneralSecurityException, JOSEException, StorageException {
 
         ClientConfig client = getClients().get(clientId);
         if (client == null) {
@@ -142,23 +93,25 @@ public class OidcResource extends BaseResource {
         }
 
         if (getUserId() == 0) {
-            String token = sessionManager.createAuthRequest(
-                    clientId, target, state, scope, nonce, codeChallenge, codeChallengeMethod);
-            
-            boolean isSecure = uriInfo.getRequestUri().getScheme().equalsIgnoreCase("https");
-
-            NewCookie authCookie = new NewCookie.Builder("oidc_auth_state")
-                    .value(token)
-                    .path("/api/oidc")
-                    .maxAge(300)
-                    .httpOnly(true)
-                    .secure(isSecure)
-                    .sameSite(NewCookie.SameSite.LAX)
-                    .build();
-
+            UriBuilder returnUrl = UriBuilder.fromPath("/api/oidc/authorize")
+                    .queryParam("client_id", clientId)
+                    .queryParam("redirect_uri", redirectUri)
+                    .queryParam("response_type", responseType)
+                    .queryParam("scope", scope);
+            if (state != null) {
+                returnUrl.queryParam("state", state);
+            }
+            if (nonce != null) {
+                returnUrl.queryParam("nonce", nonce);
+            }
+            if (codeChallenge != null) {
+                returnUrl.queryParam("code_challenge", codeChallenge);
+            }
+            if (codeChallengeMethod != null) {
+                returnUrl.queryParam("code_challenge_method", codeChallengeMethod);
+            }
             return Response.seeOther(UriBuilder.fromPath("/")
-                    .queryParam("return", "/api/oidc/authorize").build())
-                    .cookie(authCookie).build();
+                    .queryParam("return", returnUrl.build().toString()).build()).build();
         }
 
         String code = sessionManager.issueCode(
