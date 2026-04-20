@@ -20,7 +20,6 @@ import com.google.inject.servlet.GuiceFilter;
 import jakarta.servlet.DispatcherType;
 import jakarta.servlet.SessionCookieConfig;
 import jakarta.servlet.http.HttpServletRequest;
-import org.eclipse.jetty.ee10.servlets.CrossOriginFilter;
 import org.eclipse.jetty.compression.server.CompressionHandler;
 import org.eclipse.jetty.ee10.proxy.AsyncProxyServlet;
 import org.eclipse.jetty.ee10.servlet.FilterHolder;
@@ -33,6 +32,7 @@ import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.RequestLogWriter;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.CrossOriginHandler;
 import org.eclipse.jetty.session.DatabaseAdaptor;
 import org.eclipse.jetty.session.DefaultSessionCache;
 import org.eclipse.jetty.session.JDBCSessionDataStoreFactory;
@@ -44,7 +44,6 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.LifecycleObject;
-import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.DateParameterConverterProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.StreamWriter;
@@ -62,7 +61,9 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.EnumSet;
+import java.util.Set;
 
 public class WebServer implements LifecycleObject {
 
@@ -87,6 +88,7 @@ public class WebServer implements LifecycleObject {
 
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         JettyWebSocketServletContainerInitializer.configure(servletHandler, null);
+
         servletHandler.addFilter(GuiceFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
 
         initApi(servletHandler);
@@ -102,7 +104,21 @@ public class WebServer implements LifecycleObject {
         initClientProxy(servletHandler);
         handlers.addHandler(servletHandler);
         handlers.addHandler(new CompressionHandler());
-        server.setHandler(handlers);
+
+        String webOrigin = config.getString(Keys.WEB_ORIGIN);
+        if (webOrigin != null && !webOrigin.isEmpty()) {
+            CrossOriginHandler corsHandler = new CrossOriginHandler();
+            corsHandler.setAllowedOriginPatterns(Set.of(webOrigin));
+            corsHandler.setAllowedMethods(Set.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            corsHandler.setAllowedHeaders(Set.of("Authorization", "Content-Type", "Accept", "Origin"));
+            corsHandler.setAllowCredentials(true);
+            corsHandler.setPreflightMaxAge(Duration.ofMinutes(30));
+            corsHandler.setDeliverPreflightRequests(false);
+            corsHandler.setHandler(handlers);
+            server.setHandler(corsHandler);
+        } else {
+            server.setHandler(handlers);
+        }
 
         if (config.hasKey(Keys.WEB_REQUEST_LOG_PATH)) {
             RequestLogWriter logWriter = new RequestLogWriter(config.getString(Keys.WEB_REQUEST_LOG_PATH));
@@ -179,18 +195,6 @@ public class WebServer implements LifecycleObject {
             servletHandler.addServlet(mcpServletHolder, McpServerHolder.PATH);
 
             String mcpPath = McpServerHolder.PATH + "/*";
-            String webOrigin = config.getString(Keys.WEB_ORIGIN);
-
-            if (webOrigin != null && !webOrigin.isEmpty()) {
-                FilterHolder corsHolder = new FilterHolder(CrossOriginFilter.class);
-                corsHolder.setInitParameter(CrossOriginFilter.ALLOWED_ORIGINS_PARAM, webOrigin);
-                corsHolder.setInitParameter(CrossOriginFilter.ALLOWED_METHODS_PARAM, "GET,POST,DELETE,OPTIONS");
-                corsHolder.setInitParameter(CrossOriginFilter.ALLOWED_HEADERS_PARAM,
-                        "Authorization,Content-Type,Accept");
-                corsHolder.setInitParameter(CrossOriginFilter.CHAIN_PREFLIGHT_PARAM, "false");
-                servletHandler.addFilter(corsHolder, mcpPath, EnumSet.of(DispatcherType.REQUEST));
-            }
-
             servletHandler.addFilter(
                     new FilterHolder(new McpAuthFilter(injector.getInstance(LoginService.class))),
                     mcpPath, EnumSet.of(DispatcherType.REQUEST));
@@ -203,7 +207,6 @@ public class WebServer implements LifecycleObject {
                 ObjectMapperContextResolver.class,
                 DateParameterConverterProvider.class,
                 SecurityRequestFilter.class,
-                CorsResponseFilter.class,
                 ResourceErrorHandler.class,
                 StreamWriter.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
