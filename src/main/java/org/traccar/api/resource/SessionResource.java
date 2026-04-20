@@ -50,6 +50,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
+import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.Date;
 
@@ -180,11 +181,17 @@ public class SessionResource extends BaseResource {
     @PermitAll
     @Path("openid/callback")
     @GET
-    public Response requestToken() throws IOException, StorageException, ParseException, GeneralSecurityException {
+    public Response requestToken() throws IOException, StorageException, ParseException {
         if (openIdProvider == null) {
             throw new UnsupportedOperationException("OpenID not enabled");
         }
-        return Response.seeOther(openIdProvider.handleCallback(request.getQueryString(), request)).build();
+        try {
+            return Response.seeOther(openIdProvider.handleCallback(request.getQueryString(), request)).build();
+        } catch (GeneralSecurityException e) {
+            URI errorUri = openIdProvider.getBaseUrl().resolve("?openid=error&message=" +
+                    java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8));
+            return Response.seeOther(errorUri).build();
+        }
     }
 
 }

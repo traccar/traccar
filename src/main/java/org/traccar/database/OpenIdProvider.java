@@ -47,6 +47,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.traccar.api.security.LoginService;
 import org.traccar.config.Config;
 import org.traccar.config.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.traccar.helper.LogAction;
 import org.traccar.helper.SessionHelper;
 import org.traccar.helper.WebHelper;
@@ -60,6 +62,8 @@ import java.security.GeneralSecurityException;
 import java.util.List;
 
 public class OpenIdProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenIdProvider.class);
+
     private final Boolean force;
     private final ClientID clientId;
     private final ClientAuthentication clientAuth;
@@ -174,9 +178,9 @@ public class OpenIdProvider {
         UserInfo userInfo = getUserInfo(bearerToken);
 
         List<String> userGroups = userInfo.getStringListClaim(groupsClaimName);
-        Boolean administrator = adminGroup != null ? userGroups.contains(adminGroup) : null;
+        boolean administrator = adminGroup != null && userGroups != null && userGroups.contains(adminGroup);
 
-        if (!(Boolean.TRUE.equals(administrator) || allowGroup == null || userGroups.contains(allowGroup))) {
+        if (!(administrator || allowGroup == null || (userGroups != null && userGroups.contains(allowGroup)))) {
             throw new GeneralSecurityException("Your OpenID Groups do not permit access");
         }
 
@@ -190,5 +194,9 @@ public class OpenIdProvider {
 
     public boolean getForce() {
         return force;
+    }
+
+    public URI getBaseUrl() {
+        return baseUrl;
     }
 }
