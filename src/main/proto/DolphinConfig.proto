@@ -1,0 +1,1319 @@
+syntax = "proto3";
+
+package org.traccar.protobuf.dolphin.Config;
+option go_package = "dolphindevice";
+
+// begin: Config ---------------------------------------------
+
+message Config {
+	SerialBaudrate SerialPort_Baudrate = 80;
+	bool DoNotResetDeviceOnProblems = 90;
+	string Password = 99;
+
+	/* Movement */
+	MovementSource Movement = 100;
+	uint32 MovementSensorSensitivity = 101;
+
+	/* Sleep */
+	SleepMode Sleep = 102;
+	uint32 SleepTimeout = 103;
+
+	/* Engine state (Ignition) */
+	EngineMode EngineOn = 104;
+
+	/* EngineOn conditions */
+	bool EngineOn_DIN1 = 105;
+	bool EngineOn_DIN2 = 106;
+	bool EngineOn_MovementSensor = 107;
+	bool EngineOn_PowerSupplyAvailable = 108;
+	uint32 EngineOn_GpsSpeed = 109;
+	uint32 EngineOn_CanRPM = 110;
+	uint32 EngineOn_MinActiveStateDuration = 111;
+	ConditionOperator EngineOn_Operator = 112;
+	uint32 EngineOn_MovementStartDelay = 113;
+	uint32 EngineOn_MovementStopDelay = 114;
+	uint32 EngineOn_ExternalVoltage = 115;
+
+	bool LedIndication = 116;
+
+	/* GPS/GNSS Mode */
+	GNSSMode GNSS = 117;
+
+	/* Static navigation */
+	bool StaticNavigation_Enabled = 118;
+	StaticNavigationSource StaticNavigation_Source = 119;
+
+	/* Records saving/sending without time synchronization */
+	RecordsMode RecordsSaveAndSendMode = 120;
+	TimeSynchronization TimeSynchronization = 121;
+	string NTPServer = 122;
+	uint32 NTPInterval = 123;
+
+	uint32 Sleep_NoPowerTimeout = 125;
+
+	bool SendPing = 130;
+
+	/* Data acquisition */
+	bool TimetableMode = 140;
+	bytes TimetableData = 141;
+
+	// Service
+	Service Service_1 = 200;
+	Service Service_2 = 201;
+	Service Service_3 = 202;
+	// Service Service_4 = 203;
+	// Service Service_5 = 204;
+
+	/* IO config */
+	uint32 AnalogInput1_AverageTime = 700;
+	uint32 AnalogInput2_AverageTime = 701;
+	uint32 AnalogInput3_AverageTime = 702;
+
+	/* Bluetooth */
+	BluetoothMode Bluetooth_RadioMode = 800;
+	string Bluetooth_Name = 801;
+	string Bluetooth_PIN = 802;
+	BluetoothSecurityMode Bluetooth_SecurityMode = 803;
+	bool Bluetooth_PowerDownOnSleep = 804;
+	
+	BluetoothExternalConnectionMode Bluetooth_ExternalConnectionMode = 810;
+	string Bluetooth_ExternalDevice_MAC = 811;
+	string Bluetooth_ExternalDevice_Name = 812;
+	string Bluetooth_ExternalDevice_PIN = 813;
+
+	string Bluetooth_AuthorizedMAC1 = 820;
+	string Bluetooth_AuthorizedMAC2 = 821;
+	string Bluetooth_AuthorizedMAC3 = 822;
+	string Bluetooth_AuthorizedMAC4 = 823;
+	string Bluetooth_AuthorizedMAC5 = 824;
+
+	/* Connection ------------ */
+	/* APN */
+	bool GPRS_ContextEnabled = 2001;
+	string GPRS_ApnName = 2002;
+	string GPRS_ApnUsername = 2003;
+	string GPRS_ApnPassword = 2004;
+	bool GPRS_CHAPAuthentication = 2005;
+
+	uint32 GPRS_LinkTimeout = 2006;
+	uint32 GPRS_ResponseTimeout = 2007;
+
+	/* Main Server configurations */
+	string GPRS_ServerAddress = 2008 ;
+	uint32 GPRS_ServerPort = 2009;
+	ServerProtocol GPRS_ServerProtocol = 2010;
+
+	/* Backup server configurations */
+	string GPRS_BackupServerAddress = 2011;
+	uint32 GPRS_BackupServerPort = 2012;
+	ServerProtocol GPRS_BackupServerProtocol = 2013;
+
+	// SSL
+	bool GPRS_SSL_ClientAuthentication = 2020;
+
+	bool GPRS_DataCompression = 2030;
+
+	AuthenticationMode Authentication_Mode = 2035;
+	string Authentication_Code = 2036;
+
+	// Firmware update server
+	bool FirmwareUpdate_Enabled = 2040;
+	string FirmwareUpdate_Channel = 2041;
+	uint32 FirmwareUpdate_CheckInterval = 2042;
+
+	string FirmwareUpdate_ServerAddress = 2045;
+	uint32 FirmwareUpdate_ServerPort = 2046;
+	ServerProtocol FirmwareUpdate_ServerProtocol = 2047;
+	uint32 FirmwareUpdate_LinkTimeout = 2048;
+	uint32 FirmwareUpdate_ResponseTimeout = 2049;
+
+	/* SMS / Call settings */
+	bool SMS_DataSending = 3000;
+	string SMS_DataSendNumber = 3001;
+	string SMS_Password = 3002;
+	int32 SMS_EventTimeZone = 3003;
+
+	CallAction Call_IncommingCallAction = 3051;
+
+	uint32 Call_DigitalInput1_CallTo = 3055;
+	uint32 Call_DigitalInput2_CallTo = 3056;
+	uint32 Call_DigitalInput3_CallTo = 3057;
+	
+	/* Authorized numbers */
+	string AuthorizedNumber1 = 3100;
+	string AuthorizedNumber2 = 3101;
+	string AuthorizedNumber3 = 3102;
+	string AuthorizedNumber4 = 3103;
+	string AuthorizedNumber5 = 3104;
+	string AuthorizedNumber6 = 3105;
+	string AuthorizedNumber7 = 3106;
+	string AuthorizedNumber8 = 3107;
+	string AuthorizedNumber9 = 3108;
+	string AuthorizedNumber10 = 3109;
+	reserved 3110 to 3149;
+
+	string GsmPredefinedNumber1 = 3200;
+	string GsmPredefinedNumber2 = 3201;
+	string GsmPredefinedNumber3 = 3202;
+	string GsmPredefinedNumber4 = 3203;
+	string GsmPredefinedNumber5 = 3204;
+	string GsmPredefinedNumber6 = 3205;
+	string GsmPredefinedNumber7 = 3206;
+	string GsmPredefinedNumber8 = 3207;
+	string GsmPredefinedNumber9 = 3208;
+	string GsmPredefinedNumber10 = 3209;
+
+	string RoamingOperator1 = 5000;
+	string RoamingOperator2 = 5001;
+	string RoamingOperator3 = 5002;
+	string RoamingOperator4 = 5003;
+	string RoamingOperator5 = 5004;
+	reserved 5005 to 5049;
+
+	/* Data acquisition on Stop mode */
+	uint32 DAQ_Stop_Home_MinPeriod = 10000;
+
+	uint32 DAQ_Stop_Roaming_MinPeriod = 10100;
+
+	/* Data acquisition on Moving mode */
+	uint32 DAQ_Moving_Home_MinPeriod = 10050;
+	uint32 DAQ_Moving_Home_MinPathDeviation = 10051;
+
+	uint32 DAQ_Moving_Roaming_MinPeriod = 10150;
+	uint32 DAQ_Moving_Roaming_MinPathDeviation = 10151;
+
+	/* Geofencing */
+	GeoZone GeoZone1 = 20000;
+	GeoZone GeoZone2 = 20020;
+	GeoZone GeoZone3 = 20040;
+	GeoZone GeoZone4 = 20060;
+	GeoZone GeoZone5 = 20080;
+	GeoZone GeoZone6 = 20100;
+	GeoZone GeoZone7 = 20120;
+	GeoZone GeoZone8 = 20140;
+	GeoZone GeoZone9 = 20160;
+	GeoZone GeoZone10 = 20180;
+	GeoZone GeoZone11 = 20200;
+	GeoZone GeoZone12 = 20220;
+	GeoZone GeoZone13 = 20240;
+	GeoZone GeoZone14 = 20260;
+	GeoZone GeoZone15 = 20280;
+	GeoZone GeoZone16 = 20300;
+	GeoZone GeoZone17 = 20320;
+	GeoZone GeoZone18 = 20340;
+	GeoZone GeoZone19 = 20360;
+	GeoZone GeoZone20 = 20380;
+	GeoZone GeoZone21 = 20400;
+	GeoZone GeoZone22 = 20420;
+	GeoZone GeoZone23 = 20440;
+	GeoZone GeoZone24 = 20460;
+	GeoZone GeoZone25 = 20480;
+	GeoZone GeoZone26 = 20500;
+	GeoZone GeoZone27 = 20520;
+	GeoZone GeoZone28 = 20540;
+	GeoZone GeoZone29 = 20560;
+	GeoZone GeoZone30 = 20580;
+	GeoZone GeoZone31 = 20600;
+	GeoZone GeoZone32 = 20620;
+	GeoZone GeoZone33 = 20640;
+	GeoZone GeoZone34 = 20660;
+	GeoZone GeoZone35 = 20680;
+	GeoZone GeoZone36 = 20700;
+	GeoZone GeoZone37 = 20720;
+	GeoZone GeoZone38 = 20740;
+	GeoZone GeoZone39 = 20760;
+	GeoZone GeoZone40 = 20780;
+	GeoZone GeoZone41 = 20800;
+	GeoZone GeoZone42 = 20820;
+	GeoZone GeoZone43 = 20840;
+	GeoZone GeoZone44 = 20860;
+	GeoZone GeoZone45 = 20880;
+	GeoZone GeoZone46 = 20900;
+	GeoZone GeoZone47 = 20920;
+	GeoZone GeoZone48 = 20940;
+	GeoZone GeoZone49 = 20960;
+	GeoZone GeoZone50 = 20980;
+	
+	// Features
+	
+	// Trip
+	uint32 Trip_StartSpeed = 28000;
+	bool Trip_UseIgnition = 28001;
+	uint32 Trip_ParkDetectionTimeout = 28002;
+
+	// Overspeeding
+	bool Overspeeding_Enable = 28100;
+	uint32 Overspeeding_Limit = 28101;
+	uint32 Overspeeding_ActivationSpeed = 28102;
+	OverSpeedingDeactivationMode Overspeeding_DeactivationMode = 28103;
+	uint32 Overspeeding_DeactivationValue = 28104;
+
+	// USSD 
+	bool USSD_Enabled = 28140;
+	uint32 USSD_ID = 28141;
+	uint32 USSD_Interval = 28142;
+	string USSD_Code = 28143;
+	
+	// Vehicle Speed Sensor
+	uint32 SpeedSensor_KmPulseCount = 28150;
+
+	// Accelerometer Features
+	// Crash detection
+	bool CrashDetection_Enabled = 28200;
+	uint32 CrashDetection_Level1Threshold = 28201;
+	uint32 CrashDetection_Level2Threshold = 28202;
+	uint32 CrashDetection_Level3Threshold = 28203;
+
+	CrashTraceType CrashDetection_Trace = 28205;
+
+	uint32 CrashDetection_Duration = 28210;
+	uint32 CrashDetection_SendSMSTo = 28220;
+	string CrashDetection_SMSText = 28221;
+	
+	uint32 CrashDetection_CallTo = 28225;
+
+	// Rollover detection
+	bool RolloverDetection_Enabled = 28230;
+
+	// Driver Registration
+	DriverRegistration_Mode DriverRegistration_Mode = 29000;
+	DriverRegistration_Authentication DriverRegistration_Authentication = 29001;
+	uint32 DriverRegistration_DeregistrationTimeout = 29002;
+	DigitalOutputName DriverRegistration_BuzzerDigitalOutput = 29010;
+	DigitalOutputName DriverRegistration_ImmobilizerDigitalOutput = 29011;
+	bool DriverRegistration_ImmobilizerActiveLow = 29012;
+
+	uint64 DriverRegistration_AuthorizedID1 = 29100;
+	uint64 DriverRegistration_AuthorizedID2 = 29101;
+	uint64 DriverRegistration_AuthorizedID3 = 29102;
+	uint64 DriverRegistration_AuthorizedID4 = 29103;
+	uint64 DriverRegistration_AuthorizedID5 = 29104;
+	uint64 DriverRegistration_AuthorizedID6 = 29105;
+	uint64 DriverRegistration_AuthorizedID7 = 29106;
+	uint64 DriverRegistration_AuthorizedID8 = 29107;
+	uint64 DriverRegistration_AuthorizedID9 = 29108;
+	uint64 DriverRegistration_AuthorizedID10 = 29109;
+
+	// ECO drive config
+	bool ECODriveActive = 30000;
+	uint32 ECO_OverSpeedingLimit = 30001;
+	uint32 ECO_RPM_GreenBandLowLimit = 30002;
+	uint32 ECO_RPM_GreenBandHighLimit = 30003;
+	uint32 ECO_HarshBreakingLimit = 30004;
+	uint32 ECO_ExtremeBreakingLimit = 30005;
+	uint32 ECO_HarshAccelerationLimit = 30006;
+	uint32 ECO_CorneringLimit = 30007;
+	uint32 ECO_IdlingDelay = 30008;
+	uint32 ECO_IdlingSpeed = 30009;
+	uint32 ECO_CruiseControlSpeed = 30010;
+
+	bool ECO_CalculateOnlyWhenEngineOn = 30020;
+	bool ECO_CustomEngineSource = 30021;
+	bool ECO_EngineOn_DIN1 = 30022;
+	bool ECO_EngineOn_DIN2 = 30023;
+	bool ECO_EngineOn_MovementSensor = 30024;
+	bool ECO_EngineOn_PowerSupplyAvailable = 30025;
+	uint32 ECO_EngineOn_CanRPM_Low = 30026;
+	uint32 ECO_EngineOn_CanRPM_High = 30027;
+	ConditionOperator ECO_EngineOn_Operator = 30028;
+	uint32 ECO_EngineOn_ExternalVoltage = 30029;
+
+	// ECU
+	ECUInterface ECU_Interface = 30100;
+	
+	// Fuel consumption
+	FuelConsumption FuelConsumption_Enabled = 30150;
+	uint32 FuelConsumption_EngineDisplacement = 30151;
+	uint32 FuelConsumption_Cylinders = 30152;
+	uint32 FuelConsumption_InjectorPerformance = 30153;
+	uint32 FuelConsumption_VolumetricEfficiently = 30154;
+	
+	uint32 FaultCodesReadTime = 30200;
+
+	// SIPAAD
+	uint32 SIPAAD_LinkTimeout = 30500;
+	uint32 SIPAAD_ResponseTimeout = 30501;
+
+	// SIPAAD server configurations
+	string SIPAAD_ServerAddress = 30502;
+	uint32 SIPAAD_ServerPort = 30503;
+	ServerProtocol SIPAAD_ServerProtocol = 30504;
+	bool SIPAAD_SSL_ClientAuthentication = 30505;
+
+	// IO
+	IO IO_Time = 50003;
+	IO IO_Angle = 50004;
+    IO IO_Speed = 50005;
+
+    IO IO_SleepMode = 50008;
+	
+	IO IO_Ignition = 50010;
+	IO IO_Movement = 50011;
+	IO IO_DataMode = 50012;
+	
+	IO IO_GnssStatus = 50020;
+	IO IO_GnssHDOP = 50021;
+	IO IO_GnssPDOP = 50022;
+	IO IO_GnssJammingStatus = 50023;
+	reserved 50024; // Alarm_GnssDataJumping
+
+	IO IO_GsmSignal = 50030;
+	IO IO_GsmCellId = 50031;
+	IO IO_GsmAreaCode = 50032;
+	IO IO_GsmOperator = 50033;
+	IO IO_GsmTemperature = 50034;
+	IO IO_GsmJammingStatus = 50035;
+	
+	IO IO_ExternalVoltage = 50040;
+	IO IO_BatteryVoltage = 50041;
+	IO IO_BatteryCurrent = 50042;
+
+	IO IO_TotalOdometer = 50050;
+	IO IO_Odometer = 50051;
+	IO IO_EngineOnTime = 50052;
+	IO IO_EngineOnTimeDelta = 50053;
+	IO IO_IdlingTime = 50054;
+	IO IO_IdlingTimeDelta = 50055;
+
+	IO IO_SpeedSensor_Speed = 50060;
+	IO IO_SpeedSensor_Distance = 50061;
+	IO IO_SpeedSensor_TotalDistance = 50062;
+	IO IO_SpeedSensor_MaxSpeed = 50063;
+	IO IO_SpeedSensor_GPSSpeedDiff = 50064;
+	
+	IO IO_DigitalInput1 = 50070;
+	IO IO_DigitalInput2 = 50071;
+	IO IO_PowerSupply = 50072;
+	IO IO_DigitalInput3 = 50073;
+
+	IO IO_VehicleConnection = 50079;
+
+	IO IO_DigitalInput1Time = 50080;
+	IO IO_DigitalInput1TimeDelta = 50081;
+	IO IO_DigitalInput2Time = 50082;
+	IO IO_DigitalInput2TimeDelta = 50083;
+	IO IO_PowerSupplyTime = 50084;
+	IO IO_PowerSupplyTimeDelta = 50085;
+	IO IO_DigitalInput3Time = 50086;
+	IO IO_DigitalInput3TimeDelta = 50087;
+
+	IO IO_DigitalOutput1 = 50090;
+	IO IO_DigitalOutput2 = 50091;
+
+	IO IO_AnalogInput1 = 50100;
+	IO IO_AnalogInput2 = 50101;
+	IO IO_AnalogInput3 = 50102;
+
+	IO IO_AxisX = 50110;
+	IO IO_AxisY = 50111;
+	IO IO_AxisZ = 50112;
+
+	// ECO drive
+	IO IO_ECO_MaxSpeed = 50150;
+	IO IO_ECO_NormalSpeedDistance = 50151;
+	IO IO_ECO_NormalSpeedTotalDistance = 50152;
+	IO IO_ECO_NormalSpeedTimer = 50153;
+	IO IO_ECO_NormalSpeedTotalTimer = 50154;
+	IO IO_ECO_OverSpeedingDistance = 50155;
+	IO IO_ECO_OverSpeedingTotalDistance = 50156;
+	IO IO_ECO_OverSpeedingTimer = 50157;
+	IO IO_ECO_OverSpeedingTotalTimer = 50158;
+	
+	IO IO_ECO_MaxRPM = 50159;
+	IO IO_ECO_RPMGreenBandDistance = 50160;
+	IO IO_ECO_RPMGreenBandTotalDistance = 50161;
+	IO IO_ECO_RPMGreenBandTimer = 50162;
+	IO IO_ECO_RPMGreenBandTotalTimer = 50163;
+
+	IO IO_ECO_OverRPMDistance = 50164;
+	IO IO_ECO_OverRPMTotalDistance = 50165;
+	IO IO_ECO_OverRPMTimer = 50166;
+	IO IO_ECO_OverRPMTotalTimer = 50167;
+
+	IO IO_ECO_IdlingEvent = 50170;
+	IO IO_ECO_CruiseControlTimer = 50171;
+	IO IO_ECO_CruiseControlTotalTimer = 50172;
+	IO IO_ECO_CruiseControlDistance = 50173;
+	IO IO_ECO_CruiseControlTotalDistance = 50174;
+
+	IO IO_ECO_UnderRPMDistance = 50175;
+	IO IO_ECO_UnderRPMTotalDistance = 50176;
+	IO IO_ECO_UnderRPMTimer = 50177;
+	IO IO_ECO_UnderRPMTotalTimer = 50178;
+
+	// ECO Green driving
+	IO IO_ECO_BreakCounter = 50180;
+	IO IO_ECO_HarshBreakCounter = 50181;
+	IO IO_ECO_ExtremeBreakCounter = 50182;
+	IO IO_ECO_HarshAccelerationCounter = 50183;
+	IO IO_ECO_CorneringCounter = 50184;
+
+	IO IO_ECO_TotalBreak = 50185;
+	IO IO_ECO_TotalHarshBreak = 50186;
+	IO IO_ECO_TotalExtremeBreak = 50187;
+	IO IO_ECO_TotalHarshAcceleration = 50188;
+	IO IO_ECO_TotalCornering = 50189;
+
+	// Geozones
+	reserved 50200 to 50249;
+
+	// Trip
+	IO IO_Trip = 50300;
+	IO IO_Trip_Time = 50301;
+	IO IO_Trip_Distance = 50302;
+
+	// Service
+	reserved 50330; // Service
+	
+	// IO IO_CrashDetection = 50340;
+	reserved 50340;
+
+	// Driver Registration
+	IO IO_DriverID = 50350;
+
+	// Sensors
+	IO IO_TemperatureSensor1 = 50400;
+	IO IO_TemperatureSensor1_ID = 50401;
+
+	IO IO_TemperatureSensor2 = 50402;
+	IO IO_TemperatureSensor2_ID = 50403;
+
+	IO IO_TemperatureSensor3 = 50404;
+	IO IO_TemperatureSensor3_ID = 50405;
+
+	IO IO_HumiditySensor1 = 50410;
+
+	IO IO_TiltStatus = 50490;
+
+	// OBD
+	IO IO_OBD_EngineRPM = 50500;
+	IO IO_OBD_BatteryVoltage = 50501;
+	IO IO_OBD_EngineCoolantTemperature = 50502;
+	IO IO_OBD_VehicleSpeed = 50503;
+	IO IO_OBD_TotalDistance = 50504;
+	IO IO_OBD_FuelRate = 50505;
+	IO IO_OBD_TotalFuelUsed = 50506;
+	IO IO_OBD_IntakeAirTemperature = 50507;
+	IO IO_OBD_IntakeManifoldAbsolutePressure = 50508;
+
+	/* OBD II Standard */
+	IO IO_OBD_MalfunctionIndicatorLamp = 50550;
+	IO IO_DiagnosticTroubleCodesCount = 50551;
+	IO IO_OBD_CalculatedEngineLoad = 50552;
+	IO IO_OBD_MassAirFlowRate = 50553;
+	IO IO_OBD_ThrottlePosition = 50554;
+	IO IO_OBD_RunTimeSinceEngineStart = 50555;
+	IO IO_OBD_FuelTankLevelInput = 50556;
+	IO IO_OBD_DistanceTraveledSinceCodesCleared = 50557;
+	IO IO_OBD_AbsoluteThrottlePositionD = 50558;
+	IO IO_OBD_TimeRunWithMILOn = 50559;
+	IO IO_OBD_EngineOilTemperature = 50560;
+	IO IO_OBD_FuelSystem1Status = 50561;
+	IO IO_OBD_FuelSystem2Status = 50562;
+	IO IO_OBD_OxygenSensor1Voltage = 50563;
+	IO IO_OBD_OxygenSensor1ShortTermFuelTrim = 50564;
+	IO IO_OBD_OxygenSensor2Voltage = 50565;
+	IO IO_OBD_OxygenSensor2ShortTermFuelTrim = 50566;
+	IO IO_OBD_OxygenSensor3Voltage = 50567;
+	IO IO_OBD_OxygenSensor3ShortTermFuelTrim = 50568;
+	IO IO_OBD_OxygenSensor4Voltage = 50569;
+	IO IO_OBD_OxygenSensor4ShortTermFuelTrim = 50570;
+
+	/* CAN Bus */
+	IO IO_CANBus_Tachograph1_WorkingState1 = 50700;
+	IO IO_CANBus_Tachograph1_WorkingState2 = 50701;
+	IO IO_CANBus_Tachograph1_VehicleMotion = 50702;
+	IO IO_CANBus_Tachograph1_Driv_1_Time_Rel_States = 50703;
+	IO IO_CANBus_Tachograph1_Driver1_Card = 50704;
+	IO IO_CANBus_Tachograph1_VehicleOverspeed = 50705;
+	IO IO_CANBus_Tachograph1_Driv_2_Time_Rel_States = 50706;
+	IO IO_CANBus_Tachograph1_Driver2_Card = 50707;
+	IO IO_CANBus_Tachograph1_SystemEvent = 50708;
+	IO IO_CANBus_Tachograph1_HandlingInformation = 50709;
+	IO IO_CANBus_Tachograph1_TachographPerformance = 50710;
+	IO IO_CANBus_Tachograph1_DirectionIndicator = 50711;
+	IO IO_CANBus_Tachograph1_VehicleSpeed = 50712;
+	IO IO_CANBus_EngineTemperature1_EngineCoolantTemperature = 50713;
+	IO IO_CANBus_ElectronicEngineController1_ActualEnginePercent = 50714;
+	IO IO_CANBus_ElectronicEngineController1_EngineSpeed = 50715;
+	IO IO_CANBus_EngineHours_EngineTotalHours = 50716;
+	IO IO_CANBus_VehicleDistance_TotalVehicleDistance = 50717;
+	IO IO_CANBus_HighResolutionFuelConsumption_TotalFuelUsed = 50718;
+	IO IO_CANBus_DashDisplay_FuelLevel1 = 50719;
+	IO IO_CANBus_AmbientConditions_AmbientAirTemperature = 50720;
+	IO IO_CANBus_FuelEconomy_FuelRate = 50721;
+	IO IO_CANBus_FuelEconomy_InstantaneousFuelEconomy = 50722;
+	IO IO_CANBus_AirSupplyPressure_ServiceBrakeAirPressureCircuit_1 = 50723;
+	IO IO_CANBus_AirSupplyPressure_ServiceBrakeAirPressureCircuit_2 = 50724;
+	IO IO_CANBus_AftertreatmentDieselExhaustFluidTankInformation_Tank1_Level = 50725;
+	// 50726;
+	// 50727;
+	// 50728;
+	// 50729;
+	// 50730;
+	// 50731;
+	// 50732;
+	// 50733;
+	// 50734;
+	// 50735;
+	// 50736;
+	// 50737;
+	// 50738;
+	// 50739;
+	// 50740;
+	// 50741;
+	IO IO_CANBus_TruckBus_ElectronicEngineController2_AcceleratorPedalPosition_1 = 50742;
+	IO IO_CANBus_TruckBus_ElectronicEngineController2_EnginePercentLoad = 50743;
+	IO IO_CANBus_Truck_VehicleWeight_AxleWeight1 = 50744;
+	IO IO_CANBus_Truck_VehicleWeight_AxleWeight2 = 50745;
+	IO IO_CANBus_Truck_VehicleWeight_AxleWeight3 = 50746;
+	IO IO_CANBus_Truck_ServiceInformation_ServiceDistance = 50747;
+	IO IO_CANBus_Truck_PTODriveEngagement_PTOEngageStat = 50748;
+	IO IO_CANBus_Truck_CombinationVehicleWeight_GrossCombinationVehicleWeight = 50749;
+	IO IO_CANBus_TruckBus_Electronic_Retarder_Controller_1_RetarderTorqueMode = 50750;
+	IO IO_CANBus_TruckBus_Electronic_Retarder_Controller_1_RetarderSelection = 50751;
+	IO IO_CANBus_Bus_DoorControl1_DoorPosition = 50752;
+	IO IO_CANBus_Bus_DoorControl1_RampWheelChairlift = 50753;
+	IO IO_CANBus_Bus_DoorControl1_DoorsStatus2 = 50754;
+	IO IO_CANBus_Bus_DoorControl2 = 50755;
+	IO IO_CANBus_BrakeLiningRemaining_AxleFrontLeftWheel = 50756;
+	IO IO_CANBus_BrakeLiningRemaining_AxleFrontRightWheel = 50757;
+	IO IO_CANBus_BrakeLiningRemaining_AxleRear1LeftWheel = 50758;
+	IO IO_CANBus_BrakeLiningRemaining_AxleRear1RightWheel = 50759;
+	IO IO_CANBus_BrakeLiningRemaining_AxleRear2LeftWheel = 50760;
+	IO IO_CANBus_BrakeLiningRemaining_AxleRear2RightWheel = 50761;
+	IO IO_CANBus_BrakeLiningRemaining_AxleRear3LeftWheel = 50762;
+	IO IO_CANBus_BrakeLiningRemaining_AxleRear3RightWheel = 50763;
+	// 50764;
+	// 50765;
+	// 50766;
+	// 50767;
+	// 50768;
+	// 50769;
+	// 50770;
+	// 50771;
+	// 50772;
+	// 50773;
+	// 50774;
+	// 50775;
+	// 50776;
+	// 50777;
+	// 50778;
+	// 50779;
+	// 50780;
+	// 50781;
+	// 50782;
+	// 50783;
+	IO IO_CANBus_TruckBus_CruiseControl = 50784;
+	IO IO_CANBus_Bus_AlternatorSpeed_AlternatorStatus1 = 50785;
+	IO IO_CANBus_Bus_AlternatorSpeed_AlternatorStatus2 = 50786;
+	IO IO_CANBus_Bus_AlternatorSpeed_AlternatorStatus3 = 50787;
+	IO IO_CANBus_Bus_AlternatorSpeed_AlternatorStatus4 = 50788;
+	IO IO_CANBus_Bus_ElectronicTransmissionController2_SelectedGear = 50789;
+	IO IO_CANBus_Bus_ElectronicTransmissionController2_CurrentGear = 50790;
+	IO IO_CANBus_Bus_AirSuspensionControl4_FrontAxleLeft = 50791;
+	IO IO_CANBus_Bus_AirSuspensionControl4_FrontAxleRight = 50792;
+	IO IO_CANBus_Bus_AirSuspensionControl4_RearAxleLeft = 50793;
+	IO IO_CANBus_Bus_AirSuspensionControl4_RearAxleright = 50794;
+	IO IO_CANBus_DashDisplay_FuelLevel2 = 50795;
+	IO IO_CANBus_ElectronicBrakeController_BrakePedalPosition = 50796;
+	IO IO_CANBus_FuelConsumptionGaseous_TotalFuelUsed = 50797;
+	IO IO_CANBus_TruckBus_CruiseControlVehicleSpeed_ParkingBrakeSwitch = 50798;
+	IO IO_CANBus_TruckBus_CruiseControlVehicleSpeed_WheelBasedSpeed = 50799;
+	IO IO_CANBus_TruckBus_CruiseControlVehicleSpeed_CruiseControlActive = 50800;
+	IO IO_CANBus_TruckBus_CruiseControlVehicleSpeed_BrakeSwitch = 50801;
+	IO IO_CANBus_TruckBus_CruiseControlVehicleSpeed_ClutchSwitch = 50802;
+	IO IO_CANBus_TruckBus_CruiseControlVehicleSpeed_PtoState = 50803;
+	IO IO_CANBus_TruckBus_CruiseControlVehicleSpeed_CruiseControlStates = 50804;
+	IO IO_CANBus_Bus_VehicleElectricalPower_HybridBatteryPackRemainingCharge = 50805;
+	IO IO_CANBus_Bus_VehicleDynamicStabilityControl2_SteeringWheelAngle = 50806;
+	IO IO_CANBus_ElectronicEngineController14_FuelType = 50807;
+	IO IO_CANBus_EngineFluidLevelPressure_EngineOilLevel = 50808;
+	IO IO_CANBus_EngineFluidLevelPressure_EngineOilPressure = 50809;
+	IO IO_CANBus_EngineFluidLevelPressure_CoolantLevel = 50810;
+	IO IO_CANBus_TellTaleStatus = 50811;
+	IO IO_CANBus_FuelConsumption_EngineTotalFuelUsed = 50812;
+	IO IO_CANBus_Truck_VehicleWeight_AxleWeight4 = 50813;
+}
+
+message ConfigDiff {
+	repeated Uint32DiffItem Uint32DiffItems = 1;
+	repeated Int32DiffItem Int32DiffItems = 2;
+	repeated Uint64DiffItem Uint64DiffItems = 3;
+	repeated Int64DiffItem Int64DiffItems = 4;
+	repeated StringDiffItem  StringDiffItems = 5;
+	repeated BoolDiffItem  BoolDiffItems = 6;
+}
+
+message Uint32DiffItem {
+	uint32 Tag = 1;
+	uint32 Value = 2;
+}
+
+message Int32DiffItem {
+	uint32 Tag = 1;
+	int32 Value = 2;
+}
+
+message Uint64DiffItem {
+	uint32 Tag = 1;
+	uint64 Value = 2;
+}
+
+message Int64DiffItem {
+	uint32 Tag = 1;
+	int64 Value = 2;
+}
+
+message BoolDiffItem {
+	uint32 Tag = 1;
+	bool Value = 2;
+}
+
+message StringDiffItem {
+	uint32 Tag = 1;
+	string Value = 2;
+}
+
+// end: config
+
+// begin: General ---------------------------------------------
+enum MovementSource {
+	MS_Ignition = 0;
+	MS_Movement = 1;
+	MS_GPS = 2;
+	MS_CANSpeed = 3;
+}
+
+enum StaticNavigationSource {
+	SN_Movement = 0;
+	SN_Ignition = 1;
+	SN_GPS = 2;
+	SN_Custom = 3;
+}
+
+enum GNSSMode {
+	All = 0;
+	GLONASS = 1;
+	GPS = 2;
+}
+
+enum TimeSynchronization {
+	TS_None = 0;
+	TS_NTP = 1;
+	TS_NITZ = 2;
+	TS_NTP_NITZ = 3;
+}
+
+enum CallAction {
+	Nothing = 0;
+	HangUp = 1;
+	ReportPosition = 2;
+	AutoAnswer = 3;
+}
+
+/* GeoFencing ----------------- */
+message GeoZone {
+	Priority Priority = 1;
+	EventType Event = 2;
+	bool EventOnly = 3;
+	GeoZoneType Type = 4;
+	uint32 Radius = 5;
+	uint32 Border = 6;
+	bool OverSpeeding = 7;
+	uint32 MaxSpeed = 8;
+	uint32 SendSmsTo = 9;
+	string SmsText = 10;
+	repeated float Points = 11;
+}
+
+enum GeoZoneType {
+	Circular = 0;
+	Polygon = 1;
+	Line = 2;
+}
+
+enum GeozoneState {
+	GEO_OutOfZone = 0;
+	GEO_InZone = 0x01;
+	GEO_EnteringZone = 0x02;
+	GEO_LeavingZone = 0x04;
+	GEO_OverSpeeding = 0x08;
+}
+
+// System --------------------------------
+enum SleepMode {
+	SleepDisabled = 0;
+	GpsSleep = 1;
+	DeepSleep = 2;
+	OnlineDeepSleep = 3;
+	UltraSleep = 4;
+}
+
+enum EngineMode {
+	EM_AlwaysOn = 0;
+	EM_Ignition = 1;
+	EM_MoveSensor = 2;
+	EM_Custom = 3;
+}
+
+enum RecordsMode {
+	PositionFix = 0;
+	TimeSync = 1;
+	Allways = 2;
+}
+
+// begin: IO configs ----------------------------------------
+enum AlarmType {
+	Alarm_None = 0;
+	
+	Alarm_Normal = 1;
+	
+	Alarm_Time = 3;
+	Alarm_Angle = 4;
+	Alarm_Speed = 5;
+	
+	Alarm_SleepMode = 8;
+	Alarm_SystemReset = 9;
+	
+	Alarm_Ignition = 10;
+	Alarm_Movement = 11;
+	Alarm_DataMode = 12;
+	
+	Alarm_GnssStatus = 20;
+	Alarm_GnssHDOP = 21;
+	Alarm_GnssPDOP = 22;
+	Alarm_GnssJammingStatus = 23;
+	Alarm_GnssDataJumping = 24;
+
+	Alarm_GsmSignal = 30;
+	Alarm_GsmCellId = 31;
+	Alarm_GsmAreaCode = 32;
+	Alarm_GsmOperator = 33;
+	Alarm_GsmTemperature = 34;
+	Alarm_GsmJammingStatus = 35;
+	
+	Alarm_ExternalVoltage = 40;
+	Alarm_BatteryVoltage = 41;
+	Alarm_BatteryCurrent = 42;
+
+	Alarm_TotalOdometer = 50;
+	Alarm_Odometer = 51;
+	Alarm_EngineOnTime = 52;
+	Alarm_EngineOnTimeDelta = 53;
+	Alarm_IdlingTime = 54;
+	Alarm_IdlingTimeDelta = 55;
+
+	Alarm_SpeedSensor_Speed = 60;
+	Alarm_SpeedSensor_Distance = 61;
+	Alarm_SpeedSensor_TotalDistance = 62;
+	Alarm_SpeedSensor_MaxSpeed = 63;
+	Alarm_SpeedSensor_GPSSpeedDiff = 64;
+	
+	Alarm_DigitalInput1 = 70;
+	Alarm_DigitalInput2 = 71;
+	Alarm_PowerSupply = 72;
+	Alarm_DigitalInput3 = 73;
+	
+	Alarm_VehicleConnection = 79;
+
+	Alarm_DigitalInput1Time = 80;
+	Alarm_DigitalInput1TimeDelta = 81;
+	Alarm_DigitalInput2Time = 82;
+	Alarm_DigitalInput2TimeDelta = 83;
+	Alarm_PowerSupplyTime = 84;
+	Alarm_PowerSupplyTimeDelta = 85;
+	Alarm_DigitalInput3Time = 86;
+	Alarm_DigitalInput3TimeDelta = 87;
+
+	Alarm_DigitalOutput1 = 90;
+	Alarm_DigitalOutput2 = 91;
+
+	Alarm_AnalogInput1 = 100;
+	Alarm_AnalogInput2 = 101;
+	Alarm_AnalogInput3 = 102;
+
+	Alarm_AxisX = 110;
+	Alarm_AxisY = 111;
+	Alarm_AxisZ = 112;
+
+	// ECO drive
+	Alarm_ECO_MaxSpeed = 150;
+	Alarm_ECO_NormalSpeedDistance = 151;
+	Alarm_ECO_NormalSpeedTotalDistance = 152;
+	Alarm_ECO_NormalSpeedTimer = 153;
+	Alarm_ECO_NormalSpeedTotalTimer = 154;
+	Alarm_ECO_OverSpeedingDistance = 155;
+	Alarm_ECO_OverSpeedingTotalDistance = 156;
+	Alarm_ECO_OverSpeedingTimer = 157;
+	Alarm_ECO_OverSpeedingTotalTimer = 158;
+	
+	Alarm_ECO_MaxRPM = 159;
+	Alarm_ECO_RPMGreenBandDistance = 160;
+	Alarm_ECO_RPMGreenBandTotalDistance = 161;
+	Alarm_ECO_RPMGreenBandTimer = 162;
+	Alarm_ECO_RPMGreenBandTotalTimer = 163;
+
+	Alarm_ECO_OverRPMDistance = 164;
+	Alarm_ECO_OverRPMTotalDistance = 165;
+	Alarm_ECO_OverRPMTimer = 166;
+	Alarm_ECO_OverRPMTotalTimer = 167;
+
+	Alarm_ECO_IdlingEvent = 170;
+	Alarm_ECO_CruiseControlTimer = 171;
+	Alarm_ECO_CruiseControlTotalTimer = 172;
+	Alarm_ECO_CruiseControlDistance = 173;
+	Alarm_ECO_CruiseControlTotalDistance = 174;
+
+	Alarm_ECO_UnderRPMDistance = 175;
+	Alarm_ECO_UnderRPMTotalDistance = 176;
+	Alarm_ECO_UnderRPMTimer = 177;
+	Alarm_ECO_UnderRPMTotalTimer = 178;
+
+	// ECO Green driving
+	Alarm_ECO_BreakCounter = 180;
+	Alarm_ECO_HarshBreakCounter = 181;
+	Alarm_ECO_ExtremeBreakCounter = 182;
+	Alarm_ECO_HarshAccelerationCounter = 183;
+	Alarm_ECO_CorneringCounter = 184;
+
+	Alarm_ECO_TotalBreak = 185;
+	Alarm_ECO_TotalHarshBreak = 186;
+	Alarm_ECO_TotalExtremeBreak = 187;
+	Alarm_ECO_TotalHarshAcceleration = 188;
+	Alarm_ECO_TotalCornering = 189;
+
+	// Geofencing alarm
+	Alarm_GeoZone1 = 200;
+	Alarm_GeoZone2 = 201;
+	Alarm_GeoZone3 = 202;
+	Alarm_GeoZone4 = 203;
+	Alarm_GeoZone5 = 204;
+	Alarm_GeoZone6 = 205;
+	Alarm_GeoZone7 = 206;
+	Alarm_GeoZone8 = 207;
+	Alarm_GeoZone9 = 208;
+	Alarm_GeoZone10 = 209;
+	Alarm_GeoZone11 = 210;
+	Alarm_GeoZone12 = 211;
+	Alarm_GeoZone13 = 212;
+	Alarm_GeoZone14 = 213;
+	Alarm_GeoZone15 = 214;
+	Alarm_GeoZone16 = 215;
+	Alarm_GeoZone17 = 216;
+	Alarm_GeoZone18 = 217;
+	Alarm_GeoZone19 = 218;
+	Alarm_GeoZone20 = 219;
+	Alarm_GeoZone21 = 220;
+	Alarm_GeoZone22 = 221;
+	Alarm_GeoZone23 = 222;
+	Alarm_GeoZone24 = 223;
+	Alarm_GeoZone25 = 224;
+	Alarm_GeoZone26 = 225;
+	Alarm_GeoZone27 = 226;
+	Alarm_GeoZone28 = 227;
+	Alarm_GeoZone29 = 228;
+	Alarm_GeoZone30 = 229;
+	Alarm_GeoZone31 = 230;
+	Alarm_GeoZone32 = 231;
+	Alarm_GeoZone33 = 232;
+	Alarm_GeoZone34 = 233;
+	Alarm_GeoZone35 = 234;
+	Alarm_GeoZone36 = 235;
+	Alarm_GeoZone37 = 236;
+	Alarm_GeoZone38 = 237;
+	Alarm_GeoZone39 = 238;
+	Alarm_GeoZone40 = 239;
+	Alarm_GeoZone41 = 240;
+	Alarm_GeoZone42 = 241;
+	Alarm_GeoZone43 = 242;
+	Alarm_GeoZone44 = 243;
+	Alarm_GeoZone45 = 244;
+	Alarm_GeoZone46 = 245;
+	Alarm_GeoZone47 = 246;
+	Alarm_GeoZone48 = 247;
+	Alarm_GeoZone49 = 248;
+	Alarm_GeoZone50 = 249;
+
+	Alarm_Trip = 300;
+	Alarm_Trip_Time = 301;
+	Alarm_Trip_Distance = 302;
+
+	Alarm_Service = 330;
+	
+	// Crash detection
+	Alarm_CrashDetection = 340;
+
+	// Driver registration
+	Alarm_DriverID = 350;
+
+	// Sensors
+	Alarm_TemperatureSensor1 = 400;
+	Alarm_TemperatureSensor1_ID = 401;
+	
+	Alarm_TemperatureSensor2 = 402;
+	Alarm_TemperatureSensor2_ID = 403;
+	
+	Alarm_TemperatureSensor3 = 404;
+	Alarm_TemperatureSensor3_ID = 405;
+
+	Alarm_HumiditySensor1 = 410;
+
+	Alarm_TiltStatus = 490;
+
+	/* OBD */
+	Alarm_OBD_EngineRPM = 500;
+	Alarm_OBD_BatteryVoltage = 501;
+	Alarm_OBD_EngineCoolantTemperature = 502;
+	Alarm_OBD_VehicleSpeed = 503;
+	Alarm_OBD_TotalDistance = 504;
+	Alarm_OBD_FuelRate = 505;
+	Alarm_OBD_TotalFuelUsed = 506;
+	Alarm_OBD_IntakeAirTemperature = 507;
+	Alarm_OBD_IntakeManifoldAbsolutePressure = 508;
+
+	/* OBD II Standard */
+	Alarm_OBD_MalfunctionIndicatorLamp = 550;
+	Alarm_DiagnosticTroubleCodesCount = 551;
+	Alarm_OBD_CalculatedEngineLoad = 552;
+	Alarm_OBD_MassAirFlowRate = 553;
+	Alarm_OBD_ThrottlePosition = 554;
+	Alarm_OBD_RunTimeSinceEngineStart = 555;
+	Alarm_OBD_FuelTankLevelInput = 556;
+	Alarm_OBD_DistanceTraveledSinceCodesCleared = 557;
+	Alarm_OBD_AbsoluteThrottlePositionD = 558;
+	Alarm_OBD_TimeRunWithMILOn = 559;
+	Alarm_OBD_EngineOilTemperature = 560;
+	Alarm_OBD_FuelSystem1Status = 561;
+	Alarm_OBD_FuelSystem2Status = 562;
+	Alarm_OBD_OxygenSensor1Voltage = 563;
+	Alarm_OBD_OxygenSensor1ShortTermFuelTrim = 564;
+	Alarm_OBD_OxygenSensor2Voltage = 565;
+	Alarm_OBD_OxygenSensor2ShortTermFuelTrim = 566;
+	Alarm_OBD_OxygenSensor3Voltage = 567;
+	Alarm_OBD_OxygenSensor3ShortTermFuelTrim = 568;
+	Alarm_OBD_OxygenSensor4Voltage = 569;
+	Alarm_OBD_OxygenSensor4ShortTermFuelTrim = 570;
+
+	/* CAN Bus */
+	Alarm_CANBus_Tachograph1_WorkingState1 = 700;
+	Alarm_CANBus_Tachograph1_WorkingState2 = 701;
+	Alarm_CANBus_Tachograph1_VehicleMotion = 702;
+	Alarm_CANBus_Tachograph1_Driv_1_Time_Rel_States = 703;
+	Alarm_CANBus_Tachograph1_Driver1_Card = 704;
+	Alarm_CANBus_Tachograph1_VehicleOverspeed = 705;
+	Alarm_CANBus_Tachograph1_Driv_2_Time_Rel_States = 706;
+	Alarm_CANBus_Tachograph1_Driver2_Card = 707;
+	Alarm_CANBus_Tachograph1_SystemEvent = 708;
+	Alarm_CANBus_Tachograph1_HandlingInformation = 709;
+	Alarm_CANBus_Tachograph1_TachographPerformance = 710;
+	Alarm_CANBus_Tachograph1_DirectionIndicator = 711;
+	Alarm_CANBus_Tachograph1_VehicleSpeed = 712;
+	Alarm_CANBus_EngineTemperature1_EngineCoolantTemperature = 713;
+	Alarm_CANBus_ElectronicEngineController1_ActualEnginePercent = 714;
+	Alarm_CANBus_ElectronicEngineController1_EngineSpeed = 715;
+	Alarm_CANBus_EngineHours_EngineTotalHours = 716;
+	Alarm_CANBus_VehicleDistance_TotalVehicleDistance = 717;
+	Alarm_CANBus_HighResolutionFuelConsumption_TotalFuelUsed = 718;
+	Alarm_CANBus_DashDisplay_FuelLevel1 = 719;
+	Alarm_CANBus_AmbientConditions_AmbientAirTemperature = 720;
+	Alarm_CANBus_FuelEconomy_FuelRate = 721;
+	Alarm_CANBus_FuelEconomy_InstantaneousFuelEconomy = 722;
+	Alarm_CANBus_AirSupplyPressure_ServiceBrakeAirPressureCircuit_1 = 723;
+	Alarm_CANBus_AirSupplyPressure_ServiceBrakeAirPressureCircuit_2 = 724;
+	Alarm_CANBus_AftertreatmentDieselExhaustFluidTankInformation_Tank1_Level = 725;
+	// 726;
+	// 727;
+	// 728;
+	// 729;
+	// 730;
+	// 731;
+	// 732;
+	// 733;
+	// 734;
+	// 735;
+	// 736;
+	// 737;
+	// 738;
+	// 739;
+	// 740;
+	// 741;
+	Alarm_CANBus_TruckBus_ElectronicEngineController2_AcceleratorPedalPosition_1 = 742;
+	Alarm_CANBus_TruckBus_ElectronicEngineController2_EnginePercentLoad = 743;
+	Alarm_CANBus_Truck_VehicleWeight_AxleWeight1 = 744;
+	Alarm_CANBus_Truck_VehicleWeight_AxleWeight2 = 745;
+	Alarm_CANBus_Truck_VehicleWeight_AxleWeight3 = 746;
+	Alarm_CANBus_Truck_ServiceInformation_ServiceDistance = 747;
+	Alarm_CANBus_Truck_PTODriveEngagement_PTOEngageStat = 748;
+	Alarm_CANBus_Truck_CombinationVehicleWeight_GrossCombinationVehicleWeight = 749;
+	Alarm_CANBus_TruckBus_Electronic_Retarder_Controller_1_RetarderTorqueMode = 750;
+	Alarm_CANBus_TruckBus_Electronic_Retarder_Controller_1_RetarderSelection = 751;
+	Alarm_CANBus_Bus_DoorControl1_DoorPosition = 752;
+	Alarm_CANBus_Bus_DoorControl1_RampWheelChairlift = 753;
+	Alarm_CANBus_Bus_DoorControl1_DoorsStatus2 = 754;
+	Alarm_CANBus_Bus_DoorControl2 = 755;
+	Alarm_CANBus_BrakeLiningRemaining_AxleFrontLeftWheel = 756;
+	Alarm_CANBus_BrakeLiningRemaining_AxleFrontRightWheel = 757;
+	Alarm_CANBus_BrakeLiningRemaining_AxleRear1LeftWheel = 758;
+	Alarm_CANBus_BrakeLiningRemaining_AxleRear1RightWheel = 759;
+	Alarm_CANBus_BrakeLiningRemaining_AxleRear2LeftWheel = 760;
+	Alarm_CANBus_BrakeLiningRemaining_AxleRear2RightWheel = 761;
+	Alarm_CANBus_BrakeLiningRemaining_AxleRear3LeftWheel = 762;
+	Alarm_CANBus_BrakeLiningRemaining_AxleRear3RightWheel = 763;
+	// 764;
+	// 765;
+	// 766;
+	// 767;
+	// 768;
+	// 769;
+	// 770;
+	// 771;
+	// 772;
+	// 773;
+	// 774;
+	// 775;
+	// 776;
+	// 777;
+	// 778;
+	// 779;
+	// 780;
+	// 781;
+	// 782;
+	// 783;
+	Alarm_CANBus_TruckBus_CruiseControl = 784;
+	Alarm_CANBus_Bus_AlternatorSpeed_AlternatorStatus1 = 785;
+	Alarm_CANBus_Bus_AlternatorSpeed_AlternatorStatus2 = 786;
+	Alarm_CANBus_Bus_AlternatorSpeed_AlternatorStatus3 = 787;
+	Alarm_CANBus_Bus_AlternatorSpeed_AlternatorStatus4 = 788;
+	Alarm_CANBus_Bus_ElectronicTransmissionController2_SelectedGear = 789;
+	Alarm_CANBus_Bus_ElectronicTransmissionController2_CurrentGear = 790;
+	Alarm_CANBus_Bus_AirSuspensionControl4_FrontAxleLeft = 791;
+	Alarm_CANBus_Bus_AirSuspensionControl4_FrontAxleRight = 792;
+	Alarm_CANBus_Bus_AirSuspensionControl4_RearAxleLeft = 793;
+	Alarm_CANBus_Bus_AirSuspensionControl4_RearAxleright = 794;
+	Alarm_CANBus_DashDisplay_FuelLevel2 = 795;
+	Alarm_CANBus_ElectronicBrakeController_BrakePedalPosition = 796;
+	Alarm_CANBus_FuelConsumptionGaseous_TotalFuelUsed = 797;
+	Alarm_CANBus_TruckBus_CruiseControlVehicleSpeed_ParkingBrakeSwitch = 798;
+	Alarm_CANBus_TruckBus_CruiseControlVehicleSpeed_WheelBasedSpeed = 799;
+	Alarm_CANBus_TruckBus_CruiseControlVehicleSpeed_CruiseControlActive = 800;
+	Alarm_CANBus_TruckBus_CruiseControlVehicleSpeed_BrakeSwitch = 801;
+	Alarm_CANBus_TruckBus_CruiseControlVehicleSpeed_ClutchSwitch = 802;
+	Alarm_CANBus_TruckBus_CruiseControlVehicleSpeed_PtoState = 803;
+	Alarm_CANBus_TruckBus_CruiseControlVehicleSpeed_CruiseControlStates = 804;
+	Alarm_CANBus_Bus_VehicleElectricalPower_HybridBatteryPackRemainingCharge = 805;
+	Alarm_CANBus_Bus_VehicleDynamicStabilityControl2_SteeringWheelAngle = 806;
+	Alarm_CANBus_ElectronicEngineController14_FuelType = 807;
+	Alarm_CANBus_EngineFluidLevelPressure_EngineOilLevel = 808;
+	Alarm_CANBus_EngineFluidLevelPressure_EngineOilPressure = 809;
+	Alarm_CANBus_EngineFluidLevelPressure_CoolantLevel = 810;
+	Alarm_CANBus_TellTaleStatus = 811;
+	Alarm_CANBus_FuelConsumption_EngineTotalFuelUsed = 812;
+	Alarm_CANBus_Truck_VehicleWeight_AxleWeight4 = 813;
+}
+
+message IO {
+	Priority Priority = 1;
+	EventType Event = 2;
+	int32 LowLevel = 3;
+	int32 HighLevel = 4;
+	// int32 Average = 5;
+	reserved 5;
+	bool EventOnly = 6;
+	uint32 SendSmsTo = 7;
+	string SmsText = 8;
+}
+
+enum EventType {
+	Monitoring = 0;
+	OnExit = 1;
+	OnEntrance = 2;
+	OnBoth = 3;
+	OnHystersis = 4;
+	OnChange = 5;
+	OnDeltaChange = 6;
+}
+
+enum Priority {
+	PR_None = 0;
+	PR_Low = 1;
+	PR_High = 2;
+	PR_SendData = 3;
+}
+
+// end: IO configs ------------------------------------------
+
+// begin: Digital output -----------------------------------
+enum DigitalOutputName {
+	DigitalOutput_None = 0;
+	DigitalOutput_1 = 1;
+	DigitalOutput_2 = 2;
+}
+// end: Digital output -------------------------------------
+
+// begin: OverSpeeding -------------------------------------
+enum OverSpeedingDeactivationMode {
+	OverSpeedingDeactivationMode_Timeout = 0;
+	OverSpeedingDeactivationMode_Speed = 1;
+}
+// end: Digital OverSpeeding --------------------------------
+
+// end: general ---------------------------------------------
+
+// begin: Driver registration -------------------------------
+enum DriverRegistration_Mode {
+	DRMode_Disabled = 0;
+	DRMode_Registration = 1;
+}
+
+enum DriverRegistration_Authentication {
+	DRAuth_UnAuthorized = 0;
+	DRAuth_Authorized = 1;
+}
+// end: Driver registration ---------------------------------
+
+// begin: Bluetooth -----------------------------------------
+enum BluetoothMode {
+	BM_Disabled = 0;
+	BM_EnableHidden = 1;
+	BM_EnableVisible = 2;
+}
+
+enum BluetoothSecurityMode {
+	BSMode_PINOnly = 0;
+	BSMode_PIN_MACList = 1;
+	BSMode_MACList = 2;
+	BSMode_None = 3;
+}
+
+enum BluetoothExternalConnectionMode {
+	BECMode_None = 0;
+	BECMode_HandsFree = 1;
+	BECMode_OBDII = 2;
+	BECMode_DataLink = 3;
+}
+
+// end: Bluetooth -------------------------------------------
+
+// begin: Connection ----------------------------------------
+enum ServerProtocol {
+	TCP = 0;
+	UDP = 1;
+	SSL = 2;
+}
+
+enum AuthenticationMode {
+	Authentication_IMEI = 0;
+	Authentication_AuthenticationCodeAndIMEI = 1;
+}
+// end: Connection --------------------------------------------
+
+// Tilt status
+enum TiltStatus {
+	TS_Unknown = 0;
+	
+	// For MCU
+	TS_BoardReset = 90;
+	TS_OffsetReset = 91;
+
+	// For server
+	TS_NormalTilt = 100;
+	TS_AuthorizedTiltUnloading = 101;
+	TS_PTOActive = 102;
+	TS_InvalidTilt = 103;
+	TS_UnauthorizedTiltUnloading = 104;
+}
+
+// begin: ECU Interface configs -----------------------------------------
+enum ECUInterface {
+	ECU_Disabled = 0;
+
+	OBD_Auto = 1;
+	OBD_KLine_ISO14230_KWP_Fast = 2;
+	OBD_KLine_ISO14230_KWP_5Baud = 3;
+	OBD_KLine_ISO9141 = 4;
+	OBD_CAN_ISO15765_11bit_500 = 5;
+	OBD_CAN_ISO15765_11bit_250 = 6;
+	OBD_CAN_ISO15765_29bit_500 = 7;
+	OBD_CAN_ISO15765_29bit_250 = 8;
+	OBD_KLine_Siemense = 9;
+
+	CANBus_FMS = 20;
+	CANBus_BenzAxor = 21;
+	CANBus_Scania = 22;
+}
+// end: ECU Interface configs -------------------------------------
+
+// begin: Fuel consumption ----------------------------------
+enum FuelConsumption {
+	FC_Disabled = 0;
+	FC_Gasoline = 1;
+	FC_Diesel = 2;
+}
+// end: Fuel consumption ------------------------------------
+
+// begin: OverSpeeding -------------------------------------
+enum CrashTraceType {
+	Trace_Disabled = 0;
+	Trace_Point = 1;
+	Trace_IO = 2;
+}
+// end: Digital OverSpeeding --------------------------------
+
+// begin: Service --------------------------------------------
+message Service_IOCondition {
+	uint32 IO_ID = 1;
+	NumberOperator Operator = 2;
+	int64 Value = 3;
+	bool CalcDiff = 4;
+}
+
+message Service_IOConditionGroup {
+	ConditionOperator Operator = 1;
+	repeated Service_IOCondition IO_Conditions = 2;
+}
+
+message Service_StateCondition {
+	ConditionOperator Condition_Operator = 1;
+	repeated Service_IOCondition IO_Conditions = 2;
+	repeated Service_IOConditionGroup IO_ConditionGroups = 3;
+}
+
+message Service_State {
+	uint32 ID = 1;
+	Service_StateCondition PointCondition = 2;
+	Service_StateCondition ChangeCondition = 3;
+}
+
+message Service {
+	uint32 ID = 1;
+	repeated Service_State States = 2;
+}
+// end : Service ---------------------------------------------
+
+// begin: General defs ---------------------------------------
+enum NumberOperator {
+	Equal = 0;
+	Greater = 1;
+	Smaller = 2;
+}
+
+enum ConditionOperator {
+	AND = 0;
+	OR = 1;
+}
+
+enum SerialBaudrate {
+	SBaud_115200 = 0;
+	SBaud_57600 = 1;
+	SBaud_38400 = 2;
+	SBaud_28800 = 3;
+	SBaud_19200 = 4;
+	SBaud_14400 = 5;
+	SBaud_9600 = 6;
+	SBaud_4800 = 7;
+	SBaud_2400 = 8;
+	SBaud_1200 = 9;
+	SBaud_600 = 10;
+}
+// end:: General defs ----------------------------------------

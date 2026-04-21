@@ -1,0 +1,641 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd"
+  logicalFilePath="changelog-4.0-clean">
+
+  <changeSet author="author" id="changelog-4.0-clean">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <changeSetExecuted changeLogFile="changelog-3.3" id="changelog-3.3" author="author" />
+      </not>
+    </preConditions>
+
+    <createTable tableName="tc_attributes">
+      <column autoIncrement="true" name="id" type="INT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="description" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="attribute" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="expression" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_calendars">
+      <column autoIncrement="true" name="id" type="INT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="data" type="MEDIUMBLOB">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_commands">
+      <column autoIncrement="true" name="id" type="INT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="description" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="textchannel" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_device_attribute">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributeid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_device_command">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="commandid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_device_driver">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="driverid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_device_geofence">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="geofenceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_device_maintenance">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="maintenanceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_device_notification">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="notificationid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_devices">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="uniqueid" type="VARCHAR(128)">
+        <constraints nullable="false" unique="true" />
+      </column>
+      <column name="lastupdate" type="timestamp" />
+      <column name="positionid" type="INT" />
+      <column name="groupid" type="INT" />
+      <column name="attributes" type="VARCHAR(4000)" />
+      <column name="phone" type="VARCHAR(128)" />
+      <column name="model" type="VARCHAR(128)" />
+      <column name="contact" type="VARCHAR(512)" />
+      <column name="category" type="VARCHAR(128)" />
+      <column name="disabled" type="BOOLEAN" defaultValueBoolean="false" />
+    </createTable>
+
+    <createTable tableName="tc_drivers">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="uniqueid" type="VARCHAR(128)">
+        <constraints nullable="false" unique="true" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_events">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="servertime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="deviceid" type="INT" />
+      <column name="positionid" type="INT" />
+      <column name="geofenceid" type="INT" />
+      <column name="attributes" type="VARCHAR(4000)" />
+      <column name="maintenanceid" type="INT" />
+    </createTable>
+
+    <createTable tableName="tc_geofences">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="description" type="VARCHAR(128)" />
+      <column name="area" type="VARCHAR(4096)">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)" />
+      <column name="calendarid" type="INT" />
+    </createTable>
+
+    <createTable tableName="tc_group_attribute">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributeid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_group_command">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="commandid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_group_driver">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="driverid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_group_geofence">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="geofenceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_group_maintenance">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="maintenanceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_group_notification">
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="notificationid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_groups">
+      <column autoIncrement="true" name="id" type="INT">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="groupid" type="INT" />
+      <column name="attributes" type="VARCHAR(4000)" />
+    </createTable>
+
+    <createTable tableName="tc_maintenances">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="start" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="period" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_notifications">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="type" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)" />
+      <column name="always" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="calendarid" type="INT" />
+      <column name="notificators" type="VARCHAR(128)" />
+    </createTable>
+
+    <createTable tableName="tc_positions">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="protocol" type="VARCHAR(128)" />
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="servertime" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="devicetime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="fixtime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="valid" type="BOOLEAN">
+        <constraints nullable="false" />
+      </column>
+      <column name="latitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE">
+        <constraints nullable="false" />
+      </column>
+      <column name="altitude" type="FLOAT">
+        <constraints nullable="false" />
+      </column>
+      <column name="speed" type="FLOAT">
+        <constraints nullable="false" />
+      </column>
+      <column name="course" type="FLOAT">
+        <constraints nullable="false" />
+      </column>
+      <column name="address" type="VARCHAR(512)" />
+      <column name="attributes" type="VARCHAR(4000)" />
+      <column name="accuracy" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="network" type="VARCHAR(4000)" />
+    </createTable>
+
+    <createTable tableName="tc_servers">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="registration" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="latitude" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="zoom" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="map" type="VARCHAR(128)" />
+      <column name="bingkey" type="VARCHAR(128)" />
+      <column name="mapurl" type="VARCHAR(512)" />
+      <column name="readonly" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="twelvehourformat" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)" />
+      <column name="forcesettings" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="coordinateformat" type="VARCHAR(128)" />
+      <column name="devicereadonly" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="limitcommands" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="poilayer" type="VARCHAR(512)" />
+    </createTable>
+
+    <createTable tableName="tc_statistics">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="capturetime" type="TIMESTAMP">
+        <constraints nullable="false" />
+      </column>
+      <column name="activeusers" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="activedevices" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="requests" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="messagesreceived" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="messagesstored" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4096)">
+        <constraints nullable="false" />
+      </column>
+      <column name="mailsent" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="smssent" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="geocoderrequests" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="geolocationrequests" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_attribute">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributeid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_calendar">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="calendarid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_command">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="commandid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_device">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_driver">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="driverid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_geofence">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="geofenceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_group">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="groupid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_maintenance">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="maintenanceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_notification">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="notificationid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_user_user">
+      <column name="userid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="manageduserid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <createTable tableName="tc_users">
+      <column name="id" type="INT" autoIncrement="true">
+        <constraints primaryKey="true" />
+      </column>
+      <column name="name" type="VARCHAR(128)">
+        <constraints nullable="false" />
+      </column>
+      <column name="email" type="VARCHAR(128)">
+        <constraints nullable="false" unique="true" />
+      </column>
+      <column name="hashedpassword" type="VARCHAR(128)" />
+      <column name="salt" type="VARCHAR(128)" />
+      <column name="readonly" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="administrator" type="BOOLEAN" />
+      <column name="map" type="VARCHAR(128)" />
+      <column name="latitude" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="longitude" type="DOUBLE" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="zoom" type="INT" defaultValueNumeric="0">
+        <constraints nullable="false" />
+      </column>
+      <column name="twelvehourformat" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false" />
+      </column>
+      <column name="attributes" type="VARCHAR(4000)" />
+      <column name="coordinateformat" type="VARCHAR(128)" />
+      <column name="disabled" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="expirationtime" type="timestamp" />
+      <column name="devicelimit" type="INT" defaultValueNumeric="-1" />
+      <column name="token" type="VARCHAR(128)" />
+      <column name="userlimit" type="INT" defaultValueNumeric="0" />
+      <column name="devicereadonly" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="phone" type="VARCHAR(128)" />
+      <column name="limitcommands" type="BOOLEAN" defaultValueBoolean="false" />
+      <column name="login" type="VARCHAR(128)" />
+      <column name="poilayer" type="VARCHAR(512)" />
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_device_command" baseColumnNames="commandid" constraintName="fk_device_command_commandid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_commands" />
+    <addForeignKeyConstraint baseTableName="tc_device_command" baseColumnNames="deviceid" constraintName="fk_device_command_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+
+    <addForeignKeyConstraint baseTableName="tc_device_driver" baseColumnNames="deviceid" constraintName="fk_device_driver_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+    <addForeignKeyConstraint baseTableName="tc_device_driver" baseColumnNames="driverid" constraintName="fk_device_driver_driverid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_drivers" />
+
+    <addForeignKeyConstraint baseTableName="tc_device_geofence" baseColumnNames="deviceid" constraintName="fk_device_geofence_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+    <addForeignKeyConstraint baseTableName="tc_device_geofence" baseColumnNames="geofenceid" constraintName="fk_device_geofence_geofenceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_geofences" />
+
+    <addForeignKeyConstraint baseTableName="tc_device_maintenance" baseColumnNames="deviceid" constraintName="fk_device_maintenance_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+    <addForeignKeyConstraint baseTableName="tc_device_maintenance" baseColumnNames="maintenanceid" constraintName="fk_device_maintenance_maintenanceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_maintenances" />
+
+    <addForeignKeyConstraint baseTableName="tc_device_notification" baseColumnNames="deviceid" constraintName="fk_device_notification_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+    <addForeignKeyConstraint baseTableName="tc_device_notification" baseColumnNames="notificationid" constraintName="fk_device_notification_notificationid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_notifications" />
+
+    <addForeignKeyConstraint baseTableName="tc_devices" baseColumnNames="groupid" constraintName="fk_devices_groupid" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="tc_groups" />
+
+    <addForeignKeyConstraint baseTableName="tc_events" baseColumnNames="deviceid" constraintName="fk_events_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+
+    <addForeignKeyConstraint baseTableName="tc_geofences" baseColumnNames="calendarid" constraintName="fk_geofence_calendar_calendarid" onDelete="SET NULL" referencedColumnNames="id" referencedTableName="tc_calendars" />
+
+    <addForeignKeyConstraint baseTableName="tc_group_attribute" baseColumnNames="attributeid" constraintName="fk_group_attribute_attributeid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_attributes" />
+    <addForeignKeyConstraint baseTableName="tc_group_attribute" baseColumnNames="groupid" constraintName="fk_group_attribute_groupid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_groups" />
+
+    <addForeignKeyConstraint baseTableName="tc_group_command" baseColumnNames="commandid" constraintName="fk_group_command_commandid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_commands" />
+    <addForeignKeyConstraint baseTableName="tc_group_command" baseColumnNames="groupid" constraintName="fk_group_command_groupid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_groups" />
+
+    <addForeignKeyConstraint baseTableName="tc_group_driver" baseColumnNames="driverid" constraintName="fk_group_driver_driverid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_drivers" />
+    <addForeignKeyConstraint baseTableName="tc_group_driver" baseColumnNames="groupid" constraintName="fk_group_driver_groupid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_groups" />
+
+    <addForeignKeyConstraint baseTableName="tc_group_geofence" baseColumnNames="geofenceid" constraintName="fk_group_geofence_geofenceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_geofences" />
+    <addForeignKeyConstraint baseTableName="tc_group_geofence" baseColumnNames="groupid" constraintName="fk_group_geofence_groupid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_groups" />
+
+    <addForeignKeyConstraint baseTableName="tc_group_maintenance" baseColumnNames="groupid" constraintName="fk_group_maintenance_groupid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_groups" />
+    <addForeignKeyConstraint baseTableName="tc_group_maintenance" baseColumnNames="maintenanceid" constraintName="fk_group_maintenance_maintenanceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_maintenances" />
+
+    <addForeignKeyConstraint baseTableName="tc_group_notification" baseColumnNames="groupid" constraintName="fk_group_notification_groupid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_groups" />
+    <addForeignKeyConstraint baseTableName="tc_group_notification" baseColumnNames="notificationid" constraintName="fk_group_notification_notificationid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_notifications" />
+
+    <addForeignKeyConstraint baseTableName="tc_notifications" baseColumnNames="calendarid" constraintName="fk_notification_calendar_calendarid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="tc_calendars" />
+
+    <addForeignKeyConstraint baseTableName="tc_positions" baseColumnNames="deviceid" constraintName="fk_positions_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+
+    <addForeignKeyConstraint baseTableName="tc_user_attribute" baseColumnNames="attributeid" constraintName="fk_user_attribute_attributeid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_attributes" />
+    <addForeignKeyConstraint baseTableName="tc_user_attribute" baseColumnNames="userid" constraintName="fk_user_attribute_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+    <addForeignKeyConstraint baseTableName="tc_user_calendar" baseColumnNames="calendarid" constraintName="fk_user_calendar_calendarid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_calendars" />
+    <addForeignKeyConstraint baseTableName="tc_user_calendar" baseColumnNames="userid" constraintName="fk_user_calendar_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+    <addForeignKeyConstraint baseTableName="tc_user_command" baseColumnNames="commandid" constraintName="fk_user_command_commandid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_commands" />
+    <addForeignKeyConstraint baseTableName="tc_user_command" baseColumnNames="userid" constraintName="fk_user_command_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+    <addForeignKeyConstraint baseTableName="tc_device_attribute" baseColumnNames="attributeid" constraintName="fk_user_device_attribute_attributeid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_attributes" />
+    <addForeignKeyConstraint baseTableName="tc_device_attribute" baseColumnNames="deviceid" constraintName="fk_user_device_attribute_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+
+    <addForeignKeyConstraint baseTableName="tc_user_device" baseColumnNames="deviceid" constraintName="fk_user_device_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+    <addForeignKeyConstraint baseTableName="tc_user_device" baseColumnNames="userid" constraintName="fk_user_device_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+    <addForeignKeyConstraint baseTableName="tc_user_driver" baseColumnNames="driverid" constraintName="fk_user_driver_driverid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_drivers" />
+    <addForeignKeyConstraint baseTableName="tc_user_driver" baseColumnNames="userid" constraintName="fk_user_driver_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+    <addForeignKeyConstraint baseTableName="tc_user_geofence" baseColumnNames="geofenceid" constraintName="fk_user_geofence_geofenceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_geofences" />
+    <addForeignKeyConstraint baseTableName="tc_user_geofence" baseColumnNames="userid" constraintName="fk_user_geofence_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+    <addForeignKeyConstraint baseTableName="tc_user_group" baseColumnNames="groupid" constraintName="fk_user_group_groupid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_groups" />
+    <addForeignKeyConstraint baseTableName="tc_user_group" baseColumnNames="userid" constraintName="fk_user_group_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+    <addForeignKeyConstraint baseTableName="tc_user_maintenance" baseColumnNames="maintenanceid" constraintName="fk_user_maintenance_maintenanceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_maintenances" />
+    <addForeignKeyConstraint baseTableName="tc_user_maintenance" baseColumnNames="userid" constraintName="fk_user_maintenance_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+    <addForeignKeyConstraint baseTableName="tc_user_notification" baseColumnNames="notificationid" constraintName="fk_user_notification_notificationid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_notifications" />
+    <addForeignKeyConstraint baseTableName="tc_user_notification" baseColumnNames="userid" constraintName="fk_user_notification_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+    <addForeignKeyConstraint baseTableName="tc_user_user" baseColumnNames="userid" constraintName="fk_user_user_userid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+    
+    <insert tableName="tc_servers">
+      <column name="registration" valueBoolean="false" />
+      <column name="latitude" valueNumeric="0" />
+      <column name="longitude" valueNumeric="0" />
+      <column name="zoom" valueNumeric="0" />
+    </insert>
+
+  </changeSet>
+  
+  <changeSet author="author" id="changelog-4.0-clean-common">
+
+    <preConditions onFail="MARK_RAN">
+      <not>
+        <changeSetExecuted changeLogFile="changelog-3.3" id="changelog-3.3" author="author" />
+      </not>
+      <not>
+        <dbms type="mssql" />
+      </not>
+    </preConditions>
+
+    <addForeignKeyConstraint baseTableName="tc_groups" baseColumnNames="groupid" constraintName="fk_groups_groupid" onDelete="SET NULL" onUpdate="RESTRICT" referencedColumnNames="id" referencedTableName="tc_groups" />
+    <addForeignKeyConstraint baseTableName="tc_user_user" baseColumnNames="manageduserid" constraintName="fk_user_user_manageduserid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_users" />
+
+  </changeSet>
+
+</databaseChangeLog>

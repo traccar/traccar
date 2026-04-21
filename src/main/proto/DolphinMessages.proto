@@ -1,0 +1,511 @@
+syntax = "proto3";
+
+package org.traccar.protobuf.dolphin.Messages;
+option go_package = "dolphindevice";
+
+import "DolphinConfig.proto";
+
+// begin: Messages - defs ---------------------
+enum MessageType {
+	Timeout = 0;								/* Reserved for embedded system */
+	
+	DataPack_Request = 1;
+	DataPack_Response = 2;
+
+	Authentication_Request = 7;
+	Authentication_Response = 8;
+	
+	OnlinePosition_Request = 9;
+
+	/* Config messages */
+	Config_Set_Request = 10;				/* Set configuration - from server */
+	Config_Set_Response = 11;				/* Setting configuration ok - from device */
+	Config_Get_Request = 12;				/* Get configuration from device - from server */
+	Config_Get_Response = 13;				/* Packet has config data - from device */
+	Config_Diff_Request = 14;				/* Configuration diff message - from server */
+	Config_Diff_Response = 15;				/* Configuration diff response - from device */
+
+	Config_SSLSetCertificate_Request = 16;
+	Config_SSLSetCertificate_Response = 17;
+	Config_SSLGetStatus_Request = 18;
+	Config_SSLGetStatus_Response = 19;
+
+	/* Firmware update */
+	Firmware_Info_Request = 20;				/* from device */
+	Firmware_Info_Response = 21;			/* from server */
+	Firmware_Update_Start_Request = 22;		/* Starting firmware update - from server */
+	Firmware_Update_Start_Response = 23;	/* Starting firmware update is ok - from device */
+	Firmware_GetPack_Request = 24;			/* Packet get message - from device */
+	Firmware_GetPack_Response = 25;			/* Pachet get response - from server */
+	Firmware_Update_State = 26;				/* Update state - from device */
+
+	/* Connection messages */
+	Ping = 30;
+	Pong = 31;
+	Log_Start = 32;
+	Log_End = 33;
+	Log_Pack = 34;
+	DeviceInfo_Request = 35;
+	DeviceInfo_Response = 36;
+
+	// Sensors
+	Temperature_Request = 40;
+	Temperature_Response = 41;
+
+	TiltStatus_Request = 42;
+	TiltStatus_Data = 43;
+
+	// Commands
+	Command_Request = 60;
+	Command_Response = 61;
+
+	// USSD Data
+	USSDData_Request = 68;
+		
+	// Expansion Board
+	ExpBoard_Data_Request = 70;
+	ExpBoard_Data_Response = 71;
+	ExpBoard_SetDigital_Request = 72;
+	ExpBoard_SetDigital_Response = 73;
+
+	// FMS Data
+	FMS_DataLog_Start = 80;
+	FMS_DataLog_End = 81;
+	FMS_DataLog_Data = 82;
+
+	// Crash Data
+	Crash_Data_Request = 90;
+	Crash_Data_Response = 91;
+
+	// SIPAAD
+	SIPAAD_SSL_GetStatus_Request = 100;
+	SIPAAD_SSL_GetStatus_Response = 101;
+
+	// DiagnosticsTroubleCodes
+	DiagnosticsTroubleCodes_SaveCodes_Request = 110;
+	DiagnosticsTroubleCodes_SaveCodes_Response = 111;
+}
+
+enum MessageFlags {
+	Flag_None = 0;
+	Flag_Compressed = 0x01;
+}
+
+// end: Messages defs   -------------------
+
+// begin: Point - Statistics defs ---------------------
+message IOData {
+	Config.AlarmType ID = 1;
+	uint64 Value = 2;
+}
+
+message DataPoint {
+	float Latitude = 1;
+	float Longitude = 2;
+	float Altitude = 3;
+	uint32 Satellites = 4;
+	float Speed = 5;
+	float Bearing = 6;
+	uint32 HDOP = 7;
+	fixed32 Timestamp = 8;
+	Config.AlarmType Alarm = 9;
+
+	// repeated IOData IO = 10 [deprecated = true];
+
+	// Netw protocol IO
+	repeated Config.AlarmType IOList_ID = 11;
+	repeated uint64 IOList_Value = 12;
+}
+
+message DataPackRequest {
+	repeated DataPoint Points = 1;
+}
+
+enum DataPackResponseCode {
+	DataPack_Timeout = 0;
+	DataPack_OK = 1;
+	DataPack_UnknownError = 2;
+	DataPack_Decode_Error = 3;
+}
+
+message DataPackResponse {
+	DataPackResponseCode Response = 1;
+}
+
+// end: Point defs   -------------------
+
+// Serial port --------------------
+message DeviceInfo {
+	string Name = 1;
+	fixed64 IMEI = 2;
+	string FirmwareVersion = 3;
+
+	// System info
+	fixed32 RTCTimestamp = 10;
+	fixed32 LastStartTimestamp = 11;
+	uint32 UpTime = 12;
+	uint32 TotalUpTime = 13;
+	
+	// GNSS
+	GNSSStatus GNSS_Status = 20;
+	bool GNSS_Fix = 21;
+	uint32 GNSS_TimeToFirstFix = 22;
+	uint32 GNSS_TimeToLastFix = 23;
+	uint32 GNSS_Packets = 25;
+	float GNSS_Latitude = 26;
+	float GNSS_Longitude = 27;
+	uint32 GNSS_Altitude = 28;
+	uint32 GNSS_Speed = 29;
+	uint32 GNSS_Bearing = 30;
+	uint32 GNSS_HDOP = 31;
+	uint32 GNSS_PDOP = 32;
+	uint32 GNSS_SatsInUse = 33;
+	uint32 GNSS_GPSSats = 34;
+	uint32 GNSS_GLONASSSats = 35;
+	uint32 GNSS_GalileoSats = 36;
+	uint32 GNSS_BeidouSats = 37;
+	GNSS_JammingStatus GNSS_JammingStatus = 38;
+
+	// GSM
+	ModemStatus GSM_ModemStatus = 50;
+	SIMStatus GSM_SIMStatus = 52;
+	bool GSM_GPRSStatus = 53;
+	string GSM_OperatorName = 54;
+	uint32 GSM_OperatorCode = 55;
+	uint32 GSM_LocationAreaCode = 56;
+	uint32 GSM_CellID = 57;
+	uint32 GSM_SignalStrength = 58;
+	bool GSM_Jamming = 59;
+
+	uint32 GSM_Records_SentCount = 60;
+	uint32 GSM_Records_LastSentTime = 61;
+	uint32 GSM_Records_LastServerResponseTime = 62;
+	uint32 GSM_Records_Count = 63;
+
+	uint32 GSM_GPRS_SentData = 65;
+	uint32 GSM_GPRS_ReceivedData = 66;
+	
+	uint32 GSM_SMS_Sent = 69;
+	uint32 GSM_SMS_Received = 70;
+
+	bool GSM_Socket_State = 75;
+
+	// Bluetooth
+	BluetoothStatus Bluetooth_Status = 80;
+	string Bluetooth_Name = 81;
+	string Bluetooth_MAC = 82;
+	bool Bluetooth_DataLink_ConnectStatus = 83;
+	string Bluetooth_DataLink_Name = 84;
+	string Bluetooth_DataLink_MAC = 85;
+	BluetoothExtDeviceStatus Bluetooth_ExtDevice_Status = 86;
+	string Bluetooth_ExtDevice_Name = 87;
+	string Bluetooth_ExtDevice_MAC = 88;
+	
+	// IO
+	repeated Config.AlarmType IOList_ID = 100;
+	repeated uint64 IOList_Value = 101;
+}
+
+enum GNSSStatus {
+	GNSS_Off = 0;
+	GNSS_NotFixed = 1;
+	GNSS_Fixed = 2;
+	GNSS_Sleep = 3;
+}
+
+enum GNSS_JammingStatus {
+	GNSS_UnknownJammingStatus = 0;
+	GNSS_NoJamming = 1;
+	GNSS_JammingWarning = 2;
+	GNSS_JammingCritical = 3;
+}
+
+enum ModemStatus {
+	ModemStatus_Off = 0;
+	ModemStatus_NotRegistered = 1;
+	ModemStatus_Searching = 2;
+	ModemStatus_Registered = 3;
+	ModemStatus_Roaming = 4;
+}
+
+enum SIMStatus {
+	SIM_NotInserted = 0;
+    SIM_Ready = 1;
+    SIM_PIN_REQ = 2;
+    SIM_PUK_REQ = 3;
+    SIM_PH_PIN_REQ = 4;
+    SIM_PH_PUK_REQ = 5;
+    SIM_PIN2_REQ = 6;
+    SIM_PUK2_REQ = 7;
+    SIM_Busy = 8;
+    SIM_NotReady = 9;
+    SIM_Unspecified = 10;
+}
+
+enum BluetoothStatus {
+	BL_Off = 0;
+	BL_OnHidden = 1;
+	BL_OnVisible = 2;
+}
+
+enum BluetoothExtDeviceStatus {
+	BLExt_None = 0;
+	BLExt_Scanning = 1;
+	BLExt_Pairing = 2;
+	BLExt_WaitForPair = 3;
+	BLExt_Connecting = 4;
+	BLExt_Connected = 5;
+}
+
+// --------------------------------
+
+// Config ------------------------
+enum ConfigResponseCode {
+	OK = 0;
+	Unknown_Error = 1;		/* Config error - from device */
+	Protocol_Error = 2;		/* Config message protocol error - from device */
+	Store_Error = 3;		/* Config store error - from device */
+	Wrong_Password = 4;		/* Configuration password is wrong */
+}
+
+message ConfigSetRequest {
+	string Password = 1;
+	Config.Config Configuration = 2;
+}
+
+message ConfigSetResponse {
+	ConfigResponseCode Response = 1;
+}
+
+message ConfigGetRequest {
+	string Password = 1;
+}
+
+message ConfigGetResponse {
+	ConfigResponseCode Response = 1;
+	Config.Config Data = 2;
+}
+
+message ConfigDiffRequest {
+	string Password = 1;
+	Config.ConfigDiff ConfigDiff = 2;
+}
+
+// ----------------------------------
+
+// Firmware update ---------------------
+message FirmwareUpdateInfo_Request {
+	string Channel = 1;
+	uint32 HardwareVersion = 2;
+
+	string Device_Version_Name = 10;
+	uint32 Device_Version_Major = 11;
+	uint32 Device_Version_Minor = 12;
+	uint32 Device_Version_Revision = 13;
+}
+
+message FirmwareUpdateInfo_Response {
+	string Version_Name = 1;
+	uint32 Version_Major = 2;
+	uint32 Version_Minor = 3;
+	uint32 Version_Revision = 4;
+	// Firmware ID
+	uint32 FirmwareID = 5;
+	// Firmware file total size in bytes
+	uint32 TotalSize = 6;
+}
+
+enum FURespCode {
+	FU_NONE = 0;						// Reserved for embedded system
+	
+	FU_UPDATE_START_OK = 1;
+	FU_UPDATE_START_ERROR = 2;
+	FU_UPDATE_START_ERROR_SIZE = 3;
+
+	FU_GETPACK_OK = 4;
+	FU_GETPACK_ERROR = 5;
+	
+	FU_UPDATE_STATE_INSTALLING = 6;
+	FU_UPDATE_STATE_FINISHED = 7;
+	FU_UPDATE_STATE_ERROR = 8;
+	FU_UPDATE_STATE_ERROR_INVALID = 9;
+	FU_UPDATE_STATE_ERROR_CRC = 10;
+}
+
+message  FirmwareUpdateResp {
+	uint32 FirmwareID = 1;
+	FURespCode Response = 2;
+
+	string Firmware_Version_Name = 3;
+	uint32 Firmware_Version_Major = 4;
+	uint32 Firmware_Version_Minor = 5;
+	uint32 Firmware_Version_Revision = 6;
+}
+
+message FUStartData {
+	// Firmware ID
+	uint32 FirmwareID = 1;
+	// Firmware file total size in bytes
+	uint32 TotalSize = 2;
+}
+
+message FUPackRequest {
+	uint32 FirmwareID = 1;
+	uint32 Start = 2;
+	uint32 End = 3;
+}
+
+message FUPacket {
+	uint32 FirmwareID = 1;
+	FURespCode Response = 2;
+	uint32 Start = 3;
+	uint32 End = 4;
+	bytes Data = 5;
+}
+
+// Log messages -----------------
+enum LogLevel {
+	LOG_LEVEL_NONE = 0;
+	LOG_LEVEL_FATAL = 0x01;
+	LOG_LEVEL_ERROR = 0x02;
+	LOG_LEVEL_WARN = 0x04;
+	LOG_LEVEL_INFO = 0x08;
+	LOG_LEVEL_DEBUG = 0x10;
+}
+
+message LogMessage {
+	fixed32 UnixTimestamp = 1;
+	LogLevel Level = 2;
+	string Message = 3;
+}
+
+message LogPack {
+	repeated LogMessage Messages = 1;
+}
+
+message LogStart {
+	LogLevel Level = 1;
+}
+
+// FMS -------------------------------------
+message FMSData {
+	repeated uint32 PGN_Id_List = 1;
+	repeated uint64 PGN_Value_List = 2;
+}
+
+// System ----------------------------------
+enum SystemResetType {
+	SystemReset_PowerOn = 0;
+	SystemReset_Sleep = 1;
+	SystemReset_HardFault = 2;
+	SystemReset_WatchDog = 3;
+	SystemReset_FirmwareUpdate = 4;
+	SystemReset_User = 5;
+}
+
+
+// Authenticate -----------------------
+message AuthenticateRequest {
+	string Code = 1;
+}
+
+enum AuthenticateResponseCode {
+	Authenticate_Invalid = 0;
+	Authenticate_Valid = 1;
+}
+
+message AuthenticateResponse {
+	AuthenticateResponseCode Code = 1;
+}
+
+// Commands ---------------------------
+message CommandRequest {
+	string Command = 1;
+}
+
+message CommandResponse {
+	string Response = 1;
+}
+
+
+message USSDData{
+	uint32 ID = 1;
+	string USSDCode = 2;
+	string USSDResponse = 3;
+	uint32 Timestamp = 4;
+	bool ResponseStatus = 5;
+}
+
+// Crash
+message CrashAccelData {
+	uint64 Timestamp = 1;
+	sint32 X = 2;
+	sint32 Y = 3;
+	sint32 Z = 4;
+}
+
+message CrashData {
+	uint32 Timestamp = 1;
+	uint32 Level = 2;
+	repeated CrashAccelData AccelData = 3;
+	repeated DataPoint PointData = 4;
+}
+
+message CrashDataResponse {
+	CrashDataResponseCode Code = 1;
+}
+
+enum CrashDataResponseCode {
+	CrashData_Error = 0;
+	CrashData_OK = 1;
+}
+
+// Diagnostics Trouble Codes ----------
+enum DTCResposneCode {
+	DTC_RESPOSNE_NONE = 0;
+	DTC_RESPOSNE_ERROR = 1;
+	DTC_RESPOSNE_OK = 2;
+}
+
+message DTCResposne {
+	DTCResposneCode DTCResposneCode = 1;
+}
+
+message DTCRequest {
+	repeated DTCRecord DTCRecords = 1;
+}
+
+message DTCRecord {
+	repeated DTCCode DTCCodes = 1;
+	uint32 Timestamp = 2;
+
+	// OBD Lamp status
+	bool OBD_MalfunctionIndicatorLamp = 3;
+
+	// FMS Lamp Status
+	uint32 FMS_ProtectLamp = 4;
+	uint32 FMS_AmberWarningLamp = 5;
+	uint32 FMS_RedStopLamp = 6;
+	uint32 FMS_MalfunctionIndicatorLamp = 7;
+
+	uint32 FMS_SAELamp1 = 8;
+	uint32 FMS_SAELamp2 = 9;
+	uint32 FMS_SAELamp3 = 10;
+	uint32 FMS_SAELamp4 = 11;
+}
+
+message DTCCode {
+	DTCType DTCType = 1;
+	uint32 Code = 2;
+	uint32 Reason = 3;
+	uint32 OccurrenceCount = 4;
+	uint32 Source = 5;
+}
+
+enum DTCType {
+	OBD_STORED_DTC = 0;
+	OBD_PENDING_DTC = 1;
+	OBD_PERMANENT_DTC = 2;
+	FMS_DTC = 3;
+	SCANIA_DTC = 4;
+}

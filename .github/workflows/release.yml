@@ -1,0 +1,139 @@
+name: Build Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version
+        required: true
+        default: preview
+
+jobs:
+  build:
+    name: Build installers
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: true
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - run: ./gradlew build
+      - run: git checkout ${{ github.ref_name }}
+        working-directory: ./traccar-web
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: traccar-web/package-lock.json
+      - run: npm ci && npm run build
+        working-directory: ./traccar-web
+      - run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y libgcc-s1:i386 libstdc++6:i386
+          sudo apt-get install -y innoextract makeself wine32
+      - run: |
+          JDK_VERSION="21.0.7+6"
+          JDK_BASE="https://github.com/adoptium/temurin21-binaries/releases/download/jdk-${JDK_VERSION}"
+          wget -q "$JDK_BASE/OpenJDK21U-jdk_x64_windows_hotspot_${JDK_VERSION/+/_}.zip"
+          wget -q "$JDK_BASE/OpenJDK21U-jdk_x64_linux_hotspot_${JDK_VERSION/+/_}.tar.gz"
+          wget -q "$JDK_BASE/OpenJDK21U-jdk_aarch64_linux_hotspot_${JDK_VERSION/+/_}.tar.gz"
+          wget -q http://files.jrsoftware.org/is/5/isetup-5.5.6.exe
+          ./package.sh ${{ github.event.inputs.version }}
+        working-directory: ./setup
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installers
+          path: setup/traccar-*.zip
+          compression-level: 0
+          retention-days: 1
+
+  upload:
+    name: Upload installers
+    needs: build
+    if: ${{ github.event.inputs.version == 'preview' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+      - env:
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+        run: |
+          sudo apt-get install -y s3cmd
+          s3cmd --acl-public put installers/traccar-*.zip s3://traccar/builds/ --host=nyc3.digitaloceanspaces.com --host-bucket=traccar --access_key="$S3_ACCESS_KEY" --secret_key="$S3_SECRET_KEY"
+
+  release:
+    name: Create release with installers
+    needs: build
+    if: ${{ github.event.inputs.version != 'preview' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          files: installers/traccar-*.zip
+
+  docker:
+    name: Build and push docker images
+    needs: build
+    if: ${{ github.event.inputs.version != 'preview' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [alpine, debian, ubuntu]
+        include:
+          - platforms: linux/amd64,linux/arm64
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v4
+        with:
+          path: docker
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          flavor: latest=false
+          images: |
+            traccar/traccar
+            ghcr.io/traccar/traccar
+          tags: |
+            type=semver,pattern={{major}}.{{minor}}.{{patch}},suffix=-${{ matrix.os }},value=v${{ github.event.inputs.version }}
+            type=semver,pattern={{major}}.{{minor}},suffix=-${{ matrix.os }},value=v${{ github.event.inputs.version }}
+            type=semver,pattern={{major}},suffix=-${{ matrix.os }},value=v${{ github.event.inputs.version }}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}},value=v${{ github.event.inputs.version }},enable=${{ matrix.os == 'alpine' }}
+            type=semver,pattern={{major}}.{{minor}},value=v${{ github.event.inputs.version }},enable=${{ matrix.os == 'alpine' }}
+            type=semver,pattern={{major}},value=v${{ github.event.inputs.version }},enable=${{ matrix.os == 'alpine' }}
+            type=raw,value=latest,enable=${{ matrix.os == 'alpine' }}
+            type=raw,value=${{ matrix.os }}
+          labels: |
+            org.opencontainers.image.version=${{ github.event.inputs.version }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: docker
+          file: docker/Dockerfile.${{ matrix.os }}
+          build-args: VERSION=${{ github.event.inputs.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: ${{ matrix.platforms }}
+          push: true

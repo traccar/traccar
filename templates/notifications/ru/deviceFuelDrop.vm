@@ -1,0 +1,14 @@
+#set($subject = "$esc.html($device.name): сброс топлива)
+#set($digest = "$device.name сброс топлива в $dateTool.format('dd.MM.yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)")
+<!DOCTYPE html>
+<html>
+<body>
+Устройство: $esc.html($device.name)<br>
+Время: $dateTool.format('dd.MM.yyyy HH:mm:ss', $event.eventTime, $locale, $timezone)<br>
+Количество до: $esc.html($event.attributes.before)<br>
+Количество после: $esc.html($event.attributes.after)<br>
+Координаты: <a href="$webUrl/event/$event.id">#{if}($position.address)$position.address#{else}$position.latitude&deg;, $position.longitude&deg;#{end}</a><br>
+<br>
+<a href="$webUrl/settings/notifications?token=$token">Отписаться</a>
+</body>
+</html>

@@ -1,0 +1,25 @@
+#cloud-config
+
+write_files:
+  - content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE properties SYSTEM 'http://java.sun.com/dtd/properties.dtd'>
+      <properties>
+        <entry key='database.driver'>com.mysql.jdbc.Driver</entry>
+        <entry key='database.url'>jdbc:mysql://localhost/traccar?zeroDateTimeBehavior=round&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true&amp;useSSL=false&amp;allowMultiQueries=true&amp;autoReconnect=true&amp;useUnicode=yes&amp;characterEncoding=UTF-8&amp;sessionVariables=sql_mode=''</entry>
+        <entry key='database.user'>root</entry>
+        <entry key='database.password'>root</entry>
+      </properties>
+    path: /root/traccar.xml
+
+package_update: true
+packages:
+  - unzip
+  - mysql-server
+
+runcmd:
+  - mysql -u root --execute="ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'root'; GRANT ALL ON *.* TO 'root'@'localhost' WITH GRANT OPTION; FLUSH PRIVILEGES; CREATE DATABASE traccar;"
+  - wget https://www.traccar.org/download/traccar-linux-64-latest.zip
+  - unzip traccar-linux-*.zip && ./traccar.run
+  - cp /root/traccar.xml /opt/traccar/conf/
+  - service traccar start

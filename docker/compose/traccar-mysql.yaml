@@ -1,0 +1,55 @@
+services:
+
+  database:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+      MYSQL_DATABASE: traccar
+      MYSQL_USER: traccar
+      MYSQL_PASSWORD: traccar
+    volumes:
+      - /opt/traccar/data:/var/lib/mysql
+
+  traccar:
+    image: traccar/traccar:latest
+    restart: unless-stopped
+    depends_on:
+      - database
+    environment:
+      CONFIG_USE_ENVIRONMENT_VARIABLES: "true"
+      DATABASE_DRIVER: com.mysql.cj.jdbc.Driver
+      DATABASE_URL: >-
+        jdbc:mysql://database:3306/traccar
+        ?zeroDateTimeBehavior=round
+        &serverTimezone=UTC
+        &allowPublicKeyRetrieval=true
+        &useSSL=false
+        &allowMultiQueries=true
+        &autoReconnect=true
+        &useUnicode=yes
+        &characterEncoding=UTF-8
+        &sessionVariables=sql_mode=''
+      DATABASE_USER: traccar
+      DATABASE_PASSWORD: traccar
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:8082/api/health" ]
+      interval: 2m
+      timeout: 5s
+      start_period: 1h
+      retries: 3
+    ports:
+      - "8082:8082"
+      - "5000-5500:5000-5500"
+    volumes:
+      - /opt/traccar/logs:/opt/traccar/logs
+
+  autoheal:
+    image: willfarrell/autoheal:latest
+    restart: always
+    environment:
+      AUTOHEAL_CONTAINER_LABEL: all
+      AUTOHEAL_INTERVAL: 60
+      AUTOHEAL_START_PERIOD: 3600
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro

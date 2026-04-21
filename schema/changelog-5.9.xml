@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-5.9">
+
+  <changeSet author="author" id="changelog-5.9">
+
+    <addColumn tableName="tc_devices">
+      <column name="calendarid" type="INT" />
+    </addColumn>
+
+    <addForeignKeyConstraint
+      baseTableName="tc_devices"
+      baseColumnNames="calendarid"
+      constraintName="fk_devices_calendarid"
+      referencedTableName="tc_calendars"
+      referencedColumnNames="id"
+      onDelete="SET NULL"
+      onUpdate="RESTRICT"
+    />
+
+  </changeSet>
+
+</databaseChangeLog>

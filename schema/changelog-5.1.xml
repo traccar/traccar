@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd"
+  logicalFilePath="changelog-5.1">
+
+  <changeSet author="author" id="changelog-5.1">
+
+    <createIndex tableName="tc_drivers" indexName="idx_drivers_uniqueid">
+      <column name="uniqueid" />
+    </createIndex>
+
+    <createIndex tableName="tc_devices" indexName="idx_devices_uniqueid">
+      <column name="uniqueid" />
+    </createIndex>
+
+    <createIndex tableName="tc_users" indexName="idx_users_email">
+      <column name="email" />
+    </createIndex>
+
+    <createIndex tableName="tc_users" indexName="idx_users_login">
+      <column name="login" />
+    </createIndex>
+
+    <createIndex tableName="tc_users" indexName="idx_users_token">
+      <column name="token" />
+    </createIndex>
+
+    <addColumn tableName="tc_servers">
+      <column name="overlayurl" type="VARCHAR(512)" />
+    </addColumn>
+
+  </changeSet>
+
+</databaseChangeLog>
