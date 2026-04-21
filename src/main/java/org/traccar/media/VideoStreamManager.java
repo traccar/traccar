@@ -44,7 +44,7 @@ public class VideoStreamManager {
 
     public String getPlaylist(String uniqueId, int channel) {
         DeviceStream stream = streams.get(uniqueId + "_" + channel);
-        return stream != null ? stream.getPlaylist() : null;
+        return stream != null ? stream.getPlaylist() : DeviceStream.EMPTY_PLAYLIST;
     }
 
     public ByteBuf getSegment(String uniqueId, int channel, int index) {
@@ -85,22 +85,28 @@ public class VideoStreamManager {
             }
         }
 
+        static final String EMPTY_PLAYLIST =
+                "#EXTM3U\n#EXT-X-VERSION:3\n#EXT-X-TARGETDURATION:5\n#EXT-X-MEDIA-SEQUENCE:0\n";
+
         synchronized String getPlaylist() {
-            if (segments.isEmpty()) {
-                return null;
+            if (currentSegment != null) {
+                finalizeSegment();
             }
+            if (segments.isEmpty()) {
+                return EMPTY_PLAYLIST;
+            }
+
+            int firstIndex = segments.keySet().iterator().next();
 
             StringBuilder sb = new StringBuilder();
             sb.append("#EXTM3U\n");
             sb.append("#EXT-X-VERSION:3\n");
             sb.append("#EXT-X-TARGETDURATION:5\n");
-
-            int firstIndex = segments.keySet().iterator().next();
             sb.append("#EXT-X-MEDIA-SEQUENCE:").append(firstIndex).append("\n");
 
-            for (Map.Entry<Integer, ByteBuf> entry : segments.entrySet()) {
+            for (int key : segments.keySet()) {
                 sb.append("#EXTINF:3.0,\n");
-                sb.append(entry.getKey()).append(".ts\n");
+                sb.append(key).append(".ts\n");
             }
 
             return sb.toString();
