@@ -19,6 +19,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseProtocolDecoder;
 import org.traccar.Protocol;
 import org.traccar.database.DeviceLookupService;
@@ -36,6 +37,9 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
     private CompositeByteBuf frameBuffer;
     private int frameDataType;
     private long frameTimestamp;
+
+    private String streamUniqueId;
+    private int streamChannel;
 
     public Jt1078ProtocolDecoder(Protocol protocol) {
         super(protocol);
@@ -63,7 +67,7 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedShort(); // index
 
         String uniqueId = HuabaoProtocolDecoder.decodeId(buf.readSlice(6));
-        int logicalChannel = buf.readUnsignedByte();
+        int videoChannel = buf.readUnsignedByte();
         int rawType = buf.readUnsignedByte();
         int dataType = BitUtil.from(rawType, 4);
         int subpackageType = BitUtil.to(rawType, 4);
@@ -83,15 +87,16 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
+        streamUniqueId = uniqueId;
+        streamChannel = videoChannel;
+
         ByteBuf body = buf.readRetainedSlice(bodyLength);
 
         if (subpackageType == 0) {
-            // atomic packet - complete frame
             boolean isKeyFrame = dataType == 0;
-            streamManager.handleFrame(uniqueId, logicalChannel, body, timestamp, isKeyFrame);
+            streamManager.handleFrame(uniqueId, videoChannel, body, timestamp, isKeyFrame);
             body.release();
         } else if (subpackageType == 1) {
-            // first subpackage
             if (frameBuffer != null) {
                 frameBuffer.release();
             }
@@ -100,18 +105,16 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
             frameDataType = dataType;
             frameTimestamp = timestamp;
         } else if (subpackageType == 3) {
-            // middle subpackage
             if (frameBuffer != null) {
                 frameBuffer.addComponent(true, body);
             } else {
                 body.release();
             }
         } else if (subpackageType == 2) {
-            // last subpackage
             if (frameBuffer != null) {
                 frameBuffer.addComponent(true, body);
                 boolean isKeyFrame = frameDataType == 0;
-                streamManager.handleFrame(uniqueId, logicalChannel, frameBuffer, frameTimestamp, isKeyFrame);
+                streamManager.handleFrame(uniqueId, videoChannel, frameBuffer, frameTimestamp, isKeyFrame);
                 frameBuffer.release();
                 frameBuffer = null;
             } else {
@@ -120,6 +123,18 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
         }
 
         return null;
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        super.channelInactive(ctx);
+        if (streamUniqueId != null) {
+            streamManager.removeStream(streamUniqueId, streamChannel);
+        }
+        if (frameBuffer != null) {
+            frameBuffer.release();
+            frameBuffer = null;
+        }
     }
 
 }

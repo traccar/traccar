@@ -47,6 +47,13 @@ public class VideoStreamManager {
         return stream != null ? stream.getPlaylist() : DeviceStream.EMPTY_PLAYLIST;
     }
 
+    public void removeStream(String uniqueId, int channel) {
+        DeviceStream stream = streams.remove(uniqueId + "_" + channel);
+        if (stream != null) {
+            stream.release();
+        }
+    }
+
     public ByteBuf getSegment(String uniqueId, int channel, int index) {
         DeviceStream stream = streams.get(uniqueId + "_" + channel);
         return stream != null ? stream.getSegment(index) : null;
@@ -82,6 +89,15 @@ public class VideoStreamManager {
             while (segments.size() > MAX_SEGMENTS) {
                 Integer oldest = segments.keySet().iterator().next();
                 segments.remove(oldest).release();
+            }
+        }
+
+        synchronized void release() {
+            if (currentSegment != null) {
+                currentSegment.release();
+            }
+            for (ByteBuf segment : segments.values()) {
+                segment.release();
             }
         }
 
