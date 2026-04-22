@@ -996,6 +996,7 @@ public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
                         }
                     }
                     break;
+                case 0xEC:
                 case 0xF4:
                     while (buf.readerIndex() < endIndex) {
                         String mac = ByteBufUtil.hexDump(buf.readSlice(6)).replaceAll("(..)", "$1:");
