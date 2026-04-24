@@ -3,12 +3,12 @@ package org.traccar.protocol;
 import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 
-public class HuabaoFrameDecoderTest extends ProtocolTest {
+public class Jt808FrameDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = inject(new HuabaoFrameDecoder());
+        var decoder = inject(new Jt808FrameDecoder());
 
         verifyFrame(
                 binary("283734303139303331313138352c312c3030312c454c4f434b2c332c35323934333929"),

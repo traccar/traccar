@@ -21,7 +21,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import org.traccar.BaseFrameDecoder;
 
-public class HuabaoFrameDecoder extends BaseFrameDecoder {
+public class Jt808FrameDecoder extends BaseFrameDecoder {
 
     @Override
     protected Object decode(

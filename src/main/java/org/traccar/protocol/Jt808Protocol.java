@@ -23,10 +23,10 @@ import org.traccar.model.Command;
 
 import jakarta.inject.Inject;
 
-public class HuabaoProtocol extends BaseProtocol {
+public class Jt808Protocol extends BaseProtocol {
 
     @Inject
-    public HuabaoProtocol(Config config) {
+    public Jt808Protocol(Config config) {
         setSupportedDataCommands(
                 Command.TYPE_CUSTOM,
                 Command.TYPE_REBOOT_DEVICE,
@@ -40,10 +40,10 @@ public class HuabaoProtocol extends BaseProtocol {
         addServer(new TrackerServer(config, getName(), false) {
             @Override
             protected void addProtocolHandlers(PipelineBuilder pipeline, Config config) {
-                pipeline.addLast(new HuabaoFrameEncoder());
-                pipeline.addLast(new HuabaoFrameDecoder());
-                pipeline.addLast(new HuabaoProtocolEncoder(HuabaoProtocol.this));
-                pipeline.addLast(new HuabaoProtocolDecoder(HuabaoProtocol.this));
+                pipeline.addLast(new Jt808FrameEncoder());
+                pipeline.addLast(new Jt808FrameDecoder());
+                pipeline.addLast(new Jt808ProtocolEncoder(Jt808Protocol.this));
+                pipeline.addLast(new Jt808ProtocolDecoder(Jt808Protocol.this));
             }
         });
     }
