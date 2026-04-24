@@ -66,7 +66,7 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
         buf.readUnsignedByte(); // M/PT
         buf.readUnsignedShort(); // index
 
-        String uniqueId = HuabaoProtocolDecoder.decodeId(buf.readSlice(6));
+        String uniqueId = Jt808ProtocolDecoder.decodeId(buf.readSlice(6));
         int videoChannel = buf.readUnsignedByte();
         int rawType = buf.readUnsignedByte();
         int dataType = BitUtil.from(rawType, 4);

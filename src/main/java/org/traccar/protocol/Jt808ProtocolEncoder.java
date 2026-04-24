@@ -32,9 +32,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 
-public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
+public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
 
-    public HuabaoProtocolEncoder(Protocol protocol) {
+    public Jt808ProtocolEncoder(Protocol protocol) {
         super(protocol);
     }
 
@@ -44,7 +44,7 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
         boolean alternative = AttributeUtil.lookup(
                 getCacheManager(), Keys.PROTOCOL_ALTERNATIVE.withPrefix(getProtocolName()), command.getDeviceId());
 
-        ByteBuf id = HuabaoProtocolDecoder.encodeId(getUniqueId(command.getDeviceId()));
+        ByteBuf id = Jt808ProtocolDecoder.encodeId(getUniqueId(command.getDeviceId()));
         try {
             ByteBuf data = Unpooled.buffer();
 
@@ -57,14 +57,14 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                         int length = command.getString(Command.KEY_DATA).length();
                         data.writeByte(length);
                         data.writeCharSequence(command.getString(Command.KEY_DATA), StandardCharsets.US_ASCII);
-                        return HuabaoProtocolDecoder.formatMessage(
-                                0x7e, HuabaoProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
+                        return Jt808ProtocolDecoder.formatMessage(
+                                0x7e, Jt808ProtocolDecoder.MSG_CONFIGURATION_PARAMETERS, id, false, data);
                     } else if ("BSJ".equals(model)) {
                         data.writeByte(1); // flag
                         var charset = Charset.isSupported("GBK") ? Charset.forName("GBK") : StandardCharsets.US_ASCII;
                         data.writeCharSequence(command.getString(Command.KEY_DATA), charset);
-                        return HuabaoProtocolDecoder.formatMessage(
-                                0x7e, HuabaoProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
+                        return Jt808ProtocolDecoder.formatMessage(
+                                0x7e, Jt808ProtocolDecoder.MSG_SEND_TEXT_MESSAGE, id, false, data);
                     } else {
                         return Unpooled.wrappedBuffer(DataConverter.parseHex(command.getString(Command.KEY_DATA)));
                     }
@@ -73,15 +73,15 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                     data.writeByte(0x23); // parameter id
                     data.writeByte(1); // parameter value length
                     data.writeByte(0x03); // restart
-                    return HuabaoProtocolDecoder.formatMessage(
-                            0x7e, HuabaoProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
+                    return Jt808ProtocolDecoder.formatMessage(
+                            0x7e, Jt808ProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
                 case Command.TYPE_POSITION_PERIODIC:
                     data.writeByte(1); // number of parameters
                     data.writeByte(0x06); // parameter id
                     data.writeByte(4); // parameter value length
                     data.writeInt(command.getInteger(Command.KEY_FREQUENCY));
-                    return HuabaoProtocolDecoder.formatMessage(
-                            0x7e, HuabaoProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
+                    return Jt808ProtocolDecoder.formatMessage(
+                            0x7e, Jt808ProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
                 case Command.TYPE_ALARM_ARM:
                 case Command.TYPE_ALARM_DISARM:
                     data.writeByte(1); // number of parameters
@@ -90,16 +90,16 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                     data.writeByte(1 + username.length()); // parameter value length
                     data.writeByte(command.getType().equals(Command.TYPE_ALARM_ARM) ? 0x01 : 0x00);
                     data.writeCharSequence(username, StandardCharsets.US_ASCII);
-                    return HuabaoProtocolDecoder.formatMessage(
-                            0x7e, HuabaoProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
+                    return Jt808ProtocolDecoder.formatMessage(
+                            0x7e, Jt808ProtocolDecoder.MSG_PARAMETER_SETTING, id, false, data);
                 case Command.TYPE_ENGINE_STOP:
                 case Command.TYPE_ENGINE_RESUME:
                     if (alternative) {
                         data.writeByte(command.getType().equals(Command.TYPE_ENGINE_STOP) ? 0x01 : 0x00);
                         data.writeBytes(DataConverter.parseHex(
                                 new SimpleDateFormat("yyMMddHHmmss").format(new Date())));
-                        return HuabaoProtocolDecoder.formatMessage(
-                                0x7e, HuabaoProtocolDecoder.MSG_OIL_CONTROL, id, false, data);
+                        return Jt808ProtocolDecoder.formatMessage(
+                                0x7e, Jt808ProtocolDecoder.MSG_OIL_CONTROL, id, false, data);
                     } else {
                         if ("VL300".equals(getDeviceModel(command.getDeviceId()))) {
                             data.writeCharSequence(command.getType().equals(Command.TYPE_ENGINE_STOP) ? "#0;1" : "#0;0",
@@ -107,8 +107,8 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                         } else {
                             data.writeByte(command.getType().equals(Command.TYPE_ENGINE_STOP) ? 0xf0 : 0xf1);
                         }
-                        return HuabaoProtocolDecoder.formatMessage(
-                                0x7e, HuabaoProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
+                        return Jt808ProtocolDecoder.formatMessage(
+                                0x7e, Jt808ProtocolDecoder.MSG_TERMINAL_CONTROL, id, false, data);
                     }
                 case Command.TYPE_VIDEO_START:
                     var config = getCacheManager().getConfig();
@@ -123,15 +123,15 @@ public class HuabaoProtocolEncoder extends BaseProtocolEncoder {
                     data.writeByte(channel);
                     data.writeByte(1); // video only
                     data.writeByte(0); // main stream
-                    return HuabaoProtocolDecoder.formatMessage(
-                            0x7e, HuabaoProtocolDecoder.MSG_VIDEO_REQUEST, id, false, data);
+                    return Jt808ProtocolDecoder.formatMessage(
+                            0x7e, Jt808ProtocolDecoder.MSG_VIDEO_REQUEST, id, false, data);
                 case Command.TYPE_VIDEO_STOP:
                     data.writeByte(command.getInteger(Command.KEY_INDEX, 1));
                     data.writeByte(0); // close audio/video transmission
                     data.writeByte(0); // close both audio and video
                     data.writeByte(0); // main stream
-                    return HuabaoProtocolDecoder.formatMessage(
-                            0x7e, HuabaoProtocolDecoder.MSG_VIDEO_CONTROL, id, false, data);
+                    return Jt808ProtocolDecoder.formatMessage(
+                            0x7e, Jt808ProtocolDecoder.MSG_VIDEO_CONTROL, id, false, data);
                 default:
                     return null;
             }

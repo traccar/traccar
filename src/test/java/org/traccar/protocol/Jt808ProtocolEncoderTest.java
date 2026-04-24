@@ -5,13 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Command;
 
-public class HuabaoProtocolEncoderTest extends ProtocolTest {
+public class Jt808ProtocolEncoderTest extends ProtocolTest {
 
     @Disabled
     @Test
     public void testEncode() throws Exception {
 
-        var encoder = inject(new HuabaoProtocolEncoder(null));
+        var encoder = inject(new Jt808ProtocolEncoder(null));
 
         Command command = new Command();
         command.setDeviceId(1);

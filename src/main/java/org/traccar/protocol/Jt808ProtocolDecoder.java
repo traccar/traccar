@@ -47,9 +47,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
-public class HuabaoProtocolDecoder extends BaseProtocolDecoder {
+public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
 
-    public HuabaoProtocolDecoder(Protocol protocol) {
+    public Jt808ProtocolDecoder(Protocol protocol) {
         super(protocol);
     }
 

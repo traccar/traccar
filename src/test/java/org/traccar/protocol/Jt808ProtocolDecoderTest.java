@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Test;
 import org.traccar.ProtocolTest;
 import org.traccar.model.Position;
 
-public class HuabaoProtocolDecoderTest extends ProtocolTest {
+public class Jt808ProtocolDecoderTest extends ProtocolTest {
 
     @Test
     public void testDecode() throws Exception {
 
-        var decoder = inject(new HuabaoProtocolDecoder(null));
+        var decoder = inject(new Jt808ProtocolDecoder(null));
 
         verifyAttribute(decoder, binary(
                 "7e0200004d794308010679013800000000022c004e01819568036ef38c005c00120000251118112611d40164d50201a230011d31010cf40104f9020007fe0400000090fd0a02e8000400044a150fe6ef014a0b062200623a4965977e"),
