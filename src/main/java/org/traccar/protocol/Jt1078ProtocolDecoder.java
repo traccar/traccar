@@ -37,6 +37,7 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
     private CompositeByteBuf frameBuffer;
     private int frameDataType;
     private long frameTimestamp;
+    private int framePayloadType;
 
     private String streamUniqueId;
     private int streamChannel;
@@ -63,7 +64,7 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
 
         buf.readUnsignedInt(); // header
         buf.readUnsignedByte(); // V/P/X/CC
-        buf.readUnsignedByte(); // M/PT
+        int payloadType = buf.readUnsignedByte() & 0x7F; // M/PT
         buf.readUnsignedShort(); // index
 
         String uniqueId = Jt808ProtocolDecoder.decodeId(buf.readSlice(6));
@@ -94,7 +95,7 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
 
         if (subpackageType == 0) {
             boolean isKeyFrame = dataType == 0;
-            streamManager.handleFrame(uniqueId, videoChannel, body, timestamp, isKeyFrame);
+            streamManager.handleFrame(uniqueId, videoChannel, body, timestamp, isKeyFrame, payloadType);
             body.release();
         } else if (subpackageType == 1) {
             if (frameBuffer != null) {
@@ -104,6 +105,7 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
             frameBuffer.addComponent(true, body);
             frameDataType = dataType;
             frameTimestamp = timestamp;
+            framePayloadType = payloadType;
         } else if (subpackageType == 3) {
             if (frameBuffer != null) {
                 frameBuffer.addComponent(true, body);
@@ -114,7 +116,8 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
             if (frameBuffer != null) {
                 frameBuffer.addComponent(true, body);
                 boolean isKeyFrame = frameDataType == 0;
-                streamManager.handleFrame(uniqueId, videoChannel, frameBuffer, frameTimestamp, isKeyFrame);
+                streamManager.handleFrame(
+                        uniqueId, videoChannel, frameBuffer, frameTimestamp, isKeyFrame, framePayloadType);
                 frameBuffer.release();
                 frameBuffer = null;
             } else {

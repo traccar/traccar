@@ -36,10 +36,11 @@ public class VideoStreamManager {
     public VideoStreamManager() {
     }
 
-    public void handleFrame(String uniqueId, int channel, ByteBuf nalData, long timestamp, boolean isKeyFrame) {
+    public void handleFrame(
+            String uniqueId, int channel, ByteBuf nalData, long timestamp, boolean isKeyFrame, int payloadType) {
         String key = uniqueId + "_" + channel;
         DeviceStream stream = streams.computeIfAbsent(key, k -> new DeviceStream());
-        stream.addFrame(nalData, timestamp, isKeyFrame);
+        stream.addFrame(nalData, timestamp, isKeyFrame, payloadType);
     }
 
     public String getPlaylist(String uniqueId, int channel) {
@@ -67,7 +68,7 @@ public class VideoStreamManager {
         private int segmentIndex;
         private long firstTimestamp;
 
-        synchronized void addFrame(ByteBuf nalData, long timestamp, boolean isKeyFrame) {
+        synchronized void addFrame(ByteBuf nalData, long timestamp, boolean isKeyFrame, int payloadType) {
             if (isKeyFrame && currentSegment != null) {
                 finalizeSegment();
             }
@@ -79,7 +80,7 @@ public class VideoStreamManager {
                 }
             }
 
-            writer.write(currentSegment, nalData, timestamp - firstTimestamp, isKeyFrame);
+            writer.write(currentSegment, nalData, timestamp - firstTimestamp, isKeyFrame, payloadType);
         }
 
         private void finalizeSegment() {

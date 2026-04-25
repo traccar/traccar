@@ -25,19 +25,21 @@ public class VideoStreamWriter {
     private static final int PMT_PID = 0x1000;
     private static final int VIDEO_PID = 0x0100;
     private static final int STREAM_TYPE_H264 = 0x1B;
+    private static final int STREAM_TYPE_H265 = 0x24;
 
     private int patContinuityCounter;
     private int pmtContinuityCounter;
     private int videoContinuityCounter;
 
-    public void write(ByteBuf output, ByteBuf nalData, long pts, boolean isKeyFrame) {
+    public void write(ByteBuf output, ByteBuf nalData, long pts, boolean isKeyFrame, int payloadType) {
+        boolean isH265 = payloadType == 99;
         if (isKeyFrame) {
             writePat(output);
-            writePmt(output);
+            writePmt(output, isH265);
         }
 
         long pts90k = pts * 90;
-        ByteBuf pesPacket = createPes(nalData, pts90k);
+        ByteBuf pesPacket = createPes(nalData, pts90k, isH265);
         writePesPackets(output, pesPacket, isKeyFrame, pts90k);
         pesPacket.release();
     }
@@ -76,7 +78,7 @@ public class VideoStreamWriter {
         }
     }
 
-    private void writePmt(ByteBuf output) {
+    private void writePmt(ByteBuf output, boolean isH265) {
         int start = output.writerIndex();
 
         // TS header
@@ -98,8 +100,8 @@ public class VideoStreamWriter {
         output.writeShort(0xE000 | VIDEO_PID); // reserved + PCR PID
         output.writeShort(0xF000); // reserved + program info length (0)
 
-        // stream entry - H.264 video
-        output.writeByte(STREAM_TYPE_H264);
+        // stream entry
+        output.writeByte(isH265 ? STREAM_TYPE_H265 : STREAM_TYPE_H264);
         output.writeShort(0xE000 | VIDEO_PID);
         output.writeShort(0xF000); // reserved + ES info length (0)
 
@@ -114,7 +116,7 @@ public class VideoStreamWriter {
         }
     }
 
-    private ByteBuf createPes(ByteBuf nalData, long pts90k) {
+    private ByteBuf createPes(ByteBuf nalData, long pts90k, boolean isH265) {
 
         ByteBuf pes = Unpooled.buffer();
 
@@ -122,7 +124,8 @@ public class VideoStreamWriter {
         pes.writeMedium(0x000001); // start code prefix
         pes.writeByte(0xE0); // stream id (video)
 
-        int pesLength = nalData.readableBytes() + 14; // 3 (flags) + 5 (PTS) + 6 (AUD NAL)
+        int audSize = isH265 ? 7 : 6; // H.265 AUD NAL is 3 bytes vs H.264's 2 bytes
+        int pesLength = nalData.readableBytes() + 8 + audSize; // 3 (flags) + 5 (PTS) + AUD NAL
         if (pesLength > 65535) {
             pes.writeShort(0x0000); // unbounded
         } else {
@@ -142,8 +145,14 @@ public class VideoStreamWriter {
 
         // access unit delimiter NAL
         pes.writeInt(0x00000001); // start code
-        pes.writeByte(0x09); // AUD NAL type
-        pes.writeByte(0xF0); // primary_pic_type = 7 (any) + rbsp stop bit
+        if (isH265) {
+            pes.writeByte(0x46); // AUD NAL type 35 (35 << 1)
+            pes.writeByte(0x01); // temporal_id_plus1
+            pes.writeByte(0x50); // pic_type = 2 (I, P, B) + rbsp stop bit
+        } else {
+            pes.writeByte(0x09); // AUD NAL type
+            pes.writeByte(0xF0); // primary_pic_type = 7 (any) + rbsp stop bit
+        }
 
         pes.writeBytes(nalData, nalData.readerIndex(), nalData.readableBytes());
 
