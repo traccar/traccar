@@ -237,7 +237,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             case MSG_LBS_ALARM:
                 return true;
             case MSG_GPS_LBS_2:
-                return model != null && Set.of("NT20", "VL100","XT40").contains(model.toUpperCase());
+                return model != null && Set.of("NT20", "VL100", "XT40").contains(model.toUpperCase());
             case 0xA3: // MSG_FENCE_SINGLE / MSG_STATUS_3
                 return variant == Variant.SEEWORLD;
             default:
