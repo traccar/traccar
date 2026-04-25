@@ -587,7 +587,12 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 Position.KEY_HOURS, 22140000L);
         verifyAttribute(decoder, binary(
                 "78783c22010357789648774484180c06142038180c06142038cb03313ee4061fe98300185e090000000000000000460984284c000200000000017101d6f35d0d0a"),
-                Position.KEY_BATTERY_LEVEL, 66);
+                Position.KEY_BATTERY, 4.0);
+        verifyAttribute(decoder, binary(
+                "78783c22010357789648774484180c06142038180c06142038cb03313ee4061fe98300185e090000000000000000460984284c000200000000017101d6f35d0d0a"),
+                Position.KEY_BATTERY_LEVEL, null);
+
+        decoder.setModelOverride("XT40");
 
         verifyAttribute(decoder, binary(
                 "78783c220109999999999999991a04171433101a041714310fb00288a5a8050754500008000800000000000000000604e32933000200468b000025008d87ce0d0a"),
@@ -597,7 +602,7 @@ public class Gt06ProtocolDecoderTest extends ProtocolTest {
                 Position.KEY_BATTERY, 4.1);
         verifyAttribute(decoder, binary(
                 "78783c220109999999999999991a04171433101a041714310fb00288a5a8050754500008000800000000000000000604e32933000200468b000025008d87ce0d0a"),
-                Position.KEY_BATTERY_LEVEL, 66);
+                Position.KEY_BATTERY_LEVEL, null);
 
 
         decoder.setModelOverride("G18");
