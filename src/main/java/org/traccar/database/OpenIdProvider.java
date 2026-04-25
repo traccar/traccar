@@ -176,7 +176,10 @@ public class OpenIdProvider {
         List<String> userGroups = userInfo.getStringListClaim(groupsClaimName);
         Boolean administrator = adminGroup != null && userGroups != null ? userGroups.contains(adminGroup) : null;
 
-        if (!(Boolean.TRUE.equals(administrator) || allowGroup == null || (userGroups != null && userGroups.contains(allowGroup)))) {
+        boolean authorized = Boolean.TRUE.equals(administrator)
+                || allowGroup == null
+                || (userGroups != null && userGroups.contains(allowGroup));
+        if (!authorized) {
             throw new GeneralSecurityException("Your OpenID Groups do not permit access");
         }
 
