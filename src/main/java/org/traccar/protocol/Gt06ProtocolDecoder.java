@@ -877,8 +877,10 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                     } else {
                         int battery = buf.readUnsignedByte();
                         if (modelNT && type == MSG_GPS_LBS_2) {
+                            position.set(Position.KEY_BATTERY, battery / 10.0);
                             battery = battery / 10;
                         }
+
                         if (battery <= 6) {
                             position.set(Position.KEY_BATTERY_LEVEL, battery * 100 / 6);
                         } else if (battery <= 100) {
