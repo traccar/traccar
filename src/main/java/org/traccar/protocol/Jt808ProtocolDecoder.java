@@ -57,6 +57,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GENERAL_RESPONSE = 0x8001;
     public static final int MSG_GENERAL_RESPONSE_2 = 0x4401;
     public static final int MSG_HEARTBEAT = 0x0002;
+    public static final int MSG_TERMINAL_LOGOUT = 0x0003;
     public static final int MSG_HEARTBEAT_2 = 0x0506;
     public static final int MSG_TERMINAL_REGISTER = 0x0100;
     public static final int MSG_TERMINAL_REGISTER_RESPONSE = 0x8100;
@@ -350,7 +351,8 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 return position;
             }
 
-        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT_2 || type == MSG_PHOTO) {
+        } else if (type == MSG_TERMINAL_AUTH || type == MSG_HEARTBEAT_2
+                || type == MSG_PHOTO || type == MSG_TERMINAL_LOGOUT) {
 
             sendGeneralResponse(channel, remoteAddress, id, type, index);
 
@@ -908,6 +910,15 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                 case 0x002D:
                                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
                                     break;
+                                case 0x0089:
+                                    long extAlarm = buf.readUnsignedInt();
+                                    if (!BitUtil.check(extAlarm, 0)) {
+                                        position.addAlarm(Position.ALARM_POWER_OFF);
+                                    }
+                                    if (!BitUtil.check(extAlarm, 12)) {
+                                        position.addAlarm(Position.ALARM_REMOVING);
+                                    }
+                                    break;
                                 case 0x00B2:
                                     position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(
                                             buf.readSlice(10)).replaceAll("f", ""));
@@ -919,6 +930,18 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                     for (int i = 0; i < wifi.length / 2; i++) {
                                         network.addWifiAccessPoint(
                                                 WifiAccessPoint.from(wifi[i * 2], Integer.parseInt(wifi[i * 2 + 1])));
+                                    }
+                                    break;
+                                case 0x00C5:
+                                    long extStatus = buf.readUnsignedInt();
+                                    if (!BitUtil.check(extStatus, 6)) {
+                                        position.addAlarm(Position.ALARM_VIBRATION);
+                                    }
+                                    long motionState = BitUtil.between(extStatus, 23, 25);
+                                    if (motionState == 0) {
+                                        position.set(Position.KEY_MOTION, true);
+                                    } else if (motionState == 1) {
+                                        position.set(Position.KEY_MOTION, false);
                                     }
                                     break;
                                 case 0x00C6:

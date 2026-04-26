@@ -104,6 +104,8 @@ public class Jt808ProtocolEncoder extends BaseProtocolEncoder {
                         if ("VL300".equals(getDeviceModel(command.getDeviceId()))) {
                             data.writeCharSequence(command.getType().equals(Command.TYPE_ENGINE_STOP) ? "#0;1" : "#0;0",
                                     StandardCharsets.US_ASCII);
+                        } else if ("W15L".equals(getDeviceModel(command.getDeviceId()))) {
+                            data.writeByte(command.getType().equals(Command.TYPE_ENGINE_STOP) ? 0x64 : 0x65);
                         } else {
                             data.writeByte(command.getType().equals(Command.TYPE_ENGINE_STOP) ? 0xf0 : 0xf1);
                         }
