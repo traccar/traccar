@@ -119,6 +119,8 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
     public static final int MSG_GPS_LBS_8 = 0x38;
     public static final int MSG_IBUTTON = 0x61;
 
+    private static final Set<String> NT_MODELS = Set.of("NT11", "NT20", "NT26", "NT40", "NT46", "VL100", "XT40");
+
     private enum Variant {
         VXT01,
         WANWAY_S20,
@@ -136,8 +138,6 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
         RFID,
         LW4G,
     }
-
-    private static final Set<String> NT_MODELS = Set.of("NT11", "NT20", "NT26", "NT40", "NT46", "VL100", "XT40");
 
     private Variant variant;
 
