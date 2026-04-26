@@ -592,6 +592,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             int endIndex = buf.readerIndex() + length;
             String stringValue;
             int event;
+            long alarm;
             switch (subtype) {
                 case 0x01:
                     position.set(Position.KEY_ODOMETER, buf.readUnsignedInt() * 100);
@@ -665,14 +666,14 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     buf.readUnsignedByte(); // reserved
                     break;
                 case 0x57:
-                    int alarm = buf.readUnsignedShort();
+                    alarm = buf.readUnsignedShort();
                     position.addAlarm(BitUtil.check(alarm, 8) ? Position.ALARM_ACCELERATION : null);
                     position.addAlarm(BitUtil.check(alarm, 9) ? Position.ALARM_BRAKING : null);
                     position.addAlarm(BitUtil.check(alarm, 10) ? Position.ALARM_CORNERING : null);
                     buf.readUnsignedShort(); // external switch state
-                    long alarm2 = buf.readUnsignedInt();
+                    alarm = buf.readUnsignedInt();
                     if ("MV810G".equals(model) || "MV710G".equals(model)) {
-                        position.addAlarm(BitUtil.check(alarm2, 16) ? Position.ALARM_DOOR : null);
+                        position.addAlarm(BitUtil.check(alarm, 16) ? Position.ALARM_DOOR : null);
                     }
                     break;
                 case 0x60:
@@ -911,11 +912,11 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                     position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 1000.0);
                                     break;
                                 case 0x0089:
-                                    long extAlarm = buf.readUnsignedInt();
-                                    if (!BitUtil.check(extAlarm, 0)) {
+                                    alarm = buf.readUnsignedInt();
+                                    if (!BitUtil.check(alarm, 0)) {
                                         position.addAlarm(Position.ALARM_POWER_OFF);
                                     }
-                                    if (!BitUtil.check(extAlarm, 12)) {
+                                    if (!BitUtil.check(alarm, 12)) {
                                         position.addAlarm(Position.ALARM_REMOVING);
                                     }
                                     break;
@@ -933,11 +934,11 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                     }
                                     break;
                                 case 0x00C5:
-                                    long extStatus = buf.readUnsignedInt();
-                                    if (!BitUtil.check(extStatus, 6)) {
+                                    alarm = buf.readUnsignedInt();
+                                    if (!BitUtil.check(alarm, 6)) {
                                         position.addAlarm(Position.ALARM_VIBRATION);
                                     }
-                                    long motionState = BitUtil.between(extStatus, 23, 25);
+                                    long motionState = BitUtil.between(alarm, 23, 25);
                                     if (motionState == 0) {
                                         position.set(Position.KEY_MOTION, true);
                                     } else if (motionState == 1) {
