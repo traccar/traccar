@@ -32,6 +32,7 @@ import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.RequestLogWriter;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.CrossOriginHandler;
 import org.eclipse.jetty.session.DatabaseAdaptor;
 import org.eclipse.jetty.session.DefaultSessionCache;
 import org.eclipse.jetty.session.JDBCSessionDataStoreFactory;
@@ -43,7 +44,6 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.traccar.LifecycleObject;
-import org.traccar.api.CorsResponseFilter;
 import org.traccar.api.DateParameterConverterProvider;
 import org.traccar.api.ResourceErrorHandler;
 import org.traccar.api.StreamWriter;
@@ -61,7 +61,9 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
 import java.util.EnumSet;
+import java.util.Set;
 
 public class WebServer implements LifecycleObject {
 
@@ -86,6 +88,7 @@ public class WebServer implements LifecycleObject {
 
         ServletContextHandler servletHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
         JettyWebSocketServletContainerInitializer.configure(servletHandler, null);
+
         servletHandler.addFilter(GuiceFilter.class, "/*", EnumSet.allOf(DispatcherType.class));
 
         initApi(servletHandler);
@@ -101,7 +104,21 @@ public class WebServer implements LifecycleObject {
         initClientProxy(servletHandler);
         handlers.addHandler(servletHandler);
         handlers.addHandler(new CompressionHandler());
-        server.setHandler(handlers);
+
+        String webOrigin = config.getString(Keys.WEB_ORIGIN);
+        if (webOrigin != null && !webOrigin.isEmpty()) {
+            CrossOriginHandler corsHandler = new CrossOriginHandler();
+            corsHandler.setAllowedOriginPatterns(Set.of(webOrigin));
+            corsHandler.setAllowedMethods(Set.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+            corsHandler.setAllowedHeaders(Set.of("Authorization", "Content-Type", "Accept", "Origin"));
+            corsHandler.setAllowCredentials(true);
+            corsHandler.setPreflightMaxAge(Duration.ofMinutes(30));
+            corsHandler.setDeliverPreflightRequests(false);
+            corsHandler.setHandler(handlers);
+            server.setHandler(corsHandler);
+        } else {
+            server.setHandler(handlers);
+        }
 
         if (config.hasKey(Keys.WEB_REQUEST_LOG_PATH)) {
             RequestLogWriter logWriter = new RequestLogWriter(config.getString(Keys.WEB_REQUEST_LOG_PATH));
@@ -176,9 +193,11 @@ public class WebServer implements LifecycleObject {
             var mcpServletHolder = new ServletHolder(mcpServerHolder.getServlet());
             mcpServletHolder.setAsyncSupported(true);
             servletHandler.addServlet(mcpServletHolder, McpServerHolder.PATH);
+
+            String mcpPath = McpServerHolder.PATH + "/*";
             servletHandler.addFilter(
                     new FilterHolder(new McpAuthFilter(injector.getInstance(LoginService.class))),
-                    McpServerHolder.PATH + "/*", EnumSet.of(DispatcherType.REQUEST));
+                    mcpPath, EnumSet.of(DispatcherType.REQUEST));
         }
 
         ResourceConfig resourceConfig = new ResourceConfig();
@@ -188,7 +207,6 @@ public class WebServer implements LifecycleObject {
                 ObjectMapperContextResolver.class,
                 DateParameterConverterProvider.class,
                 SecurityRequestFilter.class,
-                CorsResponseFilter.class,
                 ResourceErrorHandler.class,
                 StreamWriter.class);
         resourceConfig.packages(ServerResource.class.getPackage().getName());
