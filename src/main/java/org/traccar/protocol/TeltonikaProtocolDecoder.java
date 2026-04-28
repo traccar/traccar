@@ -195,7 +195,7 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
     static {
         Predicate<String> any = (m) -> true;
         Predicate<String> fmbXXX = (m) -> m != null && m.matches("FM[B-Z]...|MTB100|MSP500");
-        Predicate<String> obd = (m) -> m != null && m.matches("FM[BCM]...");
+        Predicate<String> obdEV = (m) -> m != null && m.matches("(FMB001|FM.00[3A])");
         Predicate<String> fmb6XX = (m) -> m != null && m.matches("FM.6..");
 
         register(1, any, (p, b) -> p.set(Position.PREFIX_IN + 1, b.readUnsignedByte() > 0));
@@ -279,23 +279,23 @@ public class TeltonikaProtocolDecoder extends BaseProtocolDecoder {
         register(175, fmbXXX, (p, b) -> {
             p.addAlarm(b.readUnsignedByte() > 0 ? Position.ALARM_GEOFENCE_ENTER : Position.ALARM_GEOFENCE_EXIT);
         });
-        register(410, obd, (p, b) -> p.set("evCharging", b.readUnsignedByte()));
-        register(411, obd, (p, b) -> p.set("evChargeLevel", b.readUnsignedByte()));
-        register(755, obd, (p, b) -> p.set("distanceRemaining", b.readUnsignedShort()));
+        register(410, obdEV, (p, b) -> p.set("evCharging", b.readUnsignedByte()));
+        register(411, obdEV, (p, b) -> p.set("evChargeLevel", b.readUnsignedByte()));
+        register(755, obdEV, (p, b) -> p.set("evDistanceRemaining", b.readUnsignedShort()));
         register(636, fmbXXX, (p, b) -> p.set("cid4g", b.readUnsignedInt()));
         register(662, fmbXXX, (p, b) -> p.set(Position.KEY_DOOR, b.readUnsignedByte() > 0));
-        register(1151, obd, (p, b) -> p.set("evSOH", b.readUnsignedShort()));
-        register(1152, obd, (p, b) -> p.set("evTemp", b.readShort()));
-        register(1378, obd, (p, b) -> p.set("hvMinCellVoltage", b.readUnsignedShort() * 0.01));
-        register(1379, obd, (p, b) -> p.set("hvMaxCellVoltage", b.readUnsignedShort() * 0.01));
-        register(1380, obd, (p, b) -> p.set("hvCurrent", b.readUnsignedShort() * 0.1));
-        register(1381, obd, (p, b) -> p.set("hvVoltage", b.readUnsignedShort() * 0.1));
-        register(1382, obd, (p, b) -> p.set("hvCapacity", b.readUnsignedShort() * 0.01));
-        register(1383, obd, (p, b) -> p.set("hvEnergy", b.readUnsignedShort() * 0.01));
-        register(1386, obd, (p, b) -> p.set("hvMinCellTemp", b.readShort() * 0.1));
-        register(1387, obd, (p, b) -> p.set("hvMaxCellTemp", b.readShort() * 0.1));
-        register(1388, obd, (p, b) -> p.set("hvLifetimeEnergyUsed", b.readInt()));
-        register(1389, obd, (p, b) -> p.set("hvLifetimeEnergyCharged", b.readUnsignedInt()));
+        register(1151, obdEV, (p, b) -> p.set("evSOH", b.readUnsignedShort()));
+        register(1152, obdEV, (p, b) -> p.set("evTemp", b.readShort()));
+        register(1378, obdEV, (p, b) -> p.set("evMinCellVoltage", b.readUnsignedShort() * 0.01));
+        register(1379, obdEV, (p, b) -> p.set("evMaxCellVoltage", b.readUnsignedShort() * 0.01));
+        register(1380, obdEV, (p, b) -> p.set("evCurrent", b.readUnsignedShort() * 0.1));
+        register(1381, obdEV, (p, b) -> p.set("evVoltage", b.readUnsignedShort() * 0.1));
+        register(1382, obdEV, (p, b) -> p.set("evCapacity", b.readUnsignedShort() * 0.01));
+        register(1383, obdEV, (p, b) -> p.set("evEnergy", b.readUnsignedShort() * 0.01));
+        register(1386, obdEV, (p, b) -> p.set("evMinCellTemp", b.readShort() * 0.1));
+        register(1387, obdEV, (p, b) -> p.set("evMaxCellTemp", b.readShort() * 0.1));
+        register(1388, obdEV, (p, b) -> p.set("evLifetimeEnergyUsed", b.readInt()));
+        register(1389, obdEV, (p, b) -> p.set("evLifetimeEnergyCharged", b.readUnsignedInt()));
         register(10644, fmbXXX, (p, b) -> p.set("tempProbe1", b.readShort() / 100.0));
         register(10645, fmbXXX, (p, b) -> p.set("tempProbe2", b.readShort() / 100.0));
         register(10646, fmbXXX, (p, b) -> p.set("tempProbe3", b.readShort() / 100.0));
