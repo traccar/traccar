@@ -25,6 +25,7 @@ import org.traccar.Protocol;
 import org.traccar.database.DeviceLookupService;
 import org.traccar.helper.BitUtil;
 import org.traccar.media.VideoStreamManager;
+import org.traccar.model.Device;
 
 import jakarta.inject.Inject;
 import java.net.SocketAddress;
@@ -39,7 +40,7 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
     private long frameTimestamp;
     private int framePayloadType;
 
-    private String streamUniqueId;
+    private long streamDeviceId;
     private int streamChannel;
 
     public Jt1078ProtocolDecoder(Protocol protocol) {
@@ -84,18 +85,19 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
             return null;
         }
 
-        if (deviceLookupService.lookup(new String[]{uniqueId}) == null) {
+        Device device = deviceLookupService.lookup(new String[]{uniqueId});
+        if (device == null) {
             return null;
         }
 
-        streamUniqueId = uniqueId;
+        streamDeviceId = device.getId();
         streamChannel = videoChannel;
 
         ByteBuf body = buf.readRetainedSlice(bodyLength);
 
         if (subpackageType == 0) {
             boolean isKeyFrame = dataType == 0;
-            streamManager.handleFrame(uniqueId, videoChannel, body, timestamp, isKeyFrame, payloadType);
+            streamManager.handleFrame(streamDeviceId, videoChannel, body, timestamp, isKeyFrame, payloadType);
             body.release();
         } else if (subpackageType == 1) {
             if (frameBuffer != null) {
@@ -117,7 +119,7 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
                 frameBuffer.addComponent(true, body);
                 boolean isKeyFrame = frameDataType == 0;
                 streamManager.handleFrame(
-                        uniqueId, videoChannel, frameBuffer, frameTimestamp, isKeyFrame, framePayloadType);
+                        streamDeviceId, videoChannel, frameBuffer, frameTimestamp, isKeyFrame, framePayloadType);
                 frameBuffer.release();
                 frameBuffer = null;
             } else {
@@ -131,8 +133,8 @@ public class Jt1078ProtocolDecoder extends BaseProtocolDecoder {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        if (streamUniqueId != null) {
-            streamManager.removeStream(streamUniqueId, streamChannel);
+        if (streamDeviceId > 0) {
+            streamManager.removeStream(streamDeviceId, streamChannel);
         }
         if (frameBuffer != null) {
             frameBuffer.release();

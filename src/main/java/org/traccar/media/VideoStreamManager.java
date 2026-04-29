@@ -37,26 +37,25 @@ public class VideoStreamManager {
     }
 
     public void handleFrame(
-            String uniqueId, int channel, ByteBuf nalData, long timestamp, boolean isKeyFrame, int payloadType) {
-        String key = uniqueId + "_" + channel;
-        DeviceStream stream = streams.computeIfAbsent(key, k -> new DeviceStream());
+            long deviceId, int channel, ByteBuf nalData, long timestamp, boolean isKeyFrame, int payloadType) {
+        DeviceStream stream = streams.computeIfAbsent(deviceId + "_" + channel, k -> new DeviceStream());
         stream.addFrame(nalData, timestamp, isKeyFrame, payloadType);
     }
 
-    public String getPlaylist(String uniqueId, int channel) {
-        DeviceStream stream = streams.get(uniqueId + "_" + channel);
+    public String getPlaylist(long deviceId, int channel) {
+        DeviceStream stream = streams.get(deviceId + "_" + channel);
         return stream != null ? stream.getPlaylist() : DeviceStream.EMPTY_PLAYLIST;
     }
 
-    public void removeStream(String uniqueId, int channel) {
-        DeviceStream stream = streams.remove(uniqueId + "_" + channel);
+    public void removeStream(long deviceId, int channel) {
+        DeviceStream stream = streams.remove(deviceId + "_" + channel);
         if (stream != null) {
             stream.release();
         }
     }
 
-    public ByteBuf getSegment(String uniqueId, int channel, int index) {
-        DeviceStream stream = streams.get(uniqueId + "_" + channel);
+    public ByteBuf getSegment(long deviceId, int channel, int index) {
+        DeviceStream stream = streams.get(deviceId + "_" + channel);
         return stream != null ? stream.getSegment(index) : null;
     }
 
