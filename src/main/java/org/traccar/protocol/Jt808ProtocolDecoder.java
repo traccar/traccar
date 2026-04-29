@@ -176,7 +176,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             if (BitUtil.check(value, 19)) {
                 position.addAlarm(Position.ALARM_PARKING);
             }
-            if (BitUtil.check(value, 20) || BitUtil.check(value, 21)) {
+            if (BitUtil.check(value, 20)) {
                 position.addAlarm(Position.ALARM_GEOFENCE);
             }
             if (BitUtil.check(value, 26)) {
@@ -629,12 +629,7 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0x14:
-                    alarm = buf.readUnsignedInt();
-                    if (BitUtil.check(alarm, 0) || BitUtil.check(alarm, 1)
-                            || BitUtil.check(alarm, 2) || BitUtil.check(alarm, 3)) {
-                        position.addAlarm(Position.ALARM_FAULT);
-                    }
-                    position.set("videoAlarm", alarm);
+                    position.set("videoAlarm", buf.readUnsignedInt());
                     break;
                 case 0x25:
                     position.set(Position.KEY_INPUT, buf.readUnsignedInt());
@@ -912,18 +907,17 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                             buf.skipBytes(idLength); // alarm ID structure
                             buf.readUnsignedByte(); // supplementary information length
                             switch (packetId) {
-                                case 0x0001, 0x0002 -> position.addAlarm(Position.ALARM_FAULT);
+                                case 0x0001 -> position.addAlarm(Position.ALARM_FAULT);
                                 case 0x0400, 0x0412 -> position.addAlarm(Position.ALARM_ACCELERATION);
                                 case 0x0401, 0x0413 -> position.addAlarm(Position.ALARM_BRAKING);
                                 case 0x0402, 0x0414 -> position.addAlarm(Position.ALARM_CORNERING);
                                 case 0x0403 -> position.addAlarm(Position.ALARM_OVERSPEED);
-                                case 0x0404 -> position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
                                 case 0x0405, 0x0416, 0x0417 -> position.addAlarm(Position.ALARM_ACCIDENT);
                                 case 0x0406 -> position.addAlarm(Position.ALARM_VIBRATION);
                                 case 0x0407 -> position.addAlarm(Position.ALARM_TOW);
                                 case 0x0408 -> position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
                                 case 0x0409 -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
-                                case 0x040C, 0x040D -> position.addAlarm(Position.ALARM_DOOR);
+                                case 0x040C -> position.addAlarm(Position.ALARM_DOOR);
                                 case 0x0415 -> position.addAlarm(Position.ALARM_LANE_CHANGE);
                                 case 0x0C01 -> position.addAlarm(Position.ALARM_SOS);
                                 case 0x0C02 -> position.addAlarm(Position.ALARM_LOW_POWER);
