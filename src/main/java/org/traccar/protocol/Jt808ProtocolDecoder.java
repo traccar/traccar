@@ -858,10 +858,10 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                 case 0xE8:
                     if (model != null
                             && Set.of("JC371", "JC181", "JC182", "JC450", "JC451").contains(model)) {
-                        int packetId = buf.readUnsignedShort();
-                        if (packetId >= 0x2000 && packetId <= 0x2FFF) {
+                        int extendedType = buf.readUnsignedShort();
+                        if (extendedType >= 0x2000 && extendedType <= 0x2FFF) {
                             buf.readUnsignedByte(); // packet length
-                            switch (packetId) {
+                            switch (extendedType) {
                                 case 0x2002 -> {
                                     position.set("uploadMode", buf.readUnsignedByte());
                                     position.set("buffered", buf.readUnsignedByte() == 1);
@@ -872,9 +872,9 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                     if (batteryStatus >= 1 && batteryStatus <= 6) {
                                         position.set(Position.KEY_BATTERY_LEVEL, batteryStatus * 100 / 6);
                                     }
-                                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                                    position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
                                     position.set(Position.KEY_RSSI, buf.readUnsignedByte());
-                                    position.set(Position.KEY_POWER, buf.readUnsignedShort() * 0.01);
+                                    position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
                                 }
                                 case 0x2005 -> {
                                     while (buf.readerIndex() < endIndex) {
@@ -883,30 +883,28 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                         int statusEndIndex = buf.readerIndex() + statusLength;
                                         switch (statusId) {
                                             case 0x0001 -> position.set(
-                                                    Position.KEY_BATTERY, buf.readUnsignedShort() * 0.01);
+                                                    Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
                                             case 0x0002 -> position.set("dataUsage", buf.readUnsignedInt());
                                             case 0x0003 -> position.set(
                                                     Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
                                             case 0x0004 -> position.set(
                                                     Position.KEY_CHARGE, buf.readUnsignedByte() == 0);
-                                            case 0x0005 -> position.set(Position.KEY_ICCID, ByteBufUtil.hexDump(
-                                                    buf.readSlice(10)).replaceAll("f", ""));
+                                            case 0x0005 -> position.set(Position.KEY_ICCID,
+                                                    ByteBufUtil.hexDump(buf.readSlice(10)).substring(0, 19));
                                             case 0x0007 -> position.set(
-                                                    Position.KEY_HDOP, buf.readUnsignedShort() * 0.1);
+                                                    Position.KEY_HDOP, buf.readUnsignedShort() / 10.0);
                                             case 0x2001 -> position.set(
-                                                    Position.KEY_POWER, buf.readUnsignedShort() * 0.1);
-                                            default -> { }
+                                                    Position.KEY_POWER, buf.readUnsignedShort() / 10.0);
                                         }
                                         buf.readerIndex(statusEndIndex);
                                     }
                                 }
-                                default -> { }
                             }
-                        } else if (packetId <= 0x0FFF) {
+                        } else if (extendedType <= 0x0FFF) {
                             int idLength = buf.readUnsignedByte();
                             buf.skipBytes(idLength); // alarm ID structure
                             buf.readUnsignedByte(); // supplementary information length
-                            switch (packetId) {
+                            switch (extendedType) {
                                 case 0x0001 -> position.addAlarm(Position.ALARM_FAULT);
                                 case 0x0400, 0x0412 -> position.addAlarm(Position.ALARM_ACCELERATION);
                                 case 0x0401, 0x0413 -> position.addAlarm(Position.ALARM_BRAKING);
@@ -928,7 +926,6 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                                 case 0x0C0F -> position.addAlarm(Position.ALARM_LOW_BATTERY);
                                 case 0x0C10 -> position.addAlarm(Position.ALARM_POWER_OFF);
                                 case 0x0C12 -> position.addAlarm(Position.ALARM_TAMPERING);
-                                default -> { }
                             }
                         }
                         buf.readerIndex(endIndex);
