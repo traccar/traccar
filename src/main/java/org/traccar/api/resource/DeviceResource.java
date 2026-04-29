@@ -194,6 +194,8 @@ public class DeviceResource extends BaseObjectResource<Device> {
             @PathParam("id") long deviceId, File file,
             @HeaderParam(HttpHeaders.CONTENT_TYPE) String type) throws StorageException, IOException {
 
+        permissionsService.checkEdit(getUserId(), Device.class, false, false);
+
         Device device = storage.getObject(Device.class, new Request(
                 new Columns.All(),
                 new Condition.And(
