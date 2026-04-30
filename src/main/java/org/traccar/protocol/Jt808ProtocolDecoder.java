@@ -151,7 +151,10 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             if (BitUtil.check(value, 1)) {
                 position.addAlarm(Position.ALARM_OVERSPEED);
             }
-            if (BitUtil.check(value, 5)) {
+            if (BitUtil.check(value, 2)) {
+                position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
+            }
+            if (BitUtil.check(value, 5) || BitUtil.check(value, 6)) {
                 position.addAlarm(Position.ALARM_GPS_ANTENNA_CUT);
             }
             if (BitUtil.check(value, 4) || BitUtil.check(value, 9)
@@ -170,8 +173,14 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
             if (BitUtil.check(value, 16) || BitUtil.check(value, 17)) {
                 position.addAlarm(Position.ALARM_TAMPERING);
             }
+            if (BitUtil.check(value, 19)) {
+                position.addAlarm(Position.ALARM_PARKING);
+            }
             if (BitUtil.check(value, 20)) {
                 position.addAlarm(Position.ALARM_GEOFENCE);
+            }
+            if (BitUtil.check(value, 26)) {
+                position.addAlarm(Position.ALARM_GENERAL);
             }
             if (BitUtil.check(value, 28)) {
                 position.addAlarm(Position.ALARM_MOVEMENT);
@@ -847,7 +856,76 @@ public class Jt808ProtocolDecoder extends BaseProtocolDecoder {
                     }
                     break;
                 case 0xE8:
-                    position.set("lockStatus", buf.readUnsignedMedium());
+                    if (model != null
+                            && Set.of("JC371", "JC181", "JC182", "JC450", "JC451").contains(model)) {
+                        int extendedType = buf.readUnsignedShort();
+                        switch (extendedType) {
+                            case 0x2002 -> {
+                                buf.readUnsignedByte(); // packet length
+                                position.set("uploadMode", buf.readUnsignedByte());
+                                position.set("buffered", buf.readUnsignedByte() == 1);
+                            }
+                            case 0x2003 -> {
+                                buf.readUnsignedByte(); // packet length
+                                position.set(Position.KEY_CHARGE, buf.readUnsignedByte() == 1);
+                                int batteryStatus = buf.readUnsignedByte();
+                                if (batteryStatus >= 1 && batteryStatus <= 6) {
+                                    position.set(Position.KEY_BATTERY_LEVEL, batteryStatus * 100 / 6);
+                                }
+                                position.set(Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
+                                position.set(Position.KEY_RSSI, buf.readUnsignedByte());
+                                position.set(Position.KEY_POWER, buf.readUnsignedShort() / 100.0);
+                            }
+                            case 0x2005 -> {
+                                buf.readUnsignedByte(); // packet length
+                                while (buf.readerIndex() < endIndex) {
+                                    int statusId = buf.readUnsignedShort();
+                                    int statusLength = buf.readUnsignedByte();
+                                    int statusEndIndex = buf.readerIndex() + statusLength;
+                                    switch (statusId) {
+                                        case 0x0001 -> position.set(
+                                                Position.KEY_BATTERY, buf.readUnsignedShort() / 100.0);
+                                        case 0x0002 -> position.set("dataUsage", buf.readUnsignedInt());
+                                        case 0x0003 -> position.set(
+                                                Position.KEY_BATTERY_LEVEL, buf.readUnsignedByte());
+                                        case 0x0004 -> position.set(
+                                                Position.KEY_CHARGE, buf.readUnsignedByte() == 0);
+                                        case 0x0005 -> position.set(Position.KEY_ICCID,
+                                                ByteBufUtil.hexDump(buf.readSlice(10)).substring(0, 19));
+                                        case 0x0007 -> position.set(
+                                                Position.KEY_HDOP, buf.readUnsignedShort() / 10.0);
+                                        case 0x2001 -> position.set(
+                                                Position.KEY_POWER, buf.readUnsignedShort() / 10.0);
+                                    }
+                                    buf.readerIndex(statusEndIndex);
+                                }
+                            }
+                            case 0x0001 -> position.addAlarm(Position.ALARM_FAULT);
+                            case 0x0400, 0x0412 -> position.addAlarm(Position.ALARM_ACCELERATION);
+                            case 0x0401, 0x0413 -> position.addAlarm(Position.ALARM_BRAKING);
+                            case 0x0402, 0x0414 -> position.addAlarm(Position.ALARM_CORNERING);
+                            case 0x0403 -> position.addAlarm(Position.ALARM_OVERSPEED);
+                            case 0x0405, 0x0416, 0x0417 -> position.addAlarm(Position.ALARM_ACCIDENT);
+                            case 0x0406 -> position.addAlarm(Position.ALARM_VIBRATION);
+                            case 0x0407 -> position.addAlarm(Position.ALARM_TOW);
+                            case 0x0408 -> position.addAlarm(Position.ALARM_GEOFENCE_ENTER);
+                            case 0x0409 -> position.addAlarm(Position.ALARM_GEOFENCE_EXIT);
+                            case 0x040C -> position.addAlarm(Position.ALARM_DOOR);
+                            case 0x0415 -> position.addAlarm(Position.ALARM_LANE_CHANGE);
+                            case 0x0C01 -> position.addAlarm(Position.ALARM_SOS);
+                            case 0x0C02 -> position.addAlarm(Position.ALARM_LOW_POWER);
+                            case 0x0C03 -> position.set(Position.KEY_IGNITION, true);
+                            case 0x0C04 -> position.set(Position.KEY_IGNITION, false);
+                            case 0x0C05 -> position.addAlarm(Position.ALARM_GENERAL);
+                            case 0x0C0E -> position.addAlarm(Position.ALARM_POWER_CUT);
+                            case 0x0C0F -> position.addAlarm(Position.ALARM_LOW_BATTERY);
+                            case 0x0C10 -> position.addAlarm(Position.ALARM_POWER_OFF);
+                            case 0x0C12 -> position.addAlarm(Position.ALARM_TAMPERING);
+                        }
+                        buf.readerIndex(endIndex);
+                    } else {
+                        position.set("lockStatus", buf.readUnsignedMedium());
+                    }
                     break;
                 case 0xEA:
                     if (length > 2) {
