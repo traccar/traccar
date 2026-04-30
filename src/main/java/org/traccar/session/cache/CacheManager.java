@@ -33,6 +33,7 @@ import org.traccar.model.Driver;
 import org.traccar.model.Geofence;
 import org.traccar.model.Group;
 import org.traccar.model.GroupedModel;
+import org.traccar.model.LinkedDevice;
 import org.traccar.model.Maintenance;
 import org.traccar.model.Notification;
 import org.traccar.model.ObjectOperation;
@@ -63,7 +64,7 @@ public class CacheManager implements BroadcastInterface {
     private static final Logger LOGGER = LoggerFactory.getLogger(CacheManager.class);
 
     private static final Set<Class<? extends BaseModel>> GROUPED_CLASSES =
-            Set.of(Attribute.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
+            Set.of(Attribute.class, Device.class, Driver.class, Geofence.class, Maintenance.class, Notification.class);
 
     private final Config config;
     private final Storage storage;
@@ -277,8 +278,13 @@ public class CacheManager implements BroadcastInterface {
         }
     }
 
-    private <T1 extends BaseModel, T2 extends BaseModel> void invalidatePermission(
-            Class<T1> fromClass, long fromId, Class<T2> toClass, long toId, boolean link) throws Exception {
+    private void invalidatePermission(
+            Class<? extends BaseModel> fromClass, long fromId,
+            Class<? extends BaseModel> toClass, long toId, boolean link) throws Exception {
+
+        if (toClass.equals(LinkedDevice.class)) {
+            toClass = Device.class;
+        }
 
         boolean groupLink = GroupedModel.class.isAssignableFrom(fromClass) && toClass.equals(Group.class);
         boolean calendarLink = Schedulable.class.isAssignableFrom(fromClass) && toClass.equals(Calendar.class);

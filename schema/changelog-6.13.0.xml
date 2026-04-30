@@ -13,6 +13,18 @@
       <column name="motionlongitude" type="DOUBLE" defaultValueNumeric="0" />
     </addColumn>
 
+    <createTable tableName="tc_device_device">
+      <column name="deviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+      <column name="linkeddeviceid" type="INT">
+        <constraints nullable="false" />
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="tc_device_device" baseColumnNames="deviceid" constraintName="fk_device_device_deviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+    <addForeignKeyConstraint baseTableName="tc_device_device" baseColumnNames="linkeddeviceid" constraintName="fk_device_device_linkeddeviceid" onDelete="CASCADE" referencedColumnNames="id" referencedTableName="tc_devices" />
+
   </changeSet>
 
 </databaseChangeLog>

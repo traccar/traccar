@@ -20,6 +20,7 @@ import java.beans.Introspector;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -84,9 +85,11 @@ public class Permission {
     public static String getStorageName(Class<?> ownerClass, Class<?> propertyClass) {
         String ownerName = ownerClass.getSimpleName();
         String propertyName = propertyClass.getSimpleName();
-        String managedPrefix = "Managed";
-        if (propertyName.startsWith(managedPrefix)) {
-            propertyName = propertyName.substring(managedPrefix.length());
+        for (String prefix : List.of("Managed", "Linked")) {
+            if (propertyName.startsWith(prefix)) {
+                propertyName = propertyName.substring(prefix.length());
+                break;
+            }
         }
         return "tc_" + Introspector.decapitalize(ownerName) + "_" + Introspector.decapitalize(propertyName);
     }
