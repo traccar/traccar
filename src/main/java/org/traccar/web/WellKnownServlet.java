@@ -49,7 +49,7 @@ public class WellKnownServlet extends HttpServlet {
             case "/openid-configuration" -> openIdConfiguration();
             case "/oauth-authorization-server" -> authorizationServerConfiguration();
             case "/oauth-protected-resource" -> protectedResourceConfiguration();
-            default -> null;
+            default -> path.startsWith("/oauth-authorization-server") ? authorizationServerConfiguration() : null;
         };
         if (payload != null) {
             resp.setContentType("application/json");
