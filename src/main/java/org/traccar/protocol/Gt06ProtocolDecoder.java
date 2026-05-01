@@ -1070,6 +1070,9 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             switch (event) {
                 case 0x01 -> position.addAlarm(extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
                 case 0x0E -> position.addAlarm(Position.ALARM_LOW_POWER);
+                case 0x47, 0x8C, 0xA0 -> position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
+                case 0x51 -> position.addAlarm(Position.ALARM_DOOR);
+                case 0x6B, 0x6F -> position.addAlarm(Position.ALARM_FAULT);
                 case 0x76 -> position.addAlarm(Position.ALARM_TEMPERATURE);
                 case 0x80 -> position.addAlarm(Position.ALARM_VIBRATION);
                 case 0x87 -> position.addAlarm(Position.ALARM_OVERSPEED);
@@ -1078,14 +1081,7 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
                 case 0x91 -> position.addAlarm(Position.ALARM_BRAKING);
                 case 0x92 -> position.addAlarm(Position.ALARM_CORNERING);
                 case 0x93 -> position.addAlarm(Position.ALARM_ACCIDENT);
-            }
-            if (variant == Variant.JC400) {
-                switch (event) {
-                    case 0x47, 0x8C, 0xA0 -> position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
-                    case 0x51 -> position.addAlarm(Position.ALARM_DOOR);
-                    case 0x6B, 0x6F -> position.addAlarm(Position.ALARM_FAULT);
-                    case 0xCD -> position.addAlarm(Position.ALARM_LANE_CHANGE);
-                }
+                case 0xCD -> position.addAlarm(Position.ALARM_LANE_CHANGE);
             }
 
             int filesLength = buf.readableBytes() - 6;
