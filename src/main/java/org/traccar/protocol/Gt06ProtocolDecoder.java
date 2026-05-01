@@ -1070,25 +1070,22 @@ public class Gt06ProtocolDecoder extends BaseProtocolDecoder {
             switch (event) {
                 case 0x01 -> position.addAlarm(extendedAlarm ? Position.ALARM_SOS : Position.ALARM_GENERAL);
                 case 0x0E -> position.addAlarm(Position.ALARM_LOW_POWER);
-                case 0x47 -> position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
-                case 0x51 -> position.addAlarm(Position.ALARM_DOOR);
-                case 0x53 -> position.addAlarm(Position.ALARM_GENERAL);
-                case 0x6B, 0x6F -> position.addAlarm(Position.ALARM_FAULT);
                 case 0x76 -> position.addAlarm(Position.ALARM_TEMPERATURE);
                 case 0x80 -> position.addAlarm(Position.ALARM_VIBRATION);
-                case 0x84, 0xA7 -> position.addAlarm(Position.ALARM_GENERAL);
                 case 0x87 -> position.addAlarm(Position.ALARM_OVERSPEED);
                 case 0x88 -> position.addAlarm(Position.ALARM_POWER_CUT);
-                case 0x8C, 0xA0 -> position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
-                case 0x8F, 0x94, 0x97, 0x9A -> position.addAlarm(Position.ALARM_GENERAL);
                 case 0x90 -> position.addAlarm(Position.ALARM_ACCELERATION);
                 case 0x91 -> position.addAlarm(Position.ALARM_BRAKING);
                 case 0x92 -> position.addAlarm(Position.ALARM_CORNERING);
                 case 0x93 -> position.addAlarm(Position.ALARM_ACCIDENT);
-                case 0xCC, 0xCE -> position.addAlarm(Position.ALARM_GENERAL);
-                case 0xCD -> position.addAlarm(Position.ALARM_LANE_CHANGE);
-                case 0xD4 -> position.set("driverIdentified", true);
-                case 0xD5 -> position.set("driverIdentified", false);
+            }
+            if (variant == Variant.JC400) {
+                switch (event) {
+                    case 0x47, 0x8C, 0xA0 -> position.addAlarm(Position.ALARM_FATIGUE_DRIVING);
+                    case 0x51 -> position.addAlarm(Position.ALARM_DOOR);
+                    case 0x6B, 0x6F -> position.addAlarm(Position.ALARM_FAULT);
+                    case 0xCD -> position.addAlarm(Position.ALARM_LANE_CHANGE);
+                }
             }
 
             int filesLength = buf.readableBytes() - 6;
