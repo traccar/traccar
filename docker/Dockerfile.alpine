@@ -8,7 +8,7 @@ RUN jlink --module-path $JAVA_HOME/jmods \
     --add-modules java.se,jdk.charsets,jdk.crypto.ec,jdk.unsupported \
     --strip-debug --no-header-files --no-man-pages --compress=2 --output /jre
 
-FROM alpine:3.22
+FROM alpine
 COPY --from=package /traccar /opt/traccar
 COPY --from=jdk /jre /opt/traccar/jre
 WORKDIR /opt/traccar
