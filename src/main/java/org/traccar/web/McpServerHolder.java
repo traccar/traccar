@@ -116,8 +116,9 @@ public class McpServerHolder implements AutoCloseable {
                 .tool(toolSchema)
                 .callHandler((context, request) -> {
                     String version = getClass().getPackage().getImplementationVersion();
-                    var result = new McpSchema.CallToolResult(version != null ? version : "Unknown", false);
-                    return Mono.just(result);
+                    return Mono.just(McpSchema.CallToolResult.builder()
+                            .addTextContent(version != null ? version : "Unknown")
+                            .build());
                 })
                 .build();
     }
@@ -184,7 +185,6 @@ public class McpServerHolder implements AutoCloseable {
 
             return Mono.just(McpSchema.CallToolResult.builder()
                     .structuredContent(position)
-                    .isError(false)
                     .build());
         } catch (StorageException | SecurityException e) {
             return Mono.just(errorResult(e.getMessage()));
